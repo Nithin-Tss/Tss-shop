@@ -1,0 +1,25 @@
+{
+  "name": "tss-shop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nithin-Tss/Tss-shop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Nithin-Tss/Tss-shop/issues"
+  },
+  "homepage": "https://github.com/Nithin-Tss/Tss-shop#readme",
+  "dependencies": {
+    "next": "^16.3.8",
+    "react": "^19.3.0"
+  }
+}
