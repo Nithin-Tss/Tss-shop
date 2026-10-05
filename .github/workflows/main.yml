@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: shopify_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/shopify_test
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-test-secret-key
+      DEBUG: "False"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install lint tools
+        run: pip install ruff black
+
+      - name: Install backend dependencies
+        if: hashFiles('backend/requirements/dev.txt') != ''
+        working-directory: backend
+        run: pip install -r requirements/dev.txt
+
+      - name: Lint with Ruff
+        if: hashFiles('backend/**/*.py') != ''
+        working-directory: backend
+        run: ruff check .
+
+      - name: Check formatting with Black
+        if: hashFiles('backend/**/*.py') != ''
+        working-directory: backend
+        run: black --check .
+
+      - name: Django system checks
+        if: hashFiles('backend/manage.py') != ''
+        working-directory: backend
+        run: python manage.py check
+
+      - name: Check for missing migrations
+        if: hashFiles('backend/manage.py') != ''
+        working-directory: backend
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run backend tests
+        if: hashFiles('backend/manage.py') != '' && hashFiles('backend/**/test_*.py', 'backend/**/tests.py') != ''
+        working-directory: backend
+        run: pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [storefront, admin]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        if: hashFiles(format('frontend/{0}/package-lock.json', matrix.app)) != ''
+        working-directory: frontend/${{ matrix.app }}
+        run: npm ci
+
+      - name: Lint
+        if: hashFiles(format('frontend/{0}/package-lock.json', matrix.app)) != ''
+        working-directory: frontend/${{ matrix.app }}
+        run: npm run lint --if-present
+
+      - name: Type check
+        if: hashFiles(format('frontend/{0}/package-lock.json', matrix.app)) != ''
+        working-directory: frontend/${{ matrix.app }}
+        run: npm run typecheck --if-present
+
+      - name: Run tests
+        if: hashFiles(format('frontend/{0}/package-lock.json', matrix.app)) != ''
+        working-directory: frontend/${{ matrix.app }}
+        run: npm test --if-present
+
+      - name: Build
+        if: hashFiles(format('frontend/{0}/package-lock.json', matrix.app)) != ''
+        working-directory: frontend/${{ matrix.app }}
+        run: npm run build
