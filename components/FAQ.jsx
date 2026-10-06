@@ -11,7 +11,7 @@ const faqItems = [
   {
     question: "Can I use my own domain name?",
     answer:
-      "Yes. You can connect your existing domain name to your Vendra online store.",
+      "Yes. You can connect your existing domain name to your online store.",
   },
   {
     question: "How do I get paid?",
@@ -21,7 +21,7 @@ const faqItems = [
   {
     question: "Can I move my products from another platform?",
     answer:
-      "Yes. You can migrate your existing product information and store data to Vendra.",
+      "Yes. You can migrate your existing product information and store data to Store.",
   },
   {
     question: "Can I cancel anytime?",
