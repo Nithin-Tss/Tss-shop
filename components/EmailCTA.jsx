@@ -50,7 +50,7 @@ export default function EmailCTA() {
         {/* Content */}
         <div className="relative z-10 mx-auto max-w-3xl">
           <h2 className="text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
-            Start building with VENDRA today.
+            Start building with STORE today.
           </h2>
 
           <p className="mt-3 text-sm text-slate-300 sm:text-base">

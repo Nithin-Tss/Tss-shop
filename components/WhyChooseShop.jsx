@@ -43,7 +43,7 @@ export default function WhyChooseVendra() {
       <div className="mx-auto max-w-6xl">
         {/* Heading */}
         <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Why choose Vendra?
+          Why choose Store?
         </h2>
 
         {/* Features */}
