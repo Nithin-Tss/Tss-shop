@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Brand colors */
+@theme {
+  /* #161C2C — a very deep, dark charcoal-navy */
+  --color-charcoal-navy: #161C2C;
+}
+
 /* Global reset */
 * {
   box-sizing: border-box;

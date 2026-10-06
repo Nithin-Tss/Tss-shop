@@ -19,8 +19,7 @@ export default function NavBar() {
     <header className="w-full sticky top-0 z-50 bg-white shadow-xs">
       {/* 1. ANNOUNCEMENT BAR */}
       <div 
-        style={{ backgroundColor: "#161C2C" }} 
-        className="w-full text-white text-xs sm:text-sm py-2 px-4 flex items-center justify-between transition-all"
+        className="w-full bg-charcoal-navy text-white text-xs sm:text-sm py-2 px-4 flex items-center justify-between transition-all"
       >
         <div className="hidden sm:block sm:w-28"></div>
         

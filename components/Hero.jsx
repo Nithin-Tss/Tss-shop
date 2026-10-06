@@ -1,7 +1,3 @@
-hero
-
-
-
 import Link from 'next/link';
 
 export default function Hero() {
@@ -30,7 +26,7 @@ export default function Hero() {
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <Link 
                 href="/signup" 
-                className="w-full sm:w-auto bg-charcoal-navy text-white font-medium px-8 py-3.5 rounded-xl hover:bg-opacity-90 transition shadow-md flex items-center justify-center space-x-2"
+                className="w-full sm:w-auto bg-charcoal-navy text-white font-medium px-8 py-3.5 rounded-xl hover:bg-charcoal-navy/90 transition shadow-md flex items-center justify-center space-x-2"
               >
                 <span>Start Free →</span>
               </Link>
