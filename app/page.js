@@ -1,8 +1,13 @@
+import FAQ from "./components/FAQ";
+import EmailCTA from "./components/EmailCTA";
+import WhyChooseShop from "./components/WhyChooseShop";
+
 export default function HomePage() {
   return (
     <main>
-      <h1>Welcome to TSS Shop</h1>
-      <p>Your e-commerce platform</p>
+       <FAQ />
+       <EmailCTA />
+       <WhyChooseShop />
     </main>
   );
 }
