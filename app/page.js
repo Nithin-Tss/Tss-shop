@@ -8,7 +8,7 @@ import StoreBuilder from "../components/StoreBuilder";
 export default function HomePage() {
   return (
     <main>
-      <NavBar />
+      <NavBar isLoggedIn={true} userName="My Account" />
       <Hero />
       <FAQ />
       <EmailCTA />

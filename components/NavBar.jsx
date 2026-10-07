@@ -128,17 +128,17 @@ export default function NavBar({ isLoggedIn = false, userName = "My Account" }) 
 
             {isLoggedIn ? (
               /* Account (signed in) */
-              <button
-                type="button"
-                className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
+              <Link
+  href="/profile"
+  className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+>
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-charcoal-navy text-white">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
                   </svg>
                 </span>
                 <span className="max-w-[160px] truncate">{userName}</span>
-              </button>
+              </Link>
             ) : (
               <>
                 {/* Login Link */}
