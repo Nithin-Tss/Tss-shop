@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { apiPost } from "@/lib/api";
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -110,21 +111,13 @@ export default function SignUpPage() {
     setIsSubmitting(true);
 
     try {
-      /*
-       * FRONTEND ONLY
-       *
-       * No backend API is connected.
-       * No localStorage is used.
-       * No account is actually created.
-       *
-       * Django integration will be added later.
-       */
+      const result = await apiPost("/api/v1/auth/signup/", formData);
 
-      await new Promise((resolve) => setTimeout(resolve, 700));
-
-      setMessage(
-        "Form validation successful. Backend account creation will be connected later."
-      );
+      if (result.ok) {
+        setMessage("Account validated successfully.");
+      } else {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+      }
     } finally {
       setIsSubmitting(false);
     }

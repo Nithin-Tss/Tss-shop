@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { apiPost } from "@/lib/api";
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
@@ -66,21 +67,13 @@ export default function SignInPage() {
     setIsSubmitting(true);
 
     try {
-      /*
-       * FRONTEND ONLY
-       *
-       * No backend API is connected yet.
-       * No localStorage is used.
-       * No authentication is performed.
-       *
-       * Django integration will be added later.
-       */
+      const result = await apiPost("/api/v1/auth/login/", formData);
 
-      await new Promise((resolve) => setTimeout(resolve, 700));
-
-      setMessage(
-        "Form validation successful. Backend authentication will be connected later."
-      );
+      if (result.ok) {
+        setMessage("Signed in successfully.");
+      } else {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+      }
     } finally {
       setIsSubmitting(false);
     }
