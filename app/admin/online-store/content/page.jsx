@@ -4,14 +4,24 @@ import Link from "next/link";
 
 const menuItems = [
   { icon: "⌂", label: "Home", href: "/admin/online-store/home" },
-  { icon: "▣", label: "Orders",  href: "/admin/online-store/orders", active: true },
+  { icon: "▣", label: "Orders", badge: "12", href: "/admin/online-store/orders" },
   { icon: "◇", label: "Products", href: "/admin/online-store/products" },
   { icon: "♙", label: "Catalogues", href: "/admin/online-store/catalogues" },
   { icon: "▥", label: "Inventory", href: "/admin/online-store/inventory" },
-  { icon: "⌁", label: "Content", href: "/admin/online-store/content" },
+  { icon: "⌁", label: "Content", href: "/admin/online-store/content", active: true },
 ];
 
-export default function OrdersPage() {
+const lineIcon = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.7,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  viewBox: "0 0 24 24",
+  "aria-hidden": true,
+};
+
+export default function ContentPage() {
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
 
@@ -77,39 +87,31 @@ export default function OrdersPage() {
               const Row = item.href ? Link : "div";
 
               return (
-                <div key={item.label}>
-                  <Row
-                    href={item.href}
-                    className={`h-11 px-3 rounded-lg flex items-center justify-between transition ${
-                      item.active ? "bg-[#30466F] font-medium" : "hover:bg-white/10"
-                    }`}
-                  >
+                <Row
+                  key={item.label}
+                  href={item.href}
+                  className={`h-11 px-3 rounded-lg flex items-center justify-between transition ${
+                    item.active ? "bg-[#30466F] font-medium" : "hover:bg-white/10"
+                  }`}
+                >
 
-                    <div className="flex items-center gap-4">
-                      <span className="w-5 text-center text-lg">
-                        {item.icon}
-                      </span>
+                  <div className="flex items-center gap-4">
+                    <span className="w-5 text-center text-lg">
+                      {item.icon}
+                    </span>
 
-                      <span className="text-sm">
-                        {item.label}
-                      </span>
-                    </div>
+                    <span className="text-sm">
+                      {item.label}
+                    </span>
+                  </div>
 
-                    {item.badge && (
-                      <span className="bg-[#53627E] px-2.5 py-1 rounded-full text-xs">
-                        {item.badge}
-                      </span>
-                    )}
-
-                  </Row>
-
-                  {/* Drafts sub-item under Orders */}
-                  {item.active && (
-                    <div className="h-9 pl-12 flex items-center text-sm text-white/70 hover:text-white transition">
-                      Drafts
-                    </div>
+                  {item.badge && (
+                    <span className="bg-[#53627E] px-2.5 py-1 rounded-full text-xs">
+                      {item.badge}
+                    </span>
                   )}
-                </div>
+
+                </Row>
               );
             })}
 
@@ -202,76 +204,103 @@ export default function OrdersPage() {
         {/* MAIN CONTENT */}
         <main className="flex-1 bg-[#F7F8FA] px-6 lg:px-8 py-6 overflow-hidden">
 
-          {/* TITLE */}
-          <div className="flex items-center justify-between">
+          {/* TITLE + ACTIONS */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
-              <span className="text-xl">▣</span>
-              Orders
+              <span className="text-xl">⌁</span>
+              Metaobjects
             </h1>
 
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#DDE3EA] transition"
-            >
-              More actions
-              <span>⌄</span>
-            </button>
-          </div>
-
-
-          {/* EMPTY STATE CARD */}
-          <section className="mt-5 rounded-2xl border border-[#E3E7ED] bg-white px-6 py-16 shadow-sm">
-            <div className="flex flex-col items-center text-center">
-
-              {/* Illustration */}
-              <div className="relative h-[170px] w-[170px] overflow-hidden rounded-full bg-[#EEF1F6]">
-                <div className="absolute bottom-0 left-0 right-0 h-[46px] bg-[#161C2C]" />
-
-                <div className="absolute left-1/2 top-6 h-[125px] w-[110px] -translate-x-1/2 rounded-md border border-[#E3E7ED] bg-white p-3 shadow-sm">
-                  <div className="h-1.5 w-8 rounded-full bg-[#30466F]" />
-
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="h-8 w-8 rounded bg-[#E9EEF5]" />
-                    <div className="flex-1 space-y-1.5">
-                      <div className="h-1.5 rounded-full bg-[#E6EBF2]" />
-                      <div className="h-1.5 w-2/3 rounded-full bg-[#E6EBF2]" />
-                    </div>
-                  </div>
-
-                  <div className="mt-2.5 flex items-center gap-2">
-                    <div className="h-8 w-8 rounded bg-[#E9EEF5]" />
-                    <div className="flex-1 space-y-1.5">
-                      <div className="h-1.5 rounded-full bg-[#E6EBF2]" />
-                      <div className="h-1.5 w-2/3 rounded-full bg-[#E6EBF2]" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <h2 className="mt-8 text-lg font-semibold text-[#161C2C]">
-                Your orders will show here
-              </h2>
-
-              <p className="mt-2 max-w-[440px] text-sm leading-6 text-[#53627E]">
-                To get orders and accept payments from customers, you need to
-                select a plan.
-              </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#DDE3EA] transition"
+              >
+                Manage
+              </button>
 
               <button
                 type="button"
-                className="mt-5 rounded-lg bg-[#161C2C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
               >
-                Select plan
+                Add definition
+              </button>
+            </div>
+          </div>
+
+
+          {/* DEFINITIONS CARD */}
+          <section className="mt-5 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
+
+            {/* Toolbar */}
+            <div className="flex items-center gap-3 border-b border-[#E3E7ED] px-4 py-3">
+              <button
+                type="button"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition"
+              >
+                Custom
+                <svg {...lineIcon} className="h-4 w-4 text-[#53627E]">
+                  <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
+                </svg>
               </button>
 
+              <div className="flex flex-1 items-center gap-2">
+                <svg {...lineIcon} className="h-4 w-4 shrink-0 text-[#53627E]">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-4-4" />
+                </svg>
+
+                <input
+                  type="text"
+                  placeholder="Searching in metaobject definitions..."
+                  className="w-full bg-transparent text-sm text-[#161C2C] outline-none placeholder:text-slate-500"
+                />
+              </div>
+
+              <div className="flex shrink-0 items-center gap-1 border-l border-[#E3E7ED] pl-3">
+                <button
+                  type="button"
+                  aria-label="Columns"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C] transition"
+                >
+                  <svg {...lineIcon} className="h-[18px] w-[18px]">
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <path d="M9 4v16M15 4v16" />
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  aria-label="View"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C] transition"
+                >
+                  <svg {...lineIcon} className="h-[18px] w-[18px]">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              </div>
             </div>
+
+
+            {/* Empty state */}
+            <div className="px-6 py-12 text-center">
+              <h2 className="text-xl font-semibold text-[#161C2C]">
+                No definitions found
+              </h2>
+
+              <p className="mt-3 text-sm text-[#53627E]">
+                Try changing the filters or search term
+              </p>
+            </div>
+
           </section>
 
 
           {/* LEARN MORE */}
           <p className="mt-8 text-center text-sm font-medium text-[#161C2C]">
             <a href="#" className="hover:underline">
-              Learn more about orders
+              Learn more about metaobjects
             </a>
           </p>
 

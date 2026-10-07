@@ -5,10 +5,10 @@ import Link from "next/link";
 const menuItems = [
   { icon: "⌂", label: "Home", href: "/admin/online-store/home", active: true },
   { icon: "▣", label: "Orders", badge: "12", href: "/admin/online-store/orders" },
-  { icon: "◇", label: "Products" },
-  { icon: "♙", label: "Catalogues" },
-  { icon: "▥", label: "Inventory" },
-  { icon: "⌁", label: "Content" },
+  { icon: "◇", label: "Products", href: "/admin/online-store/products" },
+  { icon: "♙", label: "Catalogues", href: "/admin/online-store/catalogues" },
+  { icon: "▥", label: "Inventory", href: "/admin/online-store/inventory" },
+  { icon: "⌁", label: "Content", href: "/admin/online-store/content" },
 ];
 
 const lineIcon = {
