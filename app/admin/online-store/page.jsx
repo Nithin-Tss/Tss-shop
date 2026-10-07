@@ -202,10 +202,6 @@ export default function OnlineStorePage() {
 
             <div>
 
-              <p className="text-sm font-medium tracking-wide text-[#53627E] mb-2">
-                STEP 2 OF 4
-              </p>
-
               <h1 className="text-[36px] leading-tight font-bold text-[#161C2C]">
                 Create your custom theme
               </h1>

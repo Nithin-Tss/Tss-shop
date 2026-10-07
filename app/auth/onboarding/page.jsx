@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import NavBar from "../../../components/NavBar";
 
 const iconProps = {
@@ -124,6 +125,7 @@ const THEME_OPTIONS = [
 ];
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [selectedGoals, setSelectedGoals] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -272,6 +274,10 @@ export default function OnboardingPage() {
                 <button
                   key={theme.id}
                   type="button"
+                  onClick={() =>{
+                    if (theme.id === "custom"){
+                      router.push("/admin/online-store");}
+                    }}
                   className="group flex min-h-[260px] w-full flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-6 py-8 text-center transition-colors hover:border-charcoal-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-charcoal-navy"
                 >
                   <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-gray-100 text-charcoal-navy transition-colors group-hover:bg-charcoal-navy group-hover:text-white">
