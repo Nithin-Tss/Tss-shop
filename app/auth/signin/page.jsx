@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { apiPost } from "@/lib/api";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -69,16 +70,9 @@ export default function SignInPage() {
     setIsSubmitting(true);
 
     try {
-      /*
-       * FRONTEND ONLY
-       *
-       * No backend API is connected yet.
-       * No localStorage is used.
-       * No authentication is performed.
-       *
-       * Django integration will be added later.
-       */
+      const result = await apiPost("/api/v1/auth/login/", formData);
 
+<<<<<<< HEAD
       await new Promise((resolve) => setTimeout(resolve, 700));
 
       setMessage(
@@ -89,6 +83,13 @@ export default function SignInPage() {
       setTimeout(() => {
         router.push("/auth/onboarding");
       }, 1200);
+=======
+      if (result.ok) {
+        setMessage("Signed in successfully.");
+      } else {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+      }
+>>>>>>> 394c7d979d5ab78b8c8810e017ba94fc60cfeceb
     } finally {
       setIsSubmitting(false);
     }

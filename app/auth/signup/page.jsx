@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { apiPost } from "@/lib/api";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -113,16 +114,9 @@ export default function SignUpPage() {
     setIsSubmitting(true);
 
     try {
-      /*
-       * FRONTEND ONLY
-       *
-       * No backend API is connected.
-       * No localStorage is used.
-       * No account is actually created.
-       *
-       * Django integration will be added later.
-       */
+      const result = await apiPost("/api/v1/auth/signup/", formData);
 
+<<<<<<< HEAD
       await new Promise((resolve) => setTimeout(resolve, 700));
 
       setMessage(
@@ -133,6 +127,13 @@ export default function SignUpPage() {
       setTimeout(() => {
         router.push("/auth/onboarding");
       }, 1200);
+=======
+      if (result.ok) {
+        setMessage("Account validated successfully.");
+      } else {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+      }
+>>>>>>> 394c7d979d5ab78b8c8810e017ba94fc60cfeceb
     } finally {
       setIsSubmitting(false);
     }
