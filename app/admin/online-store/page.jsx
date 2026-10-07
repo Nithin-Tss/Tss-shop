@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const categories = [
   "All",
@@ -15,8 +16,8 @@ const categories = [
 ];
 
 const menuItems = [
-  { icon: "⌂", label: "Home" },
-  { icon: "▣", label: "Orders", badge: "12" },
+  { icon: "⌂", label: "Home", href: "/admin/online-store/home" },
+  { icon: "▣", label: "Orders", badge: "12", href: "/admin/online-store/orders" },
   { icon: "◇", label: "Products" },
   { icon: "♙", label: "Catalogues" },
   { icon: "▥", label: "Inventory" },
@@ -86,30 +87,36 @@ export default function OnlineStorePage() {
 
           <nav className="px-4 py-6 space-y-1">
 
-            {menuItems.map((item) => (
-              <div
-                key={item.label}
-                className="h-11 px-3 rounded-lg flex items-center justify-between hover:bg-white/10 transition"
-              >
+            {menuItems.map((item) => {
+              // Items with a page (like Home) are links
+              const Row = item.href ? Link : "div";
 
-                <div className="flex items-center gap-4">
-                  <span className="w-5 text-center text-lg">
-                    {item.icon}
-                  </span>
+              return (
+                <Row
+                  key={item.label}
+                  href={item.href}
+                  className="h-11 px-3 rounded-lg flex items-center justify-between hover:bg-white/10 transition"
+                >
 
-                  <span className="text-sm">
-                    {item.label}
-                  </span>
-                </div>
+                  <div className="flex items-center gap-4">
+                    <span className="w-5 text-center text-lg">
+                      {item.icon}
+                    </span>
 
-                {item.badge && (
-                  <span className="bg-[#53627E] px-2.5 py-1 rounded-full text-xs">
-                    {item.badge}
-                  </span>
-                )}
+                    <span className="text-sm">
+                      {item.label}
+                    </span>
+                  </div>
 
-              </div>
-            ))}
+                  {item.badge && (
+                    <span className="bg-[#53627E] px-2.5 py-1 rounded-full text-xs">
+                      {item.badge}
+                    </span>
+                  )}
+
+                </Row>
+              );
+            })}
 
 
             {/* ONLINE STORE */}
