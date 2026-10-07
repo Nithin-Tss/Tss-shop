@@ -72,24 +72,15 @@ export default function SignInPage() {
     try {
       const result = await apiPost("/api/v1/auth/login/", formData);
 
-<<<<<<< HEAD
-      await new Promise((resolve) => setTimeout(resolve, 700));
-
-      setMessage(
-        "Form validation successful. Redirecting to onboarding..."
-      );
-
-      // Redirect to onboarding after successful sign in
-      setTimeout(() => {
-        router.push("/auth/onboarding");
-      }, 1200);
-=======
       if (result.ok) {
-        setMessage("Signed in successfully.");
+        setMessage("Signed in successfully. Redirecting to onboarding...");
+
+        setTimeout(() => {
+          router.push("/auth/onboarding");
+        }, 1200);
       } else {
         setErrors({ ...result.fieldErrors, form: result.formError });
       }
->>>>>>> 394c7d979d5ab78b8c8810e017ba94fc60cfeceb
     } finally {
       setIsSubmitting(false);
     }

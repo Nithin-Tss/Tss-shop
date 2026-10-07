@@ -116,24 +116,15 @@ export default function SignUpPage() {
     try {
       const result = await apiPost("/api/v1/auth/signup/", formData);
 
-<<<<<<< HEAD
-      await new Promise((resolve) => setTimeout(resolve, 700));
-
-      setMessage(
-        "Form validation successful. Backend account creation will be connected later."
-      );
-
-      // Redirect to onboarding after successful signup
-      setTimeout(() => {
-        router.push("/auth/onboarding");
-      }, 1200);
-=======
       if (result.ok) {
-        setMessage("Account validated successfully.");
+        setMessage("Account created successfully. Redirecting to onboarding...");
+
+        setTimeout(() => {
+          router.push("/auth/onboarding");
+        }, 1200);
       } else {
         setErrors({ ...result.fieldErrors, form: result.formError });
       }
->>>>>>> 394c7d979d5ab78b8c8810e017ba94fc60cfeceb
     } finally {
       setIsSubmitting(false);
     }
