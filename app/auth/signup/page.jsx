@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function SignUpPage() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -125,6 +128,11 @@ export default function SignUpPage() {
       setMessage(
         "Form validation successful. Backend account creation will be connected later."
       );
+
+      // Redirect to onboarding after successful signup
+      setTimeout(() => {
+        router.push("/auth/onboarding");
+      }, 1200);
     } finally {
       setIsSubmitting(false);
     }

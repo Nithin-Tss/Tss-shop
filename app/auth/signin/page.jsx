@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function SignInPage() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -79,8 +82,13 @@ export default function SignInPage() {
       await new Promise((resolve) => setTimeout(resolve, 700));
 
       setMessage(
-        "Form validation successful. Backend authentication will be connected later."
+        "Form validation successful. Redirecting to onboarding..."
       );
+
+      // Redirect to onboarding after successful sign in
+      setTimeout(() => {
+        router.push("/auth/onboarding");
+      }, 1200);
     } finally {
       setIsSubmitting(false);
     }
