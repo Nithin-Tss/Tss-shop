@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Brand colors */
+@theme {
+  /* #161C2C — a very deep, dark charcoal-navy */
+  --color-charcoal-navy: #161C2C;
+}
+
+/* Global reset */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Common form elements */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Images */
+img {
+  display: block;
+  max-width: 100%;
+}
