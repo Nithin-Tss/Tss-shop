@@ -1,9 +1,18 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import React, { useState } from "react";
+import { useSession } from "../lib/auth";
 
-export default function NavBar({ isLoggedIn = false, userName = "My Account" }) {
+export default function NavBar() {
+  const session = useSession();
+  const pathname = usePathname();
+  // Remember where the account link was clicked, so logout can return here
+  const profileHref = `/profile?from=${encodeURIComponent(pathname || "/")}`;
+  const isLoggedIn = Boolean(session);
+  const userName = session?.name || "My Account";
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -129,7 +138,7 @@ export default function NavBar({ isLoggedIn = false, userName = "My Account" }) 
             {isLoggedIn ? (
               /* Account (signed in) */
               <Link
-  href="/profile"
+  href={profileHref}
   className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
 >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-charcoal-navy text-white">
@@ -226,24 +235,28 @@ export default function NavBar({ isLoggedIn = false, userName = "My Account" }) 
 
             {isLoggedIn ? (
               <div className="pt-3 border-t border-gray-100 px-2">
-                <div className="flex items-center gap-3 px-3 py-2">
+                <Link
+                  href={profileHref}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-slate-50"
+                >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-charcoal-navy text-white">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
                     </svg>
                   </span>
                   <span className="text-base font-medium text-slate-700">{userName}</span>
-                </div>
+                </Link>
               </div>
             ) : (
               <div className="pt-3 border-t border-gray-100 flex flex-col space-y-2 px-2">
-                <a
-                  href="#login"
+                <Link
+                  href="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}
                   className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors"
                 >
                   Login
-                </a>
+                </Link>
                 <a
                   href="#create-store"
                   onClick={() => setMobileMenuOpen(false)}

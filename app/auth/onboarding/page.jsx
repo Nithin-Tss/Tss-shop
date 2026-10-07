@@ -141,7 +141,7 @@ export default function OnboardingPage() {
 
   return (
     <main className="min-h-screen bg-[#f7f7f8] text-charcoal-navy">
-      <NavBar isLoggedIn />
+      <NavBar />
 
       {/* Skip — on the page, top-right, under the account */}
       <div className="mx-auto flex min-h-[52px] max-w-7xl justify-end px-4 pt-4 sm:px-6 lg:px-8">

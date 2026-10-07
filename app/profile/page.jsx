@@ -2,8 +2,11 @@
  
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut } from "../../lib/auth";
  
 export default function ProfilePage() {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
  
@@ -211,18 +214,19 @@ export default function ProfilePage() {
   };
  
   // Logout
-  const handleLogout = () => {
-    /*
-     * FRONTEND ONLY
-     *
-     * Actual logout will be handled by Django
-     * when authentication is integrated.
-     */
- 
-    setMessage(
-      "Logout functionality will be connected to the backend later."
-    );
-  };
+  // Logout
+const handleLogout = () => {
+  signOut();
+
+  // Go back to the page the account link was clicked from (same-site paths only)
+  const from = new URLSearchParams(window.location.search).get("from");
+  const returnTo =
+    from && from.startsWith("/") && !from.startsWith("//") && from !== "/profile"
+      ? from
+      : "/";
+
+  router.replace(returnTo);
+};
  
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">

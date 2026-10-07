@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signIn } from "../../../lib/auth";
  
 export default function SignInPage() {
   const router = useRouter();
@@ -86,6 +87,8 @@ export default function SignInPage() {
       );
  
       // Redirect to onboarding after successful sign in
+      signIn({ email: formData.email });
+
       setTimeout(() => {
         router.push("/auth/onboarding");
       }, 1200);

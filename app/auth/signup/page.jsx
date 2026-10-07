@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Link from "next/link";
+import { signIn } from "../../../lib/auth";
  
 export default function SignUpPage() {
 
@@ -209,6 +210,11 @@ export default function SignUpPage() {
       );
  
       // Redirect to onboarding after successful signup
+
+      signIn({
+        name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
+        email: formData.email,
+      });
 
       setTimeout(() => {
 
