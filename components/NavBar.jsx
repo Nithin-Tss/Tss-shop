@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import React, { useState } from "react";
 
@@ -124,12 +125,12 @@ export default function NavBar() {
             </div>
 
             {/* Login Link */}
-            <a
-              href="#login"
-              className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors px-2 py-1"
-            >
-              Login
-            </a>
+<Link
+  href="/auth/signin"
+  className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors px-2 py-1"
+>
+  Login
+</Link>
 
             {/* Create Store CTA Button */}
             <a
