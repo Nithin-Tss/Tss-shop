@@ -262,7 +262,7 @@ export default function Terms() {
 
               <section id="contact" className="scroll-mt-8">
                 <h2 className="mb-3 text-2xl font-bold text-gray-900">
-                  13. Contact
+                  13. Contact Us
                 </h2>
 
                 <p className="mb-6 leading-7 text-gray-600">
@@ -305,11 +305,7 @@ export default function Terms() {
                 </form>
               </section>
 
-              <div className="mt-12 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-800">
-                <strong>Legal notice:</strong> This page is a general template
-                and should be reviewed and customized by qualified legal
-                counsel before being used as final legal terms.
-              </div>
+             
             </div>
           </article>
         </div>
