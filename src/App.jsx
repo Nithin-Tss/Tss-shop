@@ -17,6 +17,8 @@ import AdminOverview from "@/pages/AdminOverview";
 import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminDiscounts from "@/pages/AdminDiscounts";
+import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
 
 export default function App() {
   return (
@@ -38,6 +40,8 @@ export default function App() {
       <Route path="/admin/online-store/reports" element={<AdminReports />} />
       <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
       <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />   
     </Routes>
   );
 }

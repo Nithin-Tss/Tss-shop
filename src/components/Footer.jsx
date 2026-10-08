@@ -1,3 +1,4 @@
+
 export default function Footer() {
   return (
     <footer className="bg-[#1C1A17] text-[#F5F5F3]">
@@ -71,8 +72,13 @@ export default function Footer() {
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-gray-400">
           <span>🌐 Australia</span>
           <span>English</span>
-          <a href="#" className="hover:text-[#D98324]">Terms & Conditions</a>
-          <a href="#" className="hover:text-[#D98324]">Privacy Policy</a>
+        <a href="/terms" className="hover:text-[#D98324]">
+          Terms & Conditions
+        </a>
+
+        <a href="/privacy" className="hover:text-[#D98324]">
+          Privacy Policy
+        </a>
           <a href="#" className="hover:text-[#D98324]">Sitemap</a>
           <a href="#" className="hover:text-[#D98324]">Responsible Service</a>
         </div>
