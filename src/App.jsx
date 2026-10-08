@@ -23,6 +23,7 @@ import Privacy from "@/pages/Privacy";
 import AdminShipping from "@/pages/AdminShipping";
 import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";   
+import Settings from "@/pages/Settings";
 
 
 export default function App() {
@@ -51,6 +52,7 @@ export default function App() {
       <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="/settings" element={<Settings />} />
       
     </Routes>
   );

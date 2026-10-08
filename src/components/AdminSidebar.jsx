@@ -117,13 +117,23 @@ export default function AdminSidebar() {
       </nav>
 
       {/* SETTINGS */}
-      <div className="mt-auto px-7 pb-8 flex items-center gap-4">
-        <span className="text-xl">⚙</span>
+      
+      {/* SETTINGS */}
 
-        <span className="text-sm">
-          Settings
-        </span>
-      </div>
+<div className="mt-auto px-4 pb-6">
+  <Link
+    to="/admin/settings"
+    className="h-11 px-3 rounded-lg flex items-center gap-4 hover:bg-white/10 transition cursor-pointer"
+  >
+    <span className="w-5 text-center text-xl">
+      ⚙
+    </span>
+
+    <span className="text-sm">
+      Settings
+    </span>
+  </Link>
+</div>
     </aside>
   );
 }
