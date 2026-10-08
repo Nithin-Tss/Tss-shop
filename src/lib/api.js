@@ -1,76 +1,101 @@
-import { getStoreId, getToken, signOut } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-function authHeaders() {
-  const headers = {};
-  const token = getToken();
-  const storeId = getStoreId();
+function getHeaders(extraHeaders = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...extraHeaders,
+  };
 
-  if (token) headers.Authorization = `Bearer ${token}`;
-  if (storeId) headers["X-Store-Id"] = storeId;
+  try {
+    const session = getSession();
+    if (session?.token) {
+      headers["Authorization"] = `Bearer ${session.token}`;
+    }
+    const storeId =
+      session?.storeId ||
+      (typeof localStorage !== "undefined"
+        ? localStorage.getItem("tss-store-id")
+        : null);
+    if (storeId) {
+      headers["X-Store-Id"] = storeId;
+    }
+  } catch {}
 
   return headers;
 }
 
-// Turns any DRF error body into one readable message
-function errorMessage(data) {
-  if (Array.isArray(data)) return String(data[0] ?? "Request failed.");
-  if (data?.detail) return String(data.detail);
-  if (data?.non_field_errors) return String(data.non_field_errors[0]);
+export async function apiRequest(path, options = {}) {
+  const { method = "GET", headers = {}, body } = options;
 
-  const first = data && Object.values(data)[0];
-  if (Array.isArray(first)) return String(first[0]);
-  if (first) return typeof first === "string" ? first : JSON.stringify(first);
+  const res = await fetch(`${API_URL}${path}`, {
+    method,
+    headers: getHeaders(headers),
+    body: body
+      ? typeof body === "string"
+        ? body
+        : JSON.stringify(body)
+      : undefined,
+  });
 
-  return "Request failed.";
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const message =
+      errorData.detail ||
+      errorData.message ||
+      errorData.non_field_errors?.[0] ||
+      res.statusText ||
+      "Request failed";
+    const error = new Error(message);
+    error.status = res.status;
+    error.data = errorData;
+    throw error;
+  }
+
+  if (res.status === 204) return null;
+  return res.json().catch(() => null);
 }
 
-/*
- * Authenticated JSON request. Resolves with the response data, or throws
- * an Error whose message is ready to show. A 401 signs the user out.
- */
-export async function apiRequest(path, { method = "GET", body, headers } = {}) {
+export async function apiGet(path, customHeaders = {}) {
   let response;
 
   try {
     response = await fetch(`${API_URL}${path}`, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeaders(),
-        ...headers,
-      },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      method: "GET",
+      headers: getHeaders(customHeaders),
     });
   } catch {
-    throw new Error("Unable to reach the server. Is the backend running?");
+    return {
+      ok: false,
+      error: "Unable to reach the server. Please try again.",
+      data: null,
+    };
   }
 
-  const data = await response.json().catch(() => ({}));
+  const data = await response.json().catch(() => null);
 
-  if (response.status === 401 && getToken()) {
-    signOut();
+  if (response.ok) {
+    return { ok: true, data };
   }
 
-  if (!response.ok) {
-    const error = new Error(errorMessage(data));
-    error.status = response.status;
-    error.data = data;
-    throw error;
-  }
+  const errorMessage =
+    data?.detail || data?.message || "Failed to fetch data from server.";
 
-  return data;
+  return {
+    ok: false,
+    error: String(errorMessage),
+    data: null,
+  };
 }
 
-// Form-friendly POST: never throws, returns field errors for the form
-export async function apiPost(path, body) {
+export async function apiPost(path, body, customHeaders = {}) {
   let response;
 
   try {
     response = await fetch(`${API_URL}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: getHeaders(customHeaders),
       body: JSON.stringify(body),
     });
   } catch {
@@ -87,21 +112,50 @@ export async function apiPost(path, body) {
     return { ok: true, data };
   }
 
-  // DRF returns { field: ["msg", ...] } (or { detail: "msg" })
   const fieldErrors = {};
-  Object.entries(data).forEach(([key, value]) => {
-    if (key !== "detail" && key !== "non_field_errors") {
-      fieldErrors[key] = Array.isArray(value) ? value[0] : String(value);
-    }
-  });
+  if (data && typeof data === "object") {
+    Object.entries(data).forEach(([key, value]) => {
+      if (key !== "detail" && key !== "non_field_errors") {
+        fieldErrors[key] = Array.isArray(value) ? value[0] : String(value);
+      }
+    });
+  }
 
-  const nonField = data.non_field_errors?.[0] || data.detail;
+  const nonField = data?.non_field_errors?.[0] || data?.detail;
 
   return {
     ok: false,
     fieldErrors,
     formError:
       nonField ||
-      (Object.keys(fieldErrors).length ? "" : "Something went wrong. Please try again."),
+      (Object.keys(fieldErrors).length
+        ? ""
+        : "Something went wrong. Please try again."),
+  };
+}
+
+export async function apiDelete(path, customHeaders = {}) {
+  let response;
+
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method: "DELETE",
+      headers: getHeaders(customHeaders),
+    });
+  } catch {
+    return {
+      ok: false,
+      error: "Unable to reach the server. Please try again.",
+    };
+  }
+
+  if (response.status === 204 || response.ok) {
+    return { ok: true };
+  }
+
+  const data = await response.json().catch(() => ({}));
+  return {
+    ok: false,
+    error: data?.detail || "Failed to delete item.",
   };
 }
