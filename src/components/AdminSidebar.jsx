@@ -11,6 +11,8 @@ const menuItems = [
   { icon: "▦", label: "Overview", href: "/admin/online-store/overview" },
   { icon: "▤", label: "Reports", href: "/admin/online-store/reports" },
   { icon: "▥", label: "Analytics", href: "/admin/online-store/analytics" },
+  { icon: "▥", label: "Discounts", href: "/admin/online-store/discounts" },
+  { icon: "▥", label: "Shipping", href: "/admin/online-store/shipping" },
 ];
 
 export default function AdminSidebar() {
