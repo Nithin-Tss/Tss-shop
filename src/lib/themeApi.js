@@ -1,74 +1,35 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-const BASE = `${API_URL}/api/v1/themes`;
+import { apiRequest } from "@/lib/api";
 
-// TODO: replace with the store from the logged-in user once login issues tokens.
-function storeHeaders() {
-  try {
-    const storeId = localStorage.getItem("tss-store-id");
-    return storeId ? { "X-Store-Id": storeId } : {};
-  } catch {
-    return {};
-  }
-}
+// Every call is for the signed-in user's current store (Authorization + X-Store-Id).
+const BASE = "/api/v1/themes";
 
-async function request(path, options = {}) {
-  let response;
-
-  try {
-    response = await fetch(`${BASE}${path}`, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...storeHeaders(),
-        ...options.headers,
-      },
-    });
-  } catch {
-    throw new Error("Unable to reach the server. Is the backend running?");
-  }
-
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    const first = Object.values(data)[0];
-    const message =
-      data.detail || (Array.isArray(first) ? first[0] : first) || "Request failed.";
-    throw new Error(String(message));
-  }
-
-  return data;
-}
-
+// -> { store, storefrontUrl, files: [{ path, content }] }
 export function listThemeFiles() {
-  return request("/files/");
+  return apiRequest(`${BASE}/files/`);
 }
 
 export function saveThemeFile(path, content) {
-  return request("/files/", {
-    method: "POST",
-    body: JSON.stringify({ path, content }),
-  });
+  return apiRequest(`${BASE}/files/`, { method: "POST", body: { path, content } });
 }
 
 export function deleteThemePath(path) {
-  return request(`/files/?path=${encodeURIComponent(path)}`, { method: "DELETE" });
+  return apiRequest(`${BASE}/files/?path=${encodeURIComponent(path)}`, { method: "DELETE" });
 }
 
 export function renameThemePath(source, target) {
-  return request("/files/rename/", {
-    method: "POST",
-    body: JSON.stringify({ source, target }),
-  });
+  return apiRequest(`${BASE}/files/rename/`, { method: "POST", body: { source, target } });
 }
 
-export function themeRenderUrl(storeId) {
-  let id = storeId;
+// Section layout + settings of every page, with defaults filled in
+export function getThemeSettings() {
+  return apiRequest(`${BASE}/settings/`);
+}
 
-  if (!id) {
-    try {
-      id = localStorage.getItem("tss-store-id");
-    } catch {}
-  }
+export function saveThemeSettings(data) {
+  return apiRequest(`${BASE}/settings/`, { method: "PUT", body: data });
+}
 
-  return `${BASE}/render/${id ? `?store=${encodeURIComponent(id)}` : ""}`;
+// Section types and their setting fields, for the customizer
+export function getThemeSchema() {
+  return apiRequest(`${BASE}/schema/`);
 }

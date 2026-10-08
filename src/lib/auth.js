@@ -2,11 +2,13 @@
 import { useSyncExternalStore } from "react";
 
 /*
- * FRONTEND-ONLY SESSION
+ * SESSION
  *
- * The Django login/signup endpoints don't return a session or token yet,
- * so the signed-in state is kept in the browser. Replace this with the
- * real backend session/token once it's available.
+ * After sign-in/sign-up the backend returns { token, user, stores }.
+ * It's kept in localStorage so the API helpers can send
+ *   Authorization: Bearer <token>   and   X-Store-Id: <current store>
+ *
+ * Shape: { token, name, email, user, stores: [...], storeId }
  */
 
 const SESSION_KEY = "store_session";
@@ -20,6 +22,15 @@ function readSession() {
   }
 }
 
+function writeSession(session) {
+  try {
+    if (session) window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    else window.localStorage.removeItem(SESSION_KEY);
+  } catch {}
+
+  window.dispatchEvent(new Event(SESSION_EVENT));
+}
+
 function subscribe(callback) {
   window.addEventListener("storage", callback);
   window.addEventListener(SESSION_EVENT, callback);
@@ -30,23 +41,56 @@ function subscribe(callback) {
   };
 }
 
-export function signIn(user = {}) {
-  try {
-    window.localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-  } catch {}
+export function getSession() {
+  const raw = readSession();
 
-  window.dispatchEvent(new Event(SESSION_EVENT));
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+// `data` is the backend's sign-in/sign-up response: { token, user, stores }
+export function signIn(data) {
+  const user = data.user || {};
+  const stores = data.stores || [];
+
+  writeSession({
+    token: data.token,
+    name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
+    email: user.email,
+    user,
+    stores,
+    storeId: stores[0]?.storeId || null,
+  });
 }
 
 export function signOut() {
-  try {
-    window.localStorage.removeItem(SESSION_KEY);
-  } catch {}
-
-  window.dispatchEvent(new Event(SESSION_EVENT));
+  writeSession(null);
 }
 
-// Returns the signed-in user object, or null when signed out.
+export function getToken() {
+  return getSession()?.token || null;
+}
+
+export function getStoreId() {
+  return getSession()?.storeId || null;
+}
+
+// Remember a newly created store and make it the current one
+export function addStore(store) {
+  const session = getSession();
+
+  if (!session) return;
+
+  const stores = [...(session.stores || []).filter((s) => s.storeId !== store.storeId), store];
+  writeSession({ ...session, stores, storeId: store.storeId });
+}
+
+// Returns the signed-in session object, or null when signed out.
 export function useSession() {
   const raw = useSyncExternalStore(subscribe, readSession, () => null);
 

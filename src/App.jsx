@@ -7,6 +7,7 @@ import Onboarding from "@/pages/Onboarding";
 import Profile from "@/pages/Profile";
 import EditorDemo from "@/pages/EditorDemo";
 import AdminOnlineStore from "@/pages/AdminOnlineStore";
+import AdminCustomize from "@/pages/AdminCustomize";
 import AdminHome from "@/pages/AdminHome";
 import AdminProducts from "@/pages/AdminProducts";
 import AdminCatalogues from "@/pages/AdminCatalogues";
@@ -34,6 +35,7 @@ export default function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/editor-demo" element={<EditorDemo />} />
       <Route path="/admin/online-store" element={<AdminOnlineStore />} />
+      <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
       <Route path="/admin/online-store/home" element={<AdminHome />} />
       <Route path="/admin/online-store/products" element={<AdminProducts />} />
       <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />

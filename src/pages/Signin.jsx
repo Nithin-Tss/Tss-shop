@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
  
 export default function SignInPage() {
@@ -69,28 +70,18 @@ export default function SignInPage() {
     setIsSubmitting(true);
  
     try {
-      /*
-       * FRONTEND ONLY
-       *
-       * No backend API is connected yet.
-       * No localStorage is used.
-       * No authentication is performed.
-       *
-       * Django integration will be added later.
-       */
- 
-      await new Promise((resolve) => setTimeout(resolve, 700));
- 
-      setMessage(
-        "Form validation successful. Redirecting to onboarding..."
-      );
- 
-      // Redirect to onboarding after successful sign in
-      signIn({ email: formData.email });
+      const result = await apiPost("/api/v1/auth/login/", formData);
 
-      setTimeout(() => {
-        navigate("/auth/onboarding");
-      }, 1200);
+      if (!result.ok) {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+        return;
+      }
+
+      signIn(result.data);
+      setMessage("Signed in. Redirecting...");
+
+      // New accounts set up a store first; existing ones go to their admin
+      navigate(result.data.stores.length ? "/admin/online-store" : "/auth/onboarding");
     } finally {
       setIsSubmitting(false);
     }

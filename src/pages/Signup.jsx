@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Link } from "react-router-dom";
+import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
  
 export default function SignUpPage() {
@@ -181,46 +182,16 @@ export default function SignUpPage() {
     setIsSubmitting(true);
  
     try {
+      const result = await apiPost("/api/v1/auth/signup/", formData);
 
-      /*
+      if (!result.ok) {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+        return;
+      }
 
-       * FRONTEND ONLY
-
-       *
-
-       * No backend API is connected.
-
-       * No localStorage is used.
-
-       * No account is actually created.
-
-       *
-
-       * Django integration will be added later.
-
-       */
- 
-      await new Promise((resolve) => setTimeout(resolve, 700));
- 
-      setMessage(
-
-        "Form validation successful. Backend account creation will be connected later."
-
-      );
- 
-      // Redirect to onboarding after successful signup
-
-      signIn({
-        name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
-        email: formData.email,
-      });
-
-      setTimeout(() => {
-
-        navigate("/auth/onboarding");
-
-      }, 1200);
-
+      signIn(result.data);
+      setMessage("Account created. Let's set up your store...");
+      navigate("/auth/onboarding");
     } finally {
 
       setIsSubmitting(false);

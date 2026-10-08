@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "@/components/NavBar";
+import { apiRequest } from "@/lib/api";
+import { addStore, useSession } from "@/lib/auth";
 
 const iconProps = {
   width: 20,
@@ -136,6 +138,45 @@ export default function OnboardingPage() {
     );
   };
 
+  const session = useSession();
+  const [storeName, setStoreName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [storeError, setStoreError] = useState("");
+  const hasStore = Boolean(session?.stores?.length);
+
+  // Creates the user's store (once), then opens the chosen editor
+  const chooseTheme = async (themeId) => {
+    if (creating) return;
+
+    if (!session?.token) {
+      navigate("/auth/signin");
+      return;
+    }
+
+    if (!hasStore) {
+      const name = storeName.trim() || `${session.user?.firstName || "My"}'s store`;
+
+      setCreating(true);
+      setStoreError("");
+
+      try {
+        const store = await apiRequest("/api/v1/stores/", {
+          method: "POST",
+          body: { storeName: name },
+        });
+        addStore({ ...store, role: "owner" });
+      } catch (error) {
+        setStoreError(error.message);
+        return;
+      } finally {
+        setCreating(false);
+      }
+    }
+
+    // Custom: code editor (from the online store page); predefined: block customizer
+    navigate(themeId === "custom" ? "/admin/online-store" : "/admin/online-store/customize");
+  };
+
   const handleNext = () => {
     setCurrentStep(2);
   };
@@ -267,16 +308,33 @@ export default function OnboardingPage() {
               </p>
             </div>
 
+            {!hasStore && (
+              <label className="mx-auto mb-6 block max-w-[600px]">
+                <span className="mb-1.5 block text-sm font-medium">Store name</span>
+                <input
+                  value={storeName}
+                  onChange={(event) => setStoreName(event.target.value)}
+                  placeholder={`${session?.user?.firstName || "My"}'s store`}
+                  maxLength={200}
+                  className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-[15px] outline-none focus:border-charcoal-navy"
+                />
+              </label>
+            )}
+
+            {storeError && (
+              <p role="alert" className="mx-auto mb-4 max-w-[600px] rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                {storeError}
+              </p>
+            )}
+
             {/* Theme Cards */}
             <div className="mx-auto grid max-w-[600px] grid-cols-1 gap-4 sm:grid-cols-2">
               {THEME_OPTIONS.map((theme) => (
                 <button
                   key={theme.id}
                   type="button"
-                  onClick={() =>{
-                    if (theme.id === "custom"){
-                      navigate("/admin/online-store");}
-                    }}
+                  onClick={() => chooseTheme(theme.id)}
+                  disabled={creating}
                   className="group flex min-h-[260px] w-full flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-6 py-8 text-center transition-colors hover:border-charcoal-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-charcoal-navy"
                 >
                   <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-gray-100 text-charcoal-navy transition-colors group-hover:bg-charcoal-navy group-hover:text-white">

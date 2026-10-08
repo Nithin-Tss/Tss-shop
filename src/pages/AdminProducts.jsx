@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { apiRequest } from "@/lib/api";
 
 const menuItems = [
   { icon: "⌂", label: "Home", href: "/admin/online-store/home" },
@@ -30,8 +31,21 @@ const secondaryButton =
 export default function ProductsPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [notice, setNotice] = useState("");
-  // Products added in this session (kept until the page reloads)
+  // The store's products, from /api/v1/catalog/products/
   const [products, setProducts] = useState([]);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    apiRequest("/api/v1/catalog/products/")
+      .then((data) => !cancelled && setProducts(data.map(toRow)))
+      .catch((error) => !cancelled && setLoadError(error.message));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Hide the success message after a few seconds
   useEffect(() => {
@@ -46,10 +60,10 @@ export default function ProductsPage() {
     setShowAddForm(true);
   };
 
-  const handleSaved = (payload) => {
-    setProducts((current) => [{ id: newId(), createdAt: Date.now(), ...payload }, ...current]);
+  const handleSaved = (product) => {
+    setProducts((current) => [toRow(product), ...current]);
     setShowAddForm(false);
-    setNotice(`“${payload.title}” was added.`);
+    setNotice(`“${product.title}” was added.`);
   };
 
   return (
@@ -240,6 +254,12 @@ export default function ProductsPage() {
                 onSaved={handleSaved}
               />
             ) : (
+              <>
+              {loadError && (
+                <p role="alert" className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                  Couldn't load products: {loadError}
+                </p>
+              )}
               <ProductsOverview
                 products={products}
                 notice={notice}
@@ -247,6 +267,7 @@ export default function ProductsPage() {
                 onNotice={setNotice}
                 onAddProduct={openAddForm}
               />
+              </>
             )}
           </div>
         </main>
@@ -1004,6 +1025,17 @@ const INITIAL_FORM = {
 
 const newId = () => Math.random().toString(36).slice(2, 10);
 
+// API product -> the shape the products table uses
+function toRow(product) {
+  return {
+    ...product,
+    price: product.price ?? "",
+    createdAt: Date.parse(product.createdAt) || Date.now(),
+    // Stock lives in the inventory app, which has no API yet
+    track_quantity: false,
+  };
+}
+
 function slugify(text) {
   return text
     .toLowerCase()
@@ -1099,6 +1131,7 @@ function AddProductForm({ onClose, onSaved }) {
   const [form, setForm] = useState(INITIAL_FORM);
   const [touched, setTouched] = useState({});
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const imagesRef = useRef(form.images);
 
   imagesRef.current = form.images;
@@ -1157,24 +1190,26 @@ function AddProductForm({ onClose, onSaved }) {
     onClose();
   };
 
-  /* ---------------------------------------------------------------- */
-  /* SAVE                                                              */
-  /* TODO: connect the backend API here, e.g.                          */
-  /*   const response = await fetch(`${API_URL}/api/v1/products/`, {  */
-  /*     method: "POST",                                               */
-  /*     headers: { "Content-Type": "application/json" },              */
-  /*     body: JSON.stringify(payload),                                */
-  /*   });                                                             */
-  /* Show response errors before closing the form.                     */
-  /* ---------------------------------------------------------------- */
+  // SAVE: POST /api/v1/catalog/products/ (category, collections, tags and
+  // variants are saved with the product). Image upload isn't connected yet.
   const onSave = async () => {
     const payload = buildPayload(form);
 
     setSaving(true);
-    console.log("Save product payload:", payload);
-    setSaving(false);
+    setSaveError("");
 
-    onSaved(payload);
+    try {
+      const product = await apiRequest("/api/v1/catalog/products/", {
+        method: "POST",
+        body: payload,
+      });
+      onSaved(product);
+    } catch (error) {
+      setSaveError(error.message);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSubmit = (event) => {
@@ -1210,6 +1245,12 @@ function AddProductForm({ onClose, onSaved }) {
         <span aria-hidden="true">/</span>
         <span className="text-[#161C2C]">New product</span>
       </nav>
+
+      {saveError && (
+        <p role="alert" className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          Couldn't save the product: {saveError}
+        </p>
+      )}
 
       <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">

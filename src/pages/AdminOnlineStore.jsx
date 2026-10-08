@@ -102,6 +102,22 @@ export default function OnlineStorePage() {
 
             <div className="flex items-center gap-3 mt-4">
 
+            {/* THEME CUSTOMIZER BUTTON: sections, slides, colors */}
+            <Link
+              to="/admin/online-store/customize"
+              className="
+                px-7 py-3
+                rounded-xl
+                border border-[#161C2C]
+                text-[#161C2C]
+                font-medium
+                hover:bg-[#161C2C] hover:text-white
+                transition
+              "
+            >
+              Customize theme
+            </Link>
+
             {/* CODE EDITOR BUTTON */}
             <Link
               to="/editor-demo"

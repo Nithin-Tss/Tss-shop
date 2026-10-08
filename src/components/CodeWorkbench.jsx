@@ -6,7 +6,6 @@ import {
   listThemeFiles,
   renameThemePath,
   saveThemeFile,
-  themeRenderUrl,
 } from "@/lib/themeApi";
 
 const KEEP = ".keep";
@@ -86,7 +85,7 @@ const CloseIcon = () => (
 );
 
 export default function CodeWorkbench({ height = "640px", fullscreen = false }) {
-  const [project, setProject] = useState({ files: {}, folders: [], storeId: null });
+  const [project, setProject] = useState({ files: {}, folders: [], storeId: null, storefrontUrl: "" });
   const [drafts, setDrafts] = useState({});
   const [openTabs, setOpenTabs] = useState([]);
   const [activePath, setActivePath] = useState(null);
@@ -113,7 +112,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         if (baseName(f.path) === KEEP) folders.push(parentOf(f.path));
         else files[f.path] = f.content;
       });
-      setProject({ files, folders, storeId: data.store });
+      setProject({ files, folders, storeId: data.store, storefrontUrl: data.storefrontUrl });
       setStatus("ready");
     } catch (e) {
       setError(e.message);
@@ -561,7 +560,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 </button>
                 <a
                   className="hover:text-[#005fb8]"
-                  href={themeRenderUrl(project.storeId)}
+                  href={project.storefrontUrl}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -573,7 +572,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             <iframe
               key={previewKey}
               title="Theme preview"
-              src={themeRenderUrl(project.storeId)}
+              src={project.storefrontUrl}
               sandbox="allow-scripts allow-forms allow-popups"
               className="min-h-0 flex-1 bg-white"
             />
