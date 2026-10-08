@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import AdminSidebar from "../../../components/AdminSidebar";
 
@@ -100,10 +101,32 @@ export default function OnlineStorePage() {
             </div>
 
 
+            <div className="flex items-center gap-3 mt-4">
+
+            {/* CODE EDITOR BUTTON */}
+            <Link
+              href="/editor-demo"
+              className="
+                px-7 py-3
+                rounded-xl
+                bg-[#161C2C]
+                text-white
+                font-medium
+                flex items-center gap-3
+                hover:bg-[#252E45]
+                transition
+              "
+            >
+              <span className="text-xl">
+                {"</>"}
+              </span>
+
+              Code Editor
+            </Link>
+
             {/* TOP BACK BUTTON */}
             <button
               className="
-                mt-4
                 px-7 py-3
                 rounded-xl
                 border border-[#161C2C]
@@ -121,6 +144,8 @@ export default function OnlineStorePage() {
 
               Back
             </button>
+
+            </div>
 
           </div>
 
