@@ -9,6 +9,9 @@ const menuItems = [
   { icon: "♙", label: "Catalogues", href: "/admin/online-store/catalogues" },
   { icon: "▥", label: "Inventory", href: "/admin/online-store/inventory" },
   { icon: "⌁", label: "Content", href: "/admin/online-store/content" },
+  { icon: "▦", label: "Overview", href: "/admin/online-store/overview" },
+  { icon: "▤", label: "Reports", href: "/admin/online-store/reports" },
+  { icon: "▥", label: "Analytics", href: "/admin/online-store/analytics" },
 ];
 
 export default function AdminSidebar() {
@@ -56,31 +59,40 @@ export default function AdminSidebar() {
           </div>
 
           {/* THEMES */}
-          <div className="mt-1 h-11 rounded-lg bg-[#30466F] px-4 flex items-center gap-4">
+          <Link
+            href="/admin/online-store/themes"
+            className="mt-1 h-11 rounded-lg px-4 flex items-center gap-4 hover:bg-white/10 transition"
+          >
             <span className="text-lg">◉</span>
 
             <span className="text-sm font-medium">
               Themes
             </span>
-          </div>
+          </Link>
 
           {/* PAGES */}
-          <div className="h-11 px-4 flex items-center gap-4">
+          <Link
+            href="/admin/online-store/pages"
+            className="h-11 px-4 flex items-center gap-4 hover:bg-white/10 transition"
+          >
             <span className="text-lg">▤</span>
 
             <span className="text-sm">
               Pages
             </span>
-          </div>
+          </Link>
 
           {/* BLOG */}
-          <div className="h-11 px-4 flex items-center gap-4">
+          <Link
+            href="/admin/online-store/blog-posts"
+            className="h-11 px-4 flex items-center gap-4 hover:bg-white/10 transition"
+          >
             <span className="text-lg">✎</span>
 
             <span className="text-sm">
               Blog Posts
             </span>
-          </div>
+          </Link>
 
         </div>
 
