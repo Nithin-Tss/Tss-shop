@@ -19,6 +19,7 @@ import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminDiscounts from "@/pages/AdminDiscounts";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
+import AdminShipping from "@/pages/AdminShipping";
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
       <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />   
+      <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
     </Routes>
   );
 }
