@@ -21,48 +21,6 @@ const lineIcon = {
   "aria-hidden": true,
 };
 
-// Sample product pictures shown in the empty catalogue
-const sampleProducts = [
-  {
-    name: "Sneaker",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M2 16v-3.5l3-1 3 2.5h3l4-4 7 3.5V16Z" />
-        <path d="M2 16v2h20v-2" />
-        <path d="M9.5 12.5l1.5 2M12 11.5l1.5 2" />
-      </svg>
-    ),
-  },
-  {
-    name: "Tote bag",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M5 8h14l-1 13H6Z" />
-        <path d="M9 8V6a3 3 0 0 1 6 0v2" />
-      </svg>
-    ),
-  },
-  {
-    name: "Cream tube",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M3 10h13l3 1.5v1L16 14H3Z" />
-        <path d="M19 11.5h2v1h-2" />
-        <path d="M6 12c1-1 2 1 3 0s2 1 3 0" />
-      </svg>
-    ),
-  },
-  {
-    name: "Mug",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M5 7h11v10a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3Z" />
-        <path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16" />
-      </svg>
-    ),
-  },
-];
-
 const primaryButton =
   "inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#161C2C] px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(22,28,44,0.25)] hover:bg-[#252E45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-2 transition disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none";
 
@@ -286,6 +244,7 @@ export default function ProductsPage() {
                 products={products}
                 notice={notice}
                 onDismissNotice={() => setNotice("")}
+                onNotice={setNotice}
                 onAddProduct={openAddForm}
               />
             )}
@@ -372,10 +331,20 @@ function downloadCsv(products) {
   URL.revokeObjectURL(url);
 }
 
-function ProductsOverview({ products, notice, onDismissNotice, onAddProduct }) {
+// Bigger version of a button style for the page header
+const largeButton = (base) =>
+  base.replace("h-10", "h-11").replace("px-4", "px-5").replace("text-sm", "text-[15px]");
+
+function ProductsOverview({ products, notice, onDismissNotice, onNotice, onAddProduct }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sort, setSort] = useState("newest");
+  const [importOpen, setImportOpen] = useState(false);
+
+  const handleImported = () => {
+    setImportOpen(false);
+    onNotice("Products file selected successfully. Backend import will be connected later.");
+  };
 
   const counts = useMemo(() => {
     const result = { all: products.length, active: 0, draft: 0, scheduled: 0, units: 0 };
@@ -438,50 +407,93 @@ function ProductsOverview({ products, notice, onDismissNotice, onAddProduct }) {
       )}
 
 
-      {/* PAGE HEADER */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#53627E]">Catalogue</p>
+      {/* Header + stats: centred in the page while the catalogue is empty */}
+      <div
+        className={`mx-auto w-full max-w-[1120px] ${
+          products.length === 0 ? "flex min-h-[calc(100vh-11rem)] flex-col justify-center" : ""
+        }`}
+      >
 
-          <h1 className="mt-1 text-[28px] font-semibold leading-tight tracking-tight">Products</h1>
+        {/* PAGE HEADER */}
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-[34px] font-semibold leading-tight tracking-tight">Products</h1>
 
-          <p className="mt-1 text-sm text-[#53627E]">
-            Create, organise and price everything you sell.
-          </p>
+            <p className="mt-1.5 text-base text-[#53627E]">
+              Create, organise and price everything you sell.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={() => setImportOpen(true)} className={largeButton(primaryButton)}>
+              <svg {...lineIcon} strokeWidth="1.8" className="h-[18px] w-[18px]">
+                <path d="M12 15V4M7 9l5-5 5 5M5 20h14" />
+              </svg>
+              Import
+            </button>
+
+            {/* The empty state has its own Add Product button */}
+            {products.length > 0 && (
+              <button type="button" onClick={onAddProduct} className={largeButton(primaryButton)}>
+                <span className="text-lg leading-none">+</span>
+                Add Product
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <button type="button" className={secondaryButton}>
-            <svg {...lineIcon} strokeWidth="1.8" className="h-4 w-4">
-              <path d="M12 15V4M7 9l5-5 5 5M5 20h14" />
-            </svg>
-            Import
-          </button>
 
-          <button type="button" onClick={onAddProduct} className={primaryButton}>
-            <span className="text-base leading-none">+</span>
-            Add Product
-          </button>
+        {/* STATS */}
+        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-2xl border border-[#D8DFE8]/80 bg-white px-6 py-5 shadow-[0_1px_3px_rgba(22,28,44,0.05)]"
+            >
+              <p className="flex items-center gap-2 text-sm text-[#53627E]">
+                {stat.dot && <span className={`h-2 w-2 rounded-full ${stat.dot}`} />}
+                {stat.label}
+              </p>
+
+              <p className="mt-2 text-[30px] font-semibold leading-none tabular-nums">{stat.value}</p>
+            </div>
+          ))}
         </div>
-      </div>
 
 
-      {/* STATS */}
-      <div className="mt-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="rounded-xl border border-[#D8DFE8]/80 bg-white px-4 py-3.5">
-            <p className="flex items-center gap-1.5 text-xs text-[#53627E]">
-              {stat.dot && <span className={`h-1.5 w-1.5 rounded-full ${stat.dot}`} />}
-              {stat.label}
+        {/* EMPTY STATE (shown instead of the table while there are no products) */}
+        {products.length === 0 && (
+          <section
+            aria-labelledby="products-empty-heading"
+            className="mt-6 flex flex-col items-center rounded-2xl border border-[#D8DFE8]/80 bg-white px-6 py-14 text-center shadow-[0_1px_3px_rgba(22,28,44,0.05)] sm:py-16"
+          >
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F7F8FA] text-[#161C2C] ring-1 ring-[#D8DFE8]">
+              <svg {...lineIcon} strokeWidth="1.6" className="h-8 w-8">
+                <path d="M4 8l8-4 8 4v8l-8 4-8-4Z" />
+                <path d="M4 8l8 4 8-4M12 12v8" />
+              </svg>
+            </span>
+
+            <h2 id="products-empty-heading" className="mt-5 text-xl font-semibold text-[#161C2C]">
+              No products yet
+            </h2>
+
+            <p className="mt-1.5 max-w-[360px] text-sm text-[#53627E]">
+              Add your first product to start building your store.
             </p>
 
-            <p className="mt-1 text-[22px] font-semibold tabular-nums">{stat.value}</p>
-          </div>
-        ))}
+            <button type="button" onClick={onAddProduct} className={`${primaryButton} mt-6`}>
+              <span className="text-base leading-none">+</span>
+              Add Product
+            </button>
+          </section>
+        )}
+
       </div>
 
 
-      {/* PRODUCT WORKSPACE */}
+      {/* PRODUCT WORKSPACE (hidden until there are products) */}
+      {products.length > 0 && (
       <section className="mt-6 overflow-hidden rounded-2xl border border-[#D8DFE8]/80 bg-white shadow-[0_1px_3px_rgba(22,28,44,0.05)]">
 
         {/* Toolbar */}
@@ -613,43 +625,6 @@ function ProductsOverview({ products, notice, onDismissNotice, onAddProduct }) {
         )}
 
 
-        {/* Empty catalogue */}
-        {products.length === 0 && (
-          <div className="flex flex-col items-center px-6 py-16 text-center">
-            <div className="grid grid-cols-2 gap-2.5">
-              {sampleProducts.map((product, index) => (
-                <span
-                  key={product.name}
-                  title={product.name}
-                  className={`flex h-14 w-14 items-center justify-center rounded-2xl text-[#30466F] ${
-                    index === 0 ? "bg-[#161C2C] text-white" : "bg-[#F3F5F8]"
-                  }`}
-                >
-                  <span className="block h-7 w-7 [&>svg]:h-full [&>svg]:w-full">{product.icon}</span>
-                </span>
-              ))}
-            </div>
-
-            <h2 className="mt-6 text-lg font-semibold">Start your catalogue</h2>
-
-            <p className="mt-1 max-w-[420px] text-sm text-[#53627E]">
-              Add your first product by hand, or bring your whole range in at once from a CSV file.
-            </p>
-
-            <div className="mt-6 flex flex-wrap justify-center gap-2.5">
-              <button type="button" onClick={onAddProduct} className={primaryButton}>
-                <span className="text-base leading-none">+</span>
-                Add Product
-              </button>
-
-              <button type="button" className={secondaryButton}>
-                Import CSV
-              </button>
-            </div>
-          </div>
-        )}
-
-
         {/* No matches */}
         {products.length > 0 && visible.length === 0 && (
           <div className="px-6 py-14 text-center">
@@ -675,7 +650,272 @@ function ProductsOverview({ products, notice, onDismissNotice, onAddProduct }) {
         )}
 
       </section>
+      )}
+
+
+      {importOpen && (
+        <ImportProductsModal
+          onClose={() => setImportOpen(false)}
+          onImported={handleImported}
+        />
+      )}
     </>
+  );
+}
+
+
+/* ------------------------------------------------------------------ */
+/* IMPORT PRODUCTS                                                     */
+/* ------------------------------------------------------------------ */
+
+const IMPORT_EXTENSIONS = ["csv", "xls", "xlsx"];
+const IMPORT_MAX_BYTES = 25 * 1024 * 1024;
+
+const IMPORT_BADGES = {
+  csv: "bg-[#E8EEF8] text-[#30466F]",
+  xls: "bg-emerald-50 text-emerald-700",
+  xlsx: "bg-emerald-50 text-emerald-700",
+};
+
+function fileExtension(name) {
+  const dot = name.lastIndexOf(".");
+  return dot === -1 ? "" : name.slice(dot + 1).toLowerCase();
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// Returns an error message, or "" when the file can be imported
+function validateImportFile(file) {
+  if (!IMPORT_EXTENSIONS.includes(fileExtension(file.name))) {
+    return "Only CSV, XLS and XLSX files are supported.";
+  }
+
+  if (file.size > IMPORT_MAX_BYTES) {
+    return "File size must be less than 25 MB.";
+  }
+
+  return "";
+}
+
+function ImportProductsModal({ onClose, onImported }) {
+  const [file, setFile] = useState(null);
+  const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const inputRef = useRef(null);
+  const browseRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+
+  onCloseRef.current = onClose;
+
+  // Focus the dialog's main action once, and close on Escape
+  useEffect(() => {
+    browseRef.current?.focus();
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onCloseRef.current();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const selectFile = (candidate) => {
+    if (!candidate) return;
+
+    const message = validateImportFile(candidate);
+
+    // Never keep an invalid file selected
+    setError(message);
+    setFile(message ? null : candidate);
+  };
+
+  const removeFile = () => {
+    setFile(null);
+    setError("");
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setDragging(false);
+    selectFile(event.dataTransfer.files?.[0]);
+  };
+
+  // TODO: send `file` to the backend import endpoint once it exists
+  const handleImport = () => {
+    if (!file || validateImportFile(file)) return;
+
+    onImported(file);
+  };
+
+  const extension = file ? fileExtension(file.name) : "";
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#161C2C]/50 px-4 py-6"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="import-products-title"
+        aria-describedby="import-products-description"
+        className="w-full max-w-[560px] overflow-hidden rounded-2xl bg-white shadow-[0_20px_60px_rgba(22,28,44,0.25)]"
+      >
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 border-b border-[#D8DFE8] px-6 py-5">
+          <div>
+            <h2 id="import-products-title" className="text-lg font-semibold text-[#161C2C]">
+              Import Products
+            </h2>
+
+            <p id="import-products-description" className="mt-0.5 text-sm text-[#53627E]">
+              Upload a spreadsheet to add products in bulk.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg text-[#53627E] hover:bg-[#F7F8FA] hover:text-[#161C2C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/30 transition"
+          >
+            ×
+          </button>
+        </div>
+
+
+        {/* Body */}
+        <div className="space-y-4 px-6 py-6">
+
+          {/* Drop zone */}
+          <div
+            onDragEnter={(event) => {
+              event.preventDefault();
+              setDragging(true);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={(event) => {
+              // Ignore leaving into a child element
+              if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false);
+            }}
+            onDrop={handleDrop}
+            className={`flex flex-col items-center rounded-2xl border-2 border-dashed px-6 py-9 text-center transition ${
+              dragging
+                ? "border-[#161C2C] bg-[#EEF1F6]"
+                : error
+                  ? "border-[#D72C0D]/50 bg-[#D72C0D]/[0.03]"
+                  : "border-[#D8DFE8] bg-[#F7F8FA] hover:border-[#53627E]"
+            }`}
+          >
+            <span
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm transition ${
+                dragging ? "bg-[#161C2C] text-white" : "bg-white text-[#30466F]"
+              }`}
+            >
+              <svg {...lineIcon} strokeWidth="1.8" className="h-6 w-6">
+                <path d="M12 15V4M7 9l5-5 5 5" />
+                <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+              </svg>
+            </span>
+
+            <p className="mt-4 text-sm font-semibold text-[#161C2C]">
+              {dragging ? "Drop your file to upload" : "Drag & drop your file here"}
+            </p>
+
+            <p className="my-2 text-xs uppercase tracking-[0.12em] text-[#53627E]">or</p>
+
+            <button
+              ref={browseRef}
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className={secondaryButton}
+            >
+              Browse Files
+            </button>
+
+            <p className="mt-4 text-xs text-[#53627E]">
+              Supported formats: CSV, XLS, XLSX · Maximum file size: 25 MB
+            </p>
+
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".csv,.xls,.xlsx,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              aria-label="Choose a products file"
+              onChange={(event) => {
+                selectFile(event.target.files?.[0]);
+                // Allow picking the same file again after removing it
+                event.target.value = "";
+              }}
+            />
+          </div>
+
+
+          {/* Validation error */}
+          {error && (
+            <p role="alert" className="flex items-start gap-2 rounded-xl border border-[#D72C0D]/25 bg-[#D72C0D]/5 px-3.5 py-2.5 text-sm text-[#D72C0D]">
+              <span aria-hidden="true" className="mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-bold">
+                !
+              </span>
+              {error}
+            </p>
+          )}
+
+
+          {/* Selected file */}
+          {file && (
+            <div className="flex items-center gap-3 rounded-xl border border-[#D8DFE8] bg-white px-3.5 py-3">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold uppercase ${IMPORT_BADGES[extension]}`}
+              >
+                {extension}
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-[#161C2C]">{file.name}</p>
+                <p className="text-xs text-[#53627E]">
+                  {formatFileSize(file.size)} · {extension.toUpperCase()} file
+                </p>
+              </div>
+
+              <button
+                type="button"
+                aria-label={`Remove ${file.name}`}
+                onClick={removeFile}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg text-[#53627E] hover:bg-[#D72C0D]/5 hover:text-[#D72C0D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/30 transition"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+        </div>
+
+
+        {/* Footer */}
+        <div className="flex flex-col-reverse gap-2.5 border-t border-[#D8DFE8] bg-[#F7F8FA] px-6 py-4 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className={secondaryButton}>
+            Cancel
+          </button>
+
+          <button type="button" onClick={handleImport} disabled={!file} className={`${primaryButton} sm:min-w-[110px]`}>
+            Import
+          </button>
+        </div>
+
+      </div>
+    </div>
   );
 }
 
