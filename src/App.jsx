@@ -15,6 +15,10 @@ import AdminCatalogues from "@/pages/AdminCatalogues";
 import AdminContent from "@/pages/AdminContent";
 import AdminInventory from "@/pages/AdminInventory";
 import AdminOrders from "@/pages/AdminOrders";
+import AdminDrafts from "@/pages/AdminDrafts";
+import AdminCreateOrder from "@/pages/AdminCreateOrder";
+import AdminCustomers from "@/pages/AdminCustomers";
+import AdminAddCustomer from "@/pages/AdminAddCustomer";
 import AdminOverview from "@/pages/AdminOverview";
 import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
@@ -37,6 +41,10 @@ export default function App() {
       <Route path="/admin/online-store/content" element={<AdminContent />} />
       <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
       <Route path="/admin/online-store/orders" element={<AdminOrders />} />
+      <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
+      <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />
+      <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
+      <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />
       <Route path="/admin/online-store/overview" element={<AdminOverview />} />
       <Route path="/admin/online-store/reports" element={<AdminReports />} />
       <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />

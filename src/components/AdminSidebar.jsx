@@ -5,6 +5,7 @@ const menuItems = [
   { icon: "⌂", label: "Home", href: "/admin/online-store/home" },
   { icon: "▣", label: "Orders", badge: "12", href: "/admin/online-store/orders" },
   { icon: "◇", label: "Products", href: "/admin/online-store/products", hasSubmenu: true },
+  { icon: "👤", label: "Customers", href: "/admin/online-store/customers" },
   { icon: "♙", label: "Catalogues", href: "/admin/online-store/catalogues" },
   { icon: "▥", label: "Inventory", href: "/admin/online-store/inventory" },
   { icon: "⌁", label: "Content", href: "/admin/online-store/content" },
@@ -17,9 +18,12 @@ export default function AdminSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
 
+  const isDraftsActive = currentPath.startsWith("/admin/online-store/orders/drafts");
+  const isOrdersActive = currentPath.startsWith("/admin/online-store/orders");
+  const [ordersOpen, setOrdersOpen] = useState(isOrdersActive);
+
   const isCollectionsActive = currentPath.startsWith("/admin/online-store/collections");
   const isProductsActive = currentPath === "/admin/online-store/products" || isCollectionsActive;
-
   const [productsOpen, setProductsOpen] = useState(isCollectionsActive);
 
   return (
@@ -28,30 +32,103 @@ export default function AdminSidebar() {
         {menuItems.map((item) => {
           const isActive = currentPath === item.href;
 
+          // ORDERS WITH DRAFTS SUBMENU
+          if (item.label === "Orders") {
+            return (
+              <div key={item.label} className="space-y-1">
+                <div
+                  className={`w-full h-11 px-3 rounded-lg flex items-center justify-between transition ${
+                    isActive || isOrdersActive
+                      ? "bg-[#30466F] font-medium text-white"
+                      : "text-slate-200 hover:bg-white/10"
+                  }`}
+                >
+                  <Link
+                    to={item.href}
+                    className="flex items-center gap-4 flex-1 h-full"
+                  >
+                    <span className="w-5 text-center text-lg">{item.icon}</span>
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+
+                  <div className="flex items-center gap-1.5">
+                    {item.badge && (
+                      <span className="bg-[#53627E] px-2 py-0.5 rounded-full text-xs">
+                        {item.badge}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOrdersOpen((prev) => !prev);
+                      }}
+                      className="p-1 hover:bg-white/10 rounded cursor-pointer"
+                    >
+                      <span
+                        className={`text-xs block transition-transform duration-200 ${
+                          ordersOpen ? "rotate-0" : "-rotate-90"
+                        }`}
+                      >
+                        ⌄
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* DRAFTS SUB-ITEM */}
+                {ordersOpen && (
+                  <div className="pl-9 pr-2">
+                    <Link
+                      to="/admin/online-store/orders/drafts"
+                      className={`h-9 px-3 rounded-md flex items-center text-sm transition ${
+                        isDraftsActive
+                          ? "bg-white/20 text-white font-semibold"
+                          : "text-slate-300 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      Drafts
+                    </Link>
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           if (item.hasSubmenu) {
             return (
               <div key={item.label} className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => setProductsOpen((prev) => !prev)}
-                  className={`w-full h-11 px-3 rounded-lg flex items-center justify-between transition cursor-pointer ${
+                <div
+                  className={`w-full h-11 px-3 rounded-lg flex items-center justify-between transition ${
                     isActive || isProductsActive
                       ? "bg-[#30466F] font-medium text-white"
                       : "text-slate-200 hover:bg-white/10"
                   }`}
                 >
-                  <div className="flex items-center gap-4">
+                  <Link
+                    to={item.href}
+                    className="flex items-center gap-4 flex-1 h-full"
+                  >
                     <span className="w-5 text-center text-lg">{item.icon}</span>
                     <span className="text-sm">{item.label}</span>
-                  </div>
-                  <span
-                    className={`text-xs transition-transform duration-200 ${
-                      productsOpen ? "rotate-0" : "-rotate-90"
-                    }`}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setProductsOpen((prev) => !prev);
+                    }}
+                    className="p-1 hover:bg-white/10 rounded cursor-pointer"
                   >
-                    ⌄
-                  </span>
-                </button>
+                    <span
+                      className={`text-xs block transition-transform duration-200 ${
+                        productsOpen ? "rotate-0" : "-rotate-90"
+                      }`}
+                    >
+                      ⌄
+                    </span>
+                  </button>
+                </div>
 
                 {/* COLLECTIONS SUB-ITEM */}
                 {productsOpen && (
