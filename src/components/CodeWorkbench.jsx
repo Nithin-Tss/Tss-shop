@@ -85,7 +85,7 @@ const CloseIcon = () => (
   <svg {...svgProps} width={14} height={14}><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" strokeWidth="1.3" /></svg>
 );
 
-export default function CodeWorkbench({ height = "640px" }) {
+export default function CodeWorkbench({ height = "640px", fullscreen = false }) {
   const [project, setProject] = useState({ files: {}, folders: [], storeId: null });
   const [drafts, setDrafts] = useState({});
   const [openTabs, setOpenTabs] = useState([]);
@@ -347,7 +347,9 @@ export default function CodeWorkbench({ height = "640px" }) {
   return (
     <div
       onKeyDown={onKeyDown}
-      className="flex flex-col overflow-hidden rounded-lg border border-[#d4d4d4] bg-white text-[#3b3b3b]"
+      className={`flex flex-col overflow-hidden bg-white text-[#3b3b3b] ${
+        fullscreen ? "" : "rounded-lg border border-[#d4d4d4]"
+      }`}
       style={{ height }}
     >
       <div className="flex min-h-0 flex-1">
