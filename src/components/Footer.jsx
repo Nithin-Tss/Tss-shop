@@ -41,7 +41,9 @@ export default function Footer() {
           </h3>
 
           <div className="flex flex-col gap-3">
-            <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Blog</a>
+            <a href="/blog" className="text-sm text-gray-300 hover:text-[#D98324]">
+              Blog
+            </a>
             <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Compare Shopify</a>
             <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Guides</a>
             <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Free Tools</a>
@@ -56,7 +58,7 @@ export default function Footer() {
           </h3>
 
           <div className="flex flex-col gap-3">
-            <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Store Help Center</a>
+            <a href="/contact" className="text-sm text-gray-300 hover:text-[#D98324]">Store Help Center</a>
             <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Community Forum</a>
             <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Hire a Partner</a>
             <a href="#" className="text-sm text-gray-300 hover:text-[#D98324]">Service Status</a>
