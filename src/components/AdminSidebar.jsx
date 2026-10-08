@@ -145,9 +145,15 @@ export default function AdminSidebar() {
       </nav>
 
       {/* SETTINGS */}
-      <div className="mt-auto px-7 pb-8 flex items-center gap-4">
-        <span className="text-xl">⚙</span>
-        <span className="text-sm">Settings</span>
+            {/* SETTINGS */}
+      <div className="mt-auto px-7 pb-8">
+        <Link
+          to="/admin/online-store/settings"
+          className="flex items-center gap-4 h-11 px-3 rounded-lg hover:bg-white/10 transition"
+        >
+          <span className="text-xl">⚙</span>
+          <span className="text-sm">Settings</span>
+        </Link>
       </div>
     </aside>
   );
