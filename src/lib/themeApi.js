@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/api";
+import { apiRequest, apiUpload } from "@/lib/api";
 
 // Every call is for the signed-in user's current store (Authorization + X-Store-Id).
 const BASE = "/api/v1/themes";
@@ -43,4 +43,15 @@ export function saveThemeCustomizer(data) {
     method: "POST",
     body: data,
   });
+}
+
+// Home page HTML rendered from unsaved section data, for the customizer's live preview -> { html }
+export function previewTheme(data, { scroll = 0, selected = "" } = {}) {
+  const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected });
+  return apiRequest(`${BASE}/preview/?${query}`, { method: "POST", body: data });
+}
+
+// Banner / slide / image block picture -> { ok, data: { url } } or { ok: false, error }
+export function uploadThemeImage(file) {
+  return apiUpload(`${BASE}/images/`, "image", file);
 }
