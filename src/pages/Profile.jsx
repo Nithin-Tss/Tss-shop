@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { logout } from "@/lib/api";
+import { apiPost, logout } from "@/lib/api";
+import { setTokens } from "@/lib/auth";
  
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -185,21 +186,17 @@ export default function ProfilePage() {
     setIsChangingPassword(true);
  
     try {
-      /*
-       * FRONTEND ONLY
-       *
-       * No backend API is connected.
-       * Django password API will be connected later.
-       */
- 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 700)
-      );
- 
-      setMessage(
-        "Password validation successful. Backend integration will be added later."
-      );
- 
+      // Other devices are signed out; this one gets fresh tokens and stays in
+      const result = await apiPost("/api/v1/auth/password/", passwordData);
+
+      if (!result.ok) {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+        return;
+      }
+
+      setTokens(result.data);
+      setMessage("Password changed. Other devices have been signed out.");
+
       setPasswordData({
         currentPassword: "",
         newPassword: "",
@@ -626,20 +623,13 @@ const handleLogout = () => {
                       Current Password
                     </label>
  
-                    <input
+                    <PasswordInput
                       id="currentPassword"
-                      name="currentPassword"
-                      type="password"
-                      value={
-                        passwordData.currentPassword
-                      }
+                      value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
                       placeholder="Enter current password"
-                      className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                        errors.currentPassword
-                          ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                          : "border-slate-300 focus:border-charcoal-navy focus:ring-slate-100"
-                      }`}
+                      autoComplete="current-password"
+                      hasError={Boolean(errors.currentPassword)}
                     />
  
                     {errors.currentPassword && (
@@ -658,18 +648,13 @@ const handleLogout = () => {
                       New Password
                     </label>
  
-                    <input
+                    <PasswordInput
                       id="newPassword"
-                      name="newPassword"
-                      type="password"
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange}
                       placeholder="Enter new password"
-                      className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                        errors.newPassword
-                          ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                          : "border-slate-300 focus:border-charcoal-navy focus:ring-slate-100"
-                      }`}
+                      autoComplete="new-password"
+                      hasError={Boolean(errors.newPassword)}
                     />
  
                     {errors.newPassword && (
@@ -688,20 +673,13 @@ const handleLogout = () => {
                       Confirm New Password
                     </label>
  
-                    <input
+                    <PasswordInput
                       id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      value={
-                        passwordData.confirmPassword
-                      }
+                      value={passwordData.confirmPassword}
                       onChange={handlePasswordChange}
                       placeholder="Confirm new password"
-                      className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                        errors.confirmPassword
-                          ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                          : "border-slate-300 focus:border-charcoal-navy focus:ring-slate-100"
-                      }`}
+                      autoComplete="new-password"
+                      hasError={Boolean(errors.confirmPassword)}
                     />
  
                     {errors.confirmPassword && (
@@ -745,5 +723,60 @@ const handleLogout = () => {
         </div>
       </div>
     </main>
+  );
+}
+
+// Password field with an eye button to show or hide what was typed
+function PasswordInput({ id, value, onChange, placeholder, autoComplete, hasError }) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div className="relative">
+      <input
+        id={id}
+        name={id}
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        className={`w-full rounded-lg border py-3 pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+          hasError
+            ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+            : "border-slate-300 focus:border-charcoal-navy focus:ring-slate-100"
+        }`}
+      />
+
+      <button
+        type="button"
+        onClick={() => setVisible((shown) => !shown)}
+        aria-label={visible ? "Hide password" : "Show password"}
+        aria-pressed={visible}
+        title={visible ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-slate-400 transition hover:text-slate-700 focus:text-slate-700 focus:outline-none"
+      >
+        {visible ? <EyeOffIcon /> : <EyeIcon />}
+      </button>
+    </div>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19" />
+      <path d="M6.61 6.61A18.5 18.5 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+      <path d="M2 2l20 20" />
+    </svg>
   );
 }

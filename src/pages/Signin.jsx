@@ -80,8 +80,13 @@ export default function SignInPage() {
       signIn(result.data);
       setMessage("Signed in. Redirecting...");
 
-      // New accounts set up a store first; existing ones go to their admin
-      navigate(result.data.stores.length ? "/admin/online-store" : "/auth/onboarding");
+      // New accounts set up a store first; existing ones go back to the page
+      // that sent them here (?next=, same-site paths only) or to their admin
+      const next = new URLSearchParams(window.location.search).get("next");
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+
+      if (!result.data.stores.length) navigate("/auth/onboarding");
+      else navigate(safeNext || "/admin/online-store");
     } finally {
       setIsSubmitting(false);
     }

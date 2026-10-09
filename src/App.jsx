@@ -1,4 +1,4 @@
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
 import Home from "@/pages/Home";
 import Signin from "@/pages/Signin";
@@ -47,29 +47,32 @@ export default function App() {
       <Route path="/auth/onboarding" element={<Onboarding />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/editor-demo" element={<EditorDemo />} />
-      <Route path="/admin/online-store" element={<AdminOnlineStore />} />
-      <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
-      <Route path="/admin/settings" element={<AdminSettings />} />
-      <Route path="/admin/online-store/home" element={<AdminHome />} />
-      <Route path="/admin/online-store/products" element={<AdminProducts />} />
-      <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
-      <Route path="/admin/online-store/products/:productId" element={<AdminProductDetails />} />
-      <Route path="/admin/online-store/collections" element={<AdminCollections />} />
-      <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
-      <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />
-      <Route path="/admin/online-store/content" element={<AdminContent />} />
-      <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
-      <Route path="/admin/online-store/orders" element={<AdminOrders />} />
-      <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
-      <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />
-      <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
-      <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />
-      <Route path="/admin/online-store/overview" element={<AdminOverview />} />
-      <Route path="/admin/online-store/reports" element={<AdminReports />} />
-      <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
-      <Route path="/admin/online-store/settings" element={<AdminSettings />} />
-      <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
-      <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
+      {/* Admin pages need a signed-in user; otherwise go to sign-in first */}
+      <Route element={<RequireSignIn />}>
+        <Route path="/admin/online-store" element={<AdminOnlineStore />} />
+        <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
+        <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/online-store/home" element={<AdminHome />} />
+        <Route path="/admin/online-store/products" element={<AdminProducts />} />
+        <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
+        <Route path="/admin/online-store/products/:productId" element={<AdminProductDetails />} />
+        <Route path="/admin/online-store/collections" element={<AdminCollections />} />
+        <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
+        <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />
+        <Route path="/admin/online-store/content" element={<AdminContent />} />
+        <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
+        <Route path="/admin/online-store/orders" element={<AdminOrders />} />
+        <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
+        <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />
+        <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
+        <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />
+        <Route path="/admin/online-store/overview" element={<AdminOverview />} />
+        <Route path="/admin/online-store/reports" element={<AdminReports />} />
+        <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
+        <Route path="/admin/online-store/settings" element={<AdminSettings />} />
+        <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
+        <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
+      </Route>
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/contact" element={<Contact />} />
@@ -78,6 +81,21 @@ export default function App() {
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
+}
+
+// Signed out (never signed in, signed out, or the session expired): go to
+// sign-in instead of showing a page whose API calls would all fail with 401.
+// Sign-in brings the user back here afterwards (?next=).
+function RequireSignIn() {
+  const session = useSession();
+  const location = useLocation();
+
+  if (!session?.token) {
+    const next = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/auth/signin?next=${next}`} replace />;
+  }
+
+  return <Outlet />;
 }
 
 // Without a catch-all, an unknown URL renders nothing: a blank page
