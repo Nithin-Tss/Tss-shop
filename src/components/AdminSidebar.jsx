@@ -5,39 +5,205 @@ import { ONBOARDING_PATH, getActiveStore, setActiveStore, setStores, signOut, us
 
 const BASE = "/admin/online-store";
 
+// Line icons (shapes from the Lucide set, ISC licence), all drawn at one size, stroke and colour
+const navIcons = {
+  home: (
+    <>
+      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+      <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </>
+  ),
+  orders: (
+    <>
+      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+    </>
+  ),
+  products: (
+    <>
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+      <circle cx="7.5" cy="7.5" r="1" fill="currentColor" />
+    </>
+  ),
+  customers: (
+    <>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  catalogues: (
+    <>
+      <path d="M12 7v14" />
+      <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+    </>
+  ),
+  inventory: (
+    <>
+      <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+      <path d="M12 22V12" />
+      <path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7" />
+      <path d="m7.5 4.27 9 5.15" />
+    </>
+  ),
+  content: (
+    <>
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      <path d="M10 9H8M16 13H8M16 17H8" />
+    </>
+  ),
+  overview: (
+    <>
+      <rect width="7" height="9" x="3" y="3" rx="1" />
+      <rect width="7" height="5" x="14" y="3" rx="1" />
+      <rect width="7" height="9" x="14" y="12" rx="1" />
+      <rect width="7" height="5" x="3" y="16" rx="1" />
+    </>
+  ),
+  reports: (
+    <>
+      <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+      <path d="M18 17V9M13 17V5M8 17v-3" />
+    </>
+  ),
+  analytics: (
+    <>
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+      <polyline points="16 7 22 7 22 13" />
+    </>
+  ),
+  discounts: (
+    <>
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+      <path d="m15 9-6 6M9 9h.01M15 15h.01" />
+    </>
+  ),
+  shipping: (
+    <>
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+      <path d="M15 18H9" />
+      <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+      <circle cx="17" cy="18" r="2" />
+      <circle cx="7" cy="18" r="2" />
+    </>
+  ),
+  store: (
+    <>
+      <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7" />
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
+      <path d="M2 7h20" />
+      <path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7" />
+    </>
+  ),
+  themes: (
+    <>
+      <circle cx="13.5" cy="6.5" r="1" fill="currentColor" />
+      <circle cx="17.5" cy="10.5" r="1" fill="currentColor" />
+      <circle cx="8.5" cy="7.5" r="1" fill="currentColor" />
+      <circle cx="6.5" cy="12.5" r="1" fill="currentColor" />
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+    </>
+  ),
+  pages: (
+    <>
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M3 9h18M9 21V9" />
+    </>
+  ),
+  blog: (
+    <>
+      <path d="M12 20h9" />
+      <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" />
+    </>
+  ),
+  apps: (
+    <>
+      <rect width="7" height="7" x="14" y="3" rx="1" />
+      <path d="M10 21V8a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H3" />
+    </>
+  ),
+  settings: (
+    <>
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  chevron: <path d="m6 9 6 6 6-6" />,
+};
+
+function NavIcon({ name, className = "h-[18px] w-[18px]" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={`shrink-0 ${className}`}
+    >
+      {navIcons[name]}
+    </svg>
+  );
+}
+
+// Grouped under small section labels; order and routes are unchanged.
 // `match` lists the route prefixes that count as "this item" (e.g. /customers/new -> Customers)
-const menuItems = [
-  { icon: "⌂", label: "Home", href: `${BASE}/home` },
+const menuGroups = [
   {
-    icon: "▣",
-    label: "Orders",
-    badge: "12",
-    href: `${BASE}/orders`,
-    children: [{ label: "Drafts", href: `${BASE}/orders/drafts` }],
+    label: "Main",
+    items: [
+      { icon: "home", label: "Home", href: `${BASE}/home` },
+      {
+        icon: "orders",
+        label: "Orders",
+        href: `${BASE}/orders`,
+        children: [{ label: "Drafts", href: `${BASE}/orders/drafts` }],
+      },
+      {
+        icon: "products",
+        label: "Products",
+        href: `${BASE}/products`,
+        match: [`${BASE}/products`, `${BASE}/collections`],
+        children: [{ label: "Collections", href: `${BASE}/collections` }],
+      },
+      { icon: "customers", label: "Customers", href: `${BASE}/customers` },
+    ],
   },
   {
-    icon: "◇",
-    label: "Products",
-    href: `${BASE}/products`,
-    match: [`${BASE}/products`, `${BASE}/collections`],
-    children: [{ label: "Collections", href: `${BASE}/collections` }],
+    label: "Store",
+    items: [
+      { icon: "catalogues", label: "Catalogues", href: `${BASE}/catalogues` },
+      { icon: "inventory", label: "Inventory", href: `${BASE}/inventory` },
+      { icon: "content", label: "Content", href: `${BASE}/content` },
+    ],
   },
-  { icon: "👤", label: "Customers", href: `${BASE}/customers` },
-  { icon: "♙", label: "Catalogues", href: `${BASE}/catalogues` },
-  { icon: "▥", label: "Inventory", href: `${BASE}/inventory` },
-  { icon: "⌁", label: "Content", href: `${BASE}/content` },
-  { icon: "▦", label: "Overview", href: `${BASE}/overview` },
-  { icon: "▤", label: "Reports", href: `${BASE}/reports` },
-  { icon: "▥", label: "Analytics", href: `${BASE}/analytics` },
-  { icon: "▥", label: "Discounts", href: `${BASE}/discounts` },
-  { icon: "▥", label: "Shipping", href: `${BASE}/shipping` },
+  {
+    label: "Insights",
+    items: [
+      { icon: "overview", label: "Overview", href: `${BASE}/overview` },
+      { icon: "reports", label: "Reports", href: `${BASE}/reports` },
+      { icon: "analytics", label: "Analytics", href: `${BASE}/analytics` },
+    ],
+  },
+  {
+    label: "Marketing & delivery",
+    items: [
+      { icon: "discounts", label: "Discounts", href: `${BASE}/discounts` },
+      { icon: "shipping", label: "Shipping", href: `${BASE}/shipping` },
+    ],
+  },
 ];
 
 // Pages and Blog Posts have no admin screens yet, so they aren't links
 const onlineStoreItems = [
-  { icon: "◉", label: "Themes", href: BASE, exact: true },
-  { icon: "▤", label: "Pages" },
-  { icon: "✎", label: "Blog Posts" },
+  { icon: "themes", label: "Themes", href: BASE, exact: true },
+  { icon: "pages", label: "Pages" },
+  { icon: "blog", label: "Blog Posts" },
 ];
 
 const isUnder = (path, prefix) => path === prefix || path.startsWith(`${prefix}/`);
@@ -48,27 +214,44 @@ function matches(path, item) {
   return (item.match || [item.href]).some((prefix) => isUnder(path, prefix));
 }
 
+// One row style for every item: 42px tall, icon + label on the same vertical line
 const rowClass = (active) =>
-  `h-11 px-3 rounded-lg flex items-center justify-between transition ${
-    active ? "bg-[#30466F] font-medium text-white" : "text-slate-200 hover:bg-white/10"
+  `group relative flex h-[42px] w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium transition-colors duration-150 ${
+    active
+      ? "bg-[#26324D] text-white before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#8FB0FF]"
+      : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
   }`;
 
+// Text-only sub links (Drafts, Collections), lined up under the parent's label
 const subRowClass = (active) =>
-  `h-9 px-3 rounded-md flex items-center text-sm transition ${
-    active ? "bg-white/20 text-white font-semibold" : "text-slate-300 hover:text-white hover:bg-white/10"
+  `flex h-9 items-center rounded-md px-3 text-[13px] font-medium transition-colors duration-150 ${
+    active ? "bg-white/[0.08] text-white" : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
   }`;
 
-function Chevron({ open, onClick }) {
+// Smooth open/close for nested items; closed content can't be tabbed into
+function Collapse({ open, children }) {
   return (
-    <button
-      type="button"
-      aria-label={open ? "Collapse" : "Expand"}
-      aria-expanded={open}
-      onClick={onClick}
-      className="p-1 hover:bg-white/10 rounded cursor-pointer"
+    <div
+      className={`grid transition-[grid-template-rows] duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+      inert={!open}
     >
-      <span className={`text-xs block transition-transform duration-200 ${open ? "rotate-0" : "-rotate-90"}`}>⌄</span>
-    </button>
+      <div className="overflow-hidden">{children}</div>
+    </div>
+  );
+}
+
+function ChevronIcon({ open }) {
+  return (
+    <NavIcon
+      name="chevron"
+      className={`h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:text-white ${open ? "rotate-0" : "-rotate-90"}`}
+    />
+  );
+}
+
+function SectionLabel({ children }) {
+  return (
+    <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">{children}</p>
   );
 }
 
@@ -78,27 +261,41 @@ function MenuItem({ item, path }) {
   const [open, setOpen] = useState(childActive);
 
   return (
-    <div className="space-y-1">
+    <div>
       <div className={rowClass(active)}>
-        <Link to={item.href} aria-current={active ? "page" : undefined} className="flex items-center gap-4 flex-1 h-full">
-          <span className="w-5 text-center text-lg">{item.icon}</span>
-          <span className="text-sm">{item.label}</span>
+        <Link to={item.href} aria-current={active ? "page" : undefined} className="flex h-full flex-1 items-center gap-3">
+          <NavIcon name={item.icon} />
+          <span className="truncate">{item.label}</span>
         </Link>
 
-        <div className="flex items-center gap-1.5">
-          {item.badge && <span className="bg-[#53627E] px-2 py-0.5 rounded-full text-xs">{item.badge}</span>}
-          {item.children && <Chevron open={open} onClick={() => setOpen((v) => !v)} />}
-        </div>
+        {item.badge && (
+          <span className="rounded-full bg-white/10 px-2 py-px text-[11px] font-semibold leading-4 text-slate-200">
+            {item.badge}
+          </span>
+        )}
+        {item.children && (
+          <button
+            type="button"
+            aria-label={open ? `Collapse ${item.label}` : `Expand ${item.label}`}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="-mr-1.5 flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/10"
+          >
+            <ChevronIcon open={open} />
+          </button>
+        )}
       </div>
 
-      {item.children && open && (
-        <div className="pl-9 pr-2 space-y-1">
-          {item.children.map((child) => (
-            <Link key={child.href} to={child.href} className={subRowClass(isUnder(path, child.href))}>
-              {child.label}
-            </Link>
-          ))}
-        </div>
+      {item.children && (
+        <Collapse open={open}>
+          <div className="ml-[21px] mt-0.5 space-y-0.5 border-l border-white/10 pl-[18px]">
+            {item.children.map((child) => (
+              <Link key={child.href} to={child.href} className={subRowClass(isUnder(path, child.href))}>
+                {child.label}
+              </Link>
+            ))}
+          </div>
+        </Collapse>
       )}
     </div>
   );
@@ -117,64 +314,91 @@ export default function AdminSidebar() {
     <aside className="hidden md:block w-[256px] shrink-0 bg-[#141b2d] text-white select-none">
       {/* Stays in view below the 72px header while long pages scroll */}
       <div className="sticky top-[72px] flex h-[calc(100vh-72px)] flex-col">
-        <nav className="px-4 py-6 space-y-1 overflow-y-auto flex-1">
-          {menuItems.map((item) => (
-            <MenuItem key={item.label} item={item} path={path} />
+        <nav
+          aria-label="Admin"
+          className="flex-1 overflow-y-auto scroll-smooth px-3 py-4 [scrollbar-color:rgba(255,255,255,0.14)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
+        >
+          {menuGroups.map((group) => (
+            <div key={group.label} className="border-b border-white/[0.07] pb-3 pt-3 first:pt-0">
+              <SectionLabel>{group.label}</SectionLabel>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <MenuItem key={item.label} item={item} path={path} />
+                ))}
+              </div>
+            </div>
           ))}
 
-          {/* ONLINE STORE */}
-          <div className="pt-5 space-y-1">
-            <div className={rowClass(false)}>
-              <span className={`flex items-center gap-4 ${onlineStoreActive ? "text-white font-medium" : ""}`}>
-                <span className="w-5 text-center text-lg">▣</span>
-                <span className="text-sm">Online Store</span>
-              </span>
-              <Chevron open={onlineStoreOpen} onClick={() => setOnlineStoreOpen((v) => !v)} />
+          {/* SALES CHANNELS */}
+          <div className="pt-3">
+            <SectionLabel>Sales channels</SectionLabel>
+
+            <div className="space-y-0.5">
+              <button
+                type="button"
+                aria-expanded={onlineStoreOpen}
+                onClick={() => setOnlineStoreOpen((v) => !v)}
+                className={`${rowClass(false)} ${onlineStoreActive ? "text-white" : ""}`}
+              >
+                <NavIcon name="store" />
+                <span className="flex-1 truncate">Online Store</span>
+                <ChevronIcon open={onlineStoreOpen} />
+              </button>
+
+              <Collapse open={onlineStoreOpen}>
+                <div className="space-y-0.5 pl-4">
+                  {onlineStoreItems.map((item) =>
+                    item.href ? (
+                      <Link
+                        key={item.label}
+                        to={item.href}
+                        aria-current={matches(path, item) ? "page" : undefined}
+                        className={rowClass(matches(path, item))}
+                      >
+                        <NavIcon name={item.icon} />
+                        <span className="truncate">{item.label}</span>
+                      </Link>
+                    ) : (
+                      <div
+                        key={item.label}
+                        title="Coming soon"
+                        className={`${rowClass(false)} cursor-default hover:bg-transparent hover:text-slate-300`}
+                      >
+                        <NavIcon name={item.icon} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </Collapse>
+
+              <button
+                type="button"
+                aria-expanded={appsOpen}
+                onClick={() => setAppsOpen((v) => !v)}
+                className={rowClass(false)}
+              >
+                <NavIcon name="apps" />
+                <span className="flex-1 truncate">Apps</span>
+                <ChevronIcon open={appsOpen} />
+              </button>
+
+              <Collapse open={appsOpen}>
+                <p className="py-2 pl-[42px] pr-3 text-xs text-slate-500">No apps installed yet.</p>
+              </Collapse>
             </div>
-
-            {onlineStoreOpen &&
-              onlineStoreItems.map((item) => {
-                const content = (
-                  <span className="flex items-center gap-4">
-                    <span className="w-5 text-center text-lg">{item.icon}</span>
-                    <span className="text-sm">{item.label}</span>
-                  </span>
-                );
-
-                return item.href ? (
-                  <Link key={item.label} to={item.href} className={rowClass(matches(path, item))}>
-                    {content}
-                  </Link>
-                ) : (
-                  <div key={item.label} title="Coming soon" className={`${rowClass(false)} cursor-default hover:bg-transparent`}>
-                    {content}
-                  </div>
-                );
-              })}
-          </div>
-
-          {/* APPS */}
-          <div className="pt-5">
-            <div className={rowClass(false)}>
-              <span className="flex items-center gap-4">
-                <span className="w-5 text-center text-lg">◉</span>
-                <span className="text-sm">Apps</span>
-              </span>
-              <Chevron open={appsOpen} onClick={() => setAppsOpen((v) => !v)} />
-            </div>
-            {appsOpen && <p className="pl-12 pr-3 py-2 text-xs text-slate-400">No apps installed yet.</p>}
           </div>
         </nav>
 
         {/* SETTINGS */}
-        <div className="px-4 pb-6 pt-2">
+        <div className="border-t border-white/[0.08] px-3 py-3">
           <Link
             to={`${BASE}/settings`}
             aria-current={settingsActive ? "page" : undefined}
-            className={`${rowClass(settingsActive)} justify-start gap-4`}
+            className={rowClass(settingsActive)}
           >
-            <span className="w-5 text-center text-xl">⚙</span>
-            <span className="text-sm">Settings</span>
+            <NavIcon name="settings" />
+            <span>Settings</span>
           </Link>
         </div>
       </div>
