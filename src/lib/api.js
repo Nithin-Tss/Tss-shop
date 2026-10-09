@@ -1,4 +1,4 @@
-import { getRefreshToken, getSession, setTokens, signOut } from "@/lib/auth";
+import { getSession, setTokens, signOut } from "@/lib/auth";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -46,26 +46,46 @@ function errorMessage(data, fallback) {
 /* The access token lives 15 minutes. When a request gets 401, swap the */
 /* refresh token for a new pair once and repeat the request. If that    */
 /* fails too, the session is over: sign out.                            */
+/*                                                                      */
+/* A refresh token works only once, and all tabs share it (localStorage),*/
+/* so only one tab may refresh at a time (a lock shared by every tab).  */
+/* A tab that waited checks first whether another tab already got new  */
+/* tokens, and then just uses those.                                    */
 /* ------------------------------------------------------------------ */
 
-// One refresh at a time, even if several requests expire together
+const REFRESH_LOCK = "tss-auth-refresh";
+
+// Run `task` while holding a lock shared by all tabs of this site.
+function withTabLock(task) {
+  if (typeof navigator !== "undefined" && navigator.locks?.request) {
+    return navigator.locks.request(REFRESH_LOCK, task);
+  }
+  return task(); // very old browsers: no cross-tab lock
+}
+
+// One refresh at a time in this tab, even if several requests expire together
 let refreshing = null;
 
-function refreshSession() {
-  const refresh = getRefreshToken();
+// `expiredToken` is the access token the server just rejected.
+function refreshSession(expiredToken) {
+  refreshing ??= withTabLock(async () => {
+    const session = getSession();
 
-  if (!refresh) return Promise.resolve(false);
+    if (!session?.refresh) return false;
 
-  refreshing ??= fetch(`${API_URL}/api/v1/auth/refresh/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh }),
+    // Another tab refreshed while this one waited: use its new tokens.
+    if (session.token && session.token !== expiredToken) return true;
+
+    const response = await fetch(`${API_URL}/api/v1/auth/refresh/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh: session.refresh }),
+    });
+
+    if (!response.ok) return false;
+    setTokens(await response.json());
+    return true;
   })
-    .then(async (response) => {
-      if (!response.ok) return false;
-      setTokens(await response.json());
-      return true;
-    })
     .catch(() => false)
     .finally(() => {
       refreshing = null;
@@ -80,10 +100,11 @@ async function send(path, { method, headers, body }) {
   const request = () =>
     fetch(`${API_URL}${path}`, { method, headers: getHeaders(headers), body });
 
+  const usedToken = getSession()?.token;
   let response = await request();
 
-  if (response.status === 401 && getSession()?.token) {
-    if (await refreshSession()) {
+  if (response.status === 401 && usedToken) {
+    if (await refreshSession(usedToken)) {
       response = await request();
     }
     if (response.status === 401) {
