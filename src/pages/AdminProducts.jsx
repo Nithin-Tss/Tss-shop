@@ -226,7 +226,7 @@ function ImportProductsModal({ onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[#D8DFE8] bg-white px-4 py-2.5 text-sm font-medium text-[#161C2C] hover:border-[#161C2C] transition"
+            className="rounded-lg border border-[#D8DFE8] bg-white px-5 py-2.5 text-base font-medium text-[#161C2C] hover:border-[#161C2C] transition"
           >
             Cancel
           </button>
@@ -234,7 +234,7 @@ function ImportProductsModal({ onClose }) {
             type="button"
             disabled={!file}
             onClick={handleImport}
-            className="rounded-lg bg-[#141b2d] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45] transition disabled:cursor-not-allowed disabled:bg-[#C5CCD8] disabled:hover:bg-[#C5CCD8]"
+            className="rounded-lg bg-[#141b2d] px-5 py-2.5 text-base font-semibold text-white hover:bg-[#252E45] transition disabled:cursor-not-allowed disabled:bg-[#C5CCD8] disabled:hover:bg-[#C5CCD8]"
           >
             Import
           </button>
@@ -301,23 +301,23 @@ export default function ProductsPage() {
                   Add your products
                 </h2>
 
-                <p className="mt-1 text-sm text-[#53627E]">
+                <p className="mt-2 text-base leading-relaxed text-[#53627E]">
                   Start by stocking your store with products your customers will love
                 </p>
 
-                <div className="mt-5 flex flex-wrap items-center gap-3">
+                <div className="mt-6 flex flex-wrap items-center gap-3">
                   <Link
                     to="/admin/online-store/products/new"
-                    className="flex items-center gap-2 rounded-lg bg-[#141b2d] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                    className="flex items-center gap-2 rounded-lg bg-[#141b2d] px-5 py-2.5 text-base font-semibold text-white hover:bg-[#252E45] transition"
                   >
-                    <span className="text-base leading-none">+</span>
+                    <span className="text-lg leading-none">+</span>
                     Add product
                   </Link>
 
                   <button
                     type="button"
                     onClick={() => setIsImportOpen(true)}
-                    className="flex items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-4 py-2.5 text-sm font-medium text-[#161C2C] hover:border-[#161C2C] transition"
+                    className="flex items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-5 py-2.5 text-base font-medium text-[#161C2C] hover:border-[#161C2C] transition"
                   >
                     <svg {...lineIcon} strokeWidth="1.8" className="h-4 w-4">
                       <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
@@ -349,18 +349,18 @@ export default function ProductsPage() {
 
             {/* Find products to sell */}
             <div className="bg-[#F7F8FA] px-6 py-10 sm:px-12 lg:px-[14%]">
-              <h3 className="text-base font-semibold text-[#161C2C]">
+              <h3 className="text-lg font-semibold text-[#161C2C]">
                 Find products to sell
               </h3>
 
-              <p className="mt-1 max-w-[640px] text-sm text-[#53627E]">
+              <p className="mt-2 max-w-[640px] text-base leading-relaxed text-[#53627E]">
                 Have dropshipping or print on demand products shipped directly
                 from the supplier to your customer, and only pay for what you sell.
               </p>
 
               <button
                 type="button"
-                className="mt-5 rounded-lg border border-[#D8DFE8] bg-white px-4 py-2.5 text-sm font-medium text-[#161C2C] hover:border-[#161C2C] transition"
+                className="mt-6 rounded-lg border border-[#D8DFE8] bg-white px-5 py-2.5 text-base font-medium text-[#161C2C] hover:border-[#161C2C] transition"
               >
                 Discover products to sell
               </button>

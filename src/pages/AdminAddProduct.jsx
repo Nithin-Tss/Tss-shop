@@ -38,21 +38,10 @@ function combinations(options) {
 
 /* ---------- small building blocks ---------- */
 
-function Card({ step, title, hint, action, last = false, children }) {
+function Card({ title, hint, action, children }) {
   return (
-    <section className="relative flex gap-3 sm:gap-4">
-      {/* step marker + the line joining it to the next step */}
-      <div className="relative flex w-9 shrink-0 flex-col items-center sm:w-11">
-        <span
-          className="z-10 flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white shadow-md shadow-[#141b2d]/20 sm:h-11 sm:w-11 sm:text-base"
-          style={{ backgroundColor: NAVY }}
-        >
-          {step}
-        </span>
-        {!last && <span className="absolute top-9 -bottom-6 w-px border-l-2 border-dashed border-[#D5DAE3] sm:top-11" />}
-      </div>
-
-      <div className="min-w-0 flex-1 overflow-hidden rounded-[22px] rounded-tl-md border border-[#E5E7EB] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
+    <section>
+      <div className="overflow-hidden rounded-[22px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
         <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[#E6E9F2] bg-[#EEF1F8] px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <h2 className="text-base font-bold tracking-tight text-[#141b2d]">{title}</h2>
@@ -435,7 +424,7 @@ export default function AdminAddProduct() {
           </div>
 
           <div className="mx-auto max-w-[960px] px-3 py-8 sm:px-4">
-            <div className="mb-8 pl-12 sm:pl-[60px]">
+            <div className="mb-8">
               <h2 className="text-2xl font-bold tracking-tight text-[#141b2d]">Add a new product</h2>
               <p className="mt-1 text-sm text-[#55607A]">
                 Work down the steps below. Only the product name is required. You can come back and fill in the rest later.
@@ -443,12 +432,12 @@ export default function AdminAddProduct() {
             </div>
 
             {error && (
-              <div className="mb-6 ml-12 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 sm:ml-[60px]">{error}</div>
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
             )}
 
             <div className="space-y-6">
               {/* 1 BASIC INFO */}
-              <Card step={1} title="Basic info" hint="Give your product a clear name and describe it in a few simple sentences.">
+              <Card title="Basic info" hint="Give your product a clear name and describe it in a few simple sentences.">
                 <div className="space-y-4">
                   <Field label="Product name">
                     <input
@@ -474,7 +463,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 2 PHOTOS */}
-              <Card step={2} title="Photos" hint="Add clear photos of the product. The first photo is the main one shoppers see.">
+              <Card title="Photos" hint="Add clear photos of the product. The first photo is the main one shoppers see.">
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
                   {photos.map((photo, i) => (
                     <div
@@ -549,7 +538,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 3 PRICING */}
-              <Card step={3} title="Pricing" hint="Set what shoppers pay. Your cost stays private and helps you see your profit.">
+              <Card title="Pricing" hint="Set what shoppers pay. Your cost stays private and helps you see your profit.">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <Field label="Selling price">
                     <MoneyInput value={price} onChange={setPrice} />
@@ -580,7 +569,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 4 STOCK */}
-              <Card step={4} title="Stock" hint="Enter how many you have, plus your own codes to keep track of it." action={<Toggle checked={trackStock} onChange={setTrackStock} label="Track quantity" />}>
+              <Card title="Stock" hint="Enter how many you have, plus your own codes to keep track of it." action={<Toggle checked={trackStock} onChange={setTrackStock} label="Track quantity" />}>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <Field label="Quantity" help={variants.length ? "Set per option below" : undefined}>
                     <input
@@ -613,7 +602,6 @@ export default function AdminAddProduct() {
 
               {/* 5 OPTIONS */}
               <Card
-                step={5}
                 title="Options"
                 hint="Does it come in different sizes, colours or styles? Add each choice here."
                 action={
@@ -707,7 +695,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 6 DELIVERY */}
-              <Card step={6} title="Delivery" hint="Enter the packed size and weight so shipping costs can be worked out." action={<Toggle checked={physical} onChange={setPhysical} label="Ships physically" />}>
+              <Card title="Delivery" hint="Enter the packed size and weight so shipping costs can be worked out." action={<Toggle checked={physical} onChange={setPhysical} label="Ships physically" />}>
                 {physical ? (
                   <div className="space-y-4">
                     <Field label="Package size">
@@ -750,7 +738,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 7 ORGANIZE */}
-              <Card step={7} title="Organize" hint="Add a brand, groups and labels so the product is easy to find and sort.">
+              <Card title="Organize" hint="Add a brand, groups and labels so the product is easy to find and sort.">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field label="Brand">
                     <input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="e.g. Sipnow" className={inputClass} />
@@ -780,7 +768,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 8 EXTRA DETAILS */}
-              <Card step={8} title="Extra details" hint="Optional. These details help with searching and filtering in your store.">
+              <Card title="Extra details" hint="Optional. These details help with searching and filtering in your store.">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field label="Category">
                     <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Wine" className={inputClass} />
@@ -793,7 +781,6 @@ export default function AdminAddProduct() {
 
               {/* 9 GOOGLE PREVIEW */}
               <Card
-                step={9}
                 title="Google preview"
                 hint="This is how the product may look on Google. Edit it if you want to change it."
                 action={
@@ -834,7 +821,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 10 SALES CHANNELS */}
-              <Card step={10} title="Sales channels" hint="Choose where you want to sell this product.">
+              <Card title="Sales channels" hint="Choose where you want to sell this product.">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {[
                     { key: "online", label: "Online store" },
@@ -854,7 +841,7 @@ export default function AdminAddProduct() {
               </Card>
 
               {/* 11 VISIBILITY */}
-              <Card step={11} last title="Visibility" hint="Choose whether shoppers can see this product now, or keep it hidden for later.">
+              <Card title="Visibility" hint="Choose whether shoppers can see this product now, or keep it hidden for later.">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {[
                     { value: "active", label: "Live", text: "Shoppers can find and buy it" },
