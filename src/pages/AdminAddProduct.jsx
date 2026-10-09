@@ -9,6 +9,20 @@ const PRODUCTS_URL = "/admin/online-store/products";
 const inputClass =
   "w-full h-11 rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#141b2d] focus:bg-white focus:ring-4 focus:ring-[#141b2d]/[0.07]";
 
+// Photos: JPG, PNG or WEBP, up to 5MB each
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const PHOTO_EXTENSIONS = /\.(jpe?g|png|webp)$/i;
+const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+
+// Returns why a photo can't be added, or "" when it's fine
+function photoError(file) {
+  // Some browsers leave file.type empty, so fall back to the extension
+  const isAllowedType = file.type ? PHOTO_TYPES.includes(file.type) : PHOTO_EXTENSIONS.test(file.name);
+  if (!isAllowedType) return "Not a supported image. Use JPG, PNG or WEBP.";
+  if (file.size > MAX_PHOTO_SIZE) return "Image is too large. Maximum size is 5MB.";
+  return "";
+}
+
 const slugify = (text) =>
   text.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
 
@@ -170,6 +184,7 @@ export default function AdminAddProduct() {
   // Photos (previews only for now)
   const [photos, setPhotos] = useState([]);
   const [dragging, setDragging] = useState(false);
+  const [photoErrors, setPhotoErrors] = useState([]); // [{ name, message }] from the last upload
 
   // Pricing
   const [price, setPrice] = useState("");
@@ -254,7 +269,17 @@ export default function AdminAddProduct() {
 
   /* photos */
   const addPhotos = (fileList) => {
-    const images = Array.from(fileList || []).filter((f) => f.type.startsWith("image/"));
+    const images = [];
+    const rejected = [];
+    Array.from(fileList || []).forEach((file) => {
+      const message = photoError(file);
+      if (message) rejected.push({ name: file.name, message });
+      else images.push(file);
+    });
+
+    setPhotoErrors(rejected);
+    if (!images.length) return;
+
     setPhotos((prev) => [
       ...prev,
       ...images.map((file) => ({ id: `${file.name}-${file.lastModified}-${Math.random()}`, file, url: URL.createObjectURL(file) })),
@@ -493,9 +518,34 @@ export default function AdminAddProduct() {
                     <span className="text-2xl text-slate-400">＋</span>
                     <span className="text-xs font-semibold text-slate-700">{photos.length ? "Add" : "Upload photos"}</span>
                     {!photos.length && <span className="text-xs text-slate-500">or drag and drop images here</span>}
-                    <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        addPhotos(e.target.files);
+                        // Reset so choosing the same file again still triggers onChange
+                        e.target.value = "";
+                      }}
+                    />
                   </label>
                 </div>
+
+                {photoErrors.length > 0 && (
+                  <div role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {photoErrors.length > 1 && (
+                      <p className="mb-1 font-semibold">{photoErrors.length} files weren't added:</p>
+                    )}
+                    <ul className="space-y-0.5">
+                      {photoErrors.map((item, i) => (
+                        <li key={`${item.name}-${i}`}>
+                          <span className="font-medium break-all">{item.name}</span>: {item.message}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </Card>
 
               {/* 3 PRICING */}

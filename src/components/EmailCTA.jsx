@@ -1,9 +1,11 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ONBOARDING_PATH } from "@/lib/auth";
 
 export default function EmailCTA() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = (event) => {
@@ -21,19 +23,7 @@ export default function EmailCTA() {
       return;
     }
 
-    /*
-      TEMPORARY FRONTEND BEHAVIOR
-
-      Currently we are only showing a success message.
-
-      Later this can be replaced with a Django API call such as:
-
-      POST /api/newsletter/subscribe/
-
-      The actual endpoint should come from the backend team.
-    */
-
-    setSubmitted(true);
+    navigate(ONBOARDING_PATH);
   };
 
   return (
@@ -57,8 +47,7 @@ export default function EmailCTA() {
             minutes.
           </p>
 
-          {!submitted ? (
-            <form
+          <form
               onSubmit={handleSubmit}
               className="mx-auto mt-7 flex max-w-2xl flex-col gap-3 sm:flex-row"
             >
@@ -90,11 +79,6 @@ export default function EmailCTA() {
                 Start free trial
               </button>
             </form>
-          ) : (
-            <div className="mx-auto mt-7 max-w-2xl rounded-md bg-white/10 px-5 py-4 text-sm font-medium text-white">
-              Thanks! We'll help you get started with VENDRA.
-            </div>
-          )}
         </div>
       </div>
     </section>

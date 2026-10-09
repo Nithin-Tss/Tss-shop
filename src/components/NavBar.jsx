@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 import React, { useState } from "react";
-import { useSession } from "@/lib/auth";
+import { ONBOARDING_PATH, useSession } from "@/lib/auth";
 
 export default function NavBar() {
   const session = useSession();
@@ -158,12 +158,12 @@ export default function NavBar() {
                 </Link>
 
                 {/* Create Store CTA Button */}
-                <a
-                  href="#create-store"
+                <Link
+                  to={ONBOARDING_PATH}
                   className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-150 inline-flex items-center justify-center whitespace-nowrap"
                 >
                   Create Store
-                </a>
+                </Link>
               </>
             )}
           </div>
@@ -256,13 +256,13 @@ export default function NavBar() {
                 >
                   Login
                 </Link>
-                <a
-                  href="#create-store"
+                <Link
+                  to={ONBOARDING_PATH}
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-center shadow-sm transition-colors"
                 >
                   Create Store
-                </a>
+                </Link>
               </div>
             )}
           </div>

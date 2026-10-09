@@ -13,6 +13,9 @@ import { useSyncExternalStore } from "react";
  * Shape: { token (= access), refresh, name, email, user, stores: [...], storeId }
  */
 
+// Where every "Create store" / "Start free" button leads
+export const ONBOARDING_PATH = "/auth/onboarding";
+
 const SESSION_KEY = "store_session";
 const SESSION_EVENT = "store-session-change";
 
