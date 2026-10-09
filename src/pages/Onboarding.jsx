@@ -128,7 +128,9 @@ const THEME_OPTIONS = [
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const [selectedGoals, setSelectedGoals] = useState([]);
-  const [currentStep, setCurrentStep] = useState(1);
+  // "Themes" in the navbar opens this page with ?step=themes to skip the goals step
+  const [searchParams] = useSearchParams();
+  const [currentStep, setCurrentStep] = useState(searchParams.get("step") === "themes" ? 2 : 1);
 
   const toggleOption = (id) => {
     setSelectedGoals((prev) =>
@@ -143,7 +145,6 @@ export default function OnboardingPage() {
   const [creating, setCreating] = useState(false);
   const [storeError, setStoreError] = useState("");
   // "+ Create new store" in the admin store switcher opens this page with ?new=1
-  const [searchParams] = useSearchParams();
   const creatingNew = searchParams.get("new") === "1";
   const hasStore = Boolean(session?.stores?.length) && !creatingNew;
 
