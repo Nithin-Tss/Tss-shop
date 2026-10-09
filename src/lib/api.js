@@ -97,8 +97,12 @@ function refreshSession(expiredToken) {
 // fetch() with the auth headers, refreshing an expired access token once.
 // Throws only when the server can't be reached.
 async function send(path, { method, headers, body }) {
-  const request = () =>
-    fetch(`${API_URL}${path}`, { method, headers: getHeaders(headers), body });
+  const request = () => {
+    const allHeaders = getHeaders(headers);
+    // Files go as multipart: the browser sets that Content-Type (with its boundary) itself
+    if (typeof FormData !== "undefined" && body instanceof FormData) delete allHeaders["Content-Type"];
+    return fetch(`${API_URL}${path}`, { method, headers: allHeaders, body });
+  };
 
   const usedToken = getSession()?.token;
   let response = await request();
@@ -234,6 +238,24 @@ export async function apiPost(path, body, customHeaders = {}) {
         ? ""
         : "Something went wrong. Please try again."),
   };
+}
+
+// Upload one file as multipart form data: { ok, data } or { ok: false, error }
+export async function apiUpload(path, field, file) {
+  const form = new FormData();
+  form.append(field, file);
+
+  let response;
+  try {
+    response = await send(path, { method: "POST", headers: {}, body: form });
+  } catch {
+    return { ok: false, error: "Unable to reach the server. Please try again." };
+  }
+
+  const data = await response.json().catch(() => null);
+  if (response.ok) return { ok: true, data };
+
+  return { ok: false, error: errorMessage(data, "Upload failed. Please try again.") };
 }
 
 export async function apiDelete(path, customHeaders = {}) {

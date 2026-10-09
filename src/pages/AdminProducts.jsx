@@ -32,43 +32,44 @@ const lineIcon = {
   "aria-hidden": true,
 };
 
-// Sample product pictures shown next to "Add your products"
+// Sample products in the storefront mockup next to "Add your products" (line icons from the Lucide set)
 const sampleProducts = [
   {
-    name: "Sneaker",
+    name: "T-shirt",
+    price: "$24",
     icon: (
       <svg {...lineIcon}>
-        <path d="M2 16v-3.5l3-1 3 2.5h3l4-4 7 3.5V16Z" />
-        <path d="M2 16v2h20v-2" />
-        <path d="M9.5 12.5l1.5 2M12 11.5l1.5 2" />
+        <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
       </svg>
     ),
   },
   {
     name: "Tote bag",
+    price: "$38",
     icon: (
       <svg {...lineIcon}>
-        <path d="M5 8h14l-1 13H6Z" />
-        <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+        <path d="M3 6h18" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
       </svg>
     ),
   },
   {
-    name: "Cream tube",
+    name: "Headphones",
+    price: "$89",
     icon: (
       <svg {...lineIcon}>
-        <path d="M3 10h13l3 1.5v1L16 14H3Z" />
-        <path d="M19 11.5h2v1h-2" />
-        <path d="M6 12c1-1 2 1 3 0s2 1 3 0" />
+        <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
       </svg>
     ),
   },
   {
     name: "Mug",
+    price: "$16",
     icon: (
       <svg {...lineIcon}>
-        <path d="M5 7h11v10a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3Z" />
-        <path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16" />
+        <path d="M10 2v2M14 2v2M6 2v2" />
+        <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" />
       </svg>
     ),
   },
@@ -265,23 +266,23 @@ export default function ProductsPage() {
 
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 bg-[#F7F8FA] px-6 lg:px-8 py-6 overflow-hidden">
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F8FA] p-5 lg:p-6">
 
           {/* TITLE */}
-          <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+          <h1 className="flex items-center gap-2.5 text-2xl font-bold text-[#161C2C]">
             <PageIcon name="products" />
             Products
           </h1>
 
 
           {/* PRODUCTS CARD */}
-          <section className="mt-5 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
+          <section className="mt-5 flex flex-1 flex-col overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
 
             {/* Tabs */}
             <div className="flex items-center gap-2 border-b border-[#E3E7ED] px-4 py-3">
               <button
                 type="button"
-                className="rounded-lg bg-[#EEF1F6] px-3 py-1.5 text-sm font-medium text-[#161C2C]"
+                className="rounded-lg bg-[#EEF1F6] px-3.5 py-1.5 text-[15px] font-medium text-[#161C2C]"
               >
                 All
               </button>
@@ -297,32 +298,32 @@ export default function ProductsPage() {
 
 
             {/* Add your products */}
-            <div className="flex items-center justify-between gap-10 px-6 py-14 sm:px-12 lg:pl-[14%] lg:pr-10">
+            <div className="flex flex-1 items-center justify-between gap-10 px-6 py-12 sm:px-12 lg:pl-[14%] lg:pr-[8%]">
 
               <div>
-                <h2 className="text-xl font-semibold text-[#161C2C]">
+                <h2 className="text-[30px] font-semibold leading-tight text-[#161C2C] sm:text-[34px]">
                   Add your products
                 </h2>
 
-                <p className="mt-2 text-base leading-relaxed text-[#53627E]">
+                <p className="mt-3 text-xl leading-relaxed text-[#53627E]">
                   Start by stocking your store with products your customers will love
                 </p>
 
-                <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="mt-7 flex flex-wrap items-center gap-3">
                   <Link
                     to="/admin/online-store/products/new"
-                    className="flex items-center gap-2 rounded-lg bg-[#141b2d] px-5 py-2.5 text-base font-semibold text-white hover:bg-[#252E45] transition"
+                    className="flex items-center gap-2 rounded-lg bg-[#141b2d] px-7 py-3.5 text-[17px] font-semibold text-white hover:bg-[#252E45] transition"
                   >
-                    <span className="text-lg leading-none">+</span>
+                    <span className="text-2xl leading-none">+</span>
                     Add product
                   </Link>
 
                   <button
                     type="button"
                     onClick={() => setIsImportOpen(true)}
-                    className="flex items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-5 py-2.5 text-base font-medium text-[#161C2C] hover:border-[#161C2C] transition"
+                    className="flex items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-7 py-3.5 text-[17px] font-medium text-[#161C2C] hover:border-[#161C2C] transition"
                   >
-                    <svg {...lineIcon} strokeWidth="1.8" className="h-4 w-4">
+                    <svg {...lineIcon} strokeWidth="1.8" className="h-5 w-5">
                       <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
                     </svg>
                     Import
@@ -331,42 +332,44 @@ export default function ProductsPage() {
               </div>
 
 
-              {/* Product pictures */}
-              <div className="hidden lg:grid shrink-0 grid-cols-2 gap-3">
-                {sampleProducts.map((product, index) => (
-                  <div
-                    key={product.name}
-                    title={product.name}
-                    className={`flex h-[90px] w-[140px] items-center justify-center rounded-xl bg-[#F3F5F8] text-[#30466F] ${index % 2 === 1 ? "-mt-6" : "mt-6"
-                      }`}
-                  >
-                    <span className="block h-12 w-12 [&>svg]:h-full [&>svg]:w-full">
-                      {product.icon}
-                    </span>
+              {/* Storefront mockup */}
+              <div
+                aria-hidden="true"
+                className="hidden xl:block w-[420px] shrink-0 overflow-hidden rounded-xl border border-[#E6E9EF] bg-white shadow-[0_12px_32px_-24px_rgba(20,27,45,0.3)]"
+              >
+                {/* Browser bar */}
+                <div className="flex items-center gap-3 border-b border-[#EEF0F4] bg-[#FAFBFC] px-4 py-2.5">
+                  <div className="flex gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
+                    <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
+                    <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
                   </div>
-                ))}
+                  <span className="flex-1 rounded-md border border-[#EEF0F4] bg-white px-3 py-0.5 text-center text-[11px] text-[#8A94A8]">
+                    yourstore.com
+                  </span>
+                </div>
+
+                {/* Shop header */}
+                <div className="px-5 pb-1 pt-4">
+                  <span className="text-xs font-bold tracking-[0.2em] text-[#141b2d]">STORE</span>
+                </div>
+
+                {/* Product grid */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-5 p-5">
+                  {sampleProducts.map((product) => (
+                    <div key={product.name}>
+                      <div className="flex h-[104px] items-center justify-center rounded-lg bg-[#F5F6F8] text-[#53627E]">
+                        <span className="block h-9 w-9 [&>svg]:h-full [&>svg]:w-full [&>svg]:stroke-[1.25]">
+                          {product.icon}
+                        </span>
+                      </div>
+                      <p className="mt-2.5 text-[13px] font-medium text-[#161C2C]">{product.name}</p>
+                      <p className="text-xs text-[#8A94A8]">{product.price}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-            </div>
-
-
-            {/* Find products to sell */}
-            <div className="bg-[#F7F8FA] px-6 py-10 sm:px-12 lg:px-[14%]">
-              <h3 className="text-lg font-semibold text-[#161C2C]">
-                Find products to sell
-              </h3>
-
-              <p className="mt-2 max-w-[640px] text-base leading-relaxed text-[#53627E]">
-                Have dropshipping or print on demand products shipped directly
-                from the supplier to your customer, and only pay for what you sell.
-              </p>
-
-              <button
-                type="button"
-                className="mt-6 rounded-lg border border-[#D8DFE8] bg-white px-5 py-2.5 text-base font-medium text-[#161C2C] hover:border-[#161C2C] transition"
-              >
-                Discover products to sell
-              </button>
             </div>
 
           </section>
