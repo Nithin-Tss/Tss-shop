@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import React, { useState } from "react";
 import { ONBOARDING_PATH, useSession } from "@/lib/auth";
 
+
 export default function NavBar() {
   const session = useSession();
   const pathname = useLocation().pathname;
@@ -21,7 +22,7 @@ export default function NavBar() {
     { name: "Themes", href: "#themes" },
     { name: "Pricing", href: "#pricing" },
     { name: "Resources", href: "#resources" },
-    { name: "Blog", href: "#blog" },
+    { name: "Blog", href: "/blog", isRoute: true },
   ];
 
   return (
@@ -64,13 +65,22 @@ export default function NavBar() {
 
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              {navLinks.map((link) => (
-                <a
+              {navLinks.map((link) => 
+              link.isRoute ?(
+                <Link
+        
                   key={link.name}
-                  href={link.href}
+                  to={link.href}
                   className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150"
                 >
                   {link.name}
+                  </Link>):(
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150" 
+                >
+                  {link.name}   
                 </a>
               ))}
             </nav>
