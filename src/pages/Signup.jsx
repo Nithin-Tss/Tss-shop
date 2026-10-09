@@ -38,10 +38,43 @@ export default function SignUpPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [message, setMessage] = useState("");
- 
-  const handleChange = (event) => {
+  // Live password requirements
+  const passwordChecks = [
+    {
+      label: "At least 8 characters",
+      valid: formData.password.length >= 8,
+    },
+    {
+      label: "One uppercase letter",
+      valid: /[A-Z]/.test(formData.password),
+    },
+    {
+      label: "One lowercase letter",
+      valid: /[a-z]/.test(formData.password),
+    },
+    {
+      label: "One number",
+      valid: /[0-9]/.test(formData.password),
+    },
+    {
+      label: "One special character",
+      valid: /[^A-Za-z0-9]/.test(formData.password),
+    },
+  ];
 
+  const isPasswordValid = passwordChecks.every(
+    (requirement) => requirement.valid
+  );
+
+  const handleChange = (event) => {
     const { name, value, checked, type } = event.target;
+    // Allow alphabets and spaces only for names
+  if (name === "firstName" || name === "lastName") {
+    if (!/^[a-zA-Z ]*$/.test(value)) {
+      return;
+    }
+  }
+
  
     setFormData((previousData) => ({
 
@@ -93,27 +126,28 @@ export default function SignUpPage() {
 
     } else if (
 
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
 
     ) {
 
       newErrors.email = "Please enter a valid email address.";
 
     }
- 
     // Password
-
     if (!formData.password) {
-
       newErrors.password = "Password is required.";
-
     } else if (formData.password.length < 8) {
-
-      newErrors.password =
-
-        "Password must contain at least 8 characters.";
-
+      newErrors.password = "Password must contain at least 8 characters.";
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = "Include at least one uppercase letter.";
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password = "Include at least one lowercase letter.";
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = "Include at least one number.";
+    } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
+      newErrors.password = "Include at least one special character.";
     }
+
  
     // Confirm Password
 
@@ -192,7 +226,15 @@ export default function SignUpPage() {
       signIn(result.data);
       setMessage("Account created. Let's set up your store...");
       navigate("/auth/onboarding");
-    } finally {
+    } 
+    catch (error) {
+  console.error("Signup failed:", error);
+
+  setErrors({
+    form: "Unable to connect to the server. Please try again.",
+  });
+
+}finally {
 
       setIsSubmitting(false);
 
@@ -503,7 +545,43 @@ export default function SignUpPage() {
                   {showPassword ? "Hide" : "Show"}
 </button>
 </div>
- 
+
+{/* Live Password Requirements */}
+<div className="mt-5 space-y-2">
+  {passwordChecks.map((requirement) => (
+    <div
+      key={requirement.label}
+      className={`flex items-center gap-3 text-sm transition-colors ${
+        requirement.valid
+          ? "text-green-600"
+          : "text-slate-400"
+      }`}
+    >
+      <span
+        className={`flex h-4 w-4 items-center justify-center rounded- border ${
+          requirement.valid
+            ? "border-green-600"
+            : "border-slate-400"
+        }`}
+      >
+        {requirement.valid ? (
+          <svg
+            viewBox="0 0 16 16"
+            className="h-3 w-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="m3 8 3 3 7-7" />
+          </svg>
+        ) : 
+        null}
+      </span>
+
+      <span>{requirement.label}</span>
+    </div>
+  ))}
+</div>
               {errors.password && (
 <p className="mt-1 text-xs text-red-500">
 
