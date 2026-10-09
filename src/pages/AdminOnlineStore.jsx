@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 
 const categories = [
   "All",
@@ -24,53 +24,7 @@ export default function OnlineStorePage() {
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
 
-      {/* HEADER */}
-      <header className="h-[72px] border-b border-gray-200 flex items-center justify-between px-7">
-
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#161C2C] flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">S</span>
-          </div>
-
-          <span className="text-[22px] font-bold">
-            Store
-          </span>
-        </div>
-
-        {/* Search */}
-        <div className="hidden md:flex items-center w-[420px] h-11 rounded-full bg-[#F3F6FA] px-5 gap-3">
-          <span className="text-xl">⌕</span>
-
-          <input
-            type="text"
-            placeholder="Search anything..."
-            className="w-full bg-transparent outline-none text-sm text-[#161C2C] placeholder:text-slate-500"
-          />
-        </div>
-
-        {/* Right */}
-        <div className="flex items-center gap-6">
-
-          <button className="relative text-2xl">
-            ♧
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-          </button>
-
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#161C2C] text-white flex items-center justify-center font-medium">
-              A
-            </div>
-
-            <span className="text-sm font-medium">
-              Admin
-            </span>
-
-            <span>⌄</span>
-          </div>
-
-        </div>
-      </header>
+      <AdminHeader />
 
 
       {/* BODY */}

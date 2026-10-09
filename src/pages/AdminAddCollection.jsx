@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiPost } from "@/lib/api";
 
 export default function AdminAddCollection() {
@@ -72,44 +72,7 @@ export default function AdminAddCollection() {
 
   return (
     <div className="min-h-screen bg-[#F1F2F4] text-[#161C2C]">
-      {/* 1. TOP ADMIN HEADER */}
-      <header className="h-[72px] border-b border-gray-200 flex items-center justify-between px-7 sticky top-0 bg-white z-40">
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <Link to="/admin/online-store/home" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#161C2C] flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">S</span>
-            </div>
-            <span className="text-[22px] font-bold">Store</span>
-          </Link>
-        </div>
-
-        {/* Search */}
-        <div className="hidden md:flex items-center w-[420px] h-11 rounded-full bg-[#F3F6FA] px-5 gap-3">
-          <span className="text-xl text-slate-500">⌕</span>
-          <input
-            type="text"
-            placeholder="Search anything..."
-            className="w-full bg-transparent outline-none text-sm text-[#161C2C] placeholder:text-slate-500"
-          />
-        </div>
-
-        {/* Right Action Icons & Profile */}
-        <div className="flex items-center gap-6">
-          <button type="button" className="relative text-2xl">
-            ♧
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-          </button>
-
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#161C2C] text-white flex items-center justify-center font-medium">
-              A
-            </div>
-            <span className="text-sm font-medium">Admin</span>
-            <span>⌄</span>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
       <div className="flex min-h-[calc(100vh-72px)]">

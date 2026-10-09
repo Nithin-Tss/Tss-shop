@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 
 const settingsMenu = [
   { icon: "⌂", label: "General" },
@@ -1101,92 +1102,18 @@ export default function AdminSettings() {
   return (
     <div className="min-h-screen bg-[#f1f1f1] text-[#161c2c]">
 
-      {/* =====================================================
-          TOP HEADER
-          ===================================================== */}
-
-      <header className="flex h-16 items-center justify-between bg-[#0b0b0b] px-5 text-white">
-
-        {/* SEARCH */}
-
-        <div className="mx-auto flex h-11 w-[45%] items-center rounded-xl bg-[#292929] px-4">
-
-          <span className="mr-3 text-lg text-slate-300">
-            ⌕
-          </span>
-
-
-          <input
-            type="text"
-            placeholder="Search"
-            className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-300"
-          />
-
-
-          <div className="ml-3 flex items-center gap-1 text-xs text-slate-400">
-
-            <span className="rounded bg-[#3a3a3a] px-2 py-1">
-              CTRL
-            </span>
-
-            <span className="rounded bg-[#3a3a3a] px-2 py-1">
-              K
-            </span>
-
-          </div>
-
-        </div>
-
-
-        {/* HEADER RIGHT */}
-
-        <div className="flex items-center gap-4">
-
-          <button
-            type="button"
-            onClick={() =>
-              alert("Notifications clicked")
-            }
-            className="text-lg hover:text-slate-300"
-          >
-            ◉
-          </button>
-
-
-          <button
-            type="button"
-            onClick={() =>
-              alert("Messages clicked")
-            }
-            className="text-lg hover:text-slate-300"
-          >
-            ♧
-          </button>
-
-
-          <button
-            type="button"
-            onClick={() =>
-              alert("Store profile clicked")
-            }
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-600 text-xs font-semibold"
-          >
-            Sto
-          </button>
-
-
-          <span className="text-sm font-semibold">
-            Store
-          </span>
-
-        </div>
-
-      </header>
+      <AdminHeader />
 
 
       {/* =====================================================
           SETTINGS BODY
           ===================================================== */}
+
+      <div className="flex min-h-[calc(100vh-72px)]">
+
+        <AdminSidebar />
+
+        <div className="min-w-0 flex-1">
 
       <div className="mx-auto flex max-w-[1500px] gap-7 px-6 py-7">
 
@@ -1348,6 +1275,10 @@ export default function AdminSettings() {
             : renderOtherSection()}
 
         </main>
+
+      </div>
+
+        </div>
 
       </div>
 

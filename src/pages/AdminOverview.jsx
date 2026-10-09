@@ -1,9 +1,12 @@
 
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 
 export default function OverviewPage() {
   return (
-    <div className="flex min-h-screen bg-[#F7F8FA]">
+    <div className="min-h-screen bg-[#F7F8FA]">
+      <AdminHeader />
+
+      <div className="flex min-h-[calc(100vh-72px)]">
 
       <AdminSidebar />
 
@@ -81,6 +84,7 @@ export default function OverviewPage() {
         </div>
 
       </main>
+      </div>
     </div>
   );
 }

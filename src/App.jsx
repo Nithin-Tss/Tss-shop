@@ -9,6 +9,7 @@ import EditorDemo from "@/pages/EditorDemo";
 import AdminOnlineStore from "@/pages/AdminOnlineStore";
 import AdminHome from "@/pages/AdminHome";
 import AdminProducts from "@/pages/AdminProducts";
+import AdminAddProduct from "@/pages/AdminAddProduct";
 import AdminCollections from "@/pages/AdminCollections";
 import AdminAddCollection from "@/pages/AdminAddCollection";
 import AdminCatalogues from "@/pages/AdminCatalogues";
@@ -42,6 +43,7 @@ export default function App() {
       <Route path="/admin/online-store" element={<AdminOnlineStore />} />
       <Route path="/admin/online-store/home" element={<AdminHome />} />
       <Route path="/admin/online-store/products" element={<AdminProducts />} />
+      <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
       <Route path="/admin/online-store/collections" element={<AdminCollections />} />
       <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
       <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />

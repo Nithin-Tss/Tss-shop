@@ -1,9 +1,12 @@
 
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 
 export default function AnalyticsPage() {
   return (
-    <div className="flex min-h-screen bg-[#F7F8FA]">
+    <div className="min-h-screen bg-[#F7F8FA]">
+      <AdminHeader />
+
+      <div className="flex min-h-[calc(100vh-72px)]">
       <AdminSidebar />
 
       <main className="min-w-0 flex-1 overflow-x-hidden">
@@ -107,6 +110,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }
