@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "@/lib/auth";
+import { logout } from "@/lib/api";
  
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -215,7 +215,7 @@ export default function ProfilePage() {
   // Logout
   // Logout
 const handleLogout = () => {
-  signOut();
+  logout();
 
   // Go back to the page the account link was clicked from (same-site paths only)
   const from = new URLSearchParams(window.location.search).get("from");

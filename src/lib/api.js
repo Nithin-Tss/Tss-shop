@@ -115,6 +115,24 @@ async function send(path, { method, headers, body }) {
   return response;
 }
 
+// The Logout button: sign out here at once, and tell the backend to end this
+// sign-in so its tokens stop working there too (even if they were copied).
+// `keepalive` lets the request finish while the page navigates away.
+export function logout() {
+  const refresh = getSession()?.refresh;
+
+  signOut();
+
+  if (!refresh) return;
+
+  fetch(`${API_URL}/api/v1/auth/logout/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+    keepalive: true,
+  }).catch(() => {}); // offline: the sign-in still expires on its own
+}
+
 /* ------------------------------------------------------------------ */
 
 export async function apiRequest(path, options = {}) {

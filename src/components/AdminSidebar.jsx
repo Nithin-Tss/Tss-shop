@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { apiDelete, apiGet, apiRequest } from "@/lib/api";
-import { ONBOARDING_PATH, getActiveStore, setActiveStore, setStores, signOut, useSession } from "@/lib/auth";
+import { apiDelete, apiGet, apiRequest, logout as endSession } from "@/lib/api";
+import { ONBOARDING_PATH, getActiveStore, setActiveStore, setStores, useSession } from "@/lib/auth";
 
 const BASE = "/admin/online-store";
 
@@ -761,7 +761,7 @@ function ProfileMenu() {
 
   const logout = () => {
     setOpen(false);
-    signOut();
+    endSession();
     navigate("/auth/signin", { replace: true });
   };
 
