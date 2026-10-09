@@ -19,7 +19,7 @@ export default function NavBar() {
 
   const navLinks = [
     { name: "Features", href: "#features" },
-    { name: "Themes", href: "#themes" },
+    { name: "Themes", href: `${ONBOARDING_PATH}?step=themes`, isRoute: true },
     { name: "Pricing", href: "#pricing" },
     { name: "Resources", href: "#resources" },
     { name: "Blog", href: "/blog", isRoute: true },
@@ -230,16 +230,19 @@ export default function NavBar() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-b border-gray-200 space-y-3 bg-white">
             <div className="flex flex-col space-y-2 px-2">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors"
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const Tag = link.isRoute ? Link : "a";
+                return (
+                  <Tag
+                    key={link.name}
+                    {...(link.isRoute ? { to: link.href } : { href: link.href })}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors"
+                  >
+                    {link.name}
+                  </Tag>
+                );
+              })}
             </div>
 
             {isLoggedIn ? (
