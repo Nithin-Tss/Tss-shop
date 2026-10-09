@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import { apiGet, apiPost } from "@/lib/api";
+import { getSession } from "@/lib/auth";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const IMPORT_BATCH_SIZE = 200; // products per request; the server accepts up to 500
 
 function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -21,6 +25,65 @@ function validateFile(file) {
   }
   return "";
 }
+
+// Spreadsheet column headers (lower-cased) that map to each product field
+const COLUMN_ALIASES = {
+  title: ["title", "name", "product name", "product title"],
+  description: ["description", "body", "about"],
+  price: ["price", "variant price"],
+  sku: ["sku", "variant sku"],
+  vendor: ["vendor", "brand"],
+  product_type: ["product_type", "product type", "type"],
+  category: ["category"],
+  status: ["status"],
+  tags: ["tags"],
+  collections: ["collections", "collection"],
+};
+
+const splitList = (value) =>
+  String(value ?? "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+// Turns the first sheet of the file into product payloads for the products API
+async function readProductRows(file) {
+  const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = sheet ? XLSX.utils.sheet_to_json(sheet, { defval: "" }) : [];
+
+  return rows.map((raw) => {
+    const row = {};
+    Object.entries(raw).forEach(([key, value]) => {
+      row[String(key).trim().toLowerCase()] = value;
+    });
+    const pick = (field) => {
+      const key = COLUMN_ALIASES[field].find((alias) => row[alias] !== undefined && row[alias] !== "");
+      return key === undefined ? "" : String(row[key]).trim();
+    };
+
+    const status = pick("status").toLowerCase();
+    const price = pick("price").replace(/[^0-9.]/g, "");
+    return {
+      title: pick("title"),
+      description: pick("description"),
+      vendor: pick("vendor"),
+      product_type: pick("product_type"),
+      category: pick("category"),
+      status: status === "active" ? "active" : "draft",
+      tags: splitList(pick("tags")),
+      collections: splitList(pick("collections")),
+      price: price === "" ? null : price,
+      sku: pick("sku"),
+    };
+  });
+}
+
+// The last product list loaded, so coming back to this page shows it at once
+// while a fresh copy loads. Only reused for the same store.
+let productsCache = { storeId: null, items: null };
+
+const activeStoreId = () => getSession()?.storeId || null;
 
 const lineIcon = {
   fill: "none",
@@ -75,10 +138,12 @@ const sampleProducts = [
   },
 ];
 
-function ImportProductsModal({ onClose }) {
+function ImportProductsModal({ onClose, onImported }) {
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState("");
   const inputRef = useRef(null);
 
   // Close on Escape
@@ -112,8 +177,71 @@ function ImportProductsModal({ onClose }) {
     selectFile(e.dataTransfer.files?.[0]);
   };
 
-  const handleImport = () => {
-    if (!file) return;
+  const handleImport = async () => {
+    if (!file || importing) return;
+    setImporting(true);
+    setError("");
+
+    let rows;
+    try {
+      rows = await readProductRows(file);
+    } catch {
+      setImporting(false);
+      setError("We couldn't read this file. Check that it's a valid Excel or CSV file.");
+      return;
+    }
+
+    if (!rows.length) {
+      setImporting(false);
+      setError("This file has no product rows.");
+      return;
+    }
+
+    const failures = [];
+    let created = 0;
+    let skipped = 0;
+    let processed = 0;
+
+    for (let start = 0; start < rows.length; start += IMPORT_BATCH_SIZE) {
+      const batch = rows.slice(start, start + IMPORT_BATCH_SIZE);
+      setProgress(`Importing ${processed} of ${rows.length}...`);
+
+      const res = await apiPost("/api/v1/catalog/products/bulk/", { products: batch });
+
+      if (!res.ok) {
+        setImporting(false);
+        setProgress("");
+        if (created) onImported();
+        setError(
+          `${created} of ${rows.length} products imported before the import stopped. ` +
+            (res.status === 401
+              ? "Your session expired. Sign in again, then import the file again."
+              : res.formError || Object.values(res.fieldErrors || {})[0] || "The server rejected the file.")
+        );
+        return;
+      }
+
+      created += res.data.created;
+      skipped += res.data.skipped;
+      res.data.errors.forEach((e) =>
+        failures.push(`Row ${start + e.index + 2} (${batch[e.index].title || "no title"}): ${e.message}`)
+      );
+      processed += batch.length;
+    }
+
+    setProgress("");
+    setImporting(false);
+    if (created) onImported();
+
+    if (failures.length) {
+      setFile(null);
+      setError(
+        `${created} of ${rows.length} products imported${skipped ? `, ${skipped} already existed` : ""}. ${failures.slice(0, 3).join("; ")}${
+          failures.length > 3 ? `; and ${failures.length - 3} more` : ""
+        }.`
+      );
+      return;
+    }
     onClose();
   };
 
@@ -210,6 +338,10 @@ function ImportProductsModal({ onClose }) {
             </button>
           )}
 
+          {importing && progress && (
+            <p role="status" className="mt-3 text-sm text-[#53627E]">{progress}</p>
+          )}
+
           {error && (
             <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg bg-[#FDECEC] px-3 py-2 text-sm text-[#B42318]">
               <svg {...lineIcon} strokeWidth="1.8" className="mt-0.5 h-4 w-4 shrink-0">
@@ -233,11 +365,11 @@ function ImportProductsModal({ onClose }) {
           </button>
           <button
             type="button"
-            disabled={!file}
+            disabled={!file || importing}
             onClick={handleImport}
             className="rounded-lg bg-[#141b2d] px-5 py-2.5 text-base font-semibold text-white hover:bg-[#252E45] transition disabled:cursor-not-allowed disabled:bg-[#C5CCD8] disabled:hover:bg-[#C5CCD8]"
           >
-            Import
+            {importing ? "Importing..." : "Import"}
           </button>
         </div>
 
@@ -251,6 +383,81 @@ export default function ProductsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isImportOpen, setIsImportOpen] = useState(Boolean(location.state?.openImport));
+  const [products, setProducts] = useState(() =>
+    productsCache.items && productsCache.storeId === activeStoreId() ? productsCache.items : []
+  );
+  const [loaded, setLoaded] = useState(
+    Boolean(productsCache.items) && productsCache.storeId === activeStoreId()
+  );
+  const [selected, setSelected] = useState(() => new Set());
+  const [deleting, setDeleting] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  const loadProducts = () =>
+    apiGet("/api/v1/catalog/products/").then((res) => {
+      setLoaded(true);
+      if (!res.ok) return;
+      const items = Array.isArray(res.data) ? res.data : res.data?.results || [];
+      productsCache = { storeId: activeStoreId(), items };
+      setProducts(items);
+    });
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const allSelected = products.length > 0 && selected.size === products.length;
+
+  const toggleOne = (id) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const toggleAll = () =>
+    setSelected(allSelected ? new Set() : new Set(products.map((p) => p.id)));
+
+  const deleteSelected = async () => {
+    const count = selected.size;
+    if (!count || deleting) return;
+    if (!window.confirm(`Delete ${count} product${count === 1 ? "" : "s"}? This can't be undone.`)) return;
+
+    setDeleting(true);
+    setNotice("");
+    const ids = [...selected];
+    let deleted = 0;
+    const blocked = [];
+
+    for (let start = 0; start < ids.length; start += 500) {
+      const res = await apiPost("/api/v1/catalog/products/bulk-delete/", {
+        ids: ids.slice(start, start + 500),
+      });
+      if (!res.ok) {
+        setNotice(
+          `${deleted} deleted. ${
+            res.status === 401 ? "Your session expired. Sign in again." : res.formError || "Something went wrong."
+          }`
+        );
+        break;
+      }
+      deleted += res.data.deleted;
+      blocked.push(...res.data.blocked);
+    }
+
+    if (blocked.length) {
+      setNotice(
+        `${deleted} deleted. ${blocked.length} couldn't be deleted because orders or inventory use them (set them to Draft instead): ${blocked
+          .slice(0, 3)
+          .join(", ")}${blocked.length > 3 ? ", ..." : ""}.`
+      );
+    }
+
+    setSelected(new Set());
+    setDeleting(false);
+    await loadProducts();
+  };
 
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
@@ -297,7 +504,104 @@ export default function ProductsPage() {
             </div>
 
 
+            {products.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between px-6 py-4">
+                  <p className="text-sm text-[#53627E]">
+                    {selected.size ? `${selected.size} selected` : `${products.length} products`}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    {selected.size > 0 && (
+                      <button
+                        type="button"
+                        onClick={deleteSelected}
+                        disabled={deleting}
+                        className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition disabled:opacity-50"
+                      >
+                        {deleting ? "Deleting..." : `Delete ${selected.size}`}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setIsImportOpen(true)}
+                      className="rounded-lg border border-[#D8DFE8] bg-white px-4 py-2 text-sm font-medium text-[#161C2C] hover:border-[#161C2C] transition"
+                    >
+                      Import
+                    </button>
+                    <Link
+                      to="/admin/online-store/products/new"
+                      className="rounded-lg bg-[#141b2d] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                    >
+                      + Add product
+                    </Link>
+                  </div>
+                </div>
+                {notice && (
+                  <p role="status" className="mx-6 mb-3 rounded-lg bg-[#FFF6E5] px-3 py-2 text-sm text-[#7A4B00]">
+                    {notice}
+                  </p>
+                )}
+                <table className="w-full text-left text-sm">
+                  <thead className="border-y border-[#E3E7ED] bg-[#F7F8FA] text-[#53627E]">
+                    <tr>
+                      <th className="w-10 py-3 pl-6">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all products"
+                          checked={allSelected}
+                          onChange={toggleAll}
+                        />
+                      </th>
+                      <th className="px-4 py-3 font-medium">Product</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium">Category</th>
+                      <th className="px-4 py-3 font-medium">SKU</th>
+                      <th className="px-6 py-3 text-right font-medium">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((product) => (
+                      <tr
+                        key={product.id}
+                        className={`border-b border-[#E3E7ED] last:border-0 hover:bg-[#F7F8FA] ${
+                          selected.has(product.id) ? "bg-[#F3F6FA]" : ""
+                        }`}
+                      >
+                        <td className="w-10 py-3 pl-6">
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${product.title}`}
+                            checked={selected.has(product.id)}
+                            onChange={() => toggleOne(product.id)}
+                          />
+                        </td>
+                        <td className="px-4 py-3 font-medium text-[#161C2C]">
+                          <Link
+                            to={`/admin/online-store/products/${product.id}`}
+                            className="hover:underline"
+                          >
+                            {product.title}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 capitalize text-[#53627E]">{product.status}</td>
+                        <td className="px-4 py-3 text-[#53627E]">{product.category || "-"}</td>
+                        <td className="px-4 py-3 text-[#53627E]">{product.sku || "-"}</td>
+                        <td className="px-6 py-3 text-right text-[#161C2C]">{product.price ?? "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {!loaded && products.length === 0 && (
+              <p role="status" className="px-6 py-14 text-center text-sm text-[#53627E]">
+                Loading products...
+              </p>
+            )}
+
             {/* Add your products */}
+            {loaded && products.length === 0 && (
             <div className="flex flex-1 items-center justify-between gap-10 px-6 py-12 sm:px-12 lg:pl-[14%] lg:pr-[8%]">
 
               <div>
@@ -371,6 +675,7 @@ export default function ProductsPage() {
               </div>
 
             </div>
+            )}
 
           </section>
 
@@ -380,6 +685,7 @@ export default function ProductsPage() {
 
       {isImportOpen && (
         <ImportProductsModal
+          onImported={loadProducts}
           onClose={() => {
             setIsImportOpen(false);
             // Clear the shortcut flag so a page refresh doesn't reopen the popup

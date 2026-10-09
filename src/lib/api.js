@@ -207,6 +207,7 @@ export async function apiPost(path, body, customHeaders = {}) {
   } catch {
     return {
       ok: false,
+      status: 0,
       fieldErrors: {},
       formError: "Unable to reach the server. Please try again.",
     };
@@ -231,6 +232,7 @@ export async function apiPost(path, body, customHeaders = {}) {
 
   return {
     ok: false,
+    status: response.status,
     fieldErrors,
     formError:
       nonField ||
