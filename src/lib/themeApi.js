@@ -33,3 +33,14 @@ export function saveThemeSettings(data) {
 export function getThemeSchema() {
   return apiRequest(`${BASE}/schema/`);
 }
+// Theme customizer: colors, fonts and button radius
+export function getThemeCustomizer() {
+  return apiRequest(`${BASE}/customizer/`);
+}
+
+export function saveThemeCustomizer(data) {
+  return apiRequest(`${BASE}/customizer/`, {
+    method: "POST",
+    body: data,
+  });
+}
