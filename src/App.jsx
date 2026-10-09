@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 
 import Home from "@/pages/Home";
 import Signin from "@/pages/Signin";
@@ -7,6 +7,8 @@ import Onboarding from "@/pages/Onboarding";
 import Profile from "@/pages/Profile";
 import EditorDemo from "@/pages/EditorDemo";
 import AdminOnlineStore from "@/pages/AdminOnlineStore";
+import AdminCustomize from "@/pages/AdminCustomize";
+import AdminSettings from "@/pages/AdminSettings";
 import AdminHome from "@/pages/AdminHome";
 import AdminProducts from "@/pages/AdminProducts";
 import AdminAddProduct from "@/pages/AdminAddProduct";
@@ -23,7 +25,6 @@ import AdminAddCustomer from "@/pages/AdminAddCustomer";
 import AdminOverview from "@/pages/AdminOverview";
 import AdminReports from "@/pages/AdminReports";
 import AdminAnalytics from "@/pages/AdminAnalytics";
-import AdminSettings from "@/pages/AdminSettings";    
 import AdminDiscounts from "@/pages/AdminDiscounts";
 import AdminShipping from "@/pages/AdminShipping";
 import Terms from "@/pages/Terms";
@@ -41,6 +42,8 @@ export default function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/editor-demo" element={<EditorDemo />} />
       <Route path="/admin/online-store" element={<AdminOnlineStore />} />
+      <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
+      <Route path="/admin/settings" element={<AdminSettings />} />
       <Route path="/admin/online-store/home" element={<AdminHome />} />
       <Route path="/admin/online-store/products" element={<AdminProducts />} />
       <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
@@ -64,6 +67,20 @@ export default function App() {
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
+  );
+}
+
+// Without a catch-all, an unknown URL renders nothing: a blank page
+function NotFound() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-4 text-center">
+      <h1 className="text-3xl font-bold text-slate-900">Page not found</h1>
+      <p className="text-sm text-slate-500">This page doesn't exist yet.</p>
+      <Link to="/" className="font-medium text-blue-600 hover:underline">
+        Back to home
+      </Link>
+    </main>
   );
 }

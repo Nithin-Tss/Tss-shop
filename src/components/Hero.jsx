@@ -25,7 +25,7 @@ export default function Hero() {
             {/* CTA Buttons */}
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <Link 
-                to="/signup" 
+                to="/auth/signup" 
                 className="w-full sm:w-auto bg-charcoal-navy text-white font-medium px-8 py-3.5 rounded-xl hover:bg-charcoal-navy/90 transition shadow-md flex items-center justify-center space-x-2"
               >
                 <span>Start Free →</span>

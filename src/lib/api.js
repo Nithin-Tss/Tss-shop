@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { getRefreshToken, getSession, setTokens, signOut } from "@/lib/auth";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -26,28 +26,97 @@ function getHeaders(extraHeaders = {}) {
   return headers;
 }
 
+// Turns any DRF error body into one readable message
+function errorMessage(data, fallback) {
+  if (Array.isArray(data)) return String(data[0] ?? fallback);
+  if (data?.detail) return String(data.detail);
+  if (data?.message) return String(data.message);
+  if (data?.non_field_errors) return String(data.non_field_errors[0]);
+
+  // Field errors: { email: ["A customer with this email already exists."] }
+  const first = data && typeof data === "object" ? Object.values(data)[0] : null;
+  if (Array.isArray(first)) return String(first[0]);
+  if (typeof first === "string") return first;
+
+  return fallback;
+}
+
+/* ------------------------------------------------------------------ */
+/* JWT refresh                                                          */
+/* The access token lives 15 minutes. When a request gets 401, swap the */
+/* refresh token for a new pair once and repeat the request. If that    */
+/* fails too, the session is over: sign out.                            */
+/* ------------------------------------------------------------------ */
+
+// One refresh at a time, even if several requests expire together
+let refreshing = null;
+
+function refreshSession() {
+  const refresh = getRefreshToken();
+
+  if (!refresh) return Promise.resolve(false);
+
+  refreshing ??= fetch(`${API_URL}/api/v1/auth/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+  })
+    .then(async (response) => {
+      if (!response.ok) return false;
+      setTokens(await response.json());
+      return true;
+    })
+    .catch(() => false)
+    .finally(() => {
+      refreshing = null;
+    });
+
+  return refreshing;
+}
+
+// fetch() with the auth headers, refreshing an expired access token once.
+// Throws only when the server can't be reached.
+async function send(path, { method, headers, body }) {
+  const request = () =>
+    fetch(`${API_URL}${path}`, { method, headers: getHeaders(headers), body });
+
+  let response = await request();
+
+  if (response.status === 401 && getSession()?.token) {
+    if (await refreshSession()) {
+      response = await request();
+    }
+    if (response.status === 401) {
+      signOut();
+    }
+  }
+
+  return response;
+}
+
+/* ------------------------------------------------------------------ */
+
 export async function apiRequest(path, options = {}) {
   const { method = "GET", headers = {}, body } = options;
 
-  const res = await fetch(`${API_URL}${path}`, {
-    method,
-    headers: getHeaders(headers),
-    body: body
-      ? typeof body === "string"
-        ? body
-        : JSON.stringify(body)
-      : undefined,
-  });
+  let res;
+  try {
+    res = await send(path, {
+      method,
+      headers,
+      body: body
+        ? typeof body === "string"
+          ? body
+          : JSON.stringify(body)
+        : undefined,
+    });
+  } catch {
+    throw new Error("Unable to reach the server. Is the backend running?");
+  }
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    const message =
-      errorData.detail ||
-      errorData.message ||
-      errorData.non_field_errors?.[0] ||
-      res.statusText ||
-      "Request failed";
-    const error = new Error(message);
+    const error = new Error(errorMessage(errorData, res.statusText || "Request failed"));
     error.status = res.status;
     error.data = errorData;
     throw error;
@@ -61,10 +130,7 @@ export async function apiGet(path, customHeaders = {}) {
   let response;
 
   try {
-    response = await fetch(`${API_URL}${path}`, {
-      method: "GET",
-      headers: getHeaders(customHeaders),
-    });
+    response = await send(path, { method: "GET", headers: customHeaders });
   } catch {
     return {
       ok: false,
@@ -79,12 +145,9 @@ export async function apiGet(path, customHeaders = {}) {
     return { ok: true, data };
   }
 
-  const errorMessage =
-    data?.detail || data?.message || "Failed to fetch data from server.";
-
   return {
     ok: false,
-    error: String(errorMessage),
+    error: errorMessage(data, "Failed to fetch data from server."),
     data: null,
   };
 }
@@ -93,9 +156,9 @@ export async function apiPost(path, body, customHeaders = {}) {
   let response;
 
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await send(path, {
       method: "POST",
-      headers: getHeaders(customHeaders),
+      headers: customHeaders,
       body: JSON.stringify(body),
     });
   } catch {
@@ -138,10 +201,7 @@ export async function apiDelete(path, customHeaders = {}) {
   let response;
 
   try {
-    response = await fetch(`${API_URL}${path}`, {
-      method: "DELETE",
-      headers: getHeaders(customHeaders),
-    });
+    response = await send(path, { method: "DELETE", headers: customHeaders });
   } catch {
     return {
       ok: false,
@@ -156,6 +216,6 @@ export async function apiDelete(path, customHeaders = {}) {
   const data = await response.json().catch(() => ({}));
   return {
     ok: false,
-    error: data?.detail || "Failed to delete item.",
+    error: errorMessage(data, "Failed to delete item."),
   };
 }

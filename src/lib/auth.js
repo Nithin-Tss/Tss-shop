@@ -4,11 +4,13 @@ import { useSyncExternalStore } from "react";
 /*
  * SESSION
  *
- * After sign-in/sign-up the backend returns { token, user, stores }.
- * It's kept in localStorage so the API helpers can send
- *   Authorization: Bearer <token>   and   X-Store-Id: <current store>
+ * After sign-in/sign-up the backend returns { access, refresh, user, stores }.
+ * - access (JWT, 15 min) is sent on every request: Authorization: Bearer <access>
+ * - refresh (JWT, 7-30 days) is only used to get a new access token
+ *   (see apiRequest in lib/api.js)
+ * Plus X-Store-Id: <current store>.
  *
- * Shape: { token, name, email, user, stores: [...], storeId }
+ * Shape: { token (= access), refresh, name, email, user, stores: [...], storeId }
  */
 
 const SESSION_KEY = "store_session";
@@ -53,13 +55,14 @@ export function getSession() {
   }
 }
 
-// `data` is the backend's sign-in/sign-up response: { token, user, stores }
+// `data` is the backend's sign-in/sign-up response: { access, refresh, user, stores }
 export function signIn(data) {
   const user = data.user || {};
   const stores = data.stores || [];
 
   writeSession({
-    token: data.token,
+    token: data.access,
+    refresh: data.refresh,
     name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
     email: user.email,
     user,
@@ -74,6 +77,17 @@ export function signOut() {
 
 export function getToken() {
   return getSession()?.token || null;
+}
+
+export function getRefreshToken() {
+  return getSession()?.refresh || null;
+}
+
+// After /auth/refresh/: keep the session, swap in the new tokens
+export function setTokens({ access, refresh }) {
+  const session = getSession();
+
+  if (session) writeSession({ ...session, token: access, refresh });
 }
 
 export function getStoreId() {
