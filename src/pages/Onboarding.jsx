@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import { apiRequest } from "@/lib/api";
 import { addStore, useSession } from "@/lib/auth";
@@ -142,7 +142,10 @@ export default function OnboardingPage() {
   const [storeName, setStoreName] = useState("");
   const [creating, setCreating] = useState(false);
   const [storeError, setStoreError] = useState("");
-  const hasStore = Boolean(session?.stores?.length);
+  // "+ Create new store" in the admin store switcher opens this page with ?new=1
+  const [searchParams] = useSearchParams();
+  const creatingNew = searchParams.get("new") === "1";
+  const hasStore = Boolean(session?.stores?.length) && !creatingNew;
 
   // Creates the user's store (once), then opens the chosen editor
   const chooseTheme = async (themeId) => {

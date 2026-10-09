@@ -17,6 +17,8 @@ import { useSyncExternalStore } from "react";
 export const ONBOARDING_PATH = "/auth/onboarding";
 
 const SESSION_KEY = "store_session";
+// The active store's id, kept on its own so it survives sign-out/sign-in (lib/api.js reads it too)
+const STORE_KEY = "tss-store-id";
 const SESSION_EVENT = "store-session-change";
 
 function readSession() {
@@ -34,6 +36,27 @@ function writeSession(session) {
   } catch {}
 
   window.dispatchEvent(new Event(SESSION_EVENT));
+}
+
+function readSavedStoreId() {
+  try {
+    return window.localStorage.getItem(STORE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveStoreId(storeId) {
+  try {
+    if (storeId) window.localStorage.setItem(STORE_KEY, storeId);
+    else window.localStorage.removeItem(STORE_KEY);
+  } catch {}
+}
+
+// The saved store if the user still has it, otherwise their first store
+function pickStoreId(stores, preferred) {
+  if (preferred && stores.some((s) => s.storeId === preferred)) return preferred;
+  return stores[0]?.storeId || null;
 }
 
 function subscribe(callback) {
@@ -62,6 +85,8 @@ export function getSession() {
 export function signIn(data) {
   const user = data.user || {};
   const stores = data.stores || [];
+  const storeId = pickStoreId(stores, readSavedStoreId());
+  saveStoreId(storeId);
 
   writeSession({
     token: data.access,
@@ -70,7 +95,7 @@ export function signIn(data) {
     email: user.email,
     user,
     stores,
-    storeId: stores[0]?.storeId || null,
+    storeId,
   });
 }
 
@@ -104,7 +129,33 @@ export function addStore(store) {
   if (!session) return;
 
   const stores = [...(session.stores || []).filter((s) => s.storeId !== store.storeId), store];
+  saveStoreId(store.storeId);
   writeSession({ ...session, stores, storeId: store.storeId });
+}
+
+// Switch the store every admin page works on
+export function setActiveStore(storeId) {
+  const session = getSession();
+
+  if (!session || !session.stores?.some((s) => s.storeId === storeId)) return;
+
+  saveStoreId(storeId);
+  writeSession({ ...session, storeId });
+}
+
+// Replace the store list (after a fetch, rename or delete), keeping the active store when it's still there
+export function setStores(stores) {
+  const session = getSession();
+
+  if (!session) return;
+
+  const storeId = pickStoreId(stores, session.storeId);
+  saveStoreId(storeId);
+  writeSession({ ...session, stores, storeId });
+}
+
+export function getActiveStore(session) {
+  return session?.stores?.find((s) => s.storeId === session.storeId) || null;
 }
 
 // Returns the signed-in session object, or null when signed out.

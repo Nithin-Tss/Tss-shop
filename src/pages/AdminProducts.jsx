@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
@@ -246,7 +246,10 @@ function ImportProductsModal({ onClose }) {
 }
 
 export default function ProductsPage() {
-  const [isImportOpen, setIsImportOpen] = useState(false);
+  // The Home page "Import products" shortcut opens the import popup straight away
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isImportOpen, setIsImportOpen] = useState(Boolean(location.state?.openImport));
 
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
@@ -372,7 +375,15 @@ export default function ProductsPage() {
 
       </div>
 
-      {isImportOpen && <ImportProductsModal onClose={() => setIsImportOpen(false)} />}
+      {isImportOpen && (
+        <ImportProductsModal
+          onClose={() => {
+            setIsImportOpen(false);
+            // Clear the shortcut flag so a page refresh doesn't reopen the popup
+            if (location.state?.openImport) navigate(".", { replace: true, state: null });
+          }}
+        />
+      )}
 
     </div>
   );

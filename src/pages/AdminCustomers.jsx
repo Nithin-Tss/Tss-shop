@@ -133,20 +133,6 @@ export default function AdminCustomers() {
             </h1>
 
             <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#D8DFE8] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition"
-              >
-                Export
-              </button>
-
-              <button
-                type="button"
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#D8DFE8] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition"
-              >
-                Import
-              </button>
-
               <Link
                 to="/admin/online-store/customers/new"
                 className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"

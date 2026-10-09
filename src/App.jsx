@@ -32,10 +32,14 @@ import Privacy from "@/pages/Privacy";
 import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";
 import ForgotPassword from "@/pages/ForgotPassword";
+import { useSession } from "@/lib/auth";
 
 export default function App() {
+  // Switching store remounts every page, so each one re-fetches the new store's data
+  const storeId = useSession()?.storeId || "none";
+
   return (
-    <Routes>
+    <Routes key={storeId}>
       <Route path="/" element={<Home />} />
       <Route path="/auth/signin" element={<Signin />} />
       <Route path="/auth/signup" element={<Signup />} />
