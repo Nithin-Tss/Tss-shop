@@ -326,51 +326,69 @@ const handleLogout = () => {
  
                 {/* Profile Information */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- 
-                  {/* First Name */}
-                  <div className="rounded-xl border border-slate-200 p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      First Name
-                    </p>
- 
-                    <p className="mt-2 text-sm text-slate-500">
-                      Will be provided by the backend
-                    </p>
-                  </div>
- 
-                  {/* Last Name */}
-                  <div className="rounded-xl border border-slate-200 p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Last Name
-                    </p>
- 
-                    <p className="mt-2 text-sm text-slate-500">
-                      Will be provided by the backend
-                    </p>
-                  </div>
- 
-                  {/* Email */}
-                  <div className="rounded-xl border border-slate-200 p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Email
-                    </p>
- 
-                    <p className="mt-2 text-sm text-slate-500">
-                      Will be provided by the backend
-                    </p>
-                  </div>
- 
-                  {/* Mobile Number */}
-                  <div className="rounded-xl border border-slate-200 p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Mobile Number
-                    </p>
- 
-                    <p className="mt-2 text-sm text-slate-500">
-                      Will be provided by the backend
-                    </p>
-                  </div>
-                </div>
+
+  {/* First Name */}
+  <div className="w-full min-h-26 rounded-xl border border-slate-200 p-5 focus-within:border-black">
+    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+      First Name
+    </label>
+    <input
+      type="text"
+      name="firstName"
+      value={profileData.firstName}
+      onChange={handleProfileChange}
+      placeholder="Enter first name"
+      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+    />
+  </div>
+
+  {/* Last Name */}
+  <div className="rounded-xl border border-slate-200 p-5 focus-within:border-black">
+    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+      Last Name
+    </label>
+    <input
+      type="text"
+      name="lastName"
+      value={profileData.lastName}
+      onChange={handleProfileChange}
+      placeholder="Enter last name"
+      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+    />
+  </div>
+
+  {/* Email */}
+  <div className="rounded-xl border border-slate-200 p-5 focus-within:border-black">
+    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+      Email
+    </label>
+    <input
+      type="email"
+      name="email"
+      value={profileData.email}
+      onChange={handleProfileChange}
+      placeholder="Enter email"
+      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+    />
+  </div>
+
+  {/* Mobile Number */}
+  <div className="rounded-xl border border-slate-200 p-5 focus-within:border-black">
+    <label className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+      Mobile Number
+    </label>
+    <input
+      type="tel"
+      name="mobileNumber"
+      value={profileData.mobileNumber}
+      onChange={handleProfileChange}
+      placeholder="Enter mobile number"
+      maxLength={10}
+      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+    />
+  </div>
+
+</div>
  
                 {/* Account Settings */}
                 <div className="mt-8 border-t border-slate-200 pt-8">
