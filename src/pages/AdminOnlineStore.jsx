@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 
@@ -16,10 +16,32 @@ const categories = [
   "Manufacturing",
 ];
 
+const lineIcon = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.8,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  viewBox: "0 0 24 24",
+  "aria-hidden": true,
+};
 
+const headerButton =
+  "group inline-flex h-9 items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-3.5 text-sm font-medium text-[#161C2C] transition-colors duration-200 hover:border-[#141b2d] hover:bg-[#f1f3f7] hover:text-[#141b2d] active:bg-[#e7ebf2] focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[#141b2d]";
+
+const headerButtonIcon = "h-4 w-4 text-[#53627E] transition-colors duration-200 group-hover:text-[#141b2d]";
 
 export default function OnlineStorePage() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  // No templates exist yet; Continue unlocks once one can be picked
+  const [selectedTheme] = useState(null);
+
+  // Back to the previous page, or the admin home if this page was opened directly
+  const goBack = () => {
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate("/admin/online-store/home");
+  };
 
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
@@ -35,266 +57,150 @@ export default function OnlineStorePage() {
 
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 px-8 lg:px-9 py-8 overflow-hidden">
+        <main className="flex min-w-0 flex-1 flex-col">
+          <div className="mx-auto flex w-full max-w-[1160px] flex-1 flex-col px-4 pb-5 pt-5 sm:px-8">
 
-          {/* TITLE */}
-          <div className="flex justify-between items-start">
-
-            <div>
-
-              <h1 className="text-[36px] leading-tight font-bold text-[#161C2C]">
-                Create your custom theme
-              </h1>
-
-              <p className="mt-2 text-[16px] text-[#53627E]">
-                Choose a template to get started. You can customize it later
-                with your brand, products and style.
-              </p>
-
-            </div>
-
-
-            <div className="flex items-center gap-3 mt-4">
-
-            {/* THEME CUSTOMIZER BUTTON: sections, slides, colors */}
-            <Link
-              to="/admin/online-store/customize"
-              className="
-                px-7 py-3
-                rounded-xl
-                border border-[#161C2C]
-                text-[#161C2C]
-                font-medium
-                hover:bg-[#161C2C] hover:text-white
-                transition
-              "
-            >
-              Customize theme
-            </Link>
-
-            {/* CODE EDITOR BUTTON */}
-            <Link
-              to="/editor-demo"
-              className="
-                px-7 py-3
-                rounded-xl
-                bg-[#161C2C]
-                text-white
-                font-medium
-                flex items-center gap-3
-                hover:bg-[#252E45]
-                transition
-              "
-            >
-              <span className="text-xl">
-                {"</>"}
-              </span>
-
-              Code Editor
-            </Link>
-
-            {/* TOP BACK BUTTON */}
+            {/* BACK */}
             <button
-              className="
-                px-7 py-3
-                rounded-xl
-                border border-[#161C2C]
-                text-[#161C2C]
-                font-medium
-                flex items-center gap-3
-                hover:bg-[#161C2C]
-                hover:text-white
-                transition
-              "
+              type="button"
+              onClick={goBack}
+              className="-ml-2 inline-flex self-start items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[#53627E] transition hover:bg-[#F3F5F8] hover:text-[#161C2C]"
             >
-              <span className="text-xl">
-                ←
-              </span>
-
+              <svg {...lineIcon} className="h-4 w-4">
+                <path d="M19 12H5M11 6l-6 6 6 6" />
+              </svg>
               Back
             </button>
 
+
+            {/* TITLE */}
+            <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <h1 className="text-[26px] font-semibold leading-tight tracking-tight text-[#161C2C] sm:text-[28px]">
+                  Create your custom theme
+                </h1>
+                <p className="mt-1.5 text-sm text-[#53627E] sm:text-[15px]">
+                  Choose a template to get started. You can customize it later with your brand, products and style.
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {/* Theme customizer: sections, slides, colours */}
+                <Link to="/admin/online-store/customize" className={headerButton}>
+                  <svg {...lineIcon} className={headerButtonIcon}>
+                    <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
+                  </svg>
+                  Customize theme
+                </Link>
+
+                <Link to="/editor-demo" className={headerButton}>
+                  <svg {...lineIcon} className={headerButtonIcon}>
+                    <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />
+                  </svg>
+                  Code Editor
+                </Link>
+              </div>
             </div>
 
-          </div>
+
+            {/* CATEGORIES: one line, scrolls sideways on small screens */}
+            <div className="-mx-4 mt-5 overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 [&::-webkit-scrollbar]:hidden">
+              <div className="flex w-max gap-2">
+                {categories.map((category) => {
+                  const active = selectedCategory === category;
+
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`h-8 whitespace-nowrap rounded-full px-3.5 text-[13px] font-medium transition ${
+                        active
+                          ? "bg-[#141b2d] text-white"
+                          : "border border-[#E3E7ED] bg-white text-[#53627E] hover:border-[#C9D1DD] hover:bg-[#F7F8FA] hover:text-[#161C2C]"
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
 
-          {/* CATEGORIES */}
-          <div className="flex flex-wrap gap-3 mt-7">
+            {/* EMPTY STATE */}
+            <section className="mt-5 flex min-h-[340px] flex-1 flex-col items-center justify-center rounded-2xl border border-[#EEF0F4] bg-[#fafbfc] px-6 py-10 text-center">
 
-            {categories.map((category) => {
-
-              const active = selectedCategory === category;
-
-              return (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`
-                    px-5 py-2.5
-                    rounded-full
-                    text-sm
-                    font-medium
-                    transition
-                    ${
-                      active
-                        ? "bg-[#161C2C] text-white"
-                        : "border border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
-                    }
-                  `}
-                >
-                  {category}
-                </button>
-              );
-            })}
-
-          </div>
-
-
-          {/* EMPTY STORE */}
-          <section className="relative min-h-[600px] flex flex-col items-center justify-center">
-
-            {/* Illustration */}
-            <div className="relative mb-7">
-
-              <div className="w-[350px] h-[240px] rounded-[48%] bg-[#F1F4F9] flex items-center justify-center">
-
-                {/* Browser */}
-                <div className="w-[245px] h-[180px] bg-white rounded-xl shadow-lg overflow-hidden border border-[#E5E9EF]">
-
-                  {/* Browser bar */}
-                  <div className="h-7 bg-[#161C2C] flex items-center gap-1.5 px-3">
-                    <span className="w-2 h-2 rounded-full bg-white" />
-                    <span className="w-2 h-2 rounded-full bg-white" />
-                    <span className="w-2 h-2 rounded-full bg-white" />
+              {/* Illustration */}
+              <div className="relative">
+                <div className="w-[234px] overflow-hidden rounded-xl border border-[#E5E9EF] bg-white">
+                  <div className="flex h-6 items-center gap-1.5 bg-[#141b2d] px-3">
+                    <span className="h-2 w-2 rounded-full bg-white/80" />
+                    <span className="h-2 w-2 rounded-full bg-white/80" />
+                    <span className="h-2 w-2 rounded-full bg-white/80" />
                   </div>
 
-
-                  {/* Browser content */}
-                  <div className="p-5">
-
+                  <div className="p-4">
                     <div className="flex gap-4">
-
-                      <div className="w-[85px] h-[65px] rounded-lg bg-[#E9EEF5] flex items-center justify-center">
-                        <span className="text-3xl text-[#53627E]">
-                          ◇
-                        </span>
+                      <div className="flex h-16 w-[72px] items-center justify-center rounded-md bg-[#EEF1F6] text-[#8A94A8]">
+                        <svg {...lineIcon} className="h-6 w-6">
+                          <rect x="3" y="4" width="18" height="16" rx="2" />
+                          <circle cx="9" cy="10" r="2" />
+                          <path d="m21 16-5-5-9 9" />
+                        </svg>
                       </div>
-
-                      <div className="flex-1">
-
-                        <div className="h-3 rounded-full bg-[#E6EBF2] mb-3" />
-
-                        <div className="h-3 w-4/5 rounded-full bg-[#E6EBF2] mb-5" />
-
-                        <span className="text-2xl">
-                          🛒
-                        </span>
-
+                      <div className="flex-1 space-y-2.5 pt-1.5">
+                        <div className="h-2.5 rounded-full bg-[#E6EBF2]" />
+                        <div className="h-2.5 w-3/4 rounded-full bg-[#E6EBF2]" />
                       </div>
-
                     </div>
-
-
-                    <div className="flex gap-3 mt-6">
-                      <div className="h-2 w-14 rounded-full bg-[#E6EBF2]" />
+                    <div className="mt-4 flex gap-2.5">
+                      <div className="h-2 w-[52px] rounded-full bg-[#E6EBF2]" />
                       <div className="h-2 w-16 rounded-full bg-[#E6EBF2]" />
                       <div className="h-2 w-10 rounded-full bg-[#E6EBF2]" />
                     </div>
-
                   </div>
-
                 </div>
 
-
-                {/* Shopping bag */}
-                <div className="absolute right-[48px] bottom-[15px] w-[65px] h-[70px] bg-[#161C2C] rounded-xl flex items-center justify-center shadow-lg">
-
-                  <span className="text-white text-4xl font-bold">
-                    S
-                  </span>
-
-                  <div className="absolute -top-5 w-8 h-7 border-[5px] border-[#161C2C] border-b-0 rounded-t-full" />
-
-                </div>
-
+                <span className="absolute -bottom-4 -right-5 flex h-[52px] w-[52px] items-center justify-center rounded-xl border-2 border-white bg-[#141b2d] text-[22px] font-bold text-white">
+                  S
+                </span>
               </div>
 
+              <h2 className="mt-9 text-[22px] font-semibold text-[#161C2C] sm:text-2xl">Store</h2>
 
-              {/* Stars */}
-              <span className="absolute -left-10 top-20 text-3xl text-[#53627E]">
-                ✧
+              <p className="mt-2 max-w-sm text-[15px] font-normal leading-relaxed text-[#53627E]">
+                In future, we will add some photos here for you to choose from.
+              </p>
+
+              <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-[#EEF1F6] px-3.5 py-1.5 text-[13px] font-medium text-[#53627E]">
+                <svg {...lineIcon} className="h-3.5 w-3.5">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+                Coming soon
               </span>
+            </section>
 
-              <span className="absolute -right-10 top-32 text-3xl text-[#53627E]">
-                ✧
-              </span>
+          </div>
 
-              <span className="absolute right-10 -top-7 text-2xl text-[#53627E]">
-                ✧
-              </span>
 
+          {/* FOOTER */}
+          <div className="sticky bottom-0 border-t border-[#EEF0F4] bg-white/90 backdrop-blur">
+            <div className="mx-auto flex max-w-[1160px] justify-end px-4 py-3 sm:px-8">
+              <button
+                type="button"
+                disabled={!selectedTheme}
+                title={selectedTheme ? undefined : "Select a theme to continue"}
+                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#141b2d] px-5 text-sm font-semibold text-white transition hover:bg-[#252E45] disabled:cursor-not-allowed disabled:bg-[#C5CCD8]"
+              >
+                Continue
+                <svg {...lineIcon} strokeWidth="2" className="h-4 w-4">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
             </div>
-
-
-            {/* STORE */}
-            <h2 className="text-[48px] leading-none font-bold text-[#161C2C]">
-              Store
-            </h2>
-
-
-            {/* DESCRIPTION */}
-            <p className="mt-5 text-[19px] leading-7 text-[#53627E] text-center">
-              In future, we will add some photos
-              <br />
-              here for you to choose from.
-            </p>
-
-
-            {/* COMING SOON */}
-            <div className="mt-8 px-7 py-3 rounded-full bg-[#EEF1F6] text-[#161C2C] font-medium flex items-center gap-3">
-              <span className="text-xl">
-                ◷
-              </span>
-
-              Coming Soon
-            </div>
-
-          </section>
-
-
-          {/* BOTTOM BUTTONS */}
-          <div className="border-t border-[#E7EBF0] pt-5 flex justify-end gap-4">
-
-            <button
-              className="
-                px-7 py-3
-                rounded-xl
-                border border-[#161C2C]
-                text-[#161C2C]
-                font-medium
-                hover:bg-[#F3F5F8]
-                transition
-              "
-            >
-              Back
-            </button>
-
-
-            <button
-              className="
-                px-7 py-3
-                rounded-xl
-                bg-[#161C2C]
-                text-white
-                font-medium
-                hover:bg-[#252E45]
-                transition
-              "
-            >
-              Continue →
-            </button>
-
           </div>
 
         </main>
