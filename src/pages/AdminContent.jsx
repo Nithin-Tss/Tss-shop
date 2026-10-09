@@ -1,4 +1,4 @@
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 const lineIcon = {
   fill: "none",
@@ -30,7 +30,7 @@ export default function ContentPage() {
           {/* TITLE + ACTIONS */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
-              <span className="text-xl">⌁</span>
+              <PageIcon name="content" />
               Metaobjects
             </h1>
 

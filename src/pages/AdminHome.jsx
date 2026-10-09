@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, NavIcon, navIcons } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
 import { getActiveStore, useSession } from "@/lib/auth";
 
@@ -17,14 +17,7 @@ const lineIcon = {
 };
 
 const icons = {
-  plus: <path d="M12 5v14M5 12h14" />,
   upload: <path d="M12 15V3M7 8l5-5 5 5M5 21h14" />,
-  tag: (
-    <>
-      <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z" />
-      <circle cx="7.5" cy="7.5" r="1.5" />
-    </>
-  ),
   image: (
     <>
       <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -32,34 +25,10 @@ const icons = {
       <path d="m21 16-5-5-9 9" />
     </>
   ),
-  eye: (
-    <>
-      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
-      <circle cx="12" cy="12" r="3" />
-    </>
-  ),
   cash: (
     <>
       <rect x="2" y="6" width="20" height="12" rx="2" />
       <circle cx="12" cy="12" r="2.5" />
-    </>
-  ),
-  bag: (
-    <>
-      <path d="M5 8h14l-1 13H6Z" />
-      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
-    </>
-  ),
-  users: (
-    <>
-      <circle cx="9" cy="8" r="3.5" />
-      <path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6" />
-    </>
-  ),
-  box: (
-    <>
-      <path d="M21 16V8l-9-5-9 5v8l9 5Z" />
-      <path d="M3.3 7 12 12l8.7-5M12 22V12" />
     </>
   ),
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
@@ -73,6 +42,9 @@ const icons = {
 };
 
 function Icon({ name, className = "h-5 w-5" }) {
+  // Sidebar items (products, orders, discounts...) use the shared sidebar icon
+  if (navIcons[name]) return <NavIcon name={name} className={className} />;
+
   return (
     <svg {...lineIcon} className={className}>
       {icons[name]}
@@ -81,11 +53,11 @@ function Icon({ name, className = "h-5 w-5" }) {
 }
 
 const quickActions = [
-  { label: "Add product", icon: "plus", to: `${BASE}/products/new` },
+  { label: "Add product", icon: "products", to: `${BASE}/products/new` },
   { label: "Import products", icon: "upload", to: `${BASE}/products`, state: { openImport: true } },
-  { label: "Create discount", icon: "tag", to: `${BASE}/discounts` },
+  { label: "Create discount", icon: "discounts", to: `${BASE}/discounts` },
   { label: "Add banner", icon: "image", to: `${BASE}/customize` },
-  { label: "View store", icon: "eye", to: `${BASE}/customize` },
+  { label: "View store", icon: "store", to: `${BASE}/customize` },
 ];
 
 const tips = [
@@ -186,9 +158,9 @@ export default function AdminHomePage() {
 
   const statCards = [
     { label: "Today's sales", value: `$${stats.sales.toFixed(2)}`, icon: "cash" },
-    { label: "Orders", value: stats.orders, icon: "bag" },
-    { label: "Visitors", value: stats.visitors, icon: "users" },
-    { label: "Products", value: stats.products, icon: "box" },
+    { label: "Orders", value: stats.orders, icon: "orders" },
+    { label: "Visitors", value: stats.visitors, icon: "customers" },
+    { label: "Products", value: stats.products, icon: "products" },
   ];
 
   return (

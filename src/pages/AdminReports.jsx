@@ -1,5 +1,5 @@
 
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 
 export default function ReportsPage() {
   return (
@@ -16,7 +16,8 @@ export default function ReportsPage() {
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-5">
 
           <div>
-            <h1 className="text-xl font-semibold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#161C2C]">
+              <PageIcon name="reports" />
               Reports
             </h1>
 
@@ -72,8 +73,8 @@ export default function ReportsPage() {
 
               <div className="text-center">
 
-                <div className="text-5xl text-slate-300">
-                  ▤
+                <div className="flex justify-center">
+                  <NavIcon name="reports" className="h-10 w-10 text-slate-300" />
                 </div>
 
                 <h2 className="mt-4 text-xl font-semibold text-[#161C2C]">

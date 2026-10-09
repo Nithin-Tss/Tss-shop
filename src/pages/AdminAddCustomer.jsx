@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiPost } from "@/lib/api";
 
 const COUNTRIES = [
@@ -151,7 +151,7 @@ export default function AdminAddCustomer() {
                 to="/admin/online-store/customers"
                 className="hover:text-slate-900 transition-colors flex items-center gap-1 text-slate-500 hover:underline"
               >
-                <span className="text-base">👤</span>
+                <NavIcon name="customers" className="h-4 w-4" />
                 <span>›</span>
               </Link>
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 export default function CataloguesPage() {
   // TODO: load the store's catalogues from the backend
@@ -26,7 +26,7 @@ export default function CataloguesPage() {
 
           {/* TITLE */}
           <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
-            <span className="text-xl">♙</span>
+            <PageIcon name="catalogues" />
             Catalogues
           </h1>
 

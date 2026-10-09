@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 
 export default function AdminCustomers() {
@@ -128,7 +128,7 @@ export default function AdminCustomers() {
           {/* TITLE & TOP ACTION BAR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
-              <span className="text-xl">👤</span>
+              <PageIcon name="customers" />
               Customers
             </h1>
 
@@ -313,7 +313,7 @@ export default function AdminCustomers() {
                     <tr>
                       <td colSpan={6} className="py-16 text-center text-slate-500">
                         <div className="flex flex-col items-center justify-center space-y-2">
-                          <span className="text-3xl text-slate-300">👤</span>
+                          <NavIcon name="customers" className="h-8 w-8 text-slate-300" />
                           <p className="text-sm font-medium text-slate-700">
                             No customers found
                           </p>

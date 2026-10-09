@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 const categories = [
   "All",
@@ -76,7 +76,8 @@ export default function OnlineStorePage() {
             {/* TITLE */}
             <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <h1 className="text-[26px] font-semibold leading-tight tracking-tight text-[#161C2C] sm:text-[28px]">
+                <h1 className="flex items-center gap-2.5 text-[26px] font-semibold leading-tight tracking-tight text-[#161C2C] sm:text-[28px]">
+                  <PageIcon name="themes" />
                   Create your custom theme
                 </h1>
                 <p className="mt-1.5 text-sm text-[#53627E] sm:text-[15px]">

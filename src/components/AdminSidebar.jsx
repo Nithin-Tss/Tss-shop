@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiDelete, apiGet, apiRequest, logout as endSession } from "@/lib/api";
 import { ONBOARDING_PATH, getActiveStore, setActiveStore, setStores, useSession } from "@/lib/auth";
 
 const BASE = "/admin/online-store";
 
-// Line icons (shapes from the Lucide set, ISC licence), all drawn at one size, stroke and colour
-const navIcons = {
+// Line icons (shapes from the Lucide set, ISC licence), all drawn at one size, stroke and colour.
+// Exported so page titles, breadcrumbs and empty states use the exact same icon as the sidebar item.
+export const navIcons = {
   home: (
     <>
       <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
@@ -134,7 +135,7 @@ const navIcons = {
   chevron: <path d="m6 9 6 6 6-6" />,
 };
 
-function NavIcon({ name, className = "h-[18px] w-[18px]" }) {
+export function NavIcon({ name, className = "h-[18px] w-[18px]" }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -149,6 +150,11 @@ function NavIcon({ name, className = "h-[18px] w-[18px]" }) {
       {navIcons[name]}
     </svg>
   );
+}
+
+// The same icon next to a page title: 22px, in the title's own colour
+export function PageIcon({ name }) {
+  return <NavIcon name={name} className="h-[22px] w-[22px]" />;
 }
 
 // Grouped under small section labels; order and routes are unchanged.
@@ -301,6 +307,49 @@ function MenuItem({ item, path }) {
   );
 }
 
+// Every admin page renders its own sidebar, so it remounts on each route change;
+// its scroll position is kept here and put back before the browser paints.
+const SIDEBAR_SCROLL_KEY = "admin-sidebar-scroll";
+
+function readSidebarScroll() {
+  try {
+    return Number(window.sessionStorage.getItem(SIDEBAR_SCROLL_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function saveSidebarScroll(top) {
+  try {
+    window.sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(Math.round(top)));
+  } catch {}
+}
+
+function useSidebarScroll(navRef, path) {
+  // Restore instantly on mount: the nav has `scroll-smooth`, so plain scrollTop would animate from the top
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (nav) nav.scrollTo({ top: readSidebarScroll(), behavior: "instant" });
+  }, [navRef]);
+
+  // Then make sure the active item is visible, scrolling only as far as needed (never back to the top)
+  useEffect(() => {
+    const nav = navRef.current;
+    const active = nav?.querySelector('[aria-current="page"]');
+    if (!active) return;
+
+    const navBox = nav.getBoundingClientRect();
+    const itemBox = active.getBoundingClientRect();
+    const margin = 8;
+
+    if (itemBox.top < navBox.top + margin) {
+      nav.scrollTo({ top: nav.scrollTop + itemBox.top - navBox.top - margin, behavior: "smooth" });
+    } else if (itemBox.bottom > navBox.bottom - margin) {
+      nav.scrollTo({ top: nav.scrollTop + itemBox.bottom - navBox.bottom + margin, behavior: "smooth" });
+    }
+  }, [navRef, path]);
+}
+
 export default function AdminSidebar() {
   const { pathname } = useLocation();
   const path = pathname.replace(/\/+$/, "") || "/";
@@ -309,12 +358,17 @@ export default function AdminSidebar() {
   const [onlineStoreOpen, setOnlineStoreOpen] = useState(true);
   const [appsOpen, setAppsOpen] = useState(false);
   const settingsActive = isUnder(path, `${BASE}/settings`);
+  const navRef = useRef(null);
+
+  useSidebarScroll(navRef, path);
 
   return (
     <aside className="hidden md:block w-[256px] shrink-0 bg-[#141b2d] text-white select-none">
       {/* Stays in view below the 72px header while long pages scroll */}
       <div className="sticky top-[72px] flex h-[calc(100vh-72px)] flex-col">
         <nav
+          ref={navRef}
+          onScroll={(e) => saveSidebarScroll(e.currentTarget.scrollTop)}
           aria-label="Admin"
           className="flex-1 overflow-y-auto scroll-smooth px-3 py-4 [scrollbar-color:rgba(255,255,255,0.14)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
         >

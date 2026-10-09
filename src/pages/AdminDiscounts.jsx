@@ -1,6 +1,6 @@
 "use client";
 
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 export default function DiscountsPage() {
   return (
@@ -16,10 +16,8 @@ export default function DiscountsPage() {
         {/* HEADER */}
         <header className="flex items-center justify-between border-b border-slate-200 bg-[#F7F8FA] px-6 py-5">
 
-          <div className="flex items-center gap-2">
-            <span className="text-xl">
-              ⚙
-            </span>
+          <div className="flex items-center gap-2.5 text-[#161C2C]">
+            <PageIcon name="discounts" />
 
             <h1 className="text-xl font-semibold text-[#161C2C]">
               Discounts

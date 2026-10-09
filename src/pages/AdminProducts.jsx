@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -269,7 +269,7 @@ export default function ProductsPage() {
 
           {/* TITLE */}
           <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
-            <span className="text-xl">◇</span>
+            <PageIcon name="products" />
             Products
           </h1>
 

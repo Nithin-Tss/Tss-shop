@@ -1,5 +1,5 @@
 
-import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 export default function OverviewPage() {
   return (
@@ -15,7 +15,8 @@ export default function OverviewPage() {
         {/* Header */}
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-5">
           <div>
-            <h1 className="text-xl font-semibold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#161C2C]">
+              <PageIcon name="overview" />
               Overview
             </h1>
 
