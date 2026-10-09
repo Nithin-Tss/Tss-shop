@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
-import { apiDelete, apiGet, apiRequest } from "@/lib/api";
+import { apiDelete, apiGet, apiRequest, apiUpload } from "@/lib/api";
 
 const PRODUCTS_URL = "/admin/online-store/products";
 
@@ -30,6 +30,19 @@ function Field({ label, help, error, children }) {
   );
 }
 
+// Photos: JPG, PNG or WEBP, up to 5MB each
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const PHOTO_EXTENSIONS = /\.(jpe?g|png|webp)$/i;
+const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+
+// Returns why a photo can't be added, or "" when it's fine
+function photoError(file) {
+  const isAllowedType = file.type ? PHOTO_TYPES.includes(file.type) : PHOTO_EXTENSIONS.test(file.name);
+  if (!isAllowedType) return "Not a supported image. Use JPG, PNG or WEBP.";
+  if (file.size > MAX_PHOTO_SIZE) return "Image is too large. Maximum size is 5MB.";
+  return "";
+}
+
 const listText = (items) => (items || []).join(", ");
 const splitList = (text) =>
   [...new Set(text.split(",").map((v) => v.trim()).filter(Boolean))];
@@ -45,6 +58,10 @@ export default function AdminProductDetails() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  // [{ id, url (display), file (new uploads only), uploadedUrl }], in display order
+  const [photos, setPhotos] = useState([]);
+  const [photoErrors, setPhotoErrors] = useState([]);
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +73,11 @@ export default function AdminProductDetails() {
         return;
       }
       const p = res.data;
+      setPhotos(
+        [...(p.images || [])]
+          .sort((a, b) => a.position - b.position)
+          .map((img, i) => ({ id: `existing-${i}`, url: img.url, uploadedUrl: img.url })),
+      );
       setForm({
         title: p.title || "",
         status: p.status || "draft",
@@ -90,6 +112,53 @@ export default function AdminProductDetails() {
     }));
   };
 
+  const addPhotos = (fileList) => {
+    const images = [];
+    const rejected = [];
+    for (const file of Array.from(fileList || [])) {
+      const message = photoError(file);
+      if (message) rejected.push(`${file.name}: ${message}`);
+      else images.push(file);
+    }
+    setPhotoErrors(rejected);
+    if (!images.length) return;
+    setSaved(false);
+    setPhotos((prev) => [
+      ...prev,
+      ...images.map((file) => ({
+        id: `${file.name}-${file.lastModified}-${Math.random()}`,
+        file,
+        url: URL.createObjectURL(file),
+      })),
+    ]);
+  };
+
+  const removePhoto = (id) => {
+    setSaved(false);
+    setPhotos((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const makeCover = (id) => {
+    setSaved(false);
+    setPhotos((prev) => [prev.find((p) => p.id === id), ...prev.filter((p) => p.id !== id)]);
+  };
+
+  // Upload photos not sent yet, keeping their order; returns { urls } or { error }
+  const uploadPhotos = async () => {
+    const updated = [...photos];
+    for (let i = 0; i < updated.length; i++) {
+      if (updated[i].uploadedUrl) continue;
+      const res = await apiUpload("/api/v1/catalog/products/images/", "image", updated[i].file);
+      if (!res.ok) {
+        setPhotos(updated);
+        return { error: `${updated[i].file.name}: ${res.error}` };
+      }
+      updated[i] = { ...updated[i], uploadedUrl: res.data.url };
+    }
+    setPhotos(updated);
+    return { urls: updated.map((p) => p.uploadedUrl) };
+  };
+
   const handleSave = async () => {
     if (!form.title.trim()) {
       setError("Give your product a name.");
@@ -98,6 +167,11 @@ export default function AdminProductDetails() {
     setSaving(true);
     setError("");
     try {
+      const uploaded = await uploadPhotos();
+      if (uploaded.error) {
+        setError(uploaded.error);
+        return;
+      }
       const p = await apiRequest(`/api/v1/catalog/products/${productId}/`, {
         method: "PATCH",
         body: {
@@ -111,6 +185,7 @@ export default function AdminProductDetails() {
           tags: splitList(form.tags),
           seo_title: form.seo_title.trim(),
           seo_description: form.seo_description.trim(),
+          images: uploaded.urls,
           variants: form.variants.map((v) => ({
             id: v.id,
             sku: v.sku.trim(),
@@ -226,6 +301,72 @@ export default function AdminProductDetails() {
                       <option value="draft">Draft</option>
                     </select>
                   </Field>
+                </Card>
+
+                <Card title="Photos">
+                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+                    {photos.map((photo, i) => (
+                      <div
+                        key={photo.id}
+                        className={`group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-50 ${
+                          i === 0 ? "col-span-2 row-span-2" : ""
+                        }`}
+                      >
+                        <img src={photo.url} alt="" className="h-full w-full object-cover" />
+                        {i === 0 && (
+                          <span className="absolute left-2 top-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold">Cover</span>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-black/50 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                          {i !== 0 && (
+                            <button type="button" onClick={() => makeCover(photo.id)} className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold">
+                              Make cover
+                            </button>
+                          )}
+                          <button type="button" onClick={() => removePhoto(photo.id)} className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-red-600">
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <label
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setDragging(true);
+                      }}
+                      onDragLeave={() => setDragging(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragging(false);
+                        addPhotos(e.dataTransfer.files);
+                      }}
+                      className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center transition ${
+                        photos.length ? "aspect-square" : "col-span-3 py-10 sm:col-span-5"
+                      } ${dragging ? "border-[#141b2d] bg-slate-50" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"}`}
+                    >
+                      <span className="text-2xl text-slate-400">＋</span>
+                      <span className="text-xs font-semibold text-slate-700">{photos.length ? "Add" : "Upload photos"}</span>
+                      {!photos.length && <span className="text-xs text-slate-500">or drag and drop images here</span>}
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          addPhotos(e.target.files);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {photoErrors.length > 0 && (
+                    <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {photoErrors.map((m) => (
+                        <p key={m}>{m}</p>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-slate-500">The first photo is the main one shoppers see. JPG, PNG or WEBP, up to 5MB each.</p>
                 </Card>
 
                 <Card title="Variants and pricing">
