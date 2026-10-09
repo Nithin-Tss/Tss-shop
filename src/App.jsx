@@ -31,6 +31,7 @@ import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";
+import ForgotPassword from "@/pages/ForgotPassword";
 
 export default function App() {
   return (
@@ -67,6 +68,7 @@ export default function App() {
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="/auth/forgot-password" element={<ForgotPassword />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
