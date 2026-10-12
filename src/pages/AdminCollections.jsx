@@ -14,6 +14,24 @@ export default function AdminCollections() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // Sales channels popover dropdown state
+  const [openChannelDropdownId, setOpenChannelDropdownId] = useState(null);
+  const channelDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (channelDropdownRef.current && !channelDropdownRef.current.contains(event.target)) {
+        setOpenChannelDropdownId(null);
+      }
+    };
+    if (openChannelDropdownId) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openChannelDropdownId]);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 50;
@@ -97,6 +115,38 @@ export default function AdminCollections() {
     fetchCollections();
   };
 
+  const renderChannelIcon = (channel) => {
+    const type = (channel?.type || "").toLowerCase();
+    const name = (channel?.name || "").toLowerCase();
+
+    if (type === "online" || name.includes("online")) {
+      return (
+        <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      );
+    }
+    if (type === "shop" || name.includes("shop")) {
+      return (
+        <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+      );
+    }
+    if (type === "pos" || name.includes("point of sale") || name.includes("pos")) {
+      return (
+        <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      );
+    }
+    return (
+      <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
       <AdminHeader />
@@ -128,7 +178,7 @@ export default function AdminCollections() {
           </div>
 
           {/* MAIN CARD CONTAINER */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs">
             {/* Filter / Search Bar */}
             <div className="p-3 sm:p-4 border-b border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               {/* Left: Tab */}
@@ -343,7 +393,7 @@ export default function AdminCollections() {
 
                           {/* Products count */}
                           <td className="px-4 py-3 text-right sm:text-left text-slate-700 font-medium">
-                            {col.products_count ?? 0}
+                            {typeof col.products_count === "number" ? col.products_count.toLocaleString() : 0}
                           </td>
 
                           {/* Conditions */}
@@ -352,11 +402,56 @@ export default function AdminCollections() {
                           </td>
 
                           {/* Sales channels */}
-                          <td className="px-4 py-3 text-right text-slate-600 hidden sm:table-cell">
-                            <span className="inline-flex items-center gap-1 font-medium">
-                              {col.sales_channels_count ?? 1}
-                              <span className="text-[10px] text-slate-400">⌄</span>
-                            </span>
+                          <td className="px-4 py-3 text-right text-slate-600 hidden sm:table-cell relative">
+                            <div className="inline-block relative">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenChannelDropdownId((prev) => (prev === col.id ? null : col.id));
+                                }}
+                                className="inline-flex items-center gap-1 font-medium text-slate-700 hover:text-slate-900 px-2 py-1 rounded-md hover:bg-slate-100 transition-colors cursor-pointer text-xs sm:text-sm"
+                                title="View sales channels"
+                              >
+                                <span>
+                                  {col.sales_channels_count ?? (col.sales_channels ? col.sales_channels.length : 0)}
+                                </span>
+                                <span className={`text-[10px] text-slate-400 transition-transform duration-150 inline-block ${openChannelDropdownId === col.id ? "rotate-180" : ""}`}>
+                                  ⌄
+                                </span>
+                              </button>
+
+                              {/* Dropdown Popover */}
+                              {openChannelDropdownId === col.id && (
+                                <div
+                                  ref={channelDropdownRef}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className={`absolute right-0 z-40 min-w-[210px] bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 px-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
+                                    paginatedCollections.indexOf(col) >= paginatedCollections.length - 2 && paginatedCollections.length > 2
+                                      ? "bottom-full mb-1.5"
+                                      : "top-full mt-1.5"
+                                  }`}
+                                >
+                                  {col.sales_channels && col.sales_channels.length > 0 ? (
+                                    col.sales_channels.map((channel, idx) => (
+                                      <div
+                                        key={channel.id || idx}
+                                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-800 rounded-lg hover:bg-slate-50 transition-colors"
+                                      >
+                                        {renderChannelIcon(channel)}
+                                        <span className="font-medium text-slate-800 text-[13px] whitespace-nowrap">
+                                          {channel.name}
+                                        </span>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="px-3 py-2 text-xs text-slate-500 italic">
+                                      No sales channels assigned
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );

@@ -289,7 +289,10 @@ async function sendForm(method, path, body, customHeaders) {
     });
   }
 
-  const nonField = data?.non_field_errors?.[0] || data?.detail;
+  const nonField =
+    (Array.isArray(data) ? (typeof data[0] === "string" ? data[0] : null) : null) ||
+    data?.non_field_errors?.[0] ||
+    data?.detail;
 
   return {
     ok: false,

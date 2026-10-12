@@ -899,7 +899,8 @@ export function ProductForm({ productId }) {
       : await apiPost("/api/v1/catalog/products/", payload);
 
     if (!res.ok) {
-      fail(res.formError || "Please fix the highlighted fields.", res.fieldErrors || {});
+      const firstFieldErr = Object.values(res.fieldErrors || {})[0];
+      fail(res.formError || firstFieldErr || "Please fix the highlighted fields.", res.fieldErrors || {});
       return;
     }
 
