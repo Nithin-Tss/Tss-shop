@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { getSession, useCan } from "@/lib/auth";
-import { EXTRA_FIELDS } from "@/lib/productFields";
+import { EXTRA_FIELDS, fetchFieldLabels, isRenamable, saveFieldLabels } from "@/lib/productFields";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -174,7 +174,19 @@ function ImportProductsModal({ onClose, onImported }) {
   const [progress, setProgress] = useState("");
   const [sheet, setSheet] = useState(null); // { headers, rows } once the file has been read
   const [mapping, setMapping] = useState({}); // fieldKey -> column index, or "" for none
+  const [labels, setLabels] = useState({}); // columnN -> the name the owner gave that field
+  const [savedLabels, setSavedLabels] = useState({});
   const inputRef = useRef(null);
+
+  // Names already given to the generic columns
+  useEffect(() => {
+    fetchFieldLabels()
+      .then((saved) => {
+        setLabels(saved);
+        setSavedLabels(saved);
+      })
+      .catch(() => {});
+  }, []);
 
   // Close on Escape
   useEffect(() => {
@@ -231,6 +243,28 @@ function ImportProductsModal({ onClose, onImported }) {
     if (!sheet || importing || missingRequired.length) return;
     setImporting(true);
     setError("");
+
+    // Keep the names for mapped generic columns; a name only makes sense with data behind it
+    const nextLabels = {};
+    EXTRA_FIELDS.filter((f) => isRenamable(f.key)).forEach((f) => {
+      const name = (labels[f.key] || "").trim();
+      if (name) nextLabels[f.key] = name;
+    });
+    const names = Object.values(nextLabels).map((n) => n.toLowerCase());
+    if (new Set(names).size !== names.length) {
+      setError("Each field needs a different name.");
+      setImporting(false);
+      return;
+    }
+    if (JSON.stringify(nextLabels) !== JSON.stringify(savedLabels)) {
+      try {
+        setSavedLabels(await saveFieldLabels(nextLabels));
+      } catch (err) {
+        setError(err?.message || "We couldn't save the field names.");
+        setImporting(false);
+        return;
+      }
+    }
 
     const rows = buildProductRows(sheet.rows, mapping);
 
@@ -332,19 +366,36 @@ function ImportProductsModal({ onClose, onImported }) {
               <div className="mt-3 max-h-[46vh] space-y-2 overflow-y-auto pr-1">
                 {IMPORT_FIELDS.map((field) => (
                   <label key={field.key} className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-[#161C2C]">
-                      {field.label}
-                      {field.required && <span className="text-[#B42318]"> *</span>}
-                    </span>
+                    {isRenamable(field.key) ? (
+                      // Generic column: the owner names it, and that name labels the field on the product page
+                      <input
+                        type="text"
+                        value={labels[field.key] ?? ""}
+                        maxLength={60}
+                        disabled={importing}
+                        placeholder={field.label}
+                        aria-label={`Name for ${field.label}`}
+                        onChange={(e) => setLabels((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                        className="h-10 w-[38%] rounded-lg border border-dashed border-[#D8DFE8] bg-white px-3 text-sm text-[#161C2C] outline-none placeholder:text-[#7A869A] focus:border-[#141b2d]"
+                      />
+                    ) : (
+                      <span className="text-sm text-[#161C2C]">
+                        {field.label}
+                        {field.required && <span className="text-[#B42318]"> *</span>}
+                      </span>
+                    )}
                     <select
                       value={mapping[field.key]}
                       disabled={importing}
-                      onChange={(e) =>
-                        setMapping((prev) => ({
-                          ...prev,
-                          [field.key]: e.target.value === "" ? "" : Number(e.target.value),
-                        }))
-                      }
+                      onChange={(e) => {
+                        const column = e.target.value === "" ? "" : Number(e.target.value);
+                        setMapping((prev) => ({ ...prev, [field.key]: column }));
+                        // Name an unnamed generic column after the file's column
+                        if (isRenamable(field.key) && column !== "" && !(labels[field.key] || "").trim()) {
+                          const header = sheet.headers[column];
+                          if (header) setLabels((prev) => ({ ...prev, [field.key]: header }));
+                        }
+                      }}
                       className="h-10 w-[55%] rounded-lg border border-[#D8DFE8] bg-white px-3 text-sm text-[#161C2C] outline-none focus:border-[#141b2d]"
                     >
                       <option value="">Don't import</option>

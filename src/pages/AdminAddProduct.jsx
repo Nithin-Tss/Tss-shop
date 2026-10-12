@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
-import { EXTRA_FIELDS, emptyExtraFields } from "@/lib/productFields";
+import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
 
@@ -184,6 +184,7 @@ const formatDate = (value) => (value ? new Date(value).toLocaleString() : "-");
 
 // The "Add product" page
 export default function AdminAddProduct() {
+  const fieldLabels = useFieldLabels();
   return <ProductForm />;
 }
 
@@ -940,7 +941,7 @@ export function ProductForm({ productId }) {
               {/* EXTRA DETAILS */}
               <Card title="Additional details" hint="Optional notes about this product. Fill in only what applies; empty fields are left out.">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {EXTRA_FIELDS.map((f) => (
+                  {withLabels(fieldLabels).map((f) => (
                     <Field key={f.key} label={f.label} error={fieldErrors[f.key]}>
                       <textarea
                         value={extra[f.key]}
