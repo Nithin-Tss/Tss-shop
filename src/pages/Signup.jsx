@@ -558,7 +558,7 @@ export default function SignUpPage() {
       }`}
     >
       <span
-        className={`flex h-4 w-4 items-center justify-center rounded- border ${
+        className={`flex h-4 w-4 items-center justify-center rounded-sm border ${
           requirement.valid
             ? "border-green-600"
             : "border-slate-400"
