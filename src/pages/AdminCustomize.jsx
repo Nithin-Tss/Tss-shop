@@ -1,6 +1,6 @@
 import { createContext, memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { API_URL, apiRequest, openStorefront } from "@/lib/api";
 
@@ -162,6 +162,11 @@ export default function AdminCustomizePage() {
   const [page, setPage] = useState("index");
 
   const [selected, setSelected] = useState(null);
+
+  // Right-click menu over the preview: where it opens, and the theme file it edits
+  const [contextMenu, setContextMenu] = useState(null);
+
+  const navigate = useNavigate();
 
   const [status, setStatus] = useState("loading");
 
@@ -735,6 +740,8 @@ export default function AdminCustomizePage() {
 
       if (!message || message.source !== "tss-preview") return;
 
+      if (message.type !== "context" && message.type !== "scroll") setContextMenu(null);
+
       if (message.type === "ready") {
         // The preview loaded: send what was waiting, re-send local images, then catch up with edits
         const sync = syncRef.current;
@@ -755,6 +762,26 @@ export default function AdminCustomizePage() {
         // Edit mode off and a link was followed: the editor page is gone until the preview reloads
         syncRef.current.ready = false;
         syncRef.current.away = true;
+      } else if (message.type === "context" && typeof message.id === "string" && editModeRef.current) {
+        // Edit mode: right-click selects the section or block and offers "Edit code"
+        const section = dataRef.current?.templates.index.sections[message.id];
+        if (!section) return;
+        const block = Number.isInteger(message.block) && section.blocks?.[message.block] ? message.block : null;
+        fromPreviewRef.current = true;
+        if (message.id === selectedRef.current) {
+          setSelectedBlock(block);
+        } else {
+          pendingBlockRef.current = block;
+          setSelected(message.id);
+        }
+        const frame = iframeRef.current.getBoundingClientRect();
+        setContextMenu({
+          x: frame.left + (Number(message.x) || 0),
+          y: frame.top + (Number(message.y) || 0),
+          // A custom section has no file of its own: it lives in the page template
+          file: section.type === "custom" ? "templates/index.liquid" : `sections/${section.type}.liquid`,
+        });
+        return;
       } else if (message.type === "select" && typeof message.id === "string" && editModeRef.current) {
         // Edit mode: a click in the preview selects a section or one of its blocks; empty space unselects
         const section = dataRef.current?.templates.index.sections[message.id];
@@ -784,6 +811,21 @@ export default function AdminCustomizePage() {
 
     return () => window.removeEventListener("message", onMessage);
   }, [moveSectionTo]);
+
+  // The menu closes on a click or Escape anywhere in the customizer (clicks in the preview are messages)
+  useEffect(() => {
+    if (!contextMenu) return undefined;
+    const close = () => setContextMenu(null);
+    const onKey = (e) => e.key === "Escape" && close();
+    window.addEventListener("click", close);
+    window.addEventListener("blur", close);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("click", close);
+      window.removeEventListener("blur", close);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [contextMenu]);
 
   // A new section starts at the top with no block open (or the block clicked in the preview)
   useEffect(() => {
@@ -2061,6 +2103,29 @@ export default function AdminCustomizePage() {
           )}
         </main>
       </div>
+      {contextMenu && (
+        <div
+          role="menu"
+          style={{
+            left: Math.min(contextMenu.x, window.innerWidth - 168),
+            top: Math.min(contextMenu.y, window.innerHeight - 56),
+          }}
+          className="fixed z-50 w-40 rounded-lg border border-[#D8DFE8] bg-white p-1 shadow-lg"
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              if (dirty && !window.confirm("Leave without saving? Your changes will be lost.")) return;
+              navigate(`/editor-demo?file=${encodeURIComponent(contextMenu.file)}`);
+            }}
+            className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F7F8FA]"
+          >
+            Edit code
+          </button>
+        </div>
+      )}
     </div>
     </UploadsContext.Provider>
     </FontsContext.Provider>

@@ -1,5 +1,6 @@
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import CodeEditor from "./CodeEditor";
 import { openStorefront } from "@/lib/api";
 import {
@@ -86,6 +87,9 @@ const CloseIcon = () => (
 );
 
 export default function CodeWorkbench({ height = "640px", fullscreen = false }) {
+  // ?file=sections/hero.liquid opens that file (the customizer's "Edit code")
+  const [searchParams] = useSearchParams();
+  const requestedFile = searchParams.get("file");
   const [project, setProject] = useState({ files: {}, folders: [], storeId: null, storefrontUrl: "" });
   const [drafts, setDrafts] = useState({});
   const [openTabs, setOpenTabs] = useState([]);
@@ -124,6 +128,17 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   useEffect(() => {
     load();
   }, []);
+
+  // Once the files are loaded, open the requested one and expand its folders in the explorer
+  useEffect(() => {
+    if (status !== "ready" || !requestedFile || !(requestedFile in project.files)) return;
+    openFile(requestedFile);
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      for (let dir = parentOf(requestedFile); dir; dir = parentOf(dir)) next.add(dir);
+      return next;
+    });
+  }, [status, requestedFile]);
 
   const children = useMemo(() => buildTree(project.files, project.folders), [project]);
   const contentOf = (path) => (path in drafts ? drafts[path] : project.files[path] ?? "");
