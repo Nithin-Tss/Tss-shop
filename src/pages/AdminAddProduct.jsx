@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
-import { apiGet, apiPost, apiUpload } from "@/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
+import { getActiveStore, useSession } from "@/lib/auth";
 
 const NAVY = "#141b2d";
 const PRODUCTS_URL = "/admin/online-store/products";
@@ -24,7 +25,21 @@ function photoError(file) {
 }
 
 const slugify = (text) =>
-  text.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+  (text || "")
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
+// What the owner types in "URL handle": lower case, dashes for anything else
+const cleanHandle = (text) =>
+  text
+    .replace(/^products\/?/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, "-")
+    .replace(/-+/g, "-");
 
 // Product.status values, and how they read in the top bar and the Visibility card
 const STATUSES = [
@@ -164,8 +179,18 @@ function ChipInput({ values, onChange, placeholder }) {
 
 /* ---------- page ---------- */
 
+const formatDate = (value) => (value ? new Date(value).toLocaleString() : "-");
+
+// The "Add product" page
 export default function AdminAddProduct() {
+  return <ProductForm />;
+}
+
+// One form for adding a product and for editing one (`productId` set)
+export function ProductForm({ productId }) {
   const navigate = useNavigate();
+  const editing = Boolean(productId);
+  const activeStore = getActiveStore(useSession());
 
   // 1 Basic info
   const [name, setName] = useState("");
@@ -204,16 +229,59 @@ export default function AdminAddProduct() {
   const [editingSeo, setEditingSeo] = useState(false);
   const [seoTitle, setSeoTitle] = useState("");
   const [seoDescription, setSeoDescription] = useState("");
+  const [handle, setHandle] = useState(""); // URL handle: products/<handle>
 
   // The active store's own lists
   const [locations, setLocations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [storeCollections, setStoreCollections] = useState([]);
   const [channels, setChannels] = useState([]);
+  // Lists that failed to load: saving leaves those fields alone instead of clearing them
+  const [failedLists, setFailedLists] = useState([]);
+
+  // Edit mode: the saved product's variants, its stock per location id, and its dates
+  const [variants, setVariants] = useState([]);
+  const [stockByLocation, setStockByLocation] = useState({});
+  const [dates, setDates] = useState({ createdAt: null, updatedAt: null });
+  const [loading, setLoading] = useState(editing);
+  const [loadError, setLoadError] = useState("");
 
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const [savedMessage, setSavedMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+
+  // Unsaved changes: the form differs from how it was when loaded or last saved
+  const [baseline, setBaseline] = useState(null);
+  const [needsBaseline, setNeedsBaseline] = useState(false);
+
+  // Put a saved product (API shape) into the form
+  const fill = (p) => {
+    const first = p.variants?.[0];
+    setName(p.title || "");
+    setAbout(p.description || "");
+    setPhotos(
+      [...(p.images || [])]
+        .sort((a, b) => a.position - b.position)
+        .map((img, i) => ({ id: `saved-${i}-${img.url}`, url: img.url, uploadedUrl: img.url }))
+    );
+    setPrice(first?.price ?? "");
+    setSku(first?.sku || "");
+    setCategoryId(p.category_id || "");
+    setProductType(p.product_type || "");
+    setVendor(p.vendor || "");
+    setCollections(p.collections || []);
+    setTags(p.tags || []);
+    setStatus(p.status || "draft");
+    setChannelIds(p.sales_channels || []);
+    setPageLayout(p.theme_template || "default");
+    setSeoTitle(p.seo_title || "");
+    setSeoDescription(p.seo_description || "");
+    setHandle(p.handle || slugify(p.title));
+    setVariants(p.variants || []);
+    setDates({ createdAt: p.createdAt, updatedAt: p.updatedAt });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -223,30 +291,71 @@ export default function AdminAddProduct() {
       apiGet("/api/v1/catalog/categories/"),
       apiGet("/api/v1/catalog/collections/"),
       apiGet("/api/v1/catalog/sales-channels/"),
-    ]).then(([locationsRes, categoriesRes, collectionsRes, channelsRes]) => {
+      editing ? apiGet(`/api/v1/catalog/products/${productId}/`) : null,
+      editing ? apiGet(`/api/v1/inventory/items/?product=${productId}`) : null,
+    ]).then(([locationsRes, categoriesRes, collectionsRes, channelsRes, productRes, stockRes]) => {
       if (cancelled) return;
       const locationList = listOf(locationsRes);
       const channelList = listOf(channelsRes);
 
       setLocations(locationList);
-      setLocationId((current) => current || locationList[0]?.id || "");
       setCategories(listOf(categoriesRes));
       setStoreCollections(listOf(collectionsRes).map((c) => c.name));
       setChannels(channelList);
-      // New products go on the online store by default
-      setChannelIds((current) => (current.length ? current : channelList.filter((c) => c.type === "online").map((c) => c.id)));
+
+      const lists = { locations: locationsRes, categories: categoriesRes, collections: collectionsRes, channels: channelsRes };
+      const failed = Object.keys(lists).filter((key) => !lists[key].ok);
+      setFailedLists(failed);
+      if (failed.length) {
+        setError(`Some of your store's lists couldn't be loaded: ${lists[failed[0]].error} Reload the page to try again.`);
+      }
+
+      if (!editing) {
+        setLocationId(locationList[0]?.id || "");
+        // New products go on the online store by default
+        setChannelIds(channelList.filter((c) => c.type === "online").map((c) => c.id));
+        setNeedsBaseline(true);
+        return;
+      }
+
+      setLoading(false);
+      if (!productRes.ok) {
+        setLoadError(productRes.error || "We couldn't load this product.");
+        return;
+      }
+      fill(productRes.data);
+
+      // Stock of the product's first variant, per location; the form opens on the first stocked location
+      const firstVariant = productRes.data.variants?.[0]?.id;
+      const stock = {};
+      listOf(stockRes)
+        .filter((item) => item.variant === firstVariant)
+        .forEach((item) => (stock[item.location] = item.available));
+      if (!stockRes.ok) setError(`The stock couldn't be loaded: ${stockRes.error}`);
+      const stockedLocation = Object.keys(stock)[0];
+      setStockByLocation(stock);
+      setLocationId(stockedLocation || locationList[0]?.id || "");
+      setQuantity(stockedLocation ? String(stock[stockedLocation]) : "");
+      setNeedsBaseline(true);
     });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => () => photos.forEach((p) => URL.revokeObjectURL(p.url)), []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => photos.forEach((p) => p.file && URL.revokeObjectURL(p.url)), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const dirty = Boolean(
-    name || about || price || sku || quantity || photos.length || collections.length || tags.length || vendor || productType
-  );
+  const snapshot = JSON.stringify([
+    name, about, photos.map((p) => p.id), price, sku, locationId, quantity, categoryId, productType,
+    vendor, collections, tags, status, channelIds, pageLayout, seoTitle, seoDescription, handle,
+  ]);
+  useEffect(() => {
+    if (!needsBaseline) return;
+    setBaseline(snapshot);
+    setNeedsBaseline(false);
+  }, [needsBaseline, snapshot]);
+  const dirty = baseline !== null && snapshot !== baseline;
 
   // Warn before closing the tab with unsaved changes
   useEffect(() => {
@@ -257,12 +366,20 @@ export default function AdminAddProduct() {
   }, [dirty]);
 
   const categoryRows = useMemo(() => categoryOptions(categories), [categories]);
+  // The product's own collections stay visible even if the store list didn't load
+  const collectionChoices = [...new Set([...storeCollections, ...collections])];
   const statusInfo = STATUSES.find((s) => s.value === status) || STATUSES[1];
 
   const leave = () => {
     if (!dirty || window.confirm("Leave without saving? Your changes will be lost.")) {
       navigate(PRODUCTS_URL);
     }
+  };
+
+  // Edit mode: switching location shows the stock already kept there
+  const chooseLocation = (id) => {
+    setLocationId(id);
+    if (editing) setQuantity(id in stockByLocation ? String(stockByLocation[id]) : "");
   };
 
   /* photos */
@@ -287,7 +404,7 @@ export default function AdminAddProduct() {
   const removePhoto = (id) =>
     setPhotos((prev) => {
       const photo = prev.find((p) => p.id === id);
-      if (photo) URL.revokeObjectURL(photo.url);
+      if (photo?.file) URL.revokeObjectURL(photo.url);
       return prev.filter((p) => p.id !== id);
     });
 
@@ -346,6 +463,7 @@ export default function AdminAddProduct() {
 
     setSaving(true);
     setError("");
+    setSavedMessage("");
     setFieldErrors({});
 
     const uploaded = await uploadPhotos();
@@ -354,28 +472,45 @@ export default function AdminAddProduct() {
       return;
     }
 
+    // Edit mode only writes stock that actually changed
+    const stockChanged = quantity !== "" && (!editing || Number(quantity) !== stockByLocation[locationId]);
+
     // Sent for the active store: lib/api adds its id to every request (X-Store-Id)
     const payload = {
       title: name.trim(),
       description: about.trim(),
       images: uploaded.urls,
-      price: price === "" ? null : price,
-      sku: sku.trim(),
-      location: quantity === "" ? null : locationId || null,
-      quantity: quantity === "" ? null : Number(quantity),
-      category_id: categoryId || null,
+      location: stockChanged ? locationId || null : null,
+      quantity: stockChanged ? Number(quantity) : null,
       product_type: productType.trim(),
       vendor: vendor.trim(),
       collections,
       tags,
       status,
-      sales_channels: channelIds,
       theme_template: pageLayout,
       seo_title: seoTitle.trim(),
       seo_description: seoDescription.trim(),
+      handle: (handle || slugify(name)).trim(),
     };
+    if (!failedLists.includes("categories")) payload.category_id = categoryId || null;
+    if (!failedLists.includes("channels")) payload.sales_channels = channelIds;
 
-    const res = await apiPost("/api/v1/catalog/products/", payload);
+    if (editing) {
+      // Price and SKU belong to the first variant; any other variants go back unchanged so none is lost
+      const [first, ...others] = variants;
+      payload.variants = [
+        { ...(first && { id: first.id }), sku: sku.trim(), price: price === "" ? null : price },
+        ...others.map((v) => ({ id: v.id, sku: v.sku, price: v.price })),
+      ];
+    } else {
+      payload.price = price === "" ? null : price;
+      payload.sku = sku.trim();
+    }
+
+    // Edit mode updates this product (PATCH, scoped to the active store), never creates another
+    const res = editing
+      ? await apiPatch(`/api/v1/catalog/products/${productId}/`, payload)
+      : await apiPost("/api/v1/catalog/products/", payload);
 
     if (!res.ok) {
       fail(res.formError || "Please fix the highlighted fields.", res.fieldErrors || {});
@@ -383,12 +518,67 @@ export default function AdminAddProduct() {
     }
 
     setSaving(false);
+    if (!editing) {
+      navigate(PRODUCTS_URL);
+      return;
+    }
+
+    fill(res.data);
+    if (stockChanged) setStockByLocation((prev) => ({ ...prev, [locationId]: Number(quantity) }));
+    setNeedsBaseline(true);
+    setSavedMessage("Changes saved.");
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Delete "${name.trim() || "this product"}"? This can't be undone.`)) return;
+    setDeleting(true);
+    setError("");
+    setSavedMessage("");
+    const res = await apiDelete(`/api/v1/catalog/products/${productId}/`);
+    setDeleting(false);
+    if (!res.ok) {
+      setError(res.error);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     navigate(PRODUCTS_URL);
   };
 
+  // The handle follows the name until the owner edits it
+  const changeName = (value) => {
+    if (!handle || handle === slugify(name)) setHandle(slugify(value));
+    setName(value);
+  };
+
+  const storeBrand = (activeStore?.storeName || "SIPNOW").toUpperCase();
+  const storeDomain = `https://${activeStore?.storeSlug || "zz35zk-e0"}.myshopify.com`;
+  const currentHandle = handle || slugify(name) || "product-handle";
   const shownSeoTitle = seoTitle || name || "Your product name";
   const shownSeoDescription =
     seoDescription || about || "Add a short description so shoppers know what makes this product special.";
+
+  if (loading || loadError) {
+    return (
+      <div className="min-h-screen bg-white text-slate-900">
+        <AdminHeader />
+        <div className="flex min-h-[calc(100vh-72px)]">
+          <AdminSidebar />
+          <main className="flex-1 min-w-0 bg-white px-6 py-10">
+            {loading ? (
+              <p className="text-sm text-slate-500">Loading product...</p>
+            ) : (
+              <>
+                <p className="text-sm text-red-700">{loadError}</p>
+                <Link to={PRODUCTS_URL} className="mt-3 inline-block text-sm font-medium underline">
+                  Back to products
+                </Link>
+              </>
+            )}
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -409,28 +599,39 @@ export default function AdminAddProduct() {
                 >
                   <span aria-hidden>←</span> Back
                 </button>
-                <h1 className="truncate text-lg font-bold">{name.trim() || "New product"}</h1>
+                <h1 className="truncate text-lg font-bold">{name.trim() || (editing ? "Product" : "New product")}</h1>
                 <span className={`hidden sm:inline rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusInfo.badge}`}>
                   {statusInfo.label}
                 </span>
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={leave}
-                  className="h-9 rounded-full px-4 text-sm font-medium text-slate-600 hover:bg-slate-100"
-                >
-                  Discard
-                </button>
+                {editing ? (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting || saving}
+                    className="h-9 rounded-full border border-red-200 px-4 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    {deleting ? "Deleting..." : "Delete"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={leave}
+                    className="h-9 rounded-full px-4 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                  >
+                    Discard
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={handleSave}
-                  disabled={saving}
+                  disabled={saving || deleting}
                   className="h-9 rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
                   style={{ backgroundColor: NAVY }}
                 >
-                  {saving ? "Saving..." : "Save product"}
+                  {saving ? "Saving..." : editing ? "Save changes" : "Save product"}
                 </button>
               </div>
             </div>
@@ -438,14 +639,21 @@ export default function AdminAddProduct() {
 
           <div className="mx-auto max-w-[960px] px-3 py-8 sm:px-4">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold tracking-tight text-[#141b2d]">Add a new product</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-[#141b2d]">{editing ? "Edit product" : "Add a new product"}</h2>
               <p className="mt-1 text-sm text-[#55607A]">
-                Work down the steps below. Only the product name is required. You can come back and fill in the rest later.
+                {editing
+                  ? "Change any of the steps below. Only the product name is required."
+                  : "Work down the steps below. Only the product name is required. You can come back and fill in the rest later."}
               </p>
             </div>
 
             {error && (
               <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+            )}
+            {savedMessage && (
+              <div role="status" className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                {savedMessage}
+              </div>
             )}
 
             <div className="space-y-6">
@@ -455,7 +663,7 @@ export default function AdminAddProduct() {
                   <Field label="Product name" error={fieldErrors.title}>
                     <input
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => changeName(e.target.value)}
                       placeholder="e.g. Zonzo Chardonnay 2023 750ml"
                       className={`${inputClass} ${withError(fieldErrors.title)}`}
                       autoFocus
@@ -578,7 +786,7 @@ export default function AdminAddProduct() {
                     >
                       <select
                         value={locationId}
-                        onChange={(e) => setLocationId(e.target.value)}
+                        onChange={(e) => chooseLocation(e.target.value)}
                         disabled={!locations.length}
                         className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.location)}`}
                       >
@@ -651,9 +859,9 @@ export default function AdminAddProduct() {
                   </Field>
                   <div>
                     <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">Collections</span>
-                    {storeCollections.length ? (
+                    {collectionChoices.length ? (
                       <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-2 py-1.5">
-                        {storeCollections.map((collection) => {
+                        {collectionChoices.map((collection) => {
                           const selected = collections.includes(collection);
                           return (
                             <button
@@ -771,15 +979,18 @@ export default function AdminAddProduct() {
                 }
               >
                 <div className="rounded-lg border border-[#DDE1EA] bg-white p-4 shadow-sm">
-                  <p className="text-xs text-slate-600">
-                    yourstore.com › products › {slugify(name) || "product-name"}
+                  <p className="text-sm font-semibold uppercase tracking-wide text-slate-800">{storeBrand}</p>
+                  <p className="break-all text-xs text-slate-600">
+                    {storeDomain} › products › {currentHandle}
                   </p>
                   <p className="mt-0.5 truncate text-lg text-[#1a0dab]">{shownSeoTitle}</p>
                   <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
-                  {price && <p className="mt-1 text-xs text-slate-500">${parseFloat(price).toFixed(2)}</p>}
+                  {price !== "" && !isNaN(Number(price)) && (
+                    <p className="mt-1 text-xs text-slate-500">${Number(price).toFixed(2)} AUD</p>
+                  )}
                 </div>
 
-                {(editingSeo || fieldErrors.seo_title || fieldErrors.seo_description) && (
+                {(editingSeo || fieldErrors.seo_title || fieldErrors.seo_description || fieldErrors.handle) && (
                   <div className="mt-4 space-y-4">
                     <Field label="SEO title" help={`${seoTitle.length} of 70 characters`} error={fieldErrors.seo_title}>
                       <input
@@ -799,10 +1010,27 @@ export default function AdminAddProduct() {
                         className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
                       />
                     </Field>
+                    <Field label="URL handle" help={`${storeDomain}/products/${currentHandle}`} error={fieldErrors.handle}>
+                      <div className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 transition focus-within:border-[#141b2d] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#141b2d]/[0.07] ${withError(fieldErrors.handle)}`}>
+                        <span className="select-none text-sm text-slate-500">products/</span>
+                        <input
+                          value={handle}
+                          onChange={(e) => setHandle(cleanHandle(e.target.value))}
+                          placeholder={slugify(name)}
+                          className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                        />
+                      </div>
+                    </Field>
                   </div>
                 )}
               </Card>
             </div>
+
+            {editing && (
+              <p className="mt-6 text-xs text-slate-500">
+                Created {formatDate(dates.createdAt)} · Updated {formatDate(dates.updatedAt)}
+              </p>
+            )}
           </div>
         </main>
       </div>
