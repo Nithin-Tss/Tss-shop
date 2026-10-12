@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiDelete, apiGet, apiRequest, forgetAdminReturn, logout as endSession, restoreAdminScroll } from "@/lib/api";
-import { ONBOARDING_PATH, getActiveStore, setActiveStore, setStores, useSession } from "@/lib/auth";
+import { ONBOARDING_PATH, can, getActiveStore, setActiveStore, setStores, storeCan, useSession } from "@/lib/auth";
 
 const BASE = "/admin/online-store";
 
@@ -159,6 +159,7 @@ export function PageIcon({ name }) {
 
 // Grouped under small section labels; order and routes are unchanged.
 // `match` lists the route prefixes that count as "this item" (e.g. /customers/new -> Customers)
+// `permission`: hidden unless the user's role in the store allows it (see can() in lib/auth.js)
 const menuGroups = [
   {
     label: "Main",
@@ -168,46 +169,48 @@ const menuGroups = [
         icon: "orders",
         label: "Orders",
         href: `${BASE}/orders`,
-        children: [{ label: "Drafts", href: `${BASE}/orders/drafts` }],
+        permission: "orders.view",
+        children: [{ label: "Drafts", href: `${BASE}/orders/drafts`, permission: "draft_orders.view" }],
       },
       {
         icon: "products",
         label: "Products",
         href: `${BASE}/products`,
         match: [`${BASE}/products`, `${BASE}/collections`],
+        permission: "products.view",
         children: [{ label: "Collections", href: `${BASE}/collections` }],
       },
-      { icon: "customers", label: "Customers", href: `${BASE}/customers` },
+      { icon: "customers", label: "Customers", href: `${BASE}/customers`, permission: "customers.view" },
     ],
   },
   {
     label: "Store",
     items: [
-      { icon: "catalogues", label: "Catalogues", href: `${BASE}/catalogues` },
-      { icon: "inventory", label: "Inventory", href: `${BASE}/inventory` },
+      { icon: "catalogues", label: "Catalogues", href: `${BASE}/catalogues`, permission: "products.view" },
+      { icon: "inventory", label: "Inventory", href: `${BASE}/inventory`, permission: "inventory.view" },
       { icon: "content", label: "Content", href: `${BASE}/content` },
     ],
   },
   {
     label: "Insights",
     items: [
-      { icon: "overview", label: "Overview", href: `${BASE}/overview` },
-      { icon: "reports", label: "Reports", href: `${BASE}/reports` },
-      { icon: "analytics", label: "Analytics", href: `${BASE}/analytics` },
+      { icon: "overview", label: "Overview", href: `${BASE}/overview`, permission: "reports.view" },
+      { icon: "reports", label: "Reports", href: `${BASE}/reports`, permission: "reports.view" },
+      { icon: "analytics", label: "Analytics", href: `${BASE}/analytics`, permission: "reports.view" },
     ],
   },
   {
     label: "Marketing & delivery",
     items: [
-      { icon: "discounts", label: "Discounts", href: `${BASE}/discounts` },
-      { icon: "shipping", label: "Shipping", href: `${BASE}/shipping` },
+      { icon: "discounts", label: "Discounts", href: `${BASE}/discounts`, permission: "discounts.view" },
+      { icon: "shipping", label: "Shipping", href: `${BASE}/shipping`, permission: "shipping.view" },
     ],
   },
 ];
 
 // Pages and Blog Posts have no admin screens yet, so they aren't links
 const onlineStoreItems = [
-  { icon: "themes", label: "Themes", href: BASE, exact: true },
+  { icon: "themes", label: "Themes", href: BASE, exact: true, permission: "themes.view" },
   { icon: "pages", label: "Pages" },
   { icon: "blog", label: "Blog Posts" },
 ];
@@ -359,6 +362,8 @@ export default function AdminSidebar() {
   const [appsOpen, setAppsOpen] = useState(false);
   const settingsActive = isUnder(path, `${BASE}/settings`);
   const navRef = useRef(null);
+  const session = useSession();
+  const allowed = (item) => !item.permission || can(session, item.permission);
 
   useSidebarScroll(navRef, path);
 
@@ -372,16 +377,25 @@ export default function AdminSidebar() {
           aria-label="Admin"
           className="flex-1 overflow-y-auto scroll-smooth px-3 py-4 [scrollbar-color:rgba(255,255,255,0.14)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
         >
-          {menuGroups.map((group) => (
-            <div key={group.label} className="border-b border-white/[0.07] pb-3 pt-3 first:pt-0">
-              <SectionLabel>{group.label}</SectionLabel>
-              <div className="space-y-0.5">
-                {group.items.map((item) => (
-                  <MenuItem key={item.label} item={item} path={path} />
-                ))}
+          {menuGroups.map((group) => {
+            const items = group.items.filter(allowed).map((item) => {
+              const children = item.children?.filter(allowed);
+              // No visible children: no expand chevron either
+              return item.children ? { ...item, children: children.length ? children : undefined } : item;
+            });
+            if (!items.length) return null;
+
+            return (
+              <div key={group.label} className="border-b border-white/[0.07] pb-3 pt-3 first:pt-0">
+                <SectionLabel>{group.label}</SectionLabel>
+                <div className="space-y-0.5">
+                  {items.map((item) => (
+                    <MenuItem key={item.label} item={item} path={path} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* SALES CHANNELS */}
           <div className="pt-3">
@@ -401,7 +415,7 @@ export default function AdminSidebar() {
 
               <Collapse open={onlineStoreOpen}>
                 <div className="space-y-0.5 pl-4">
-                  {onlineStoreItems.map((item) =>
+                  {onlineStoreItems.filter(allowed).map((item) =>
                     item.href ? (
                       <Link
                         key={item.label}
@@ -582,7 +596,7 @@ function StoresDialog({ stores, activeId, onClose }) {
 
         <ul className="max-h-[60vh] divide-y divide-[#EEF0F4] overflow-y-auto">
           {stores.map((store) => {
-            const isOwner = store.role === "owner";
+            const isOwner = storeCan(store, "store.manage");
             const busy = busyId === store.storeId;
             const live = storeStatus(store) === "Live";
             const editing = editingId === store.storeId;

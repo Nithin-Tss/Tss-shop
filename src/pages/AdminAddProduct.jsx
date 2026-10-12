@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
-import { getActiveStore, useSession } from "@/lib/auth";
+import { can, getActiveStore, useSession } from "@/lib/auth";
 
 const NAVY = "#141b2d";
 const PRODUCTS_URL = "/admin/online-store/products";
@@ -191,7 +191,14 @@ export default function AdminAddProduct() {
 export function ProductForm({ productId }) {
   const navigate = useNavigate();
   const editing = Boolean(productId);
-  const activeStore = getActiveStore(useSession());
+  const session = useSession();
+  const activeStore = getActiveStore(session);
+
+  // What the user's roles allow (the backend checks each of these too)
+  const canEdit = can(session, "products.manage");
+  const canDelete = can(session, "products.delete");
+  const canSeeStock = can(session, "inventory.view");
+  const canSetStock = can(session, "inventory.manage");
 
   // 1 Basic info
   const [name, setName] = useState("");
@@ -289,13 +296,16 @@ export function ProductForm({ productId }) {
   useEffect(() => {
     let cancelled = false;
 
+    // Without inventory access there's no stock to show: skip those requests instead of reporting them as failed
+    const noStock = { ok: true, data: [] };
+
     Promise.all([
-      apiGet("/api/v1/inventory/locations/"),
+      canSeeStock ? apiGet("/api/v1/inventory/locations/") : noStock,
       apiGet("/api/v1/catalog/categories/"),
       apiGet("/api/v1/catalog/collections/"),
       apiGet("/api/v1/catalog/sales-channels/"),
       editing ? apiGet(`/api/v1/catalog/products/${productId}/`) : null,
-      editing ? apiGet(`/api/v1/inventory/items/?product=${productId}`) : null,
+      editing && canSeeStock ? apiGet(`/api/v1/inventory/items/?product=${productId}`) : noStock,
     ]).then(([locationsRes, categoriesRes, collectionsRes, channelsRes, productRes, stockRes]) => {
       if (cancelled) return;
       const locationList = listOf(locationsRes);
@@ -476,7 +486,9 @@ export function ProductForm({ productId }) {
     }
 
     // Edit mode only writes stock that actually changed
-    const stockChanged = quantity !== "" && (!editing || Number(quantity) !== stockByLocation[locationId]);
+    // Roles without inventory rights never send stock
+    const stockChanged =
+      canSetStock && quantity !== "" && (!editing || Number(quantity) !== stockByLocation[locationId]);
 
     // Sent for the active store: lib/api adds its id to every request (X-Store-Id)
     const payload = {
@@ -610,7 +622,11 @@ export function ProductForm({ productId }) {
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
+                {!canEdit && (
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">View only</span>
+                )}
                 {editing ? (
+                  canDelete && (
                   <button
                     type="button"
                     onClick={handleDelete}
@@ -619,6 +635,7 @@ export function ProductForm({ productId }) {
                   >
                     {deleting ? "Deleting..." : "Delete"}
                   </button>
+                  )
                 ) : (
                   <button
                     type="button"
@@ -628,6 +645,7 @@ export function ProductForm({ productId }) {
                     Discard
                   </button>
                 )}
+                {canEdit && (
                 <button
                   type="button"
                   onClick={handleSave}
@@ -637,17 +655,22 @@ export function ProductForm({ productId }) {
                 >
                   {saving ? "Saving..." : editing ? "Save changes" : "Save product"}
                 </button>
+                )}
               </div>
             </div>
           </div>
 
           <div className="mx-auto max-w-[960px] px-3 py-8 sm:px-4">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold tracking-tight text-[#141b2d]">{editing ? "Edit product" : "Add a new product"}</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-[#141b2d]">
+                {!canEdit ? "Product details" : editing ? "Edit product" : "Add a new product"}
+              </h2>
               <p className="mt-1 text-sm text-[#55607A]">
-                {editing
-                  ? "Change any of the steps below. Only the product name is required."
-                  : "Work down the steps below. Only the product name is required. You can come back and fill in the rest later."}
+                {!canEdit
+                  ? "Your role can view this product but not change it."
+                  : editing
+                    ? "Change any of the steps below. Only the product name is required."
+                    : "Work down the steps below. Only the product name is required. You can come back and fill in the rest later."}
               </p>
             </div>
 
@@ -660,6 +683,8 @@ export function ProductForm({ productId }) {
               </div>
             )}
 
+            {/* View-only roles: every field and button inside is disabled */}
+            <fieldset disabled={!canEdit} className="m-0 min-w-0 border-0 p-0">
             <div className="space-y-6">
               {/* 1 BASIC INFO */}
               <Card title="Basic info" hint="Give your product a clear name and describe it in a few simple sentences.">
@@ -782,6 +807,12 @@ export function ProductForm({ productId }) {
                       className={`${inputClass} ${withError(fieldErrors.sku)}`}
                     />
                   </Field>
+                  {!canSeeStock ? (
+                    <p className="text-sm text-slate-500 sm:col-span-2 sm:self-end">
+                      Stock levels are managed by people with inventory access.
+                    </p>
+                  ) : (
+                  <>
                   <div>
                     <Field
                       label="Location"
@@ -814,17 +845,24 @@ export function ProductForm({ productId }) {
                       </span>
                     )}
                   </div>
-                  <Field label="Quantity" error={fieldErrors.quantity}>
+                  <Field
+                    label="Quantity"
+                    help={canSetStock ? undefined : "Your role can see stock but not change it"}
+                    error={fieldErrors.quantity}
+                  >
                     <input
                       type="number"
                       min="0"
                       step="1"
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
+                      disabled={!canSetStock}
                       placeholder="0"
-                      className={`${inputClass} ${withError(fieldErrors.quantity)}`}
+                      className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.quantity)}`}
                     />
                   </Field>
+                  </>
+                  )}
                 </div>
               </Card>
 
@@ -1045,6 +1083,7 @@ export function ProductForm({ productId }) {
                 )}
               </Card>
             </div>
+            </fieldset>
 
             {editing && (
               <p className="mt-6 text-xs text-slate-500">

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
+import { useCan } from "@/lib/auth";
 
 function formatDraftDate(dateString) {
   if (!dateString) return "—";
@@ -42,6 +43,9 @@ function renderDraftStatusBadge(status) {
 }
 
 export default function AdminDrafts() {
+  // The create page needs orders.manage; a draft also needs draft_orders.manage
+  const canCreateOrder = useCan("orders.manage");
+  const canCreateDraft = useCan("draft_orders.manage") && canCreateOrder;
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,12 +132,14 @@ export default function AdminDrafts() {
                 Export
               </button>
 
-              <Link
-                to="/admin/online-store/orders/create"
-                className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
-              >
-                Create order
-              </Link>
+              {canCreateOrder && (
+                <Link
+                  to="/admin/online-store/orders/create"
+                  className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                >
+                  Create order
+                </Link>
+              )}
             </div>
           </div>
 
@@ -309,12 +315,14 @@ export default function AdminDrafts() {
                               ? `No draft orders matching "${searchQuery}".`
                               : "Draft orders created manually or as quotes will appear here."}
                           </p>
-                          <Link
-                            to="/admin/online-store/orders/create"
-                            className="mt-3 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-slate-800 transition"
-                          >
-                            Create draft order
-                          </Link>
+                          {canCreateDraft && (
+                            <Link
+                              to="/admin/online-store/orders/create"
+                              className="mt-3 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-slate-800 transition"
+                            >
+                              Create draft order
+                            </Link>
+                          )}
                         </div>
                       </td>
                     </tr>

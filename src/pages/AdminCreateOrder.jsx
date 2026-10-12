@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
+import { useCan } from "@/lib/auth";
 
 const CURRENCIES = [
   { code: "AUD", symbol: "$", label: "Australian Dollar (AUD $)" },
@@ -13,6 +14,8 @@ const CURRENCIES = [
 
 export default function AdminCreateOrder() {
   const navigate = useNavigate();
+  // Custom items are saved as a draft order, which is its own permission
+  const canCreateDrafts = useCan("draft_orders.manage");
 
   // Form states
   const [items, setItems] = useState([]);
@@ -207,6 +210,12 @@ export default function AdminCreateOrder() {
     // If order items have null product (e.g. pure custom items not in DB), 
     // we route to draft or create order with products
     const hasUnsavedCustomItems = items.some((it) => !it.productId);
+
+    if (hasUnsavedCustomItems && !canCreateDrafts) {
+      setSaving(false);
+      setError("Orders with custom items are saved as draft orders, and your role can't create those. Remove the custom items or ask for draft order access.");
+      return;
+    }
 
     if (hasUnsavedCustomItems) {
       // Draft orders allow custom items without product ID
