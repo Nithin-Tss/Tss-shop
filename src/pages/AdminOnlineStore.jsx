@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import { useCan } from "@/lib/auth";
 
 const categories = [
   "All",
@@ -33,6 +34,8 @@ const headerButtonIcon = "h-4 w-4 text-[#53627E] transition-colors duration-200 
 
 export default function OnlineStorePage() {
   const navigate = useNavigate();
+  // The customizer and code editor change the theme
+  const canEditTheme = useCan("themes.manage");
   const [selectedCategory, setSelectedCategory] = useState("All");
   // No templates exist yet; Continue unlocks once one can be picked
   const [selectedTheme] = useState(null);
@@ -85,6 +88,7 @@ export default function OnlineStorePage() {
                 </p>
               </div>
 
+              {canEditTheme && (
               <div className="flex shrink-0 items-center gap-2">
                 {/* Theme customizer: sections, slides, colours */}
                 <Link to="/admin/online-store/customize" className={headerButton}>
@@ -101,6 +105,7 @@ export default function OnlineStorePage() {
                   Code Editor
                 </Link>
               </div>
+              )}
             </div>
 
 

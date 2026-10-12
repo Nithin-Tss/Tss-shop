@@ -2,8 +2,12 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
+import { useCan } from "@/lib/auth";
 
 export default function AdminCollections() {
+  // What the user's roles allow here; the backend refuses the rest anyway
+  const canManage = useCan("products.manage");
+  const canDelete = useCan("products.delete");
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -113,12 +117,14 @@ export default function AdminCollections() {
               </h1>
             </div>
 
-            <Link
-              to="/admin/online-store/collections/new"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-sm font-semibold hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xs"
-            >
-              <span>Add collection</span>
-            </Link>
+            {canManage && (
+              <Link
+                to="/admin/online-store/collections/new"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-sm font-semibold hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xs"
+              >
+                <span>Add collection</span>
+              </Link>
+            )}
           </div>
 
           {/* MAIN CARD CONTAINER */}
@@ -175,7 +181,7 @@ export default function AdminCollections() {
             </div>
 
             {/* Selection Action Bar (when rows are selected) */}
-            {selectedIds.length > 0 && (
+            {canDelete && selectedIds.length > 0 && (
               <div className="bg-slate-50 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-medium text-slate-700">
                   {selectedIds.length} collection{selectedIds.length > 1 ? "s" : ""} selected
@@ -204,16 +210,19 @@ export default function AdminCollections() {
               <table className="w-full text-left border-collapse text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-600 font-medium">
-                    <th className="w-12 px-4 py-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={isAllSelected}
-                        ref={selectAllCheckboxRef}
-                        onChange={handleSelectAll}
-                        disabled={loading || paginatedCollections.length === 0}
-                        className="rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
-                      />
-                    </th>
+                    {/* Selecting is only for deleting */}
+                    {canDelete && (
+                      <th className="w-12 px-4 py-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
+                          ref={selectAllCheckboxRef}
+                          onChange={handleSelectAll}
+                          disabled={loading || paginatedCollections.length === 0}
+                          className="rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                        />
+                      </th>
+                    )}
                     <th className="px-4 py-3 font-semibold text-slate-700">
                       Title
                     </th>
@@ -261,7 +270,7 @@ export default function AdminCollections() {
                   {/* EMPTY STATE */}
                   {!loading && filteredCollections.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-16 px-4 text-center">
+                      <td colSpan={canDelete ? 5 : 4} className="py-16 px-4 text-center">
                         <div className="max-w-md mx-auto flex flex-col items-center">
                           <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-4 text-2xl">
                             ⊞
@@ -282,14 +291,14 @@ export default function AdminCollections() {
                             >
                               Clear search
                             </button>
-                          ) : (
+                          ) : canManage ? (
                             <Link
                               to="/admin/online-store/collections/new"
                               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-xs sm:text-sm font-semibold hover:bg-slate-800 transition-colors shadow-2xs"
                             >
                               Create collection
                             </Link>
-                          )}
+                          ) : null}
                         </div>
                       </td>
                     </tr>
@@ -307,14 +316,16 @@ export default function AdminCollections() {
                           }`}
                         >
                           {/* Checkbox */}
-                          <td className="w-12 px-4 py-3 text-center">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToggleRow(col.id)}
-                              className="rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
-                            />
-                          </td>
+                          {canDelete && (
+                            <td className="w-12 px-4 py-3 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleRow(col.id)}
+                                className="rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                              />
+                            </td>
+                          )}
 
                           {/* Title with Collection Icon */}
                           <td className="px-4 py-3">
