@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
@@ -80,8 +80,8 @@ function categoryOptions(categories) {
 function Card({ title, hint, action, children }) {
   return (
     <section>
-      <div className="overflow-hidden rounded-[22px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[#E6E9F2] bg-[#EEF1F8] px-5 py-4 sm:px-6">
+      <div className="rounded-[22px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
+        <header className="flex flex-wrap items-start justify-between gap-3 rounded-t-[21px] border-b border-[#E6E9F2] bg-[#EEF1F8] px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <h2 className="text-base font-bold tracking-tight text-[#141b2d]">{title}</h2>
             {hint && <p className="mt-0.5 text-[13px] leading-snug text-[#55607A]">{hint}</p>}
@@ -178,18 +178,387 @@ function ChipInput({ values, onChange, placeholder }) {
   );
 }
 
+// Collections field with removable tags and dropdown popup (search, multi-select checkboxes, add new collection)
+function CollectionsPicker({
+  selectedCollections,
+  onChange,
+  availableCollections = [],
+  onCollectionCreated,
+  error,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCreatingInline, setIsCreatingInline] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+
+  const dropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const inlineInputRef = useRef(null);
+
+  // Close when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handleOutsideClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  // Focus search input on open
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    } else {
+      setSearchQuery("");
+      setIsCreatingInline(false);
+      setNewCollectionName("");
+      setCreateError("");
+    }
+  }, [isOpen]);
+
+  // Focus inline input when opened
+  useEffect(() => {
+    if (isCreatingInline) {
+      setTimeout(() => inlineInputRef.current?.focus(), 50);
+    }
+  }, [isCreatingInline]);
+
+  // Merge store collections and selected collections to show full available list
+  const allCollections = useMemo(() => {
+    const list = [...new Set([...availableCollections, ...selectedCollections])].filter(Boolean);
+    return list.sort((a, b) => a.localeCompare(b));
+  }, [availableCollections, selectedCollections]);
+
+  // Filter based on search query
+  const filteredCollections = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return allCollections;
+    return allCollections.filter((c) => c.toLowerCase().includes(q));
+  }, [allCollections, searchQuery]);
+
+  const handleToggle = (name) => {
+    if (selectedCollections.includes(name)) {
+      onChange(selectedCollections.filter((c) => c !== name));
+    } else {
+      onChange([...selectedCollections, name]);
+    }
+  };
+
+  const handleRemove = (name) => {
+    onChange(selectedCollections.filter((c) => c !== name));
+  };
+
+  const handleCreateCollection = async (rawName) => {
+    const trimmed = rawName.trim();
+    if (!trimmed) return;
+
+    // Check if collection already exists in all collections (case-insensitive check to prevent duplicates)
+    const existing = allCollections.find((c) => c.toLowerCase() === trimmed.toLowerCase());
+    if (existing) {
+      if (!selectedCollections.includes(existing)) {
+        onChange([...selectedCollections, existing]);
+      }
+      setSearchQuery("");
+      setIsCreatingInline(false);
+      setNewCollectionName("");
+      return;
+    }
+
+    setIsCreating(true);
+    setCreateError("");
+
+    const res = await apiPost("/api/v1/catalog/collections/", { name: trimmed });
+    setIsCreating(false);
+
+    if (res.ok && res.data) {
+      const createdName = res.data.name || trimmed;
+      if (onCollectionCreated) {
+        onCollectionCreated(createdName);
+      }
+      if (!selectedCollections.includes(createdName)) {
+        onChange([...selectedCollections, createdName]);
+      }
+      setSearchQuery("");
+      setIsCreatingInline(false);
+      setNewCollectionName("");
+    } else {
+      setCreateError(res.error || res.formError || "Failed to create collection.");
+    }
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Header with Title and Circle Plus Icon (Screenshot 1) */}
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-[13px] font-semibold text-[#141b2d]">Collections</span>
+        <button
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="rounded-full p-0.5 text-gray-400 hover:text-slate-800 transition hover:bg-slate-100"
+          title="Add or manage collections"
+          aria-label="Add or manage collections"
+        >
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="9.5" />
+            <line x1="12" y1="8" x2="12" y2="16" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Selected Collections Box with Removable Tags (Screenshot 1) */}
+      <div
+        onClick={() => setIsOpen(true)}
+        className={`min-h-[58px] cursor-pointer rounded-lg border border-[#DDE1EA] bg-white p-2.5 transition focus-within:border-[#141b2d] ${
+          error ? "border-red-400" : "hover:border-slate-400"
+        }`}
+      >
+        {selectedCollections.length === 0 ? (
+          <p className="flex items-center text-sm text-slate-400 select-none py-1">
+            No collections selected
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2 items-center">
+            {selectedCollections.map((col) => (
+              <span
+                key={col}
+                className="group inline-flex items-center gap-1.5 rounded-xl bg-[#E5E7EB] px-3 py-1 text-sm font-normal text-slate-800 transition hover:bg-[#DCDFE4]"
+              >
+                <span>{col}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemove(col);
+                  }}
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-500 hover:bg-slate-300 hover:text-slate-800 transition"
+                  title={`Remove ${col}`}
+                  aria-label={`Remove ${col}`}
+                >
+                  <svg
+                    className="h-3 w-3"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <line x1="3" y1="3" x2="9" y2="9" />
+                    <line x1="9" y1="3" x2="3" y2="9" />
+                  </svg>
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+
+      {/* Dropdown Popup (Screenshot 2) */}
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-1.5 w-72 sm:w-80 rounded-xl border border-gray-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.15)] z-50 overflow-hidden">
+          {/* Header */}
+          <div className="px-3.5 pt-3 pb-1">
+            <span className="text-xs font-semibold text-slate-600">Collections</span>
+          </div>
+
+          {/* Search Bar with Search/Plus Icon */}
+          <div className="relative flex items-center border-b border-gray-200 px-3.5 py-2">
+            <svg
+              className="h-4 w-4 shrink-0 text-slate-500"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="8" cy="8" r="5" />
+              <line x1="11.5" y1="11.5" x2="16.5" y2="16.5" />
+              <line x1="13.5" y1="3" x2="13.5" y2="7" />
+              <line x1="11.5" y1="5" x2="15.5" y2="5" />
+            </svg>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    handleCreateCollection(searchQuery.trim());
+                  }
+                }
+              }}
+              placeholder="Search or add collections"
+              className="ml-2.5 w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* List of Available Collections with Checkboxes */}
+          <div className="max-h-60 overflow-y-auto py-1">
+            {filteredCollections.length === 0 ? (
+              <div className="px-4 py-6 text-center">
+                <p className="text-sm text-slate-500">
+                  {searchQuery
+                    ? `No collections matching "${searchQuery}"`
+                    : "No collections available"}
+                </p>
+              </div>
+            ) : (
+              filteredCollections.map((colName) => {
+                const isChecked = selectedCollections.includes(colName);
+                return (
+                  <label
+                    key={colName}
+                    className="flex cursor-pointer select-none items-center gap-2.5 px-3.5 py-2 hover:bg-slate-50 transition"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleToggle(colName)}
+                      className="h-4 w-4 rounded border-gray-300 text-slate-900 focus:ring-0 cursor-pointer accent-[#141b2d]"
+                    />
+                    <span className="text-sm text-slate-800">{colName}</span>
+                  </label>
+                );
+              })
+            )}
+          </div>
+
+          {/* Create Error */}
+          {createError && (
+            <div className="border-t border-red-100 bg-red-50 px-3 py-1.5 text-xs text-red-600">
+              {createError}
+            </div>
+          )}
+
+          {/* Footer: Add new collection option */}
+          {isCreatingInline ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (newCollectionName.trim()) {
+                  handleCreateCollection(newCollectionName.trim());
+                }
+              }}
+              className="border-t border-gray-200 bg-slate-50 p-2.5"
+            >
+              <div className="flex items-center gap-1.5">
+                <input
+                  ref={inlineInputRef}
+                  type="text"
+                  value={newCollectionName}
+                  onChange={(e) => setNewCollectionName(e.target.value)}
+                  placeholder="Collection name..."
+                  className="w-full rounded border border-gray-300 bg-white px-2.5 py-1 text-xs text-slate-800 outline-none focus:border-slate-500"
+                />
+                <button
+                  type="submit"
+                  disabled={isCreating || !newCollectionName.trim()}
+                  className="rounded bg-[#141b2d] px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {isCreating ? "Adding..." : "Add"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCreatingInline(false);
+                    setNewCollectionName("");
+                    setCreateError("");
+                  }}
+                  className="px-1 text-xs text-slate-500 hover:text-slate-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button
+              type="button"
+              disabled={isCreating}
+              onClick={() => {
+                if (searchQuery.trim()) {
+                  handleCreateCollection(searchQuery.trim());
+                } else {
+                  setIsCreatingInline(true);
+                }
+              }}
+              className="flex w-full cursor-pointer select-none items-center gap-2 border-t border-gray-200 px-3.5 py-2.5 text-left hover:bg-slate-50 transition disabled:opacity-50"
+            >
+              <svg
+                className="h-4 w-4 shrink-0 text-slate-700"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+              </svg>
+              <span className="text-sm font-semibold text-slate-800">
+                {isCreating
+                  ? "Adding collection..."
+                  : searchQuery.trim()
+                  ? `Add "${searchQuery.trim()}"`
+                  : "Add new collection"}
+              </span>
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------- page ---------- */
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : "-");
 
 // The "Add product" page
 export default function AdminAddProduct() {
-  const fieldLabels = useFieldLabels();
   return <ProductForm />;
 }
 
 // One form for adding a product and for editing one (`productId` set)
 export function ProductForm({ productId }) {
+  const fieldLabels = useFieldLabels();
   const navigate = useNavigate();
   const editing = Boolean(productId);
   const session = useSession();
@@ -900,36 +1269,15 @@ export function ProductForm({ productId }) {
                       className={`${inputClass} ${withError(fieldErrors.vendor)}`}
                     />
                   </Field>
-                  <div>
-                    <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">Collections</span>
-                    {collectionChoices.length ? (
-                      <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-2 py-1.5">
-                        {collectionChoices.map((collection) => {
-                          const selected = collections.includes(collection);
-                          return (
-                            <button
-                              key={collection}
-                              type="button"
-                              aria-pressed={selected}
-                              onClick={() => toggleCollection(collection)}
-                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition ${
-                                selected
-                                  ? "bg-[#141b2d] text-white"
-                                  : "border border-[#DDE1EA] bg-white text-slate-600 hover:border-[#141b2d] hover:text-[#141b2d]"
-                              }`}
-                            >
-                              {collection}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="flex min-h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 text-sm text-slate-400">
-                        No collections yet
-                      </p>
-                    )}
-                    <FieldError message={fieldErrors.collections} />
-                  </div>
+                  <CollectionsPicker
+                    selectedCollections={collections}
+                    onChange={setCollections}
+                    availableCollections={storeCollections}
+                    onCollectionCreated={(newCol) => {
+                      setStoreCollections((prev) => (prev.includes(newCol) ? prev : [...prev, newCol]));
+                    }}
+                    error={fieldErrors.collections}
+                  />
                   <div className="sm:col-span-2">
                     <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">Tags</span>
                     <ChipInput values={tags} onChange={setTags} placeholder="Type a tag and press Enter" />

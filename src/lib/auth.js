@@ -115,7 +115,7 @@ export function getRefreshToken() {
 export function setTokens({ access, refresh }) {
   const session = getSession();
 
-  if (session) writeSession({ ...session, token: access, refresh });
+  if (session) writeSession({ ...session, token: access, refresh: refresh || session.refresh });
 }
 
 // After the profile changes (or /auth/me/ is re-read): keep the session, swap in the new user
