@@ -83,12 +83,14 @@ export default function SignInPage() {
       const next = new URLSearchParams(window.location.search).get("next");
       const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
 
-      if (!result.data.stores.length) navigate("/auth/onboarding");
-      else navigate(safeNext || "/admin/online-store");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      signIn(result.data);
+setMessage("Signed in. Redirecting...");
+
+navigate("/");
+} finally {
+  setIsSubmitting(false);
+}
+};
  
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">

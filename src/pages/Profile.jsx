@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { apiGet, apiPatch, apiPost, logout } from "@/lib/api";
-import { getSession, setTokens, setUser, useSession } from "@/lib/auth";
+import { getSession, setTokens, setUser, useSession,signIn } from "@/lib/auth";
 import { MOBILE_PATTERN, NAME_PATTERN, emailError, passwordError } from "@/lib/validation";
 import { PasswordChecklist, PasswordInput } from "@/components/PasswordFields";
 
@@ -16,10 +16,10 @@ function profileFromUser(user) {
     mobileNumber: user?.mobileNumber || "",
   };
 }
-
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const user = useSession()?.user;
+   const session = useSession();
+  const user = session?.user;
   const [isEditing, setIsEditing] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
@@ -28,19 +28,44 @@ export default function ProfilePage() {
   );
 
   // The saved copy may be old (changed on another device): read it again
-  useEffect(() => {
-    let ignore = false;
+  
+useEffect(() => {
+  let ignore = false;
 
-    apiGet("/api/v1/auth/me/").then((result) => {
-      if (ignore || !result.ok) return;
-      setUser(result.data.user);
-      setProfileData(profileFromUser(result.data.user));
-    });
+  async function loadProfile() {
+    if (!session?.token) {
+      setProfileData(profileFromUser(null));
+      return;
+    }
 
-    return () => {
-      ignore = true;
-    };
-  }, []);
+    const result = await apiGet("/api/v1/auth/me/");
+
+    if (ignore) return;
+
+    if (!result.ok) {
+      setErrors({
+        form: result.error || "Unable to load profile.",
+      });
+      return;
+    }
+
+    const currentUser = result.data.user;
+
+    setUser(currentUser);
+    setProfileData(profileFromUser(currentUser));
+  }
+
+  loadProfile().catch(() => {
+    if (!ignore) {
+      setErrors({ form: "Unable to load profile." });
+    }
+  });
+
+  return () => {
+    ignore = true;
+  };
+}, [session?.token]);
+
  
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
