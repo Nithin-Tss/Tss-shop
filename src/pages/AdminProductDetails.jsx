@@ -2,11 +2,21 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiDelete, apiGet, apiRequest, apiUpload } from "@/lib/api";
+import { getActiveStore, useSession } from "@/lib/auth";
 
 const PRODUCTS_URL = "/admin/online-store/products";
 
 const inputClass =
   "w-full h-11 rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#141b2d] focus:bg-white focus:ring-4 focus:ring-[#141b2d]/[0.07]";
+
+const slugify = (text) =>
+  (text || "")
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 
 function Card({ title, children }) {
   return (
@@ -21,12 +31,12 @@ function Card({ title, children }) {
 
 function Field({ label, help, error, children }) {
   return (
-    <label className="block">
+    <div className="block">
       <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">{label}</span>
       {children}
       {help && !error && <span className="mt-1 block text-xs text-slate-500">{help}</span>}
       {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
-    </label>
+    </div>
   );
 }
 
@@ -50,6 +60,8 @@ const splitList = (text) =>
 export default function AdminProductDetails() {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const session = useSession();
+  const activeStore = getActiveStore(session);
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -58,6 +70,7 @@ export default function AdminProductDetails() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [isEditingSeo, setIsEditingSeo] = useState(false);
   // [{ id, url (display), file (new uploads only), uploadedUrl }], in display order
   const [photos, setPhotos] = useState([]);
   const [photoErrors, setPhotoErrors] = useState([]);
@@ -78,8 +91,10 @@ export default function AdminProductDetails() {
           .sort((a, b) => a.position - b.position)
           .map((img, i) => ({ id: `existing-${i}`, url: img.url, uploadedUrl: img.url })),
       );
+      const initialTitle = p.title || "";
+      const initialHandle = p.handle || slugify(initialTitle);
       setForm({
-        title: p.title || "",
+        title: initialTitle,
         status: p.status || "draft",
         description: p.description || "",
         vendor: p.vendor || "",
@@ -89,7 +104,9 @@ export default function AdminProductDetails() {
         tags: listText(p.tags),
         seo_title: p.seo_title || "",
         seo_description: p.seo_description || "",
+        handle: initialHandle,
         variants: (p.variants || []).map((v) => ({ id: v.id, sku: v.sku || "", price: v.price ?? "" })),
+        price: p.price ?? "",
         createdAt: p.createdAt,
         updatedAt: p.updatedAt,
       });
@@ -101,7 +118,34 @@ export default function AdminProductDetails() {
 
   const set = (field) => (e) => {
     setSaved(false);
-    setForm((f) => ({ ...f, [field]: e.target.value }));
+    const value = e.target.value;
+    setForm((f) => {
+      const next = { ...f, [field]: value };
+      if (field === "title" && (!f.handle || f.handle === slugify(f.title))) {
+        next.handle = slugify(value);
+      }
+      return next;
+    });
+  };
+
+  const handleSeoTitleChange = (e) => {
+    setSaved(false);
+    setForm((f) => ({ ...f, seo_title: e.target.value.slice(0, 70) }));
+  };
+
+  const handleSeoDescChange = (e) => {
+    setSaved(false);
+    setForm((f) => ({ ...f, seo_description: e.target.value.slice(0, 160) }));
+  };
+
+  const handleUrlHandleChange = (e) => {
+    setSaved(false);
+    const raw = e.target.value.replace(/^products\/?/, "");
+    const clean = raw
+      .toLowerCase()
+      .replace(/[^a-z0-9-_]/g, "-")
+      .replace(/-+/g, "-");
+    setForm((f) => ({ ...f, handle: clean }));
   };
 
   const setVariant = (id, field, value) => {
@@ -185,6 +229,7 @@ export default function AdminProductDetails() {
           tags: splitList(form.tags),
           seo_title: form.seo_title.trim(),
           seo_description: form.seo_description.trim(),
+          handle: (form.handle || slugify(form.title)).trim(),
           images: uploaded.urls,
           variants: form.variants.map((v) => ({
             id: v.id,
@@ -195,6 +240,9 @@ export default function AdminProductDetails() {
       });
       setForm((f) => ({
         ...f,
+        seo_title: p.seo_title !== undefined ? p.seo_title : f.seo_title,
+        seo_description: p.seo_description !== undefined ? p.seo_description : f.seo_description,
+        handle: p.handle || f.handle || slugify(p.title || f.title),
         variants: (p.variants || []).map((v) => ({ id: v.id, sku: v.sku || "", price: v.price ?? "" })),
         updatedAt: p.updatedAt,
       }));
@@ -219,6 +267,17 @@ export default function AdminProductDetails() {
     }
     navigate(PRODUCTS_URL);
   };
+
+  const storeBrand = (activeStore?.storeName || "SIPNOW").toUpperCase();
+  const storeSlug = activeStore?.storeSlug || "zz35zk-e0";
+  const storeDomain = `https://${storeSlug}.myshopify.com`;
+  const currentHandle = form?.handle || slugify(form?.title || "") || "product-handle";
+  const previewTitle = form?.seo_title?.trim() || form?.title?.trim() || "Product Title";
+  const firstPrice = form?.variants?.[0]?.price ?? form?.price;
+  const priceDisplay =
+    firstPrice !== undefined && firstPrice !== null && firstPrice !== "" && !isNaN(Number(firstPrice))
+      ? `$${Number(firstPrice).toFixed(2)} AUD`
+      : "";
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -410,18 +469,111 @@ export default function AdminProductDetails() {
                   </Field>
                 </Card>
 
-                <Card title="Search engine listing">
-                  <Field label="Page title">
-                    <input className={inputClass} value={form.seo_title} onChange={set("seo_title")} />
-                  </Field>
-                  <Field label="Description">
-                    <textarea
-                      className={`${inputClass} h-24 py-3`}
-                      value={form.seo_description}
-                      onChange={set("seo_description")}
-                    />
-                  </Field>
-                </Card>
+                {/* Search engine listing */}
+                <section className="overflow-hidden rounded-[22px] border border-[#E5E7EB] bg-white p-5 shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)] sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold tracking-tight text-[#141b2d]">
+                      Search engine listing
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingSeo((prev) => !prev)}
+                      className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#141b2d]/10"
+                      aria-label="Edit search engine listing"
+                      title={isEditingSeo ? "Collapse" : "Edit search engine listing"}
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Preview Section (Screenshot 1 & 2) */}
+                  <div className="mt-3.5 space-y-1">
+                    <p className="text-sm font-semibold tracking-wide text-slate-800 uppercase">
+                      {storeBrand}
+                    </p>
+                    <p className="text-xs text-slate-600 break-all">
+                      {storeDomain} &gt; products &gt; {currentHandle}
+                    </p>
+                    <p className="text-lg font-medium text-[#1a56db] truncate cursor-pointer hover:underline">
+                      {previewTitle}
+                    </p>
+                    {form.seo_description?.trim() && (
+                      <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                        {form.seo_description.trim()}
+                      </p>
+                    )}
+                    {priceDisplay && (
+                      <p className="text-sm text-slate-600">
+                        {priceDisplay}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Editable View (Screenshot 2) */}
+                  {isEditingSeo && (
+                    <>
+                      <hr className="my-5 border-t border-slate-200" />
+
+                      <div className="space-y-4">
+                        <Field
+                          label="Page title"
+                          help={`${(form.seo_title || "").length} of 70 characters used`}
+                        >
+                          <input
+                            type="text"
+                            maxLength={70}
+                            className={inputClass}
+                            value={form.seo_title}
+                            onChange={handleSeoTitleChange}
+                            placeholder={form.title}
+                          />
+                        </Field>
+
+                        <Field
+                          label="Meta description"
+                          help={`${(form.seo_description || "").length} of 160 characters used`}
+                        >
+                          <textarea
+                            maxLength={160}
+                            rows={3}
+                            className={`${inputClass} h-auto min-h-[96px] py-2.5 resize-none`}
+                            value={form.seo_description}
+                            onChange={handleSeoDescChange}
+                            placeholder={form.description ? form.description.slice(0, 160) : ""}
+                          />
+                        </Field>
+
+                        <Field
+                          label="URL handle"
+                          help={`${storeDomain}/products/${currentHandle}`}
+                        >
+                          <div className="flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 transition focus-within:border-[#141b2d] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#141b2d]/[0.07]">
+                            <span className="text-sm text-slate-500 select-none">products/</span>
+                            <input
+                              type="text"
+                              className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                              value={form.handle}
+                              onChange={handleUrlHandleChange}
+                              placeholder={slugify(form.title)}
+                            />
+                          </div>
+                        </Field>
+                      </div>
+                    </>
+                  )}
+                </section>
 
                 <p className="text-xs text-slate-500">
                   Created {form.createdAt ? new Date(form.createdAt).toLocaleString() : "-"}
