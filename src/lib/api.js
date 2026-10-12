@@ -66,7 +66,9 @@ function withTabLock(task) {
 // One refresh at a time in this tab, even if several requests expire together
 let refreshing = null;
 
-// `expiredToken` is the access token the server just rejected.
+// Resolves true (new tokens), false (the server rejected the refresh token:
+// the session is over) or "offline" (couldn't reach the server: keep the session).
+// `expiredToken` is the access token that was rejected, or is about to expire.
 function refreshSession(expiredToken) {
   refreshing ??= withTabLock(async () => {
     const session = getSession();
@@ -82,16 +84,27 @@ function refreshSession(expiredToken) {
       body: JSON.stringify({ refresh: session.refresh }),
     });
 
+    if (response.status >= 500) return "offline";
     if (!response.ok) return false;
     setTokens(await response.json());
     return true;
   })
-    .catch(() => false)
+    .catch(() => "offline")
     .finally(() => {
       refreshing = null;
     });
 
   return refreshing;
+}
+
+// Seconds left on a JWT access token (Infinity if it can't be read)
+function secondsLeft(token) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return payload.exp - Date.now() / 1000;
+  } catch {
+    return Infinity;
+  }
 }
 
 // The role and permissions in the session are read at sign-in; someone may
@@ -106,7 +119,7 @@ export async function syncAccess({ force = false } = {}) {
   lastAccessSync = Date.now();
 
   try {
-    const res = await fetch(`${API_URL}/api/v1/stores/`, { headers: getHeaders() });
+    const res = await send("/api/v1/stores/", { method: "GET" });
     if (!res.ok) return;
     const stores = await res.json();
     const current = getSession();
@@ -131,14 +144,24 @@ async function send(path, { method, headers, body }) {
     return fetch(`${API_URL}${path}`, { method, headers: allHeaders, body });
   };
 
-  const usedToken = getSession()?.token;
+  let usedToken = getSession()?.token;
+
+  // Refresh a token that is about to expire before using it, so the user
+  // never hits a 401 in the first place.
+  if (usedToken && secondsLeft(usedToken) < 60) {
+    await refreshSession(usedToken);
+    usedToken = getSession()?.token;
+  }
+
   let response = await request();
 
   if (response.status === 401 && usedToken) {
-    if (await refreshSession(usedToken)) {
+    const refreshed = await refreshSession(usedToken);
+    if (refreshed === true) {
       response = await request();
     }
-    if (response.status === 401) {
+    // Sign out only when the session is really over, not when the server was unreachable
+    if (response.status === 401 && refreshed !== "offline") {
       signOut();
     }
   }
