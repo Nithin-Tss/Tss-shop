@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
+import { emailError } from "@/lib/validation";
  
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -38,16 +39,13 @@ export default function SignInPage() {
  
   const validateForm = () => {
     const newErrors = {};
- 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required.";
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-    ) {
-      newErrors.email = "Please enter a valid email address.";
+
+    // The backend trims spaces from both fields, so check the trimmed values
+    if (emailError(formData.email)) {
+      newErrors.email = emailError(formData.email);
     }
- 
-    if (!formData.password) {
+
+    if (!formData.password.trim()) {
       newErrors.password = "Password is required.";
     }
  

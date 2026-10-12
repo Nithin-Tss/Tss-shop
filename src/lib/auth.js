@@ -118,6 +118,20 @@ export function setTokens({ access, refresh }) {
   if (session) writeSession({ ...session, token: access, refresh });
 }
 
+// After the profile changes (or /auth/me/ is re-read): keep the session, swap in the new user
+export function setUser(user) {
+  const session = getSession();
+
+  if (!session) return;
+
+  writeSession({
+    ...session,
+    name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
+    email: user.email,
+    user,
+  });
+}
+
 export function getStoreId() {
   return getSession()?.storeId || null;
 }

@@ -1,21 +1,46 @@
  
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { apiPost, logout } from "@/lib/api";
-import { setTokens } from "@/lib/auth";
- 
+import { apiGet, apiPatch, apiPost, logout } from "@/lib/api";
+import { getSession, setTokens, setUser, useSession } from "@/lib/auth";
+import { MOBILE_PATTERN, NAME_PATTERN, emailError, passwordError } from "@/lib/validation";
+import { PasswordChecklist, PasswordInput } from "@/components/PasswordFields";
+
+// The form's fields, filled from the signed-in user
+function profileFromUser(user) {
+  return {
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    mobileNumber: user?.mobileNumber || "",
+  };
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const user = useSession()?.user;
   const [isEditing, setIsEditing] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
- 
-  const [profileData, setProfileData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    mobileNumber: "",
-  });
+
+  const [profileData, setProfileData] = useState(() =>
+    profileFromUser(getSession()?.user)
+  );
+
+  // The saved copy may be old (changed on another device): read it again
+  useEffect(() => {
+    let ignore = false;
+
+    apiGet("/api/v1/auth/me/").then((result) => {
+      if (ignore || !result.ok) return;
+      setUser(result.data.user);
+      setProfileData(profileFromUser(result.data.user));
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
  
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -28,11 +53,17 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPassword, setIsChangingPassword] =
     useState(false);
+  const [isResending, setIsResending] = useState(false);
  
   // Handle profile input changes
   const handleProfileChange = (event) => {
     const { name, value } = event.target;
- 
+
+    // Allow alphabets and spaces only for names, as on signup
+    if ((name === "firstName" || name === "lastName") && !NAME_PATTERN.test(value)) {
+      return;
+    }
+
     setProfileData((previousData) => ({
       ...previousData,
       [name]: value,
@@ -77,21 +108,15 @@ export default function ProfilePage() {
       newErrors.lastName = "Last name is required.";
     }
  
-    if (!profileData.email.trim()) {
-      newErrors.email = "Email is required.";
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        profileData.email
-      )
-    ) {
-      newErrors.email = "Please enter a valid email address.";
+    if (emailError(profileData.email)) {
+      newErrors.email = emailError(profileData.email);
     }
- 
+
     if (!profileData.mobileNumber.trim()) {
       newErrors.mobileNumber =
         "Mobile number is required.";
     } else if (
-      !/^[0-9]{10}$/.test(profileData.mobileNumber)
+      !MOBILE_PATTERN.test(profileData.mobileNumber.trim())
     ) {
       newErrors.mobileNumber =
         "Please enter a valid 10-digit mobile number.";
@@ -117,24 +142,47 @@ export default function ProfilePage() {
     setIsSaving(true);
  
     try {
-      /*
-       * FRONTEND ONLY
-       *
-       * No backend API is connected.
-       * The Django API will be connected later.
-       */
- 
-      await new Promise((resolve) =>
-        setTimeout(resolve, 700)
-      );
- 
+      const result = await apiPatch("/api/v1/auth/me/", profileData);
+
+      if (!result.ok) {
+        setErrors({ ...result.fieldErrors, form: result.formError });
+        return;
+      }
+
+      const savedUser = result.data.user;
+      const emailChanged = savedUser.email !== user?.email;
+
+      setUser(savedUser);
+      setProfileData(profileFromUser(savedUser));
       setMessage(
-        "Profile changes are ready to be connected to the backend."
+        emailChanged
+          ? `Profile saved. We've sent a verification link to ${savedUser.email}.`
+          : "Profile saved."
       );
- 
+
       setIsEditing(false);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Send the verification link again
+  const handleResendVerification = async () => {
+    setErrors({});
+    setMessage("");
+    setIsResending(true);
+
+    try {
+      const result = await apiPost("/api/v1/auth/verify-email/resend/", {});
+
+      if (!result.ok) {
+        setErrors({ form: result.formError || "Could not send the link. Please try again." });
+        return;
+      }
+
+      setMessage(result.data.message);
+    } finally {
+      setIsResending(false);
     }
   };
  
@@ -142,25 +190,25 @@ export default function ProfilePage() {
   const validatePassword = () => {
     const newErrors = {};
  
-    if (!passwordData.currentPassword) {
+    // The backend trims spaces from every field, so check the trimmed values
+    if (!passwordData.currentPassword.trim()) {
       newErrors.currentPassword =
         "Current password is required.";
     }
- 
-    if (!passwordData.newPassword) {
+
+    if (!passwordData.newPassword.trim()) {
       newErrors.newPassword =
         "New password is required.";
-    } else if (passwordData.newPassword.length < 8) {
-      newErrors.newPassword =
-        "Password must contain at least 8 characters.";
+    } else if (passwordError(passwordData.newPassword)) {
+      newErrors.newPassword = passwordError(passwordData.newPassword);
     }
- 
-    if (!passwordData.confirmPassword) {
+
+    if (!passwordData.confirmPassword.trim()) {
       newErrors.confirmPassword =
         "Please confirm your new password.";
     } else if (
-      passwordData.newPassword !==
-      passwordData.confirmPassword
+      passwordData.newPassword.trim() !==
+      passwordData.confirmPassword.trim()
     ) {
       newErrors.confirmPassword =
         "Passwords do not match.";
@@ -333,9 +381,9 @@ const handleLogout = () => {
       type="text"
       name="firstName"
       value={profileData.firstName}
-      onChange={handleProfileChange}
+      readOnly
       placeholder="Enter first name"
-      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+      className="mt-2 w-full bg-transparent text-sm text-slate-700 outline-none"
     />
   </div>
 
@@ -348,9 +396,9 @@ const handleLogout = () => {
       type="text"
       name="lastName"
       value={profileData.lastName}
-      onChange={handleProfileChange}
+      readOnly
       placeholder="Enter last name"
-      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+      className="mt-2 w-full bg-transparent text-sm text-slate-700 outline-none"
     />
   </div>
 
@@ -363,10 +411,24 @@ const handleLogout = () => {
       type="email"
       name="email"
       value={profileData.email}
-      onChange={handleProfileChange}
+      readOnly
       placeholder="Enter email"
-      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+      className="mt-2 w-full bg-transparent text-sm text-slate-700 outline-none"
     />
+
+    {user && !user.emailVerified && (
+      <p className="mt-2 text-xs text-amber-700">
+        Not verified yet.{" "}
+        <button
+          type="button"
+          onClick={handleResendVerification}
+          disabled={isResending}
+          className="font-semibold underline disabled:opacity-60"
+        >
+          {isResending ? "Sending..." : "Send verification link"}
+        </button>
+      </p>
+    )}
   </div>
 
   {/* Mobile Number */}
@@ -378,10 +440,10 @@ const handleLogout = () => {
       type="tel"
       name="mobileNumber"
       value={profileData.mobileNumber}
-      onChange={handleProfileChange}
+      readOnly
       placeholder="Enter mobile number"
       maxLength={10}
-      className="mt-2 w-full cursor-text bg-transparent text-sm text-slate-700 outline-none"
+      className="mt-2 w-full bg-transparent text-sm text-slate-700 outline-none"
     />
   </div>
 
@@ -430,7 +492,7 @@ const handleLogout = () => {
                 EDIT PROFILE
             ========================== */}
             {isEditing && (
-              <form onSubmit={handleProfileSubmit}>
+              <form onSubmit={handleProfileSubmit} noValidate>
  
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-slate-900">
@@ -576,6 +638,7 @@ const handleLogout = () => {
                     onClick={() => {
                       setIsEditing(false);
                       setErrors({});
+                      setProfileData(profileFromUser(user));
                     }}
                     className="rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
@@ -600,7 +663,7 @@ const handleLogout = () => {
                 CHANGE PASSWORD
             ========================== */}
             {showChangePassword && (
-              <form onSubmit={handlePasswordSubmit}>
+              <form onSubmit={handlePasswordSubmit} noValidate>
  
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-slate-900">
@@ -656,7 +719,9 @@ const handleLogout = () => {
                       autoComplete="new-password"
                       hasError={Boolean(errors.newPassword)}
                     />
- 
+
+                    <PasswordChecklist password={passwordData.newPassword} />
+
                     {errors.newPassword && (
                       <p className="mt-1 text-xs text-red-500">
                         {errors.newPassword}
@@ -723,60 +788,5 @@ const handleLogout = () => {
         </div>
       </div>
     </main>
-  );
-}
-
-// Password field with an eye button to show or hide what was typed
-function PasswordInput({ id, value, onChange, placeholder, autoComplete, hasError }) {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <div className="relative">
-      <input
-        id={id}
-        name={id}
-        type={visible ? "text" : "password"}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        className={`w-full rounded-lg border py-3 pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-          hasError
-            ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-            : "border-slate-300 focus:border-charcoal-navy focus:ring-slate-100"
-        }`}
-      />
-
-      <button
-        type="button"
-        onClick={() => setVisible((shown) => !shown)}
-        aria-label={visible ? "Hide password" : "Show password"}
-        aria-pressed={visible}
-        title={visible ? "Hide password" : "Show password"}
-        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-slate-400 transition hover:text-slate-700 focus:text-slate-700 focus:outline-none"
-      >
-        {visible ? <EyeOffIcon /> : <EyeIcon />}
-      </button>
-    </div>
-  );
-}
-
-function EyeIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function EyeOffIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19" />
-      <path d="M6.61 6.61A18.5 18.5 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-      <path d="M2 2l20 20" />
-    </svg>
   );
 }

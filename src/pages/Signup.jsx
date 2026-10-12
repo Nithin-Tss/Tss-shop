@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
+import { MOBILE_PATTERN, NAME_PATTERN, emailError, passwordError } from "@/lib/validation";
+import { PasswordChecklist } from "@/components/PasswordFields";
  
 export default function SignUpPage() {
 
@@ -38,39 +40,12 @@ export default function SignUpPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [message, setMessage] = useState("");
-  // Live password requirements
-  const passwordChecks = [
-    {
-      label: "At least 8 characters",
-      valid: formData.password.length >= 8,
-    },
-    {
-      label: "One uppercase letter",
-      valid: /[A-Z]/.test(formData.password),
-    },
-    {
-      label: "One lowercase letter",
-      valid: /[a-z]/.test(formData.password),
-    },
-    {
-      label: "One number",
-      valid: /[0-9]/.test(formData.password),
-    },
-    {
-      label: "One special character",
-      valid: /[^A-Za-z0-9]/.test(formData.password),
-    },
-  ];
-
-  const isPasswordValid = passwordChecks.every(
-    (requirement) => requirement.valid
-  );
 
   const handleChange = (event) => {
     const { name, value, checked, type } = event.target;
     // Allow alphabets and spaces only for names
   if (name === "firstName" || name === "lastName") {
-    if (!/^[a-zA-Z ]*$/.test(value)) {
+    if (!NAME_PATTERN.test(value)) {
       return;
     }
   }
@@ -120,38 +95,22 @@ export default function SignUpPage() {
  
     // Email
 
-    if (!formData.email.trim()) {
+    if (emailError(formData.email)) {
 
-      newErrors.email = "Email is required.";
-
-    } else if (
-
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
-
-    ) {
-
-      newErrors.email = "Please enter a valid email address.";
+      newErrors.email = emailError(formData.email);
 
     }
     // Password
-    if (!formData.password) {
+    if (!formData.password.trim()) {
       newErrors.password = "Password is required.";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must contain at least 8 characters.";
-    } else if (!/[A-Z]/.test(formData.password)) {
-      newErrors.password = "Include at least one uppercase letter.";
-    } else if (!/[a-z]/.test(formData.password)) {
-      newErrors.password = "Include at least one lowercase letter.";
-    } else if (!/[0-9]/.test(formData.password)) {
-      newErrors.password = "Include at least one number.";
-    } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
-      newErrors.password = "Include at least one special character.";
+    } else if (passwordError(formData.password)) {
+      newErrors.password = passwordError(formData.password);
     }
 
- 
+
     // Confirm Password
 
-    if (!formData.confirmPassword) {
+    if (!formData.confirmPassword.trim()) {
 
       newErrors.confirmPassword =
 
@@ -159,7 +118,7 @@ export default function SignUpPage() {
 
     } else if (
 
-      formData.password !== formData.confirmPassword
+      formData.password.trim() !== formData.confirmPassword.trim()
 
     ) {
 
@@ -173,7 +132,7 @@ export default function SignUpPage() {
 
       newErrors.mobileNumber = "Mobile number is required.";
 
-    } else if (!/^[0-9]{10}$/.test(formData.mobileNumber)) {
+    } else if (!MOBILE_PATTERN.test(formData.mobileNumber.trim())) {
 
       newErrors.mobileNumber =
 
@@ -547,41 +506,7 @@ export default function SignUpPage() {
 </div>
 
 {/* Live Password Requirements */}
-<div className="mt-5 space-y-2">
-  {passwordChecks.map((requirement) => (
-    <div
-      key={requirement.label}
-      className={`flex items-center gap-3 text-sm transition-colors ${
-        requirement.valid
-          ? "text-green-600"
-          : "text-slate-400"
-      }`}
-    >
-      <span
-        className={`flex h-4 w-4 items-center justify-center rounded-sm border ${
-          requirement.valid
-            ? "border-green-600"
-            : "border-slate-400"
-        }`}
-      >
-        {requirement.valid ? (
-          <svg
-            viewBox="0 0 16 16"
-            className="h-3 w-3"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="m3 8 3 3 7-7" />
-          </svg>
-        ) : 
-        null}
-      </span>
-
-      <span>{requirement.label}</span>
-    </div>
-  ))}
-</div>
+<PasswordChecklist password={formData.password} />
               {errors.password && (
 <p className="mt-1 text-xs text-red-500">
 

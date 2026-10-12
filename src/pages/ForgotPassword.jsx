@@ -1,16 +1,40 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { apiPost } from "@/lib/api";
+import { emailError } from "@/lib/validation";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // The server's answer; it is the same whether or not the account exists
+  const [sentMessage, setSentMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Frontend demo only. Connect the Django API later.
-    setSubmitted(true);
+    const validationError = emailError(email);
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await apiPost("/api/v1/auth/password-reset/", { email });
+
+      if (!result.ok) {
+        setError(result.fieldErrors.email || result.formError);
+        return;
+      }
+
+      setSentMessage(result.data.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -36,27 +60,27 @@ export default function ForgotPassword() {
           reset your password.
         </p>
 
-        {submitted ? (
+        {sentMessage ? (
           <div
             role="status"
             className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4"
           >
             <p className="font-semibold text-green-800">
-              Request submitted
+              Check your email
             </p>
             <p className="mt-1 text-sm text-green-700">
-              This is a frontend demo. No email has been sent yet.
+              {sentMessage}
             </p>
             <button
               type="button"
-              onClick={() => setSubmitted(false)}
+              onClick={() => setSentMessage("")}
               className="mt-3 text-sm font-semibold text-green-800 underline"
             >
               Try again
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
             <div>
               <label
                 htmlFor="email"
@@ -72,17 +96,31 @@ export default function ForgotPassword() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-700 focus:ring-2 focus:ring-slate-200"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError("");
+                }}
+                aria-invalid={Boolean(error)}
+                className={`w-full rounded-xl border px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+                  error
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-slate-300 focus:border-slate-700 focus:ring-slate-200"
+                }`}
               />
+
+              {error && (
+                <p className="mt-1 text-xs text-red-500">
+                  {error}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#161C2C] px-4 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              disabled={isSubmitting}
+              className="w-full rounded-xl bg-[#161C2C] px-4 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Send Reset Link
+              {isSubmitting ? "Sending..." : "Send Reset Link"}
             </button>
           </form>
         )}

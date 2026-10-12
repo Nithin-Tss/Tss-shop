@@ -195,12 +195,21 @@ export async function apiGet(path, customHeaders = {}) {
   };
 }
 
-export async function apiPost(path, body, customHeaders = {}) {
+export function apiPost(path, body, customHeaders = {}) {
+  return sendForm("POST", path, body, customHeaders);
+}
+
+export function apiPatch(path, body, customHeaders = {}) {
+  return sendForm("PATCH", path, body, customHeaders);
+}
+
+// Send a form's data: { ok, data } or { ok: false, status, fieldErrors, formError }
+async function sendForm(method, path, body, customHeaders) {
   let response;
 
   try {
     response = await send(path, {
-      method: "POST",
+      method,
       headers: customHeaders,
       body: JSON.stringify(body),
     });

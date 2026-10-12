@@ -33,6 +33,8 @@ import Privacy from "@/pages/Privacy";
 import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";
 import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
+import VerifyEmail from "@/pages/VerifyEmail";
 import { useSession } from "@/lib/auth";
 
 export default function App() {
@@ -45,10 +47,10 @@ export default function App() {
       <Route path="/auth/signin" element={<Signin />} />
       <Route path="/auth/signup" element={<Signup />} />
       <Route path="/auth/onboarding" element={<Onboarding />} />
-      <Route path="/profile" element={<Profile />} />
       <Route path="/editor-demo" element={<EditorDemo />} />
-      {/* Admin pages need a signed-in user; otherwise go to sign-in first */}
+      {/* Admin pages and the profile need a signed-in user; otherwise go to sign-in first */}
       <Route element={<RequireSignIn />}>
+        <Route path="/profile" element={<Profile />} />
         <Route path="/admin/online-store" element={<AdminOnlineStore />} />
         <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
@@ -78,6 +80,9 @@ export default function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+      {/* Links sent by email (see the backend's apps/identity/email_links.py) */}
+      <Route path="/auth/reset-password" element={<ResetPassword />} />
+      <Route path="/auth/verify-email" element={<VerifyEmail />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
