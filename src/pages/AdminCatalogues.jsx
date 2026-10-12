@@ -1,7 +1,9 @@
 import { useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import { useCan } from "@/lib/auth";
 
 export default function CataloguesPage() {
+  const canManage = useCan("products.manage");
   // TODO: load the store's catalogues from the backend
   const [catalogues] = useState([]);
 
@@ -63,6 +65,7 @@ export default function CataloguesPage() {
                 Create your first catalogue to organize and showcase your products.
               </p>
 
+              {canManage && (
               <button
                 type="button"
                 onClick={handleCreateCatalogue}
@@ -71,6 +74,7 @@ export default function CataloguesPage() {
                 <span className="text-base leading-none">+</span>
                 Create Catalogue
               </button>
+              )}
             </section>
           )}
 
