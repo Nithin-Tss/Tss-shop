@@ -283,18 +283,9 @@ useEffect(() => {
   };
  
   // Logout
-  // Logout
 const handleLogout = () => {
   logout();
-
-  // Go back to the page the account link was clicked from (same-site paths only)
-  const from = new URLSearchParams(window.location.search).get("from");
-  const returnTo =
-    from && from.startsWith("/") && !from.startsWith("//") && from !== "/profile"
-      ? from
-      : "/";
-
-  navigate(returnTo, { replace: true });
+  navigate("/", { replace: true });
 };
  
   return (
