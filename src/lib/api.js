@@ -1,4 +1,4 @@
-import { getActiveStore, getSession, setTokens, signOut } from "@/lib/auth";
+import { getActiveStore, getSession, setStores, setTokens, signOut } from "@/lib/auth";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -94,6 +94,33 @@ function refreshSession(expiredToken) {
   return refreshing;
 }
 
+// The role and permissions in the session are read at sign-in; someone may
+// have changed them since. Re-read them (at most every 15 seconds) after a 403
+// and when the tab regains focus, so the sidebar and page guards catch up.
+let lastAccessSync = 0;
+
+export async function syncAccess({ force = false } = {}) {
+  const session = getSession();
+  if (!session?.token || typeof fetch === "undefined") return;
+  if (!force && Date.now() - lastAccessSync < 15000) return;
+  lastAccessSync = Date.now();
+
+  try {
+    const res = await fetch(`${API_URL}/api/v1/stores/`, { headers: getHeaders() });
+    if (!res.ok) return;
+    const stores = await res.json();
+    const current = getSession();
+    // Only write when something changed, so pages don't re-render for nothing
+    if (Array.isArray(stores) && current && JSON.stringify(stores) !== JSON.stringify(current.stores)) {
+      setStores(stores);
+    }
+  } catch {}
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("focus", () => syncAccess());
+}
+
 // fetch() with the auth headers, refreshing an expired access token once.
 // Throws only when the server can't be reached.
 async function send(path, { method, headers, body }) {
@@ -115,6 +142,8 @@ async function send(path, { method, headers, body }) {
       signOut();
     }
   }
+
+  if (response.status === 403 && !path.startsWith("/api/v1/stores/")) syncAccess();
 
   return response;
 }

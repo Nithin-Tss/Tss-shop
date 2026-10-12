@@ -100,6 +100,8 @@ export function UsersSettings() {
   const canManage = can(me.session, "members.manage");
 
   const [members, setMembers] = useState(null);
+  const [invitations, setInvitations] = useState([]);
+  const [activity, setActivity] = useState(null);
   const [roles, setRoles] = useState([]);
   const [loadError, setLoadError] = useState("");
   const [rowError, setRowError] = useState("");
@@ -111,11 +113,33 @@ export function UsersSettings() {
     if (m.ok) setMembers(m.data);
     else setLoadError(m.error);
     if (r.ok) setRoles(r.data);
+    const inv = await apiGet("/api/v1/members/invitations/");
+    if (inv.ok) setInvitations(inv.data);
+  }, []);
+
+  const loadActivity = useCallback(async () => {
+    const res = await apiGet("/api/v1/members/activity/");
+    if (res.ok) setActivity(res.data);
   }, []);
 
   useEffect(() => {
     if (canView) load();
   }, [canView, load]);
+
+  useEffect(() => {
+    if (canManage) loadActivity();
+  }, [canManage, loadActivity]);
+
+  const withdraw = async (invitation) => {
+    setRowError("");
+    const res = await apiDelete(`/api/v1/members/invitations/${invitation.invitationId}/`);
+    if (!res.ok) {
+      setRowError(res.error);
+      return;
+    }
+    setInvitations((list) => list.filter((i) => i.invitationId !== invitation.invitationId));
+    loadActivity();
+  };
 
   if (!canView) {
     return (
@@ -176,7 +200,39 @@ export function UsersSettings() {
   return (
     <div className="space-y-5">
       {canManage && (
-        <AddUserForm me={me} roles={roles} onAdded={(member) => setMembers((list) => [...(list || []), member])} />
+        <AddUserForm
+          me={me}
+          roles={roles}
+          onAdded={(result) => {
+            if (result.invited) setInvitations((list) => [result, ...list]);
+            else setMembers((list) => [...(list || []), result]);
+            loadActivity();
+          }}
+        />
+      )}
+
+      {invitations.length > 0 && (
+        <Section
+          title={`Pending invitations (${invitations.length})`}
+          description="These people don't have an account yet. They get access once they sign up and verify this email address."
+        >
+          <ul className="divide-y divide-slate-200 p-5">
+            {invitations.map((invitation) => (
+              <li key={invitation.invitationId} className="flex flex-wrap items-center gap-3 py-2 first:pt-0 last:pb-0">
+                <span className="min-w-0 flex-1 truncate text-sm text-slate-800">{invitation.email}</span>
+                {invitation.isOwner && <Chip tone="dark">Store owner</Chip>}
+                {invitation.roles.map((role) => (
+                  <Chip key={role.id}>{role.name}</Chip>
+                ))}
+                {canManage && (
+                  <button type="button" onClick={() => withdraw(invitation)} className="text-sm text-red-600 hover:underline">
+                    Withdraw
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Section>
       )}
 
       <Section
@@ -256,9 +312,37 @@ export function UsersSettings() {
           )}
         </div>
       </Section>
+
+      {canManage && activity && activity.length > 0 && (
+        <Section title="Recent changes" description="Who changed roles or access, newest first.">
+          <ul className="divide-y divide-slate-200 p-5 text-sm">
+            {activity.slice(0, 20).map((entry) => (
+              <li key={entry.id} className="flex flex-wrap items-baseline gap-x-3 py-2 first:pt-0 last:pb-0">
+                <span className="font-medium text-slate-800">{ACTION_LABELS[entry.action] || entry.action}</span>
+                <span className="text-slate-600">{entry.subject}</span>
+                <span className="ml-auto text-xs text-slate-400">
+                  {entry.actor || "System"} · {new Date(entry.createdAt).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
     </div>
   );
 }
+
+const ACTION_LABELS = {
+  "role.created": "Role created",
+  "role.updated": "Role changed",
+  "role.deleted": "Role deleted",
+  "member.added": "User added",
+  "member.invited": "User invited",
+  "member.updated": "Access changed",
+  "member.removed": "User removed",
+  "invitation.accepted": "Invitation accepted",
+  "invitation.revoked": "Invitation withdrawn",
+};
 
 // Role checkboxes grouped by kind, plus "Store owner" for owners
 function RolePicker({ me, roles, roleIds, setRoleIds, isOwner, setIsOwner }) {
@@ -366,7 +450,7 @@ function AddUserForm({ me, roles, onAdded }) {
   };
 
   return (
-    <Section title="Add a user" description="Give someone who already has an account access to this store, with one or more roles.">
+    <Section title="Add a user" description="Give someone access to this store with one or more roles. If they don't have an account yet, they're invited by email and get access once they sign up and verify it.">
       <form onSubmit={submit} className="space-y-4 p-5">
         <input
           type="email"
@@ -581,7 +665,9 @@ function RoleEditor({ me, role, groups, canManageRoles, onSaved, onDeleted, onCa
   return (
     <Section
       title={isNew ? "Create role" : role.name}
-      description={`${kindLabel} · ${permissions.size} permission${permissions.size === 1 ? "" : "s"}`}
+      description={`${kindLabel} · ${permissions.size} permission${permissions.size === 1 ? "" : "s"}${
+        permissions.size === 0 ? " · people with only this role can't do anything" : ""
+      }`}
     >
       <div className="space-y-5 p-5">
         {locked && <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">{lockedReason}</p>}
