@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import { EXTRA_FIELDS, emptyExtraFields } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
 import { getActiveStore, useSession } from "@/lib/auth";
 
@@ -229,6 +230,7 @@ export function ProductForm({ productId }) {
   const [editingSeo, setEditingSeo] = useState(false);
   const [seoTitle, setSeoTitle] = useState("");
   const [seoDescription, setSeoDescription] = useState("");
+  const [extra, setExtra] = useState(emptyExtraFields); // the ten extra text fields, by key
   const [handle, setHandle] = useState(""); // URL handle: products/<handle>
 
   // The active store's own lists
@@ -278,6 +280,7 @@ export function ProductForm({ productId }) {
     setPageLayout(p.theme_template || "default");
     setSeoTitle(p.seo_title || "");
     setSeoDescription(p.seo_description || "");
+    setExtra(Object.fromEntries(EXTRA_FIELDS.map((f) => [f.key, p[f.key] || ""])));
     setHandle(p.handle || slugify(p.title));
     setVariants(p.variants || []);
     setDates({ createdAt: p.createdAt, updatedAt: p.updatedAt });
@@ -348,7 +351,7 @@ export function ProductForm({ productId }) {
 
   const snapshot = JSON.stringify([
     name, about, photos.map((p) => p.id), price, sku, locationId, quantity, categoryId, productType,
-    vendor, collections, tags, status, channelIds, pageLayout, seoTitle, seoDescription, handle,
+    vendor, collections, tags, status, channelIds, pageLayout, seoTitle, seoDescription, handle, extra,
   ]);
   useEffect(() => {
     if (!needsBaseline) return;
@@ -491,6 +494,7 @@ export function ProductForm({ productId }) {
       seo_title: seoTitle.trim(),
       seo_description: seoDescription.trim(),
       handle: (handle || slugify(name)).trim(),
+      ...Object.fromEntries(EXTRA_FIELDS.map((f) => [f.key, extra[f.key].trim()])),
     };
     if (!failedLists.includes("categories")) payload.category_id = categoryId || null;
     if (!failedLists.includes("channels")) payload.sales_channels = channelIds;
@@ -892,6 +896,22 @@ export function ProductForm({ productId }) {
                     <ChipInput values={tags} onChange={setTags} placeholder="Type a tag and press Enter" />
                     <FieldError message={fieldErrors.tags} />
                   </div>
+                </div>
+              </Card>
+
+              {/* EXTRA DETAILS */}
+              <Card title="Additional details" hint="Optional notes about this product. Fill in only what applies; empty fields are left out.">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {EXTRA_FIELDS.map((f) => (
+                    <Field key={f.key} label={f.label} error={fieldErrors[f.key]}>
+                      <textarea
+                        value={extra[f.key]}
+                        onChange={(e) => setExtra((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                        rows={2}
+                        className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors[f.key])}`}
+                      />
+                    </Field>
+                  ))}
                 </div>
               </Card>
 

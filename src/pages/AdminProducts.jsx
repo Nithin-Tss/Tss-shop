@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { getSession } from "@/lib/auth";
+import { EXTRA_FIELDS } from "@/lib/productFields";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -26,20 +27,26 @@ function validateFile(file) {
   return "";
 }
 
-// Spreadsheet column headers (lower-cased) that map to each product field
-const COLUMN_ALIASES = {
-  title: ["title", "name", "product name", "product title"],
-  description: ["description", "body", "about"],
-  price: ["price", "variant price"],
-  sku: ["sku", "variant sku"],
-  vendor: ["vendor", "brand"],
-  product_type: ["product_type", "product type", "type"],
-  category: ["category"],
-  status: ["status"],
-  tags: ["tags"],
-  collections: ["collections", "collection"],
-  quantity: ["quantity", "qty", "stock", "inventory", "variant inventory qty"],
-};
+// Product fields a file column can be mapped to. "aliases" are only used to
+// suggest a column; the user confirms or changes every mapping before importing.
+const IMPORT_FIELDS = [
+  { key: "title", label: "Title", required: true, aliases: ["title", "name", "product name", "product title"] },
+  { key: "description", label: "Description", aliases: ["description", "body", "about"] },
+  { key: "price", label: "Price", aliases: ["price", "variant price"] },
+  { key: "sku", label: "SKU", required: true, aliases: ["sku", "variant sku"] },
+  { key: "vendor", label: "Vendor", aliases: ["vendor", "brand"] },
+  { key: "product_type", label: "Product type", aliases: ["product_type", "product type", "type"] },
+  { key: "category", label: "Category", aliases: ["category"] },
+  { key: "status", label: "Status", aliases: ["status"] },
+  { key: "tags", label: "Tags", aliases: ["tags"] },
+  { key: "collections", label: "Collections", aliases: ["collections", "collection"] },
+  { key: "quantity", label: "Quantity", aliases: ["quantity", "qty", "stock", "inventory", "variant inventory qty"] },
+  ...EXTRA_FIELDS.map((f) => ({
+    key: f.key,
+    label: f.label,
+    aliases: [f.key, f.label.toLowerCase(), f.key.replace(/_/g, " ")],
+  })),
+];
 
 const splitList = (value) =>
   String(value ?? "")
@@ -47,20 +54,36 @@ const splitList = (value) =>
     .map((v) => v.trim())
     .filter(Boolean);
 
-// Turns the first sheet of the file into product payloads for the products API
-async function readProductRows(file) {
+// First sheet of the file as { headers: [string], rows: [[cell]] }
+async function readSheet(file) {
   const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = sheet ? XLSX.utils.sheet_to_json(sheet, { defval: "" }) : [];
+  const table = sheet ? XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", blankrows: false }) : [];
+  const headers = (table[0] || []).map((h) => String(h).trim());
+  return { headers, rows: table.slice(1) };
+}
 
-  return rows.map((raw) => {
-    const row = {};
-    Object.entries(raw).forEach(([key, value]) => {
-      row[String(key).trim().toLowerCase()] = value;
-    });
+// A starting mapping { fieldKey: columnIndex | "" }: each field takes the first
+// unused column whose header matches one of its aliases
+function suggestMapping(headers) {
+  const used = new Set();
+  const mapping = {};
+  IMPORT_FIELDS.forEach((field) => {
+    const index = headers.findIndex(
+      (h, i) => !used.has(i) && field.aliases.includes(h.toLowerCase())
+    );
+    mapping[field.key] = index === -1 ? "" : index;
+    if (index !== -1) used.add(index);
+  });
+  return mapping;
+}
+
+// Product payloads for the products API, reading each field from the column the user chose
+function buildProductRows(rows, mapping) {
+  return rows.map((cells) => {
     const pick = (field) => {
-      const key = COLUMN_ALIASES[field].find((alias) => row[alias] !== undefined && row[alias] !== "");
-      return key === undefined ? "" : String(row[key]).trim();
+      const column = mapping[field];
+      return column === "" || column === undefined ? "" : String(cells[column] ?? "").trim();
     };
 
     const status = pick("status").toLowerCase();
@@ -79,6 +102,7 @@ async function readProductRows(file) {
       sku: pick("sku"),
       // Stocked at the store's first location (0 when the file has no quantity)
       quantity: quantity === "" ? null : Number(quantity),
+      ...Object.fromEntries(EXTRA_FIELDS.map((f) => [f.key, pick(f.key)])),
     };
   });
 }
@@ -148,6 +172,8 @@ function ImportProductsModal({ onClose, onImported }) {
   const [isDragging, setIsDragging] = useState(false);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState("");
+  const [sheet, setSheet] = useState(null); // { headers, rows } once the file has been read
+  const [mapping, setMapping] = useState({}); // fieldKey -> column index, or "" for none
   const inputRef = useRef(null);
 
   // Close on Escape
@@ -160,6 +186,7 @@ function ImportProductsModal({ onClose, onImported }) {
   const selectFile = (selected) => {
     if (!selected) return;
     const message = validateFile(selected);
+    setSheet(null);
     if (message) {
       setFile(null);
       setError(message);
@@ -181,25 +208,31 @@ function ImportProductsModal({ onClose, onImported }) {
     selectFile(e.dataTransfer.files?.[0]);
   };
 
-  const handleImport = async () => {
+  // Step 1 -> 2: read the file and let the user choose which column feeds each field
+  const handleContinue = async () => {
     if (!file || importing) return;
+    setError("");
+    try {
+      const read = await readSheet(file);
+      if (!read.headers.length || !read.rows.length) {
+        setError("This file has no product rows.");
+        return;
+      }
+      setSheet(read);
+      setMapping(suggestMapping(read.headers));
+    } catch {
+      setError("We couldn't read this file. Check that it's a valid Excel or CSV file.");
+    }
+  };
+
+  const missingRequired = IMPORT_FIELDS.filter((f) => f.required && mapping[f.key] === "");
+
+  const handleImport = async () => {
+    if (!sheet || importing || missingRequired.length) return;
     setImporting(true);
     setError("");
 
-    let rows;
-    try {
-      rows = await readProductRows(file);
-    } catch {
-      setImporting(false);
-      setError("We couldn't read this file. Check that it's a valid Excel or CSV file.");
-      return;
-    }
-
-    if (!rows.length) {
-      setImporting(false);
-      setError("This file has no product rows.");
-      return;
-    }
+    const rows = buildProductRows(sheet.rows, mapping);
 
     const failures = [];
     let created = 0;
@@ -258,7 +291,7 @@ function ImportProductsModal({ onClose, onImported }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="import-products-title"
-        className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-xl"
+        className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -290,7 +323,42 @@ function ImportProductsModal({ onClose, onImported }) {
             onChange={handleInputChange}
           />
 
-          {file ? (
+          {sheet ? (
+            <div>
+              <p className="text-sm text-[#53627E]">
+                Choose which column in <span className="font-medium text-[#161C2C]">{file.name}</span> fills each
+                product field. {sheet.rows.length} {sheet.rows.length === 1 ? "row" : "rows"} found.
+              </p>
+              <div className="mt-3 max-h-[46vh] space-y-2 overflow-y-auto pr-1">
+                {IMPORT_FIELDS.map((field) => (
+                  <label key={field.key} className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-[#161C2C]">
+                      {field.label}
+                      {field.required && <span className="text-[#B42318]"> *</span>}
+                    </span>
+                    <select
+                      value={mapping[field.key]}
+                      disabled={importing}
+                      onChange={(e) =>
+                        setMapping((prev) => ({
+                          ...prev,
+                          [field.key]: e.target.value === "" ? "" : Number(e.target.value),
+                        }))
+                      }
+                      className="h-10 w-[55%] rounded-lg border border-[#D8DFE8] bg-white px-3 text-sm text-[#161C2C] outline-none focus:border-[#141b2d]"
+                    >
+                      <option value="">Don't import</option>
+                      {sheet.headers.map((h, i) => (
+                        <option key={i} value={i}>
+                          {h || `Column ${i + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ) : file ? (
             <div className="flex items-center gap-3 rounded-xl border border-[#D8DFE8] bg-[#F7F8FA] px-4 py-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#30466F]">
                 <svg {...lineIcon} className="h-5 w-5">
@@ -362,18 +430,20 @@ function ImportProductsModal({ onClose, onImported }) {
         <div className="flex justify-end gap-3 border-t border-[#E3E7ED] bg-[#F7F8FA] px-5 py-4">
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-lg border border-[#D8DFE8] bg-white px-5 py-2.5 text-base font-medium text-[#161C2C] hover:border-[#161C2C] transition"
+            disabled={importing}
+            onClick={sheet ? () => setSheet(null) : onClose}
+            className="rounded-lg border border-[#D8DFE8] bg-white px-5 py-2.5 text-base font-medium text-[#161C2C] hover:border-[#161C2C] transition disabled:opacity-50"
           >
-            Cancel
+            {sheet ? "Back" : "Cancel"}
           </button>
           <button
             type="button"
-            disabled={!file || importing}
-            onClick={handleImport}
+            disabled={sheet ? importing || missingRequired.length > 0 : !file}
+            title={missingRequired.length ? `Choose a column for ${missingRequired.map((f) => f.label).join(", ")}` : undefined}
+            onClick={sheet ? handleImport : handleContinue}
             className="rounded-lg bg-[#141b2d] px-5 py-2.5 text-base font-semibold text-white hover:bg-[#252E45] transition disabled:cursor-not-allowed disabled:bg-[#C5CCD8] disabled:hover:bg-[#C5CCD8]"
           >
-            {importing ? "Importing..." : "Import"}
+            {importing ? "Importing..." : sheet ? "Import" : "Continue"}
           </button>
         </div>
 
