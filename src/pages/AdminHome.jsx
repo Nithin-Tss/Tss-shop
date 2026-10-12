@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, navIcons } from "@/components/AdminSidebar";
-import { apiGet } from "@/lib/api";
+import { apiGet, openStorefront } from "@/lib/api";
 import { getActiveStore, useSession } from "@/lib/auth";
 
 const BASE = "/admin/online-store";
@@ -57,7 +57,7 @@ const quickActions = [
   { label: "Import products", icon: "upload", to: `${BASE}/products`, state: { openImport: true } },
   { label: "Create discount", icon: "discounts", to: `${BASE}/discounts` },
   { label: "Add banner", icon: "image", to: `${BASE}/customize` },
-  { label: "View store", icon: "store", to: `${BASE}/customize` },
+  { label: "View store", icon: "store", storefront: "/" },
 ];
 
 const tips = [
@@ -258,8 +258,10 @@ export default function AdminHomePage() {
                 {quickActions.map((action) => (
                   <Link
                     key={action.label}
-                    to={action.to}
+                    to={action.to || "#"}
                     state={action.state}
+                    // "View store" opens the store in this tab (with its "Back to admin" bar)
+                    onClick={action.storefront ? (e) => { e.preventDefault(); openStorefront(action.storefront); } : undefined}
                     className="group flex flex-col items-center gap-2 text-center"
                   >
                     <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E3E7ED] bg-[#F7F8FA] text-[#141b2d] transition group-hover:-translate-y-0.5 group-hover:border-[#141b2d] group-hover:bg-[#141b2d] group-hover:text-white">

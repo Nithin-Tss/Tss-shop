@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { apiDelete, apiGet, apiRequest, logout as endSession } from "@/lib/api";
+import { apiDelete, apiGet, apiRequest, forgetAdminReturn, logout as endSession, restoreAdminScroll } from "@/lib/api";
 import { ONBOARDING_PATH, getActiveStore, setActiveStore, setStores, useSession } from "@/lib/auth";
 
 const BASE = "/admin/online-store";
@@ -884,6 +884,14 @@ function ProfileMenu() {
 
 // Top bar shown on every admin page, above the sidebar (72px tall; the sidebar is pinned below it)
 export function AdminHeader() {
+  // Back from "View store": return to where the user was on this page
+  useEffect(() => {
+    restoreAdminScroll();
+    const kept = (e) => e.persisted && forgetAdminReturn();
+    window.addEventListener("pageshow", kept);
+    return () => window.removeEventListener("pageshow", kept);
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 flex h-[72px] items-center gap-3 border-b border-[#EEF0F4] bg-white px-4 text-[#161C2C] shadow-[0_1px_8px_rgba(20,27,45,0.05)] sm:gap-6 sm:px-7">
       <Link to={`${BASE}/home`} className="flex shrink-0 items-center gap-2.5">

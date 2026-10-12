@@ -1,4 +1,4 @@
-import { getSession, setTokens, signOut } from "@/lib/auth";
+import { getActiveStore, getSession, setTokens, signOut } from "@/lib/auth";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -290,4 +290,59 @@ export async function apiDelete(path, customHeaders = {}) {
     ok: false,
     error: errorMessage(data, "Failed to delete item."),
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* "View store": the active store's storefront, in this same tab.       */
+/* The backend gives a link that shows its owner/staff a "Back to admin"*/
+/* bar on top of the store. The admin page and its scroll position are  */
+/* remembered here, and restored when the user comes back (the bar, or  */
+/* the browser's Back button).                                          */
+/* ------------------------------------------------------------------ */
+
+const RETURN_KEY = "tss-admin-return";
+const here = () => window.location.pathname + window.location.search;
+
+// `path` is a storefront path: "/", "/collections/all", "/products/<id>"
+export async function openStorefront(path = "/") {
+  try {
+    sessionStorage.setItem(RETURN_KEY, JSON.stringify({ url: here(), scrollY: window.scrollY }));
+  } catch {}
+
+  const res = await apiPost("/api/v1/themes/storefront-link/", { path, return_url: window.location.href });
+  if (res.ok) {
+    window.location.assign(res.data.url); // assign, not replace: Back returns to this admin page
+    return;
+  }
+
+  // The link couldn't be made: still open the store (just without the bar)
+  const store = getActiveStore(getSession());
+  if (store?.storeSlug) window.location.assign(`${API_URL}/s/${store.storeSlug}${path}`);
+}
+
+// Called by every admin page (see AdminHeader): back from the store, scroll to where the user was
+export function restoreAdminScroll() {
+  let saved = null;
+  try {
+    saved = JSON.parse(sessionStorage.getItem(RETURN_KEY) || "null");
+    if (!saved || saved.url !== here()) return;
+    sessionStorage.removeItem(RETURN_KEY);
+  } catch {
+    return;
+  }
+
+  // The page loads its data first, so keep trying for a moment until it is tall enough
+  let tries = 0;
+  const attempt = () => {
+    window.scrollTo(0, saved.scrollY);
+    if (Math.abs(window.scrollY - saved.scrollY) > 2 && tries++ < 40) setTimeout(attempt, 50);
+  };
+  attempt();
+}
+
+// The browser kept the whole page (back/forward cache): it is already as the user left it
+export function forgetAdminReturn() {
+  try {
+    sessionStorage.removeItem(RETURN_KEY);
+  } catch {}
 }

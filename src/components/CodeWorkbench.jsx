@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CodeEditor from "./CodeEditor";
+import { openStorefront } from "@/lib/api";
 import {
   deleteThemePath,
   listThemeFiles,
@@ -561,8 +562,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 <a
                   className="hover:text-[#005fb8]"
                   href={project.storefrontUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openStorefront("/");
+                  }}
                 >
                   Open
                 </a>

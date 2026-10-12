@@ -2,7 +2,7 @@ import { createContext, memo, useCallback, useContext, useEffect, useMemo, useRe
 
 import { Link } from "react-router-dom";
 
-import { API_URL, apiRequest } from "@/lib/api";
+import { API_URL, apiRequest, openStorefront } from "@/lib/api";
 
 import { useSession } from "@/lib/auth";
 
@@ -1171,8 +1171,11 @@ export default function AdminCustomizePage() {
           {previewUrl && (
             <a
               href={previewUrl}
-              target="_blank"
-              rel="noreferrer"
+              onClick={(e) => {
+                // Same tab, with the "Back to admin" bar; the store path of the page being edited
+                e.preventDefault();
+                openStorefront(new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/");
+              }}
               className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
             >
               View store
