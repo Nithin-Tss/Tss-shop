@@ -231,6 +231,20 @@ export default function AdminCustomizePage() {
   // Preview size: "desktop" (full width) or "mobile" (phone width)
   const [device, setDevice] = useState("desktop");
 
+  // Edit mode (Home preview): Off = the preview behaves like the real store; On = clicks select sections.
+  // Kept while the customizer stays open.
+  const [editMode, setEditMode] = useState(false);
+
+  const editModeRef = useRef(false);
+
+  editModeRef.current = editMode;
+
+  // A selection that came from a click in the preview (no need to scroll the preview to it)
+  const fromPreviewRef = useRef(false);
+
+  // The block to open once a section picked in the preview is selected
+  const pendingBlockRef = useRef(null);
+
   const editScrollRef = useRef(null);
 
   const lastShownRef = useRef(null);
@@ -255,6 +269,10 @@ export default function AdminCustomizePage() {
   const selectedRef = useRef(null);
 
   selectedRef.current = selected;
+
+  const selectedBlockRef = useRef(null);
+
+  selectedBlockRef.current = selectedBlock;
 
   const pageRef = useRef("index");
 
@@ -425,6 +443,13 @@ export default function AdminCustomizePage() {
     const d = dataRef.current;
     const before = sync.rendered;
     if (!d || pageRef.current !== "index" || !before) return;
+
+    // Edit mode off, a link opened another store page in the preview: show Home with the change
+    if (sync.away) {
+      sync.away = false;
+      setPreviewKey((k) => k + 1);
+      return;
+    }
 
     const now = snapshotOf(d);
 
@@ -647,10 +672,25 @@ export default function AdminCustomizePage() {
     scheduleSave();
   }, [data, customizer]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Selecting a section only moves the outline in the preview
+  // Selecting a section or block only moves the outline in the preview (shown in Edit mode);
+  // picked in the sections list, the preview also scrolls to it
   useEffect(() => {
-    engineRef.current.postToPreview({ type: "select", id: selected || "" });
-  }, [selected]);
+    const scroll = !fromPreviewRef.current;
+    fromPreviewRef.current = false;
+    engineRef.current.postToPreview({ type: "select", id: selected || "", block: selectedBlock, scroll });
+  }, [selected, selectedBlock]);
+
+  // Edit mode on/off: just a message, the preview is not reloaded
+  useEffect(() => {
+    const sync = syncRef.current;
+    if (editMode && sync.away) {
+      // The preview shows another store page (a link was followed): back to Home to edit it
+      sync.away = false;
+      setPreviewKey((k) => k + 1);
+      return;
+    }
+    engineRef.current.postToPreview({ type: "mode", edit: editMode });
+  }, [editMode]);
 
   // Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y), except while typing in a field
   useEffect(() => {
@@ -701,16 +741,36 @@ export default function AdminCustomizePage() {
         sync.ready = true;
         const waiting = sync.queue;
         sync.queue = [];
+        sync.away = false;
         Object.entries(sync.images).forEach(([url, dataUrl]) => waiting.unshift({ type: "pending-image", url, dataUrl }));
-        waiting.push({ type: "select", id: selectedRef.current || "" });
+        waiting.push({ type: "mode", edit: editModeRef.current });
+        waiting.push({ type: "select", id: selectedRef.current || "", block: selectedBlockRef.current });
         waiting.forEach((m) => event.source.postMessage({ source: "tss-editor", ...m }, "*"));
         engineRef.current.scheduleSync();
       } else if (message.type === "need-reload") {
         engineRef.current.renderFull();
       } else if (message.type === "scroll") {
         scrollRef.current = Math.max(0, Number(message.y) || 0);
-      } else if (message.type === "select" && typeof message.id === "string") {
-        if (dataRef.current?.templates.index.sections[message.id]) setSelected(message.id);
+      } else if (message.type === "leaving") {
+        // Edit mode off and a link was followed: the editor page is gone until the preview reloads
+        syncRef.current.ready = false;
+        syncRef.current.away = true;
+      } else if (message.type === "select" && typeof message.id === "string" && editModeRef.current) {
+        // Edit mode: a click in the preview selects a section or one of its blocks; empty space unselects
+        const section = dataRef.current?.templates.index.sections[message.id];
+        const block = Number.isInteger(message.block) && section?.blocks?.[message.block] ? message.block : null;
+        fromPreviewRef.current = true;
+        if (!message.id) {
+          setSelected(null);
+        } else if (section && message.id === selectedRef.current) {
+          setSelectedBlock(block);
+        } else if (section) {
+          pendingBlockRef.current = block;
+          setSelected(message.id);
+        }
+      } else if (message.type === "escape" && editModeRef.current) {
+        setSelectedBlock(null);
+        setSelected(null);
       } else if (
         message.type === "move-section" &&
         typeof message.id === "string" &&
@@ -725,9 +785,10 @@ export default function AdminCustomizePage() {
     return () => window.removeEventListener("message", onMessage);
   }, [moveSectionTo]);
 
-  // A new section starts at the top with no block open
+  // A new section starts at the top with no block open (or the block clicked in the preview)
   useEffect(() => {
-    setSelectedBlock(null);
+    setSelectedBlock(pendingBlockRef.current);
+    pendingBlockRef.current = null;
 
     if (!selected) return;
 
@@ -1899,14 +1960,38 @@ export default function AdminCustomizePage() {
                 ? previewError
                   ? `Preview not updated: ${previewError}`
                   : dirty
-                  ? "Live preview. Changes save automatically. Drag sections here or click one to edit it."
-                  : "Live preview. Drag sections here, or click one to edit it."
+                  ? editMode
+                    ? "Live preview. Changes save automatically. Click or drag sections here to edit them."
+                    : "Live preview. Changes save automatically. Turn on Edit mode to pick sections here."
+                  : editMode
+                  ? "Live preview. Click or drag sections here to edit them."
+                  : "Live preview. Turn on Edit mode to pick sections here."
                 : dirty
                 ? "Preview shows the last saved version. Save to update it."
                 : "Live preview"}
             </span>
 
             <div className="flex items-center gap-3">
+              {/* Edit mode: On = clicking the preview selects sections; Off = the preview works like the store */}
+              <button
+                type="button"
+                aria-pressed={editMode}
+                onClick={() => setEditMode((on) => !on)}
+                disabled={page !== "index"}
+                title={page === "index" ? "Click sections in the preview to edit them" : "Edit mode works on the Home page preview"}
+                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
+                  editMode && page === "index"
+                    ? "border-[#161C2C] bg-[#161C2C] text-white"
+                    : "border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
+                }`}
+              >
+                <svg {...iconProps} className="h-3.5 w-3.5">
+                  <path d="M4 3l7 17 2.5-7.5L21 10z" />
+                </svg>
+                Edit mode
+                <span className="font-semibold">{editMode && page === "index" ? "On" : "Off"}</span>
+              </button>
+
               <div className="flex rounded-lg border border-[#D8DFE8] bg-white p-0.5" role="radiogroup" aria-label="Preview size">
                 {[
                   ["desktop", "Desktop", "M3 4h18v12H3zM8 20h8M12 16v4"],
@@ -1943,11 +2028,12 @@ export default function AdminCustomizePage() {
           {page === "index" ? (
             previewHtml ? (
               <iframe
+                key={previewKey}
                 ref={iframeRef}
                 title="Store preview"
                 srcDoc={previewHtml}
                 // Theme code is written by store owners: keep it off this origin
-                sandbox="allow-scripts allow-popups"
+                sandbox="allow-scripts allow-forms allow-popups"
                 className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#D8DFE8] bg-white transition-[width] duration-200 ${
                   device === "mobile" ? "w-[390px] max-w-full" : "w-full"
                 } ${drag ? "pointer-events-none" : ""}`}
