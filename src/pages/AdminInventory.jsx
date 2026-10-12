@@ -1,9 +1,7 @@
 import { useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
-import { useCan } from "@/lib/auth";
 
 export default function InventoryPage() {
-  const canManage = useCan("inventory.manage");
   // TODO: load the store's inventory items from the backend
   const [inventoryItems] = useState([]);
 
@@ -64,7 +62,6 @@ export default function InventoryPage() {
                 Add products to your inventory to start tracking stock levels.
               </p>
 
-              {canManage && (
               <button
                 type="button"
                 onClick={handleAddInventory}
@@ -73,7 +70,6 @@ export default function InventoryPage() {
                 <span className="text-base leading-none">+</span>
                 Add Inventory
               </button>
-              )}
             </section>
           )}
 

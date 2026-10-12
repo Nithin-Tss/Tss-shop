@@ -172,31 +172,6 @@ export function getActiveStore(session) {
   return session?.stores?.find((s) => s.storeId === session.storeId) || null;
 }
 
-/*
- * PERMISSIONS
- *
- * Each store in the session carries the user's role there and what it allows,
- * e.g. { role: "staff", permissions: ["orders.view", "orders.manage", ...] }
- * (the backend's apps/core/rbac.py). The backend checks every request; these
- * only hide what it would refuse.
- */
-
-// Does the user's role in `store` allow `permission`?
-export function storeCan(store, permission) {
-  // A session saved before stores carried permissions: show everything until the store list is re-read
-  if (!Array.isArray(store?.permissions)) return true;
-  return store.permissions.includes(permission);
-}
-
-// ...in the active store
-export function can(session, permission) {
-  return storeCan(getActiveStore(session), permission);
-}
-
-export function useCan(permission) {
-  return can(useSession(), permission);
-}
-
 // Returns the signed-in session object, or null when signed out.
 export function useSession() {
   const raw = useSyncExternalStore(subscribe, readSession, () => null);

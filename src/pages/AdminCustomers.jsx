@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
-import { useCan } from "@/lib/auth";
 
 export default function AdminCustomers() {
-  const canManage = useCan("customers.manage");
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -135,14 +133,12 @@ export default function AdminCustomers() {
             </h1>
 
             <div className="flex items-center gap-2.5">
-              {canManage && (
-                <Link
-                  to="/admin/online-store/customers/new"
-                  className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
-                >
-                  Add customer
-                </Link>
-              )}
+              <Link
+                to="/admin/online-store/customers/new"
+                className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+              >
+                Add customer
+              </Link>
             </div>
           </div>
 
@@ -326,14 +322,12 @@ export default function AdminCustomers() {
                               ? `No customers matching "${searchQuery}".`
                               : "Customers who place orders or are added will appear here."}
                           </p>
-                          {canManage && (
-                            <Link
-                              to="/admin/online-store/customers/new"
-                              className="mt-3 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-slate-800 transition"
-                            >
-                              Add customer
-                            </Link>
-                          )}
+                          <Link
+                            to="/admin/online-store/customers/new"
+                            className="mt-3 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-slate-800 transition"
+                          >
+                            Add customer
+                          </Link>
                         </div>
                       </td>
                     </tr>

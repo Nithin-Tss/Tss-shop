@@ -1,6 +1,5 @@
 import { useState } from "react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
-import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
 
 const settingsMenu = [
   { icon: "⌂", label: "General" },
@@ -1273,11 +1272,7 @@ export default function AdminSettings() {
 
           {selectedSection === "General"
             ? renderGeneral()
-            : selectedSection === "Users"
-              ? <UsersSettings />
-              : selectedSection === "Roles"
-                ? <RolesSettings />
-                : renderOtherSection()}
+            : renderOtherSection()}
 
         </main>
 

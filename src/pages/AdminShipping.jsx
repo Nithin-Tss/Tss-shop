@@ -1,10 +1,8 @@
 "use client";
 
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
-import { useCan } from "@/lib/auth";
 
 export default function ShippingPage() {
-  const canManage = useCan("shipping.manage");
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#161C2C]">
       <AdminHeader />
@@ -59,14 +57,12 @@ export default function ShippingPage() {
                 </p>
               </div>
 
-              {canManage && (
-                <button
-                  type="button"
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50"
-                >
-                  Manage
-                </button>
-              )}
+              <button
+                type="button"
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50"
+              >
+                Manage
+              </button>
 
             </div>
 
@@ -106,14 +102,12 @@ export default function ShippingPage() {
                   Add shipping rates to start offering delivery options.
                 </p>
 
-                {canManage && (
-                  <button
-                    type="button"
-                    className="mt-5 rounded-lg bg-[#161C2C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45]"
-                  >
-                    Add shipping rate
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="mt-5 rounded-lg bg-[#161C2C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45]"
+                >
+                  Add shipping rate
+                </button>
 
               </div>
 
@@ -151,14 +145,12 @@ export default function ShippingPage() {
           {/* SAVE */}
           <div className="mt-5 flex justify-end">
 
-            {canManage && (
-              <button
-                type="button"
-                className="rounded-lg bg-[#161C2C] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45]"
-              >
-                Save
-              </button>
-            )}
+            <button
+              type="button"
+              className="rounded-lg bg-[#161C2C] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45]"
+            >
+              Save
+            </button>
 
           </div>
 

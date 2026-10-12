@@ -35,7 +35,7 @@ import Blog from "@/pages/Blog";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import VerifyEmail from "@/pages/VerifyEmail";
-import { can, useSession } from "@/lib/auth";
+import { useSession } from "@/lib/auth";
 
 export default function App() {
   // Switching store remounts every page, so each one re-fetches the new store's data
@@ -47,61 +47,33 @@ export default function App() {
       <Route path="/auth/signin" element={<Signin />} />
       <Route path="/auth/signup" element={<Signup />} />
       <Route path="/auth/onboarding" element={<Onboarding />} />
+      <Route path="/editor-demo" element={<EditorDemo />} />
       {/* Admin pages and the profile need a signed-in user; otherwise go to sign-in first */}
       <Route element={<RequireSignIn />}>
         <Route path="/profile" element={<Profile />} />
+        <Route path="/admin/online-store" element={<AdminOnlineStore />} />
+        <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/online-store/home" element={<AdminHome />} />
-        <Route path="/admin/online-store/settings" element={<AdminSettings />} />
+        <Route path="/admin/online-store/products" element={<AdminProducts />} />
+        <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
+        <Route path="/admin/online-store/products/:productId" element={<AdminProductDetails />} />
+        <Route path="/admin/online-store/collections" element={<AdminCollections />} />
+        <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
+        <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />
         <Route path="/admin/online-store/content" element={<AdminContent />} />
-        {/* Pages a role may not have (see can() in lib/auth.js); the API refuses them anyway */}
-        <Route element={<RequirePermission permission="themes.view" />}>
-          <Route path="/admin/online-store" element={<AdminOnlineStore />} />
-        </Route>
-        <Route element={<RequirePermission permission="themes.manage" />}>
-          <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
-          {/* Theme code editor: it saves theme files */}
-          <Route path="/editor-demo" element={<EditorDemo />} />
-        </Route>
-        <Route element={<RequirePermission permission="products.view" />}>
-          <Route path="/admin/online-store/products" element={<AdminProducts />} />
-          <Route path="/admin/online-store/products/:productId" element={<AdminProductDetails />} />
-          <Route path="/admin/online-store/collections" element={<AdminCollections />} />
-          <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />
-        </Route>
-        <Route element={<RequirePermission permission="products.manage" />}>
-          <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
-          <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
-        </Route>
-        <Route element={<RequirePermission permission="inventory.view" />}>
-          <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
-        </Route>
-        <Route element={<RequirePermission permission="orders.view" />}>
-          <Route path="/admin/online-store/orders" element={<AdminOrders />} />
-        </Route>
-        <Route element={<RequirePermission permission="draft_orders.view" />}>
-          <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
-        </Route>
-        <Route element={<RequirePermission permission="reports.view" />}>
-          <Route path="/admin/online-store/overview" element={<AdminOverview />} />
-          <Route path="/admin/online-store/reports" element={<AdminReports />} />
-          <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
-        </Route>
-        <Route element={<RequirePermission permission="orders.manage" />}>
-          <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />
-        </Route>
-        <Route element={<RequirePermission permission="customers.view" />}>
-          <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
-        </Route>
-        <Route element={<RequirePermission permission="customers.manage" />}>
-          <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />
-        </Route>
-        <Route element={<RequirePermission permission="discounts.view" />}>
-          <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
-        </Route>
-        <Route element={<RequirePermission permission="shipping.view" />}>
-          <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
-        </Route>
+        <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
+        <Route path="/admin/online-store/orders" element={<AdminOrders />} />
+        <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
+        <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />
+        <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
+        <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />
+        <Route path="/admin/online-store/overview" element={<AdminOverview />} />
+        <Route path="/admin/online-store/reports" element={<AdminReports />} />
+        <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
+        <Route path="/admin/online-store/settings" element={<AdminSettings />} />
+        <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
+        <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
       </Route>
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
@@ -126,26 +98,6 @@ function RequireSignIn() {
   if (!session?.token) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/auth/signin?next=${next}`} replace />;
-  }
-
-  return <Outlet />;
-}
-
-// The user's role in the current store doesn't allow this page: say so instead
-// of showing a page whose every request would fail with 403.
-function RequirePermission({ permission }) {
-  const session = useSession();
-
-  if (!can(session, permission)) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-4 text-center">
-        <h1 className="text-3xl font-bold text-slate-900">No access</h1>
-        <p className="text-sm text-slate-500">Your role in this store doesn't include this page. Ask the store owner if you need it.</p>
-        <Link to="/admin/online-store/home" className="font-medium text-blue-600 hover:underline">
-          Back to admin home
-        </Link>
-      </main>
-    );
   }
 
   return <Outlet />;

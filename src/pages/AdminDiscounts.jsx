@@ -1,10 +1,8 @@
 "use client";
 
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
-import { useCan } from "@/lib/auth";
 
 export default function DiscountsPage() {
-  const canManage = useCan("discounts.manage");
   return (
     <div className="min-h-screen bg-[#F7F8FA]">
       <AdminHeader />
@@ -35,14 +33,12 @@ export default function DiscountsPage() {
               ⇧ Export
             </button>
 
-            {canManage && (
-              <button
-                type="button"
-                className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white"
-              >
-                Create discount
-              </button>
-            )}
+            <button
+              type="button"
+              className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white"
+            >
+              Create discount
+            </button>
 
           </div>
 

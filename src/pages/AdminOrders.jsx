@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
-import { useCan } from "@/lib/auth";
 
 function formatOrderDate(dateString) {
   if (!dateString) return "—";
@@ -102,7 +101,6 @@ function renderFulfillmentStatusBadge(status) {
 }
 
 export default function AdminOrders() {
-  const canCreate = useCan("orders.manage");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -199,14 +197,12 @@ export default function AdminOrders() {
                 <span className="text-xs">⌄</span>
               </button>
 
-              {canCreate && (
-                <Link
-                  to="/admin/online-store/orders/create"
-                  className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
-                >
-                  Create order
-                </Link>
-              )}
+              <Link
+                to="/admin/online-store/orders/create"
+                className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+              >
+                Create order
+              </Link>
             </div>
           </div>
 

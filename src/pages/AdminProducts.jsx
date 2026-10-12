@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
-import { getSession, useCan } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { EXTRA_FIELDS, fetchFieldLabels, isRenamable, saveFieldLabels } from "@/lib/productFields";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
@@ -507,10 +507,7 @@ export default function ProductsPage() {
   // The Home page "Import products" shortcut opens the import popup straight away
   const location = useLocation();
   const navigate = useNavigate();
-  // What the user's roles allow here; the backend refuses the rest anyway
-  const canManage = useCan("products.manage");
-  const canDelete = useCan("products.delete");
-  const [isImportOpen, setIsImportOpen] = useState(Boolean(location.state?.openImport) && canManage);
+  const [isImportOpen, setIsImportOpen] = useState(Boolean(location.state?.openImport));
   const [products, setProducts] = useState(() =>
     productsCache.items && productsCache.storeId === activeStoreId() ? productsCache.items : []
   );
@@ -639,7 +636,7 @@ export default function ProductsPage() {
                     {selected.size ? `${selected.size} selected` : `${products.length} products`}
                   </p>
                   <div className="flex items-center gap-3">
-                    {canDelete && selected.size > 0 && (
+                    {selected.size > 0 && (
                       <button
                         type="button"
                         onClick={deleteSelected}
@@ -649,23 +646,19 @@ export default function ProductsPage() {
                         {deleting ? "Deleting..." : `Delete ${selected.size}`}
                       </button>
                     )}
-                    {canManage && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setIsImportOpen(true)}
-                          className="rounded-lg border border-[#D8DFE8] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-charcoal-navy transition"
-                        >
-                          Import
-                        </button>
-                        <Link
-                          to="/admin/online-store/products/new"
-                          className="rounded-lg bg-[#141b2d] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
-                        >
-                          + Add product
-                        </Link>
-                      </>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setIsImportOpen(true)}
+                      className="rounded-lg border border-[#D8DFE8] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-[#161C2C] transition"
+                    >
+                      Import
+                    </button>
+                    <Link
+                      to="/admin/online-store/products/new"
+                      className="rounded-lg bg-[#141b2d] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                    >
+                      + Add product
+                    </Link>
                   </div>
                 </div>
                 {notice && (
@@ -676,18 +669,15 @@ export default function ProductsPage() {
                 <table className="w-full text-left text-sm">
                   <thead className="border-y border-[#E3E7ED] bg-[#F7F8FA] text-[#53627E]">
                     <tr>
-                      {/* Selecting is only for bulk delete */}
-                      {canDelete && (
-                        <th className="w-10 py-3 pl-6">
-                          <input
-                            type="checkbox"
-                            aria-label="Select all products"
-                            checked={allSelected}
-                            onChange={toggleAll}
-                          />
-                        </th>
-                      )}
-                      <th className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium`}>Product</th>
+                      <th className="w-10 py-3 pl-6">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all products"
+                          checked={allSelected}
+                          onChange={toggleAll}
+                        />
+                      </th>
+                      <th className="px-4 py-3 font-medium">Product</th>
                       <th className="px-4 py-3 font-medium">Status</th>
                       <th className="px-4 py-3 font-medium">Category</th>
                       <th className="px-4 py-3 font-medium">SKU</th>
@@ -702,17 +692,15 @@ export default function ProductsPage() {
                           selected.has(product.id) ? "bg-[#F3F6FA]" : ""
                         }`}
                       >
-                        {canDelete && (
-                          <td className="w-10 py-3 pl-6">
-                            <input
-                              type="checkbox"
-                              aria-label={`Select ${product.title}`}
-                              checked={selected.has(product.id)}
-                              onChange={() => toggleOne(product.id)}
-                            />
-                          </td>
-                        )}
-                        <td className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium text-charcoal-navy`}>
+                        <td className="w-10 py-3 pl-6">
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${product.title}`}
+                            checked={selected.has(product.id)}
+                            onChange={() => toggleOne(product.id)}
+                          />
+                        </td>
+                        <td className="px-4 py-3 font-medium text-charcoal-navy">
                           <Link
                             to={`/admin/online-store/products/${product.id}`}
                             className="hover:underline"
@@ -743,16 +731,13 @@ export default function ProductsPage() {
 
               <div>
                 <h2 className="text-[30px] font-semibold leading-tight text-charcoal-navy sm:text-[34px]">
-                  {canManage ? "Add your products" : "No products yet"}
+                  Add your products
                 </h2>
 
                 <p className="mt-3 text-xl leading-relaxed text-[#53627E]">
-                  {canManage
-                    ? "Start by stocking your store with products your customers will love"
-                    : "Products added to this store will show up here."}
+                  Start by stocking your store with products your customers will love
                 </p>
 
-                {canManage && (
                 <div className="mt-7 flex flex-wrap items-center gap-3">
                   <Link
                     to="/admin/online-store/products/new"
@@ -773,7 +758,6 @@ export default function ProductsPage() {
                     Import
                   </button>
                 </div>
-                )}
               </div>
 
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, navIcons } from "@/components/AdminSidebar";
 import { apiGet, openStorefront } from "@/lib/api";
-import { can, getActiveStore, useSession } from "@/lib/auth";
+import { getActiveStore, useSession } from "@/lib/auth";
 
 const BASE = "/admin/online-store";
 
@@ -52,13 +52,11 @@ function Icon({ name, className = "h-5 w-5" }) {
   );
 }
 
-// `permission`: shown only to roles that can use what the link opens (see can() in lib/auth.js).
-// "View store" has none: any member of the store may look at it.
 const quickActions = [
-  { label: "Add product", icon: "products", to: `${BASE}/products/new`, permission: "products.manage" },
-  { label: "Import products", icon: "upload", to: `${BASE}/products`, state: { openImport: true }, permission: "products.manage" },
-  { label: "Create discount", icon: "discounts", to: `${BASE}/discounts`, permission: "discounts.manage" },
-  { label: "Add banner", icon: "image", to: `${BASE}/customize`, permission: "themes.manage" },
+  { label: "Add product", icon: "products", to: `${BASE}/products/new` },
+  { label: "Import products", icon: "upload", to: `${BASE}/products`, state: { openImport: true } },
+  { label: "Create discount", icon: "discounts", to: `${BASE}/discounts` },
+  { label: "Add banner", icon: "image", to: `${BASE}/customize` },
   { label: "View store", icon: "store", storefront: "/" },
 ];
 
@@ -87,15 +85,7 @@ function greeting() {
 
 export default function AdminHomePage() {
   const session = useSession();
-  const store = getActiveStore(session);
-  const storeName = store?.storeName || "My Store";
-  const firstName = session?.user?.firstName || "there";
-  const allowed = (item) => !item.permission || can(session, item.permission);
-
-  const canSeeOrders = can(session, "orders.view");
-  const canSeeProducts = can(session, "products.view");
-  // Staff whose roles grant nothing in this store (owners always have permissions)
-  const hasNoAccess = Array.isArray(store?.permissions) && store.permissions.length === 0;
+  const storeName = getActiveStore(session)?.storeName || "My Store";
 
   const [stats, setStats] = useState({ sales: 0, orders: 0, visitors: 0, products: 0 });
   const [tip] = useState(() => tips[Math.floor(Math.random() * tips.length)]);
@@ -103,10 +93,9 @@ export default function AdminHomePage() {
   useEffect(() => {
     let cancelled = false;
 
-    // Only ask for what the role may see; a refused request would otherwise show as "0"
     Promise.all([
-      canSeeProducts ? apiGet("/api/v1/catalog/products/").catch(() => null) : null,
-      canSeeOrders ? apiGet("/api/v1/orders/").catch(() => null) : null,
+      apiGet("/api/v1/catalog/products/").catch(() => null),
+      apiGet("/api/v1/orders/").catch(() => null),
     ]).then(([productsRes, ordersRes]) => {
       if (cancelled) return;
       const orders = ordersRes?.ok ? listOf(ordersRes) : [];
@@ -121,66 +110,58 @@ export default function AdminHomePage() {
     return () => {
       cancelled = true;
     };
-  }, [canSeeOrders, canSeeProducts]);
+  }, []);
 
-  // Only "first product" can be checked from data today; the rest tick once there's data behind them.
-  // Each step shows only to roles that can do it; payments and the plan are the owner's.
+  // Only "first product" can be checked from data today; the rest tick once there's data behind them
   const steps = [
     {
       title: "Add your first product",
       help: "Title, price and photo",
       to: `${BASE}/products/new`,
       done: stats.products > 0,
-      permission: "products.manage",
     },
     {
       title: "Choose a theme",
       help: "Start with a free design",
       to: BASE,
       done: false,
-      permission: "themes.manage",
     },
     {
       title: "Add a banner",
       help: "Welcome shoppers on arrival",
       to: `${BASE}/customize`,
       done: false,
-      permission: "themes.manage",
     },
     {
       title: "Set up payments",
       help: "Choose how customers pay",
       to: `${BASE}/settings`,
       done: false,
-      permission: "store.manage",
     },
     {
       title: "Set up shipping",
       help: "Delivery areas and rates",
       to: `${BASE}/shipping`,
       done: false,
-      permission: "shipping.manage",
     },
     {
       title: "Pick a plan",
       help: "Open your store publicly",
       to: `${BASE}/settings`,
       done: false,
-      permission: "store.manage",
     },
-  ].filter(allowed);
+  ];
 
   const doneCount = steps.filter((s) => s.done).length;
   const nextIndex = steps.findIndex((s) => !s.done);
-  const progress = steps.length ? Math.round((doneCount / steps.length) * 100) : 100;
+  const progress = Math.round((doneCount / steps.length) * 100);
 
   const statCards = [
-    { label: "Today's sales", value: `$${stats.sales.toFixed(2)}`, icon: "cash", permission: "orders.view" },
-    { label: "Orders", value: stats.orders, icon: "orders", permission: "orders.view" },
-    { label: "Visitors", value: stats.visitors, icon: "customers", permission: "reports.view" },
-    { label: "Products", value: stats.products, icon: "products", permission: "products.view" },
-  ].filter(allowed);
-  const actions = quickActions.filter(allowed);
+    { label: "Today's sales", value: `$${stats.sales.toFixed(2)}`, icon: "cash" },
+    { label: "Orders", value: stats.orders, icon: "orders" },
+    { label: "Visitors", value: stats.visitors, icon: "customers" },
+    { label: "Products", value: stats.products, icon: "products" },
+  ];
 
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
@@ -199,8 +180,7 @@ export default function AdminHomePage() {
         <main className="flex-1 overflow-hidden bg-[#F7F8FA] px-4 py-6 sm:px-6 lg:px-9">
           <div className="mx-auto max-w-[1180px] space-y-6">
 
-            {/* PLAN PILL (choosing a plan is the owner's) */}
-            {can(session, "store.manage") && (
+            {/* PLAN PILL */}
             <div className="flex justify-end">
               <div className="flex items-center gap-1 rounded-full border border-[#E3E7ED] bg-white p-1 pl-3.5 shadow-sm">
                 <span className="relative flex h-2 w-2">
@@ -216,7 +196,6 @@ export default function AdminHomePage() {
                 </Link>
               </div>
             </div>
-            )}
 
 
             {/* WELCOME BANNER */}
@@ -226,20 +205,15 @@ export default function AdminHomePage() {
 
               <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-sm text-slate-300">{greeting()}, {firstName}</p>
+                  <p className="text-sm text-slate-300">{greeting()}, Admin</p>
                   <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-[28px]">
-                    {steps.length ? <>Let&apos;s get {storeName} ready to sell</> : <>Welcome to {storeName}</>}
+                    Let&apos;s get {storeName} ready to sell
                   </h1>
                   <p className="mt-2 max-w-lg text-sm text-slate-300">
-                    {hasNoAccess
-                      ? "You don't have any roles in this store yet."
-                      : steps.length
-                        ? "Work through the steps below. Most stores are ready to launch in under an hour."
-                        : "Use the menu on the left to get to the parts of the store you work on."}
+                    Work through the steps below. Most stores are ready to launch in under an hour.
                   </p>
                 </div>
 
-                {steps.length > 0 && (
                 <div className="w-full md:w-72">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">
@@ -254,30 +228,12 @@ export default function AdminHomePage() {
                     />
                   </div>
                 </div>
-                )}
               </div>
             </section>
 
 
-            {/* NO ROLES: nothing below would work for them */}
-            {hasNoAccess && (
-              <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <h2 className="text-base font-semibold text-[#161C2C]">You don&apos;t have access to anything here yet</h2>
-                <p className="mt-1 text-sm text-[#53627E]">
-                  Your account is part of {storeName}, but none of your roles give you access to its products, orders
-                  or settings. Ask the store owner to give you a role under Settings → Users.
-                </p>
-              </section>
-            )}
-
-
             {/* QUICK STATS */}
-            {statCards.length > 0 && (
-            <section
-              className={`grid grid-cols-2 gap-4 ${
-                statCards.length >= 4 ? "lg:grid-cols-4" : statCards.length === 3 ? "lg:grid-cols-3" : ""
-              }`}
-            >
+            <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {statCards.map((card) => (
                 <div
                   key={card.label}
@@ -293,15 +249,13 @@ export default function AdminHomePage() {
                 </div>
               ))}
             </section>
-            )}
 
 
             {/* QUICK ACTIONS */}
-            {actions.length > 0 && (
             <section className="rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
               <h2 className="text-base font-semibold text-[#161C2C]">Quick actions</h2>
               <div className="mt-4 grid grid-cols-3 gap-y-5 sm:grid-cols-5">
-                {actions.map((action) => (
+                {quickActions.map((action) => (
                   <Link
                     key={action.label}
                     to={action.to || "#"}
@@ -320,14 +274,12 @@ export default function AdminHomePage() {
                 ))}
               </div>
             </section>
-            )}
 
 
             {/* CHECKLIST + TIP */}
-            <div className={`grid grid-cols-1 items-start gap-6 ${steps.length ? "lg:grid-cols-3" : ""}`}>
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
 
               {/* SETUP CHECKLIST */}
-              {steps.length > 0 && (
               <section className="overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm lg:col-span-2">
                 <div className="flex items-center justify-between border-b border-[#E3E7ED] px-4 py-2.5">
                   <h2 className="text-sm font-semibold text-[#161C2C]">Setup checklist</h2>
@@ -371,7 +323,6 @@ export default function AdminHomePage() {
                   })}
                 </ol>
               </section>
-              )}
 
 
               {/* TIP */}
