@@ -1,4 +1,5 @@
-import { apiRequest, apiUpload } from "@/lib/api";
+import { API_URL, apiRequest, apiUpload } from "@/lib/api";
+import { getSession } from "@/lib/auth";
 
 // Every call is for the signed-in user's current store (Authorization + X-Store-Id).
 const BASE = "/api/v1/themes";
@@ -46,12 +47,49 @@ export function saveThemeCustomizer(data) {
 }
 
 // Home page HTML rendered from unsaved section data, for the customizer's live preview -> { html }
-export function previewTheme(data, { scroll = 0, selected = "" } = {}) {
+// With `section`, only that section's HTML (and the fonts stylesheet) -> { html, fonts }
+export function previewTheme(data, { scroll = 0, selected = "", section = "" } = {}) {
   const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected });
+  if (section) query.set("section", section);
   return apiRequest(`${BASE}/preview/?${query}`, { method: "POST", body: data });
 }
 
+// Save only what changed: { settings?, templates?: { index: { order?, sections?: { id: section | null } } } }
+export function patchThemeSettings(changes) {
+  return apiRequest(`${BASE}/settings/`, { method: "PATCH", body: changes });
+}
+
 // Banner / slide / image block picture -> { ok, data: { url } } or { ok: false, error }
-export function uploadThemeImage(file) {
-  return apiUpload(`${BASE}/images/`, "image", file);
+// Reports progress (0..1) while uploading; falls back to the normal upload if the session needs a refresh.
+export function uploadThemeImage(file, onProgress) {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    const session = getSession();
+    const storeId = session?.storeId || localStorage.getItem("tss-store-id");
+
+    xhr.open("POST", `${API_URL}${BASE}/images/`);
+    if (session?.token) xhr.setRequestHeader("Authorization", `Bearer ${session.token}`);
+    if (storeId) xhr.setRequestHeader("X-Store-Id", storeId);
+
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress?.(e.loaded / e.total);
+    xhr.onerror = () => resolve({ ok: false, error: "Unable to reach the server. Please try again." });
+    xhr.onload = () => {
+      if (xhr.status === 401) {
+        apiUpload(`${BASE}/images/`, "image", file).then(resolve);
+        return;
+      }
+      let data = null;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch {
+        data = null;
+      }
+      if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true, data });
+      else resolve({ ok: false, error: data?.image || data?.detail || "Upload failed. Please try again." });
+    };
+
+    const form = new FormData();
+    form.append("image", file);
+    xhr.send(form);
+  });
 }
