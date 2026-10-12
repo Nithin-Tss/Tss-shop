@@ -38,6 +38,7 @@ const COLUMN_ALIASES = {
   status: ["status"],
   tags: ["tags"],
   collections: ["collections", "collection"],
+  quantity: ["quantity", "qty", "stock", "inventory", "variant inventory qty"],
 };
 
 const splitList = (value) =>
@@ -64,6 +65,7 @@ async function readProductRows(file) {
 
     const status = pick("status").toLowerCase();
     const price = pick("price").replace(/[^0-9.]/g, "");
+    const quantity = pick("quantity").replace(/[^0-9]/g, "");
     return {
       title: pick("title"),
       description: pick("description"),
@@ -75,6 +77,8 @@ async function readProductRows(file) {
       collections: splitList(pick("collections")),
       price: price === "" ? null : price,
       sku: pick("sku"),
+      // Stocked at the store's first location (0 when the file has no quantity)
+      quantity: quantity === "" ? null : Number(quantity),
     };
   });
 }
