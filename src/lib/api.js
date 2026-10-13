@@ -132,6 +132,8 @@ export async function syncAccess({ force = false } = {}) {
 
 if (typeof window !== "undefined") {
   window.addEventListener("focus", () => syncAccess());
+  // Also when the page opens: roles granted since the last sign-in show up without signing in again
+  syncAccess({ force: true });
 }
 
 // fetch() with the auth headers, refreshing an expired access token once.
