@@ -58,6 +58,11 @@ function sectionIn(d, page, id) {
 
 const syncedJson = (d, name) => JSON.stringify(d?.sections?.[name] ?? null);
 
+// A page's sections as its synced template file lists them (id, type, hidden, in order)
+function templateLines(template) {
+  return JSON.stringify((template?.order || []).map((id) => [id, template.sections[id]?.type, Boolean(template.sections[id]?.hidden)]));
+}
+
 // What the server stores for a synced section: its settings and blocks
 function syncedForSave(section) {
   return { settings: section.settings, blocks: section.blocks };
@@ -340,7 +345,11 @@ export default function AdminCustomizePage() {
   // Synced sections: per section, the file version this editor last saw (to detect someone
   // else's change) and when its last change was made; preview updates waiting for the
   // preview's "patched" reply (timing); and whether the next save should go out quickly
-  const syncedRef = useRef({ sections: {}, quickSave: false, token: 0, waiting: {} });
+  // templates: synced page templates by name, e.g. { index: "index" } (templates/index.liquid lists the Home page's sections)
+  const syncedRef = useRef({ sections: {}, templates: {}, quickSave: false, token: 0, waiting: {} });
+
+  const templateNameOf = (pageName) =>
+    Object.keys(syncedRef.current.templates).find((name) => syncedRef.current.templates[name] === pageName);
 
   function syncedState(name) {
     const all = syncedRef.current.sections;
@@ -363,6 +372,11 @@ export default function AdminCustomizePage() {
         const sections = {};
         schemaData = { ...schemaData, sections: { ...schemaData.sections } };
         for (const [name, info] of Object.entries(synced || {})) {
+          if (info.kind === "template") {
+            syncedRef.current.templates[name] = info.page;
+            syncedState(name).version = info.version;
+            continue;
+          }
           schemaData.sections[name] = info.spec;
           sections[name] = { type: name, ...info.values };
           syncedState(name).version = info.version;
@@ -595,8 +609,25 @@ export default function AdminCustomizePage() {
       return;
     }
 
+    // A reorder or removal on a synced template's page is timed until the preview shows it
+    const templateName = templateNameOf(pageRef.current);
+    const takeToken = () => {
+      const state = templateName && syncedState(templateName);
+      if (!state?.changedAt) return "";
+      // A mark left by a change that moved nothing (e.g. showing a hidden section) is not timed later
+      if (state.clock === "perf" && performance.now() - state.changedAt > 5000) {
+        state.changedAt = 0;
+        return "";
+      }
+      const meta = syncedRef.current;
+      const token = String(++meta.token);
+      meta.waiting[token] = { at: state.changedAt, kind: state.kind, clock: state.clock };
+      state.changedAt = 0;
+      return token;
+    };
+
     before.order.filter((id) => !now.order.includes(id)).forEach((id) => {
-      postToPreview({ type: "remove", id });
+      postToPreview({ type: "remove", id, token: takeToken() });
       delete before.sections[id];
     });
     before.order = before.order.filter((id) => now.order.includes(id));
@@ -607,7 +638,7 @@ export default function AdminCustomizePage() {
 
     const existing = now.order.filter((id) => before.order.includes(id));
     if (existing.join("|") !== before.order.join("|")) {
-      postToPreview({ type: "order", ids: existing });
+      postToPreview({ type: "order", ids: existing, token: takeToken() });
       before.order = existing;
     }
   }
@@ -651,6 +682,14 @@ export default function AdminCustomizePage() {
       if (a.order.join("|") !== b.order.join("|") || Object.keys(sections).length) {
         changes.templates = changes.templates || {};
         changes.templates[name] = { order: b.order, ...(Object.keys(sections).length ? { sections } : {}) };
+        // A synced template (templates/index.liquid): its file follows, unless Edit code changed it meanwhile
+        const templateName = templateNameOf(name);
+        if (templateName && templateLines(a) !== templateLines(b)) {
+          const state = syncedState(templateName);
+          changes.section_versions = { ...changes.section_versions, [templateName]: state.version };
+          changes.client = SYNC_CLIENT;
+          changes.started_at = Math.min(changes.started_at || Infinity, state.savedChangeAt || Date.now());
+        }
       }
     }
     return Object.keys(changes).length ? changes : null;
@@ -688,7 +727,7 @@ export default function AdminCustomizePage() {
         changes ? patchThemeSettings(changes) : null,
         customizerChanged ? saveThemeCustomizer(customizerNow) : null,
       ]);
-      for (const [name, result] of Object.entries(saved?.sections || {})) {
+      for (const [name, result] of Object.entries({ ...(saved?.sections || {}), ...(saved?.templates || {}) })) {
         const state = syncedState(name);
         state.version = result.version;
         state.savedChangeAt = 0;
@@ -737,7 +776,7 @@ export default function AdminCustomizePage() {
       try {
         const info = (await getSyncedSections())?.[name];
         if (info && info.version !== syncedState(name).version) {
-          sectionEvent({ section: name, source: "code", ...info });
+          sectionEvent({ section: name, source: "code", ...info, kind: info.kind });
         }
       } catch {
         // the live event (or the next reload) brings it
@@ -817,7 +856,52 @@ export default function AdminCustomizePage() {
 
   // A synced section changed elsewhere (Edit code, a restore, or this editor in another tab):
   // its options and values are replaced here and its preview re-rendered - nothing is saved back.
+  // Edit code saved a synced template (or it was restored): the page's sections follow its lines,
+  // and the preview moves, adds or removes sections in place
+  function templateEvent(event) {
+    const name = event.section;
+    const pageName = event.page;
+    const current = dataRef.current;
+    const saved = lastSavedRef.current;
+    if (!event.template || !pageName || !current?.templates?.[pageName] || !saved) return;
+    syncedRef.current.templates[name] = pageName;
+    const state = syncedState(name);
+    if (state.version !== null && event.version <= state.version && event.source !== "restore") return;
+    state.version = event.version;
+    const label = PAGE_LABELS[pageName] || pageName;
+
+    if (JSON.stringify(current.templates[pageName]) !== JSON.stringify(saved.data.templates[pageName])) {
+      setNotice(
+        `The ${label.toLowerCase()}'s sections were changed in Edit code. Your change here is being saved on top; ` +
+          "the code editor's version is in its History."
+      );
+      return;
+    }
+    if (JSON.stringify(event.template) === JSON.stringify(current.templates[pageName])) return;
+    const withIt = (d) => ({ ...d, templates: { ...d.templates, [pageName]: event.template } });
+    lastSavedRef.current = { ...saved, data: withIt(saved.data) };
+    if (event.source !== "customizer" && event.started_at && Date.now() - event.started_at < 60000) {
+      state.changedAt = Number(event.started_at);
+      state.kind = `${name}: code save -> preview`;
+      state.clock = "epoch";
+    }
+    const next = withIt(current);
+    dataRef.current = next;
+    setData(next);
+    const open = selectedRef.current;
+    if (pageRef.current === pageName && open && open !== "theme" && !isSynced(next, open) && !event.template.sections[open]) {
+      setSelected(null);
+      setSelectedBlock(null);
+    }
+    if (event.source === "code") setNotice(`${label} sections updated from Edit code.`);
+    else if (event.source === "restore") setNotice(`An earlier ${label.toLowerCase()} version was restored.`);
+  }
+
   function sectionEvent(event) {
+    if (event.kind === "template") {
+      templateEvent(event);
+      return;
+    }
     const name = event.section;
     const current = dataRef.current;
     const saved = lastSavedRef.current;
@@ -873,7 +957,7 @@ export default function AdminCustomizePage() {
   useEffect(() => onThemeChange((kind) => engineRef.current.externalChange(kind)), []);
 
   // Live events from the server: a change to a synced section made in Edit code or another editor
-  const hasSynced = syncedNames(data).length > 0;
+  const hasSynced = syncedNames(data).length > 0 || Object.keys(syncedRef.current.templates).length > 0;
 
   // Coming back to this tab: pick up synced sections added meanwhile (their rows open their panels)
   useEffect(() => {
@@ -918,6 +1002,15 @@ export default function AdminCustomizePage() {
 
   // A synced section's change shows in the preview at once and is saved after a short pause (200 ms)
   function markSyncedChanges(before, after) {
+    for (const [name, pageName] of Object.entries(syncedRef.current.templates)) {
+      if (templateLines(before?.templates?.[pageName]) === templateLines(after?.templates?.[pageName])) continue;
+      const state = syncedState(name);
+      state.changedAt = performance.now();
+      state.kind = `${name}: sidebar -> preview`;
+      state.clock = "perf";
+      state.savedChangeAt = Date.now();
+      syncedRef.current.quickSave = true;
+    }
     for (const name of syncedNames(after)) {
       if (syncedJson(before, name) === syncedJson(after, name)) continue;
       const state = syncedState(name);

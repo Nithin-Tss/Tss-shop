@@ -149,7 +149,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       const [loaded, synced] = await Promise.all([fetchProject(), getSyncedSections().catch(() => ({}))]);
       const files = {};
       for (const [name, info] of Object.entries(synced || {})) {
-        files[info.path] = { name, label: info.label || name };
+        files[info.path] = { name, label: info.label || name, kind: info.kind || "section" };
         versionsRef.current[name] = info.version;
       }
       setSyncedFiles(files);
@@ -209,6 +209,8 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       if (event.source === "customizer" && event.started_at && Date.now() - event.started_at < 60000) {
         requestAnimationFrame(() => postSyncTiming(`${event.section}: sidebar -> code`, Date.now() - event.started_at));
       }
+      // A page template's sections are also shown as templates/<page>.json: bring that up to date
+      if (event.kind === "template") refreshRef.current();
     }
     if (history?.name === event.section) loadHistory(event.section);
   };
@@ -329,7 +331,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     if (saved.sync) {
       versionsRef.current[synced.name] = saved.sync.version;
       postSyncTiming(`${synced.name}: code save -> blocks`, performance.now() - started);
-      setNotice(saved.sync.conflict || `Saved. The customizer's ${synced.label} options now follow this schema.`);
+      setNotice(
+        saved.sync.conflict ||
+          (synced.kind === "template"
+            ? `Saved. The customizer's ${synced.label} sections now follow these lines.`
+            : `Saved. The customizer's ${synced.label} options now follow this schema.`)
+      );
+      if (synced.kind === "template") refreshRef.current();
       if (history?.name === synced.name) loadHistory(synced.name);
     }
     setProject((p) => ({ ...p, files: { ...p.files, [path]: content } }));
@@ -688,9 +696,19 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
           {activeSynced && (
             <div className="border-b border-[#e5e5e5] bg-[#eef6ff] px-3 py-1.5 text-[12px] text-[#1d3f6e]">
-              This file is linked to the {activeSynced.label} in the Customize editor: its schema is the{" "}
-              {activeSynced.label}&apos;s options and blocks. Changes made there are written here, and saving here
-              updates it there.
+              {activeSynced.kind === "template" ? (
+                <>
+                  This file lists the {activeSynced.label}&apos;s sections in the Customize editor, one{" "}
+                  <code>{"{% section %}"}</code> line each, in order. Moving, adding or removing sections there
+                  changes these lines, and saving here updates the sections list there.
+                </>
+              ) : (
+                <>
+                  This file is linked to the {activeSynced.label} in the Customize editor: its schema is the{" "}
+                  {activeSynced.label}&apos;s options and blocks. Changes made there are written here, and saving here
+                  updates it there.
+                </>
+              )}
             </div>
           )}
 
