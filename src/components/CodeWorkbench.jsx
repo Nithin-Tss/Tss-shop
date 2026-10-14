@@ -25,6 +25,8 @@ const EXT = ".liquid";
 // The customizer's settings, shown as JSON (config/settings_data.json, templates/<page>.json).
 // They are generated from what the customizer saved, and saving one updates the customizer.
 const isSettingsFile = (path) => path === "config/settings_data.json" || /^templates\/[^/]+\.json$/.test(path);
+// Pictures uploaded in the customizer (kept in the database), listed read-only
+const IMAGES_FILE = "assets/images.json";
 const languageOf = (path) => (path.toLowerCase().endsWith(".json") ? "json" : "liquid");
 
 // The footer is a synced section: its schema is what the customizer's Footer panel shows,
@@ -706,6 +708,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             </div>
           )}
 
+          {activePath === IMAGES_FILE && (
+            <div className="border-b border-[#e5e5e5] bg-[#eef5ff] px-3 py-1.5 text-[12px] text-[#1f4b8f]">
+              Pictures uploaded in the Customize editor are stored in the database and listed here. Use a picture&apos;s
+              url in a Liquid file, or pick it in the customizer. This list can&apos;t be edited.
+            </div>
+          )}
+
           {activePath && isSettingsFile(activePath) && (
             <div className="border-b border-[#e5e5e5] bg-[#fff8e5] px-3 py-1.5 text-[12px] text-[#6b4e00]">
               These are the settings from the Customize editor. Changes made there appear here, and when you save
@@ -742,6 +751,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                   })
                 }
                 height="100%"
+                readOnly={activePath === IMAGES_FILE}
               />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-[#6b6b6b]">

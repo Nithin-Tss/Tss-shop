@@ -2312,8 +2312,8 @@ export default function AdminCustomizePage() {
             type="button"
             role="menuitem"
             onClick={() => {
-              if (dirty && !window.confirm("Leave without saving? Your changes will be lost.")) return;
-              navigate(`/editor-demo?file=${encodeURIComponent(contextMenu.file)}`);
+              window.open(`/editor-demo?file=${encodeURIComponent(contextMenu.file)}`, "_blank", "noopener");
+              setContextMenu(null);
             }}
             className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F7F8FA]"
           >
