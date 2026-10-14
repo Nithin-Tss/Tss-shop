@@ -16,6 +16,8 @@ import {
   uploadThemeImage,
 } from "@/lib/themeApi";
 
+import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
+
 const PAGE_LABELS = {
   index: "Home page",
   product: "Product page",
@@ -180,6 +182,13 @@ export default function AdminCustomizePage() {
   const [saveError, setSaveError] = useState("");
 
   const dirty = saveState !== "saved";
+
+  const saveStateRef = useRef("saved");
+
+  saveStateRef.current = saveState;
+
+  // Which group of the Theme settings panel opens first (Header, Footer, ...)
+  const [themeGroup, setThemeGroup] = useState("colors");
 
 
   const [previewKey, setPreviewKey] = useState(0);
@@ -556,6 +565,8 @@ export default function AdminCustomizePage() {
         customizerChanged ? saveThemeCustomizer(customizerNow) : null,
       ]);
       lastSavedRef.current = { data: snapshot, customizer: customizerNow };
+      // Tell an open code editor tab: it shows these settings as JSON
+      announceThemeChange("settings");
       state.retryDelay = 2000;
       setSaveError("");
       if (dataRef.current !== snapshot || customizerRef.current !== customizerNow || state.again) {
@@ -586,7 +597,40 @@ export default function AdminCustomizePage() {
     state.timer = setTimeout(() => engineRef.current.flushSave(), delay);
   }
 
-  engineRef.current = { renderFull, scheduleSync, flushSave, registerPendingImage, postToPreview };
+  // The code editor (another tab) saved something: Liquid code re-renders the preview;
+  // settings JSON is loaded here, unless there are unsaved edits that it would overwrite.
+  async function externalChange(kind) {
+    if (kind !== "settings") {
+      setPreviewKey((k) => k + 1);
+      return;
+    }
+    if (saveStateRef.current !== "saved" || saveRef.current.saving) {
+      setNotice("The code editor changed the settings. Your edits here are still saving; reload to see its changes.");
+      return;
+    }
+    try {
+      const fresh = await getThemeSettings();
+      if (saveStateRef.current !== "saved") return;
+      lastSavedRef.current = { data: fresh, customizer: customizerRef.current };
+      historyRef.current = { past: [], future: [], lastKey: null, lastTime: 0 };
+      dataRef.current = fresh;
+      setData(fresh);
+      setHistoryTick((t) => t + 1);
+      const open = selectedRef.current;
+      if (open && open !== "theme" && !fresh.templates[pageRef.current]?.sections[open]) {
+        setSelected(null);
+        setSelectedBlock(null);
+      }
+      setPreviewKey((k) => k + 1);
+      setNotice("Updated from the code editor.");
+    } catch {
+      // the next save or reload reports a problem
+    }
+  }
+
+  engineRef.current = { renderFull, scheduleSync, flushSave, registerPendingImage, postToPreview, externalChange };
+
+  useEffect(() => onThemeChange((kind) => engineRef.current.externalChange(kind)), []);
 
   // ---------------- Changes and history ----------------
 
@@ -1210,7 +1254,7 @@ export default function AdminCustomizePage() {
   const panelView = !editing ? 0 : blockOpen ? 2 : 1;
 
   const editSubtitle =
-    shown === "theme" ? "Colors, fonts and currency" : shownSpec ? shownSpec.name : "";
+    shown === "theme" ? "Colours, fonts, buttons, header and footer" : shownSpec ? shownSpec.name : "";
 
   // While a block is dragged, other sections that accept it are shown as drop targets
   const blockTargets =
@@ -1270,6 +1314,16 @@ export default function AdminCustomizePage() {
               </option>
             ))}
           </select>
+
+          <a
+            href="/editor-demo"
+            target="_blank"
+            rel="noopener"
+            title="Open the theme code in a new tab; the two stay in step"
+            className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
+          >
+            Edit code
+          </a>
 
           {previewUrl && (
             <a
@@ -1392,6 +1446,16 @@ export default function AdminCustomizePage() {
           <p className="px-4 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-wider text-[#8A94A8]">
             {PAGE_LABELS[page]}
           </p>
+
+          <LayoutRows
+            part="top"
+            selected={selected}
+            themeGroup={themeGroup}
+            onOpen={(group) => {
+              setThemeGroup(group);
+              setSelected("theme");
+            }}
+          />
 
           <ul className="px-2">
             {template.order.map((id, i) => {
@@ -1673,15 +1737,28 @@ export default function AdminCustomizePage() {
             )}
           </div>
 
+          <LayoutRows
+            part="bottom"
+            selected={selected}
+            themeGroup={themeGroup}
+            onOpen={(group) => {
+              setThemeGroup(group);
+              setSelected("theme");
+            }}
+          />
+
           <div className="mt-auto border-t border-[#D8DFE8] p-2">
             <button
               type="button"
-              onClick={() => setSelected("theme")}
+              onClick={() => {
+                setThemeGroup("colors");
+                setSelected("theme");
+              }}
               className={`w-full rounded-lg px-2 py-2 text-left text-sm ${
                 selected === "theme" ? "bg-[#EEF1F6]" : "hover:bg-[#F7F8FA]"
               }`}
             >
-              Theme settings (colors, currency)
+              Theme settings (colors, fonts, buttons)
             </button>
           </div>
         </div>
@@ -1707,109 +1784,21 @@ export default function AdminCustomizePage() {
             </div>
           </div>
 
-          <div ref={editScrollRef} className={`min-h-0 flex-1 overflow-y-auto ${shown === "theme" ? "p-4" : "px-4"}`}>
+          <div ref={editScrollRef} className={`min-h-0 flex-1 overflow-y-auto px-4`}>
             {shown === "theme" ? (
-              <>
-                {/* Existing theme settings */}
-                <Fields
-                  fields={schema.settings}
-                  values={data.settings}
-                  collections={collections}
-                  onChange={(key, value) => {
-                    update((d) => {
-                      d.settings[key] = value;
-                    }, `t:${key}`);
-                  }}
-                />
-
-                {/* Theme appearance settings */}
-                <div className="mt-6 border-t border-[#D8DFE8] pt-6">
-                  <h3 className="mb-4 font-semibold">
-                    Theme appearance
-                  </h3>
-
-                  <div className="grid gap-4">
-                    {/* Primary Color */}
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-[#30466F]">
-                        Primary Color
-                      </span>
-
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={customizer.primary || "#341A01"}
-                          onChange={(e) => {
-                            setCustomizer((current) => ({
-                              ...current,
-                              primary: e.target.value.toUpperCase(),
-                            }));
-                          }}
-                          className="h-10 w-12 rounded border border-[#D8DFE8]"
-                        />
-
-                        <span className="text-sm">
-                          {customizer.primary || "#341A01"}
-                        </span>
-                      </div>
-                    </label>
-
-                    {/* Accent Color */}
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-[#30466F]">
-                        Accent Color
-                      </span>
-
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={customizer.accent || "#D4A017"}
-                          onChange={(e) => {
-                            setCustomizer((current) => ({
-                              ...current,
-                              accent: e.target.value.toUpperCase(),
-                            }));
-                          }}
-                          className="h-10 w-12 rounded border border-[#D8DFE8]"
-                        />
-
-                        <span className="text-sm">
-                          {customizer.accent || "#D4A017"}
-                        </span>
-                      </div>
-                    </label>
-
-                    {/* Background Color */}
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-[#30466F]">
-                        Background Color
-                      </span>
-
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={customizer.background || "#FFFFFF"}
-                          onChange={(e) => {
-                            setCustomizer((current) => ({
-                              ...current,
-                              background:
-                                e.target.value.toUpperCase(),
-                            }));
-                          }}
-                          className="h-10 w-12 rounded border border-[#D8DFE8]"
-                        />
-
-                        <span className="text-sm">
-                          {customizer.background || "#FFFFFF"}
-                        </span>
-                      </div>
-                    </label>
-
-
-
-                  </div>
-                </div>
-              </>
+              <GroupedFields
+                key={`theme-${themeGroup}`}
+                fields={schema.settings}
+                values={data.settings}
+                groups={schema.theme_groups || [{ id: "store", label: "Store" }]}
+                initialOpen={themeGroup}
+                collections={collections}
+                onChange={(key, value) =>
+                  update((d) => {
+                    d.settings[key] = value;
+                  }, `t:${key}`)
+                }
+              />
             ) : shownSection ? (
               <GroupedFields
                 key={shown}
@@ -2455,8 +2444,8 @@ function Fields({ fields, values, collections, products = [], onChange }) {
 }
 
 // Section options in collapsible groups; "Content" starts open, `extra` (blocks) goes at its end
-function GroupedFields({ fields, values, groups, collections, products, onChange, extra }) {
-  const [open, setOpen] = useState({ content: true });
+function GroupedFields({ fields, values, groups, collections, products, onChange, extra, initialOpen = "content" }) {
+  const [open, setOpen] = useState({ [initialOpen]: true });
 
   const handlerFor = useOptionHandlers(onChange);
 
@@ -2829,13 +2818,16 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
       );
 
     case "textarea":
+    case "menu":
       return (
         <label className="block">
           {label}
 
           <textarea
-            rows={3}
+            rows={spec.type === "menu" ? 5 : 3}
             value={value}
+            placeholder={spec.type === "menu" ? "Shop all | /collections/all\nContact | mailto:hello@example.com" : ""}
+            spellCheck={spec.type !== "menu"}
             onChange={(e) => onChange(e.target.value)}
             className="w-full rounded-lg border border-[#D8DFE8] px-3 py-2 text-sm outline-none focus:border-[#161C2C]"
           />
@@ -3385,6 +3377,46 @@ function RichTextEditor({ value, onChange }) {
         className="min-h-[120px] px-3 py-2 text-sm leading-relaxed outline-none [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-[#C9D1DD] [&_blockquote]:pl-3 [&_blockquote]:italic [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
       />
     </div>
+  );
+}
+
+// The page's fixed parts. They are theme-wide, so they open the matching group of Theme settings.
+const LAYOUT_ROWS = [
+  { part: "top", group: "announcement", name: "Announcement bar", hint: "Banner above the header", icon: "M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6" },
+  { part: "top", group: "header", name: "Header", hint: "Logo and navigation", icon: "M3 5h18v5H3zM7 15h10M9 19h6" },
+  { part: "bottom", group: "footer", name: "Footer", hint: "Links, social and copyright", icon: "M3 14h18v5H3zM7 9h10M9 5h6" },
+];
+
+function LayoutRows({ part, selected, themeGroup, onOpen }) {
+  const rows = LAYOUT_ROWS.filter((row) => row.part === part);
+
+  return (
+    <ul className={`px-2 ${part === "top" ? "mb-1" : "mt-1"}`}>
+      {rows.map((row) => {
+        const active = selected === "theme" && themeGroup === row.group;
+
+        return (
+          <li key={row.group}>
+            <button
+              type="button"
+              onClick={() => onOpen(row.group)}
+              className={`flex h-9 w-full items-center gap-2 rounded-md pl-1.5 pr-1 text-left text-sm ${
+                active ? "bg-[#EEF1F6]" : "hover:bg-[#F5F6F8]"
+              }`}
+            >
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[#8A94A8]">
+                <svg {...iconProps} className="h-4 w-4">
+                  <path d={row.icon} />
+                </svg>
+              </span>
+              <span className="min-w-0 flex-1 truncate">
+                {row.name} <span className="text-xs text-[#A3ADBF]">{row.hint}</span>
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

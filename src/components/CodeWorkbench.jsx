@@ -1,6 +1,6 @@
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import CodeEditor from "./CodeEditor";
 import { openStorefront } from "@/lib/api";
 import {
@@ -9,12 +9,17 @@ import {
   renameThemePath,
   saveThemeFile,
 } from "@/lib/themeApi";
+import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
 
 const KEEP = ".keep";
 
-// Theme code is Liquid only: the server rejects any other file type.
+// You can create Liquid files only: the server rejects any other new file.
 const EXT = ".liquid";
-const languageOf = () => "liquid";
+
+// The customizer's settings, shown as JSON (config/settings_data.json, templates/<page>.json).
+// They are generated from what the customizer saved, and saving one updates the customizer.
+const isSettingsFile = (path) => path === "config/settings_data.json" || /^templates\/[^/]+\.json$/.test(path);
+const languageOf = (path) => (path.toLowerCase().endsWith(".json") ? "json" : "liquid");
 
 // "product-card" -> "product-card.liquid"; "theme.css" -> null (not allowed)
 function toLiquidName(name) {
@@ -106,18 +111,22 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
 
+  async function fetchProject() {
+    const data = await listThemeFiles();
+    const files = {};
+    const folders = [];
+    data.files.forEach((f) => {
+      if (baseName(f.path) === KEEP) folders.push(parentOf(f.path));
+      else files[f.path] = f.content;
+    });
+    return { files, folders, storeId: data.store, storefrontUrl: data.storefrontUrl };
+  }
+
   async function load() {
     setStatus("loading");
     setError("");
     try {
-      const data = await listThemeFiles();
-      const files = {};
-      const folders = [];
-      data.files.forEach((f) => {
-        if (baseName(f.path) === KEEP) folders.push(parentOf(f.path));
-        else files[f.path] = f.content;
-      });
-      setProject({ files, folders, storeId: data.store, storefrontUrl: data.storefrontUrl });
+      setProject(await fetchProject());
       setStatus("ready");
     } catch (e) {
       setError(e.message);
@@ -125,8 +134,29 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     }
   }
 
+  // The customizer (or another code editor tab) saved: bring in what changed without
+  // touching the file you are typing in. Unsaved edits stay as they are.
+  const refreshRef = useRef(null);
+  refreshRef.current = async () => {
+    try {
+      setProject(await fetchProject());
+      setPreviewKey((k) => k + 1);
+    } catch {
+      // keep showing what we have; the next save or refresh reports problems
+    }
+  };
+
   useEffect(() => {
     load();
+    const stop = onThemeChange(() => refreshRef.current());
+    const onFocus = () => document.visibilityState === "visible" && refreshRef.current();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      stop();
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
   }, []);
 
   // Once the files are loaded, open the requested one and expand its folders in the explorer
@@ -205,6 +235,9 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       return next;
     });
     setPreviewKey((k) => k + 1);
+    announceThemeChange(isSettingsFile(path) ? "settings" : "code");
+    // A settings file is normalised by the server (defaults filled in): show it as saved
+    if (isSettingsFile(path)) refreshRef.current();
   }
 
   const targetFolder = () =>
@@ -515,6 +548,14 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             >
               Save
             </button>
+            <Link
+              to="/admin/online-store/customize"
+              target="_blank"
+              className="rounded border border-[#cecece] px-2.5 py-1 hover:bg-[#e8e8e8]"
+              title="Open the Customize editor in a new tab; both stay in step"
+            >
+              Customize
+            </Link>
             <button
               onClick={() => setPreviewOpen((o) => !o)}
               className={`rounded border px-2.5 py-1 ${
@@ -527,6 +568,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             </button>
           </div>
           </div>
+
+          {activePath && isSettingsFile(activePath) && (
+            <div className="border-b border-[#e5e5e5] bg-[#fff8e5] px-3 py-1.5 text-[12px] text-[#6b4e00]">
+              These are the settings from the Customize editor. Changes made there appear here, and when you save
+              changes here they appear there. Settings that aren&apos;t valid are refused.
+            </div>
+          )}
 
           {activePath && (
             <div className="flex items-center gap-1 border-b border-[#e5e5e5] bg-white px-3 py-1 text-[13px] text-[#6b6b6b]">
