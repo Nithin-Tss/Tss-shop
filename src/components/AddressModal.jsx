@@ -562,9 +562,6 @@ export default function AddressModal({
                   {/* Search Input Header */}
                   <div className="p-2 border-b border-slate-100 bg-slate-50/70">
                     <div className="relative">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                        🔍
-                      </span>
                       <input
                         ref={searchInputRef}
                         type="text"

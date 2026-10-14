@@ -695,7 +695,7 @@ const handleLogout = () => {
 
                               {addr.phone && (
                                 <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
-                                  <span>📞</span>
+                
                                   <span>{addr.phone}</span>
                                 </p>
                               )}
