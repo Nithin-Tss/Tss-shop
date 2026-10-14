@@ -18,6 +18,7 @@ import {
   postSyncTiming,
   subscribeThemeEvents,
   SYNC_CLIENT,
+  listBlogPosts,
 } from "@/lib/themeApi";
 
 import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
@@ -28,6 +29,14 @@ const PAGE_LABELS = {
   collection: "Collection page",
   blog: "Blog page",
   article: "Article page",
+};
+
+// Each page's own main section: selected when a store link opens that page in the preview
+const MAIN_SECTION = {
+  product: "main-product",
+  collection: "main-collection",
+  blog: "main-blog",
+  article: "main-article",
 };
 
 const inputClass =
@@ -188,13 +197,24 @@ export default function AdminCustomizePage() {
 
   const [collections, setCollections] = useState([]);
 
-  const [sampleProductId, setSampleProductId] = useState(null);
+  // ?page=product&product=<id>&article=<handle>&section=<id>: what was open, so a refresh shows it again
+  const [startParams] = useState(() => new URLSearchParams(window.location.search));
+
+  const [sampleProductId, setSampleProductId] = useState(() => startParams.get("product"));
+
+  // Published blog posts, and the one the Article page preview shows (its handle)
+  const [blogPosts, setBlogPosts] = useState([]);
+
+  const [sampleArticle, setSampleArticle] = useState(() => startParams.get("article") || "");
 
   const [products, setProducts] = useState([]);
 
-  const [page, setPage] = useState("index");
+  const [page, setPage] = useState(() => (startParams.get("page") in PAGE_LABELS ? startParams.get("page") : "index"));
 
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(() => startParams.get("section"));
+
+  // Pages left by following a store link in the preview ({page, selected, product, article}), for "Back"
+  const [backStack, setBackStack] = useState([]);
 
   // Right-click menu over the preview: where it opens, and the theme file it edits
   const [contextMenu, setContextMenu] = useState(null);
@@ -327,6 +347,29 @@ export default function AdminCustomizePage() {
 
   sampleProductRef.current = sampleProductId;
 
+  const sampleArticleRef = useRef("");
+
+  sampleArticleRef.current = sampleArticle;
+
+  // Posts written in Blog posts; the article preview keeps its post while that post is still published
+  const loadBlogPosts = useCallback(
+    () =>
+      listBlogPosts()
+        .then((all) => {
+          const published = all.filter((p) => p.status === "published");
+          setBlogPosts(published);
+          setSampleArticle((current) =>
+            published.some((p) => p.handle === current) ? current : published[0]?.handle || ""
+          );
+        })
+        .catch(() => setBlogPosts([])),
+    []
+  );
+
+  useEffect(() => {
+    loadBlogPosts();
+  }, [loadBlogPosts]);
+
   // What the server last saved, to send only the changes
   const lastSavedRef = useRef(null);
 
@@ -390,7 +433,16 @@ export default function AdminCustomizePage() {
         setCustomizer(customizerData);
         setCollections(collectionData);
         setProducts(productData);
-        setSampleProductId(productData.find((p) => p.status === "active")?.id || null);
+        // The product from the address (a refresh) while it still exists, else the first active one
+        setSampleProductId((current) =>
+          current && productData.some((p) => p.id === current)
+            ? current
+            : productData.find((p) => p.status === "active")?.id || null
+        );
+        // A section from the address that this page no longer has: show the sections list
+        setSelected((current) =>
+          current === "theme" || settingsData.templates[pageRef.current]?.sections[current] ? current : null
+        );
         setStatus("ready");
       })
       .catch((e) => {
@@ -433,11 +485,12 @@ export default function AdminCustomizePage() {
       return `${base}/collections/all`;
     }
 
-    // The blog has no store page of its own until posts can be written
-    if (page === "blog" || page === "article") return "";
+    if (page === "blog") return `${base}/blog`;
+
+    if (page === "article") return sampleArticle ? `${base}/blog/${sampleArticle}` : "";
 
     return `${base}/`;
-  }, [store, page, sampleProductId]);
+  }, [store, page, sampleProductId, sampleArticle]);
 
   // ---------------- Live preview (the page being edited) ----------------
   // The preview is rendered once; afterwards only the sections that changed are rendered
@@ -445,7 +498,11 @@ export default function AdminCustomizePage() {
 
   // Which page the preview renders (and, for the product page, which product)
   function previewTarget() {
-    return { page: pageRef.current, product: pageRef.current === "product" ? sampleProductRef.current || "" : "" };
+    return {
+      page: pageRef.current,
+      product: pageRef.current === "product" ? sampleProductRef.current || "" : "",
+      article: pageRef.current === "article" ? sampleArticleRef.current : "",
+    };
   }
 
   function visibleOrder(d) {
@@ -769,6 +826,7 @@ export default function AdminCustomizePage() {
 
   // The code editor (another tab) saved something: Liquid code re-renders the preview;
   // settings JSON is loaded here, unless there are unsaved edits that it would overwrite.
+  // A blog post was saved or deleted (Blog posts page): reload the posts, then the preview.
   async function externalChange(kind) {
     // A synced section's file was saved in Edit code (another tab): only that section is updated
     if (kind.startsWith("section:")) {
@@ -781,6 +839,11 @@ export default function AdminCustomizePage() {
       } catch {
         // the live event (or the next reload) brings it
       }
+      return;
+    }
+    if (kind === "posts") {
+      await loadBlogPosts();
+      setPreviewKey((k) => k + 1);
       return;
     }
     if (kind !== "settings") {
@@ -1078,10 +1141,62 @@ export default function AdminCustomizePage() {
 
   engineRef.current.replaceImage = replaceImage;
 
-  // Full render when the preview first opens, the page changes or Refresh is pressed
+  // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed
   useEffect(() => {
     if (status === "ready") engineRef.current.renderFull();
-  }, [status, page, previewKey]);
+  }, [status, page, previewKey, sampleArticle, sampleProductId]);
+
+  // The address remembers the page, its product or post, and the open section (a refresh shows them again)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const put = (key, value) => (value ? params.set(key, value) : params.delete(key));
+    put("page", page === "index" ? "" : page);
+    put("product", page === "product" ? sampleProductId : "");
+    put("article", page === "article" ? sampleArticle : "");
+    put("section", selected);
+    const query = params.toString();
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+  }, [page, sampleProductId, sampleArticle, selected]);
+
+  // A store link followed in the preview ("/products/<id>", "/collections/all", "/blog/<handle>", "/"):
+  // open that page's own template here, with Edit mode on and its main section (e.g. Product information)
+  // selected. The page it came from is kept for "Back".
+  function openStorePage(path) {
+    const [first, second, third] = path.split("/").filter(Boolean);
+    let next = "index";
+    if (first === "products" && second) next = "product";
+    else if (first === "collections") next = "collection";
+    else if (first === "blog") next = second && !third ? "article" : "blog";
+    if (!dataRef.current?.templates[next]) return;
+
+    setBackStack((stack) => [
+      ...stack.slice(-19),
+      { page: pageRef.current, selected: selectedRef.current, product: sampleProductRef.current, article: sampleArticleRef.current },
+    ]);
+    if (next === "product") setSampleProductId(second);
+    if (next === "article") setSampleArticle(second);
+
+    const template = dataRef.current.templates[next];
+    const main = template.order.find((id) => template.sections[id]?.type === MAIN_SECTION[next]) || null;
+    setPage(next);
+    setAdding(false);
+    setSelected(main);
+    setEditMode(true);
+  }
+
+  // "Back": the page (and section) open before the last store link was followed
+  function goBack() {
+    const previous = backStack[backStack.length - 1];
+    if (!previous) return;
+    setBackStack((stack) => stack.slice(0, -1));
+    if (previous.product) setSampleProductId(previous.product);
+    if (previous.article) setSampleArticle(previous.article);
+    setPage(previous.page);
+    setAdding(false);
+    setSelected(previous.selected && dataRef.current?.templates[previous.page]?.sections[previous.selected] ? previous.selected : null);
+  }
+
+  engineRef.current.openStorePage = openStorePage;
 
   // Each change: patch the preview (next frame) and schedule a background save
   useEffect(() => {
@@ -1181,6 +1296,9 @@ export default function AdminCustomizePage() {
         engineRef.current.renderFull();
       } else if (message.type === "scroll") {
         scrollRef.current = Math.max(0, Number(message.y) || 0);
+      } else if (message.type === "navigate" && typeof message.path === "string") {
+        // A product, collection, blog or post link was clicked: open that page's template here
+        engineRef.current.openStorePage(message.path);
       } else if (message.type === "leaving") {
         // Edit mode off and a link was followed: the editor page is gone until the preview reloads
         syncRef.current.ready = false;
@@ -1688,12 +1806,24 @@ export default function AdminCustomizePage() {
             {panelOpen ? "Hide panel" : "Sections"}
           </button>
 
+          {backStack.length > 0 && (
+            <button
+              type="button"
+              onClick={goBack}
+              className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm hover:border-[#161C2C]"
+              title="Back to the page you came from"
+            >
+              &larr; {PAGE_LABELS[backStack[backStack.length - 1].page] || "Back"}
+            </button>
+          )}
+
           <select
             value={page}
             onChange={(e) => {
               setPage(e.target.value);
               setSelected(null);
               setAdding(false);
+              setBackStack([]);
             }}
             className="h-9 rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
             aria-label="Page to edit"
@@ -1704,6 +1834,22 @@ export default function AdminCustomizePage() {
               </option>
             ))}
           </select>
+
+          {/* The Article page previews one post at a time: pick which */}
+          {page === "article" && blogPosts.length > 0 && (
+            <select
+              value={sampleArticle}
+              onChange={(e) => setSampleArticle(e.target.value)}
+              className="h-9 max-w-[200px] rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
+              aria-label="Post to preview"
+            >
+              {blogPosts.map((p) => (
+                <option key={p.id} value={p.handle}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          )}
 
           <a
             href="/editor-demo"
@@ -2401,7 +2547,7 @@ export default function AdminCustomizePage() {
             <span>
               {previewError
                 ? `Preview not updated: ${previewError}`
-                : `${page === "blog" || page === "article" ? "Sample posts. " : ""}${
+                : `${(page === "blog" || page === "article") && !blogPosts.length ? "Sample posts until you publish one. " : ""}${
                     dirty
                       ? editMode
                         ? "Live preview. Changes save automatically. Click or drag sections here to edit them."

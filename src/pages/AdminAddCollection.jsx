@@ -112,7 +112,8 @@ const ICONS = {
 // ---------------------------------------------------------------- rich text
 
 // A small editor for the description: bold, italic, underline, lists and links. The store cleans the HTML.
-function RichTextEditor({ id, value, onChange, placeholder }) {
+// Also used for blog posts (AdminContent).
+export function RichTextEditor({ id, value, onChange, placeholder }) {
   const ref = useRef(null);
 
   // Only write the HTML in when it changes from outside (loading, Discard), never while typing

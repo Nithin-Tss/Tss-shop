@@ -208,11 +208,11 @@ const menuGroups = [
   },
 ];
 
-// Pages and Blog Posts have no admin screens yet, so they aren't links
+// Pages has no admin screen yet, so it isn't a link
 const onlineStoreItems = [
   { icon: "themes", label: "Themes", href: BASE, exact: true, permission: "themes.view" },
   { icon: "pages", label: "Pages" },
-  { icon: "blog", label: "Blog Posts" },
+  { icon: "blog", label: "Blog Posts", href: `${BASE}/blog-posts`, permission: "themes.manage" },
 ];
 
 const isUnder = (path, prefix) => path === prefix || path.startsWith(`${prefix}/`);

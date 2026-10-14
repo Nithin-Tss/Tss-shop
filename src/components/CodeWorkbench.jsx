@@ -122,6 +122,8 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // "Saved product-card.liquid at 10:42:05" after a save; the store shows it from then on
+  const [savedNote, setSavedNote] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   // Synced files: { path: { name, label } }, the version of each this editor last saw,
@@ -321,6 +323,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     const path = activePath;
     const content = drafts[path];
     const started = performance.now();
+    setSavedNote("");
     // A synced section: its code is checked first (invalid Liquid or schema JSON is refused with
     // its line, and the saved version keeps working); then the customizer's panel is rebuilt from it
     const synced = syncedFiles[path];
@@ -328,6 +331,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       synced ? saveSyncedFile(path, content, versionsRef.current[synced.name]) : saveThemeFile(path, content)
     );
     if (!saved) return;
+    setSavedNote(`Saved ${baseName(path)} at ${new Date().toLocaleTimeString()}. Live on your store.`);
     if (saved.sync) {
       versionsRef.current[synced.name] = saved.sync.version;
       postSyncTiming(`${synced.name}: code save -> blocks`, performance.now() - started);
@@ -833,7 +837,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       {/* Status bar */}
       <div className="flex items-center justify-between border-t border-[#e5e5e5] bg-[#f8f8f8] px-3 py-1 text-[12px] text-[#3b3b3b]">
         <span className={error ? "text-red-600" : ""}>
-          {busy ? "Saving..." : error || "Connected to server"}
+          {busy ? "Saving..." : error || savedNote || "Connected to server"}
         </span>
         <span>
           {activePath && activePath in drafts ? "Unsaved (Cmd/Ctrl+S to save)  •  " : ""}

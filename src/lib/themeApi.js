@@ -48,12 +48,29 @@ export function saveThemeCustomizer(data) {
 
 // Home page HTML rendered from unsaved section data, for the customizer's live preview -> { html }
 // With `section`, only that section's HTML (and the fonts stylesheet) -> { html, fonts }
-// `page`: index, product, collection, blog or article; `product`: the product the product page shows
-export function previewTheme(data, { scroll = 0, selected = "", section = "", page = "index", product = "" } = {}) {
+// `page`: index, product, collection, blog or article; `product`: the product the product page shows;
+// `article`: the handle of the post the article page shows
+export function previewTheme(data, { scroll = 0, selected = "", section = "", page = "index", product = "", article = "" } = {}) {
   const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected, page });
   if (section) query.set("section", section);
   if (product) query.set("product", product);
+  if (article) query.set("article", article);
   return apiRequest(`${BASE}/preview/?${query}`, { method: "POST", body: data });
+}
+
+// Blog posts -> [{ id, title, handle, excerpt, body, cover_image, author, category, tags, status, published_at, url }]
+export function listBlogPosts() {
+  return apiRequest(`${BASE}/posts/`);
+}
+
+export function saveBlogPost(id, data) {
+  return id
+    ? apiRequest(`${BASE}/posts/${id}/`, { method: "PATCH", body: data })
+    : apiRequest(`${BASE}/posts/`, { method: "POST", body: data });
+}
+
+export function deleteBlogPost(id) {
+  return apiRequest(`${BASE}/posts/${id}/`, { method: "DELETE" });
 }
 
 // Save only what changed: { settings?, templates?: { index: { order?, sections?: { id: section | null } } } }

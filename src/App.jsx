@@ -17,7 +17,7 @@ import AdminProductDetails from "@/pages/AdminProductDetails";
 import AdminCollections from "@/pages/AdminCollections";
 import AdminAddCollection from "@/pages/AdminAddCollection";
 import AdminCatalogues from "@/pages/AdminCatalogues";
-import AdminContent from "@/pages/AdminContent";
+import AdminContent, { BlogPostsPage } from "@/pages/AdminContent";
 import AdminInventory from "@/pages/AdminInventory";
 import AdminOrders from "@/pages/AdminOrders";
 import AdminDrafts from "@/pages/AdminDrafts";
@@ -65,6 +65,7 @@ export default function App() {
         </Route>
         <Route element={<RequirePermission permission="themes.manage" />}>
           <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
+          <Route path="/admin/online-store/blog-posts" element={<BlogPostsPage />} />
           {/* Theme code editor: it saves theme files */}
           <Route path="/editor-demo" element={<EditorDemo />} />
         </Route>
