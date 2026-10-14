@@ -72,6 +72,7 @@ export default function App() {
         <Route element={<RequirePermission permission="products.manage" />}>
           <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
           <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
+          <Route path="/admin/online-store/collections/:collectionId" element={<AdminAddCollection />} />
         </Route>
         <Route element={<RequirePermission permission="inventory.view" />}>
           <Route path="/admin/online-store/inventory" element={<AdminInventory />} />

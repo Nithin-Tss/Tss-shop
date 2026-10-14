@@ -614,6 +614,8 @@ export function ProductForm({ productId }) {
   const [locations, setLocations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [storeCollections, setStoreCollections] = useState([]);
+  // Automated collections fill themselves from their conditions: shown here, not picked
+  const [automatedCollections, setAutomatedCollections] = useState([]);
   const [channels, setChannels] = useState([]);
   // Lists that failed to load: saving leaves those fields alone instead of clearing them
   const [failedLists, setFailedLists] = useState([]);
@@ -683,7 +685,9 @@ export function ProductForm({ productId }) {
 
       setLocations(locationList);
       setCategories(listOf(categoriesRes));
-      setStoreCollections(listOf(collectionsRes).map((c) => c.name));
+      const storeCollectionList = listOf(collectionsRes);
+      setStoreCollections(storeCollectionList.filter((c) => c.type !== "automated").map((c) => c.name));
+      setAutomatedCollections(storeCollectionList.filter((c) => c.type === "automated").map((c) => c.name));
       setChannels(channelList);
 
       const lists = { locations: locationsRes, categories: categoriesRes, collections: collectionsRes, channels: channelsRes };
@@ -1270,15 +1274,22 @@ export function ProductForm({ productId }) {
                       className={`${inputClass} ${withError(fieldErrors.vendor)}`}
                     />
                   </Field>
-                  <CollectionsPicker
-                    selectedCollections={collections}
-                    onChange={setCollections}
-                    availableCollections={storeCollections}
-                    onCollectionCreated={(newCol) => {
-                      setStoreCollections((prev) => (prev.includes(newCol) ? prev : [...prev, newCol]));
-                    }}
-                    error={fieldErrors.collections}
-                  />
+                  <div>
+                    <CollectionsPicker
+                      selectedCollections={collections.filter((c) => !automatedCollections.includes(c))}
+                      onChange={(picked) => setCollections([...picked, ...collections.filter((c) => automatedCollections.includes(c))])}
+                      availableCollections={storeCollections}
+                      onCollectionCreated={(newCol) => {
+                        setStoreCollections((prev) => (prev.includes(newCol) ? prev : [...prev, newCol]));
+                      }}
+                      error={fieldErrors.collections}
+                    />
+                    {collections.some((c) => automatedCollections.includes(c)) && (
+                      <p className="mt-1.5 text-[12px] text-slate-500">
+                        Also in, by their conditions: {collections.filter((c) => automatedCollections.includes(c)).join(", ")}
+                      </p>
+                    )}
+                  </div>
                   <div className="sm:col-span-2">
                     <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">Tags</span>
                     <ChipInput values={tags} onChange={setTags} placeholder="Type a tag and press Enter" />

@@ -385,9 +385,15 @@ export default function AdminCollections() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                               </div>
-                              <span className="font-medium text-slate-900 hover:text-blue-600 transition-colors cursor-pointer">
+                              <Link
+                                to={`/admin/online-store/collections/${col.id}`}
+                                className="font-medium text-slate-900 hover:text-blue-600 transition-colors"
+                              >
                                 {col.name}
-                              </span>
+                              </Link>
+                              {col.status === "draft" && (
+                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">Draft</span>
+                              )}
                             </div>
                           </td>
 
@@ -398,7 +404,11 @@ export default function AdminCollections() {
 
                           {/* Conditions */}
                           <td className="px-4 py-3 text-slate-500 text-xs hidden md:table-cell max-w-xs truncate">
-                            {col.conditions || "—"}
+                            {col.type === "automated" && col.rules?.length
+                              ? col.rules
+                                  .map((r) => `${r.field.replace(/_/g, " ")} ${r.operator.replace(/_/g, " ")} ${r.value}`)
+                                  .join(col.match === "any" ? " or " : " and ")
+                              : "—"}
                           </td>
 
                           {/* Sales channels */}

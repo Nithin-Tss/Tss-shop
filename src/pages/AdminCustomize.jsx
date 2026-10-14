@@ -2345,7 +2345,7 @@ function LinkPicker({ value, collections, products, onChange, label }) {
           {collections.length === 0 && <option value="">No collections yet</option>}
           {collections.map((c) => (
             <option key={c.id} value={`/collections/${c.id}`}>
-              {c.name}
+              {c.name}{c.status === "draft" ? " (Draft, hidden on store)" : ""}
             </option>
           ))}
         </select>
@@ -2750,7 +2750,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
 
             {collections.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {c.name}{c.status === "draft" ? " (Draft, hidden on store)" : ""}
               </option>
             ))}
           </select>
@@ -2788,7 +2788,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
 
           <ProductPicker
             value={value || []}
-            products={collections.map((c) => ({ id: c.id, title: c.name, status: "active" }))}
+            products={collections.map((c) => ({ id: c.id, title: c.name, status: c.status || "active" }))}
             max={spec.max || 12}
             noun="collections"
             onChange={onChange}
