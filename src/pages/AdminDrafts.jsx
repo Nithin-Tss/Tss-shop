@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
+import ExportDraftOrdersModal from "@/components/ExportDraftOrdersModal";
 import { apiGet } from "@/lib/api";
 import { useCan } from "@/lib/auth";
 
@@ -51,6 +52,13 @@ export default function AdminDrafts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
 
+  // Export modal state
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+
   useEffect(() => {
     async function fetchDrafts() {
       setLoading(true);
@@ -83,14 +91,34 @@ export default function AdminDrafts() {
     );
   });
 
+  // Reset pagination on search
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const totalPages = Math.ceil(filteredDrafts.length / pageSize) || 1;
+  const paginatedDrafts = filteredDrafts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   const allSelected =
-    filteredDrafts.length > 0 && selectedIds.size === filteredDrafts.length;
+    paginatedDrafts.length > 0 &&
+    paginatedDrafts.every((d) => selectedIds.has(d.id));
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedIds(new Set(filteredDrafts.map((d) => d.id)));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        paginatedDrafts.forEach((d) => next.add(d.id));
+        return next;
+      });
     } else {
-      setSelectedIds(new Set());
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        paginatedDrafts.forEach((d) => next.delete(d.id));
+        return next;
+      });
     }
   };
 
@@ -127,7 +155,8 @@ export default function AdminDrafts() {
             <div className="flex items-center gap-2.5">
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#D8DFE8] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition"
+                onClick={() => setIsExportModalOpen(true)}
+                className="flex items-center gap-2 rounded-lg bg-white border border-[#D8DFE8] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition cursor-pointer"
               >
                 Export
               </button>
@@ -246,8 +275,8 @@ export default function AdminDrafts() {
                         </td>
                       </tr>
                     ))
-                  ) : filteredDrafts.length > 0 ? (
-                    filteredDrafts.map((d) => {
+                  ) : paginatedDrafts.length > 0 ? (
+                    paginatedDrafts.map((d) => {
                       const isSelected = selectedIds.has(d.id);
                       const curr = d.currency_code || "AUD";
 
@@ -330,6 +359,39 @@ export default function AdminDrafts() {
                 </tbody>
               </table>
             </div>
+
+            {/* TABLE PAGINATION FOOTER */}
+            {filteredDrafts.length > 0 && (
+              <div className="flex items-center justify-between gap-4 border-t border-[#E3E7ED] px-4 py-3 text-xs text-slate-500">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    aria-label="Previous page"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#D8DFE8] bg-white text-slate-600 hover:bg-[#F3F6FA] disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    aria-label="Next page"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#D8DFE8] bg-white text-slate-600 hover:bg-[#F3F6FA] disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    ›
+                  </button>
+                  <span className="min-w-[48px] text-center tabular-nums text-slate-700">
+                    {`${(currentPage - 1) * pageSize + 1}-${Math.min(
+                      currentPage * pageSize,
+                      filteredDrafts.length
+                    )}`}
+                  </span>
+                </div>
+                <span className="tabular-nums">Total {filteredDrafts.length} draft orders</span>
+              </div>
+            )}
           </section>
 
           {/* LEARN MORE FOOTER */}
@@ -340,6 +402,17 @@ export default function AdminDrafts() {
           </p>
         </main>
       </div>
+
+      {/* EXPORT DRAFT ORDERS MODAL */}
+      <ExportDraftOrdersModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        drafts={drafts}
+        paginatedDrafts={paginatedDrafts}
+        filteredDrafts={filteredDrafts}
+        selectedIds={selectedIds}
+        searchQuery={searchQuery}
+      />
     </div>
   );
 }
