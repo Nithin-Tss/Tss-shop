@@ -26,6 +26,8 @@ const PAGE_LABELS = {
   index: "Home page",
   product: "Product page",
   collection: "Collection page",
+  blog: "Blog page",
+  article: "Article page",
 };
 
 const inputClass =
@@ -313,6 +315,10 @@ export default function AdminCustomizePage() {
 
   pageRef.current = page;
 
+  const sampleProductRef = useRef(null);
+
+  sampleProductRef.current = sampleProductId;
+
   // What the server last saved, to send only the changes
   const lastSavedRef = useRef(null);
 
@@ -404,21 +410,29 @@ export default function AdminCustomizePage() {
       return `${base}/collections/all`;
     }
 
+    // The blog has no store page of its own until posts can be written
+    if (page === "blog" || page === "article") return "";
+
     return `${base}/`;
   }, [store, page, sampleProductId]);
 
-  // ---------------- Live preview (home page) ----------------
+  // ---------------- Live preview (the page being edited) ----------------
   // The preview is rendered once; afterwards only the sections that changed are rendered
   // and swapped into the open page by message. Hide/delete/reorder happen inside the page.
 
+  // Which page the preview renders (and, for the product page, which product)
+  function previewTarget() {
+    return { page: pageRef.current, product: pageRef.current === "product" ? sampleProductRef.current || "" : "" };
+  }
+
   function visibleOrder(d) {
-    const t = d.templates.index;
+    const t = d.templates[pageRef.current];
     return t.order.filter((id) => !t.sections[id]?.hidden);
   }
 
   function snapshotOf(d) {
     const order = visibleOrder(d);
-    const t = d.templates.index;
+    const t = d.templates[pageRef.current];
     return {
       settings: JSON.stringify(d.settings),
       footer: footerJson(d),
@@ -441,9 +455,14 @@ export default function AdminCustomizePage() {
     const sync = syncRef.current;
     clearTimeout(sync.fullTimer);
     const d = dataRef.current;
-    if (!d || pageRef.current !== "index") return;
+    if (!d) return;
+    // Another page was picked: nothing on screen can be patched until it is rendered
+    if (sync.page !== pageRef.current) {
+      sync.page = pageRef.current;
+      sync.rendered = null;
+    }
     const gen = ++sync.gen;
-    previewTheme(d, { scroll: scrollRef.current, selected: selectedRef.current || "" })
+    previewTheme(d, { scroll: scrollRef.current, selected: selectedRef.current || "", ...previewTarget() })
       .then((res) => {
         if (gen !== sync.gen) return;
         sync.rendered = snapshotOf(d);
@@ -478,7 +497,7 @@ export default function AdminCustomizePage() {
     }
     sync.inflight[FOOTER] = true;
 
-    previewTheme(d, { section: FOOTER })
+    previewTheme(d, { section: FOOTER, ...previewTarget() })
       .then((res) => {
         if (gen !== sync.gen || !sync.rendered) return;
         postToPreview({ type: "patch", id: FOOTER, html: res.html, index: Infinity, token });
@@ -505,11 +524,11 @@ export default function AdminCustomizePage() {
       return;
     }
     const d = dataRef.current;
-    const requested = JSON.stringify(d.templates.index.sections[id]);
+    const requested = JSON.stringify(d.templates[pageRef.current].sections[id]);
     const gen = sync.gen;
     sync.inflight[id] = true;
 
-    previewTheme(d, { section: id })
+    previewTheme(d, { section: id, ...previewTarget() })
       .then((res) => {
         if (gen !== sync.gen || !sync.rendered) return;
         const order = visibleOrder(dataRef.current);
@@ -537,7 +556,7 @@ export default function AdminCustomizePage() {
     sync.frame = 0;
     const d = dataRef.current;
     const before = sync.rendered;
-    if (!d || pageRef.current !== "index" || !before) return;
+    if (!d || !before || sync.page !== pageRef.current) return;
 
     // Edit mode off, a link opened another store page in the preview: show Home with the change
     if (sync.away) {
@@ -890,7 +909,7 @@ export default function AdminCustomizePage() {
 
   // Full render when the preview first opens, the page changes or Refresh is pressed
   useEffect(() => {
-    if (status === "ready" && page === "index") engineRef.current.renderFull();
+    if (status === "ready") engineRef.current.renderFull();
   }, [status, page, previewKey]);
 
   // Each change: patch the preview (next frame) and schedule a background save
@@ -997,7 +1016,7 @@ export default function AdminCustomizePage() {
         syncRef.current.away = true;
       } else if (message.type === "context" && typeof message.id === "string" && editModeRef.current) {
         // Edit mode: right-click selects the section or block and offers "Edit code"
-        const section = dataRef.current && sectionIn(dataRef.current, "index", message.id);
+        const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
         if (!section) return;
         const block = Number.isInteger(message.block) && section.blocks?.[message.block] ? message.block : null;
         fromPreviewRef.current = true;
@@ -1017,7 +1036,7 @@ export default function AdminCustomizePage() {
         return;
       } else if (message.type === "select" && typeof message.id === "string" && editModeRef.current) {
         // Edit mode: a click in the preview selects a section or one of its blocks; empty space unselects
-        const section = dataRef.current && sectionIn(dataRef.current, "index", message.id);
+        const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
         const block = Number.isInteger(message.block) && section?.blocks?.[message.block] ? message.block : null;
         fromPreviewRef.current = true;
         if (!message.id) {
@@ -1036,7 +1055,7 @@ export default function AdminCustomizePage() {
         typeof message.id === "string" &&
         typeof message.target === "string"
       ) {
-        moveSectionTo("index", message.id, message.target, Boolean(message.after));
+        moveSectionTo(pageRef.current, message.id, message.target, Boolean(message.after));
       }
     }
 
@@ -2193,19 +2212,17 @@ export default function AdminCustomizePage() {
         <main className="flex min-w-0 flex-1 flex-col p-4">
           <div className="mb-2 flex items-center justify-between text-xs text-[#53627E]">
             <span>
-              {page === "index"
-                ? previewError
-                  ? `Preview not updated: ${previewError}`
-                  : dirty
-                  ? editMode
-                    ? "Live preview. Changes save automatically. Click or drag sections here to edit them."
-                    : "Live preview. Changes save automatically. Turn on Edit mode to pick sections here."
-                  : editMode
-                  ? "Live preview. Click or drag sections here to edit them."
-                  : "Live preview. Turn on Edit mode to pick sections here."
-                : dirty
-                ? "Preview shows the last saved version. Save to update it."
-                : "Live preview"}
+              {previewError
+                ? `Preview not updated: ${previewError}`
+                : `${page === "blog" || page === "article" ? "Sample posts. " : ""}${
+                    dirty
+                      ? editMode
+                        ? "Live preview. Changes save automatically. Click or drag sections here to edit them."
+                        : "Live preview. Changes save automatically. Turn on Edit mode to pick sections here."
+                      : editMode
+                      ? "Live preview. Click or drag sections here to edit them."
+                      : "Live preview. Turn on Edit mode to pick sections here."
+                  }`}
             </span>
 
             <div className="flex items-center gap-3">
@@ -2214,10 +2231,9 @@ export default function AdminCustomizePage() {
                 type="button"
                 aria-pressed={editMode}
                 onClick={() => setEditMode((on) => !on)}
-                disabled={page !== "index"}
-                title={page === "index" ? "Click sections in the preview to edit them" : "Edit mode works on the Home page preview"}
+                title="Click sections in the preview to edit them"
                 className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  editMode && page === "index"
+                  editMode
                     ? "border-[#161C2C] bg-[#161C2C] text-white"
                     : "border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
                 }`}
@@ -2226,7 +2242,7 @@ export default function AdminCustomizePage() {
                   <path d="M4 3l7 17 2.5-7.5L21 10z" />
                 </svg>
                 Edit mode
-                <span className="font-semibold">{editMode && page === "index" ? "On" : "Off"}</span>
+                <span className="font-semibold">{editMode ? "On" : "Off"}</span>
               </button>
 
               <div className="flex rounded-lg border border-[#D8DFE8] bg-white p-0.5" role="radiogroup" aria-label="Preview size">
@@ -2262,38 +2278,22 @@ export default function AdminCustomizePage() {
             </div>
           </div>
 
-          {page === "index" ? (
-            previewHtml ? (
-              <iframe
-                key={previewKey}
-                ref={iframeRef}
-                title="Store preview"
-                srcDoc={previewHtml}
-                // Theme code is written by store owners: keep it off this origin
-                sandbox="allow-scripts allow-forms allow-popups"
-                className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#D8DFE8] bg-white transition-[width] duration-200 ${
-                  device === "mobile" ? "w-[390px] max-w-full" : "w-full"
-                } ${drag ? "pointer-events-none" : ""}`}
-              />
-            ) : (
-              <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#D8DFE8] text-sm text-[#53627E]">
-                Loading preview...
-              </div>
-            )
-          ) : previewUrl ? (
+          {/* Every page: rendered from the unsaved layout, patched section by section as it changes */}
+          {previewHtml ? (
             <iframe
-              key={`${previewKey}-${previewUrl}`}
+              key={previewKey}
+              ref={iframeRef}
               title="Store preview"
-              src={previewUrl}
+              srcDoc={previewHtml}
               // Theme code is written by store owners: keep it off this origin
               sandbox="allow-scripts allow-forms allow-popups"
               className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#D8DFE8] bg-white transition-[width] duration-200 ${
                 device === "mobile" ? "w-[390px] max-w-full" : "w-full"
-              }`}
+              } ${drag ? "pointer-events-none" : ""}`}
             />
           ) : (
             <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#D8DFE8] text-sm text-[#53627E]">
-              Add an active product to preview the product page.
+              Loading preview...
             </div>
           )}
         </main>
