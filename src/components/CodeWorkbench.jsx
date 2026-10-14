@@ -5,9 +5,15 @@ import CodeEditor from "./CodeEditor";
 import { openStorefront } from "@/lib/api";
 import {
   deleteThemePath,
+  getSectionHistory,
+  getSyncedSections,
   listThemeFiles,
+  postSyncTiming,
   renameThemePath,
+  restoreSectionVersion,
+  saveSyncedFile,
   saveThemeFile,
+  subscribeThemeEvents,
 } from "@/lib/themeApi";
 import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
 
@@ -20,6 +26,12 @@ const EXT = ".liquid";
 // They are generated from what the customizer saved, and saving one updates the customizer.
 const isSettingsFile = (path) => path === "config/settings_data.json" || /^templates\/[^/]+\.json$/.test(path);
 const languageOf = (path) => (path.toLowerCase().endsWith(".json") ? "json" : "liquid");
+
+// The footer is a synced section: its schema is what the customizer's Footer panel shows,
+// and changes made there are written into this file (see section_sync on the server)
+const FOOTER_PATH = "sections/footer.liquid";
+
+const SOURCE_LABELS = { code: "Edit code", customizer: "Customizer", restore: "Restore", starter: "Original" };
 
 // "product-card" -> "product-card.liquid"; "theme.css" -> null (not allowed)
 function toLiquidName(name) {
@@ -110,6 +122,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   const [busy, setBusy] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  // The synced footer: the version this editor last saw, a message about it, and its History
+  const footerVersionRef = useRef(null);
+  const [notice, setNotice] = useState("");
+  const [history, setHistory] = useState(null);
 
   async function fetchProject() {
     const data = await listThemeFiles();
@@ -126,7 +142,9 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     setStatus("loading");
     setError("");
     try {
-      setProject(await fetchProject());
+      const [loaded, synced] = await Promise.all([fetchProject(), getSyncedSections().catch(() => ({}))]);
+      if (synced?.footer) footerVersionRef.current = synced.footer.version;
+      setProject(loaded);
       setStatus("ready");
     } catch (e) {
       setError(e.message);
@@ -158,6 +176,63 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       document.removeEventListener("visibilitychange", onFocus);
     };
   }, []);
+
+  // Live events: the customizer (or a restore elsewhere) changed the footer. The new file shows
+  // here straight away - unless you have unsaved edits in it, which are never replaced.
+  const footerEventRef = useRef(null);
+  footerEventRef.current = (event) => {
+    if (event.section !== "footer" || typeof event.code !== "string") return;
+    if (footerVersionRef.current !== null && event.version <= footerVersionRef.current) return;
+    footerVersionRef.current = event.version;
+    if (FOOTER_PATH in drafts && drafts[FOOTER_PATH] !== event.code) {
+      setNotice(
+        "The footer was just changed in the customizer. Your unsaved edits here are kept: saving them puts your version on top " +
+          "(the customizer's version stays in History)."
+      );
+    } else {
+      setProject((p) => ({ ...p, files: { ...p.files, [FOOTER_PATH]: event.code } }));
+      if (event.source === "customizer" && event.started_at && Date.now() - event.started_at < 60000) {
+        requestAnimationFrame(() => postSyncTiming("footer: sidebar -> code", Date.now() - event.started_at));
+      }
+    }
+    if (history) loadHistory();
+  };
+
+  useEffect(() => {
+    if (status !== "ready") return undefined;
+    return subscribeThemeEvents((event) => footerEventRef.current(event));
+  }, [status]);
+
+  useEffect(() => {
+    if (!notice) return undefined;
+    const timer = setTimeout(() => setNotice(""), 8000);
+    return () => clearTimeout(timer);
+  }, [notice]);
+
+  async function loadHistory() {
+    try {
+      setHistory(await getSectionHistory("footer"));
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function restoreVersion(entry) {
+    if (FOOTER_PATH in drafts && !window.confirm("Discard your unsaved edits to footer.liquid and restore this version?")) return;
+    if (!window.confirm(`Restore the footer from ${new Date(entry.saved_at * 1000).toLocaleString()}? The current version is kept in History.`)) return;
+    const restored = await run(() => restoreSectionVersion("footer", entry.index));
+    if (!restored) return;
+    footerVersionRef.current = restored.sync?.version ?? footerVersionRef.current;
+    setDrafts((d) => {
+      const next = { ...d };
+      delete next[FOOTER_PATH];
+      return next;
+    });
+    await refreshRef.current();
+    announceThemeChange("section:footer");
+    setNotice("The footer was restored. The customizer shows it too.");
+    loadHistory();
+  }
 
   // Once the files are loaded, open the requested one and expand its folders in the explorer
   useEffect(() => {
@@ -226,8 +301,19 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     if (!activePath || !(activePath in drafts)) return;
     const path = activePath;
     const content = drafts[path];
-    const saved = await run(() => saveThemeFile(path, content));
+    const started = performance.now();
+    // The synced footer: its code is checked first (invalid Liquid or schema JSON is refused with
+    // its line, and the saved version keeps working); then the customizer's Footer is rebuilt from it
+    const saved = await run(() =>
+      path === FOOTER_PATH ? saveSyncedFile(path, content, footerVersionRef.current) : saveThemeFile(path, content)
+    );
     if (!saved) return;
+    if (saved.sync) {
+      footerVersionRef.current = saved.sync.version;
+      postSyncTiming("footer: code save -> blocks", performance.now() - started);
+      setNotice(saved.sync.conflict || "Saved. The customizer's Footer options now follow this schema.");
+      if (history) loadHistory();
+    }
     setProject((p) => ({ ...p, files: { ...p.files, [path]: content } }));
     setDrafts((d) => {
       const next = { ...d };
@@ -235,7 +321,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       return next;
     });
     setPreviewKey((k) => k + 1);
-    announceThemeChange(isSettingsFile(path) ? "settings" : "code");
+    announceThemeChange(path === FOOTER_PATH ? "section:footer" : isSettingsFile(path) ? "settings" : "code");
     // A settings file is normalised by the server (defaults filled in): show it as saved
     if (isSettingsFile(path)) refreshRef.current();
   }
@@ -548,6 +634,17 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             >
               Save
             </button>
+            {activePath === FOOTER_PATH && (
+              <button
+                onClick={() => (history ? setHistory(null) : loadHistory())}
+                className={`rounded border px-2.5 py-1 ${
+                  history ? "border-[#161C2C] bg-[#161C2C] text-white" : "border-[#cecece] hover:bg-[#e8e8e8]"
+                }`}
+                title="The last 20 versions of this file"
+              >
+                History
+              </button>
+            )}
             <Link
               to="/admin/online-store/customize"
               target="_blank"
@@ -568,6 +665,46 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             </button>
           </div>
           </div>
+
+          {activePath === FOOTER_PATH && (
+            <div className="border-b border-[#e5e5e5] bg-[#eef6ff] px-3 py-1.5 text-[12px] text-[#1d3f6e]">
+              This file is linked to the Footer in the Customize editor: its schema is the Footer&apos;s options and
+              blocks. Changes made there are written here, and saving here updates it there.
+            </div>
+          )}
+
+          {notice && (
+            <div role="status" className="border-b border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[12px] text-emerald-800">
+              {notice}
+            </div>
+          )}
+
+          {error && activePath === FOOTER_PATH && (
+            <div role="alert" className="border-b border-red-200 bg-red-50 px-3 py-1.5 text-[12px] text-red-700">
+              Not saved: {error} The saved version keeps working until this is fixed.
+            </div>
+          )}
+
+          {history && activePath === FOOTER_PATH && (
+            <div className="max-h-56 overflow-y-auto border-b border-[#e5e5e5] bg-[#fbfbfb] px-3 py-2 text-[12px]">
+              <p className="mb-1 font-bold uppercase text-[#3b3b3b]">History (latest first)</p>
+              {history.history.length === 0 && <p className="text-[#6b6b6b]">No earlier versions yet.</p>}
+              {history.history.map((entry) => (
+                <div key={entry.index} className="flex items-center gap-3 border-t border-[#efefef] py-1 first:border-t-0">
+                  <span className="w-40 shrink-0">{new Date(entry.saved_at * 1000).toLocaleString()}</span>
+                  <span className="w-24 shrink-0 text-[#6b6b6b]">{SOURCE_LABELS[entry.source] || entry.source}</span>
+                  <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-[#6b6b6b]">{entry.preview.split("\n")[0]}</span>
+                  <button
+                    onClick={() => restoreVersion(entry)}
+                    disabled={busy}
+                    className="shrink-0 rounded border border-[#cecece] px-2 py-0.5 hover:bg-[#e8e8e8] disabled:opacity-40"
+                  >
+                    Restore
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {activePath && isSettingsFile(activePath) && (
             <div className="border-b border-[#e5e5e5] bg-[#fff8e5] px-3 py-1.5 text-[12px] text-[#6b4e00]">
