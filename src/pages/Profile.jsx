@@ -743,9 +743,6 @@ const handleLogout = () => {
                   ) : (
                     /* Empty State */
                     <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center bg-slate-50/50">
-                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400 mb-3">
-                        📍
-                      </div>
                       <h3 className="text-sm font-bold text-slate-800">
                         No saved addresses
                       </h3>
