@@ -1,6 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { apiGet, apiPatch, syncAccess } from "@/lib/api";
+import { getActiveStore, getSession } from "@/lib/auth";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
+
+// [IANA name, label]; the backend validates the name
+const TIME_ZONES = [
+  ["Asia/Kolkata", "(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi"],
+  ["Australia/Melbourne", "(GMT+10:00) Canberra, Melbourne"],
+  ["Europe/London", "(GMT+00:00) London"],
+  ["America/New_York", "(GMT-05:00) Eastern Time"],
+];
+
+const CURRENCIES = [
+  ["INR", "Indian Rupee (INR ₹)"],
+  ["AUD", "Australian Dollar (AUD $)"],
+  ["USD", "US Dollar (USD $)"],
+  ["GBP", "British Pound (GBP £)"],
+  ["EUR", "Euro (EUR €)"],
+];
+
+const REGIONS = ["Australia", "India", "United States", "United Kingdom"];
 
 const settingsMenu = [
   { icon: "⌂", label: "General" },
@@ -40,7 +60,7 @@ export default function AdminSettings() {
      GENERAL SETTINGS STATE
      ========================================================= */
 
-  const [storeName, setStoreName] = useState("Store");
+  const [storeName, setStoreName] = useState("");
 
   const [email, setEmail] = useState("");
 
@@ -48,33 +68,70 @@ export default function AdminSettings() {
 
   const [address, setAddress] = useState("");
 
+  const [currency, setCurrency] = useState("INR");
 
-  const [backupRegion, setBackupRegion] =
-    useState("Australia");
+  const [backupRegion, setBackupRegion] = useState("");
 
-  const [unitSystem, setUnitSystem] =
-    useState("Metric system");
+  const [unitSystem, setUnitSystem] = useState("metric");
 
-  const [weightUnit, setWeightUnit] =
-    useState("Kilogram (kg)");
+  const [weightUnit, setWeightUnit] = useState("kg");
 
-  const [timeZone, setTimeZone] = useState(
-    "(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi"
-  );
+  const [timeZone, setTimeZone] = useState("Asia/Kolkata");
 
 
-  const [orderPrefix, setOrderPrefix] =
-    useState("#");
+  const [orderPrefix, setOrderPrefix] = useState("#");
 
-  const [orderSuffix, setOrderSuffix] =
-    useState("");
+  const [orderSuffix, setOrderSuffix] = useState("");
 
 
-  const [fulfillment, setFulfillment] =
-    useState("gift");
+  const [fulfillment, setFulfillment] = useState("gift_cards");
 
-  const [autoArchive, setAutoArchive] =
-    useState(true);
+  const [autoArchive, setAutoArchive] = useState(true);
+
+
+  /* Loading and saving against the backend */
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState(null); // { type: "ok" | "error", text }
+  const [errors, setErrors] = useState({});
+
+  const storeId = getActiveStore(getSession())?.storeId;
+
+  useEffect(() => {
+    if (!storeId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    apiGet(`/api/v1/stores/${storeId}/`).then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        const s = res.data;
+        setStoreName(s.storeName ?? "");
+        setEmail(s.contactEmail ?? "");
+        setPhone(s.phone ?? "");
+        setAddress(s.address ?? "");
+        setCurrency(s.currency ?? "INR");
+        setBackupRegion(s.backupRegion ?? "");
+        setUnitSystem(s.unitSystem ?? "metric");
+        setWeightUnit(s.weightUnit ?? "kg");
+        setTimeZone(s.timezone ?? "Asia/Kolkata");
+        setOrderPrefix(s.orderPrefix ?? "#");
+        setOrderSuffix(s.orderSuffix ?? "");
+        setFulfillment(s.autoFulfill ?? "gift_cards");
+        setAutoArchive(s.autoArchive ?? true);
+      } else {
+        setMessage({ type: "error", text: res.error });
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [storeId]);
 
 
   /* =========================================================
@@ -101,9 +158,80 @@ export default function AdminSettings() {
      SAVE
      ========================================================= */
 
-  const handleSave = () => {
-    alert("General settings saved successfully.");
+  const handleSave = async () => {
+    if (!storeId || saving) return;
+
+    setSaving(true);
+    setMessage(null);
+    setErrors({});
+
+    const res = await apiPatch(`/api/v1/stores/${storeId}/`, {
+      storeName,
+      contactEmail: email,
+      phone,
+      address,
+      currency,
+      backupRegion,
+      unitSystem,
+      weightUnit,
+      timezone: timeZone,
+      orderPrefix,
+      orderSuffix,
+      autoFulfill: fulfillment,
+      autoArchive,
+    });
+
+    setSaving(false);
+
+    if (res.ok) {
+      syncAccess({ force: true }); // the sidebar shows the store name
+      setMessage({ type: "ok", text: "General settings saved." });
+      return;
+    }
+
+    setErrors(res.fieldErrors);
+    setMessage({
+      type: "error",
+      text:
+        res.status === 403
+          ? "Only the store owner can change store settings."
+          : res.formError || "Please fix the highlighted fields.",
+    });
   };
+
+  const FIELD_NAMES = {
+    storeName: "Store name",
+    contactEmail: "Store email",
+    phone: "Phone number",
+    address: "Store address",
+    currency: "Currency",
+    backupRegion: "Backup region",
+    unitSystem: "Unit system",
+    weightUnit: "Weight unit",
+    timezone: "Time zone",
+    orderPrefix: "Order prefix",
+    orderSuffix: "Order suffix",
+    autoFulfill: "Order processing",
+  };
+
+  const saveBanner = message && (
+    <div
+      className={`mb-5 rounded-xl border px-4 py-3 text-sm ${
+        message.type === "ok"
+          ? "border-green-200 bg-green-50 text-green-800"
+          : "border-red-200 bg-red-50 text-red-700"
+      }`}
+    >
+      <p>{message.text}</p>
+      {Object.entries(errors).map(([name, text]) => (
+        <p key={name} className="mt-1">
+          {FIELD_NAMES[name] || name}: {text}
+        </p>
+      ))}
+    </div>
+  );
+
+  const saveLabel = saving ? "Saving…" : "Save";
 
 
   /* =========================================================
@@ -113,6 +241,8 @@ export default function AdminSettings() {
   const renderGeneral = () => {
     return (
       <div className="space-y-5">
+
+        {saveBanner}
 
         {/* =====================================================
             BUSINESS DETAILS
@@ -153,7 +283,7 @@ export default function AdminSettings() {
                 <div>
 
                   <p className="text-sm font-medium text-slate-800">
-                    Red D Beverages
+                    {storeName || "Your store"}
                   </p>
 
                   <p className="mt-1 text-sm text-slate-500">
@@ -387,23 +517,17 @@ export default function AdminSettings() {
               </p>
 
 
-              <button
-                type="button"
-                onClick={() =>
-                  alert("Currency settings clicked")
-                }
-                className="mt-3 flex w-full items-center justify-between rounded-lg border border-slate-300 px-4 py-3 text-left hover:bg-slate-50"
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none focus:border-slate-500"
               >
-
-                <span className="text-sm">
-                  Australian Dollar (AUD $)
-                </span>
-
-                <span className="text-slate-400">
-                  ⋯
-                </span>
-
-              </button>
+                {CURRENCIES.map(([code, label]) => (
+                  <option key={code} value={code}>
+                    {label}
+                  </option>
+                ))}
+              </select>
 
             </div>
 
@@ -425,21 +549,11 @@ export default function AdminSettings() {
                 className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none focus:border-slate-500"
               >
 
-                <option>
-                  Australia
-                </option>
+                <option value="">Not set</option>
 
-                <option>
-                  India
-                </option>
-
-                <option>
-                  United States
-                </option>
-
-                <option>
-                  United Kingdom
-                </option>
+                {REGIONS.map((region) => (
+                  <option key={region}>{region}</option>
+                ))}
 
               </select>
 
@@ -471,11 +585,11 @@ export default function AdminSettings() {
                   className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none focus:border-slate-500"
                 >
 
-                  <option>
+                  <option value="metric">
                     Metric system
                   </option>
 
-                  <option>
+                  <option value="imperial">
                     Imperial system
                   </option>
 
@@ -499,19 +613,19 @@ export default function AdminSettings() {
                   className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none focus:border-slate-500"
                 >
 
-                  <option>
+                  <option value="kg">
                     Kilogram (kg)
                   </option>
 
-                  <option>
+                  <option value="g">
                     Gram (g)
                   </option>
 
-                  <option>
+                  <option value="lb">
                     Pound (lb)
                   </option>
 
-                  <option>
+                  <option value="oz">
                     Ounce (oz)
                   </option>
 
@@ -539,21 +653,11 @@ export default function AdminSettings() {
                 className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none focus:border-slate-500"
               >
 
-                <option>
-                  (GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi
-                </option>
-
-                <option>
-                  (GMT+10:00) Canberra, Melbourne
-                </option>
-
-                <option>
-                  (GMT+00:00) London
-                </option>
-
-                <option>
-                  (GMT-05:00) Eastern Time
-                </option>
+                {TIME_ZONES.map(([zone, label]) => (
+                  <option key={zone} value={zone}>
+                    {label}
+                  </option>
+                ))}
 
               </select>
 
@@ -709,10 +813,10 @@ export default function AdminSettings() {
                   <input
                     type="radio"
                     name="fulfillment"
-                    value="gift"
-                    checked={fulfillment === "gift"}
+                    value="gift_cards"
+                    checked={fulfillment === "gift_cards"}
                     onChange={() =>
-                      setFulfillment("gift")
+                      setFulfillment("gift_cards")
                     }
                     className="h-4 w-4"
                   />
@@ -1027,9 +1131,10 @@ export default function AdminSettings() {
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-lg bg-[#161c2c] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#252e45]"
+            disabled={saving || loading}
+            className="rounded-lg bg-[#161c2c] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#252e45] disabled:opacity-60"
           >
-            Save
+            {saveLabel}
           </button>
 
         </div>
@@ -1257,9 +1362,10 @@ export default function AdminSettings() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="rounded-lg bg-[#161c2c] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#252e45]"
+                disabled={saving || loading}
+                className="rounded-lg bg-[#161c2c] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#252e45] disabled:opacity-60"
               >
-                Save
+                {saveLabel}
               </button>
 
             )}
