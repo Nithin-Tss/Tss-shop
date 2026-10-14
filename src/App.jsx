@@ -4,7 +4,8 @@ import Home from "@/pages/Home";
 import Signin from "@/pages/Signin";
 import Signup from "@/pages/Signup";
 import Onboarding from "@/pages/Onboarding";
-import Profile from "@/pages/Profile";
+import Account from "@/pages/Account";
+import OrderHistory from "@/pages/OrderHistory";
 import EditorDemo from "@/pages/EditorDemo";
 import AdminOnlineStore from "@/pages/AdminOnlineStore";
 import AdminCustomize from "@/pages/AdminCustomize";
@@ -49,7 +50,10 @@ export default function App() {
       <Route path="/auth/onboarding" element={<Onboarding />} />
       {/* Admin pages and the profile need a signed-in user; otherwise go to sign-in first */}
       <Route element={<RequireSignIn />}>
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={<Account />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/account/orders" element={<OrderHistory />} />
+        <Route path="/orders" element={<OrderHistory />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/online-store/home" element={<AdminHome />} />
         <Route path="/admin/online-store/settings" element={<AdminSettings />} />
