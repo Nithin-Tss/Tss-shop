@@ -1978,16 +1978,19 @@ export default function AdminCustomizePage() {
                 Duplicate
               </button>
 
-              <button
-                type="button"
-                onClick={() => removeBlock(shown, shownBlockIndex)}
-                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
-              >
-                <svg {...iconProps} className="h-3.5 w-3.5">
-                  <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                </svg>
-                Delete
-              </button>
+              {/* A section's required blocks (e.g. Product information) can be hidden, not deleted */}
+              {!shownSpec.required_blocks?.includes(shownBlock.type) && (
+                <button
+                  type="button"
+                  onClick={() => removeBlock(shown, shownBlockIndex)}
+                  className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                >
+                  <svg {...iconProps} className="h-3.5 w-3.5">
+                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                  </svg>
+                  Delete
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -3020,17 +3023,19 @@ function SectionBlocks({ sectionId, spec, blocks, drag, dropTarget, startDrag, o
                     </svg>
                   </button>
 
-                  <button
-                    type="button"
-                    className={`${iconButton} hover:bg-red-50 hover:text-red-600`}
-                    onClick={() => onRemove(i)}
-                    aria-label={`Delete ${blockSpec.name}`}
-                    title="Delete"
-                  >
-                    <svg {...iconProps} className="h-3.5 w-3.5">
-                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                    </svg>
-                  </button>
+                  {!spec.required_blocks?.includes(block.type) && (
+                    <button
+                      type="button"
+                      className={`${iconButton} hover:bg-red-50 hover:text-red-600`}
+                      onClick={() => onRemove(i)}
+                      aria-label={`Delete ${blockSpec.name}`}
+                      title="Delete"
+                    >
+                      <svg {...iconProps} className="h-3.5 w-3.5">
+                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </li>
             );
