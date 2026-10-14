@@ -1656,9 +1656,9 @@ export default function AdminCustomizePage() {
           >
         {/* List view (keeps its scroll position while editing) */}
         <div className="flex h-full w-1/3 flex-col overflow-y-auto" inert={panelView !== 0} aria-hidden={panelView !== 0}>
-          <p className="px-4 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-wider text-[#8A94A8]">
-            {PAGE_LABELS[page]}
-          </p>
+          <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-[#161C2C]">{PAGE_LABELS[page]}</h2>
+
+          <GroupHeading>Header</GroupHeading>
 
           <LayoutRows
             part="top"
@@ -1669,6 +1669,8 @@ export default function AdminCustomizePage() {
               setSelected("theme");
             }}
           />
+
+          <GroupHeading>Template</GroupHeading>
 
           <ul className="px-2">
             {template.order.map((id, i) => {
@@ -1949,6 +1951,8 @@ export default function AdminCustomizePage() {
               </button>
             )}
           </div>
+
+          <GroupHeading>Footer</GroupHeading>
 
           <LayoutRows
             part="bottom"
@@ -3589,6 +3593,13 @@ const LAYOUT_ROWS = [
   { part: "top", group: "header", name: "Header", hint: "Logo and navigation", icon: "M3 5h18v5H3zM7 15h10M9 19h6" },
   { part: "bottom", group: "footer", name: "Footer", hint: "Links, social and copyright", icon: "M3 14h18v5H3zM7 9h10M9 5h6" },
 ];
+
+// A labelled group in the sections list (Header / Template / Footer), divided from the one above
+function GroupHeading({ children }) {
+  return (
+    <h3 className="mt-2 border-t border-[#E3E7ED] px-4 pb-1.5 pt-4 text-sm font-semibold text-[#161C2C]">{children}</h3>
+  );
+}
 
 function LayoutRows({ part, selected, themeGroup, footerSynced = false, onOpen }) {
   const rows = LAYOUT_ROWS.filter((row) => row.part === part);
