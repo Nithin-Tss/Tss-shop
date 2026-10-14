@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
 
@@ -212,13 +213,12 @@ export default function AdminReports() {
               </h1>
             </div>
 
-            <button
-              type="button"
-              onClick={handleNewExploration}
+            <Link
+              to="/admin/online-store/reports/new"
               className="inline-flex items-center justify-center rounded-lg bg-[#202223] px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-[#303336] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#202223]/20"
             >
               New exploration
-            </button>
+            </Link>
           </div>
 
           {/* MAIN CARD CONTAINER */}

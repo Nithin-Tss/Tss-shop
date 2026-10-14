@@ -26,6 +26,7 @@ import AdminCustomers from "@/pages/AdminCustomers";
 import AdminAddCustomer from "@/pages/AdminAddCustomer";
 import AdminOverview from "@/pages/AdminOverview";
 import AdminReports from "@/pages/AdminReports";
+import AdminReportExploration from "@/pages/AdminReportExploration";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminDiscounts from "@/pages/AdminDiscounts";
 import AdminShipping from "@/pages/AdminShipping";
@@ -90,6 +91,7 @@ export default function App() {
         <Route element={<RequirePermission permission="reports.view" />}>
           <Route path="/admin/online-store/overview" element={<AdminOverview />} />
           <Route path="/admin/online-store/reports" element={<AdminReports />} />
+          <Route path="/admin/online-store/reports/new" element={<AdminReportExploration />} />
           <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
         </Route>
         <Route element={<RequirePermission permission="orders.manage" />}>
