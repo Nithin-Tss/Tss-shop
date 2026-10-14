@@ -43,21 +43,24 @@ const newSectionId = (type) => `${type}-${Math.random().toString(36).slice(2, 6)
 
 const MAX_SECTIONS = 25;
 
-// The footer is a synced section: its options live in sections/footer.liquid's schema, and
-// a change here is written into that file (and the other way round). Its values are kept in
-// data.sections.footer as { type: "footer", settings, blocks }.
-const FOOTER = "footer";
+// Synced sections (the header and the footer): their options live in the schema of
+// sections/<name>.liquid, and a change here is written into that file (and the other way
+// round). Which ones a theme has comes from the server; their values are kept in
+// data.sections[name] as { type: name, settings, blocks }. They are on every page.
+const isSynced = (d, id) => Boolean(id && d?.sections?.[id]);
 
-// The section `id` of a page, or the synced footer
+const syncedNames = (d) => Object.keys(d?.sections || {});
+
+// The section `id` of a page, or a synced section
 function sectionIn(d, page, id) {
-  return id === FOOTER ? d.sections?.footer : d.templates[page]?.sections[id];
+  return isSynced(d, id) ? d.sections[id] : d.templates[page]?.sections[id];
 }
 
-const footerJson = (d) => JSON.stringify(d?.sections?.footer ?? null);
+const syncedJson = (d, name) => JSON.stringify(d?.sections?.[name] ?? null);
 
-// What the server stores for the footer: its settings and blocks
-function footerForSave(footer) {
-  return { settings: footer.settings, blocks: footer.blocks };
+// What the server stores for a synced section: its settings and blocks
+function syncedForSave(section) {
+  return { settings: section.settings, blocks: section.blocks };
 }
 
 const iconProps = {
@@ -334,9 +337,16 @@ export default function AdminCustomizePage() {
 
   const engineRef = useRef({});
 
-  // The synced footer: the file version this editor last saw (to detect someone else's change),
-  // when the last change was made, and preview updates waiting for the preview's "patched" reply
-  const footerRef = useRef({ version: null, changedAt: 0, kind: "", quickSave: false, token: 0, waiting: {} });
+  // Synced sections: per section, the file version this editor last saw (to detect someone
+  // else's change) and when its last change was made; preview updates waiting for the
+  // preview's "patched" reply (timing); and whether the next save should go out quickly
+  const syncedRef = useRef({ sections: {}, quickSave: false, token: 0, waiting: {} });
+
+  function syncedState(name) {
+    const all = syncedRef.current.sections;
+    all[name] = all[name] || { version: null, changedAt: 0, kind: "", savedChangeAt: 0 };
+    return all[name];
+  }
 
   useEffect(() => {
     Promise.all([
@@ -348,19 +358,18 @@ export default function AdminCustomizePage() {
       getSyncedSections().catch(() => ({})),
     ])
       .then(([schemaData, settingsData, customizerData, collectionData, productData, synced]) => {
-        // The footer's options come from its file's schema; its values from its saved JSON
-        if (synced?.footer) {
-          schemaData = { ...schemaData, sections: { ...schemaData.sections, [FOOTER]: synced.footer.spec } };
-          settingsData = {
-            ...settingsData,
-            sections: { ...(settingsData.sections || {}), [FOOTER]: { type: FOOTER, ...synced.footer.values } },
-          };
-          footerRef.current.version = synced.footer.version;
-        } else if (settingsData.sections) {
-          // No synced footer file in this theme: nothing to edit or save for it
-          settingsData = { ...settingsData };
-          delete settingsData.sections;
+        // A synced section's options come from its file's schema; its values from its saved JSON.
+        // Only the sections this theme has a file for are edited (and saved) here.
+        const sections = {};
+        schemaData = { ...schemaData, sections: { ...schemaData.sections } };
+        for (const [name, info] of Object.entries(synced || {})) {
+          schemaData.sections[name] = info.spec;
+          sections[name] = { type: name, ...info.values };
+          syncedState(name).version = info.version;
         }
+        settingsData = { ...settingsData };
+        if (Object.keys(sections).length) settingsData.sections = sections;
+        else delete settingsData.sections;
         lastSavedRef.current = { data: settingsData, customizer: customizerData };
         setSchema(schemaData);
         setData(settingsData);
@@ -435,7 +444,7 @@ export default function AdminCustomizePage() {
     const t = d.templates[pageRef.current];
     return {
       settings: JSON.stringify(d.settings),
-      footer: footerJson(d),
+      synced: Object.fromEntries(syncedNames(d).map((name) => [name, syncedJson(d, name)])),
       order,
       sections: Object.fromEntries(order.map((id) => [id, JSON.stringify(t.sections[id])])),
     };
@@ -476,46 +485,47 @@ export default function AdminCustomizePage() {
       .catch((e) => setPreviewError(e.message));
   }
 
-  // The synced footer: only it is rendered (one quick request) and swapped in
-  function requestFooter() {
+  // A synced section (header, footer): only it is rendered (one quick request) and swapped in
+  function requestSynced(name) {
     const sync = syncRef.current;
-    if (sync.inflight[FOOTER]) {
-      sync.again[FOOTER] = true;
+    if (sync.inflight[name]) {
+      sync.again[name] = true;
       return;
     }
     const d = dataRef.current;
-    const requested = footerJson(d);
+    const requested = syncedJson(d, name);
     const gen = sync.gen;
-    const footer = footerRef.current;
+    const state = syncedState(name);
+    const meta = syncedRef.current;
     // Timed from the change to the preview's "patched" reply
     let token = "";
-    if (footer.changedAt) {
-      token = String(++footer.token);
-      footer.waiting[token] = { at: footer.changedAt, kind: footer.kind || "footer: sidebar -> preview" };
-      footer.changedAt = 0;
-      footer.kind = "";
+    if (state.changedAt) {
+      token = String(++meta.token);
+      meta.waiting[token] = { at: state.changedAt, kind: state.kind || `${name}: sidebar -> preview`, clock: state.clock };
+      state.changedAt = 0;
+      state.kind = "";
     }
-    sync.inflight[FOOTER] = true;
+    sync.inflight[name] = true;
 
-    previewTheme(d, { section: FOOTER, ...previewTarget() })
+    previewTheme(d, { section: name, ...previewTarget() })
       .then((res) => {
         if (gen !== sync.gen || !sync.rendered) return;
-        postToPreview({ type: "patch", id: FOOTER, html: res.html, index: Infinity, token });
-        sync.rendered.footer = requested;
+        postToPreview({ type: "patch", id: name, html: res.html, index: Infinity, token });
+        sync.rendered.synced = { ...sync.rendered.synced, [name]: requested };
         setPreviewError("");
       })
       .catch((e) => setPreviewError(e.message))
       .finally(() => {
         if (gen !== sync.gen) return;
-        sync.inflight[FOOTER] = false;
-        sync.again[FOOTER] = false;
+        sync.inflight[name] = false;
+        sync.again[name] = false;
         engineRef.current.scheduleSync();
       });
   }
 
   function requestSection(id) {
-    if (id === FOOTER) {
-      requestFooter();
+    if (isSynced(dataRef.current, id)) {
+      requestSynced(id);
       return;
     }
     const sync = syncRef.current;
@@ -574,8 +584,10 @@ export default function AdminCustomizePage() {
       return;
     }
 
-    // The footer changed: just it is re-rendered and swapped in
-    if (now.footer !== before.footer) requestSection(FOOTER);
+    // A synced section (header, footer) changed: just it is re-rendered and swapped in
+    for (const name of Object.keys(now.synced)) {
+      if (now.synced[name] !== before.synced?.[name]) requestSection(name);
+    }
 
     // The default layout shows when there are no sections: switching to or from it needs a full render
     if (!now.order.length || !before.order.length) {
@@ -617,12 +629,14 @@ export default function AdminCustomizePage() {
   function diffForSave(before, after) {
     const changes = {};
     if (JSON.stringify(before.settings) !== JSON.stringify(after.settings)) changes.settings = after.settings;
-    // The synced footer is saved on its own path, which also writes it into sections/footer.liquid
-    if (after.sections?.footer && footerJson(before) !== footerJson(after)) {
-      changes.sections = { [FOOTER]: footerForSave(after.sections.footer) };
-      changes.section_versions = { [FOOTER]: footerRef.current.version };
+    // Synced sections are saved on their own path, which also writes them into sections/<name>.liquid
+    for (const name of syncedNames(after)) {
+      if (syncedJson(before, name) === syncedJson(after, name)) continue;
+      const state = syncedState(name);
+      changes.sections = { ...changes.sections, [name]: syncedForSave(after.sections[name]) };
+      changes.section_versions = { ...changes.section_versions, [name]: state.version };
       changes.client = SYNC_CLIENT;
-      changes.started_at = footerRef.current.savedChangeAt || Date.now();
+      changes.started_at = Math.min(changes.started_at || Infinity, state.savedChangeAt || Date.now());
     }
     for (const name of Object.keys(after.templates)) {
       const a = before.templates[name] || { order: [], sections: {} };
@@ -674,12 +688,12 @@ export default function AdminCustomizePage() {
         changes ? patchThemeSettings(changes) : null,
         customizerChanged ? saveThemeCustomizer(customizerNow) : null,
       ]);
-      const footerSaved = saved?.sections?.[FOOTER];
-      if (footerSaved) {
-        footerRef.current.version = footerSaved.version;
-        footerRef.current.savedChangeAt = 0;
-        // Someone changed the footer's code meanwhile: this change won, and they are told where theirs is
-        if (footerSaved.conflict) setNotice(footerSaved.conflict);
+      for (const [name, result] of Object.entries(saved?.sections || {})) {
+        const state = syncedState(name);
+        state.version = result.version;
+        state.savedChangeAt = 0;
+        // Someone changed the section's code meanwhile: this change won, and they are told where theirs is
+        if (result.conflict) setNotice(result.conflict);
       }
       lastSavedRef.current = { data: snapshot, customizer: customizerNow };
       // Tell an open code editor tab: it shows these settings as JSON
@@ -717,12 +731,13 @@ export default function AdminCustomizePage() {
   // The code editor (another tab) saved something: Liquid code re-renders the preview;
   // settings JSON is loaded here, unless there are unsaved edits that it would overwrite.
   async function externalChange(kind) {
-    // The footer's file was saved in Edit code (another tab): only the footer is updated
-    if (kind === "section:footer") {
+    // A synced section's file was saved in Edit code (another tab): only that section is updated
+    if (kind.startsWith("section:")) {
+      const name = kind.slice("section:".length);
       try {
-        const synced = await getSyncedSections();
-        if (synced?.footer && synced.footer.version !== footerRef.current.version) {
-          sectionEvent({ section: FOOTER, source: "code", ...synced.footer });
+        const info = (await getSyncedSections())?.[name];
+        if (info && info.version !== syncedState(name).version) {
+          sectionEvent({ section: name, source: "code", ...info });
         }
       } catch {
         // the live event (or the next reload) brings it
@@ -740,9 +755,9 @@ export default function AdminCustomizePage() {
     try {
       const fresh = { ...(await getThemeSettings()) };
       if (saveStateRef.current !== "saved") return;
-      // The synced footer keeps its own shape (and is updated by its own events)
-      const footer = dataRef.current?.sections?.footer;
-      if (footer) fresh.sections = { ...(fresh.sections || {}), [FOOTER]: footer };
+      // Synced sections keep their own shape (and are updated by their own events)
+      const synced = dataRef.current?.sections;
+      if (synced) fresh.sections = synced;
       else delete fresh.sections;
       lastSavedRef.current = { data: fresh, customizer: customizerRef.current };
       historyRef.current = { past: [], future: [], lastKey: null, lastTime: 0 };
@@ -761,60 +776,121 @@ export default function AdminCustomizePage() {
     }
   }
 
+  // Synced sections that appeared after the customizer opened (e.g. a theme got sections/header.liquid):
+  // they are added to the panel, the saved state and the undo history - nothing is saved back.
+  function addSyncedSections(found) {
+    const current = dataRef.current;
+    const saved = lastSavedRef.current;
+    const added = Object.entries(found || {}).filter(([name, info]) => info?.spec && info?.values && !isSynced(current, name));
+    if (!current || !saved || !added.length) return [];
+    const values = {};
+    for (const [name, info] of added) {
+      values[name] = { type: name, ...info.values };
+      syncedState(name).version = info.version;
+    }
+    const withThem = (d) => ({ ...d, sections: { ...(d.sections || {}), ...values } });
+    setSchema((sc) => (sc ? { ...sc, sections: { ...sc.sections, ...Object.fromEntries(added.map(([name, info]) => [name, info.spec])) } } : sc));
+    // Undo/redo snapshots get them too, so going back never drops the section from the sidebar
+    const history = historyRef.current;
+    history.past = history.past.map(withThem);
+    history.future = history.future.map(withThem);
+    lastSavedRef.current = { ...saved, data: withThem(saved.data) };
+    const next = withThem(current);
+    dataRef.current = next;
+    setData(next);
+    return added.map(([name]) => name);
+  }
+
+  // The preview asked for a section this customizer doesn't know: if the server has it as a
+  // synced section, add it and select it
+  async function selectUnknownSection(id, block) {
+    try {
+      addSyncedSections(await getSyncedSections());
+    } catch {
+      return; // offline: the click does nothing, as before
+    }
+    if (!isSynced(dataRef.current, id) || !editModeRef.current) return;
+    fromPreviewRef.current = true;
+    pendingBlockRef.current = Number.isInteger(block) && dataRef.current.sections[id].blocks?.[block] ? block : null;
+    setSelected(id);
+  }
+
   // A synced section changed elsewhere (Edit code, a restore, or this editor in another tab):
   // its options and values are replaced here and its preview re-rendered - nothing is saved back.
   function sectionEvent(event) {
-    if (event.section !== FOOTER || !event.values) return;
-    const footer = footerRef.current;
-    if (footer.version !== null && event.version <= footer.version && event.source !== "restore") return;
-    footer.version = event.version;
-
-    if (event.spec) {
-      setSchema((current) => (current ? { ...current, sections: { ...current.sections, [FOOTER]: event.spec } } : current));
-    }
-
+    const name = event.section;
     const current = dataRef.current;
     const saved = lastSavedRef.current;
-    if (!current || !saved) return;
-    const incoming = { type: FOOTER, ...event.values };
-    const unsaved = footerJson(current) !== footerJson(saved.data);
+    if (!event.values || !saved) return;
+    if (!isSynced(current, name)) {
+      addSyncedSections({ [name]: event });
+      return;
+    }
+    const state = syncedState(name);
+    if (state.version !== null && event.version <= state.version && event.source !== "restore") return;
+    state.version = event.version;
+    const label = event.spec?.name || name;
+
+    if (event.spec) {
+      setSchema((s) => (s ? { ...s, sections: { ...s.sections, [name]: event.spec } } : s));
+    }
+
+    const incoming = { type: name, ...event.values };
+    const unsaved = syncedJson(current, name) !== syncedJson(saved.data, name);
     if (unsaved) {
       // Both changed it: the edit here is saved on top (latest wins); theirs stays in the file's History
       setNotice(
         event.source === "customizer"
-          ? "The footer was changed in another tab. Your change here is being saved on top of it."
-          : "The footer's code was changed in Edit code. Your change here is being saved on top; the code editor's version is in its History."
+          ? `The ${label.toLowerCase()} was changed in another tab. Your change here is being saved on top of it.`
+          : `The ${label.toLowerCase()}'s code was changed in Edit code. Your change here is being saved on top; the code editor's version is in its History.`
       );
       return;
     }
 
-    if (JSON.stringify(incoming) === footerJson(current)) return;
-    const next = { ...current, sections: { ...(current.sections || {}), [FOOTER]: incoming } };
-    lastSavedRef.current = { ...saved, data: { ...saved.data, sections: { ...(saved.data.sections || {}), [FOOTER]: incoming } } };
+    if (JSON.stringify(incoming) === syncedJson(current, name)) return;
+    const next = { ...current, sections: { ...current.sections, [name]: incoming } };
+    lastSavedRef.current = { ...saved, data: { ...saved.data, sections: { ...(saved.data.sections || {}), [name]: incoming } } };
     // Timed until the preview shows it (from the moment Save was pressed in Edit code)
     if (event.source !== "customizer" && event.started_at && Date.now() - event.started_at < 60000) {
-      footer.changedAt = Number(event.started_at);
-      footer.kind = "footer: code save -> preview";
-      footer.clock = "epoch";
+      state.changedAt = Number(event.started_at);
+      state.kind = `${name}: code save -> preview`;
+      state.clock = "epoch";
     }
     dataRef.current = next;
     setData(next);
-    if (selectedRef.current === FOOTER && selectedBlockRef.current !== null && !incoming.blocks?.[selectedBlockRef.current]) {
+    if (selectedRef.current === name && selectedBlockRef.current !== null && !incoming.blocks?.[selectedBlockRef.current]) {
       setSelectedBlock(null);
     }
-    if (event.source === "code") setNotice("Footer updated from Edit code.");
-    else if (event.source === "restore") setNotice("An earlier footer version was restored.");
+    if (event.source === "code") setNotice(`${label} updated from Edit code.`);
+    else if (event.source === "restore") setNotice(`An earlier ${label.toLowerCase()} version was restored.`);
   }
 
-  engineRef.current = { renderFull, scheduleSync, flushSave, registerPendingImage, postToPreview, externalChange, sectionEvent };
+  engineRef.current = {
+    renderFull, scheduleSync, flushSave, registerPendingImage, postToPreview, externalChange, sectionEvent, selectUnknownSection,
+    addSyncedSections,
+  };
 
   useEffect(() => onThemeChange((kind) => engineRef.current.externalChange(kind)), []);
 
-  // Live events from the server: a change to the footer made in Edit code or another editor
+  // Live events from the server: a change to a synced section made in Edit code or another editor
+  const hasSynced = syncedNames(data).length > 0;
+
+  // Coming back to this tab: pick up synced sections added meanwhile (their rows open their panels)
   useEffect(() => {
-    if (status !== "ready" || footerRef.current.version === null) return undefined;
-    return subscribeThemeEvents((event) => engineRef.current.sectionEvent(event));
+    if (status !== "ready") return undefined;
+    const onFocus = () => {
+      if (document.visibilityState !== "visible") return;
+      getSyncedSections()
+        .then((found) => engineRef.current.addSyncedSections(found))
+        .catch(() => {});
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [status]);
+  useEffect(() => {
+    if (status !== "ready" || !hasSynced) return undefined;
+    return subscribeThemeEvents((event) => engineRef.current.sectionEvent(event));
+  }, [status, hasSynced]);
 
   // ---------------- Changes and history ----------------
 
@@ -834,21 +910,23 @@ export default function AdminCustomizePage() {
     history.lastTime = now;
     const next = structuredClone(current);
     mutator(next);
-    markFooterChange(current, next);
+    markSyncedChanges(current, next);
     dataRef.current = next;
     setData(next);
     setHistoryTick((t) => t + 1);
   }, []);
 
-  // A footer change shows in the preview at once and is saved after a short pause (200 ms)
-  function markFooterChange(before, after) {
-    if (footerJson(before) === footerJson(after)) return;
-    const footer = footerRef.current;
-    footer.changedAt = performance.now();
-    footer.kind = "footer: sidebar -> preview";
-    footer.clock = "perf";
-    footer.quickSave = true;
-    footer.savedChangeAt = Date.now();
+  // A synced section's change shows in the preview at once and is saved after a short pause (200 ms)
+  function markSyncedChanges(before, after) {
+    for (const name of syncedNames(after)) {
+      if (syncedJson(before, name) === syncedJson(after, name)) continue;
+      const state = syncedState(name);
+      state.changedAt = performance.now();
+      state.kind = `${name}: sidebar -> preview`;
+      state.clock = "perf";
+      state.savedChangeAt = Date.now();
+      syncedRef.current.quickSave = true;
+    }
   }
 
   const undo = useCallback(() => {
@@ -857,7 +935,7 @@ export default function AdminCustomizePage() {
     history.future.push(dataRef.current);
     const previous = history.past.pop();
     history.lastKey = null;
-    markFooterChange(dataRef.current, previous);
+    markSyncedChanges(dataRef.current, previous);
     dataRef.current = previous;
     setData(previous);
     setHistoryTick((t) => t + 1);
@@ -869,7 +947,7 @@ export default function AdminCustomizePage() {
     history.past.push(dataRef.current);
     const next = history.future.pop();
     history.lastKey = null;
-    markFooterChange(dataRef.current, next);
+    markSyncedChanges(dataRef.current, next);
     dataRef.current = next;
     setData(next);
     setHistoryTick((t) => t + 1);
@@ -916,8 +994,8 @@ export default function AdminCustomizePage() {
   useEffect(() => {
     if (status !== "ready") return;
     engineRef.current.scheduleSync();
-    const quick = footerRef.current.quickSave;
-    footerRef.current.quickSave = false;
+    const quick = syncedRef.current.quickSave;
+    syncedRef.current.quickSave = false;
     scheduleSave(quick ? 200 : 900);
   }, [data, customizer]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1000,10 +1078,10 @@ export default function AdminCustomizePage() {
         engineRef.current.scheduleSync();
       } else if (message.type === "patched") {
         // A section swap the customizer timed: "change made -> preview updated"
-        const waiting = footerRef.current.waiting[message.token];
+        const waiting = syncedRef.current.waiting[message.token];
         if (waiting) {
-          delete footerRef.current.waiting[message.token];
-          const ms = waiting.kind === "footer: code save -> preview" ? Date.now() - waiting.at : performance.now() - waiting.at;
+          delete syncedRef.current.waiting[message.token];
+          const ms = waiting.clock === "epoch" ? Date.now() - waiting.at : performance.now() - waiting.at;
           if (ms >= 0) postSyncTiming(waiting.kind, ms);
         }
       } else if (message.type === "need-reload") {
@@ -1017,7 +1095,10 @@ export default function AdminCustomizePage() {
       } else if (message.type === "context" && typeof message.id === "string" && editModeRef.current) {
         // Edit mode: right-click selects the section or block and offers "Edit code"
         const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
-        if (!section) return;
+        if (!section) {
+          if (message.id) engineRef.current.selectUnknownSection(message.id, message.block);
+          return;
+        }
         const block = Number.isInteger(message.block) && section.blocks?.[message.block] ? message.block : null;
         fromPreviewRef.current = true;
         if (message.id === selectedRef.current) {
@@ -1046,6 +1127,9 @@ export default function AdminCustomizePage() {
         } else if (section) {
           pendingBlockRef.current = block;
           setSelected(message.id);
+        } else {
+          // Not in this customizer yet (e.g. a synced section added after it opened)
+          engineRef.current.selectUnknownSection(message.id, message.block);
         }
       } else if (message.type === "escape" && editModeRef.current) {
         setSelectedBlock(null);
@@ -1321,8 +1405,8 @@ export default function AdminCustomizePage() {
 
       const destination = destinationId && sectionIn(d, page, destinationId);
 
-      // The footer's blocks stay in the footer (its block types are its own)
-      if (destination !== from && (payload.sectionId === FOOTER || destinationId === FOOTER)) return;
+      // A synced section's blocks stay in it (its block types are its own)
+      if (destination !== from && (isSynced(d, payload.sectionId) || isSynced(d, destinationId))) return;
 
       // Only sections that accept this block type
       if (!destination || !schema.sections[destination.type].blocks?.[block.type]) return;
@@ -1664,7 +1748,13 @@ export default function AdminCustomizePage() {
             part="top"
             selected={selected}
             themeGroup={themeGroup}
+            synced={data.sections}
             onOpen={(group) => {
+              // A synced section (the header) has its own panel: its options come from its file
+              if (isSynced(data, group)) {
+                setSelected(group);
+                return;
+              }
               setThemeGroup(group);
               setSelected("theme");
             }}
@@ -1954,11 +2044,11 @@ export default function AdminCustomizePage() {
             part="bottom"
             selected={selected}
             themeGroup={themeGroup}
-            footerSynced={Boolean(data.sections?.footer)}
+            synced={data.sections}
             onOpen={(group) => {
-              // The synced footer has its own panel (its options come from sections/footer.liquid)
-              if (group === "footer" && data.sections?.footer) {
-                setSelected(FOOTER);
+              // A synced section (the footer) has its own panel: its options come from its file
+              if (isSynced(data, group)) {
+                setSelected(group);
                 return;
               }
               setThemeGroup(group);
@@ -2010,8 +2100,8 @@ export default function AdminCustomizePage() {
                 fields={schema.settings}
                 values={data.settings}
                 groups={(schema.theme_groups || [{ id: "store", label: "Store" }]).filter(
-                  // The synced footer is edited in its own panel (Footer in the sections list)
-                  (group) => !(group.id === "footer" && data.sections?.footer)
+                  // Synced sections (header, footer) are edited in their own panels (in the sections list)
+                  (group) => !isSynced(data, group.id)
                 )}
                 initialOpen={themeGroup}
                 collections={collections}
@@ -3590,14 +3680,14 @@ const LAYOUT_ROWS = [
   { part: "bottom", group: "footer", name: "Footer", hint: "Links, social and copyright", icon: "M3 14h18v5H3zM7 9h10M9 5h6" },
 ];
 
-function LayoutRows({ part, selected, themeGroup, footerSynced = false, onOpen }) {
+function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) {
   const rows = LAYOUT_ROWS.filter((row) => row.part === part);
 
   return (
     <ul className={`px-2 ${part === "top" ? "mb-1" : "mt-1"}`}>
       {rows.map((row) => {
         const active =
-          row.group === "footer" && footerSynced ? selected === "footer" : selected === "theme" && themeGroup === row.group;
+          synced?.[row.group] ? selected === row.group : selected === "theme" && themeGroup === row.group;
 
         return (
           <li key={row.group}>
