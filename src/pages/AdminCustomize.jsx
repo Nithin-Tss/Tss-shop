@@ -14,6 +14,10 @@ import {
   saveThemeCustomizer,
   previewTheme,
   uploadThemeImage,
+  getSyncedSections,
+  postSyncTiming,
+  subscribeThemeEvents,
+  SYNC_CLIENT,
 } from "@/lib/themeApi";
 
 import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
@@ -38,6 +42,23 @@ const iconButton =
 const newSectionId = (type) => `${type}-${Math.random().toString(36).slice(2, 6)}`;
 
 const MAX_SECTIONS = 25;
+
+// The footer is a synced section: its options live in sections/footer.liquid's schema, and
+// a change here is written into that file (and the other way round). Its values are kept in
+// data.sections.footer as { type: "footer", settings, blocks }.
+const FOOTER = "footer";
+
+// The section `id` of a page, or the synced footer
+function sectionIn(d, page, id) {
+  return id === FOOTER ? d.sections?.footer : d.templates[page]?.sections[id];
+}
+
+const footerJson = (d) => JSON.stringify(d?.sections?.footer ?? null);
+
+// What the server stores for the footer: its settings and blocks
+function footerForSave(footer) {
+  return { settings: footer.settings, blocks: footer.blocks };
+}
 
 const iconProps = {
   fill: "none",
@@ -313,6 +334,10 @@ export default function AdminCustomizePage() {
 
   const engineRef = useRef({});
 
+  // The synced footer: the file version this editor last saw (to detect someone else's change),
+  // when the last change was made, and preview updates waiting for the preview's "patched" reply
+  const footerRef = useRef({ version: null, changedAt: 0, kind: "", quickSave: false, token: 0, waiting: {} });
+
   useEffect(() => {
     Promise.all([
       getThemeSchema(),
@@ -320,8 +345,22 @@ export default function AdminCustomizePage() {
       getThemeCustomizer(),
       apiRequest("/api/v1/catalog/collections/"),
       apiRequest("/api/v1/catalog/products/"),
+      getSyncedSections().catch(() => ({})),
     ])
-      .then(([schemaData, settingsData, customizerData, collectionData, productData]) => {
+      .then(([schemaData, settingsData, customizerData, collectionData, productData, synced]) => {
+        // The footer's options come from its file's schema; its values from its saved JSON
+        if (synced?.footer) {
+          schemaData = { ...schemaData, sections: { ...schemaData.sections, [FOOTER]: synced.footer.spec } };
+          settingsData = {
+            ...settingsData,
+            sections: { ...(settingsData.sections || {}), [FOOTER]: { type: FOOTER, ...synced.footer.values } },
+          };
+          footerRef.current.version = synced.footer.version;
+        } else if (settingsData.sections) {
+          // No synced footer file in this theme: nothing to edit or save for it
+          settingsData = { ...settingsData };
+          delete settingsData.sections;
+        }
         lastSavedRef.current = { data: settingsData, customizer: customizerData };
         setSchema(schemaData);
         setData(settingsData);
@@ -396,6 +435,7 @@ export default function AdminCustomizePage() {
     const t = d.templates[pageRef.current];
     return {
       settings: JSON.stringify(d.settings),
+      footer: footerJson(d),
       order,
       sections: Object.fromEntries(order.map((id) => [id, JSON.stringify(t.sections[id])])),
     };
@@ -436,7 +476,48 @@ export default function AdminCustomizePage() {
       .catch((e) => setPreviewError(e.message));
   }
 
+  // The synced footer: only it is rendered (one quick request) and swapped in
+  function requestFooter() {
+    const sync = syncRef.current;
+    if (sync.inflight[FOOTER]) {
+      sync.again[FOOTER] = true;
+      return;
+    }
+    const d = dataRef.current;
+    const requested = footerJson(d);
+    const gen = sync.gen;
+    const footer = footerRef.current;
+    // Timed from the change to the preview's "patched" reply
+    let token = "";
+    if (footer.changedAt) {
+      token = String(++footer.token);
+      footer.waiting[token] = { at: footer.changedAt, kind: footer.kind || "footer: sidebar -> preview" };
+      footer.changedAt = 0;
+      footer.kind = "";
+    }
+    sync.inflight[FOOTER] = true;
+
+    previewTheme(d, { section: FOOTER, ...previewTarget() })
+      .then((res) => {
+        if (gen !== sync.gen || !sync.rendered) return;
+        postToPreview({ type: "patch", id: FOOTER, html: res.html, index: Infinity, token });
+        sync.rendered.footer = requested;
+        setPreviewError("");
+      })
+      .catch((e) => setPreviewError(e.message))
+      .finally(() => {
+        if (gen !== sync.gen) return;
+        sync.inflight[FOOTER] = false;
+        sync.again[FOOTER] = false;
+        engineRef.current.scheduleSync();
+      });
+  }
+
   function requestSection(id) {
+    if (id === FOOTER) {
+      requestFooter();
+      return;
+    }
     const sync = syncRef.current;
     if (sync.inflight[id]) {
       sync.again[id] = true;
@@ -493,6 +574,9 @@ export default function AdminCustomizePage() {
       return;
     }
 
+    // The footer changed: just it is re-rendered and swapped in
+    if (now.footer !== before.footer) requestSection(FOOTER);
+
     // The default layout shows when there are no sections: switching to or from it needs a full render
     if (!now.order.length || !before.order.length) {
       if (now.order.length !== before.order.length) renderFull();
@@ -533,6 +617,13 @@ export default function AdminCustomizePage() {
   function diffForSave(before, after) {
     const changes = {};
     if (JSON.stringify(before.settings) !== JSON.stringify(after.settings)) changes.settings = after.settings;
+    // The synced footer is saved on its own path, which also writes it into sections/footer.liquid
+    if (after.sections?.footer && footerJson(before) !== footerJson(after)) {
+      changes.sections = { [FOOTER]: footerForSave(after.sections.footer) };
+      changes.section_versions = { [FOOTER]: footerRef.current.version };
+      changes.client = SYNC_CLIENT;
+      changes.started_at = footerRef.current.savedChangeAt || Date.now();
+    }
     for (const name of Object.keys(after.templates)) {
       const a = before.templates[name] || { order: [], sections: {} };
       const b = after.templates[name];
@@ -579,10 +670,17 @@ export default function AdminCustomizePage() {
     setSaveState("saving");
 
     try {
-      await Promise.all([
+      const [saved] = await Promise.all([
         changes ? patchThemeSettings(changes) : null,
         customizerChanged ? saveThemeCustomizer(customizerNow) : null,
       ]);
+      const footerSaved = saved?.sections?.[FOOTER];
+      if (footerSaved) {
+        footerRef.current.version = footerSaved.version;
+        footerRef.current.savedChangeAt = 0;
+        // Someone changed the footer's code meanwhile: this change won, and they are told where theirs is
+        if (footerSaved.conflict) setNotice(footerSaved.conflict);
+      }
       lastSavedRef.current = { data: snapshot, customizer: customizerNow };
       // Tell an open code editor tab: it shows these settings as JSON
       announceThemeChange("settings");
@@ -619,6 +717,18 @@ export default function AdminCustomizePage() {
   // The code editor (another tab) saved something: Liquid code re-renders the preview;
   // settings JSON is loaded here, unless there are unsaved edits that it would overwrite.
   async function externalChange(kind) {
+    // The footer's file was saved in Edit code (another tab): only the footer is updated
+    if (kind === "section:footer") {
+      try {
+        const synced = await getSyncedSections();
+        if (synced?.footer && synced.footer.version !== footerRef.current.version) {
+          sectionEvent({ section: FOOTER, source: "code", ...synced.footer });
+        }
+      } catch {
+        // the live event (or the next reload) brings it
+      }
+      return;
+    }
     if (kind !== "settings") {
       setPreviewKey((k) => k + 1);
       return;
@@ -628,8 +738,12 @@ export default function AdminCustomizePage() {
       return;
     }
     try {
-      const fresh = await getThemeSettings();
+      const fresh = { ...(await getThemeSettings()) };
       if (saveStateRef.current !== "saved") return;
+      // The synced footer keeps its own shape (and is updated by its own events)
+      const footer = dataRef.current?.sections?.footer;
+      if (footer) fresh.sections = { ...(fresh.sections || {}), [FOOTER]: footer };
+      else delete fresh.sections;
       lastSavedRef.current = { data: fresh, customizer: customizerRef.current };
       historyRef.current = { past: [], future: [], lastKey: null, lastTime: 0 };
       dataRef.current = fresh;
@@ -647,9 +761,60 @@ export default function AdminCustomizePage() {
     }
   }
 
-  engineRef.current = { renderFull, scheduleSync, flushSave, registerPendingImage, postToPreview, externalChange };
+  // A synced section changed elsewhere (Edit code, a restore, or this editor in another tab):
+  // its options and values are replaced here and its preview re-rendered - nothing is saved back.
+  function sectionEvent(event) {
+    if (event.section !== FOOTER || !event.values) return;
+    const footer = footerRef.current;
+    if (footer.version !== null && event.version <= footer.version && event.source !== "restore") return;
+    footer.version = event.version;
+
+    if (event.spec) {
+      setSchema((current) => (current ? { ...current, sections: { ...current.sections, [FOOTER]: event.spec } } : current));
+    }
+
+    const current = dataRef.current;
+    const saved = lastSavedRef.current;
+    if (!current || !saved) return;
+    const incoming = { type: FOOTER, ...event.values };
+    const unsaved = footerJson(current) !== footerJson(saved.data);
+    if (unsaved) {
+      // Both changed it: the edit here is saved on top (latest wins); theirs stays in the file's History
+      setNotice(
+        event.source === "customizer"
+          ? "The footer was changed in another tab. Your change here is being saved on top of it."
+          : "The footer's code was changed in Edit code. Your change here is being saved on top; the code editor's version is in its History."
+      );
+      return;
+    }
+
+    if (JSON.stringify(incoming) === footerJson(current)) return;
+    const next = { ...current, sections: { ...(current.sections || {}), [FOOTER]: incoming } };
+    lastSavedRef.current = { ...saved, data: { ...saved.data, sections: { ...(saved.data.sections || {}), [FOOTER]: incoming } } };
+    // Timed until the preview shows it (from the moment Save was pressed in Edit code)
+    if (event.source !== "customizer" && event.started_at && Date.now() - event.started_at < 60000) {
+      footer.changedAt = Number(event.started_at);
+      footer.kind = "footer: code save -> preview";
+      footer.clock = "epoch";
+    }
+    dataRef.current = next;
+    setData(next);
+    if (selectedRef.current === FOOTER && selectedBlockRef.current !== null && !incoming.blocks?.[selectedBlockRef.current]) {
+      setSelectedBlock(null);
+    }
+    if (event.source === "code") setNotice("Footer updated from Edit code.");
+    else if (event.source === "restore") setNotice("An earlier footer version was restored.");
+  }
+
+  engineRef.current = { renderFull, scheduleSync, flushSave, registerPendingImage, postToPreview, externalChange, sectionEvent };
 
   useEffect(() => onThemeChange((kind) => engineRef.current.externalChange(kind)), []);
+
+  // Live events from the server: a change to the footer made in Edit code or another editor
+  useEffect(() => {
+    if (status !== "ready" || footerRef.current.version === null) return undefined;
+    return subscribeThemeEvents((event) => engineRef.current.sectionEvent(event));
+  }, [status]);
 
   // ---------------- Changes and history ----------------
 
@@ -669,10 +834,22 @@ export default function AdminCustomizePage() {
     history.lastTime = now;
     const next = structuredClone(current);
     mutator(next);
+    markFooterChange(current, next);
     dataRef.current = next;
     setData(next);
     setHistoryTick((t) => t + 1);
   }, []);
+
+  // A footer change shows in the preview at once and is saved after a short pause (200 ms)
+  function markFooterChange(before, after) {
+    if (footerJson(before) === footerJson(after)) return;
+    const footer = footerRef.current;
+    footer.changedAt = performance.now();
+    footer.kind = "footer: sidebar -> preview";
+    footer.clock = "perf";
+    footer.quickSave = true;
+    footer.savedChangeAt = Date.now();
+  }
 
   const undo = useCallback(() => {
     const history = historyRef.current;
@@ -680,6 +857,7 @@ export default function AdminCustomizePage() {
     history.future.push(dataRef.current);
     const previous = history.past.pop();
     history.lastKey = null;
+    markFooterChange(dataRef.current, previous);
     dataRef.current = previous;
     setData(previous);
     setHistoryTick((t) => t + 1);
@@ -691,6 +869,7 @@ export default function AdminCustomizePage() {
     history.past.push(dataRef.current);
     const next = history.future.pop();
     history.lastKey = null;
+    markFooterChange(dataRef.current, next);
     dataRef.current = next;
     setData(next);
     setHistoryTick((t) => t + 1);
@@ -737,7 +916,9 @@ export default function AdminCustomizePage() {
   useEffect(() => {
     if (status !== "ready") return;
     engineRef.current.scheduleSync();
-    scheduleSave();
+    const quick = footerRef.current.quickSave;
+    footerRef.current.quickSave = false;
+    scheduleSave(quick ? 200 : 900);
   }, [data, customizer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Selecting a section or block only moves the outline in the preview (shown in Edit mode);
@@ -817,6 +998,14 @@ export default function AdminCustomizePage() {
         waiting.push({ type: "select", id: selectedRef.current || "", block: selectedBlockRef.current });
         waiting.forEach((m) => event.source.postMessage({ source: "tss-editor", ...m }, "*"));
         engineRef.current.scheduleSync();
+      } else if (message.type === "patched") {
+        // A section swap the customizer timed: "change made -> preview updated"
+        const waiting = footerRef.current.waiting[message.token];
+        if (waiting) {
+          delete footerRef.current.waiting[message.token];
+          const ms = waiting.kind === "footer: code save -> preview" ? Date.now() - waiting.at : performance.now() - waiting.at;
+          if (ms >= 0) postSyncTiming(waiting.kind, ms);
+        }
       } else if (message.type === "need-reload") {
         engineRef.current.renderFull();
       } else if (message.type === "scroll") {
@@ -827,7 +1016,7 @@ export default function AdminCustomizePage() {
         syncRef.current.away = true;
       } else if (message.type === "context" && typeof message.id === "string" && editModeRef.current) {
         // Edit mode: right-click selects the section or block and offers "Edit code"
-        const section = dataRef.current?.templates[pageRef.current]?.sections[message.id];
+        const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
         if (!section) return;
         const block = Number.isInteger(message.block) && section.blocks?.[message.block] ? message.block : null;
         fromPreviewRef.current = true;
@@ -847,7 +1036,7 @@ export default function AdminCustomizePage() {
         return;
       } else if (message.type === "select" && typeof message.id === "string" && editModeRef.current) {
         // Edit mode: a click in the preview selects a section or one of its blocks; empty space unselects
-        const section = dataRef.current?.templates[pageRef.current]?.sections[message.id];
+        const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
         const block = Number.isInteger(message.block) && section?.blocks?.[message.block] ? message.block : null;
         fromPreviewRef.current = true;
         if (!message.id) {
@@ -1035,16 +1224,18 @@ export default function AdminCustomizePage() {
 
   function updateBlocks(sectionId, mutate, coalesceKey) {
     update((d) => {
-      const s = d.templates[page].sections[sectionId];
+      const s = sectionIn(d, page, sectionId);
       s.blocks = s.blocks || [];
       mutate(s.blocks);
     }, coalesceKey);
   }
 
   function duplicateBlock(sectionId, index) {
-    const max = schema.sections[template.sections[sectionId].type].max_blocks;
+    const target = sectionIn(data, page, sectionId);
 
-    if ((template.sections[sectionId].blocks || []).length >= max) return;
+    const max = schema.sections[target.type].max_blocks;
+
+    if ((target.blocks || []).length >= max) return;
 
     updateBlocks(sectionId, (list) => list.splice(index + 1, 0, structuredClone(list[index])));
   }
@@ -1068,7 +1259,7 @@ export default function AdminCustomizePage() {
     if (!window.confirm("Reset all options of this section to their defaults? Its content blocks are kept.")) return;
 
     update((d) => {
-      const s = d.templates[page].sections[id];
+      const s = sectionIn(d, page, id);
 
       const defaults = defaultsOf(schema.sections[s.type].settings);
 
@@ -1120,7 +1311,7 @@ export default function AdminCustomizePage() {
       }
 
       // A block: reorder inside its section, or move it into another section
-      const from = t.sections[payload.sectionId];
+      const from = sectionIn(d, page, payload.sectionId);
 
       const block = from?.blocks?.[payload.index];
 
@@ -1128,7 +1319,10 @@ export default function AdminCustomizePage() {
 
       const destinationId = target.kind === "block" ? target.sectionId : target.kind === "into" ? target.id : null;
 
-      const destination = destinationId && t.sections[destinationId];
+      const destination = destinationId && sectionIn(d, page, destinationId);
+
+      // The footer's blocks stay in the footer (its block types are its own)
+      if (destination !== from && (payload.sectionId === FOOTER || destinationId === FOOTER)) return;
 
       // Only sections that accept this block type
       if (!destination || !schema.sections[destination.type].blocks?.[block.type]) return;
@@ -1236,7 +1430,7 @@ export default function AdminCustomizePage() {
   );
 
   const section =
-    selected && selected !== "theme" ? template.sections[selected] : null;
+    selected && selected !== "theme" ? sectionIn(data, page, selected) : null;
 
   const sectionSpec = section ? schema.sections[section.type] : null;
 
@@ -1247,7 +1441,7 @@ export default function AdminCustomizePage() {
 
   const shown = editing ? selected : lastShownRef.current;
 
-  const shownSection = shown && shown !== "theme" ? template.sections[shown] : null;
+  const shownSection = shown && shown !== "theme" ? sectionIn(data, page, shown) : null;
 
   const shownSpec = shownSection ? schema.sections[shownSection.type] : null;
 
@@ -1760,7 +1954,13 @@ export default function AdminCustomizePage() {
             part="bottom"
             selected={selected}
             themeGroup={themeGroup}
+            footerSynced={Boolean(data.sections?.footer)}
             onOpen={(group) => {
+              // The synced footer has its own panel (its options come from sections/footer.liquid)
+              if (group === "footer" && data.sections?.footer) {
+                setSelected(FOOTER);
+                return;
+              }
               setThemeGroup(group);
               setSelected("theme");
             }}
@@ -1809,7 +2009,10 @@ export default function AdminCustomizePage() {
                 key={`theme-${themeGroup}`}
                 fields={schema.settings}
                 values={data.settings}
-                groups={schema.theme_groups || [{ id: "store", label: "Store" }]}
+                groups={(schema.theme_groups || [{ id: "store", label: "Store" }]).filter(
+                  // The synced footer is edited in its own panel (Footer in the sections list)
+                  (group) => !(group.id === "footer" && data.sections?.footer)
+                )}
                 initialOpen={themeGroup}
                 collections={collections}
                 onChange={(key, value) =>
@@ -1828,7 +2031,7 @@ export default function AdminCustomizePage() {
                 products={products}
                 onChange={(key, value) =>
                   update((d) => {
-                    d.templates[page].sections[shown].settings[key] = value;
+                    sectionIn(d, page, shown).settings[key] = value;
                   }, `s:${shown}:${key}`)
                 }
                 extra={
@@ -3387,13 +3590,14 @@ const LAYOUT_ROWS = [
   { part: "bottom", group: "footer", name: "Footer", hint: "Links, social and copyright", icon: "M3 14h18v5H3zM7 9h10M9 5h6" },
 ];
 
-function LayoutRows({ part, selected, themeGroup, onOpen }) {
+function LayoutRows({ part, selected, themeGroup, footerSynced = false, onOpen }) {
   const rows = LAYOUT_ROWS.filter((row) => row.part === part);
 
   return (
     <ul className={`px-2 ${part === "top" ? "mb-1" : "mt-1"}`}>
       {rows.map((row) => {
-        const active = selected === "theme" && themeGroup === row.group;
+        const active =
+          row.group === "footer" && footerSynced ? selected === "footer" : selected === "theme" && themeGroup === row.group;
 
         return (
           <li key={row.group}>
