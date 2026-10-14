@@ -48,9 +48,11 @@ export function saveThemeCustomizer(data) {
 
 // Home page HTML rendered from unsaved section data, for the customizer's live preview -> { html }
 // With `section`, only that section's HTML (and the fonts stylesheet) -> { html, fonts }
-export function previewTheme(data, { scroll = 0, selected = "", section = "" } = {}) {
-  const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected });
+// `page`: index, product, collection, blog or article; `product`: the product the product page shows
+export function previewTheme(data, { scroll = 0, selected = "", section = "", page = "index", product = "" } = {}) {
+  const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected, page });
   if (section) query.set("section", section);
+  if (product) query.set("product", product);
   return apiRequest(`${BASE}/preview/?${query}`, { method: "POST", body: data });
 }
 
