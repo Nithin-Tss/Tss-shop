@@ -406,7 +406,6 @@ export default function AccountPage() {
               to="/account/orders"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200"
             >
-              <span>📦</span>
               <span>Order History</span>
             </Link>
           </div>
@@ -479,7 +478,6 @@ export default function AccountPage() {
                     }}
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
                   >
-                    <span>🔑</span>
                     <span>Change Password</span>
                   </button>
                 </div>
