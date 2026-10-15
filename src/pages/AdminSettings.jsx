@@ -87,18 +87,14 @@ export default function AdminSettings() {
 
   /* Loading and saving against the backend */
 
-  const [loading, setLoading] = useState(true);
+  const storeId = getActiveStore(getSession())?.storeId;
+  const [loading, setLoading] = useState(Boolean(storeId));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null); // { type: "ok" | "error", text }
   const [errors, setErrors] = useState({});
 
-  const storeId = getActiveStore(getSession())?.storeId;
-
   useEffect(() => {
-    if (!storeId) {
-      setLoading(false);
-      return;
-    }
+    if (!storeId) return;
 
     let cancelled = false;
     apiGet(`/api/v1/stores/${storeId}/`).then((res) => {

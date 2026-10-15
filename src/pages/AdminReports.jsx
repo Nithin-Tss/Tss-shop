@@ -33,7 +33,6 @@ function ShopifyBagIcon({ className = "h-4 w-4 shrink-0" }) {
 export default function AdminReports() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedCreator, setSelectedCreator] = useState("all");
@@ -72,7 +71,6 @@ export default function AdminReports() {
   useEffect(() => {
     async function fetchReports() {
       setLoading(true);
-      setError(null);
       try {
         const res = await apiGet("/api/v1/reports/");
         if (res.ok && Array.isArray(res.data)) {
@@ -83,7 +81,7 @@ export default function AdminReports() {
           // No backend endpoint or no reports in database
           setReports([]);
         }
-      } catch (err) {
+      } catch {
         setReports([]);
       } finally {
         setLoading(false);
@@ -145,9 +143,12 @@ export default function AdminReports() {
   }, [reports, searchQuery, selectedCategory, selectedCreator, sortField, sortOrder]);
 
   // Reset page when filter changes
-  useEffect(() => {
+  const filterKey = JSON.stringify([searchQuery, selectedCategory, selectedCreator]);
+  const [pagedFilterKey, setPagedFilterKey] = useState(filterKey);
+  if (pagedFilterKey !== filterKey) {
+    setPagedFilterKey(filterKey);
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory, selectedCreator]);
+  }
 
   const totalPages = Math.ceil(filteredReports.length / pageSize) || 1;
   const paginatedReports = useMemo(() => {
@@ -162,11 +163,6 @@ export default function AdminReports() {
       setSortField(field);
       setSortOrder("asc");
     }
-  };
-
-  const handleNewExploration = () => {
-    setNotice("New exploration feature will be enabled once report definitions are configured.");
-    setTimeout(() => setNotice(null), 3500);
   };
 
   const headCell = "px-4 py-2.5 text-[12px] font-semibold text-[#6B7280] whitespace-nowrap";

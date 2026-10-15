@@ -6,6 +6,7 @@ import prettier from "eslint-config-prettier";
 
 export default [
   { ignores: ["dist", "node_modules"] },
+  { settings: { react: { version: "detect" } } },
   js.configs.recommended,
   react.configs.flat.recommended,
   react.configs.flat["jsx-runtime"],
@@ -17,7 +18,6 @@ export default [
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    settings: { react: { version: "detect" } },
     plugins: { "react-hooks": reactHooks },
     rules: {
       ...reactHooks.configs.recommended.rules,

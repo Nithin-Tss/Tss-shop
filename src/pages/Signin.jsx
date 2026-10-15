@@ -74,9 +74,6 @@ export default function SignInPage() {
         return;
       }
 
-      signIn(result.data);
-      setMessage("Signed in. Redirecting...");
-
       // New accounts set up a store first; existing ones go back to the page
       // that sent them here (?next=, same-site paths only) or to their admin
       const next = new URLSearchParams(window.location.search).get("next");
@@ -85,7 +82,7 @@ export default function SignInPage() {
       signIn(result.data);
       setMessage("Signed in. Redirecting...");
 
-      navigate("/");
+      navigate(safeNext || "/");
     } finally {
       setIsSubmitting(false);
     }

@@ -29,7 +29,7 @@ export default function AdminAddCustomer() {
   const [lastName, setLastName] = useState("");
   const [language, setLanguage] = useState("English [Default]");
   const [email, setEmail] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [selectedCountry] = useState(COUNTRIES[0]);
   const [phone, setPhone] = useState("");
   const [marketingEmail, setMarketingEmail] = useState(false);
   const [marketingSms, setMarketingSms] = useState(false);
@@ -43,7 +43,7 @@ export default function AdminAddCustomer() {
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [addressCountry, setAddressCountry] = useState("Australia");
-  const [company, setCompany] = useState("");
+  const [company] = useState("");
 
   // Tax & Sidebars
   const [taxSetting, setTaxSetting] = useState("Collect tax");

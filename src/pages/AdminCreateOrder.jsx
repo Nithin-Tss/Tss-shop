@@ -21,7 +21,7 @@ export default function AdminCreateOrder() {
   const [items, setItems] = useState([]);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [shippingAmount, setShippingAmount] = useState(0);
-  const [deliveryMethod, setDeliveryMethod] = useState("");
+  const [deliveryMethod] = useState("");
   const [currency, setCurrency] = useState("AUD");
   const [notes, setNotes] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);

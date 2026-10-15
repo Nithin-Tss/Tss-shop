@@ -16,7 +16,7 @@ export default function AdminCollections() {
   // Bulk action toolbar state
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isSelectDropdownOpen, setIsSelectDropdownOpen] = useState(false);
-  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [showOnlySelectedChoice, setShowOnlySelected] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
@@ -27,7 +27,6 @@ export default function AdminCollections() {
   const channelDropdownRef = useRef(null);
   const moreMenuRef = useRef(null);
   const selectDropdownRef = useRef(null);
-  const selectAllCheckboxRef = useRef(null);
   const feedbackTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
@@ -78,6 +77,8 @@ export default function AdminCollections() {
   }, []);
 
   useEffect(() => {
+    // loading/error already start as true/null, so the synchronous sets are no-ops here
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCollections();
   }, [fetchCollections]);
 
@@ -88,6 +89,9 @@ export default function AdminCollections() {
     return collections.filter((c) => c.name?.toLowerCase().includes(query));
   }, [collections, searchQuery]);
 
+  // "Show all selected" turns itself off when nothing is selected
+  const showOnlySelected = showOnlySelectedChoice && selectedIds.length > 0;
+
   // Handle "Show all selected" toggle
   const displayedCollections = useMemo(() => {
     if (showOnlySelected) {
@@ -95,13 +99,6 @@ export default function AdminCollections() {
     }
     return filteredCollections;
   }, [filteredCollections, showOnlySelected, selectedIds]);
-
-  // Auto-disable showOnlySelected if nothing is selected
-  useEffect(() => {
-    if (selectedIds.length === 0 && showOnlySelected) {
-      setShowOnlySelected(false);
-    }
-  }, [selectedIds.length, showOnlySelected]);
 
   // Paginated list
   const totalPages = Math.ceil(displayedCollections.length / pageSize) || 1;
@@ -177,7 +174,7 @@ export default function AdminCollections() {
         `Successfully deleted ${successCount} collection${successCount > 1 ? "s" : ""}.`
       );
       await fetchCollections();
-    } catch (err) {
+    } catch {
       showFeedback("Failed to delete selected collections.", "error");
     } finally {
       setIsDeleting(false);
@@ -613,7 +610,7 @@ export default function AdminCollections() {
                                 >
                                   <button
                                     type="button"
-                                    disabled={isDeleting}
+                                    disabled={isDeleting || !canDelete}
                                     onClick={() => {
                                       setIsMoreMenuOpen(false);
                                       handleDeleteSelected();
@@ -716,14 +713,18 @@ export default function AdminCollections() {
                             ⊞
                           </div>
                           <h3 className="mb-1 text-[16px] font-semibold text-[#161C2C]">
-                            {showOnlySelected
+                            {error
+                              ? "Couldn't load collections"
+                              : showOnlySelected
                               ? "No selected collections"
                               : searchQuery
                                 ? "No matching collections"
                                 : "Manage your collections"}
                           </h3>
                           <p className="mb-6 text-[14px] leading-relaxed text-[#6B7280]">
-                            {showOnlySelected
+                            {error
+                              ? error
+                              : showOnlySelected
                               ? "You currently have no collections selected."
                               : searchQuery
                                 ? `No collections matched "${searchQuery}". Try changing your search query.`

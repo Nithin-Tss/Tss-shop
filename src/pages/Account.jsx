@@ -101,6 +101,8 @@ export default function AccountPage() {
   };
 
   useEffect(() => {
+    // loadingAddresses already starts true, so the synchronous set is a no-op here
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAddresses();
   }, []);
 

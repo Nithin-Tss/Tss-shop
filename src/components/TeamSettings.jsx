@@ -134,11 +134,14 @@ export function UsersSettings() {
     if (res.ok) setActivity(res.data);
   }, []);
 
+  // Both loaders only set state after their request resolves
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (canView) load();
   }, [canView, load]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (canManage) loadActivity();
   }, [canManage, loadActivity]);
 

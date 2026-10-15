@@ -198,7 +198,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   // The customizer (or another code editor tab) saved: bring in what changed without
   // touching the file you are typing in. Unsaved edits stay as they are.
   const refreshRef = useRef(null);
-  refreshRef.current = async () => {
+  const refresh = async () => {
     try {
       setProject(await fetchProject());
       setPreviewKey((k) => k + 1);
@@ -206,8 +206,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       // keep showing what we have; the next save or refresh reports problems
     }
   };
+  useEffect(() => {
+    refreshRef.current = refresh;
+  });
 
   useEffect(() => {
+    // Initial fetch: status and error already start as "loading" and "", so nothing re-renders early
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     const stop = onThemeChange(() => refreshRef.current());
     const onFocus = () => document.visibilityState === "visible" && refreshRef.current();
@@ -218,7 +223,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onFocus);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pathOf = (name) => Object.keys(syncedFiles).find((path) => syncedFiles[path].name === name);
   const activeSynced = activePath ? syncedFiles[activePath] : null;
@@ -226,7 +231,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   // Live events: the customizer (or a restore elsewhere) changed a synced section. The new file
   // shows here straight away - unless you have unsaved edits in it, which are never replaced.
   const syncedEventRef = useRef(null);
-  syncedEventRef.current = (event) => {
+  const onSyncedEvent = (event) => {
     const path = pathOf(event.section);
     if (!path || typeof event.code !== "string") return;
     const seen = versionsRef.current[event.section];
@@ -254,6 +259,9 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     }
     if (history?.name === event.section) loadHistory(event.section);
   };
+  useEffect(() => {
+    syncedEventRef.current = onSyncedEvent;
+  });
 
   useEffect(() => {
     if (status !== "ready" || !Object.keys(syncedFiles).length) return undefined;
@@ -303,15 +311,18 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   }
 
   // Once the files are loaded, open the requested one and expand its folders in the explorer
-  useEffect(() => {
-    if (status !== "ready" || !requestedFile || !(requestedFile in project.files)) return;
-    openFile(requestedFile);
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      for (let dir = parentOf(requestedFile); dir; dir = parentOf(dir)) next.add(dir);
-      return next;
-    });
-  }, [status, requestedFile]);
+  const [openedFor, setOpenedFor] = useState(null);
+  if (openedFor?.status !== status || openedFor?.file !== requestedFile) {
+    setOpenedFor({ status, file: requestedFile });
+    if (status === "ready" && requestedFile && requestedFile in project.files) {
+      openFile(requestedFile);
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        for (let dir = parentOf(requestedFile); dir; dir = parentOf(dir)) next.add(dir);
+        return next;
+      });
+    }
+  }
 
   const children = useMemo(() => buildTree(project.files, project.folders), [project]);
   const contentOf = (path) => (path in drafts ? drafts[path] : (project.files[path] ?? ""));

@@ -6,6 +6,10 @@ function escapeCsv(val) {
   return `"${str.replace(/"/g, '""')}"`;
 }
 
+// YYYY-MM-DD for the day `daysAgo` days before today
+const isoDay = (daysAgo = 0) =>
+  new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
 export default function ExportDraftOrdersModal({
   isOpen,
   onClose,
@@ -15,28 +19,23 @@ export default function ExportDraftOrdersModal({
   selectedIds = new Set(),
   searchQuery = "",
 }) {
-  const [exportScope, setExportScope] = useState("current_page");
+  const [chosenScope, setExportScope] = useState("current_page");
   const [exportFormat, setExportFormat] = useState("excel");
 
   // Date range state for "Draft orders by date"
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const [startDate, setStartDate] = useState(thirtyDaysAgo);
-  const [endDate, setEndDate] = useState(todayStr);
+  const [startDate, setStartDate] = useState(() => isoDay(30));
+  const [endDate, setEndDate] = useState(() => isoDay());
 
   const selectedCount = selectedIds.size;
   const isSearchActive = Boolean(searchQuery && searchQuery.trim().length > 0);
   const searchMatchCount = filteredDrafts.length;
 
-  // Auto-switch away from disabled options if state changes
-  useEffect(() => {
-    if (exportScope === "selected" && selectedCount === 0) {
-      setExportScope("current_page");
-    }
-    if (exportScope === "search" && !isSearchActive) {
-      setExportScope("current_page");
-    }
-  }, [selectedCount, isSearchActive, exportScope]);
+  // Fall back to the current page when the chosen option is no longer available
+  const exportScope =
+    (chosenScope === "selected" && selectedCount === 0) ||
+    (chosenScope === "search" && !isSearchActive)
+      ? "current_page"
+      : chosenScope;
 
   // Handle escape key
   useEffect(() => {

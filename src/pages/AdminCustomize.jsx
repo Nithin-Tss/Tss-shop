@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { API_URL, apiRequest, openStorefront } from "@/lib/api";
 
@@ -233,8 +233,6 @@ export default function AdminCustomizePage() {
 
   // Right-click menu over the preview: where it opens, and the theme file it edits
   const [contextMenu, setContextMenu] = useState(null);
-
-  const navigate = useNavigate();
 
   const [status, setStatus] = useState("loading");
 
@@ -1151,6 +1149,33 @@ export default function AdminCustomizePage() {
 
   // ---------------- Changes and history ----------------
 
+  // A synced section's change shows in the preview at once and is saved after a short pause (200 ms)
+  const markSyncedChanges = useCallback((before, after) => {
+    const synced = syncedRef.current;
+    const mark = (name) => {
+      const state = (synced.sections[name] ||= {
+        version: null,
+        changedAt: 0,
+        kind: "",
+        savedChangeAt: 0,
+      });
+      state.changedAt = performance.now();
+      state.kind = `${name}: sidebar -> preview`;
+      state.clock = "perf";
+      state.savedChangeAt = Date.now();
+      synced.quickSave = true;
+    };
+    for (const [name, pageName] of Object.entries(synced.templates)) {
+      if (
+        templateLines(before?.templates?.[pageName]) !== templateLines(after?.templates?.[pageName])
+      )
+        mark(name);
+    }
+    for (const name of syncedNames(after)) {
+      if (syncedJson(before, name) !== syncedJson(after, name)) mark(name);
+    }
+  }, []);
+
   // Every change goes through here: local state first, then the preview and autosave follow.
   // Quick repeated changes to the same option (typing, dragging a slider) become one undo step.
   const update = useCallback((mutator, coalesceKey) => {
@@ -1171,32 +1196,7 @@ export default function AdminCustomizePage() {
     dataRef.current = next;
     setData(next);
     setHistoryTick((t) => t + 1);
-  }, []);
-
-  // A synced section's change shows in the preview at once and is saved after a short pause (200 ms)
-  function markSyncedChanges(before, after) {
-    for (const [name, pageName] of Object.entries(syncedRef.current.templates)) {
-      if (
-        templateLines(before?.templates?.[pageName]) === templateLines(after?.templates?.[pageName])
-      )
-        continue;
-      const state = syncedState(name);
-      state.changedAt = performance.now();
-      state.kind = `${name}: sidebar -> preview`;
-      state.clock = "perf";
-      state.savedChangeAt = Date.now();
-      syncedRef.current.quickSave = true;
-    }
-    for (const name of syncedNames(after)) {
-      if (syncedJson(before, name) === syncedJson(after, name)) continue;
-      const state = syncedState(name);
-      state.changedAt = performance.now();
-      state.kind = `${name}: sidebar -> preview`;
-      state.clock = "perf";
-      state.savedChangeAt = Date.now();
-      syncedRef.current.quickSave = true;
-    }
-  }
+  }, [markSyncedChanges]);
 
   const undo = useCallback(() => {
     const history = historyRef.current;
@@ -1208,7 +1208,7 @@ export default function AdminCustomizePage() {
     dataRef.current = previous;
     setData(previous);
     setHistoryTick((t) => t + 1);
-  }, []);
+  }, [markSyncedChanges]);
 
   const redo = useCallback(() => {
     const history = historyRef.current;
@@ -1220,7 +1220,7 @@ export default function AdminCustomizePage() {
     dataRef.current = next;
     setData(next);
     setHistoryTick((t) => t + 1);
-  }, []);
+  }, [markSyncedChanges]);
 
   // A finished upload replaces its temporary image everywhere (current data and undo history)
   function replaceImage(from, to) {
@@ -1395,7 +1395,7 @@ export default function AdminCustomizePage() {
 
       t.order = order;
     });
-  }, []);
+  }, [update]);
 
   // Messages from the preview: drag a section there, click to select it, keep the scroll position
   useEffect(() => {
@@ -1890,8 +1890,6 @@ export default function AdminCustomizePage() {
   );
 
   const section = selected && selected !== "theme" ? sectionIn(data, page, selected) : null;
-
-  const sectionSpec = section ? schema.sections[section.type] : null;
 
   // Keep showing the last edited item while the panel slides back to the list
   const editing = selected === "theme" || Boolean(section);
@@ -2923,7 +2921,9 @@ const UploadsContext = createContext(null);
 // One stable change handler per option, so unchanged options don't re-render
 function useOptionHandlers(onChange) {
   const ref = useRef(onChange);
-  ref.current = onChange;
+  useEffect(() => {
+    ref.current = onChange;
+  });
   const handlers = useRef({});
   return (key) => (handlers.current[key] ||= (value) => ref.current(key, value));
 }
@@ -3243,29 +3243,6 @@ function isShown(spec, values) {
 
 const optionLabel = (spec, option) =>
   spec.labels?.[option] || option.charAt(0).toUpperCase() + option.slice(1).replace(/[-_]/g, " ");
-
-function Fields({ fields, values, collections, products = [], onChange }) {
-  const handlerFor = useOptionHandlers(onChange);
-
-  return (
-    <div className="grid gap-4">
-      {Object.entries(fields)
-        .filter(([, spec]) => isShown(spec, values))
-        .map(([key, spec]) => (
-          <div key={key}>
-            <Field
-              spec={spec}
-              value={values[key]}
-              collections={collections}
-              products={products}
-              onChange={handlerFor(key)}
-            />
-            <ResetToTheme spec={spec} value={values[key]} onChange={handlerFor(key)} />
-          </div>
-        ))}
-    </div>
-  );
-}
 
 // Section options in collapsible groups; "Content" starts open, `extra` (blocks) goes at its end
 function GroupedFields({
@@ -4227,6 +4204,18 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
 }
 
 // A small editor: bold, italic, underline, lists and links. The server cleans the HTML again.
+const RICH_TEXT_TOOLS = [
+  { label: "B", title: "Bold", className: "font-bold", command: "bold" },
+  { label: "I", title: "Italic", className: "italic", command: "italic" },
+  { label: "U", title: "Underline", className: "underline", command: "underline" },
+  { label: "H", title: "Heading", className: "font-bold", command: "formatBlock", arg: "<h3>" },
+  { label: "❝", title: "Quote", command: "formatBlock", arg: "<blockquote>" },
+  { label: "¶", title: "Normal text", command: "formatBlock", arg: "<p>" },
+  { label: "• List", title: "Bulleted list", command: "insertUnorderedList" },
+  { label: "1. List", title: "Numbered list", command: "insertOrderedList" },
+  { label: "Link", title: "Add a link", command: "createLink" },
+];
+
 function RichTextEditor({ value, onChange }) {
   const ref = useRef(null);
 
@@ -4244,36 +4233,23 @@ function RichTextEditor({ value, onChange }) {
     onChange(ref.current?.innerHTML || "");
   }
 
-  const tools = [
-    { label: "B", title: "Bold", className: "font-bold", run: () => run("bold") },
-    { label: "I", title: "Italic", className: "italic", run: () => run("italic") },
-    { label: "U", title: "Underline", className: "underline", run: () => run("underline") },
-    { label: "H", title: "Heading", className: "font-bold", run: () => run("formatBlock", "<h3>") },
-    { label: "❝", title: "Quote", run: () => run("formatBlock", "<blockquote>") },
-    { label: "¶", title: "Normal text", run: () => run("formatBlock", "<p>") },
-    { label: "• List", title: "Bulleted list", run: () => run("insertUnorderedList") },
-    { label: "1. List", title: "Numbered list", run: () => run("insertOrderedList") },
-    {
-      label: "Link",
-      title: "Add a link",
-      run: () => {
-        const url = window.prompt("Link address (https://... or /collections/all)");
-        if (url) run("createLink", url.trim());
-      },
-    },
-  ];
+  function apply(tool) {
+    if (tool.command !== "createLink") return run(tool.command, tool.arg);
+    const url = window.prompt("Link address (https://... or /collections/all)");
+    if (url) run("createLink", url.trim());
+  }
 
   return (
     <div className="overflow-hidden rounded-lg border border-[#D8DFE8] focus-within:border-[#161C2C]">
       <div className="flex flex-wrap gap-1 border-b border-[#D8DFE8] bg-[#F7F8FA] p-1">
-        {tools.map((tool) => (
+        {RICH_TEXT_TOOLS.map((tool) => (
           <button
             key={tool.title}
             type="button"
             title={tool.title}
             aria-label={tool.title}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={tool.run}
+            onClick={() => apply(tool)}
             className={`h-7 min-w-7 rounded px-2 text-xs text-[#161C2C] hover:bg-white ${tool.className || ""}`}
           >
             {tool.label}

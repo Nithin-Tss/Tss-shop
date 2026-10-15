@@ -140,14 +140,23 @@ function ProductThumbnail({ item }) {
   );
 }
 
+function storeItems(storeId, items) {
+  try {
+    localStorage.setItem(`inventory_items_${storeId}`, JSON.stringify(items));
+  } catch {}
+}
+
 // Inline editable Available quantity cell
 function QuantityCell({ value, onChange, disabled, symbol = "⇋" }) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempVal, setTempVal] = useState(value);
 
-  useEffect(() => {
+  // Show the new value when it changes from outside
+  const [shownValue, setShownValue] = useState(value);
+  if (shownValue !== value) {
+    setShownValue(value);
     setTempVal(value);
-  }, [value]);
+  }
 
   const handleCommit = () => {
     setIsEditing(false);
@@ -723,9 +732,7 @@ export default function InventoryPage() {
   // Persist imported items in localStorage for this store
   const saveItems = (newItems) => {
     setItems(newItems);
-    try {
-      localStorage.setItem(`inventory_items_${storeId}`, JSON.stringify(newItems));
-    } catch {}
+    storeItems(storeId, newItems);
   };
 
   // On mount, if no items are in local storage, load existing products from the store's backend catalog
@@ -747,7 +754,7 @@ export default function InventoryPage() {
             incoming: p.incoming || 0,
             image_url: p.primary_image?.image_url || p.image_url || null,
           }));
-          saveItems(catalogItems);
+          storeItems(storeId, catalogItems);
           return catalogItems;
         });
       }

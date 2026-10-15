@@ -270,15 +270,20 @@ function CollectionsPicker({
 
   // Focus search input on open
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => searchInputRef.current?.focus(), 50);
-    } else {
+    if (isOpen) setTimeout(() => searchInputRef.current?.focus(), 50);
+  }, [isOpen]);
+
+  // Closing the dropdown clears what was typed in it
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (wasOpen !== isOpen) {
+    setWasOpen(isOpen);
+    if (!isOpen) {
       setSearchQuery("");
       setIsCreatingInline(false);
       setNewCollectionName("");
       setCreateError("");
     }
-  }, [isOpen]);
+  }
 
   // Focus inline input when opened
   useEffect(() => {
@@ -837,11 +842,10 @@ export function ProductForm({ productId }) {
     handle,
     extra,
   ]);
-  useEffect(() => {
-    if (!needsBaseline) return;
+  if (needsBaseline) {
     setBaseline(snapshot);
     setNeedsBaseline(false);
-  }, [needsBaseline, snapshot]);
+  }
   const dirty = baseline !== null && snapshot !== baseline;
 
   // Warn before closing the tab with unsaved changes
@@ -853,8 +857,6 @@ export function ProductForm({ productId }) {
   }, [dirty]);
 
   const categoryRows = useMemo(() => categoryOptions(categories), [categories]);
-  // The product's own collections stay visible even if the store list didn't load
-  const collectionChoices = [...new Set([...storeCollections, ...collections])];
   const statusInfo = STATUSES.find((s) => s.value === status) || STATUSES[1];
 
   const leave = () => {
@@ -970,11 +972,6 @@ export function ProductForm({ productId }) {
 
   const makeCover = (id) =>
     setPhotos((prev) => [prev.find((p) => p.id === id), ...prev.filter((p) => p.id !== id)]);
-
-  const toggleCollection = (collection) =>
-    setCollections((prev) =>
-      prev.includes(collection) ? prev.filter((c) => c !== collection) : [...prev, collection]
-    );
 
   const isChannelChecked = (ch) => {
     if (channelIds.includes(ch.id)) return true;
@@ -1322,8 +1319,18 @@ export function ProductForm({ productId }) {
                       disabled={saving}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-white px-3 py-1.5 text-xs font-semibold text-[#141b2d] shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                      <svg
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2.5"
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                       Add media
                     </button>
@@ -1367,11 +1374,18 @@ export function ProductForm({ productId }) {
                         if (!saving) addPhotos(e.dataTransfer.files);
                       }}
                       className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
-                        dragging ? "border-[#141b2d] bg-[#EEF1F8]" : "border-[#DDE1EA] bg-[#FAFBFD] hover:bg-slate-50"
+                        dragging
+                          ? "border-[#141b2d] bg-[#EEF1F8]"
+                          : "border-[#DDE1EA] bg-[#FAFBFD] hover:bg-slate-50"
                       }`}
                     >
                       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                        <svg className="h-6 w-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className="h-6 w-6 text-slate-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -1381,16 +1395,30 @@ export function ProductForm({ productId }) {
                         </svg>
                       </div>
                       <p className="text-sm font-semibold text-[#141b2d]">Upload product images</p>
-                      <p className="mt-1 text-xs text-slate-500">Drag and drop images here, or browse files from your computer</p>
-                      <p className="mt-0.5 text-[11px] text-slate-400">Accepted formats: JPG, PNG, WEBP (up to 5MB each)</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Drag and drop images here, or browse files from your computer
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-slate-400">
+                        Accepted formats: JPG, PNG, WEBP (up to 5MB each)
+                      </p>
                       <button
                         type="button"
                         onClick={() => mainFileInputRef.current?.click()}
                         disabled={saving}
                         className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#141b2d] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1e2842] disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                        <svg
+                          className="h-3.5 w-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.5"
+                            d="M12 4v16m8-8H4"
+                          />
                         </svg>
                         Select images
                       </button>
@@ -1414,7 +1442,12 @@ export function ProductForm({ productId }) {
                             {/* Image or Broken fallback */}
                             {isBroken ? (
                               <div className="flex h-full w-full flex-col items-center justify-center p-3 text-center text-slate-400">
-                                <svg className="mb-1 h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg
+                                  className="mb-1 h-7 w-7 text-slate-300"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -1422,8 +1455,12 @@ export function ProductForm({ productId }) {
                                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                                   />
                                 </svg>
-                                <span className="text-[11px] font-medium text-slate-600">Image unavailable</span>
-                                <span className="truncate max-w-[120px] text-[10px] text-slate-400">{photo.name}</span>
+                                <span className="text-[11px] font-medium text-slate-600">
+                                  Image unavailable
+                                </span>
+                                <span className="truncate max-w-[120px] text-[10px] text-slate-400">
+                                  {photo.name}
+                                </span>
                               </div>
                             ) : (
                               <img
@@ -1437,9 +1474,24 @@ export function ProductForm({ productId }) {
                             {/* Uploading Spinner Overlay */}
                             {isUploading && (
                               <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-2xs">
-                                <svg className="mb-1.5 h-6 w-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                <svg
+                                  className="mb-1.5 h-6 w-6 animate-spin text-white"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v8H4z"
+                                  />
                                 </svg>
                                 <span className="text-[11px] font-semibold">Uploading…</span>
                               </div>
@@ -1536,8 +1588,18 @@ export function ProductForm({ productId }) {
                         } ${saving ? "pointer-events-none opacity-50" : ""}`}
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-[#141b2d]">
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2.5"
+                              d="M12 4v16m8-8H4"
+                            />
                           </svg>
                         </div>
                         <span className="text-xs font-semibold text-[#141b2d]">Add image</span>
@@ -1554,12 +1616,15 @@ export function ProductForm({ productId }) {
                     >
                       <div>
                         <p className="font-semibold text-red-800">
-                          {photoErrors.length === 1 ? "1 file could not be added:" : `${photoErrors.length} files could not be added:`}
+                          {photoErrors.length === 1
+                            ? "1 file could not be added:"
+                            : `${photoErrors.length} files could not be added:`}
                         </p>
                         <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs">
                           {photoErrors.map((item, i) => (
                             <li key={`${item.name}-${i}`}>
-                              <span className="font-medium break-all">{item.name}</span>: {item.message}
+                              <span className="font-medium break-all">{item.name}</span>:{" "}
+                              {item.message}
                             </li>
                           ))}
                         </ul>

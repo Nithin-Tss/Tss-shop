@@ -87,9 +87,11 @@ export default function AdminDrafts() {
   });
 
   // Reset pagination on search
-  useEffect(() => {
+  const [pagedQuery, setPagedQuery] = useState(searchQuery);
+  if (pagedQuery !== searchQuery) {
+    setPagedQuery(searchQuery);
     setCurrentPage(1);
-  }, [searchQuery]);
+  }
 
   const totalPages = Math.ceil(filteredDrafts.length / pageSize) || 1;
   const paginatedDrafts = filteredDrafts.slice(

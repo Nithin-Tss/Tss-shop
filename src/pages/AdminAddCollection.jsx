@@ -127,6 +127,16 @@ const ICONS = {
 
 // ---------------------------------------------------------------- rich text
 
+const RICH_TEXT_TOOLS = [
+  { label: "Bold", text: <b>B</b>, command: "bold" },
+  { label: "Italic", text: <i>I</i>, command: "italic" },
+  { label: "Underline", text: <u>U</u>, command: "underline" },
+  { label: "Bulleted list", text: "• List", command: "insertUnorderedList" },
+  { label: "Numbered list", text: "1. List", command: "insertOrderedList" },
+  { label: "Link", text: "Link", command: "createLink" },
+  { label: "Clear formatting", text: "Clear", command: "removeFormat" },
+];
+
 // A small editor for the description: bold, italic, underline, lists and links. The store cleans the HTML.
 // Also used for blog posts (AdminContent).
 export function RichTextEditor({ id, value, onChange, placeholder }) {
@@ -148,22 +158,11 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
     emit();
   };
 
-  const tools = [
-    { label: "Bold", text: <b>B</b>, run: () => run("bold") },
-    { label: "Italic", text: <i>I</i>, run: () => run("italic") },
-    { label: "Underline", text: <u>U</u>, run: () => run("underline") },
-    { label: "Bulleted list", text: "• List", run: () => run("insertUnorderedList") },
-    { label: "Numbered list", text: "1. List", run: () => run("insertOrderedList") },
-    {
-      label: "Link",
-      text: "Link",
-      run: () => {
-        const url = window.prompt("Link address (https://...)");
-        if (url) run("createLink", url);
-      },
-    },
-    { label: "Clear formatting", text: "Clear", run: () => run("removeFormat") },
-  ];
+  const apply = (tool) => {
+    if (tool.command !== "createLink") return run(tool.command);
+    const url = window.prompt("Link address (https://...)");
+    if (url) run("createLink", url);
+  };
 
   return (
     <div className="overflow-hidden rounded-lg border border-[#D5D8DD] focus-within:border-[#161C2C] focus-within:ring-2 focus-within:ring-[#161C2C]/10">
@@ -172,14 +171,14 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
         role="toolbar"
         aria-label="Text formatting"
       >
-        {tools.map((tool) => (
+        {RICH_TEXT_TOOLS.map((tool) => (
           <button
             key={tool.label}
             type="button"
             title={tool.label}
             aria-label={tool.label}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={tool.run}
+            onClick={() => apply(tool)}
             className="rounded-md px-2 py-1 text-[12px] text-[#4A5160] hover:bg-[#EDEEF0] hover:text-[#161C2C]"
           >
             {tool.text}
@@ -359,7 +358,8 @@ export default function AdminAddCollection() {
   const [viewMode, setViewMode] = useState("grid");
   const [statusFilter, setStatusFilter] = useState("all");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [preview, setPreview] = useState({ loading: false, count: 0, products: [] });
+  // Server preview of an automated collection, tagged with the conditions it was made for
+  const [fetchedPreview, setFetchedPreview] = useState({ key: null, count: 0, products: [] });
 
   const fileRef = useRef(null);
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -472,25 +472,29 @@ export default function AdminAddCollection() {
   // Automated: ask the server which products the (unsaved) conditions match
   const rulesKey = JSON.stringify([completeRules, form.match, form.excluded_products]);
   useEffect(() => {
-    if (form.type !== "automated" || loading) return undefined;
-    if (!completeRules.length) {
-      setPreview({ loading: false, count: 0, products: [] });
-      return undefined;
-    }
-    setPreview((p) => ({ ...p, loading: true }));
+    if (form.type !== "automated" || loading || !completeRules.length) return undefined;
+    let live = true;
     const t = setTimeout(async () => {
       const res = await apiPost("/api/v1/catalog/collections/preview/", {
         rules: completeRules,
         match: form.match,
         excluded_products: form.excluded_products,
       });
-      setPreview(
-        res.ok ? { loading: false, ...res.data } : { loading: false, count: 0, products: [] }
+      if (!live) return;
+      setFetchedPreview(
+        res.ok ? { key: rulesKey, ...res.data } : { key: rulesKey, count: 0, products: [] }
       );
     }, 400);
-    return () => clearTimeout(t);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rulesKey, form.type, loading]);
+  // Until the preview for the current conditions arrives, keep showing the last one as loading
+  const preview = completeRules.length
+    ? { ...fetchedPreview, loading: fetchedPreview.key !== rulesKey }
+    : { loading: false, count: 0, products: [] };
 
   const items =
     form.type === "automated"

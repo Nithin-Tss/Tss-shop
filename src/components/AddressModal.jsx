@@ -41,7 +41,10 @@ export default function AddressModal({
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  useEffect(() => {
+  // Reset the form whenever the modal opens or gets different data (during render, not in an effect)
+  const [formSource, setFormSource] = useState(null);
+  if (!formSource || formSource.initialData !== initialData || formSource.isOpen !== isOpen) {
+    setFormSource({ initialData, isOpen });
     if (initialData) {
       const parsed = parseStoredPhone(initialData.phone || "", initialData.country || "Australia");
       setSelectedCountry(parsed.country);
@@ -71,7 +74,7 @@ export default function AddressModal({
     setCountrySearch("");
     setIsCountryDropdownOpen(false);
     setErrors({});
-  }, [initialData, isOpen]);
+  }
 
   // Click-outside listener to close country dropdown
   useEffect(() => {
