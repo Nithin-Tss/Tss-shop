@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -287,8 +288,6 @@ export default function AdminCustomizePage() {
 
   const saveStateRef = useRef("saved");
 
-  saveStateRef.current = saveState;
-
   // Which group of the Theme settings panel opens first (Header, Footer, ...)
   const [themeGroup, setThemeGroup] = useState("colors");
 
@@ -353,8 +352,6 @@ export default function AdminCustomizePage() {
 
   const editModeRef = useRef(false);
 
-  editModeRef.current = editMode;
-
   // A selection that came from a click in the preview (no need to scroll the preview to it)
   const fromPreviewRef = useRef(false);
 
@@ -376,35 +373,33 @@ export default function AdminCustomizePage() {
 
   const dataRef = useRef(null);
 
-  dataRef.current = data;
-
   const customizerRef = useRef({});
-
-  customizerRef.current = customizer;
 
   const selectedRef = useRef(null);
 
-  selectedRef.current = selected;
-
   const selectedBlockRef = useRef(null);
-
-  selectedBlockRef.current = selectedBlock;
 
   const pageRef = useRef("index");
 
-  pageRef.current = page;
-
   const sampleProductRef = useRef(null);
-
-  sampleProductRef.current = sampleProductId;
 
   const sampleArticleRef = useRef("");
 
-  sampleArticleRef.current = sampleArticle;
-
   const samplePageRef = useRef("");
 
-  samplePageRef.current = samplePage;
+  // Keep the "latest value" refs in step after each commit (event handlers and timers read them)
+  useLayoutEffect(() => {
+    saveStateRef.current = saveState;
+    editModeRef.current = editMode;
+    dataRef.current = data;
+    customizerRef.current = customizer;
+    selectedRef.current = selected;
+    selectedBlockRef.current = selectedBlock;
+    pageRef.current = page;
+    sampleProductRef.current = sampleProductId;
+    sampleArticleRef.current = sampleArticle;
+    samplePageRef.current = samplePage;
+  });
 
   // Pages written in Pages; the preview keeps its page while that page is still visible
   const loadStorePages = useCallback(
@@ -1194,17 +1189,19 @@ export default function AdminCustomizePage() {
       setNotice(`An earlier ${label.toLowerCase()} version was restored.`);
   }
 
-  engineRef.current = {
-    renderFull,
-    scheduleSync,
-    flushSave,
-    registerPendingImage,
-    postToPreview,
-    externalChange,
-    sectionEvent,
-    selectUnknownSection,
-    addSyncedSections,
-  };
+  useLayoutEffect(() => {
+    engineRef.current = {
+      renderFull,
+      scheduleSync,
+      flushSave,
+      registerPendingImage,
+      postToPreview,
+      externalChange,
+      sectionEvent,
+      selectUnknownSection,
+      addSyncedSections,
+    };
+  });
 
   useEffect(() => onThemeChange((kind) => engineRef.current.externalChange(kind)), []);
 
@@ -1341,7 +1338,9 @@ export default function AdminCustomizePage() {
     []
   );
 
-  engineRef.current.replaceImage = replaceImage;
+  useLayoutEffect(() => {
+    engineRef.current.replaceImage = replaceImage;
+  });
 
   // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed
   useEffect(() => {
@@ -1418,7 +1417,9 @@ export default function AdminCustomizePage() {
     );
   }
 
-  engineRef.current.openStorePage = openStorePage;
+  useLayoutEffect(() => {
+    engineRef.current.openStorePage = openStorePage;
+  });
 
   // Each change: patch the preview (next frame) and schedule a background save
   useEffect(() => {
