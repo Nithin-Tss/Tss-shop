@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiDelete, apiGet, apiPatch, apiPost, logout } from "@/lib/api";
 import { getSession, setTokens, setUser, useSession } from "@/lib/auth";
 import { MOBILE_PATTERN, NAME_PATTERN, emailError } from "@/lib/validation";
@@ -18,6 +18,8 @@ function profileFromUser(user) {
 
 export default function AccountPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const session = useSession();
   const user = session?.user;
   const userName = user?.firstName
@@ -329,6 +331,21 @@ export default function AccountPage() {
     navigate("/", { replace: true });
   };
 
+  const handleBack = () => {
+    if (window.history.state?.idx > 0) {
+      navigate(-1);
+      return;
+    }
+
+    const from = searchParams.get("from") || location.state?.from;
+    if (from && typeof from === "string" && from.startsWith("/") && !from.startsWith("//")) {
+      navigate(from);
+      return;
+    }
+
+    navigate("/");
+  };
+
   return (
     <main className="min-h-screen bg-slate-50/60 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-5xl">
@@ -337,10 +354,14 @@ export default function AccountPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
-                <Link to="/" className="hover:text-slate-900 transition flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="hover:text-slate-900 transition flex items-center gap-1 cursor-pointer"
+                >
                   <span>←</span>
-                  <span>Store</span>
-                </Link>
+                  <span>Back</span>
+                </button>
                 <span>/</span>
                 <span className="text-slate-700">Account</span>
               </div>
