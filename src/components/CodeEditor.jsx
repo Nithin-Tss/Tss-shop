@@ -2,7 +2,11 @@
 import { lazy, Suspense } from "react";
 import { registerLiquid } from "@/lib/monacoLiquid";
 
-const Monaco = lazy(() => import("@monaco-editor/react"));
+// The local Monaco bundle must be configured before the editor component first renders
+const Monaco = lazy(async () => {
+  await import("@/lib/monacoSetup");
+  return import("@monaco-editor/react");
+});
 
 const EditorLoading = () => (
   <div className="flex h-full items-center justify-center text-sm text-neutral-500">

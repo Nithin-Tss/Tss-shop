@@ -1,42 +1,44 @@
+import { lazy, Suspense } from "react";
 import { Link, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
 import Home from "@/pages/Home";
-import Signin from "@/pages/Signin";
-import Signup from "@/pages/Signup";
-import Onboarding from "@/pages/Onboarding";
-import Account from "@/pages/Account";
-import OrderHistory from "@/pages/OrderHistory";
-import EditorDemo from "@/pages/EditorDemo";
-import AdminOnlineStore from "@/pages/AdminOnlineStore";
-import AdminCustomize from "@/pages/AdminCustomize";
-import AdminSettings from "@/pages/AdminSettings";
-import AdminHome from "@/pages/AdminHome";
-import AdminProducts from "@/pages/AdminProducts";
-import AdminAddProduct from "@/pages/AdminAddProduct";
-import AdminProductDetails from "@/pages/AdminProductDetails";
-import AdminCollections from "@/pages/AdminCollections";
-import AdminAddCollection from "@/pages/AdminAddCollection";
-import AdminCatalogues from "@/pages/AdminCatalogues";
-import AdminContent, { BlogPostsPage } from "@/pages/AdminContent";
-import AdminInventory from "@/pages/AdminInventory";
-import AdminOrders from "@/pages/AdminOrders";
-import AdminDrafts from "@/pages/AdminDrafts";
-import AdminCreateOrder from "@/pages/AdminCreateOrder";
-import AdminCustomers from "@/pages/AdminCustomers";
-import AdminAddCustomer from "@/pages/AdminAddCustomer";
-import AdminOverview from "@/pages/AdminOverview";
-import AdminReports from "@/pages/AdminReports";
-import AdminReportExploration from "@/pages/AdminReportExploration";
-import AdminAnalytics from "@/pages/AdminAnalytics";
-import AdminDiscounts from "@/pages/AdminDiscounts";
-import AdminShipping from "@/pages/AdminShipping";
-import Terms from "@/pages/Terms";
-import Privacy from "@/pages/Privacy";
-import Contact from "@/pages/Contact";
-import Blog from "@/pages/Blog";
-import ForgotPassword from "@/pages/ForgotPassword";
-import ResetPassword from "@/pages/ResetPassword";
-import VerifyEmail from "@/pages/VerifyEmail";
+const Signin = lazy(() => import("@/pages/Signin"));
+const Signup = lazy(() => import("@/pages/Signup"));
+const Onboarding = lazy(() => import("@/pages/Onboarding"));
+const Account = lazy(() => import("@/pages/Account"));
+const OrderHistory = lazy(() => import("@/pages/OrderHistory"));
+const EditorDemo = lazy(() => import("@/pages/EditorDemo"));
+const AdminOnlineStore = lazy(() => import("@/pages/AdminOnlineStore"));
+const AdminCustomize = lazy(() => import("@/pages/AdminCustomize"));
+const AdminSettings = lazy(() => import("@/pages/AdminSettings"));
+const AdminHome = lazy(() => import("@/pages/AdminHome"));
+const AdminProducts = lazy(() => import("@/pages/AdminProducts"));
+const AdminAddProduct = lazy(() => import("@/pages/AdminAddProduct"));
+const AdminProductDetails = lazy(() => import("@/pages/AdminProductDetails"));
+const AdminCollections = lazy(() => import("@/pages/AdminCollections"));
+const AdminAddCollection = lazy(() => import("@/pages/AdminAddCollection"));
+const AdminCatalogues = lazy(() => import("@/pages/AdminCatalogues"));
+const AdminContent = lazy(() => import("@/pages/AdminContent"));
+const BlogPostsPage = lazy(() => import("@/pages/AdminContent").then((m) => ({ default: m.BlogPostsPage })));
+const AdminInventory = lazy(() => import("@/pages/AdminInventory"));
+const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
+const AdminDrafts = lazy(() => import("@/pages/AdminDrafts"));
+const AdminCreateOrder = lazy(() => import("@/pages/AdminCreateOrder"));
+const AdminCustomers = lazy(() => import("@/pages/AdminCustomers"));
+const AdminAddCustomer = lazy(() => import("@/pages/AdminAddCustomer"));
+const AdminOverview = lazy(() => import("@/pages/AdminOverview"));
+const AdminReports = lazy(() => import("@/pages/AdminReports"));
+const AdminReportExploration = lazy(() => import("@/pages/AdminReportExploration"));
+const AdminAnalytics = lazy(() => import("@/pages/AdminAnalytics"));
+const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
+const AdminShipping = lazy(() => import("@/pages/AdminShipping"));
+const Terms = lazy(() => import("@/pages/Terms"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Contact = lazy(() => import("@/pages/Contact"));
+const Blog = lazy(() => import("@/pages/Blog"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
 import { can, useSession } from "@/lib/auth";
 
 export default function App() {
@@ -44,6 +46,7 @@ export default function App() {
   const storeId = useSession()?.storeId || "none";
 
   return (
+    <Suspense fallback={<div className="p-8 text-sm text-neutral-500">Loading...</div>}>
     <Routes key={storeId}>
       <Route path="/" element={<Home />} />
       <Route path="/auth/signin" element={<Signin />} />
@@ -121,6 +124,7 @@ export default function App() {
       <Route path="/auth/verify-email" element={<VerifyEmail />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 }
 

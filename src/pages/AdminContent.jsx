@@ -338,7 +338,7 @@ export function BlogPostsPage() {
                     {busy ? "Saving..." : "Save"}
                   </button>
                   {editing.id && editing.status === "published" && (
-                    <a href={editing.url} target="_blank" rel="noopener" className="text-center text-sm font-medium text-[#30466F] hover:underline">
+                    <a href={editing.url} target="_blank" rel="noopener noreferrer" className="text-center text-sm font-medium text-[#30466F] hover:underline">
                       View on store
                     </a>
                   )}
