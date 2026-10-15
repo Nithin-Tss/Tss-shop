@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
-import { getSession, useCan, useSession } from "@/lib/auth";
+import { getSession, useCan } from "@/lib/auth";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
@@ -140,143 +140,140 @@ function ProductThumbnail({ item }) {
   );
 }
 
-function storeItems(storeId, items) {
-  try {
-    localStorage.setItem(`inventory_items_${storeId}`, JSON.stringify(items));
-  } catch {}
-}
+// Reasons offered in the adjust popup, and the key the server stores for each
+const ADJUST_REASONS = {
+  Correction: "correction",
+  "Inventory count": "cycle_count",
+  Received: "received",
+  Damaged: "shrinkage",
+  Returned: "return_restock",
+  Promotion: "other",
+};
 
-// Inline editable Available quantity cell
-function QuantityCell({ value, onChange, disabled, symbol = "⇋" }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempVal, setTempVal] = useState(value);
+// Why stock is set aside (Unavailable)
+const UNAVAILABLE_REASONS = {
+  damaged: "Damaged",
+  quality_control: "Quality control",
+  safety_stock: "Safety stock",
+  other: "Other",
+};
 
-  // Show the new value when it changes from outside
-  const [shownValue, setShownValue] = useState(value);
-  if (shownValue !== value) {
-    setShownValue(value);
-    setTempVal(value);
-  }
+const listOf = (res) =>
+  res?.ok ? (Array.isArray(res.data) ? res.data : res.data?.results || []) : [];
 
-  const handleCommit = () => {
-    setIsEditing(false);
-    const parsed = parseInt(tempVal, 10);
-    if (!isNaN(parsed) && parsed !== value) {
-      onChange(parsed);
-    } else {
-      setTempVal(value);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleCommit();
-    if (e.key === "Escape") {
-      setTempVal(value);
-      setIsEditing(false);
-    }
-  };
-
-  const step = (delta) => {
-    const next = (parseInt(value, 10) || 0) + delta;
-    onChange(next);
-  };
-
-  if (isEditing) {
-    return (
-      <div className="flex items-center justify-end">
-        <input
-          type="number"
-          autoFocus
-          value={tempVal}
-          onChange={(e) => setTempVal(e.target.value)}
-          onBlur={handleCommit}
-          onKeyDown={handleKeyDown}
-          className="h-7 w-16 rounded border border-[#202223] bg-white px-1.5 text-right text-sm font-medium text-[#161C2C] shadow-inner outline-none focus:ring-1 focus:ring-[#161C2C]"
-        />
-      </div>
-    );
-  }
-
+// Text of a failed request
+function errorText(res) {
   return (
-    <div className="group relative flex items-center justify-end">
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => !disabled && setIsEditing(true)}
-        className="flex h-7 items-center gap-1.5 rounded px-2 text-right text-sm font-medium text-[#161C2C] transition hover:bg-[#E4E5E7] group-hover:border group-hover:border-[#C9CCCF] group-hover:bg-[#F1F2F4]"
-        title="Click to adjust quantity"
-      >
-        <span>{value}</span>
-        {symbol && (
-          <span className="text-[11px] text-[#6D7175] opacity-75 group-hover:opacity-100">
-            {symbol}
-          </span>
-        )}
-      </button>
-
-      {/* Quick +/- micro steppers on hover */}
-      {!disabled && (
-        <div className="absolute -right-2 top-1/2 hidden -translate-y-1/2 flex-col rounded border border-[#D8DFE8] bg-white shadow-sm group-hover:flex">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              step(1);
-            }}
-            aria-label="Increase quantity"
-            className="flex h-3.5 w-4 items-center justify-center text-[8px] text-[#53627E] hover:bg-[#F3F6FA] border-b border-[#E3E7ED]"
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              step(-1);
-            }}
-            aria-label="Decrease quantity"
-            className="flex h-3.5 w-4 items-center justify-center text-[8px] text-[#53627E] hover:bg-[#F3F6FA]"
-          >
-            ▼
-          </button>
-        </div>
-      )}
-    </div>
+    res?.formError ||
+    Object.values(res?.fieldErrors || {})[0] ||
+    res?.error ||
+    "Something went wrong. Please try again."
   );
 }
 
-// On Hand Quantity Editing Popover matching the reference screenshot
-function OnHandPopover({ item, currentOnHand, locationName, onSave, onClose }) {
-  const [actionType, setActionType] = useState("set"); // "set" | "add"
-  const [inputVal, setInputVal] = useState(currentOnHand);
-  const [selectedLocation, setSelectedLocation] = useState(locationName || "SIPNOW");
-  const [reason, setReason] = useState("Correction");
-  const [showReasonDropdown, setShowReasonDropdown] = useState(false);
-  const popoverRef = useRef(null);
+// One row per stock record (product variant at a location). A variant with no stock record yet
+// is listed too, with 0, at the store's first location: adjusting it creates the record.
+function buildRows(stock, products, locations) {
+  const image = {};
+  products.forEach((p) => {
+    image[p.id] = p.images?.[0]?.url || null;
+  });
 
-  // Close when clicking outside
+  const rows = stock.map((s) => ({
+    id: s.id,
+    itemId: s.id,
+    product: s.product,
+    variant: s.variant,
+    location: s.location,
+    locationName: s.location_name,
+    title: s.product_title,
+    sku: s.sku,
+    image_url: image[s.product] || null,
+    available: s.available,
+    committed: s.committed,
+    unavailable: s.unavailable,
+    incoming: s.incoming,
+  }));
+
+  const tracked = new Set(stock.map((s) => s.variant));
+  const first = locations[0];
+  products.forEach((p) => {
+    (p.variants || []).forEach((v) => {
+      if (tracked.has(v.id)) return;
+      rows.push({
+        id: `variant-${v.id}`,
+        itemId: null,
+        product: p.id,
+        variant: v.id,
+        location: first?.id || null,
+        locationName: first?.name || "",
+        title: p.title,
+        sku: v.sku,
+        image_url: image[p.id] || null,
+        available: 0,
+        committed: 0,
+        unavailable: 0,
+        incoming: 0,
+      });
+    });
+  });
+
+  return rows.sort(
+    (a, b) =>
+      (a.title || "").localeCompare(b.title || "") || (a.sku || "").localeCompare(b.sku || "")
+  );
+}
+
+// Closes a popover when you click outside it
+function useClickOutside(ref, onClose) {
   useEffect(() => {
     function handleClickOutside(event) {
-      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-        onClose();
-      }
+      if (ref.current && !ref.current.contains(event.target)) onClose();
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [onClose]);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [ref, onClose]);
+}
 
-  const handleConfirm = () => {
+// Adjust popup for Available and On hand: change by an amount or set a new total, with a reason
+// and an optional note. target: "available" | "onhand"
+function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose }) {
+  const [actionType, setActionType] = useState("set"); // "set" | "add"
+  const [inputVal, setInputVal] = useState(currentValue);
+  const [reason, setReason] = useState("Correction");
+  const [note, setNote] = useState("");
+  const [showReasonDropdown, setShowReasonDropdown] = useState(false);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const popoverRef = useRef(null);
+
+  useClickOutside(popoverRef, onClose);
+
+  const handleConfirm = async () => {
     const val = parseInt(inputVal, 10);
-    if (isNaN(val)) return;
+    if (isNaN(val) || busy) return;
 
-    const newOnHand = actionType === "add" ? currentOnHand + val : val;
-    // On Hand = Available + Committed + Unavailable
-    // Available = newOnHand - Committed - Unavailable
-    const newAvailable = newOnHand - (item.committed || 0) - (item.unavailable || 0);
-    onSave(item.id, newAvailable, newOnHand);
-    onClose();
+    let payload;
+    if (actionType === "add") {
+      if (val === 0) return onClose();
+      payload = { delta: val };
+    } else {
+      // On hand = Available + Committed + Unavailable, so setting On hand sets Available
+      const available =
+        target === "onhand" ? val - (item.committed || 0) - (item.unavailable || 0) : val;
+      if (available < 0) {
+        setError("That is less than what is already committed or unavailable.");
+        return;
+      }
+      payload = { available };
+    }
+
+    setBusy(true);
+    setError("");
+    const message = await onSave({ ...payload, reason: ADJUST_REASONS[reason], note: note.trim() });
+    setBusy(false);
+    if (message) setError(message);
+    else onClose();
   };
 
   const handleKeyDown = (e) => {
@@ -303,7 +300,7 @@ function OnHandPopover({ item, currentOnHand, locationName, onSave, onClose }) {
             onChange={(e) => {
               const next = e.target.value;
               setActionType(next);
-              setInputVal(next === "add" ? 0 : currentOnHand);
+              setInputVal(next === "add" ? 0 : currentValue);
             }}
             className="h-9 appearance-none bg-transparent pl-2.5 pr-6 text-xs sm:text-sm font-normal text-[#161C2C] outline-none cursor-pointer"
           >
@@ -346,20 +343,16 @@ function OnHandPopover({ item, currentOnHand, locationName, onSave, onClose }) {
         </div>
       </div>
 
-      {/* 2. Location Dropdown */}
+      {/* 2. Location (the stock record being changed) */}
       <div className="relative">
         <select
-          value={selectedLocation}
-          onChange={(e) => setSelectedLocation(e.target.value)}
-          className="h-9 appearance-none rounded-lg border border-[#8C9196] bg-white pl-3 pr-7 text-xs sm:text-sm font-normal text-[#161C2C] outline-none shadow-2xs cursor-pointer hover:border-[#161C2C] min-w-[130px]"
+          value={item.locationName}
+          disabled
+          onChange={() => {}}
+          className="h-9 appearance-none rounded-lg border border-[#8C9196] bg-white pl-3 pr-7 text-xs sm:text-sm font-normal text-[#161C2C] outline-none shadow-2xs min-w-[130px]"
         >
-          <option value={locationName}>{locationName}</option>
-          <option value="Main Warehouse">Main Warehouse</option>
-          <option value="Online Store">Online Store</option>
+          <option value={item.locationName}>{item.locationName}</option>
         </select>
-        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#53627E] leading-[6px]">
-          ▲▼
-        </span>
       </div>
 
       {/* 3. Reason for Adjustment Icon Button & Dropdown */}
@@ -392,33 +385,44 @@ function OnHandPopover({ item, currentOnHand, locationName, onSave, onClose }) {
             <div className="px-3 py-1 font-semibold text-[11px] text-[#53627E] border-b border-[#F0F2F5]">
               Reason for adjustment
             </div>
-            {["Correction", "Inventory count", "Received", "Damaged", "Returned", "Promotion"].map(
-              (r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => {
-                    setReason(r);
-                    setShowReasonDropdown(false);
-                  }}
-                  className={`w-full text-left px-3 py-1.5 hover:bg-[#F3F6FA] transition ${
-                    reason === r ? "font-semibold text-[#005BD3] bg-[#F0F4FA]" : ""
-                  }`}
-                >
-                  {r}
-                </button>
-              )
-            )}
+            {Object.keys(ADJUST_REASONS).map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => {
+                  setReason(r);
+                  setShowReasonDropdown(false);
+                }}
+                className={`w-full text-left px-3 py-1.5 hover:bg-[#F3F6FA] transition ${
+                  reason === r ? "font-semibold text-[#005BD3] bg-[#F0F4FA]" : ""
+                }`}
+              >
+                {r}
+              </button>
+            ))}
           </div>
         )}
       </div>
 
-      {/* 4. Confirm / Save Button */}
+      {/* 4. Optional note */}
+      <input
+        type="text"
+        value={note}
+        maxLength={500}
+        onChange={(e) => setNote(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Note (optional)"
+        aria-label="Note"
+        className="h-9 w-36 rounded-lg border border-[#8C9196] bg-white px-2.5 text-xs sm:text-sm text-[#161C2C] outline-none shadow-2xs focus:border-[#161C2C] focus:ring-1 focus:ring-[#161C2C]"
+      />
+
+      {/* 5. Confirm / Save Button */}
       <button
         type="button"
         onClick={handleConfirm}
+        disabled={busy}
         title="Confirm quantity change"
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-[#161C2C] hover:bg-[#161C2C] hover:text-white transition shadow-2xs"
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-[#161C2C] hover:bg-[#161C2C] hover:text-white transition shadow-2xs disabled:opacity-50"
       >
         <svg
           viewBox="0 0 24 24"
@@ -432,6 +436,249 @@ function OnHandPopover({ item, currentOnHand, locationName, onSave, onClose }) {
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </button>
+
+      {/* 6. History */}
+      {item.itemId && (
+        <button
+          type="button"
+          onClick={onHistory}
+          className="text-xs font-medium text-[#005BD3] hover:underline"
+        >
+          View history
+        </button>
+      )}
+
+      {error && (
+        <p className="absolute left-2 top-full mt-1 rounded bg-white px-1 text-xs text-[#D82C0D]">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Breakdown popup for Unavailable (by reason, with a way to set stock aside or put it back) and
+// Committed (by open order). kind: "unavailable" | "committed"
+function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [reason, setReason] = useState("damaged");
+  const [busy, setBusy] = useState(false);
+  const popoverRef = useRef(null);
+
+  useClickOutside(popoverRef, onClose);
+
+  const load = useCallback(async () => {
+    const res = await apiGet(`/api/v1/inventory/items/${item.itemId}/breakdown/`);
+    if (res.ok) setData(res.data);
+    else setError(res.error);
+  }, [item.itemId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load, item.unavailable, item.committed]);
+
+  const move = async (amount, why, release) => {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    const message = await onChange({ quantity: amount, reason: why, release });
+    setBusy(false);
+    if (message) setError(message);
+  };
+
+  return (
+    <div
+      ref={popoverRef}
+      className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-xl border border-[#D8DFE8] bg-white p-3 shadow-[0_6px_22px_rgba(0,0,0,0.16)] text-left text-xs text-[#161C2C]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="mb-2 flex items-center justify-between">
+        <span className="font-semibold text-[11px] text-[#53627E]">
+          {kind === "unavailable" ? "Unavailable by reason" : "Committed by order"}
+        </span>
+        <button
+          type="button"
+          onClick={onHistory}
+          className="text-xs font-medium text-[#005BD3] hover:underline"
+        >
+          View history
+        </button>
+      </div>
+
+      {!data && !error && <p className="py-2 text-[#53627E]">Loading…</p>}
+
+      {data && kind === "unavailable" && (
+        <ul className="divide-y divide-[#F0F2F5]">
+          {data.unavailable.length === 0 && (
+            <li className="py-2 text-[#53627E]">Nothing set aside.</li>
+          )}
+          {data.unavailable.map((row) => (
+            <li key={row.reason} className="flex items-center justify-between py-1.5">
+              <span>
+                {UNAVAILABLE_REASONS[row.reason] || row.reason}: <b>{row.quantity}</b>
+              </span>
+              {canManage && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => move(row.quantity, row.reason, true)}
+                  className="text-[#005BD3] hover:underline disabled:opacity-50"
+                >
+                  Put back
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {data && kind === "committed" && (
+        <ul className="divide-y divide-[#F0F2F5]">
+          {data.committed.length === 0 && (
+            <li className="py-2 text-[#53627E]">
+              {item.committed > 0
+                ? "These orders were placed before history was kept."
+                : "No open orders."}
+            </li>
+          )}
+          {data.committed.map((row) => (
+            <li key={row.order} className="flex items-center justify-between py-1.5">
+              <span>{row.order_number || "Order"}</span>
+              <b>{row.quantity}</b>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {kind === "unavailable" && canManage && (
+        <div className="mt-2 flex items-center gap-2 border-t border-[#F0F2F5] pt-2">
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            aria-label="Quantity to set aside"
+            className="h-8 w-14 rounded-lg border border-[#8C9196] bg-white px-1.5 text-center text-sm outline-none focus:border-[#161C2C]"
+          />
+          <select
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className="h-8 flex-1 rounded-lg border border-[#8C9196] bg-white px-2 text-xs outline-none cursor-pointer"
+          >
+            {Object.entries(UNAVAILABLE_REASONS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => move(parseInt(quantity, 10) || 0, reason, false)}
+            className="h-8 rounded-lg border border-[#D8DFE8] bg-white px-2.5 text-xs font-medium hover:bg-[#161C2C] hover:text-white transition disabled:opacity-50"
+          >
+            Set aside
+          </button>
+        </div>
+      )}
+
+      {error && <p className="mt-2 text-xs text-[#D82C0D]">{error}</p>}
+    </div>
+  );
+}
+
+// Every change to one product's stock at one location: date, change, reason, who, new quantity
+function HistoryModal({ item, onClose }) {
+  const [rows, setRows] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    apiGet(
+      `/api/v1/inventory/items/history/?variant=${item.variant}&location=${item.location}`
+    ).then((res) => {
+      if (!active) return;
+      if (res.ok) setRows(res.data);
+      else setError(res.error);
+    });
+    return () => {
+      active = false;
+    };
+  }, [item.variant, item.location]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-modal-title"
+        className="w-full max-w-2xl rounded-xl bg-white shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-[#E3E7ED] px-5 py-3">
+          <h2 id="history-modal-title" className="text-base font-semibold text-[#161C2C]">
+            History · {item.title}
+            {item.sku ? ` (${item.sku})` : ""}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="text-lg text-[#53627E] hover:text-[#161C2C]"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="max-h-[60vh] overflow-y-auto">
+          {error && <p className="px-5 py-4 text-sm text-[#D82C0D]">{error}</p>}
+          {!rows && !error && <p className="px-5 py-4 text-sm text-[#53627E]">Loading…</p>}
+          {rows && rows.length === 0 && (
+            <p className="px-5 py-6 text-center text-sm text-[#53627E]">No changes recorded yet.</p>
+          )}
+          {rows && rows.length > 0 && (
+            <table className="w-full text-left text-sm">
+              <thead className="sticky top-0 bg-[#FAFBFD] text-xs text-[#53627E]">
+                <tr>
+                  <th className="px-5 py-2 font-medium">Date</th>
+                  <th className="px-3 py-2 text-right font-medium">Change</th>
+                  <th className="px-3 py-2 font-medium">Reason</th>
+                  <th className="px-3 py-2 font-medium">Who</th>
+                  <th className="px-5 py-2 text-right font-medium">New quantity</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E3E7ED]">
+                {rows.map((row) => (
+                  <tr key={row.id} title={row.note || undefined}>
+                    <td className="px-5 py-2 text-xs text-[#53627E]">
+                      {new Date(row.created_at).toLocaleString()}
+                    </td>
+                    <td
+                      className={`px-3 py-2 text-right font-medium ${
+                        row.change < 0 ? "text-[#D82C0D]" : "text-[#161C2C]"
+                      }`}
+                    >
+                      {row.change > 0 ? `+${row.change}` : row.change}
+                    </td>
+                    <td className="px-3 py-2">
+                      {row.reason_label}
+                      {row.note ? <span className="text-[#53627E]"> · {row.note}</span> : null}
+                    </td>
+                    <td className="px-3 py-2">{row.who}</td>
+                    <td className="px-5 py-2 text-right font-medium">{row.after}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -520,15 +767,6 @@ function ImportModal({ onClose, onImportSuccess }) {
         setImporting(false);
         return;
       }
-
-      // Also sync to catalog bulk endpoint in background if accessible
-      const catalogBatch = parsedItems.map((p) => ({
-        title: p.title,
-        sku: p.sku,
-        quantity: p.available,
-        status: "active",
-      }));
-      apiPost("/api/v1/catalog/products/bulk/", { products: catalogBatch }).catch(() => {});
 
       onImportSuccess(parsedItems);
       onClose();
@@ -699,23 +937,10 @@ function ImportModal({ onClose, onImportSuccess }) {
 
 export default function InventoryPage() {
   const canManage = useCan("inventory.manage");
-  const session = useSession();
   const storeId = getSession()?.storeId || "default";
 
-  // Location name: reads from active session / store, defaults to "SIPNOW" matching screenshot
-  const locationName =
-    session?.store?.storeName ||
-    session?.stores?.find((s) => s.storeId === storeId)?.storeName ||
-    "SIPNOW";
-
-  // Dynamic inventory items loaded from catalog or imported by the user
-  const [items, setItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`inventory_items_${storeId}`);
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return [];
-  });
+  // One row per stock record, always read from the server (the one inventory table)
+  const [items, setItems] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState(() => new Set());
@@ -724,55 +949,124 @@ export default function InventoryPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [notice, setNotice] = useState("");
 
-  // ID of row currently editing On Hand quantity
-  const [editingOnHandId, setEditingOnHandId] = useState(null);
+  // The row whose popup is open: { id, kind: "available" | "onhand" | "unavailable" | "committed" }
+  const [popover, setPopover] = useState(null);
+  const [historyItem, setHistoryItem] = useState(null);
 
   const pageSize = 50;
 
-  // Persist imported items in localStorage for this store
-  const saveItems = (newItems) => {
-    setItems(newItems);
-    storeItems(storeId, newItems);
+  const flash = (message) => {
+    setNotice(message);
+    setTimeout(() => setNotice(""), 3500);
   };
 
-  // On mount, if no items are in local storage, load existing products from the store's backend catalog
+  // Load (or reload) the stock: after any change, and when you come back to this tab
+  const refresh = useCallback(async () => {
+    const [stock, products, locations] = await Promise.all([
+      apiGet("/api/v1/inventory/items/"),
+      apiGet("/api/v1/catalog/products/"),
+      apiGet("/api/v1/inventory/locations/"),
+    ]);
+    if (!stock.ok) {
+      setNotice(`Couldn't load stock: ${stock.error}`);
+      return;
+    }
+    setItems(buildRows(listOf(stock), listOf(products), listOf(locations)));
+  }, []);
+
   useEffect(() => {
-    let active = true;
-    apiGet("/api/v1/catalog/products/").then((res) => {
-      if (!active || !res?.ok) return;
-      const results = Array.isArray(res.data) ? res.data : res.data?.results || [];
-      if (results.length > 0) {
-        setItems((current) => {
-          if (current.length > 0) return current; // Keep user imported items if present
-          const catalogItems = results.map((p, idx) => ({
-            id: p.id || `prod-${idx}`,
-            title: p.title || "Untitled Product",
-            sku: p.sku || `SKU-${idx + 1000}`,
-            unavailable: p.unavailable || 0,
-            committed: p.committed || 0,
-            available: typeof p.quantity === "number" ? p.quantity : 0,
-            incoming: p.incoming || 0,
-            image_url: p.primary_image?.image_url || p.image_url || null,
-          }));
-          storeItems(storeId, catalogItems);
-          return catalogItems;
-        });
-      }
-    });
-
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refresh();
+    const onFocus = () => document.visibilityState === "visible" && refresh();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
     return () => {
-      active = false;
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [storeId]);
+  }, [refresh, storeId]);
 
-  // Handle successful import of file items
-  const handleImportSuccess = (importedProducts) => {
-    saveItems(importedProducts);
-    setNotice(
-      `Successfully imported ${importedProducts.length} product${importedProducts.length === 1 ? "" : "s"}.`
-    );
+  // Change Available / On hand through the server; returns an error message, or "" when it worked
+  const saveStock = async (item, payload, label) => {
+    if (!item.location) return "Add a location first, then adjust this stock.";
+    const base = {
+      variant: item.variant,
+      location: item.location,
+      reason: payload.reason,
+      note: payload.note,
+    };
+    const res =
+      "available" in payload
+        ? await apiPost("/api/v1/inventory/items/set/", { ...base, available: payload.available })
+        : await apiPost("/api/v1/inventory/items/adjust/", { ...base, delta: payload.delta });
+    if (!res.ok) return errorText(res);
+    await refresh();
+    flash(`Updated ${label} quantity.`);
+    return "";
+  };
+
+  // Set stock aside (damaged, ...) or put it back
+  const saveUnavailable = async (item, { quantity, reason, release }) => {
+    if (!item.location) return "Add a location first, then adjust this stock.";
+    const res = await apiPost("/api/v1/inventory/items/unavailable/", {
+      variant: item.variant,
+      location: item.location,
+      quantity,
+      reason,
+      release,
+    });
+    if (!res.ok) return errorText(res);
+    await refresh();
+    flash(release ? "Put the stock back to available." : "Set the stock aside as unavailable.");
+    return "";
+  };
+
+  // Import a file: products already in the store (same SKU) get their Available set, new ones
+  // are created. Both go through the server, so the history records them.
+  const handleImportSuccess = async (importedProducts) => {
     setCurrentPage(1);
-    setTimeout(() => setNotice(""), 4500);
+    const bySku = new Map(items.filter((i) => i.sku).map((i) => [i.sku.toLowerCase(), i]));
+    const fresh = [];
+    let updated = 0;
+    let failed = 0;
+
+    for (const p of importedProducts) {
+      const row = bySku.get((p.sku || "").toLowerCase());
+      if (!row) {
+        fresh.push({ title: p.title, sku: p.sku, quantity: p.available, status: "active" });
+        continue;
+      }
+      const res = row.location
+        ? await apiPost("/api/v1/inventory/items/set/", {
+            variant: row.variant,
+            location: row.location,
+            available: Math.max(0, Math.round(p.available)),
+            reason: "import",
+            note: "Imported from file",
+          })
+        : { ok: false };
+      if (res.ok) updated += 1;
+      else failed += 1;
+    }
+
+    let created = 0;
+    for (let i = 0; i < fresh.length; i += 500) {
+      const res = await apiPost("/api/v1/catalog/products/bulk/", {
+        products: fresh.slice(i, i + 500),
+      });
+      if (res.ok) created += res.data?.created || 0;
+      else failed += fresh.slice(i, i + 500).length;
+    }
+
+    await refresh();
+    const parts = [];
+    if (created) parts.push(`${created} new product${created === 1 ? "" : "s"}`);
+    if (updated) parts.push(`${updated} updated`);
+    flash(
+      `${parts.length ? `Imported ${parts.join(", ")}.` : "Nothing was imported."}${
+        failed ? ` ${failed} could not be imported.` : ""
+      }`
+    );
   };
 
   // Filter items by search query & tab
@@ -820,32 +1114,6 @@ export default function InventoryPage() {
       else next.add(id);
       return next;
     });
-  };
-
-  // Inline Available quantity adjustment
-  const updateAvailable = (id, newAvailable) => {
-    const updated = items.map((item) =>
-      item.id === id ? { ...item, available: newAvailable } : item
-    );
-    saveItems(updated);
-  };
-
-  // Inline Unavailable quantity adjustment
-  const updateUnavailable = (id, newUnavailable) => {
-    const updated = items.map((item) =>
-      item.id === id ? { ...item, unavailable: newUnavailable } : item
-    );
-    saveItems(updated);
-  };
-
-  // Save On Hand quantity adjustment from the popover
-  const handleSaveOnHand = (id, newAvailable, newOnHand) => {
-    const updated = items.map((item) =>
-      item.id === id ? { ...item, available: newAvailable } : item
-    );
-    saveItems(updated);
-    setNotice(`Updated on hand quantity to ${newOnHand}.`);
-    setTimeout(() => setNotice(""), 3500);
   };
 
   // Export current inventory table as CSV
@@ -1122,7 +1390,8 @@ export default function InventoryPage() {
                       const onHand =
                         (item.available || 0) + (item.committed || 0) + (item.unavailable || 0);
                       const isSelected = selectedIds.has(item.id);
-                      const isEditingThisOnHand = editingOnHandId === item.id;
+                      const open = popover?.id === item.id ? popover.kind : null;
+                      const isEditingThisOnHand = open !== null;
 
                       return (
                         <tr
@@ -1147,7 +1416,7 @@ export default function InventoryPage() {
                             <div className="flex items-center gap-3">
                               <ProductThumbnail item={item} />
                               <Link
-                                to={`/admin/online-store/products/${item.id}`}
+                                to={`/admin/online-store/products/${item.product}`}
                                 className="font-medium text-[#161C2C] hover:text-[#005BD3] hover:underline line-clamp-1 leading-snug"
                                 title={item.title}
                               >
@@ -1163,45 +1432,117 @@ export default function InventoryPage() {
                             </span>
                           </td>
 
-                          {/* Unavailable */}
-                          <td className="py-2.5 px-3 text-right">
-                            <QuantityCell
-                              value={item.unavailable ?? 0}
-                              onChange={(val) => updateUnavailable(item.id, val)}
-                              disabled={!canManage}
-                              symbol="▾"
-                            />
+                          {/* Unavailable (opens the breakdown by reason) */}
+                          <td className="py-2.5 px-3 text-right relative">
+                            <button
+                              type="button"
+                              disabled={!item.itemId}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPopover(
+                                  open === "unavailable"
+                                    ? null
+                                    : { id: item.id, kind: "unavailable" }
+                                );
+                              }}
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-[#161C2C] transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
+                              title="See why stock is unavailable"
+                            >
+                              {item.unavailable ?? 0}
+                              <span className="text-[10px] text-[#6D7175]">▾</span>
+                            </button>
+                            {open === "unavailable" && (
+                              <BreakdownPopover
+                                item={item}
+                                kind="unavailable"
+                                canManage={canManage}
+                                onChange={(change) => saveUnavailable(item, change)}
+                                onHistory={() => {
+                                  setPopover(null);
+                                  setHistoryItem(item);
+                                }}
+                                onClose={() => setPopover(null)}
+                              />
+                            )}
                           </td>
 
-                          {/* Committed */}
-                          <td className="py-2.5 px-3 text-right">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-[#161C2C]">
+                          {/* Committed (opens the open orders behind it) */}
+                          <td className="py-2.5 px-3 text-right relative">
+                            <button
+                              type="button"
+                              disabled={!item.itemId}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPopover(
+                                  open === "committed" ? null : { id: item.id, kind: "committed" }
+                                );
+                              }}
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-[#161C2C] transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
+                              title="See which orders hold this stock"
+                            >
                               {item.committed ?? 0}
                               <span className="text-[10px] text-[#6D7175]">▾</span>
-                            </span>
+                            </button>
+                            {open === "committed" && (
+                              <BreakdownPopover
+                                item={item}
+                                kind="committed"
+                                canManage={canManage}
+                                onChange={() => Promise.resolve("")}
+                                onHistory={() => {
+                                  setPopover(null);
+                                  setHistoryItem(item);
+                                }}
+                                onClose={() => setPopover(null)}
+                              />
+                            )}
                           </td>
 
-                          {/* Available (Interactive inline quantity editor) */}
-                          <td className="py-2.5 px-3 text-right">
-                            <QuantityCell
-                              value={item.available ?? 0}
-                              onChange={(val) => updateAvailable(item.id, val)}
-                              disabled={!canManage}
-                              symbol="⇋"
-                            />
-                          </td>
-
-                          {/* On Hand (Clickable to open inline editing popover matching screenshot) */}
+                          {/* Available (⇋ opens the adjust popup) */}
                           <td className="py-2.5 px-3 text-right relative">
                             <button
                               type="button"
                               disabled={!canManage}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setEditingOnHandId(isEditingThisOnHand ? null : item.id);
+                                setPopover(
+                                  open === "available" ? null : { id: item.id, kind: "available" }
+                                );
+                              }}
+                              className="inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium text-[#161C2C] transition cursor-pointer select-none hover:bg-[#E4E5E7]"
+                              title="Click to adjust quantity"
+                            >
+                              <span>{item.available ?? 0}</span>
+                              <span className="text-[11px] text-[#6D7175]">⇋</span>
+                            </button>
+                            {open === "available" && (
+                              <AdjustPopover
+                                item={item}
+                                target="available"
+                                currentValue={item.available ?? 0}
+                                onSave={(payload) => saveStock(item, payload, "available")}
+                                onHistory={() => {
+                                  setPopover(null);
+                                  setHistoryItem(item);
+                                }}
+                                onClose={() => setPopover(null)}
+                              />
+                            )}
+                          </td>
+
+                          {/* On Hand (⇋ opens the adjust popup) */}
+                          <td className="py-2.5 px-3 text-right relative">
+                            <button
+                              type="button"
+                              disabled={!canManage}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPopover(
+                                  open === "onhand" ? null : { id: item.id, kind: "onhand" }
+                                );
                               }}
                               className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium transition cursor-pointer select-none ${
-                                isEditingThisOnHand
+                                open === "onhand"
                                   ? "bg-[#E4E5E7] text-[#161C2C] ring-1 ring-[#8C9196]"
                                   : onHand < 0
                                     ? "text-[#D82C0D] hover:bg-[#E4E5E7]"
@@ -1213,14 +1554,17 @@ export default function InventoryPage() {
                               <span className="text-[11px] text-[#6D7175]">⇋</span>
                             </button>
 
-                            {/* On Hand Editing Popover */}
-                            {isEditingThisOnHand && (
-                              <OnHandPopover
+                            {open === "onhand" && (
+                              <AdjustPopover
                                 item={item}
-                                currentOnHand={onHand}
-                                locationName={locationName}
-                                onSave={handleSaveOnHand}
-                                onClose={() => setEditingOnHandId(null)}
+                                target="onhand"
+                                currentValue={onHand}
+                                onSave={(payload) => saveStock(item, payload, "on hand")}
+                                onHistory={() => {
+                                  setPopover(null);
+                                  setHistoryItem(item);
+                                }}
+                                onClose={() => setPopover(null)}
                               />
                             )}
                           </td>
@@ -1285,6 +1629,9 @@ export default function InventoryPage() {
           </div>
         </main>
       </div>
+
+      {/* STOCK HISTORY */}
+      {historyItem && <HistoryModal item={historyItem} onClose={() => setHistoryItem(null)} />}
 
       {/* REUSABLE IMPORT MODAL */}
       {isImportModalOpen && (
