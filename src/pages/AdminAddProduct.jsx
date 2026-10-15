@@ -56,6 +56,12 @@ const PAGE_LAYOUTS = [
   { value: "minimal", label: "Minimal" },
 ];
 
+const TARGET_SALES_CHANNELS = [
+  { name: "Online Store", type: "online" },
+  { name: "Point of Sale", type: "pos" },
+  { name: "Shop", type: "shop" },
+];
+
 // Lists from the API come back either as an array or as { results }
 const listOf = (res) => (Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.results) ? res.data.results : []);
 
@@ -617,6 +623,16 @@ export function ProductForm({ productId }) {
   // Automated collections fill themselves from their conditions: shown here, not picked
   const [automatedCollections, setAutomatedCollections] = useState([]);
   const [channels, setChannels] = useState([]);
+  const displayedChannels = useMemo(() => {
+    return TARGET_SALES_CHANNELS.map((target) => {
+      const found = channels.find(
+        (c) =>
+          (c.type && c.type.toLowerCase() === target.type.toLowerCase()) ||
+          (c.name && c.name.trim().toLowerCase() === target.name.toLowerCase())
+      );
+      return found ? { ...found, name: target.name } : null;
+    }).filter(Boolean);
+  }, [channels]);
   // Lists that failed to load: saving leaves those fields alone instead of clearing them
   const [failedLists, setFailedLists] = useState([]);
 
@@ -801,8 +817,30 @@ export function ProductForm({ productId }) {
   const toggleCollection = (collection) =>
     setCollections((prev) => (prev.includes(collection) ? prev.filter((c) => c !== collection) : [...prev, collection]));
 
-  const toggleChannel = (id) =>
-    setChannelIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+  const isChannelChecked = (ch) => {
+    if (channelIds.includes(ch.id)) return true;
+    const matchingChannels = channels.filter(
+      (c) =>
+        (c.type && ch.type && c.type.toLowerCase() === ch.type.toLowerCase()) ||
+        (c.name && ch.name && c.name.trim().toLowerCase() === ch.name.trim().toLowerCase())
+    );
+    return matchingChannels.some((c) => channelIds.includes(c.id));
+  };
+
+  const toggleChannel = (ch) => {
+    const matchingChannels = channels.filter(
+      (c) =>
+        (c.type && ch.type && c.type.toLowerCase() === ch.type.toLowerCase()) ||
+        (c.name && ch.name && c.name.trim().toLowerCase() === ch.name.trim().toLowerCase())
+    );
+    const matchingIds = matchingChannels.map((c) => c.id);
+    const checked = isChannelChecked(ch);
+    if (checked) {
+      setChannelIds((prev) => prev.filter((id) => !matchingIds.includes(id) && id !== ch.id));
+    } else {
+      setChannelIds((prev) => [...prev.filter((id) => !matchingIds.includes(id)), ch.id]);
+    }
+  };
 
   const fail = (message, errors = {}) => {
     setSaving(false);
@@ -1344,19 +1382,25 @@ export function ProductForm({ productId }) {
 
               {/* 7 SALES CHANNELS */}
               <Card title="Sales channels" hint="Choose where you want to sell this product.">
-                {channels.length ? (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {channels.map((ch) => (
-                      <label key={ch.id} className="flex cursor-pointer items-center justify-between rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-4 py-3 text-sm font-medium">
-                        {ch.name}
-                        <input
-                          type="checkbox"
-                          checked={channelIds.includes(ch.id)}
-                          onChange={() => toggleChannel(ch.id)}
-                          className="h-4 w-4 accent-[#141b2d]"
-                        />
-                      </label>
-                    ))}
+                {displayedChannels.length ? (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {displayedChannels.map((ch) => {
+                      const checked = isChannelChecked(ch);
+                      return (
+                        <label
+                          key={ch.id}
+                          className="flex cursor-pointer items-center justify-between rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-4 py-3 text-sm font-medium transition hover:border-[#141b2d] hover:bg-white"
+                        >
+                          <span className="text-[#141b2d]">{ch.name}</span>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleChannel(ch)}
+                            className="h-4 w-4 accent-[#141b2d] cursor-pointer rounded"
+                          />
+                        </label>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-sm text-slate-500">Loading your sales channels…</p>
