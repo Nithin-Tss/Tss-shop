@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 // A Shopify-style link field: shows where the link goes; opening it lists the store's
 // Home page, Collections, Products, Pages, Blogs, Blog posts and Policies to pick from,
@@ -287,87 +288,100 @@ export default function LinkField({
         )}
       </div>
 
-      {open && box && (
-        <div
-          ref={popRef}
-          style={{ position: "fixed", zIndex: 60, ...box }}
-          className="overflow-y-auto rounded-xl border border-[#E4DEFB] bg-white p-1.5 shadow-xl"
-          role="listbox"
-        >
-          {typedAddress && (
-            <button type="button" className={rowClass} onClick={() => pick(query.trim())}>
-              <Icon name="link" />
-              <span className="min-w-0 flex-1 truncate">
-                Use <strong className="font-semibold">{query.trim()}</strong>
-              </span>
-            </button>
-          )}
-
-          {results &&
-            results.map((r) => (
-              <button key={r.url} type="button" className={rowClass} onClick={() => pick(r.url)}>
-                <span className="text-[#4C4F7A]">
-                  <Icon name={r.icon} />
+      {open &&
+        box &&
+        createPortal(
+          <div
+            ref={popRef}
+            style={{ position: "fixed", zIndex: 1000, ...box }}
+            className="overflow-y-auto rounded-xl border border-[#E4DEFB] bg-white p-1.5 shadow-xl"
+            role="listbox"
+          >
+            {typedAddress && (
+              <button type="button" className={rowClass} onClick={() => pick(query.trim())}>
+                <Icon name="link" />
+                <span className="min-w-0 flex-1 truncate">
+                  Use <strong className="font-semibold">{query.trim()}</strong>
                 </span>
-                <span className="min-w-0 flex-1 truncate">{r.name}</span>
               </button>
-            ))}
-          {results && !results.length && !typedAddress && (
-            <p className="px-2.5 py-2 text-sm text-[#4C4F7A]">
-              No matches. Paste a full link instead.
-            </p>
-          )}
+            )}
 
-          {!results && group && (
-            <>
-              <button
-                type="button"
-                onClick={() => setGroup(null)}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-[#0B1020] hover:bg-[#F5F3FF]"
-              >
-                <Icon name="back" />
-                {GROUPS[group].title}
-              </button>
-              {GROUPS[group].items.length === 0 && (
-                <p className="px-2.5 py-2 text-sm text-[#4C4F7A]">Nothing here yet.</p>
-              )}
-              {GROUPS[group].items.map((i) => (
-                <button key={i.url} type="button" className={rowClass} onClick={() => pick(i.url)}>
-                  <span className="min-w-0 flex-1 truncate">{i.name}</span>
-                  {i.url === value && <span className="text-xs text-[#4C4F7A]">Selected</span>}
+            {results &&
+              results.map((r) => (
+                <button key={r.url} type="button" className={rowClass} onClick={() => pick(r.url)}>
+                  <span className="text-[#4C4F7A]">
+                    <Icon name={r.icon} />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{r.name}</span>
                 </button>
               ))}
-            </>
-          )}
-
-          {!results && !group && (
-            <>
-              <p className="px-2.5 pb-1 pt-1.5 text-xs font-semibold text-[#4C4F7A]">
-                Online store
+            {results && !results.length && !typedAddress && (
+              <p className="px-2.5 py-2 text-sm text-[#4C4F7A]">
+                No matches. Paste a full link instead.
               </p>
-              {shortcuts.map((s) => (
-                <button key={s.url} type="button" className={rowClass} onClick={() => pick(s.url)}>
-                  <span className="text-[#4C4F7A]">
-                    <Icon name={s.icon} />
-                  </span>
-                  {s.name}
+            )}
+
+            {!results && group && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setGroup(null)}
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-[#0B1020] hover:bg-[#F5F3FF]"
+                >
+                  <Icon name="back" />
+                  {GROUPS[group].title}
                 </button>
-              ))}
-              {groupRows.map(([id, name]) => (
-                <button key={id} type="button" className={rowClass} onClick={() => setGroup(id)}>
-                  <span className="text-[#4C4F7A]">
-                    <Icon name={GROUPS[id].icon} />
-                  </span>
-                  <span className="flex-1">{name}</span>
-                  <span className="text-[#4C4F7A]">
-                    <Icon name="chevron" />
-                  </span>
-                </button>
-              ))}
-            </>
-          )}
-        </div>
-      )}
+                {GROUPS[group].items.length === 0 && (
+                  <p className="px-2.5 py-2 text-sm text-[#4C4F7A]">Nothing here yet.</p>
+                )}
+                {GROUPS[group].items.map((i) => (
+                  <button
+                    key={i.url}
+                    type="button"
+                    className={rowClass}
+                    onClick={() => pick(i.url)}
+                  >
+                    <span className="min-w-0 flex-1 truncate">{i.name}</span>
+                    {i.url === value && <span className="text-xs text-[#4C4F7A]">Selected</span>}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {!results && !group && (
+              <>
+                <p className="px-2.5 pb-1 pt-1.5 text-xs font-semibold text-[#4C4F7A]">
+                  Online store
+                </p>
+                {shortcuts.map((s) => (
+                  <button
+                    key={s.url}
+                    type="button"
+                    className={rowClass}
+                    onClick={() => pick(s.url)}
+                  >
+                    <span className="text-[#4C4F7A]">
+                      <Icon name={s.icon} />
+                    </span>
+                    {s.name}
+                  </button>
+                ))}
+                {groupRows.map(([id, name]) => (
+                  <button key={id} type="button" className={rowClass} onClick={() => setGroup(id)}>
+                    <span className="text-[#4C4F7A]">
+                      <Icon name={GROUPS[id].icon} />
+                    </span>
+                    <span className="flex-1">{name}</span>
+                    <span className="text-[#4C4F7A]">
+                      <Icon name="chevron" />
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
