@@ -205,6 +205,17 @@ export default function AdminCustomizePage() {
 
   const store = session?.stores?.find((s) => s.storeId === session.storeId);
 
+  // "Edit code" opens a new tab, which shares this tab's HTTP cache: fetch the editor
+  // route and the Monaco bundle while the browser is idle so that tab starts warm.
+  useEffect(() => {
+    const warm = () => {
+      import("@/pages/EditorDemo");
+      import("@/lib/monacoSetup");
+    };
+    const id = window.setTimeout(warm, 1500);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const [schema, setSchema] = useState(null);
 
   const [data, setData] = useState(null);

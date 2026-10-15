@@ -2,10 +2,16 @@ import { lazy, Suspense } from "react";
 import { registerLiquid } from "@/lib/monacoLiquid";
 
 // The local Monaco bundle must be configured before the editor component first renders
-const Monaco = lazy(async () => {
-  await import("@/lib/monacoSetup");
-  return import("@monaco-editor/react");
-});
+// Started as soon as this module loads (not when the editor first renders), so the
+// large Monaco bundle downloads in parallel with the theme files fetch.
+const monacoReady = () => import("@/lib/monacoSetup").then(() => import("@monaco-editor/react"));
+let monacoPromise = null;
+export function preloadMonaco() {
+  monacoPromise ??= monacoReady();
+  return monacoPromise;
+}
+const Monaco = lazy(preloadMonaco);
+preloadMonaco();
 
 const EditorLoading = () => (
   <div className="flex h-full items-center justify-center text-sm text-neutral-500">
