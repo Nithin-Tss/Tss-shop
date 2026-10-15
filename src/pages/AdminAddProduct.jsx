@@ -27,6 +27,25 @@ function photoError(file) {
   return "";
 }
 
+function formatFileSize(bytes) {
+  if (!bytes || bytes <= 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFilenameFromUrl(url) {
+  if (!url) return "";
+  try {
+    const cleanUrl = url.split("?")[0].split("#")[0];
+    const parts = cleanUrl.split("/");
+    const name = parts[parts.length - 1];
+    return decodeURIComponent(name) || "image";
+  } catch {
+    return "image";
+  }
+}
+
 const slugify = (text) =>
   (text || "")
     .toString()
@@ -605,10 +624,15 @@ export function ProductForm({ productId }) {
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
 
-  // 2 Photos: [{ id, file, url (preview), uploadedUrl }], in display order
+  // 2 Photos: [{ id, file, url (preview), uploadedUrl, isSaved, name, size }], in display order
   const [photos, setPhotos] = useState([]);
   const [dragging, setDragging] = useState(false);
   const [photoErrors, setPhotoErrors] = useState([]); // [{ name, message }] from the last upload
+  const [uploadingPhotoId, setUploadingPhotoId] = useState(null);
+  const [brokenImages, setBrokenImages] = useState([]);
+  const mainFileInputRef = useRef(null);
+  const replaceFileInputRef = useRef(null);
+  const [replacingPhotoId, setReplacingPhotoId] = useState(null);
 
   // 3 Pricing
   const [price, setPrice] = useState("");
@@ -686,7 +710,14 @@ export function ProductForm({ productId }) {
     setPhotos(
       [...(p.images || [])]
         .sort((a, b) => a.position - b.position)
-        .map((img, i) => ({ id: `saved-${i}-${img.url}`, url: img.url, uploadedUrl: img.url }))
+        .map((img, i) => ({
+          id: `saved-${i}-${img.url}`,
+          url: img.url,
+          uploadedUrl: img.url,
+          isSaved: true,
+          name: getFilenameFromUrl(img.url),
+          size: null,
+        }))
     );
     setPrice(first?.price ?? "");
     setSku(first?.sku || "");
@@ -844,8 +875,17 @@ export function ProductForm({ productId }) {
     const rejected = [];
     Array.from(fileList || []).forEach((file) => {
       const message = photoError(file);
-      if (message) rejected.push({ name: file.name, message });
-      else images.push(file);
+      if (message) {
+        let detailedMsg = message;
+        if (file.size > MAX_PHOTO_SIZE) {
+          detailedMsg = `File size (${formatFileSize(file.size)}) exceeds maximum allowed size of 5MB.`;
+        } else if (!file.type || !PHOTO_TYPES.includes(file.type)) {
+          detailedMsg = `Unsupported format (${file.type || file.name.split(".").pop() || "unknown"}). Please use JPG, PNG, or WEBP.`;
+        }
+        rejected.push({ name: file.name, message: detailedMsg });
+      } else {
+        images.push(file);
+      }
     });
 
     setPhotoErrors(rejected);
@@ -857,6 +897,9 @@ export function ProductForm({ productId }) {
         id: `${file.name}-${file.lastModified}-${Math.random()}`,
         file,
         url: URL.createObjectURL(file),
+        isSaved: false,
+        name: file.name,
+        size: file.size,
       })),
     ]);
   };
@@ -865,8 +908,65 @@ export function ProductForm({ productId }) {
     setPhotos((prev) => {
       const photo = prev.find((p) => p.id === id);
       if (photo?.file) URL.revokeObjectURL(photo.url);
+      setBrokenImages((b) => b.filter((item) => item !== id));
       return prev.filter((p) => p.id !== id);
     });
+
+  const replacePhoto = (id, file) => {
+    if (!file) return;
+    const message = photoError(file);
+    if (message) {
+      let detailedMsg = message;
+      if (file.size > MAX_PHOTO_SIZE) {
+        detailedMsg = `File size (${formatFileSize(file.size)}) exceeds maximum allowed size of 5MB.`;
+      } else if (!file.type || !PHOTO_TYPES.includes(file.type)) {
+        detailedMsg = `Unsupported format (${file.type || file.name.split(".").pop() || "unknown"}). Please use JPG, PNG, or WEBP.`;
+      }
+      setPhotoErrors([{ name: file.name, message: detailedMsg }]);
+      return;
+    }
+    setPhotoErrors([]);
+
+    setPhotos((prev) => {
+      const index = prev.findIndex((p) => p.id === id);
+      if (index === -1) return prev;
+      const oldPhoto = prev[index];
+      if (oldPhoto?.file) URL.revokeObjectURL(oldPhoto.url);
+      setBrokenImages((b) => b.filter((item) => item !== id));
+
+      const updated = [...prev];
+      updated[index] = {
+        id: `${file.name}-${file.lastModified}-${Math.random()}`,
+        file,
+        url: URL.createObjectURL(file),
+        isSaved: false,
+        name: file.name,
+        size: file.size,
+      };
+      return updated;
+    });
+  };
+
+  const handleStartReplace = (id) => {
+    setReplacingPhotoId(id);
+    if (replaceFileInputRef.current) {
+      replaceFileInputRef.current.value = "";
+      replaceFileInputRef.current.click();
+    }
+  };
+
+  const handleReplaceFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file && replacingPhotoId) {
+      replacePhoto(replacingPhotoId, file);
+    }
+    setReplacingPhotoId(null);
+    e.target.value = "";
+  };
+
+  const handleImageError = (id) => {
+    setBrokenImages((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  };
 
   const makeCover = (id) =>
     setPhotos((prev) => [prev.find((p) => p.id === id), ...prev.filter((p) => p.id !== id)]);
@@ -916,16 +1016,19 @@ export function ProductForm({ productId }) {
     for (let i = 0; i < updated.length; i += 1) {
       const photo = updated[i];
       if (!photo.uploadedUrl) {
+        setUploadingPhotoId(photo.id);
         const res = await apiUpload("/api/v1/catalog/products/images/", "image", photo.file);
         if (!res.ok) {
+          setUploadingPhotoId(null);
           setPhotos(updated);
-          return { error: `${photo.file.name}: ${res.error}` };
+          return { error: `${photo.name || photo.file.name}: ${res.error}` };
         }
-        updated[i] = { ...photo, uploadedUrl: res.data.url };
+        updated[i] = { ...photo, uploadedUrl: res.data.url, isSaved: true };
       }
       urls.push(updated[i].uploadedUrl);
     }
 
+    setUploadingPhotoId(null);
     setPhotos(updated);
     return { urls };
   };
@@ -1208,47 +1311,51 @@ export function ProductForm({ productId }) {
                   </div>
                 </Card>
 
-                {/* 2 PHOTOS */}
+                {/* 2 MEDIA */}
                 <Card
-                  title="Photos"
-                  hint="Add clear photos of the product. The first photo is the main one shoppers see."
+                  title="Media"
+                  hint="Add clear photos of your product. The first photo is the primary cover shoppers see."
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => mainFileInputRef.current?.click()}
+                      disabled={saving}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-white px-3 py-1.5 text-xs font-semibold text-[#141b2d] shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add media
+                    </button>
+                  }
                 >
-                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-                    {photos.map((photo, i) => (
-                      <div
-                        key={photo.id}
-                        className={`group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-50 ${
-                          i === 0 ? "col-span-2 row-span-2" : ""
-                        }`}
-                      >
-                        <img src={photo.url} alt="" className="h-full w-full object-cover" />
-                        {i === 0 && (
-                          <span className="absolute left-2 top-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold">
-                            Cover
-                          </span>
-                        )}
-                        <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-black/50 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-                          {i !== 0 && (
-                            <button
-                              type="button"
-                              onClick={() => makeCover(photo.id)}
-                              className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold"
-                            >
-                              Make cover
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removePhoto(photo.id)}
-                            className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-red-600"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  {/* Hidden file input for adding multiple images */}
+                  <input
+                    ref={mainFileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    multiple
+                    className="hidden"
+                    disabled={saving}
+                    onChange={(e) => {
+                      addPhotos(e.target.files);
+                      e.target.value = "";
+                    }}
+                  />
 
-                    <label
+                  {/* Hidden file input for replacing an individual image */}
+                  <input
+                    ref={replaceFileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    disabled={saving}
+                    onChange={handleReplaceFileChange}
+                  />
+
+                  {/* Photos Grid or Empty Drag & Drop Area */}
+                  {photos.length === 0 ? (
+                    <div
                       onDragOver={(e) => {
                         e.preventDefault();
                         setDragging(true);
@@ -1257,51 +1364,214 @@ export function ProductForm({ productId }) {
                       onDrop={(e) => {
                         e.preventDefault();
                         setDragging(false);
-                        addPhotos(e.dataTransfer.files);
+                        if (!saving) addPhotos(e.dataTransfer.files);
                       }}
-                      className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center transition ${
-                        photos.length ? "aspect-square" : "col-span-3 py-10 sm:col-span-5"
-                      } ${dragging ? "border-[#141b2d] bg-slate-50" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"}`}
+                      className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
+                        dragging ? "border-[#141b2d] bg-[#EEF1F8]" : "border-[#DDE1EA] bg-[#FAFBFD] hover:bg-slate-50"
+                      }`}
                     >
-                      <span className="text-2xl text-slate-400">＋</span>
-                      <span className="text-xs font-semibold text-slate-700">
-                        {photos.length ? "Add" : "Upload photos"}
-                      </span>
-                      {!photos.length && (
-                        <span className="text-xs text-slate-500">or drag and drop images here</span>
-                      )}
-                      <input
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                        multiple
-                        className="hidden"
-                        onChange={(e) => {
-                          addPhotos(e.target.files);
-                          // Reset so choosing the same file again still triggers onChange
-                          e.target.value = "";
-                        }}
-                      />
-                    </label>
-                  </div>
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                        <svg className="h-6 w-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="1.7"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-semibold text-[#141b2d]">Upload product images</p>
+                      <p className="mt-1 text-xs text-slate-500">Drag and drop images here, or browse files from your computer</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400">Accepted formats: JPG, PNG, WEBP (up to 5MB each)</p>
+                      <button
+                        type="button"
+                        onClick={() => mainFileInputRef.current?.click()}
+                        disabled={saving}
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#141b2d] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1e2842] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Select images
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+                      {photos.map((photo, i) => {
+                        const isCover = i === 0;
+                        const isBroken = brokenImages.includes(photo.id);
+                        const isUploading = uploadingPhotoId === photo.id;
 
+                        return (
+                          <div
+                            key={photo.id}
+                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAFBFD] transition ${
+                              isCover
+                                ? "border-[#141b2d] ring-2 ring-[#141b2d]/15 col-span-2 row-span-2"
+                                : "border-[#DDE1EA] hover:border-slate-400"
+                            }`}
+                          >
+                            {/* Image or Broken fallback */}
+                            {isBroken ? (
+                              <div className="flex h-full w-full flex-col items-center justify-center p-3 text-center text-slate-400">
+                                <svg className="mb-1 h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="1.5"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                  />
+                                </svg>
+                                <span className="text-[11px] font-medium text-slate-600">Image unavailable</span>
+                                <span className="truncate max-w-[120px] text-[10px] text-slate-400">{photo.name}</span>
+                              </div>
+                            ) : (
+                              <img
+                                src={photo.url}
+                                alt={photo.name || "Product image"}
+                                onError={() => handleImageError(photo.id)}
+                                className="h-full w-full object-cover transition duration-200 group-hover:scale-102"
+                              />
+                            )}
+
+                            {/* Uploading Spinner Overlay */}
+                            {isUploading && (
+                              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-2xs">
+                                <svg className="mb-1.5 h-6 w-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                </svg>
+                                <span className="text-[11px] font-semibold">Uploading…</span>
+                              </div>
+                            )}
+
+                            {/* Top Badges */}
+                            <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
+                              {isCover && (
+                                <span className="rounded-md bg-[#141b2d] px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                                  ★ Primary
+                                </span>
+                              )}
+                              {photo.isSaved ? (
+                                <span className="rounded-md border border-emerald-200 bg-white/95 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 shadow-2xs">
+                                  Saved
+                                </span>
+                              ) : (
+                                <span className="rounded-md bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
+                                  New preview
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Bottom info banner & action buttons */}
+                            <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/50 to-transparent p-2.5 text-white">
+                              {/* File information */}
+                              <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium leading-tight text-slate-100">
+                                <span className="truncate max-w-[140px]" title={photo.name}>
+                                  {photo.name || "image"}
+                                </span>
+                                {photo.size && (
+                                  <span className="ml-1 shrink-0 text-[10px] text-slate-300">
+                                    {formatFileSize(photo.size)}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                                {!isCover && (
+                                  <button
+                                    type="button"
+                                    onClick={() => makeCover(photo.id)}
+                                    disabled={saving}
+                                    className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-[#141b2d] shadow-sm transition disabled:opacity-50"
+                                    title="Set as primary product image"
+                                  >
+                                    Make primary
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartReplace(photo.id)}
+                                  disabled={saving}
+                                  className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm transition disabled:opacity-50"
+                                  title="Replace with another image"
+                                >
+                                  Replace
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => removePhoto(photo.id)}
+                                  disabled={saving}
+                                  className="rounded-md bg-red-600/90 hover:bg-red-600 px-2 py-1 text-[10px] font-semibold text-white shadow-sm transition disabled:opacity-50"
+                                  title="Remove this image"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* Add More Drop Target inside Grid */}
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setDragging(true);
+                        }}
+                        onDragLeave={() => setDragging(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setDragging(false);
+                          if (!saving) addPhotos(e.dataTransfer.files);
+                        }}
+                        onClick={() => {
+                          if (!saving) mainFileInputRef.current?.click();
+                        }}
+                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
+                          dragging
+                            ? "border-[#141b2d] bg-[#EEF1F8]"
+                            : "border-[#DDE1EA] bg-[#FAFBFD] hover:border-slate-400 hover:bg-slate-50"
+                        } ${saving ? "pointer-events-none opacity-50" : ""}`}
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-[#141b2d]">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        <span className="text-xs font-semibold text-[#141b2d]">Add image</span>
+                        <span className="text-[10px] text-slate-400">or drop here</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Validation Error Alerts */}
                   {photoErrors.length > 0 && (
                     <div
                       role="alert"
-                      className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                      className="mt-3 flex items-start justify-between rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
                     >
-                      {photoErrors.length > 1 && (
-                        <p className="mb-1 font-semibold">
-                          {photoErrors.length} files weren't added:
+                      <div>
+                        <p className="font-semibold text-red-800">
+                          {photoErrors.length === 1 ? "1 file could not be added:" : `${photoErrors.length} files could not be added:`}
                         </p>
-                      )}
-                      <ul className="space-y-0.5">
-                        {photoErrors.map((item, i) => (
-                          <li key={`${item.name}-${i}`}>
-                            <span className="font-medium break-all">{item.name}</span>:{" "}
-                            {item.message}
-                          </li>
-                        ))}
-                      </ul>
+                        <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs">
+                          {photoErrors.map((item, i) => (
+                            <li key={`${item.name}-${i}`}>
+                              <span className="font-medium break-all">{item.name}</span>: {item.message}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPhotoErrors([])}
+                        className="ml-3 inline-flex h-5 w-5 items-center justify-center rounded text-red-500 hover:bg-red-100 hover:text-red-700"
+                        aria-label="Dismiss errors"
+                      >
+                        ✕
+                      </button>
                     </div>
                   )}
                   <FieldError message={fieldErrors.images} />
