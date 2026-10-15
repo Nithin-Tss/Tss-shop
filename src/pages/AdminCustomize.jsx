@@ -1178,25 +1178,28 @@ export default function AdminCustomizePage() {
 
   // Every change goes through here: local state first, then the preview and autosave follow.
   // Quick repeated changes to the same option (typing, dragging a slider) become one undo step.
-  const update = useCallback((mutator, coalesceKey) => {
-    const current = dataRef.current;
-    if (!current) return;
-    const history = historyRef.current;
-    const now = Date.now();
-    if (!(coalesceKey && history.lastKey === coalesceKey && now - history.lastTime < 800)) {
-      history.past.push(current);
-      if (history.past.length > 100) history.past.shift();
-    }
-    history.future = [];
-    history.lastKey = coalesceKey || null;
-    history.lastTime = now;
-    const next = structuredClone(current);
-    mutator(next);
-    markSyncedChanges(current, next);
-    dataRef.current = next;
-    setData(next);
-    setHistoryTick((t) => t + 1);
-  }, [markSyncedChanges]);
+  const update = useCallback(
+    (mutator, coalesceKey) => {
+      const current = dataRef.current;
+      if (!current) return;
+      const history = historyRef.current;
+      const now = Date.now();
+      if (!(coalesceKey && history.lastKey === coalesceKey && now - history.lastTime < 800)) {
+        history.past.push(current);
+        if (history.past.length > 100) history.past.shift();
+      }
+      history.future = [];
+      history.lastKey = coalesceKey || null;
+      history.lastTime = now;
+      const next = structuredClone(current);
+      mutator(next);
+      markSyncedChanges(current, next);
+      dataRef.current = next;
+      setData(next);
+      setHistoryTick((t) => t + 1);
+    },
+    [markSyncedChanges]
+  );
 
   const undo = useCallback(() => {
     const history = historyRef.current;
@@ -1383,19 +1386,22 @@ export default function AdminCustomizePage() {
   }, [undo, redo]);
 
   // Move section `id` before or after `targetId` on the current page
-  const moveSectionTo = useCallback((pageName, id, targetId, after) => {
-    update((d) => {
-      const t = d.templates[pageName];
+  const moveSectionTo = useCallback(
+    (pageName, id, targetId, after) => {
+      update((d) => {
+        const t = d.templates[pageName];
 
-      if (!t.sections[id] || !t.sections[targetId] || id === targetId) return;
+        if (!t.sections[id] || !t.sections[targetId] || id === targetId) return;
 
-      const order = t.order.filter((s) => s !== id);
+        const order = t.order.filter((s) => s !== id);
 
-      order.splice(order.indexOf(targetId) + (after ? 1 : 0), 0, id);
+        order.splice(order.indexOf(targetId) + (after ? 1 : 0), 0, id);
 
-      t.order = order;
-    });
-  }, [update]);
+        t.order = order;
+      });
+    },
+    [update]
+  );
 
   // Messages from the preview: drag a section there, click to select it, keep the scroll position
   useEffect(() => {

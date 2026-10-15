@@ -716,19 +716,19 @@ export default function AdminCollections() {
                             {error
                               ? "Couldn't load collections"
                               : showOnlySelected
-                              ? "No selected collections"
-                              : searchQuery
-                                ? "No matching collections"
-                                : "Manage your collections"}
+                                ? "No selected collections"
+                                : searchQuery
+                                  ? "No matching collections"
+                                  : "Manage your collections"}
                           </h3>
                           <p className="mb-6 text-[14px] leading-relaxed text-[#6B7280]">
                             {error
                               ? error
                               : showOnlySelected
-                              ? "You currently have no collections selected."
-                              : searchQuery
-                                ? `No collections matched "${searchQuery}". Try changing your search query.`
-                                : "Group your products into categories to make it easier for customers to find what they're looking for."}
+                                ? "You currently have no collections selected."
+                                : searchQuery
+                                  ? `No collections matched "${searchQuery}". Try changing your search query.`
+                                  : "Group your products into categories to make it easier for customers to find what they're looking for."}
                           </p>
                           {showOnlySelected ? (
                             <button
