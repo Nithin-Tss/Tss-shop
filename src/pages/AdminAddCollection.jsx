@@ -65,19 +65,26 @@ function slugify(text) {
 }
 
 const plainText = (html) =>
-  (html || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  (html || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const capitalize = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 function formatPrice(value) {
   if (value === null || value === undefined || value === "") return "";
   const n = Number(value);
-  return Number.isFinite(n) ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
+  return Number.isFinite(n)
+    ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : "";
 }
 
 // ---------------------------------------------------------------- shared styles
 
-const card = "rounded-xl border border-[#E3E5E8] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04)]";
+const card =
+  "rounded-xl border border-[#E3E5E8] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04)]";
 const cardTitle = "text-[15px] font-semibold text-[#161C2C]";
 const labelClass = "mb-1.5 block text-[13px] font-medium text-[#4A5160]";
 const inputClass =
@@ -89,7 +96,16 @@ const iconButton =
 
 function Icon({ d, className = "h-4 w-4" }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d={d} />
     </svg>
   );
@@ -151,7 +167,11 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
 
   return (
     <div className="overflow-hidden rounded-lg border border-[#D5D8DD] focus-within:border-[#161C2C] focus-within:ring-2 focus-within:ring-[#161C2C]/10">
-      <div className="flex flex-wrap gap-0.5 border-b border-[#E3E5E8] bg-[#FAFAFB] px-1.5 py-1" role="toolbar" aria-label="Text formatting">
+      <div
+        className="flex flex-wrap gap-0.5 border-b border-[#E3E5E8] bg-[#FAFAFB] px-1.5 py-1"
+        role="toolbar"
+        aria-label="Text formatting"
+      >
         {tools.map((tool) => (
           <button
             key={tool.label}
@@ -198,7 +218,11 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return q ? products.filter((p) => p.title.toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q)) : products;
+    return q
+      ? products.filter(
+          (p) => p.title.toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q)
+        )
+      : products;
   }, [products, query]);
 
   const toggle = (id) =>
@@ -209,10 +233,20 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
     });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#161C2C]/30 p-0 sm:items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div role="dialog" aria-modal="true" aria-labelledby="picker-title" className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-t-xl bg-white shadow-xl sm:rounded-xl">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[#161C2C]/30 p-0 sm:items-center sm:p-4"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="picker-title"
+        className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-t-xl bg-white shadow-xl sm:rounded-xl"
+      >
         <div className="flex items-center justify-between border-b border-[#E3E5E8] px-5 py-4">
-          <h2 id="picker-title" className={cardTitle}>{title}</h2>
+          <h2 id="picker-title" className={cardTitle}>
+            {title}
+          </h2>
           <button type="button" onClick={onClose} className={iconButton} aria-label="Close">
             <Icon d={ICONS.x} />
           </button>
@@ -236,11 +270,20 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
         </div>
 
         <ul className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
-          {shown.length === 0 && <li className="px-3 py-10 text-center text-[13px] text-[#6B7280]">No products found.</li>}
+          {shown.length === 0 && (
+            <li className="px-3 py-10 text-center text-[13px] text-[#6B7280]">
+              No products found.
+            </li>
+          )}
           {shown.map((p) => (
             <li key={p.id}>
               <label className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-[#F6F7F8]">
-                <input type="checkbox" checked={picked.has(p.id)} onChange={() => toggle(p.id)} className="h-4 w-4 accent-[#161C2C]" />
+                <input
+                  type="checkbox"
+                  checked={picked.has(p.id)}
+                  onChange={() => toggle(p.id)}
+                  className="h-4 w-4 accent-[#161C2C]"
+                />
                 <Thumb product={p} size="h-10 w-10" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px] text-[#161C2C]">{p.title}</span>
@@ -257,7 +300,9 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
         <div className="flex items-center justify-between gap-3 border-t border-[#E3E5E8] px-5 py-3">
           <span className="text-[13px] text-[#6B7280]">{picked.size} selected</span>
           <div className="flex gap-2">
-            <button type="button" onClick={onClose} className={subtleButton}>Cancel</button>
+            <button type="button" onClick={onClose} className={subtleButton}>
+              Cancel
+            </button>
             <button
               type="button"
               onClick={() => onDone([...picked])}
@@ -275,8 +320,14 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
 function Thumb({ product, size = "h-full w-full" }) {
   const url = product.images?.[0]?.url;
   return (
-    <span className={`${size} flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#F1F2F4] text-[#B4B9C1]`}>
-      {url ? <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" /> : <Icon d={ICONS.image} className="h-5 w-5" />}
+    <span
+      className={`${size} flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#F1F2F4] text-[#B4B9C1]`}
+    >
+      {url ? (
+        <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
+      ) : (
+        <Icon d={ICONS.image} className="h-5 w-5" />
+      )}
     </span>
   );
 }
@@ -347,7 +398,10 @@ export default function AdminAddCollection() {
         };
       } else {
         // A new collection goes on the Online Store
-        loaded = { ...EMPTY_FORM, sales_channels: storeChannels.filter((ch) => ch.type === "online").map((ch) => ch.id) };
+        loaded = {
+          ...EMPTY_FORM,
+          sales_channels: storeChannels.filter((ch) => ch.type === "online").map((ch) => ch.id),
+        };
       }
       setForm(loaded);
       setInitial(loaded);
@@ -371,7 +425,8 @@ export default function AdminAddCollection() {
   }, [dirty]);
 
   const leave = () => {
-    if (!dirty || window.confirm("Leave without saving? Your changes will be lost.")) navigate(LIST_PATH);
+    if (!dirty || window.confirm("Leave without saving? Your changes will be lost."))
+      navigate(LIST_PATH);
   };
 
   const discard = () => {
@@ -429,28 +484,35 @@ export default function AdminAddCollection() {
         match: form.match,
         excluded_products: form.excluded_products,
       });
-      setPreview(res.ok ? { loading: false, ...res.data } : { loading: false, count: 0, products: [] });
+      setPreview(
+        res.ok ? { loading: false, ...res.data } : { loading: false, count: 0, products: [] }
+      );
     }, 400);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rulesKey, form.type, loading]);
 
   const items =
-    form.type === "automated" ? preview.products : form.products.map((id) => byId[id]).filter(Boolean);
+    form.type === "automated"
+      ? preview.products
+      : form.products.map((id) => byId[id]).filter(Boolean);
   const itemCount = form.type === "automated" ? preview.count : items.length;
-  const shownItems = statusFilter === "all" ? items : items.filter((p) => p.status === statusFilter);
+  const shownItems =
+    statusFilter === "all" ? items : items.filter((p) => p.status === statusFilter);
 
   const switchType = (type) =>
     setForm((f) => {
       if (f.type === type) return f;
       // Automated -> manual keeps the products it matched, so nothing disappears by surprise
-      const products = type === "manual" && !f.products.length ? preview.products.map((p) => p.id) : f.products;
+      const products =
+        type === "manual" && !f.products.length ? preview.products.map((p) => p.id) : f.products;
       return { ...f, type, products };
     });
 
   // ---- conditions
 
-  const addRule = () => set("rules", [...form.rules, { field: "tag", operator: "equals", value: "" }]);
+  const addRule = () =>
+    set("rules", [...form.rules, { field: "tag", operator: "equals", value: "" }]);
   const updateRule = (i, patch) =>
     set(
       "rules",
@@ -464,9 +526,13 @@ export default function AdminAddCollection() {
           if (kind !== fieldKind(r.field)) next.value = kind === "status" ? "active" : "";
         }
         return next;
-      }),
+      })
     );
-  const removeRule = (i) => set("rules", form.rules.filter((_, j) => j !== i));
+  const removeRule = (i) =>
+    set(
+      "rules",
+      form.rules.filter((_, j) => j !== i)
+    );
 
   // ---- publishing
 
@@ -477,7 +543,7 @@ export default function AdminAddCollection() {
       "sales_channels",
       on
         ? [...new Set([...(form.sales_channels || []), ...onlineIds])]
-        : (form.sales_channels || []).filter((id) => !onlineIds.includes(id)),
+        : (form.sales_channels || []).filter((id) => !onlineIds.includes(id))
     );
 
   // ---- save
@@ -485,7 +551,8 @@ export default function AdminAddCollection() {
   const validate = () => {
     const next = {};
     if (!form.name.trim()) next.name = "Title is required.";
-    if (form.type === "automated" && !completeRules.length) next.rules = "Add at least one condition with a value.";
+    if (form.type === "automated" && !completeRules.length)
+      next.rules = "Add at least one condition with a value.";
     return next;
   };
 
@@ -503,7 +570,10 @@ export default function AdminAddCollection() {
       ...form,
       name: form.name.trim(),
       handle: slugify(form.handle),
-      rules: form.type === "automated" ? completeRules : form.rules.filter((r) => String(r.value).trim() !== ""),
+      rules:
+        form.type === "automated"
+          ? completeRules
+          : form.rules.filter((r) => String(r.value).trim() !== ""),
       products: form.type === "manual" ? form.products : undefined,
       sales_channels: form.sales_channels || [],
     };
@@ -514,7 +584,8 @@ export default function AdminAddCollection() {
 
     if (!res.ok) {
       const fieldErrors = { ...res.fieldErrors };
-      if (fieldErrors.rules && typeof fieldErrors.rules !== "string") fieldErrors.rules = "Check the conditions.";
+      if (fieldErrors.rules && typeof fieldErrors.rules !== "string")
+        fieldErrors.rules = "Check the conditions.";
       setErrors(fieldErrors);
       if (fieldErrors.handle) setSeoOpen(true);
       setFormError(res.formError || "Couldn't save the collection. Check the highlighted fields.");
@@ -535,7 +606,8 @@ export default function AdminAddCollection() {
     setHandleTouched(true);
     setErrors({});
     if (editing) setNotice("Collection saved");
-    else navigate(`${LIST_PATH}/${c.id}`, { replace: true, state: { notice: "Collection created" } });
+    else
+      navigate(`${LIST_PATH}/${c.id}`, { replace: true, state: { notice: "Collection created" } });
   };
 
   // ---- search engine listing
@@ -545,7 +617,9 @@ export default function AdminAddCollection() {
   const collectionUrl = `${storeUrl}/collections/${slugify(form.handle) || "collection-handle"}`;
   const seoTitle = form.seo_title || form.name || "Collection title";
   const seoDescription =
-    form.seo_description || plainText(form.description) || "Add a description to see how this collection appears in search results.";
+    form.seo_description ||
+    plainText(form.description) ||
+    "Add a description to see how this collection appears in search results.";
 
   const pageTitle = editing ? initial.name || "Edit collection" : "Add collection";
   const excludedProducts = form.excluded_products.map((id) => byId[id]).filter(Boolean);
@@ -562,7 +636,12 @@ export default function AdminAddCollection() {
           {/* Top bar */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
-              <button type="button" onClick={leave} className={iconButton} aria-label="Back to collections">
+              <button
+                type="button"
+                onClick={leave}
+                className={iconButton}
+                aria-label="Back to collections"
+              >
                 <Icon d={ICONS.back} />
               </button>
               <h1 className="truncate text-[20px] font-semibold tracking-tight">{pageTitle}</h1>
@@ -573,7 +652,12 @@ export default function AdminAddCollection() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={discard} disabled={!dirty || saving} className={subtleButton}>
+              <button
+                type="button"
+                onClick={discard}
+                disabled={!dirty || saving}
+                className={subtleButton}
+              >
                 Discard
               </button>
               <button
@@ -592,13 +676,21 @@ export default function AdminAddCollection() {
             {notice && (
               <div className="mb-5 flex items-center justify-between rounded-xl border border-[#D5D8DD] bg-white px-4 py-3 text-[14px] shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
                 <span>✓ {notice}</span>
-                <button type="button" onClick={() => setNotice("")} className={iconButton} aria-label="Dismiss">
+                <button
+                  type="button"
+                  onClick={() => setNotice("")}
+                  className={iconButton}
+                  aria-label="Dismiss"
+                >
                   <Icon d={ICONS.x} />
                 </button>
               </div>
             )}
             {formError && (
-              <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700">
+              <div
+                role="alert"
+                className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-700"
+              >
                 {formError}
               </div>
             )}
@@ -607,7 +699,11 @@ export default function AdminAddCollection() {
           {loadError ? (
             <div className={`${card} text-center`}>
               <p className="text-[14px] text-[#4A5160]">{loadError}</p>
-              <button type="button" onClick={() => navigate(LIST_PATH)} className={`${subtleButton} mt-4`}>
+              <button
+                type="button"
+                onClick={() => navigate(LIST_PATH)}
+                className={`${subtleButton} mt-4`}
+              >
                 Back to collections
               </button>
             </div>
@@ -631,13 +727,25 @@ export default function AdminAddCollection() {
                       {form.image_url ? (
                         <div className="w-full sm:w-36">
                           <div className="aspect-square overflow-hidden rounded-xl border border-[#E3E5E8] bg-[#F1F2F4]">
-                            <img src={form.image_url} alt="Collection" className="h-full w-full object-cover" />
+                            <img
+                              src={form.image_url}
+                              alt="Collection"
+                              className="h-full w-full object-cover"
+                            />
                           </div>
                           <div className="mt-2 flex gap-1.5">
-                            <button type="button" onClick={() => fileRef.current?.click()} className={`${subtleButton} flex-1 px-2 py-1.5 text-[12px]`}>
+                            <button
+                              type="button"
+                              onClick={() => fileRef.current?.click()}
+                              className={`${subtleButton} flex-1 px-2 py-1.5 text-[12px]`}
+                            >
                               Replace
                             </button>
-                            <button type="button" onClick={() => set("image_url", "")} className={`${subtleButton} flex-1 px-2 py-1.5 text-[12px]`}>
+                            <button
+                              type="button"
+                              onClick={() => set("image_url", "")}
+                              className={`${subtleButton} flex-1 px-2 py-1.5 text-[12px]`}
+                            >
                               Remove
                             </button>
                           </div>
@@ -655,7 +763,9 @@ export default function AdminAddCollection() {
                           className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#C4C8CE] bg-[#FAFAFB] text-[#6B7280] transition hover:border-[#8A909A] hover:bg-white sm:w-36"
                         >
                           <Icon d={ICONS.upload} className="h-5 w-5" />
-                          <span className="text-[12px]">{uploading ? "Uploading…" : "Add image"}</span>
+                          <span className="text-[12px]">
+                            {uploading ? "Uploading…" : "Add image"}
+                          </span>
                         </button>
                       )}
                       <input
@@ -665,12 +775,16 @@ export default function AdminAddCollection() {
                         className="hidden"
                         onChange={(e) => uploadImage(e.target.files?.[0])}
                       />
-                      {errors.image_url && <p className="mt-2 text-[12px] text-red-600 sm:w-36">{errors.image_url}</p>}
+                      {errors.image_url && (
+                        <p className="mt-2 text-[12px] text-red-600 sm:w-36">{errors.image_url}</p>
+                      )}
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-4">
                       <div>
-                        <label htmlFor="collection-title" className={labelClass}>Title</label>
+                        <label htmlFor="collection-title" className={labelClass}>
+                          Title
+                        </label>
                         <input
                           id="collection-title"
                           value={form.name}
@@ -681,10 +795,14 @@ export default function AdminAddCollection() {
                           className={`${inputClass} ${errors.name ? "border-red-400" : ""}`}
                           autoFocus={!editing}
                         />
-                        {errors.name && <p className="mt-1.5 text-[12px] text-red-600">{errors.name}</p>}
+                        {errors.name && (
+                          <p className="mt-1.5 text-[12px] text-red-600">{errors.name}</p>
+                        )}
                       </div>
                       <div>
-                        <label htmlFor="collection-description" className={labelClass}>Description</label>
+                        <label htmlFor="collection-description" className={labelClass}>
+                          Description
+                        </label>
                         <RichTextEditor
                           id="collection-description"
                           value={form.description}
@@ -700,13 +818,19 @@ export default function AdminAddCollection() {
                 <section className={card} aria-labelledby="items-title">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <h2 id="items-title" className={cardTitle}>Collection items</h2>
+                      <h2 id="items-title" className={cardTitle}>
+                        Collection items
+                      </h2>
                       <span className="rounded-full bg-[#F1F2F4] px-2 py-0.5 text-[12px] font-medium text-[#4A5160]">
                         {preview.loading && form.type === "automated" ? "…" : itemCount}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <div className="flex rounded-lg border border-[#E3E5E8] p-0.5" role="radiogroup" aria-label="View">
+                      <div
+                        className="flex rounded-lg border border-[#E3E5E8] p-0.5"
+                        role="radiogroup"
+                        aria-label="View"
+                      >
                         {["grid", "list"].map((mode) => (
                           <button
                             key={mode}
@@ -733,7 +857,9 @@ export default function AdminAddCollection() {
                         </button>
                         {filterOpen && (
                           <div className="absolute right-0 top-9 z-20 w-44 rounded-lg border border-[#E3E5E8] bg-white p-1 shadow-lg">
-                            <p className="px-2.5 py-1.5 text-[12px] font-medium text-[#6B7280]">Product status</p>
+                            <p className="px-2.5 py-1.5 text-[12px] font-medium text-[#6B7280]">
+                              Product status
+                            </p>
                             {["all", ...PRODUCT_STATUSES].map((s) => (
                               <button
                                 key={s}
@@ -757,7 +883,12 @@ export default function AdminAddCollection() {
                     <div className="mb-4">
                       <span className="inline-flex items-center gap-1 rounded-full border border-[#D5D8DD] bg-[#FAFAFB] py-1 pl-3 pr-1 text-[12px] text-[#30343B]">
                         Status: {capitalize(statusFilter)}
-                        <button type="button" onClick={() => setStatusFilter("all")} className="rounded-full p-0.5 hover:bg-[#E9EAEC]" aria-label="Clear status filter">
+                        <button
+                          type="button"
+                          onClick={() => setStatusFilter("all")}
+                          className="rounded-full p-0.5 hover:bg-[#E9EAEC]"
+                          aria-label="Clear status filter"
+                        >
                           <Icon d={ICONS.x} className="h-3.5 w-3.5" />
                         </button>
                       </span>
@@ -776,19 +907,28 @@ export default function AdminAddCollection() {
                         ))}
                       </div>
                       <p className="mt-5 text-center text-[13px] text-[#6B7280]">
-                        {preview.loading ? "Finding matching products…" : "Add conditions or products to populate your collection"}
+                        {preview.loading
+                          ? "Finding matching products…"
+                          : "Add conditions or products to populate your collection"}
                       </p>
                     </div>
                   ) : shownItems.length === 0 ? (
-                    <p className="py-10 text-center text-[13px] text-[#6B7280]">No {statusFilter} products in this collection.</p>
+                    <p className="py-10 text-center text-[13px] text-[#6B7280]">
+                      No {statusFilter} products in this collection.
+                    </p>
                   ) : viewMode === "grid" ? (
                     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
                       {shownItems.map((p) => (
-                        <li key={p.id} className="group relative rounded-xl border border-[#E3E5E8] p-2.5">
+                        <li
+                          key={p.id}
+                          className="group relative rounded-xl border border-[#E3E5E8] p-2.5"
+                        >
                           <div className="mb-2.5 aspect-square">
                             <Thumb product={p} />
                           </div>
-                          <p className="truncate text-[13px] font-medium text-[#161C2C]">{p.title}</p>
+                          <p className="truncate text-[13px] font-medium text-[#161C2C]">
+                            {p.title}
+                          </p>
                           <p className="text-[12px] text-[#6B7280]">
                             {formatPrice(p.price) || "—"}
                             {p.status !== "active" && <span> · {capitalize(p.status)}</span>}
@@ -800,24 +940,35 @@ export default function AdminAddCollection() {
                   ) : (
                     <ul className="divide-y divide-[#EEEFF1] rounded-xl border border-[#E3E5E8]">
                       {shownItems.map((p) => (
-                        <li key={p.id} className="group relative flex items-center gap-3 px-3 py-2.5">
+                        <li
+                          key={p.id}
+                          className="group relative flex items-center gap-3 px-3 py-2.5"
+                        >
                           <Thumb product={p} size="h-10 w-10" />
                           <span className="min-w-0 flex-1 truncate text-[14px]">{p.title}</span>
-                          <span className="hidden text-[12px] text-[#6B7280] sm:inline">{capitalize(p.status)}</span>
-                          <span className="w-20 text-right text-[13px] text-[#4A5160]">{formatPrice(p.price) || "—"}</span>
+                          <span className="hidden text-[12px] text-[#6B7280] sm:inline">
+                            {capitalize(p.status)}
+                          </span>
+                          <span className="w-20 text-right text-[13px] text-[#4A5160]">
+                            {formatPrice(p.price) || "—"}
+                          </span>
                           <ItemAction product={p} type={form.type} form={form} set={set} inline />
                         </li>
                       ))}
                     </ul>
                   )}
                   {form.type === "automated" && preview.count > preview.products.length && (
-                    <p className="mt-3 text-[12px] text-[#6B7280]">Showing the first {preview.products.length} of {preview.count} products.</p>
+                    <p className="mt-3 text-[12px] text-[#6B7280]">
+                      Showing the first {preview.products.length} of {preview.count} products.
+                    </p>
                   )}
                 </section>
 
                 {/* Theme template */}
                 <section className={card}>
-                  <label htmlFor="theme-template" className={`${cardTitle} mb-3 block`}>Theme template</label>
+                  <label htmlFor="theme-template" className={`${cardTitle} mb-3 block`}>
+                    Theme template
+                  </label>
                   <select
                     id="theme-template"
                     value={form.theme_template}
@@ -825,7 +976,9 @@ export default function AdminAddCollection() {
                     className={inputClass}
                   >
                     {[...new Set([...TEMPLATES, form.theme_template].filter(Boolean))].map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </select>
                 </section>
@@ -833,7 +986,9 @@ export default function AdminAddCollection() {
                 {/* Search engine listing */}
                 <section className={card} aria-labelledby="seo-title">
                   <div className="mb-3 flex items-center justify-between">
-                    <h2 id="seo-title" className={cardTitle}>Search engine listing</h2>
+                    <h2 id="seo-title" className={cardTitle}>
+                      Search engine listing
+                    </h2>
                     <button
                       type="button"
                       onClick={() => setSeoOpen((o) => !o)}
@@ -854,7 +1009,9 @@ export default function AdminAddCollection() {
                   {seoOpen && (
                     <div className="mt-5 space-y-4 border-t border-[#EEEFF1] pt-5">
                       <div>
-                        <label htmlFor="seo-page-title" className={labelClass}>Page title</label>
+                        <label htmlFor="seo-page-title" className={labelClass}>
+                          Page title
+                        </label>
                         <input
                           id="seo-page-title"
                           value={form.seo_title}
@@ -863,23 +1020,35 @@ export default function AdminAddCollection() {
                           maxLength={255}
                           className={inputClass}
                         />
-                        <p className="mt-1 text-[12px] text-[#9AA0A9]">{form.seo_title.length} of 70 characters used</p>
+                        <p className="mt-1 text-[12px] text-[#9AA0A9]">
+                          {form.seo_title.length} of 70 characters used
+                        </p>
                       </div>
                       <div>
-                        <label htmlFor="seo-description" className={labelClass}>Meta description</label>
+                        <label htmlFor="seo-description" className={labelClass}>
+                          Meta description
+                        </label>
                         <textarea
                           id="seo-description"
                           value={form.seo_description}
                           onChange={(e) => set("seo_description", e.target.value)}
                           rows={3}
-                          placeholder={plainText(form.description) || "A short summary for search results"}
+                          placeholder={
+                            plainText(form.description) || "A short summary for search results"
+                          }
                           className={`${inputClass} resize-y`}
                         />
-                        <p className="mt-1 text-[12px] text-[#9AA0A9]">{form.seo_description.length} of 160 characters used</p>
+                        <p className="mt-1 text-[12px] text-[#9AA0A9]">
+                          {form.seo_description.length} of 160 characters used
+                        </p>
                       </div>
                       <div>
-                        <label htmlFor="seo-handle" className={labelClass}>URL handle</label>
-                        <div className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-[#161C2C] ${errors.handle ? "border-red-400" : "border-[#D5D8DD]"}`}>
+                        <label htmlFor="seo-handle" className={labelClass}>
+                          URL handle
+                        </label>
+                        <div
+                          className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-[#161C2C] ${errors.handle ? "border-red-400" : "border-[#D5D8DD]"}`}
+                        >
                           <span className="hidden max-w-[45%] truncate border-r border-[#E3E5E8] bg-[#FAFAFB] px-3 py-2.5 text-[13px] text-[#6B7280] sm:block">
                             {storeUrl}/collections/
                           </span>
@@ -895,7 +1064,9 @@ export default function AdminAddCollection() {
                             className="min-w-0 flex-1 px-3 py-2.5 text-[14px] outline-none"
                           />
                         </div>
-                        {errors.handle && <p className="mt-1.5 text-[12px] text-red-600">{errors.handle}</p>}
+                        {errors.handle && (
+                          <p className="mt-1.5 text-[12px] text-red-600">{errors.handle}</p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -906,9 +1077,15 @@ export default function AdminAddCollection() {
               <div className="min-w-0 space-y-6">
                 {/* Products: manual or automated */}
                 <section className={`${card} p-5`} aria-labelledby="products-title">
-                  <h2 id="products-title" className={`${cardTitle} mb-3`}>Products</h2>
+                  <h2 id="products-title" className={`${cardTitle} mb-3`}>
+                    Products
+                  </h2>
 
-                  <div className="mb-4 grid grid-cols-2 rounded-lg bg-[#F1F2F4] p-0.5" role="radiogroup" aria-label="Collection type">
+                  <div
+                    className="mb-4 grid grid-cols-2 rounded-lg bg-[#F1F2F4] p-0.5"
+                    role="radiogroup"
+                    aria-label="Collection type"
+                  >
                     {[
                       ["manual", "Manual"],
                       ["automated", "Automated"],
@@ -929,25 +1106,35 @@ export default function AdminAddCollection() {
                   {form.type === "manual" ? (
                     <>
                       <p className="mb-3 text-[13px] text-[#6B7280]">Pick products one by one.</p>
-                      <button type="button" onClick={() => setPicker("include")} className={`${subtleButton} w-full`}>
+                      <button
+                        type="button"
+                        onClick={() => setPicker("include")}
+                        className={`${subtleButton} w-full`}
+                      >
                         <Icon d={ICONS.plus} /> Add products
                       </button>
                       {form.products.length > 0 && (
                         <p className="mt-3 text-[12px] text-[#6B7280]">
-                          {form.products.length} product{form.products.length === 1 ? "" : "s"} selected
+                          {form.products.length} product{form.products.length === 1 ? "" : "s"}{" "}
+                          selected
                         </p>
                       )}
                     </>
                   ) : (
                     <>
                       <fieldset className="mb-4">
-                        <legend className="mb-2 text-[13px] text-[#4A5160]">Products must match</legend>
+                        <legend className="mb-2 text-[13px] text-[#4A5160]">
+                          Products must match
+                        </legend>
                         <div className="flex gap-4">
                           {[
                             ["all", "all conditions"],
                             ["any", "any condition"],
                           ].map(([value, label]) => (
-                            <label key={value} className="flex cursor-pointer items-center gap-2 text-[13px]">
+                            <label
+                              key={value}
+                              className="flex cursor-pointer items-center gap-2 text-[13px]"
+                            >
                               <input
                                 type="radio"
                                 name="match"
@@ -974,10 +1161,17 @@ export default function AdminAddCollection() {
                                   className={`${inputClass} py-2 text-[13px]`}
                                 >
                                   {RULE_FIELDS.map((f) => (
-                                    <option key={f.value} value={f.value}>{f.label}</option>
+                                    <option key={f.value} value={f.value}>
+                                      {f.label}
+                                    </option>
                                   ))}
                                 </select>
-                                <button type="button" onClick={() => removeRule(i)} className={iconButton} aria-label={`Remove condition ${i + 1}`}>
+                                <button
+                                  type="button"
+                                  onClick={() => removeRule(i)}
+                                  className={iconButton}
+                                  aria-label={`Remove condition ${i + 1}`}
+                                >
                                   <Icon d={ICONS.x} />
                                 </button>
                               </div>
@@ -989,7 +1183,9 @@ export default function AdminAddCollection() {
                                   className={`${inputClass} py-2 text-[13px]`}
                                 >
                                   {OPERATORS_FOR[kind].map((op) => (
-                                    <option key={op} value={op}>{OPERATORS[op]}</option>
+                                    <option key={op} value={op}>
+                                      {OPERATORS[op]}
+                                    </option>
                                   ))}
                                 </select>
                                 {kind === "status" ? (
@@ -1000,7 +1196,9 @@ export default function AdminAddCollection() {
                                     className={`${inputClass} py-2 text-[13px]`}
                                   >
                                     {PRODUCT_STATUSES.map((s) => (
-                                      <option key={s} value={s}>{capitalize(s)}</option>
+                                      <option key={s} value={s}>
+                                        {capitalize(s)}
+                                      </option>
                                     ))}
                                   </select>
                                 ) : (
@@ -1019,27 +1217,43 @@ export default function AdminAddCollection() {
                           );
                         })}
                       </ul>
-                      {errors.rules && <p className="mb-3 text-[12px] text-red-600">{errors.rules}</p>}
+                      {errors.rules && (
+                        <p className="mb-3 text-[12px] text-red-600">{errors.rules}</p>
+                      )}
 
                       <div className="grid grid-cols-2 gap-2">
                         <button type="button" onClick={addRule} className={subtleButton}>
                           <Icon d={ICONS.plus} /> Add condition
                         </button>
-                        <button type="button" onClick={() => setPicker("exclude")} className={subtleButton}>
+                        <button
+                          type="button"
+                          onClick={() => setPicker("exclude")}
+                          className={subtleButton}
+                        >
                           <Icon d={ICONS.minus} /> Exclude
                         </button>
                       </div>
 
                       {excludedProducts.length > 0 && (
                         <div className="mt-4 border-t border-[#EEEFF1] pt-3">
-                          <p className="mb-2 text-[12px] font-medium text-[#4A5160]">Excluded ({excludedProducts.length})</p>
+                          <p className="mb-2 text-[12px] font-medium text-[#4A5160]">
+                            Excluded ({excludedProducts.length})
+                          </p>
                           <ul className="space-y-1">
                             {excludedProducts.map((p) => (
-                              <li key={p.id} className="flex items-center justify-between gap-2 text-[13px]">
+                              <li
+                                key={p.id}
+                                className="flex items-center justify-between gap-2 text-[13px]"
+                              >
                                 <span className="truncate">{p.title}</span>
                                 <button
                                   type="button"
-                                  onClick={() => set("excluded_products", form.excluded_products.filter((id) => id !== p.id))}
+                                  onClick={() =>
+                                    set(
+                                      "excluded_products",
+                                      form.excluded_products.filter((id) => id !== p.id)
+                                    )
+                                  }
                                   className="shrink-0 text-[12px] text-[#4A5160] underline hover:text-[#161C2C]"
                                 >
                                   Include
@@ -1055,9 +1269,13 @@ export default function AdminAddCollection() {
 
                 {/* Publishing */}
                 <section className={`${card} p-5`} aria-labelledby="publishing-title">
-                  <h2 id="publishing-title" className={`${cardTitle} mb-4`}>Publishing</h2>
+                  <h2 id="publishing-title" className={`${cardTitle} mb-4`}>
+                    Publishing
+                  </h2>
 
-                  <label htmlFor="collection-status" className={labelClass}>Status</label>
+                  <label htmlFor="collection-status" className={labelClass}>
+                    Status
+                  </label>
                   <select
                     id="collection-status"
                     value={form.status}
@@ -1080,7 +1298,9 @@ export default function AdminAddCollection() {
                       onClick={() => setOnlineStore(!onOnlineStore)}
                       className={`relative h-5 w-9 rounded-full transition ${onOnlineStore ? "bg-[#161C2C]" : "bg-[#D5D8DD]"} disabled:opacity-40`}
                     >
-                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${onOnlineStore ? "left-[18px]" : "left-0.5"}`} />
+                      <span
+                        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${onOnlineStore ? "left-[18px]" : "left-0.5"}`}
+                      />
                     </button>
                   </div>
                   <p className="mt-3 text-[12px] leading-relaxed text-[#6B7280]">
@@ -1118,7 +1338,11 @@ function ItemAction({ product, type, form, set, inline = false }) {
   const manual = type === "manual";
   const label = manual ? `Remove ${product.title}` : `Exclude ${product.title}`;
   const run = useCallback(() => {
-    if (manual) set("products", form.products.filter((id) => id !== product.id));
+    if (manual)
+      set(
+        "products",
+        form.products.filter((id) => id !== product.id)
+      );
     else set("excluded_products", [...form.excluded_products, product.id]);
   }, [manual, form.products, form.excluded_products, product.id, set]);
 

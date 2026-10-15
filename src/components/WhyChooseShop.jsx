@@ -49,27 +49,19 @@ export default function WhyChooseVendra() {
         {/* Features */}
         <div className="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="flex items-start gap-5"
-            >
+            <div key={feature.title} className="flex items-start gap-5">
               {/* Icon */}
               <div
                 className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full ${feature.iconBackground}`}
               >
-                <span
-                  className="text-3xl font-bold text-blue-600"
-                  aria-hidden="true"
-                >
+                <span className="text-3xl font-bold text-blue-600" aria-hidden="true">
                   {feature.icon}
                 </span>
               </div>
 
               {/* Content */}
               <div className="pt-1">
-                <h3 className="text-lg font-bold text-slate-900">
-                  {feature.title}
-                </h3>
+                <h3 className="text-lg font-bold text-slate-900">{feature.title}</h3>
 
                 <p className="mt-1 text-sm leading-6 text-slate-500 sm:text-base">
                   {feature.description}

@@ -142,8 +142,7 @@ export default function AdminOrders() {
     );
   });
 
-  const allSelected =
-    filteredOrders.length > 0 && selectedIds.size === filteredOrders.length;
+  const allSelected = filteredOrders.length > 0 && selectedIds.size === filteredOrders.length;
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -355,17 +354,14 @@ export default function AdminOrders() {
                       const itemsCount =
                         order.items_count ||
                         (Array.isArray(order.items)
-                          ? order.items.reduce(
-                              (sum, item) => sum + (item.quantity || 1),
-                              0
-                            )
+                          ? order.items.reduce((sum, item) => sum + (item.quantity || 1), 0)
                           : 0);
 
                       const tagsList = Array.isArray(order.tags)
                         ? order.tags
                         : typeof order.tags === "string" && order.tags.trim()
-                        ? order.tags.split(",").map((t) => t.trim())
-                        : [];
+                          ? order.tags.split(",").map((t) => t.trim())
+                          : [];
 
                       return (
                         <tr
@@ -444,7 +440,10 @@ export default function AdminOrders() {
                           </td>
 
                           {/* Delivery method */}
-                          <td className="py-3.5 px-3 text-slate-700 max-w-[200px] truncate" title={order.delivery_method || "—"}>
+                          <td
+                            className="py-3.5 px-3 text-slate-700 max-w-[200px] truncate"
+                            title={order.delivery_method || "—"}
+                          >
                             {order.delivery_method || "—"}
                           </td>
 
@@ -474,9 +473,7 @@ export default function AdminOrders() {
                       <td colSpan={13} className="py-16 text-center text-slate-500">
                         <div className="flex flex-col items-center justify-center space-y-2">
                           <NavIcon name="orders" className="h-8 w-8 text-slate-300" />
-                          <p className="text-sm font-medium text-slate-700">
-                            No orders found
-                          </p>
+                          <p className="text-sm font-medium text-slate-700">No orders found</p>
                           <p className="text-xs text-slate-400 max-w-sm">
                             {searchQuery
                               ? `No orders matching "${searchQuery}".`

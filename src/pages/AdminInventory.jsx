@@ -29,7 +29,9 @@ function validateFile(file) {
 async function readSheet(file) {
   const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const table = sheet ? XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", blankrows: false }) : [];
+  const table = sheet
+    ? XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", blankrows: false })
+    : [];
   const headers = (table[0] || []).map((h) => String(h).trim());
   return { headers, rows: table.slice(1) };
 }
@@ -40,7 +42,16 @@ const IMPORT_FIELDS = [
     key: "title",
     label: "Product Name",
     required: true,
-    aliases: ["product", "product name", "product title", "title", "name", "item", "item name", "description"],
+    aliases: [
+      "product",
+      "product name",
+      "product title",
+      "title",
+      "name",
+      "item",
+      "item name",
+      "description",
+    ],
   },
   {
     key: "sku",
@@ -52,7 +63,15 @@ const IMPORT_FIELDS = [
     key: "available",
     label: "Available",
     required: false,
-    aliases: ["available", "quantity", "qty", "stock", "inventory", "available quantity", "variant inventory qty"],
+    aliases: [
+      "available",
+      "quantity",
+      "qty",
+      "stock",
+      "inventory",
+      "available quantity",
+      "variant inventory qty",
+    ],
   },
   {
     key: "unavailable",
@@ -218,13 +237,7 @@ function QuantityCell({ value, onChange, disabled, symbol = "⇋" }) {
 }
 
 // On Hand Quantity Editing Popover matching the reference screenshot
-function OnHandPopover({
-  item,
-  currentOnHand,
-  locationName,
-  onSave,
-  onClose,
-}) {
+function OnHandPopover({ item, currentOnHand, locationName, onSave, onClose }) {
   const [actionType, setActionType] = useState("set"); // "set" | "add"
   const [inputVal, setInputVal] = useState(currentOnHand);
   const [selectedLocation, setSelectedLocation] = useState(locationName || "SIPNOW");
@@ -370,21 +383,23 @@ function OnHandPopover({
             <div className="px-3 py-1 font-semibold text-[11px] text-[#53627E] border-b border-[#F0F2F5]">
               Reason for adjustment
             </div>
-            {["Correction", "Inventory count", "Received", "Damaged", "Returned", "Promotion"].map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => {
-                  setReason(r);
-                  setShowReasonDropdown(false);
-                }}
-                className={`w-full text-left px-3 py-1.5 hover:bg-[#F3F6FA] transition ${
-                  reason === r ? "font-semibold text-[#005BD3] bg-[#F0F4FA]" : ""
-                }`}
-              >
-                {r}
-              </button>
-            ))}
+            {["Correction", "Inventory count", "Received", "Damaged", "Returned", "Promotion"].map(
+              (r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => {
+                    setReason(r);
+                    setShowReasonDropdown(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 hover:bg-[#F3F6FA] transition ${
+                    reason === r ? "font-semibold text-[#005BD3] bg-[#F0F4FA]" : ""
+                  }`}
+                >
+                  {r}
+                </button>
+              )
+            )}
           </div>
         )}
       </div>
@@ -557,11 +572,15 @@ function ImportModal({ onClose, onImportSuccess }) {
           {sheet ? (
             <div>
               <p className="text-sm text-[#53627E] mb-3">
-                Match columns in <span className="font-medium text-[#161C2C]">{file?.name}</span> to inventory fields. Found {sheet.rows.length} rows.
+                Match columns in <span className="font-medium text-[#161C2C]">{file?.name}</span> to
+                inventory fields. Found {sheet.rows.length} rows.
               </p>
               <div className="max-h-[46vh] space-y-2.5 overflow-y-auto pr-1">
                 {IMPORT_FIELDS.map((field) => (
-                  <label key={field.key} className="flex items-center justify-between gap-3 text-sm">
+                  <label
+                    key={field.key}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
                     <span className="text-[#161C2C] font-medium">
                       {field.label}
                       {field.required && <span className="text-red-500"> *</span>}
@@ -621,15 +640,16 @@ function ImportModal({ onClose, onImportSuccess }) {
                 isDragging
                   ? "border-[#161C2C] bg-[#EEF1F6]"
                   : error
-                  ? "border-red-300 bg-red-50/20"
-                  : "border-[#D8DFE8] bg-[#FAFBFD] hover:border-[#161C2C] hover:bg-white"
+                    ? "border-red-300 bg-red-50/20"
+                    : "border-[#D8DFE8] bg-[#FAFBFD] hover:border-[#161C2C] hover:bg-white"
               }`}
             >
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-[#D8DFE8] text-[#161C2C] shadow-2xs mb-2">
                 ⬆
               </span>
               <p className="text-sm font-medium text-[#161C2C]">
-                <span className="underline underline-offset-2">Click to browse</span> or drag and drop
+                <span className="underline underline-offset-2">Click to browse</span> or drag and
+                drop
               </p>
               <p className="mt-1 text-xs text-[#53627E]">
                 Excel (.xlsx, .xls) or CSV (.csv), up to 15MB
@@ -675,7 +695,9 @@ export default function InventoryPage() {
 
   // Location name: reads from active session / store, defaults to "SIPNOW" matching screenshot
   const locationName =
-    session?.store?.storeName || session?.stores?.find((s) => s.storeId === storeId)?.storeName || "SIPNOW";
+    session?.store?.storeName ||
+    session?.stores?.find((s) => s.storeId === storeId)?.storeName ||
+    "SIPNOW";
 
   // Dynamic inventory items loaded from catalog or imported by the user
   const [items, setItems] = useState(() => {
@@ -739,7 +761,9 @@ export default function InventoryPage() {
   // Handle successful import of file items
   const handleImportSuccess = (importedProducts) => {
     saveItems(importedProducts);
-    setNotice(`Successfully imported ${importedProducts.length} product${importedProducts.length === 1 ? "" : "s"}.`);
+    setNotice(
+      `Successfully imported ${importedProducts.length} product${importedProducts.length === 1 ? "" : "s"}.`
+    );
     setCurrentPage(1);
     setTimeout(() => setNotice(""), 4500);
   };
@@ -752,10 +776,7 @@ export default function InventoryPage() {
       if (filterTab === "out_of_stock" && item.available > 0) return false;
 
       if (!q) return true;
-      return (
-        item.title?.toLowerCase().includes(q) ||
-        item.sku?.toLowerCase().includes(q)
-      );
+      return item.title?.toLowerCase().includes(q) || item.sku?.toLowerCase().includes(q);
     });
   }, [items, searchQuery, filterTab]);
 
@@ -1026,22 +1047,34 @@ export default function InventoryPage() {
                     <th className="py-3 px-3 min-w-[280px]">Product</th>
                     <th className="py-3 px-3 min-w-[200px]">SKU</th>
                     <th className="py-3 px-3 text-right min-w-[100px]">
-                      <span className="border-b border-dotted border-slate-400 cursor-help" title="Unavailable inventory">
+                      <span
+                        className="border-b border-dotted border-slate-400 cursor-help"
+                        title="Unavailable inventory"
+                      >
                         Unavailable
                       </span>
                     </th>
                     <th className="py-3 px-3 text-right min-w-[100px]">
-                      <span className="border-b border-dotted border-slate-400 cursor-help" title="Committed to open orders">
+                      <span
+                        className="border-b border-dotted border-slate-400 cursor-help"
+                        title="Committed to open orders"
+                      >
                         Committed
                       </span>
                     </th>
                     <th className="py-3 px-3 text-right min-w-[100px]">
-                      <span className="border-b border-dotted border-slate-400 cursor-help" title="Available to sell">
+                      <span
+                        className="border-b border-dotted border-slate-400 cursor-help"
+                        title="Available to sell"
+                      >
                         Available
                       </span>
                     </th>
                     <th className="py-3 px-3 text-right min-w-[110px]">
-                      <span className="border-b border-dotted border-slate-400 cursor-help" title="Total on hand: Available + Committed + Unavailable">
+                      <span
+                        className="border-b border-dotted border-slate-400 cursor-help"
+                        title="Total on hand: Available + Committed + Unavailable"
+                      >
                         On hand
                       </span>
                     </th>
@@ -1080,9 +1113,7 @@ export default function InventoryPage() {
                   ) : (
                     pageItems.map((item) => {
                       const onHand =
-                        (item.available || 0) +
-                        (item.committed || 0) +
-                        (item.unavailable || 0);
+                        (item.available || 0) + (item.committed || 0) + (item.unavailable || 0);
                       const isSelected = selectedIds.has(item.id);
                       const isEditingThisOnHand = editingOnHandId === item.id;
 
@@ -1166,8 +1197,8 @@ export default function InventoryPage() {
                                 isEditingThisOnHand
                                   ? "bg-[#E4E5E7] text-[#161C2C] ring-1 ring-[#8C9196]"
                                   : onHand < 0
-                                  ? "text-[#D82C0D] hover:bg-[#E4E5E7]"
-                                  : "text-[#161C2C] hover:bg-[#E4E5E7]"
+                                    ? "text-[#D82C0D] hover:bg-[#E4E5E7]"
+                                    : "text-[#161C2C] hover:bg-[#E4E5E7]"
                               }`}
                               title="Click to edit on hand quantity"
                             >
@@ -1230,9 +1261,7 @@ export default function InventoryPage() {
                 </span>
               </div>
 
-              <div className="text-xs text-slate-500">
-                Showing {totalItems} total items
-              </div>
+              <div className="text-xs text-slate-500">Showing {totalItems} total items</div>
             </div>
           </section>
 

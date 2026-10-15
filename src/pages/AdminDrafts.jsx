@@ -83,12 +83,7 @@ export default function AdminDrafts() {
     const customer = (d.customer_name || "").toLowerCase();
     const status = (d.status || "").toLowerCase();
 
-    return (
-      num.includes(q) ||
-      po.includes(q) ||
-      customer.includes(q) ||
-      status.includes(q)
-    );
+    return num.includes(q) || po.includes(q) || customer.includes(q) || status.includes(q);
   });
 
   // Reset pagination on search
@@ -103,8 +98,7 @@ export default function AdminDrafts() {
   );
 
   const allSelected =
-    paginatedDrafts.length > 0 &&
-    paginatedDrafts.every((d) => selectedIds.has(d.id));
+    paginatedDrafts.length > 0 && paginatedDrafts.every((d) => selectedIds.has(d.id));
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {

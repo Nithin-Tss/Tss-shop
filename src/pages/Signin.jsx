@@ -1,42 +1,41 @@
- 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
 import { emailError } from "@/lib/validation";
- 
+
 export default function SignInPage() {
   const navigate = useNavigate();
- 
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
   });
- 
+
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
- 
+
   const handleChange = (event) => {
     const { name, value, checked, type } = event.target;
- 
+
     setFormData((previousData) => ({
       ...previousData,
       [name]: type === "checkbox" ? checked : value,
     }));
- 
+
     setErrors((previousErrors) => ({
       ...previousErrors,
       [name]: "",
       form: "",
     }));
- 
+
     setMessage("");
   };
- 
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -48,25 +47,25 @@ export default function SignInPage() {
     if (!formData.password.trim()) {
       newErrors.password = "Password is required.";
     }
- 
+
     return newErrors;
   };
- 
+
   const handleSubmit = async (event) => {
     event.preventDefault();
- 
+
     setMessage("");
     setErrors({});
- 
+
     const validationErrors = validateForm();
- 
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
- 
+
     setIsSubmitting(true);
- 
+
     try {
       const result = await apiPost("/api/v1/auth/login/", formData);
 
@@ -84,53 +83,46 @@ export default function SignInPage() {
       const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
 
       signIn(result.data);
-setMessage("Signed in. Redirecting...");
+      setMessage("Signed in. Redirecting...");
 
-navigate("/");
-} finally {
-  setIsSubmitting(false);
-}
-};
- 
+      navigate("/");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-md items-center justify-center">
         <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           {/* Heading */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-slate-900">
-              Welcome Back
-            </h1>
- 
-            <p className="mt-2 text-sm text-slate-500">
-              Sign in to continue to your account
-            </p>
+            <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
+
+            <p className="mt-2 text-sm text-slate-500">Sign in to continue to your account</p>
           </div>
- 
+
           {/* Form Error */}
           {errors.form && (
             <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {errors.form}
             </div>
           )}
- 
+
           {/* Frontend Message */}
           {message && (
             <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
               {message}
             </div>
           )}
- 
+
           <form onSubmit={handleSubmit} noValidate>
             {/* Email */}
             <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
                 Email
               </label>
- 
+
               <input
                 id="email"
                 name="email"
@@ -145,23 +137,16 @@ navigate("/");
                     : "border-slate-300 focus:border-blue-500 focus:ring-blue-100"
                 }`}
               />
- 
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-500">
-                  {errors.email}
-                </p>
-              )}
+
+              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
             </div>
- 
+
             {/* Password */}
             <div className="mt-5">
-              <label
-                htmlFor="password"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-700">
                 Password
               </label>
- 
+
               <div className="relative">
                 <input
                   id="password"
@@ -177,25 +162,19 @@ navigate("/");
                       : "border-slate-300 focus:border-blue-500 focus:ring-blue-100"
                   }`}
                 />
- 
+
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword((previousValue) => !previousValue)
-                  }
+                  onClick={() => setShowPassword((previousValue) => !previousValue)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-blue-600 hover:text-blue-700"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
- 
-              {errors.password && (
-                <p className="mt-1 text-xs text-red-500">
-                  {errors.password}
-                </p>
-              )}
+
+              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
             </div>
- 
+
             {/* Remember Me + Forgot Password */}
             <div className="mt-5 flex items-center justify-between gap-4">
               <label className="flex cursor-pointer items-center gap-2">
@@ -206,12 +185,10 @@ navigate("/");
                   onChange={handleChange}
                   className="h-4 w-4 accent-blue-600"
                 />
- 
-                <span className="text-sm text-slate-600">
-                  Remember me
-                </span>
+
+                <span className="text-sm text-slate-600">Remember me</span>
               </label>
- 
+
               <Link
                 to="/auth/forgot-password"
                 className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
@@ -219,7 +196,7 @@ navigate("/");
                 Forgot Password?
               </Link>
             </div>
- 
+
             {/* Sign In Button */}
             <button
               type="submit"
@@ -229,13 +206,11 @@ navigate("/");
               {isSubmitting ? "Signing In..." : "Sign In"}
             </button>
           </form>
- 
+
           {/* Sign Up */}
           <div className="mt-7 border-t border-slate-200 pt-6 text-center">
-            <p className="text-sm text-slate-500">
-              Don't have an account?
-            </p>
- 
+            <p className="text-sm text-slate-500">Don't have an account?</p>
+
             <Link
               to="/auth/signup"
               className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-blue-600 px-5 py-3 font-semibold text-blue-600 transition hover:bg-blue-50"
@@ -248,4 +223,3 @@ navigate("/");
     </main>
   );
 }
- 

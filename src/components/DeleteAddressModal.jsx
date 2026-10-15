@@ -23,9 +23,7 @@ export default function DeleteAddressModal({
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900">Delete Address</h3>
-            <p className="text-xs text-slate-500">
-              Are you sure you want to delete this address?
-            </p>
+            <p className="text-xs text-slate-500">Are you sure you want to delete this address?</p>
           </div>
         </div>
 
@@ -46,7 +44,8 @@ export default function DeleteAddressModal({
         </div>
 
         <p className="text-xs text-slate-500">
-          This action cannot be undone. If this is a default address, another saved address will automatically be selected as default.
+          This action cannot be undone. If this is a default address, another saved address will
+          automatically be selected as default.
         </p>
 
         {/* Action Buttons */}

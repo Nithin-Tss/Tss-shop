@@ -19,7 +19,9 @@ const AdminCollections = lazy(() => import("@/pages/AdminCollections"));
 const AdminAddCollection = lazy(() => import("@/pages/AdminAddCollection"));
 const AdminCatalogues = lazy(() => import("@/pages/AdminCatalogues"));
 const AdminContent = lazy(() => import("@/pages/AdminContent"));
-const BlogPostsPage = lazy(() => import("@/pages/AdminContent").then((m) => ({ default: m.BlogPostsPage })));
+const BlogPostsPage = lazy(() =>
+  import("@/pages/AdminContent").then((m) => ({ default: m.BlogPostsPage }))
+);
 const AdminInventory = lazy(() => import("@/pages/AdminInventory"));
 const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
 const AdminDrafts = lazy(() => import("@/pages/AdminDrafts"));
@@ -47,83 +49,89 @@ export default function App() {
 
   return (
     <Suspense fallback={<div className="p-8 text-sm text-neutral-500">Loading...</div>}>
-    <Routes key={storeId}>
-      <Route path="/" element={<Home />} />
-      <Route path="/auth/signin" element={<Signin />} />
-      <Route path="/auth/signup" element={<Signup />} />
-      <Route path="/auth/onboarding" element={<Onboarding />} />
-      {/* Admin pages and the profile need a signed-in user; otherwise go to sign-in first */}
-      <Route element={<RequireSignIn />}>
-        <Route path="/profile" element={<Account />} />
-        <Route path="/account" element={<Account />} />
-        <Route path="/account/orders" element={<OrderHistory />} />
-        <Route path="/orders" element={<OrderHistory />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
-        <Route path="/admin/online-store/home" element={<AdminHome />} />
-        <Route path="/admin/online-store/settings" element={<AdminSettings />} />
-        <Route path="/admin/online-store/content" element={<AdminContent />} />
-        {/* Pages a role may not have (see can() in lib/auth.js); the API refuses them anyway */}
-        <Route element={<RequirePermission permission="themes.view" />}>
-          <Route path="/admin/online-store" element={<AdminOnlineStore />} />
+      <Routes key={storeId}>
+        <Route path="/" element={<Home />} />
+        <Route path="/auth/signin" element={<Signin />} />
+        <Route path="/auth/signup" element={<Signup />} />
+        <Route path="/auth/onboarding" element={<Onboarding />} />
+        {/* Admin pages and the profile need a signed-in user; otherwise go to sign-in first */}
+        <Route element={<RequireSignIn />}>
+          <Route path="/profile" element={<Account />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/account/orders" element={<OrderHistory />} />
+          <Route path="/orders" element={<OrderHistory />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/online-store/home" element={<AdminHome />} />
+          <Route path="/admin/online-store/settings" element={<AdminSettings />} />
+          <Route path="/admin/online-store/content" element={<AdminContent />} />
+          {/* Pages a role may not have (see can() in lib/auth.js); the API refuses them anyway */}
+          <Route element={<RequirePermission permission="themes.view" />}>
+            <Route path="/admin/online-store" element={<AdminOnlineStore />} />
+          </Route>
+          <Route element={<RequirePermission permission="themes.manage" />}>
+            <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
+            <Route path="/admin/online-store/blog-posts" element={<BlogPostsPage />} />
+            {/* Theme code editor: it saves theme files */}
+            <Route path="/editor-demo" element={<EditorDemo />} />
+          </Route>
+          <Route element={<RequirePermission permission="products.view" />}>
+            <Route path="/admin/online-store/products" element={<AdminProducts />} />
+            <Route
+              path="/admin/online-store/products/:productId"
+              element={<AdminProductDetails />}
+            />
+            <Route path="/admin/online-store/collections" element={<AdminCollections />} />
+            <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />
+          </Route>
+          <Route element={<RequirePermission permission="products.manage" />}>
+            <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
+            <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
+            <Route
+              path="/admin/online-store/collections/:collectionId"
+              element={<AdminAddCollection />}
+            />
+          </Route>
+          <Route element={<RequirePermission permission="inventory.view" />}>
+            <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
+          </Route>
+          <Route element={<RequirePermission permission="orders.view" />}>
+            <Route path="/admin/online-store/orders" element={<AdminOrders />} />
+          </Route>
+          <Route element={<RequirePermission permission="draft_orders.view" />}>
+            <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
+          </Route>
+          <Route element={<RequirePermission permission="reports.view" />}>
+            <Route path="/admin/online-store/overview" element={<AdminOverview />} />
+            <Route path="/admin/online-store/reports" element={<AdminReports />} />
+            <Route path="/admin/online-store/reports/new" element={<AdminReportExploration />} />
+            <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
+          </Route>
+          <Route element={<RequirePermission permission="orders.manage" />}>
+            <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />
+          </Route>
+          <Route element={<RequirePermission permission="customers.view" />}>
+            <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
+          </Route>
+          <Route element={<RequirePermission permission="customers.manage" />}>
+            <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />
+          </Route>
+          <Route element={<RequirePermission permission="discounts.view" />}>
+            <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
+          </Route>
+          <Route element={<RequirePermission permission="shipping.view" />}>
+            <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
+          </Route>
         </Route>
-        <Route element={<RequirePermission permission="themes.manage" />}>
-          <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
-          <Route path="/admin/online-store/blog-posts" element={<BlogPostsPage />} />
-          {/* Theme code editor: it saves theme files */}
-          <Route path="/editor-demo" element={<EditorDemo />} />
-        </Route>
-        <Route element={<RequirePermission permission="products.view" />}>
-          <Route path="/admin/online-store/products" element={<AdminProducts />} />
-          <Route path="/admin/online-store/products/:productId" element={<AdminProductDetails />} />
-          <Route path="/admin/online-store/collections" element={<AdminCollections />} />
-          <Route path="/admin/online-store/catalogues" element={<AdminCatalogues />} />
-        </Route>
-        <Route element={<RequirePermission permission="products.manage" />}>
-          <Route path="/admin/online-store/products/new" element={<AdminAddProduct />} />
-          <Route path="/admin/online-store/collections/new" element={<AdminAddCollection />} />
-          <Route path="/admin/online-store/collections/:collectionId" element={<AdminAddCollection />} />
-        </Route>
-        <Route element={<RequirePermission permission="inventory.view" />}>
-          <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
-        </Route>
-        <Route element={<RequirePermission permission="orders.view" />}>
-          <Route path="/admin/online-store/orders" element={<AdminOrders />} />
-        </Route>
-        <Route element={<RequirePermission permission="draft_orders.view" />}>
-          <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
-        </Route>
-        <Route element={<RequirePermission permission="reports.view" />}>
-          <Route path="/admin/online-store/overview" element={<AdminOverview />} />
-          <Route path="/admin/online-store/reports" element={<AdminReports />} />
-          <Route path="/admin/online-store/reports/new" element={<AdminReportExploration />} />
-          <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
-        </Route>
-        <Route element={<RequirePermission permission="orders.manage" />}>
-          <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />
-        </Route>
-        <Route element={<RequirePermission permission="customers.view" />}>
-          <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
-        </Route>
-        <Route element={<RequirePermission permission="customers.manage" />}>
-          <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />
-        </Route>
-        <Route element={<RequirePermission permission="discounts.view" />}>
-          <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
-        </Route>
-        <Route element={<RequirePermission permission="shipping.view" />}>
-          <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
-        </Route>
-      </Route>
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-      {/* Links sent by email (see the backend's apps/identity/email_links.py) */}
-      <Route path="/auth/reset-password" element={<ResetPassword />} />
-      <Route path="/auth/verify-email" element={<VerifyEmail />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+        {/* Links sent by email (see the backend's apps/identity/email_links.py) */}
+        <Route path="/auth/reset-password" element={<ResetPassword />} />
+        <Route path="/auth/verify-email" element={<VerifyEmail />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </Suspense>
   );
 }
@@ -152,7 +160,9 @@ function RequirePermission({ permission }) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-4 text-center">
         <h1 className="text-3xl font-bold text-slate-900">No access</h1>
-        <p className="text-sm text-slate-500">Your role in this store doesn't include this page. Ask the store owner if you need it.</p>
+        <p className="text-sm text-slate-500">
+          Your role in this store doesn't include this page. Ask the store owner if you need it.
+        </p>
         <Link to="/admin/online-store/home" className="font-medium text-blue-600 hover:underline">
           Back to admin home
         </Link>

@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { registerLiquid } from "@/lib/monacoLiquid";
 
@@ -40,29 +39,26 @@ export default function CodeEditor({
   }
 
   return (
-    <div
-      className="overflow-hidden rounded-lg border border-neutral-200"
-      style={{ height }}
-    >
+    <div className="overflow-hidden rounded-lg border border-neutral-200" style={{ height }}>
       <Suspense fallback={<EditorLoading />}>
-      <Monaco
-        height="100%"
-        path={path}
-        language={language}
-        value={value}
-        theme={theme}
-        onChange={(next) => onChange?.(next ?? "")}
-        beforeMount={registerLiquid}
-        onMount={handleMount}
-        options={{
-          readOnly,
-          minimap: { enabled: false },
-          fontSize: 14,
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          tabSize: 2,
-        }}
-      />
+        <Monaco
+          height="100%"
+          path={path}
+          language={language}
+          value={value}
+          theme={theme}
+          onChange={(next) => onChange?.(next ?? "")}
+          beforeMount={registerLiquid}
+          onMount={handleMount}
+          options={{
+            readOnly,
+            minimap: { enabled: false },
+            fontSize: 14,
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+          }}
+        />
       </Suspense>
     </div>
   );

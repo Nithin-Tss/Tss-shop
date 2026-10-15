@@ -12,8 +12,14 @@ import { can, getActiveStore, setStores, useSession } from "@/lib/auth";
  */
 
 const KIND_INFO = {
-  system: { label: "System roles", note: "Managed by the platform. They can't be changed or deleted." },
-  predefined: { label: "Predefined roles", note: "Come with every store. You can customize or delete them." },
+  system: {
+    label: "System roles",
+    note: "Managed by the platform. They can't be changed or deleted.",
+  },
+  predefined: {
+    label: "Predefined roles",
+    note: "Come with every store. You can customize or delete them.",
+  },
   custom: { label: "Custom roles", note: "Roles your store created." },
 };
 
@@ -56,11 +62,16 @@ function Chip({ children, tone = "slate" }) {
     dark: "bg-[#161c2c] text-white",
     amber: "bg-amber-50 text-amber-800",
   };
-  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}>{children}</span>;
+  return (
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}>
+      {children}
+    </span>
+  );
 }
 
 // apiPost / apiPatch results: the message to show (DRF may send a bare list, which lands in fieldErrors as "0")
-const formMessage = (res, fallback) => res.formError || Object.values(res.fieldErrors)[0] || fallback;
+const formMessage = (res, fallback) =>
+  res.formError || Object.values(res.fieldErrors)[0] || fallback;
 
 // The signed-in user's own access changed: re-read their stores so the session's
 // permissions (sidebar, page guards) match the backend again.
@@ -88,7 +99,8 @@ function useMyAccess() {
 }
 
 // Non-owners can only hand out access they have themselves (the backend checks this too)
-const withinMyAccess = (me, permissions) => me.isOwner || permissions.every((p) => me.permissions.has(p));
+const withinMyAccess = (me, permissions) =>
+  me.isOwner || permissions.every((p) => me.permissions.has(p));
 
 /* ------------------------------------------------------------------ */
 /* Users                                                                */
@@ -182,7 +194,8 @@ export function UsersSettings() {
 
   const remove = async (member) => {
     const who = member.userId === me.userId ? "yourself" : member.email;
-    if (!window.confirm(`Remove ${who} from this store? They will lose access straight away.`)) return;
+    if (!window.confirm(`Remove ${who} from this store? They will lose access straight away.`))
+      return;
 
     setRowError("");
     setBusyId(member.membershipId);
@@ -218,14 +231,23 @@ export function UsersSettings() {
         >
           <ul className="divide-y divide-slate-200 p-5">
             {invitations.map((invitation) => (
-              <li key={invitation.invitationId} className="flex flex-wrap items-center gap-3 py-2 first:pt-0 last:pb-0">
-                <span className="min-w-0 flex-1 truncate text-sm text-slate-800">{invitation.email}</span>
+              <li
+                key={invitation.invitationId}
+                className="flex flex-wrap items-center gap-3 py-2 first:pt-0 last:pb-0"
+              >
+                <span className="min-w-0 flex-1 truncate text-sm text-slate-800">
+                  {invitation.email}
+                </span>
                 {invitation.isOwner && <Chip tone="dark">Store owner</Chip>}
                 {invitation.roles.map((role) => (
                   <Chip key={role.id}>{role.name}</Chip>
                 ))}
                 {canManage && (
-                  <button type="button" onClick={() => withdraw(invitation)} className="text-sm text-red-600 hover:underline">
+                  <button
+                    type="button"
+                    onClick={() => withdraw(invitation)}
+                    className="text-sm text-red-600 hover:underline"
+                  >
                     Withdraw
                   </button>
                 )}
@@ -247,7 +269,8 @@ export function UsersSettings() {
           {members && (
             <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200">
               {members.map((member) => {
-                const name = `${member.firstName || ""} ${member.lastName || ""}`.trim() || member.email;
+                const name =
+                  `${member.firstName || ""} ${member.lastName || ""}`.trim() || member.email;
                 const busy = busyId === member.membershipId;
                 const editing = editingId === member.membershipId;
 
@@ -271,7 +294,9 @@ export function UsersSettings() {
                           {member.roles.map((role) => (
                             <Chip key={role.id}>{role.name}</Chip>
                           ))}
-                          {!member.isOwner && !member.roles.length && <Chip tone="amber">No roles: no access</Chip>}
+                          {!member.isOwner && !member.roles.length && (
+                            <Chip tone="amber">No roles: no access</Chip>
+                          )}
                         </div>
                       </div>
 
@@ -285,7 +310,12 @@ export function UsersSettings() {
                           >
                             Edit access
                           </button>
-                          <button type="button" disabled={busy} onClick={() => remove(member)} className={dangerButton}>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => remove(member)}
+                            className={dangerButton}
+                          >
                             Remove
                           </button>
                         </div>
@@ -317,8 +347,13 @@ export function UsersSettings() {
         <Section title="Recent changes" description="Who changed roles or access, newest first.">
           <ul className="divide-y divide-slate-200 p-5 text-sm">
             {activity.slice(0, 20).map((entry) => (
-              <li key={entry.id} className="flex flex-wrap items-baseline gap-x-3 py-2 first:pt-0 last:pb-0">
-                <span className="font-medium text-slate-800">{ACTION_LABELS[entry.action] || entry.action}</span>
+              <li
+                key={entry.id}
+                className="flex flex-wrap items-baseline gap-x-3 py-2 first:pt-0 last:pb-0"
+              >
+                <span className="font-medium text-slate-800">
+                  {ACTION_LABELS[entry.action] || entry.action}
+                </span>
                 <span className="text-slate-600">{entry.subject}</span>
                 <span className="ml-auto text-xs text-slate-400">
                   {entry.actor || "System"} · {new Date(entry.createdAt).toLocaleString()}
@@ -346,17 +381,24 @@ const ACTION_LABELS = {
 
 // Role checkboxes grouped by kind, plus "Store owner" for owners
 function RolePicker({ me, roles, roleIds, setRoleIds, isOwner, setIsOwner }) {
-  const toggle = (id) => setRoleIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+  const toggle = (id) =>
+    setRoleIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
   return (
     <div className="space-y-4">
       {me.isOwner && (
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3">
-          <input type="checkbox" checked={isOwner} onChange={(e) => setIsOwner(e.target.checked)} className="mt-0.5" />
+          <input
+            type="checkbox"
+            checked={isOwner}
+            onChange={(e) => setIsOwner(e.target.checked)}
+            className="mt-0.5"
+          />
           <span>
             <span className="block text-sm font-medium text-slate-800">Store owner</span>
             <span className="block text-xs text-slate-500">
-              Can do everything, including closing the store and managing other owners. Roles don't apply to owners.
+              Can do everything, including closing the store and managing other owners. Roles don't
+              apply to owners.
             </span>
           </span>
         </label>
@@ -364,7 +406,8 @@ function RolePicker({ me, roles, roleIds, setRoleIds, isOwner, setIsOwner }) {
 
       {!me.isOwner && (
         <p className="text-xs text-slate-500">
-          You can only give roles whose permissions you have yourself. Greyed-out roles go beyond your own access.
+          You can only give roles whose permissions you have yourself. Greyed-out roles go beyond
+          your own access.
         </p>
       )}
 
@@ -374,7 +417,9 @@ function RolePicker({ me, roles, roleIds, setRoleIds, isOwner, setIsOwner }) {
 
         return (
           <fieldset key={kind} disabled={isOwner}>
-            <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{info.label}</legend>
+            <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {info.label}
+            </legend>
             <div className="grid gap-2 sm:grid-cols-2">
               {ofKind.map((role) => {
                 const allowed = withinMyAccess(me, role.permissions);
@@ -383,12 +428,22 @@ function RolePicker({ me, roles, roleIds, setRoleIds, isOwner, setIsOwner }) {
                 return (
                   <label
                     key={role.id}
-                    title={allowed ? undefined : "This role has permissions you don't have, so you can't give it."}
+                    title={
+                      allowed
+                        ? undefined
+                        : "This role has permissions you don't have, so you can't give it."
+                    }
                     className={`flex items-start gap-3 rounded-lg border p-3 ${
                       checked ? "border-[#161c2c] bg-slate-50" : "border-slate-200"
                     } ${!allowed || isOwner ? "opacity-50" : "cursor-pointer hover:border-slate-400"}`}
                   >
-                    <input type="checkbox" checked={checked} disabled={!allowed} onChange={() => toggle(role.id)} className="mt-0.5" />
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={!allowed}
+                      onChange={() => toggle(role.id)}
+                      className="mt-0.5"
+                    />
                     <span className="min-w-0">
                       <span className="block text-sm font-medium text-slate-800">{role.name}</span>
                       <span className="block text-xs text-slate-500">
@@ -412,12 +467,24 @@ function AccessEditor({ me, roles, initialRoleIds, initialOwner, busy, onSubmit,
 
   return (
     <div className="mt-4 space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-      <RolePicker me={me} roles={roles} roleIds={roleIds} setRoleIds={setRoleIds} isOwner={isOwner} setIsOwner={setIsOwner} />
+      <RolePicker
+        me={me}
+        roles={roles}
+        roleIds={roleIds}
+        setRoleIds={setRoleIds}
+        isOwner={isOwner}
+        setIsOwner={setIsOwner}
+      />
       <div className="flex justify-end gap-2">
         <button type="button" onClick={onCancel} className={secondaryButton}>
           Cancel
         </button>
-        <button type="button" disabled={busy} onClick={() => onSubmit({ roleIds, isOwner })} className={primaryButton}>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onSubmit({ roleIds, isOwner })}
+          className={primaryButton}
+        >
           {busy ? "Saving…" : "Save access"}
         </button>
       </div>
@@ -436,7 +503,11 @@ function AddUserForm({ me, roles, onAdded }) {
     e.preventDefault();
     setError("");
     setSaving(true);
-    const res = await apiPost("/api/v1/members/", { email: email.trim(), roleIds, ...(me.isOwner ? { isOwner } : {}) });
+    const res = await apiPost("/api/v1/members/", {
+      email: email.trim(),
+      roleIds,
+      ...(me.isOwner ? { isOwner } : {}),
+    });
     setSaving(false);
 
     if (!res.ok) {
@@ -450,7 +521,10 @@ function AddUserForm({ me, roles, onAdded }) {
   };
 
   return (
-    <Section title="Add a user" description="Give someone access to this store with one or more roles. If they don't have an account yet, they're invited by email and get access once they sign up and verify it.">
+    <Section
+      title="Add a user"
+      description="Give someone access to this store with one or more roles. If they don't have an account yet, they're invited by email and get access once they sign up and verify it."
+    >
       <form onSubmit={submit} className="space-y-4 p-5">
         <input
           type="email"
@@ -461,7 +535,14 @@ function AddUserForm({ me, roles, onAdded }) {
           aria-label="Email address"
           className={`${inputClass} w-full`}
         />
-        <RolePicker me={me} roles={roles} roleIds={roleIds} setRoleIds={setRoleIds} isOwner={isOwner} setIsOwner={setIsOwner} />
+        <RolePicker
+          me={me}
+          roles={roles}
+          roleIds={roleIds}
+          setRoleIds={setRoleIds}
+          isOwner={isOwner}
+          setIsOwner={setIsOwner}
+        />
         <ErrorNote>{error}</ErrorNote>
         <div className="flex justify-end">
           <button type="submit" disabled={saving} className={primaryButton}>
@@ -510,7 +591,9 @@ export function RolesSettings() {
   const selected = selectedId === NEW ? null : roles.find((r) => r.id === selectedId);
 
   const saved = (role, created) => {
-    setRoles((list) => (created ? [...list, role] : list.map((r) => (r.id === role.id ? role : r))));
+    setRoles((list) =>
+      created ? [...list, role] : list.map((r) => (r.id === role.id ? role : r))
+    );
     setSelectedId(role.id);
     if (me.roleNames.includes(role.name)) refreshMyStores();
   };
@@ -528,7 +611,11 @@ export function RolesSettings() {
         description="Pick a role to see its permissions."
         action={
           canManageRoles && (
-            <button type="button" onClick={() => setSelectedId(NEW)} className={`${primaryButton} shrink-0 px-3 py-2`}>
+            <button
+              type="button"
+              onClick={() => setSelectedId(NEW)}
+              className={`${primaryButton} shrink-0 px-3 py-2`}
+            >
               Create role
             </button>
           )
@@ -540,7 +627,9 @@ export function RolesSettings() {
 
             return (
               <div key={kind}>
-                <p className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{info.label}</p>
+                <p className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {info.label}
+                </p>
                 <p className="mb-2 px-1 text-xs text-slate-400">{info.note}</p>
                 {!ofKind.length && <p className="px-1 text-sm text-slate-500">None yet.</p>}
                 <div className="space-y-1">
@@ -559,10 +648,16 @@ export function RolesSettings() {
                         <span className="min-w-0 truncate font-medium">
                           {role.name}
                           {me.roleNames.includes(role.name) && (
-                            <span className={`ml-2 text-xs font-normal ${active ? "text-slate-300" : "text-slate-500"}`}>yours</span>
+                            <span
+                              className={`ml-2 text-xs font-normal ${active ? "text-slate-300" : "text-slate-500"}`}
+                            >
+                              yours
+                            </span>
                           )}
                         </span>
-                        <span className={`shrink-0 text-xs ${active ? "text-slate-300" : "text-slate-400"}`}>
+                        <span
+                          className={`shrink-0 text-xs ${active ? "text-slate-300" : "text-slate-400"}`}
+                        >
                           {role.memberCount} {role.memberCount === 1 ? "user" : "users"}
                         </span>
                       </button>
@@ -632,8 +727,14 @@ function RoleEditor({ me, role, groups, canManageRoles, onSaved, onDeleted, onCa
   const save = async () => {
     setError("");
     setSaving(true);
-    const body = { name: name.trim(), description: description.trim(), permissions: [...permissions] };
-    const res = isNew ? await apiPost("/api/v1/roles/", body) : await apiPatch(`/api/v1/roles/${role.id}/`, body);
+    const body = {
+      name: name.trim(),
+      description: description.trim(),
+      permissions: [...permissions],
+    };
+    const res = isNew
+      ? await apiPost("/api/v1/roles/", body)
+      : await apiPatch(`/api/v1/roles/${role.id}/`, body);
     setSaving(false);
 
     if (!res.ok) {
@@ -660,7 +761,9 @@ function RoleEditor({ me, role, groups, canManageRoles, onSaved, onDeleted, onCa
     onDeleted(role);
   };
 
-  const kindLabel = role ? { system: "System role", predefined: "Predefined role", custom: "Custom role" }[role.kind] : "Custom role";
+  const kindLabel = role
+    ? { system: "System role", predefined: "Predefined role", custom: "Custom role" }[role.kind]
+    : "Custom role";
 
   return (
     <Section
@@ -670,7 +773,9 @@ function RoleEditor({ me, role, groups, canManageRoles, onSaved, onDeleted, onCa
       }`}
     >
       <div className="space-y-5 p-5">
-        {locked && <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">{lockedReason}</p>}
+        {locked && (
+          <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">{lockedReason}</p>
+        )}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
@@ -722,7 +827,11 @@ function RoleEditor({ me, role, groups, canManageRoles, onSaved, onDeleted, onCa
                   {group.permissions.map(({ key, label }) => (
                     <label
                       key={key}
-                      title={mayGrant(key) ? undefined : "You don't have this permission, so you can't give it."}
+                      title={
+                        mayGrant(key)
+                          ? undefined
+                          : "You don't have this permission, so you can't give it."
+                      }
                       className={`flex items-start gap-2 text-sm ${mayGrant(key) ? "text-slate-700" : "text-slate-400"}`}
                     >
                       <input
@@ -754,7 +863,12 @@ function RoleEditor({ me, role, groups, canManageRoles, onSaved, onDeleted, onCa
                 Delete role
               </button>
             )}
-            <button type="button" disabled={saving || !name.trim()} onClick={save} className={primaryButton}>
+            <button
+              type="button"
+              disabled={saving || !name.trim()}
+              onClick={save}
+              className={primaryButton}
+            >
               {saving ? "Saving…" : isNew ? "Create role" : "Save role"}
             </button>
           </div>

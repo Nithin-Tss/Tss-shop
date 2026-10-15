@@ -85,9 +85,7 @@ export default function AdminCollections() {
   const filteredCollections = useMemo(() => {
     if (!searchQuery.trim()) return collections;
     const query = searchQuery.toLowerCase().trim();
-    return collections.filter((c) =>
-      c.name?.toLowerCase().includes(query)
-    );
+    return collections.filter((c) => c.name?.toLowerCase().includes(query));
   }, [collections, searchQuery]);
 
   // Handle "Show all selected" toggle
@@ -142,11 +140,17 @@ export default function AdminCollections() {
   const handleBulkAction = (actionName) => {
     if (!selectedIds.length) return;
     if (actionName === "Bulk edit") {
-      showFeedback(`Opening bulk editor for ${selectedIds.length} collection${selectedIds.length > 1 ? "s" : ""}...`);
+      showFeedback(
+        `Opening bulk editor for ${selectedIds.length} collection${selectedIds.length > 1 ? "s" : ""}...`
+      );
     } else if (actionName === "Include in sales channels") {
-      showFeedback(`Included ${selectedIds.length} collection${selectedIds.length > 1 ? "s" : ""} in sales channels.`);
+      showFeedback(
+        `Included ${selectedIds.length} collection${selectedIds.length > 1 ? "s" : ""} in sales channels.`
+      );
     } else if (actionName === "Exclude from sales channels") {
-      showFeedback(`Excluded ${selectedIds.length} collection${selectedIds.length > 1 ? "s" : ""} from sales channels.`);
+      showFeedback(
+        `Excluded ${selectedIds.length} collection${selectedIds.length > 1 ? "s" : ""} from sales channels.`
+      );
     }
   };
 
@@ -154,7 +158,9 @@ export default function AdminCollections() {
   const handleDeleteSelected = async () => {
     if (!selectedIds.length) return;
     const count = selectedIds.length;
-    if (!window.confirm(`Are you sure you want to delete ${count} collection${count > 1 ? "s" : ""}?`)) {
+    if (
+      !window.confirm(`Are you sure you want to delete ${count} collection${count > 1 ? "s" : ""}?`)
+    ) {
       return;
     }
 
@@ -167,7 +173,9 @@ export default function AdminCollections() {
       }
       setSelectedIds([]);
       setShowOnlySelected(false);
-      showFeedback(`Successfully deleted ${successCount} collection${successCount > 1 ? "s" : ""}.`);
+      showFeedback(
+        `Successfully deleted ${successCount} collection${successCount > 1 ? "s" : ""}.`
+      );
       await fetchCollections();
     } catch (err) {
       showFeedback("Failed to delete selected collections.", "error");
@@ -188,28 +196,68 @@ export default function AdminCollections() {
 
     if (type === "online" || name.includes("online")) {
       return (
-        <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <svg
+          className="w-4 h-4 text-slate-700 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          />
         </svg>
       );
     }
     if (type === "shop" || name.includes("shop")) {
       return (
-        <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        <svg
+          className="w-4 h-4 text-slate-700 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+          />
         </svg>
       );
     }
     if (type === "pos" || name.includes("point of sale") || name.includes("pos")) {
       return (
-        <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        <svg
+          className="w-4 h-4 text-slate-700 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.7"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          />
         </svg>
       );
     }
     return (
-      <svg className="w-4 h-4 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      <svg
+        className="w-4 h-4 text-slate-700 shrink-0"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.7"
+          d="M13 10V3L4 14h7v7l9-11h-7z"
+        />
       </svg>
     );
   };
@@ -234,12 +282,32 @@ export default function AdminCollections() {
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
         >
           {feedback.type === "error" ? (
-            <svg className="h-4 w-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="h-4 w-4 text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           ) : (
-            <svg className="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            <svg
+              className="h-4 w-4 text-emerald-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           )}
           <span>{feedback.message}</span>
@@ -264,8 +332,12 @@ export default function AdminCollections() {
           {/* Top Heading Row */}
           <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
-              <span className="text-[18px] text-[#6B7280]" aria-hidden="true">⊞</span>
-              <h1 className="text-[20px] font-semibold tracking-tight text-[#161C2C]">Collections</h1>
+              <span className="text-[18px] text-[#6B7280]" aria-hidden="true">
+                ⊞
+              </span>
+              <h1 className="text-[20px] font-semibold tracking-tight text-[#161C2C]">
+                Collections
+              </h1>
             </div>
 
             {canManage && (
@@ -286,8 +358,18 @@ export default function AdminCollections() {
                   className="flex items-center gap-1.5 rounded-lg bg-[#F3F4F6] px-3 py-1.5 text-[13px] font-medium text-[#161C2C] transition-colors hover:bg-[#E5E7EB]"
                 >
                   <span>All</span>
-                  <svg className="h-3.5 w-3.5 text-[#6B7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+                  <svg
+                    className="h-3.5 w-3.5 text-[#6B7280]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"
+                    />
                   </svg>
                 </button>
               </div>
@@ -295,8 +377,19 @@ export default function AdminCollections() {
               {/* Right: Search and filter input + view button */}
               <div className="ml-auto flex w-full flex-1 items-center gap-2 sm:max-w-md">
                 <div className="relative flex flex-1 items-center">
-                  <svg className="pointer-events-none absolute left-3 h-4 w-4 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5" />
+                  <svg
+                    className="pointer-events-none absolute left-3 h-4 w-4 text-[#9CA3AF]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                      d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"
+                    />
                   </svg>
                   <input
                     type="text"
@@ -327,8 +420,19 @@ export default function AdminCollections() {
                   aria-label="View columns and filters"
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#6B7280] transition-colors hover:bg-[#F9FAFB] hover:text-[#161C2C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/15"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 4.5v15m6-15v15m-10.5 0h15a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5h-15A1.5 1.5 0 003 6v12a1.5 1.5 0 001.5 1.5z" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                      d="M9 4.5v15m6-15v15m-10.5 0h15a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5h-15A1.5 1.5 0 003 6v12a1.5 1.5 0 001.5 1.5z"
+                    />
                   </svg>
                 </button>
               </div>
@@ -356,8 +460,18 @@ export default function AdminCollections() {
                               </span>
                             ) : isAllSelected ? (
                               <span className="flex h-4 w-4 items-center justify-center rounded bg-[#161C2C] text-white shadow-xs">
-                                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                <svg
+                                  className="h-3 w-3"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 13l4 4L19 7"
+                                  />
                                 </svg>
                               </span>
                             ) : (
@@ -389,7 +503,12 @@ export default function AdminCollections() {
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
                                 >
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m6 9 6 6 6-6" />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="m6 9 6 6 6-6"
+                                  />
                                 </svg>
                               </button>
 
@@ -399,7 +518,9 @@ export default function AdminCollections() {
                                     type="button"
                                     onClick={() => {
                                       const pageIds = paginatedCollections.map((c) => c.id);
-                                      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+                                      setSelectedIds((prev) =>
+                                        Array.from(new Set([...prev, ...pageIds]))
+                                      );
                                       setIsSelectDropdownOpen(false);
                                     }}
                                     className="flex w-full items-center rounded-lg px-3 py-2 text-[13px] text-[#202223] transition-colors hover:bg-[#F6F6F7]"
@@ -473,7 +594,11 @@ export default function AdminCollections() {
                                 aria-label="More bulk actions"
                                 aria-expanded={isMoreMenuOpen}
                               >
-                                <svg className="h-4 w-4 text-[#5C5F62]" fill="currentColor" viewBox="0 0 24 24">
+                                <svg
+                                  className="h-4 w-4 text-[#5C5F62]"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
                                   <circle cx="5" cy="12" r="2" />
                                   <circle cx="12" cy="12" r="2" />
                                   <circle cx="19" cy="12" r="2" />
@@ -594,15 +719,15 @@ export default function AdminCollections() {
                             {showOnlySelected
                               ? "No selected collections"
                               : searchQuery
-                              ? "No matching collections"
-                              : "Manage your collections"}
+                                ? "No matching collections"
+                                : "Manage your collections"}
                           </h3>
                           <p className="mb-6 text-[14px] leading-relaxed text-[#6B7280]">
                             {showOnlySelected
                               ? "You currently have no collections selected."
                               : searchQuery
-                              ? `No collections matched "${searchQuery}". Try changing your search query.`
-                              : "Group your products into categories to make it easier for customers to find what they're looking for."}
+                                ? `No collections matched "${searchQuery}". Try changing your search query.`
+                                : "Group your products into categories to make it easier for customers to find what they're looking for."}
                           </p>
                           {showOnlySelected ? (
                             <button
@@ -613,7 +738,11 @@ export default function AdminCollections() {
                               Show all collections
                             </button>
                           ) : searchQuery ? (
-                            <button type="button" onClick={() => setSearchQuery("")} className={darkButton}>
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery("")}
+                              className={darkButton}
+                            >
                               Clear search
                             </button>
                           ) : canManage ? (
@@ -652,8 +781,18 @@ export default function AdminCollections() {
                               >
                                 {isSelected ? (
                                   <span className="flex h-4 w-4 items-center justify-center rounded bg-[#161C2C] text-white shadow-xs">
-                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    <svg
+                                      className="h-3 w-3"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2.5"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M5 13l4 4L19 7"
+                                      />
                                     </svg>
                                   </span>
                                 ) : (
@@ -668,10 +807,26 @@ export default function AdminCollections() {
                             <div className="flex items-center gap-3">
                               <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF]">
                                 {col.image_url ? (
-                                  <img src={col.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                                  <img
+                                    src={col.image_url}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                    loading="lazy"
+                                  />
                                 ) : (
-                                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="1.6"
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
                                   </svg>
                                 )}
                               </div>
@@ -682,21 +837,28 @@ export default function AdminCollections() {
                                 {col.name}
                               </Link>
                               {col.status === "draft" && (
-                                <span className="shrink-0 rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[12px] text-[#4B5563]">Draft</span>
+                                <span className="shrink-0 rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[12px] text-[#4B5563]">
+                                  Draft
+                                </span>
                               )}
                             </div>
                           </td>
 
                           {/* Products count */}
                           <td className={`${cell} tabular-nums text-[#374151]`}>
-                            {typeof col.products_count === "number" ? col.products_count.toLocaleString() : 0}
+                            {typeof col.products_count === "number"
+                              ? col.products_count.toLocaleString()
+                              : 0}
                           </td>
 
                           {/* Conditions */}
                           <td className={`${cell} max-w-xs truncate text-[#6B7280]`}>
                             {col.type === "automated" && col.rules?.length
                               ? col.rules
-                                  .map((r) => `${r.field.replace(/_/g, " ")} ${r.operator.replace(/_/g, " ")} ${r.value}`)
+                                  .map(
+                                    (r) =>
+                                      `${r.field.replace(/_/g, " ")} ${r.operator.replace(/_/g, " ")} ${r.value}`
+                                  )
                                   .join(col.match === "any" ? " or " : " and ")
                               : "—"}
                           </td>
@@ -708,14 +870,17 @@ export default function AdminCollections() {
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setOpenChannelDropdownId((prev) => (prev === col.id ? null : col.id));
+                                  setOpenChannelDropdownId((prev) =>
+                                    prev === col.id ? null : col.id
+                                  );
                                 }}
                                 aria-expanded={openChannelDropdownId === col.id}
                                 className="inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 tabular-nums text-[#374151] transition-colors hover:bg-[#F3F4F6] hover:text-[#161C2C]"
                                 title="View sales channels"
                               >
                                 <span>
-                                  {col.sales_channels_count ?? (col.sales_channels ? col.sales_channels.length : 0)}
+                                  {col.sales_channels_count ??
+                                    (col.sales_channels ? col.sales_channels.length : 0)}
                                 </span>
                                 <svg
                                   className={`h-3.5 w-3.5 text-[#9CA3AF] transition-transform duration-150 ${
@@ -726,7 +891,12 @@ export default function AdminCollections() {
                                   viewBox="0 0 24 24"
                                   aria-hidden="true"
                                 >
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m6 9 6 6 6-6" />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="m6 9 6 6 6-6"
+                                  />
                                 </svg>
                               </button>
 
@@ -736,7 +906,9 @@ export default function AdminCollections() {
                                   ref={channelDropdownRef}
                                   onClick={(e) => e.stopPropagation()}
                                   className={`absolute right-0 z-40 min-w-[210px] rounded-lg border border-[#E5E7EB] bg-white p-1 text-left shadow-lg ${
-                                    paginatedCollections.indexOf(col) >= paginatedCollections.length - 2 && paginatedCollections.length > 2
+                                    paginatedCollections.indexOf(col) >=
+                                      paginatedCollections.length - 2 &&
+                                    paginatedCollections.length > 2
                                       ? "bottom-full mb-2"
                                       : "top-full mt-2"
                                   }`}

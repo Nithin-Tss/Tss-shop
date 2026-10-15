@@ -1,7 +1,22 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { apiDelete, apiGet, apiRequest, forgetAdminReturn, logout as endSession, restoreAdminScroll } from "@/lib/api";
-import { ONBOARDING_PATH, can, getActiveStore, setActiveStore, setStores, storeCan, useSession } from "@/lib/auth";
+import {
+  apiDelete,
+  apiGet,
+  apiRequest,
+  forgetAdminReturn,
+  logout as endSession,
+  restoreAdminScroll,
+} from "@/lib/api";
+import {
+  ONBOARDING_PATH,
+  can,
+  getActiveStore,
+  setActiveStore,
+  setStores,
+  storeCan,
+  useSession,
+} from "@/lib/auth";
 
 const BASE = "/admin/online-store";
 
@@ -170,7 +185,9 @@ const menuGroups = [
         label: "Orders",
         href: `${BASE}/orders`,
         permission: "orders.view",
-        children: [{ label: "Drafts", href: `${BASE}/orders/drafts`, permission: "draft_orders.view" }],
+        children: [
+          { label: "Drafts", href: `${BASE}/orders/drafts`, permission: "draft_orders.view" },
+        ],
       },
       {
         icon: "products",
@@ -180,14 +197,29 @@ const menuGroups = [
         permission: "products.view",
         children: [{ label: "Collections", href: `${BASE}/collections` }],
       },
-      { icon: "customers", label: "Customers", href: `${BASE}/customers`, permission: "customers.view" },
+      {
+        icon: "customers",
+        label: "Customers",
+        href: `${BASE}/customers`,
+        permission: "customers.view",
+      },
     ],
   },
   {
     label: "Store",
     items: [
-      { icon: "catalogues", label: "Catalogues", href: `${BASE}/catalogues`, permission: "products.view" },
-      { icon: "inventory", label: "Inventory", href: `${BASE}/inventory`, permission: "inventory.view" },
+      {
+        icon: "catalogues",
+        label: "Catalogues",
+        href: `${BASE}/catalogues`,
+        permission: "products.view",
+      },
+      {
+        icon: "inventory",
+        label: "Inventory",
+        href: `${BASE}/inventory`,
+        permission: "inventory.view",
+      },
       { icon: "content", label: "Content", href: `${BASE}/content` },
     ],
   },
@@ -196,14 +228,29 @@ const menuGroups = [
     items: [
       { icon: "overview", label: "Overview", href: `${BASE}/overview`, permission: "reports.view" },
       { icon: "reports", label: "Reports", href: `${BASE}/reports`, permission: "reports.view" },
-      { icon: "analytics", label: "Analytics", href: `${BASE}/analytics`, permission: "reports.view" },
+      {
+        icon: "analytics",
+        label: "Analytics",
+        href: `${BASE}/analytics`,
+        permission: "reports.view",
+      },
     ],
   },
   {
     label: "Marketing & delivery",
     items: [
-      { icon: "discounts", label: "Discounts", href: `${BASE}/discounts`, permission: "discounts.view" },
-      { icon: "shipping", label: "Shipping", href: `${BASE}/shipping`, permission: "shipping.view" },
+      {
+        icon: "discounts",
+        label: "Discounts",
+        href: `${BASE}/discounts`,
+        permission: "discounts.view",
+      },
+      {
+        icon: "shipping",
+        label: "Shipping",
+        href: `${BASE}/shipping`,
+        permission: "shipping.view",
+      },
     ],
   },
 ];
@@ -260,7 +307,9 @@ function ChevronIcon({ open }) {
 
 function SectionLabel({ children }) {
   return (
-    <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">{children}</p>
+    <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+      {children}
+    </p>
   );
 }
 
@@ -272,7 +321,11 @@ function MenuItem({ item, path }) {
   return (
     <div>
       <div className={rowClass(active)}>
-        <Link to={item.href} aria-current={active ? "page" : undefined} className="flex h-full flex-1 items-center gap-3">
+        <Link
+          to={item.href}
+          aria-current={active ? "page" : undefined}
+          className="flex h-full flex-1 items-center gap-3"
+        >
           <NavIcon name={item.icon} />
           <span className="truncate">{item.label}</span>
         </Link>
@@ -299,7 +352,11 @@ function MenuItem({ item, path }) {
         <Collapse open={open}>
           <div className="ml-[21px] mt-0.5 space-y-0.5 border-l border-white/10 pl-[18px]">
             {item.children.map((child) => (
-              <Link key={child.href} to={child.href} className={subRowClass(isUnder(path, child.href))}>
+              <Link
+                key={child.href}
+                to={child.href}
+                className={subRowClass(isUnder(path, child.href))}
+              >
                 {child.label}
               </Link>
             ))}
@@ -348,7 +405,10 @@ function useSidebarScroll(navRef, path) {
     if (itemBox.top < navBox.top + margin) {
       nav.scrollTo({ top: nav.scrollTop + itemBox.top - navBox.top - margin, behavior: "smooth" });
     } else if (itemBox.bottom > navBox.bottom - margin) {
-      nav.scrollTo({ top: nav.scrollTop + itemBox.bottom - navBox.bottom + margin, behavior: "smooth" });
+      nav.scrollTo({
+        top: nav.scrollTop + itemBox.bottom - navBox.bottom + margin,
+        behavior: "smooth",
+      });
     }
   }, [navRef, path]);
 }
@@ -381,7 +441,9 @@ export default function AdminSidebar() {
             const items = group.items.filter(allowed).map((item) => {
               const children = item.children?.filter(allowed);
               // No visible children: no expand chevron either
-              return item.children ? { ...item, children: children.length ? children : undefined } : item;
+              return item.children
+                ? { ...item, children: children.length ? children : undefined }
+                : item;
             });
             if (!items.length) return null;
 
@@ -474,7 +536,6 @@ export default function AdminSidebar() {
   );
 }
 
-
 const headerIcon = {
   fill: "none",
   stroke: "currentColor",
@@ -502,7 +563,9 @@ function useDismiss(ref, open, close) {
 
 function StoreAvatar({ name, size = "h-7 w-7 text-xs" }) {
   return (
-    <span className={`flex shrink-0 items-center justify-center rounded-lg bg-[#30466F] font-bold uppercase text-white ${size}`}>
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-lg bg-[#30466F] font-bold uppercase text-white ${size}`}
+    >
       {(name || "S").trim().charAt(0)}
     </span>
   );
@@ -538,8 +601,15 @@ function StoresDialog({ stores, activeId, onClose }) {
     setBusyId(store.storeId);
     setError("");
     try {
-      const updated = await apiRequest(`/api/v1/stores/${store.storeId}/`, { method: "PATCH", body: { storeName: name } });
-      setStores(stores.map((s) => (s.storeId === store.storeId ? { ...s, storeName: updated.storeName } : s)));
+      const updated = await apiRequest(`/api/v1/stores/${store.storeId}/`, {
+        method: "PATCH",
+        body: { storeName: name },
+      });
+      setStores(
+        stores.map((s) =>
+          s.storeId === store.storeId ? { ...s, storeName: updated.storeName } : s
+        )
+      );
       setEditingId(null);
     } catch (err) {
       setError(err.message);
@@ -567,7 +637,10 @@ function StoresDialog({ stores, activeId, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#161C2C]/50 px-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#161C2C]/50 px-4"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -577,7 +650,9 @@ function StoresDialog({ stores, activeId, onClose }) {
       >
         <div className="flex items-center justify-between border-b border-[#E3E7ED] px-5 py-4">
           <div>
-            <h2 id="all-stores-title" className="text-base font-semibold text-[#161C2C]">All stores</h2>
+            <h2 id="all-stores-title" className="text-base font-semibold text-[#161C2C]">
+              All stores
+            </h2>
             <p className="text-sm text-[#53627E]">
               {stores.length} {stores.length === 1 ? "store" : "stores"} on your account
             </p>
@@ -624,7 +699,9 @@ function StoresDialog({ stores, activeId, onClose }) {
                     />
                   ) : (
                     <>
-                      <p className="truncate text-sm font-semibold text-[#161C2C]">{store.storeName}</p>
+                      <p className="truncate text-sm font-semibold text-[#161C2C]">
+                        {store.storeName}
+                      </p>
                       <div className="mt-0.5 flex items-center gap-2 text-xs">
                         <span
                           className={`rounded-full px-2 py-0.5 font-medium ${
@@ -633,7 +710,9 @@ function StoresDialog({ stores, activeId, onClose }) {
                         >
                           {storeStatus(store)}
                         </span>
-                        {store.storeId === activeId && <span className="text-[#53627E]">Current store</span>}
+                        {store.storeId === activeId && (
+                          <span className="text-[#53627E]">Current store</span>
+                        )}
                       </div>
                     </>
                   )}
@@ -738,7 +817,10 @@ function StoreSwitcher() {
         <span className="hidden max-w-[160px] truncate text-sm font-semibold text-[#161C2C] sm:inline">
           {active?.storeName || "No store yet"}
         </span>
-        <svg {...headerIcon} className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}>
+        <svg
+          {...headerIcon}
+          className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+        >
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
@@ -748,7 +830,9 @@ function StoreSwitcher() {
           role="menu"
           className="absolute left-0 top-[calc(100%+8px)] z-50 w-64 rounded-xl border border-[#E3E7ED] bg-white p-1.5 shadow-lg shadow-[#141b2d]/10"
         >
-          <p className="px-2.5 pb-1 pt-1.5 text-xs font-medium uppercase tracking-wide text-[#8A94A8]">Your stores</p>
+          <p className="px-2.5 pb-1 pt-1.5 text-xs font-medium uppercase tracking-wide text-[#8A94A8]">
+            Your stores
+          </p>
 
           <div className="max-h-64 overflow-y-auto">
             {stores.map((store) => (
@@ -763,7 +847,11 @@ function StoreSwitcher() {
                 <StoreAvatar name={store.storeName} />
                 <span className="min-w-0 flex-1 truncate font-medium">{store.storeName}</span>
                 {store.storeId === session?.storeId && (
-                  <svg {...headerIcon} strokeWidth="2.2" className="h-4 w-4 shrink-0 text-[#141b2d]">
+                  <svg
+                    {...headerIcon}
+                    strokeWidth="2.2"
+                    className="h-4 w-4 shrink-0 text-[#141b2d]"
+                  >
                     <path d="m5 12.5 4.5 4.5L19 7.5" />
                   </svg>
                 )}
@@ -811,7 +899,13 @@ function StoreSwitcher() {
         </div>
       )}
 
-      {showAll && <StoresDialog stores={stores} activeId={session?.storeId} onClose={() => setShowAll(false)} />}
+      {showAll && (
+        <StoresDialog
+          stores={stores}
+          activeId={session?.storeId}
+          onClose={() => setShowAll(false)}
+        />
+      )}
     </div>
   );
 }
@@ -849,7 +943,10 @@ function ProfileMenu() {
           A
         </span>
         <span className="hidden sm:inline text-sm font-medium text-[#161C2C]">Admin</span>
-        <svg {...headerIcon} className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}>
+        <svg
+          {...headerIcon}
+          className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+        >
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
@@ -871,7 +968,12 @@ function ProfileMenu() {
             </svg>
             Profile
           </Link>
-          <Link role="menuitem" to={`${BASE}/settings`} onClick={() => setOpen(false)} className={itemClass}>
+          <Link
+            role="menuitem"
+            to={`${BASE}/settings`}
+            onClick={() => setOpen(false)}
+            className={itemClass}
+          >
             <svg {...headerIcon} className="h-4 w-4 text-slate-500">
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
@@ -920,7 +1022,10 @@ export function AdminHeader() {
       {/* Search: grows to fill the middle, narrower on small screens */}
       <div className="flex flex-1 justify-center">
         <label className="group flex h-11 w-full max-w-[560px] items-center gap-2.5 rounded-full border border-transparent bg-[#F3F5F8] px-4 transition focus-within:border-[#141b2d]/40 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(20,27,45,0.08)]">
-          <svg {...headerIcon} className="h-[18px] w-[18px] shrink-0 text-slate-500 group-focus-within:text-[#141b2d]">
+          <svg
+            {...headerIcon}
+            className="h-[18px] w-[18px] shrink-0 text-slate-500 group-focus-within:text-[#141b2d]"
+          >
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>

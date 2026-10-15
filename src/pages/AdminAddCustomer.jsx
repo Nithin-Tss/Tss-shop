@@ -196,9 +196,7 @@ export default function AdminAddCustomer() {
             <div className="lg:col-span-8 space-y-5">
               {/* CARD 1: CUSTOMER OVERVIEW */}
               <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
-                <h2 className="text-base font-bold text-slate-900">
-                  Customer overview
-                </h2>
+                <h2 className="text-base font-bold text-slate-900">Customer overview</h2>
 
                 {/* First & Last Name */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -256,9 +254,7 @@ export default function AdminAddCustomer() {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                    Email
-                  </label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">Email</label>
                   <input
                     type="email"
                     value={email}
@@ -334,8 +330,8 @@ export default function AdminAddCustomer() {
                 {/* Footer Note */}
                 <div className="pt-3 border-t border-slate-100">
                   <p className="text-xs text-slate-500 leading-5">
-                    You should ask your customers for permission before you subscribe
-                    them to your marketing emails, SMS, or WhatsApp messages.
+                    You should ask your customers for permission before you subscribe them to your
+                    marketing emails, SMS, or WhatsApp messages.
                   </p>
                 </div>
               </div>
@@ -343,9 +339,7 @@ export default function AdminAddCustomer() {
               {/* CARD 2: DEFAULT ADDRESS */}
               <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-4">
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">
-                    Default address
-                  </h2>
+                  <h2 className="text-base font-bold text-slate-900">Default address</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     The primary address of this customer
                   </p>

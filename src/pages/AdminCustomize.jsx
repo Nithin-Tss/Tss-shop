@@ -1,4 +1,13 @@
-import { createContext, memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -69,7 +78,13 @@ const syncedJson = (d, name) => JSON.stringify(d?.sections?.[name] ?? null);
 
 // A page's sections as its synced template file lists them (id, type, hidden, in order)
 function templateLines(template) {
-  return JSON.stringify((template?.order || []).map((id) => [id, template.sections[id]?.type, Boolean(template.sections[id]?.hidden)]));
+  return JSON.stringify(
+    (template?.order || []).map((id) => [
+      id,
+      template.sections[id]?.type,
+      Boolean(template.sections[id]?.hidden),
+    ])
+  );
 }
 
 // What the server stores for a synced section: its settings and blocks
@@ -185,9 +200,7 @@ function DragHandle({ label, onPointerDown, onKeyDown }) {
 export default function AdminCustomizePage() {
   const session = useSession();
 
-  const store = session?.stores?.find(
-    (s) => s.storeId === session.storeId
-  );
+  const store = session?.stores?.find((s) => s.storeId === session.storeId);
 
   const [schema, setSchema] = useState(null);
 
@@ -209,7 +222,9 @@ export default function AdminCustomizePage() {
 
   const [products, setProducts] = useState([]);
 
-  const [page, setPage] = useState(() => (startParams.get("page") in PAGE_LABELS ? startParams.get("page") : "index"));
+  const [page, setPage] = useState(() =>
+    startParams.get("page") in PAGE_LABELS ? startParams.get("page") : "index"
+  );
 
   const [selected, setSelected] = useState(() => startParams.get("section"));
 
@@ -241,7 +256,6 @@ export default function AdminCustomizePage() {
   // Which group of the Theme settings panel opens first (Header, Footer, ...)
   const [themeGroup, setThemeGroup] = useState("colors");
 
-
   const [previewKey, setPreviewKey] = useState(0);
 
   const [previewHtml, setPreviewHtml] = useState("");
@@ -265,7 +279,8 @@ export default function AdminCustomizePage() {
     if (!rowMenu) return undefined;
 
     const onPointer = (e) => {
-      if (!e.target.closest("[data-row-menu]") && !e.target.closest('[aria-haspopup="menu"]')) setRowMenu(null);
+      if (!e.target.closest("[data-row-menu]") && !e.target.closest('[aria-haspopup="menu"]'))
+        setRowMenu(null);
     };
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -381,7 +396,17 @@ export default function AdminCustomizePage() {
   const [, setHistoryTick] = useState(0);
 
   // Live preview: what the open preview shows, so only changed sections are re-rendered and patched in
-  const syncRef = useRef({ ready: false, queue: [], rendered: null, inflight: {}, again: {}, frame: 0, fullTimer: 0, gen: 0, images: {} });
+  const syncRef = useRef({
+    ready: false,
+    queue: [],
+    rendered: null,
+    inflight: {},
+    again: {},
+    frame: 0,
+    fullTimer: 0,
+    gen: 0,
+    images: {},
+  });
 
   const engineRef = useRef({});
 
@@ -389,10 +414,18 @@ export default function AdminCustomizePage() {
   // else's change) and when its last change was made; preview updates waiting for the
   // preview's "patched" reply (timing); and whether the next save should go out quickly
   // templates: synced page templates by name, e.g. { index: "index" } (templates/index.liquid lists the Home page's sections)
-  const syncedRef = useRef({ sections: {}, templates: {}, quickSave: false, token: 0, waiting: {} });
+  const syncedRef = useRef({
+    sections: {},
+    templates: {},
+    quickSave: false,
+    token: 0,
+    waiting: {},
+  });
 
   const templateNameOf = (pageName) =>
-    Object.keys(syncedRef.current.templates).find((name) => syncedRef.current.templates[name] === pageName);
+    Object.keys(syncedRef.current.templates).find(
+      (name) => syncedRef.current.templates[name] === pageName
+    );
 
   function syncedState(name) {
     const all = syncedRef.current.sections;
@@ -441,7 +474,9 @@ export default function AdminCustomizePage() {
         );
         // A section from the address that this page no longer has: show the sections list
         setSelected((current) =>
-          current === "theme" || settingsData.templates[pageRef.current]?.sections[current] ? current : null
+          current === "theme" || settingsData.templates[pageRef.current]?.sections[current]
+            ? current
+            : null
         );
         setStatus("ready");
       })
@@ -542,7 +577,11 @@ export default function AdminCustomizePage() {
       sync.rendered = null;
     }
     const gen = ++sync.gen;
-    previewTheme(d, { scroll: scrollRef.current, selected: selectedRef.current || "", ...previewTarget() })
+    previewTheme(d, {
+      scroll: scrollRef.current,
+      selected: selectedRef.current || "",
+      ...previewTarget(),
+    })
       .then((res) => {
         if (gen !== sync.gen) return;
         sync.rendered = snapshotOf(d);
@@ -572,7 +611,11 @@ export default function AdminCustomizePage() {
     let token = "";
     if (state.changedAt) {
       token = String(++meta.token);
-      meta.waiting[token] = { at: state.changedAt, kind: state.kind || `${name}: sidebar -> preview`, clock: state.clock };
+      meta.waiting[token] = {
+        at: state.changedAt,
+        kind: state.kind || `${name}: sidebar -> preview`,
+        clock: state.clock,
+      };
       state.changedAt = 0;
       state.kind = "";
     }
@@ -683,10 +726,12 @@ export default function AdminCustomizePage() {
       return token;
     };
 
-    before.order.filter((id) => !now.order.includes(id)).forEach((id) => {
-      postToPreview({ type: "remove", id, token: takeToken() });
-      delete before.sections[id];
-    });
+    before.order
+      .filter((id) => !now.order.includes(id))
+      .forEach((id) => {
+        postToPreview({ type: "remove", id, token: takeToken() });
+        delete before.sections[id];
+      });
     before.order = before.order.filter((id) => now.order.includes(id));
 
     now.order.forEach((id) => {
@@ -716,7 +761,8 @@ export default function AdminCustomizePage() {
 
   function diffForSave(before, after) {
     const changes = {};
-    if (JSON.stringify(before.settings) !== JSON.stringify(after.settings)) changes.settings = after.settings;
+    if (JSON.stringify(before.settings) !== JSON.stringify(after.settings))
+      changes.settings = after.settings;
     // Synced sections are saved on their own path, which also writes them into sections/<name>.liquid
     for (const name of syncedNames(after)) {
       if (syncedJson(before, name) === syncedJson(after, name)) continue;
@@ -724,28 +770,38 @@ export default function AdminCustomizePage() {
       changes.sections = { ...changes.sections, [name]: syncedForSave(after.sections[name]) };
       changes.section_versions = { ...changes.section_versions, [name]: state.version };
       changes.client = SYNC_CLIENT;
-      changes.started_at = Math.min(changes.started_at || Infinity, state.savedChangeAt || Date.now());
+      changes.started_at = Math.min(
+        changes.started_at || Infinity,
+        state.savedChangeAt || Date.now()
+      );
     }
     for (const name of Object.keys(after.templates)) {
       const a = before.templates[name] || { order: [], sections: {} };
       const b = after.templates[name];
       const sections = {};
       for (const id of Object.keys(b.sections)) {
-        if (JSON.stringify(a.sections[id]) !== JSON.stringify(b.sections[id])) sections[id] = b.sections[id];
+        if (JSON.stringify(a.sections[id]) !== JSON.stringify(b.sections[id]))
+          sections[id] = b.sections[id];
       }
       for (const id of Object.keys(a.sections)) {
         if (!(id in b.sections)) sections[id] = null;
       }
       if (a.order.join("|") !== b.order.join("|") || Object.keys(sections).length) {
         changes.templates = changes.templates || {};
-        changes.templates[name] = { order: b.order, ...(Object.keys(sections).length ? { sections } : {}) };
+        changes.templates[name] = {
+          order: b.order,
+          ...(Object.keys(sections).length ? { sections } : {}),
+        };
         // A synced template (templates/index.liquid): its file follows, unless Edit code changed it meanwhile
         const templateName = templateNameOf(name);
         if (templateName && templateLines(a) !== templateLines(b)) {
           const state = syncedState(templateName);
           changes.section_versions = { ...changes.section_versions, [templateName]: state.version };
           changes.client = SYNC_CLIENT;
-          changes.started_at = Math.min(changes.started_at || Infinity, state.savedChangeAt || Date.now());
+          changes.started_at = Math.min(
+            changes.started_at || Infinity,
+            state.savedChangeAt || Date.now()
+          );
         }
       }
     }
@@ -769,7 +825,8 @@ export default function AdminCustomizePage() {
     const snapshot = dataRef.current;
     const customizerNow = customizerRef.current;
     const changes = diffForSave(lastSavedRef.current.data, snapshot);
-    const customizerChanged = JSON.stringify(customizerNow) !== JSON.stringify(lastSavedRef.current.customizer);
+    const customizerChanged =
+      JSON.stringify(customizerNow) !== JSON.stringify(lastSavedRef.current.customizer);
 
     if (!changes && !customizerChanged) {
       setSaveState("saved");
@@ -784,7 +841,10 @@ export default function AdminCustomizePage() {
         changes ? patchThemeSettings(changes) : null,
         customizerChanged ? saveThemeCustomizer(customizerNow) : null,
       ]);
-      for (const [name, result] of Object.entries({ ...(saved?.sections || {}), ...(saved?.templates || {}) })) {
+      for (const [name, result] of Object.entries({
+        ...(saved?.sections || {}),
+        ...(saved?.templates || {}),
+      })) {
         const state = syncedState(name);
         state.version = result.version;
         state.savedChangeAt = 0;
@@ -851,7 +911,9 @@ export default function AdminCustomizePage() {
       return;
     }
     if (saveStateRef.current !== "saved" || saveRef.current.saving) {
-      setNotice("The code editor changed the settings. Your edits here are still saving; reload to see its changes.");
+      setNotice(
+        "The code editor changed the settings. Your edits here are still saving; reload to see its changes."
+      );
       return;
     }
     try {
@@ -883,7 +945,9 @@ export default function AdminCustomizePage() {
   function addSyncedSections(found) {
     const current = dataRef.current;
     const saved = lastSavedRef.current;
-    const added = Object.entries(found || {}).filter(([name, info]) => info?.spec && info?.values && !isSynced(current, name));
+    const added = Object.entries(found || {}).filter(
+      ([name, info]) => info?.spec && info?.values && !isSynced(current, name)
+    );
     if (!current || !saved || !added.length) return [];
     const values = {};
     for (const [name, info] of added) {
@@ -891,7 +955,17 @@ export default function AdminCustomizePage() {
       syncedState(name).version = info.version;
     }
     const withThem = (d) => ({ ...d, sections: { ...(d.sections || {}), ...values } });
-    setSchema((sc) => (sc ? { ...sc, sections: { ...sc.sections, ...Object.fromEntries(added.map(([name, info]) => [name, info.spec])) } } : sc));
+    setSchema((sc) =>
+      sc
+        ? {
+            ...sc,
+            sections: {
+              ...sc.sections,
+              ...Object.fromEntries(added.map(([name, info]) => [name, info.spec])),
+            },
+          }
+        : sc
+    );
     // Undo/redo snapshots get them too, so going back never drops the section from the sidebar
     const history = historyRef.current;
     history.past = history.past.map(withThem);
@@ -913,7 +987,8 @@ export default function AdminCustomizePage() {
     }
     if (!isSynced(dataRef.current, id) || !editModeRef.current) return;
     fromPreviewRef.current = true;
-    pendingBlockRef.current = Number.isInteger(block) && dataRef.current.sections[id].blocks?.[block] ? block : null;
+    pendingBlockRef.current =
+      Number.isInteger(block) && dataRef.current.sections[id].blocks?.[block] ? block : null;
     setSelected(id);
   }
 
@@ -929,11 +1004,14 @@ export default function AdminCustomizePage() {
     if (!event.template || !pageName || !current?.templates?.[pageName] || !saved) return;
     syncedRef.current.templates[name] = pageName;
     const state = syncedState(name);
-    if (state.version !== null && event.version <= state.version && event.source !== "restore") return;
+    if (state.version !== null && event.version <= state.version && event.source !== "restore")
+      return;
     state.version = event.version;
     const label = PAGE_LABELS[pageName] || pageName;
 
-    if (JSON.stringify(current.templates[pageName]) !== JSON.stringify(saved.data.templates[pageName])) {
+    if (
+      JSON.stringify(current.templates[pageName]) !== JSON.stringify(saved.data.templates[pageName])
+    ) {
       setNotice(
         `The ${label.toLowerCase()}'s sections were changed in Edit code. Your change here is being saved on top; ` +
           "the code editor's version is in its History."
@@ -943,7 +1021,11 @@ export default function AdminCustomizePage() {
     if (JSON.stringify(event.template) === JSON.stringify(current.templates[pageName])) return;
     const withIt = (d) => ({ ...d, templates: { ...d.templates, [pageName]: event.template } });
     lastSavedRef.current = { ...saved, data: withIt(saved.data) };
-    if (event.source !== "customizer" && event.started_at && Date.now() - event.started_at < 60000) {
+    if (
+      event.source !== "customizer" &&
+      event.started_at &&
+      Date.now() - event.started_at < 60000
+    ) {
       state.changedAt = Number(event.started_at);
       state.kind = `${name}: code save -> preview`;
       state.clock = "epoch";
@@ -952,12 +1034,19 @@ export default function AdminCustomizePage() {
     dataRef.current = next;
     setData(next);
     const open = selectedRef.current;
-    if (pageRef.current === pageName && open && open !== "theme" && !isSynced(next, open) && !event.template.sections[open]) {
+    if (
+      pageRef.current === pageName &&
+      open &&
+      open !== "theme" &&
+      !isSynced(next, open) &&
+      !event.template.sections[open]
+    ) {
       setSelected(null);
       setSelectedBlock(null);
     }
     if (event.source === "code") setNotice(`${label} sections updated from Edit code.`);
-    else if (event.source === "restore") setNotice(`An earlier ${label.toLowerCase()} version was restored.`);
+    else if (event.source === "restore")
+      setNotice(`An earlier ${label.toLowerCase()} version was restored.`);
   }
 
   function sectionEvent(event) {
@@ -974,7 +1063,8 @@ export default function AdminCustomizePage() {
       return;
     }
     const state = syncedState(name);
-    if (state.version !== null && event.version <= state.version && event.source !== "restore") return;
+    if (state.version !== null && event.version <= state.version && event.source !== "restore")
+      return;
     state.version = event.version;
     const label = event.spec?.name || name;
 
@@ -996,31 +1086,51 @@ export default function AdminCustomizePage() {
 
     if (JSON.stringify(incoming) === syncedJson(current, name)) return;
     const next = { ...current, sections: { ...current.sections, [name]: incoming } };
-    lastSavedRef.current = { ...saved, data: { ...saved.data, sections: { ...(saved.data.sections || {}), [name]: incoming } } };
+    lastSavedRef.current = {
+      ...saved,
+      data: { ...saved.data, sections: { ...(saved.data.sections || {}), [name]: incoming } },
+    };
     // Timed until the preview shows it (from the moment Save was pressed in Edit code)
-    if (event.source !== "customizer" && event.started_at && Date.now() - event.started_at < 60000) {
+    if (
+      event.source !== "customizer" &&
+      event.started_at &&
+      Date.now() - event.started_at < 60000
+    ) {
       state.changedAt = Number(event.started_at);
       state.kind = `${name}: code save -> preview`;
       state.clock = "epoch";
     }
     dataRef.current = next;
     setData(next);
-    if (selectedRef.current === name && selectedBlockRef.current !== null && !incoming.blocks?.[selectedBlockRef.current]) {
+    if (
+      selectedRef.current === name &&
+      selectedBlockRef.current !== null &&
+      !incoming.blocks?.[selectedBlockRef.current]
+    ) {
       setSelectedBlock(null);
     }
     if (event.source === "code") setNotice(`${label} updated from Edit code.`);
-    else if (event.source === "restore") setNotice(`An earlier ${label.toLowerCase()} version was restored.`);
+    else if (event.source === "restore")
+      setNotice(`An earlier ${label.toLowerCase()} version was restored.`);
   }
 
   engineRef.current = {
-    renderFull, scheduleSync, flushSave, registerPendingImage, postToPreview, externalChange, sectionEvent, selectUnknownSection,
+    renderFull,
+    scheduleSync,
+    flushSave,
+    registerPendingImage,
+    postToPreview,
+    externalChange,
+    sectionEvent,
+    selectUnknownSection,
     addSyncedSections,
   };
 
   useEffect(() => onThemeChange((kind) => engineRef.current.externalChange(kind)), []);
 
   // Live events from the server: a change to a synced section made in Edit code or another editor
-  const hasSynced = syncedNames(data).length > 0 || Object.keys(syncedRef.current.templates).length > 0;
+  const hasSynced =
+    syncedNames(data).length > 0 || Object.keys(syncedRef.current.templates).length > 0;
 
   // Coming back to this tab: pick up synced sections added meanwhile (their rows open their panels)
   useEffect(() => {
@@ -1066,7 +1176,10 @@ export default function AdminCustomizePage() {
   // A synced section's change shows in the preview at once and is saved after a short pause (200 ms)
   function markSyncedChanges(before, after) {
     for (const [name, pageName] of Object.entries(syncedRef.current.templates)) {
-      if (templateLines(before?.templates?.[pageName]) === templateLines(after?.templates?.[pageName])) continue;
+      if (
+        templateLines(before?.templates?.[pageName]) === templateLines(after?.templates?.[pageName])
+      )
+        continue;
       const state = syncedState(name);
       state.changedAt = performance.now();
       state.kind = `${name}: sidebar -> preview`;
@@ -1113,7 +1226,11 @@ export default function AdminCustomizePage() {
   function replaceImage(from, to) {
     const swap = (d) => {
       const text = JSON.stringify(d);
-      return text.includes(from) ? JSON.parse(text.split(JSON.stringify(from).slice(1, -1)).join(JSON.stringify(to).slice(1, -1))) : d;
+      return text.includes(from)
+        ? JSON.parse(
+            text.split(JSON.stringify(from).slice(1, -1)).join(JSON.stringify(to).slice(1, -1))
+          )
+        : d;
     };
     const history = historyRef.current;
     history.past = history.past.map(swap);
@@ -1155,7 +1272,11 @@ export default function AdminCustomizePage() {
     put("article", page === "article" ? sampleArticle : "");
     put("section", selected);
     const query = params.toString();
-    window.history.replaceState(window.history.state, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}`
+    );
   }, [page, sampleProductId, sampleArticle, selected]);
 
   // A store link followed in the preview ("/products/<id>", "/collections/all", "/blog/<handle>", "/"):
@@ -1171,13 +1292,19 @@ export default function AdminCustomizePage() {
 
     setBackStack((stack) => [
       ...stack.slice(-19),
-      { page: pageRef.current, selected: selectedRef.current, product: sampleProductRef.current, article: sampleArticleRef.current },
+      {
+        page: pageRef.current,
+        selected: selectedRef.current,
+        product: sampleProductRef.current,
+        article: sampleArticleRef.current,
+      },
     ]);
     if (next === "product") setSampleProductId(second);
     if (next === "article") setSampleArticle(second);
 
     const template = dataRef.current.templates[next];
-    const main = template.order.find((id) => template.sections[id]?.type === MAIN_SECTION[next]) || null;
+    const main =
+      template.order.find((id) => template.sections[id]?.type === MAIN_SECTION[next]) || null;
     setPage(next);
     setAdding(false);
     setSelected(main);
@@ -1193,7 +1320,11 @@ export default function AdminCustomizePage() {
     if (previous.article) setSampleArticle(previous.article);
     setPage(previous.page);
     setAdding(false);
-    setSelected(previous.selected && dataRef.current?.templates[previous.page]?.sections[previous.selected] ? previous.selected : null);
+    setSelected(
+      previous.selected && dataRef.current?.templates[previous.page]?.sections[previous.selected]
+        ? previous.selected
+        : null
+    );
   }
 
   engineRef.current.openStorePage = openStorePage;
@@ -1212,7 +1343,12 @@ export default function AdminCustomizePage() {
   useEffect(() => {
     const scroll = !fromPreviewRef.current;
     fromPreviewRef.current = false;
-    engineRef.current.postToPreview({ type: "select", id: selected || "", block: selectedBlock, scroll });
+    engineRef.current.postToPreview({
+      type: "select",
+      id: selected || "",
+      block: selectedBlock,
+      scroll,
+    });
   }, [selected, selectedBlock]);
 
   // Edit mode on/off: just a message, the preview is not reloaded
@@ -1279,9 +1415,15 @@ export default function AdminCustomizePage() {
         const waiting = sync.queue;
         sync.queue = [];
         sync.away = false;
-        Object.entries(sync.images).forEach(([url, dataUrl]) => waiting.unshift({ type: "pending-image", url, dataUrl }));
+        Object.entries(sync.images).forEach(([url, dataUrl]) =>
+          waiting.unshift({ type: "pending-image", url, dataUrl })
+        );
         waiting.push({ type: "mode", edit: editModeRef.current });
-        waiting.push({ type: "select", id: selectedRef.current || "", block: selectedBlockRef.current });
+        waiting.push({
+          type: "select",
+          id: selectedRef.current || "",
+          block: selectedBlockRef.current,
+        });
         waiting.forEach((m) => event.source.postMessage({ source: "tss-editor", ...m }, "*"));
         engineRef.current.scheduleSync();
       } else if (message.type === "patched") {
@@ -1289,7 +1431,8 @@ export default function AdminCustomizePage() {
         const waiting = syncedRef.current.waiting[message.token];
         if (waiting) {
           delete syncedRef.current.waiting[message.token];
-          const ms = waiting.clock === "epoch" ? Date.now() - waiting.at : performance.now() - waiting.at;
+          const ms =
+            waiting.clock === "epoch" ? Date.now() - waiting.at : performance.now() - waiting.at;
           if (ms >= 0) postSyncTiming(waiting.kind, ms);
         }
       } else if (message.type === "need-reload") {
@@ -1303,14 +1446,19 @@ export default function AdminCustomizePage() {
         // Edit mode off and a link was followed: the editor page is gone until the preview reloads
         syncRef.current.ready = false;
         syncRef.current.away = true;
-      } else if (message.type === "context" && typeof message.id === "string" && editModeRef.current) {
+      } else if (
+        message.type === "context" &&
+        typeof message.id === "string" &&
+        editModeRef.current
+      ) {
         // Edit mode: right-click selects the section or block and offers "Edit code"
         const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
         if (!section) {
           if (message.id) engineRef.current.selectUnknownSection(message.id, message.block);
           return;
         }
-        const block = Number.isInteger(message.block) && section.blocks?.[message.block] ? message.block : null;
+        const block =
+          Number.isInteger(message.block) && section.blocks?.[message.block] ? message.block : null;
         fromPreviewRef.current = true;
         if (message.id === selectedRef.current) {
           setSelectedBlock(block);
@@ -1323,13 +1471,23 @@ export default function AdminCustomizePage() {
           x: frame.left + (Number(message.x) || 0),
           y: frame.top + (Number(message.y) || 0),
           // A custom section has no file of its own: it lives in the page template
-          file: section.type === "custom" ? "templates/index.liquid" : `sections/${section.type}.liquid`,
+          file:
+            section.type === "custom"
+              ? "templates/index.liquid"
+              : `sections/${section.type}.liquid`,
         });
         return;
-      } else if (message.type === "select" && typeof message.id === "string" && editModeRef.current) {
+      } else if (
+        message.type === "select" &&
+        typeof message.id === "string" &&
+        editModeRef.current
+      ) {
         // Edit mode: a click in the preview selects a section or one of its blocks; empty space unselects
         const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
-        const block = Number.isInteger(message.block) && section?.blocks?.[message.block] ? message.block : null;
+        const block =
+          Number.isInteger(message.block) && section?.blocks?.[message.block]
+            ? message.block
+            : null;
         fromPreviewRef.current = true;
         if (!message.id) {
           setSelected(null);
@@ -1551,7 +1709,12 @@ export default function AdminCustomizePage() {
 
   // Every option back to its default; content blocks (and a custom section's name) are kept
   function resetSection(id) {
-    if (!window.confirm("Reset all options of this section to their defaults? Its content blocks are kept.")) return;
+    if (
+      !window.confirm(
+        "Reset all options of this section to their defaults? Its content blocks are kept."
+      )
+    )
+      return;
 
     update((d) => {
       const s = sectionIn(d, page, id);
@@ -1612,12 +1775,14 @@ export default function AdminCustomizePage() {
 
       if (!block) return;
 
-      const destinationId = target.kind === "block" ? target.sectionId : target.kind === "into" ? target.id : null;
+      const destinationId =
+        target.kind === "block" ? target.sectionId : target.kind === "into" ? target.id : null;
 
       const destination = destinationId && sectionIn(d, page, destinationId);
 
       // A synced section's blocks stay in it (its block types are its own)
-      if (destination !== from && (isSynced(d, payload.sectionId) || isSynced(d, destinationId))) return;
+      if (destination !== from && (isSynced(d, payload.sectionId) || isSynced(d, destinationId)))
+        return;
 
       // Only sections that accept this block type
       if (!destination || !schema.sections[destination.type].blocks?.[block.type]) return;
@@ -1666,7 +1831,12 @@ export default function AdminCustomizePage() {
 
         const box = blockEl.getBoundingClientRect();
 
-        target = { kind: "block", sectionId, index: Number(index), after: e.clientY > box.top + box.height / 2 };
+        target = {
+          kind: "block",
+          sectionId,
+          index: Number(index),
+          after: e.clientY > box.top + box.height / 2,
+        };
       } else if (sectionEl) {
         const id = sectionEl.dataset.dropSection;
 
@@ -1676,8 +1846,8 @@ export default function AdminCustomizePage() {
           payload.kind === "section"
             ? { kind: "section", id, after: e.clientY > box.top + box.height / 2 }
             : id === payload.sectionId
-            ? null
-            : { kind: "into", id };
+              ? null
+              : { kind: "into", id };
       }
 
       setDropTarget(target);
@@ -1699,7 +1869,6 @@ export default function AdminCustomizePage() {
     window.addEventListener("pointercancel", end);
   }
 
-
   if (!store) {
     return (
       <CenteredMessage>
@@ -1713,19 +1882,14 @@ export default function AdminCustomizePage() {
   }
 
   if (status !== "ready") {
-    return (
-      <CenteredMessage>
-        {status === "loading" ? "Loading theme..." : error}
-      </CenteredMessage>
-    );
+    return <CenteredMessage>{status === "loading" ? "Loading theme..." : error}</CenteredMessage>;
   }
 
   const templateTypes = Object.entries(schema.sections).filter(
     ([type, spec]) => spec.pages.includes(page) && !spec.required && type !== "custom"
   );
 
-  const section =
-    selected && selected !== "theme" ? sectionIn(data, page, selected) : null;
+  const section = selected && selected !== "theme" ? sectionIn(data, page, selected) : null;
 
   const sectionSpec = section ? schema.sections[section.type] : null;
 
@@ -1744,25 +1908,33 @@ export default function AdminCustomizePage() {
     shown === "theme"
       ? "Theme settings"
       : shownSection
-      ? shownSection.settings.heading || shownSpec.name
-      : "";
+        ? shownSection.settings.heading || shownSpec.name
+        : "";
 
   // The open block (kept while the panel slides back to the section)
   const blockOpen =
-    editing && shownSection && selectedBlock !== null && Boolean(shownSection.blocks?.[selectedBlock]);
+    editing &&
+    shownSection &&
+    selectedBlock !== null &&
+    Boolean(shownSection.blocks?.[selectedBlock]);
 
   if (blockOpen) lastBlockRef.current = selectedBlock;
 
   const shownBlockIndex = blockOpen ? selectedBlock : lastBlockRef.current;
 
-  const shownBlock = shownSection && shownBlockIndex !== null ? shownSection.blocks?.[shownBlockIndex] : null;
+  const shownBlock =
+    shownSection && shownBlockIndex !== null ? shownSection.blocks?.[shownBlockIndex] : null;
 
   const shownBlockSpec = shownBlock ? shownSpec.blocks[shownBlock.type] : null;
 
   const panelView = !editing ? 0 : blockOpen ? 2 : 1;
 
   const editSubtitle =
-    shown === "theme" ? "Colours, fonts, buttons, header and footer" : shownSpec ? shownSpec.name : "";
+    shown === "theme"
+      ? "Colours, fonts, buttons, header and footer"
+      : shownSpec
+        ? shownSpec.name
+        : "";
 
   // While a block is dragged, other sections that accept it are shown as drop targets
   const blockTargets =
@@ -1770,892 +1942,974 @@ export default function AdminCustomizePage() {
       ? template.order.filter((id) => {
           const target = template.sections[id];
           const moving = template.sections[drag.sectionId]?.blocks?.[drag.index];
-          return id !== drag.sectionId && moving && schema.sections[target.type].blocks?.[moving.type];
+          return (
+            id !== drag.sectionId && moving && schema.sections[target.type].blocks?.[moving.type]
+          );
         })
       : [];
 
   return (
     <FontsContext.Provider value={schema.fonts || []}>
-    <UploadsContext.Provider value={uploads}>
-    <div className={`flex h-screen flex-col bg-[#F7F8FA] text-[#161C2C] ${drag ? "cursor-grabbing select-none" : ""}`}>
-      {/* Top bar */}
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#D8DFE8] bg-white px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link
-            to="/admin/online-store"
-            onClick={(e) => {
-              if (dirty && !window.confirm("Leave without saving? Your changes will be lost.")) e.preventDefault();
-            }}
-            className="text-sm text-[#53627E] hover:text-[#161C2C]"
-          >
-            ← Online store
-          </Link>
-
-          <span className="truncate font-semibold">
-            Customize · {store.storeName}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setPanelOpen((v) => !v)}
-            className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm hover:border-[#161C2C] lg:hidden"
-            aria-expanded={panelOpen}
-          >
-            {panelOpen ? "Hide panel" : "Sections"}
-          </button>
-
-          {backStack.length > 0 && (
-            <button
-              type="button"
-              onClick={goBack}
-              className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm hover:border-[#161C2C]"
-              title="Back to the page you came from"
-            >
-              &larr; {PAGE_LABELS[backStack[backStack.length - 1].page] || "Back"}
-            </button>
-          )}
-
-          <select
-            value={page}
-            onChange={(e) => {
-              setPage(e.target.value);
-              setSelected(null);
-              setAdding(false);
-              setBackStack([]);
-            }}
-            className="h-9 rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
-            aria-label="Page to edit"
-          >
-            {schema.pages.map((p) => (
-              <option key={p} value={p}>
-                {PAGE_LABELS[p] || p}
-              </option>
-            ))}
-          </select>
-
-          {/* The Article page previews one post at a time: pick which */}
-          {page === "article" && blogPosts.length > 0 && (
-            <select
-              value={sampleArticle}
-              onChange={(e) => setSampleArticle(e.target.value)}
-              className="h-9 max-w-[200px] rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
-              aria-label="Post to preview"
-            >
-              {blogPosts.map((p) => (
-                <option key={p.id} value={p.handle}>
-                  {p.title}
-                </option>
-              ))}
-            </select>
-          )}
-
-          <a
-            href="/editor-demo"
-            target="_blank"
-            rel="noopener"
-            title="Open the theme code in a new tab; the two stay in step"
-            className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
-          >
-            Edit code
-          </a>
-
-          {previewUrl && (
-            <a
-              href={previewUrl}
-              onClick={(e) => {
-                // Same tab, with the "Back to admin" bar; the store path of the page being edited
-                e.preventDefault();
-                openStorefront(new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/");
-              }}
-              className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
-            >
-              View store
-            </a>
-          )}
-
-          <div className="flex items-center rounded-lg border border-[#D8DFE8]">
-            <button
-              type="button"
-              onClick={undo}
-              disabled={!historyRef.current.past.length}
-              className="flex h-9 w-9 items-center justify-center text-[#53627E] hover:text-[#161C2C] disabled:opacity-30"
-              aria-label="Undo"
-              title="Undo (Ctrl+Z)"
-            >
-              <svg {...iconProps} className="h-4 w-4">
-                <path d="M9 14 4 9l5-5" />
-                <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
-              </svg>
-            </button>
-            <span className="h-5 w-px bg-[#D8DFE8]" />
-            <button
-              type="button"
-              onClick={redo}
-              disabled={!historyRef.current.future.length}
-              className="flex h-9 w-9 items-center justify-center text-[#53627E] hover:text-[#161C2C] disabled:opacity-30"
-              aria-label="Redo"
-              title="Redo (Ctrl+Shift+Z)"
-            >
-              <svg {...iconProps} className="h-4 w-4">
-                <path d="m15 14 5-5-5-5" />
-                <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
-              </svg>
-            </button>
-          </div>
-
-          <span role="status" aria-live="polite" className="hidden min-w-0 items-center gap-1.5 text-xs sm:flex">
-            {saveState === "saved" && (
-              <span className="flex items-center gap-1 text-[#53627E]">
-                <svg {...iconProps} strokeWidth="2.2" className="h-3.5 w-3.5 text-emerald-600">
-                  <path d="m5 12.5 4.5 4.5L19 7.5" />
-                </svg>
-                All changes saved
-              </span>
-            )}
-            {(saveState === "pending" || saveState === "saving") && (
-              <span className="flex items-center gap-1.5 text-[#53627E]">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[#8A94A8]" />
-                Saving...
-              </span>
-            )}
-            {saveState === "error" && (
-              <span className="flex items-center gap-1.5 text-red-600" title={saveError}>
-                Couldn't save, retrying
-                <button type="button" className="font-medium underline" onClick={() => engineRef.current.flushSave()}>
-                  Retry now
-                </button>
-              </span>
-            )}
-            {saveState === "invalid" && (
-              <span className="flex max-w-[260px] items-center gap-1.5 text-red-600" title={saveError}>
-                <span className="truncate">Couldn't save: {saveError}</span>
-                <button type="button" className="shrink-0 font-medium underline" onClick={undo}>
-                  Undo
-                </button>
-              </span>
-            )}
-          </span>
-
-          <button
-            type="button"
-            onClick={() => engineRef.current.flushSave()}
-            disabled={!dirty || saveState === "saving"}
-            className="h-9 rounded-lg bg-[#161C2C] px-4 text-sm font-semibold text-white hover:bg-[#252E45] disabled:opacity-40"
-            title="Changes save automatically; this saves right away"
-          >
-            Save
-          </button>
-        </div>
-      </header>
-
-      {error && (
-        <p role="alert" className="flex items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-          {error}
-          <button type="button" className="text-xs underline" onClick={() => setError("")}>
-            Dismiss
-          </button>
-        </p>
-      )}
-
-      {notice && (
-        <p role="status" className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800">
-          {notice}
-        </p>
-      )}
-
-      <div className="relative flex min-h-0 flex-1">
-        {/* Side panel: list view and edit view slide inside the same panel */}
-        <aside
-          className={`absolute inset-y-0 left-0 z-30 w-[340px] max-w-[90vw] shrink-0 overflow-hidden border-r border-[#D8DFE8] bg-white shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${
-            panelOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+      <UploadsContext.Provider value={uploads}>
+        <div
+          className={`flex h-screen flex-col bg-[#F7F8FA] text-[#161C2C] ${drag ? "cursor-grabbing select-none" : ""}`}
         >
-          <div
-            className={`flex h-full w-[300%] transition-transform duration-200 ease-out motion-reduce:transition-none ${
-              panelView === 2 ? "-translate-x-2/3" : panelView === 1 ? "-translate-x-1/3" : "translate-x-0"
-            }`}
-          >
-        {/* List view (keeps its scroll position while editing) */}
-        <div className="flex h-full w-1/3 flex-col overflow-y-auto" inert={panelView !== 0} aria-hidden={panelView !== 0}>
-          <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-[#161C2C]">{PAGE_LABELS[page]}</h2>
+          {/* Top bar */}
+          <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#D8DFE8] bg-white px-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <Link
+                to="/admin/online-store"
+                onClick={(e) => {
+                  if (dirty && !window.confirm("Leave without saving? Your changes will be lost."))
+                    e.preventDefault();
+                }}
+                className="text-sm text-[#53627E] hover:text-[#161C2C]"
+              >
+                ← Online store
+              </Link>
 
-          <GroupHeading>Header</GroupHeading>
+              <span className="truncate font-semibold">Customize · {store.storeName}</span>
+            </div>
 
-          <LayoutRows
-            part="top"
-            selected={selected}
-            themeGroup={themeGroup}
-            synced={data.sections}
-            onOpen={(group) => {
-              // A synced section (the header) has its own panel: its options come from its file
-              if (isSynced(data, group)) {
-                setSelected(group);
-                return;
-              }
-              setThemeGroup(group);
-              setSelected("theme");
-            }}
-          />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPanelOpen((v) => !v)}
+                className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm hover:border-[#161C2C] lg:hidden"
+                aria-expanded={panelOpen}
+              >
+                {panelOpen ? "Hide panel" : "Sections"}
+              </button>
 
-          <GroupHeading>Template</GroupHeading>
+              {backStack.length > 0 && (
+                <button
+                  type="button"
+                  onClick={goBack}
+                  className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm hover:border-[#161C2C]"
+                  title="Back to the page you came from"
+                >
+                  &larr; {PAGE_LABELS[backStack[backStack.length - 1].page] || "Back"}
+                </button>
+              )}
 
-          <ul className="px-2">
-            {template.order.map((id, i) => {
-              const s = template.sections[id];
+              <select
+                value={page}
+                onChange={(e) => {
+                  setPage(e.target.value);
+                  setSelected(null);
+                  setAdding(false);
+                  setBackStack([]);
+                }}
+                className="h-9 rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
+                aria-label="Page to edit"
+              >
+                {schema.pages.map((p) => (
+                  <option key={p} value={p}>
+                    {PAGE_LABELS[p] || p}
+                  </option>
+                ))}
+              </select>
 
-              const spec = schema.sections[s.type];
+              {/* The Article page previews one post at a time: pick which */}
+              {page === "article" && blogPosts.length > 0 && (
+                <select
+                  value={sampleArticle}
+                  onChange={(e) => setSampleArticle(e.target.value)}
+                  className="h-9 max-w-[200px] rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
+                  aria-label="Post to preview"
+                >
+                  {blogPosts.map((p) => (
+                    <option key={p.id} value={p.handle}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              )}
 
-              const name = s.settings.heading || spec.name;
+              <a
+                href="/editor-demo"
+                target="_blank"
+                rel="noopener"
+                title="Open the theme code in a new tab; the two stay in step"
+                className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
+              >
+                Edit code
+              </a>
 
-              const canRename = "heading" in spec.settings;
+              {previewUrl && (
+                <a
+                  href={previewUrl}
+                  onClick={(e) => {
+                    // Same tab, with the "Back to admin" bar; the store path of the page being edited
+                    e.preventDefault();
+                    openStorefront(new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/");
+                  }}
+                  className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
+                >
+                  View store
+                </a>
+              )}
 
-              const lineHere = dropTarget?.kind === "section" && dropTarget.id === id;
+              <div className="flex items-center rounded-lg border border-[#D8DFE8]">
+                <button
+                  type="button"
+                  onClick={undo}
+                  disabled={!historyRef.current.past.length}
+                  className="flex h-9 w-9 items-center justify-center text-[#53627E] hover:text-[#161C2C] disabled:opacity-30"
+                  aria-label="Undo"
+                  title="Undo (Ctrl+Z)"
+                >
+                  <svg {...iconProps} className="h-4 w-4">
+                    <path d="M9 14 4 9l5-5" />
+                    <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+                  </svg>
+                </button>
+                <span className="h-5 w-px bg-[#D8DFE8]" />
+                <button
+                  type="button"
+                  onClick={redo}
+                  disabled={!historyRef.current.future.length}
+                  className="flex h-9 w-9 items-center justify-center text-[#53627E] hover:text-[#161C2C] disabled:opacity-30"
+                  aria-label="Redo"
+                  title="Redo (Ctrl+Shift+Z)"
+                >
+                  <svg {...iconProps} className="h-4 w-4">
+                    <path d="m15 14 5-5-5-5" />
+                    <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+                  </svg>
+                </button>
+              </div>
 
-              const blockInto = dropTarget?.kind === "into" && dropTarget.id === id;
-
-              const isSelected = selected === id;
-
-              const showType = s.type !== "custom" && name.trim().toLowerCase() !== spec.name.toLowerCase();
-
-              const menuOpen = rowMenu === id;
-
-              // Actions appear on hover/focus (always on touch screens); stay visible while the menu is open
-              const reveal = menuOpen
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100";
-
-              return (
-                <li key={id} data-drop-section={id} className={`relative ${drag?.kind === "section" && drag.id === id ? "opacity-40" : ""}`}>
-                  {lineHere && <DropLine after={dropTarget.after} />}
-
-                  <div
-                    className={`group flex h-9 items-center gap-2 rounded-md pl-1.5 pr-1 text-sm ${
-                      blockInto
-                        ? "bg-[#EEF1F6] ring-1 ring-[#141b2d]/30"
-                        : isSelected
-                        ? "bg-[#EEF1F6]"
-                        : "hover:bg-[#F5F6F8]"
-                    }`}
+              <span
+                role="status"
+                aria-live="polite"
+                className="hidden min-w-0 items-center gap-1.5 text-xs sm:flex"
+              >
+                {saveState === "saved" && (
+                  <span className="flex items-center gap-1 text-[#53627E]">
+                    <svg {...iconProps} strokeWidth="2.2" className="h-3.5 w-3.5 text-emerald-600">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    All changes saved
+                  </span>
+                )}
+                {(saveState === "pending" || saveState === "saving") && (
+                  <span className="flex items-center gap-1.5 text-[#53627E]">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#8A94A8]" />
+                    Saving...
+                  </span>
+                )}
+                {saveState === "error" && (
+                  <span className="flex items-center gap-1.5 text-red-600" title={saveError}>
+                    Couldn't save, retrying
+                    <button
+                      type="button"
+                      className="font-medium underline"
+                      onClick={() => engineRef.current.flushSave()}
+                    >
+                      Retry now
+                    </button>
+                  </span>
+                )}
+                {saveState === "invalid" && (
+                  <span
+                    className="flex max-w-[260px] items-center gap-1.5 text-red-600"
+                    title={saveError}
                   >
-                    {/* The type icon turns into the drag handle on hover */}
-                    <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
-                      <svg
-                        {...iconProps}
-                        className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
-                          s.hidden ? "text-[#C2C9D6]" : "text-[#8A94A8]"
-                        }`}
-                      >
-                        {SECTION_ICONS[s.type] || SECTION_ICONS.custom}
-                      </svg>
-                      <span className="invisible absolute inset-0 flex items-center justify-center group-hover:visible group-focus-within:visible [@media(hover:none)]:visible">
-                        <DragHandle
-                          label={`Move ${name}`}
-                          onPointerDown={(e) => startDrag(e, { kind: "section", id })}
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowUp" && i > 0) {
-                              e.preventDefault();
-                              moveSection(id, -1);
-                            }
-                            if (e.key === "ArrowDown" && i < template.order.length - 1) {
-                              e.preventDefault();
-                              moveSection(id, 1);
-                            }
-                          }}
-                        />
-                      </span>
-                    </span>
+                    <span className="truncate">Couldn't save: {saveError}</span>
+                    <button type="button" className="shrink-0 font-medium underline" onClick={undo}>
+                      Undo
+                    </button>
+                  </span>
+                )}
+              </span>
 
-                    {renaming === id ? (
-                      <input
-                        autoFocus
-                        value={renameValue}
-                        maxLength={200}
-                        aria-label="Section name"
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onBlur={finishRename}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") finishRename();
-                          if (e.key === "Escape") {
-                            e.preventDefault();
-                            setRenaming(null);
-                          }
-                        }}
-                        className="h-7 min-w-0 flex-1 rounded border border-[#161C2C] bg-white px-2 text-sm outline-none"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        className="flex min-w-0 flex-1 items-baseline gap-1.5 text-left"
-                        onClick={() => setSelected(id)}
-                        onDoubleClick={() => canRename && startRename(id)}
-                        title={showType ? `${name} (${spec.name})` : name}
-                      >
-                        <span className={`truncate ${s.hidden ? "text-[#A3ADBF]" : "text-[#161C2C]"} ${isSelected ? "font-medium" : ""}`}>
-                          {name}
-                        </span>
-                        {showType && <span className="shrink-0 truncate text-xs text-[#A3ADBF]">{spec.name}</span>}
-                      </button>
-                    )}
+              <button
+                type="button"
+                onClick={() => engineRef.current.flushSave()}
+                disabled={!dirty || saveState === "saving"}
+                className="h-9 rounded-lg bg-[#161C2C] px-4 text-sm font-semibold text-white hover:bg-[#252E45] disabled:opacity-40"
+                title="Changes save automatically; this saves right away"
+              >
+                Save
+              </button>
+            </div>
+          </header>
 
-                    {renaming !== id && !spec.required && (
-                      <div className="flex shrink-0 items-center">
-                        {/* Hidden sections keep the crossed-out eye visible */}
-                        <button
-                          type="button"
-                          onClick={() => toggleHidden(id)}
-                          className={`${iconButton} ${s.hidden ? "opacity-100" : reveal}`}
-                          aria-label={s.hidden ? `Show ${name}` : `Hide ${name}`}
-                          aria-pressed={!s.hidden}
-                          title={s.hidden ? "Hidden. Click to show" : "Hide"}
-                        >
-                          <EyeIcon hidden={s.hidden} />
-                        </button>
-
-                        <div className={`relative ${reveal}`}>
-                          <button
-                            type="button"
-                            onClick={() => setRowMenu(menuOpen ? null : id)}
-                            className={iconButton}
-                            aria-label={`More actions for ${name}`}
-                            aria-haspopup="menu"
-                            aria-expanded={menuOpen}
-                          >
-                            <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                              <circle cx="5" cy="12" r="1.6" />
-                              <circle cx="12" cy="12" r="1.6" />
-                              <circle cx="19" cy="12" r="1.6" />
-                            </svg>
-                          </button>
-
-                          {menuOpen && (
-                            <div
-                              role="menu"
-                              data-row-menu
-                              className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-[#E3E7ED] bg-white py-1 text-sm shadow-lg"
-                            >
-                              {canRename && (
-                                <button
-                                  type="button"
-                                  role="menuitem"
-                                  onClick={() => {
-                                    setRowMenu(null);
-                                    startRename(id);
-                                  }}
-                                  className="block w-full px-3 py-1.5 text-left hover:bg-[#F5F6F8]"
-                                >
-                                  Rename
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                role="menuitem"
-                                onClick={() => {
-                                  setRowMenu(null);
-                                  duplicateSection(id);
-                                }}
-                                className="block w-full px-3 py-1.5 text-left hover:bg-[#F5F6F8]"
-                              >
-                                Duplicate
-                              </button>
-                              <div className="my-1 h-px bg-[#EEF0F4]" />
-                              <button
-                                type="button"
-                                role="menuitem"
-                                onClick={() => {
-                                  setRowMenu(null);
-                                  removeSection(id);
-                                }}
-                                className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-red-50"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-
-          {template.order.length === 0 && (
-            <p className="px-4 py-2 text-xs text-[#53627E]">
-              No sections yet. Your store shows a simple default layout until you add one.
+          {error && (
+            <p
+              role="alert"
+              className="flex items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+            >
+              {error}
+              <button type="button" className="text-xs underline" onClick={() => setError("")}>
+                Dismiss
+              </button>
             </p>
           )}
 
-          {/* Add section */}
-          <div className="px-2 pb-3 pt-1">
-            {adding ? (
-              <div className="rounded-xl border border-[#D8DFE8] bg-[#F7F8FA] p-3">
-                <label className="block text-xs font-medium text-[#30466F]" htmlFor="new-section-name">
-                  Section name
-                </label>
+          {notice && (
+            <p
+              role="status"
+              className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800"
+            >
+              {notice}
+            </p>
+          )}
 
-                <div className="mt-1.5 flex items-center gap-1.5">
-                  <input
-                    id="new-section-name"
-                    autoFocus
-                    value={newName}
-                    maxLength={200}
-                    placeholder="e.g. Our story"
-                    onChange={(e) => setNewName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addCustomSection();
-                      }
-                      if (e.key === "Escape") {
-                        setAdding(false);
-                        setNewName("");
-                      }
-                    }}
-                    className="h-9 min-w-0 flex-1 rounded-lg border border-[#D8DFE8] bg-white px-2.5 text-sm outline-none focus:border-[#161C2C]"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={addCustomSection}
-                    disabled={!newName.trim()}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#161C2C] text-white hover:bg-[#252E45] disabled:opacity-30"
-                    aria-label="Add section"
-                    title="Add section"
-                  >
-                    <svg {...iconProps} strokeWidth="2.2" className="h-4 w-4">
-                      <path d="m5 12.5 4.5 4.5L19 7.5" />
-                    </svg>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAdding(false);
-                      setNewName("");
-                    }}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
-                    aria-label="Cancel"
-                    title="Cancel"
-                  >
-                    <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                      <path d="M6 6l12 12M18 6L6 18" />
-                    </svg>
-                  </button>
-                </div>
-
-                {templateTypes.length > 0 && (
-                  <>
-                    <p className="mt-3 text-[11px] text-[#53627E]">Or start from a template:</p>
-
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                      {templateTypes.map(([type, spec]) => (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => addTemplateSection(type)}
-                          className="rounded-full border border-[#D8DFE8] bg-white px-2.5 py-1 text-xs text-[#30466F] hover:border-[#161C2C] hover:text-[#161C2C]"
-                        >
-                          {spec.name}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setAdding(true)}
-                className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-sm font-medium text-[#30466F] hover:bg-[#F5F6F8] hover:text-[#161C2C]"
-              >
-                <span className="flex h-5 w-5 items-center justify-center" aria-hidden="true">
-                  <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                </span>
-                Add section
-              </button>
-            )}
-          </div>
-
-          <GroupHeading>Footer</GroupHeading>
-
-          <LayoutRows
-            part="bottom"
-            selected={selected}
-            themeGroup={themeGroup}
-            synced={data.sections}
-            onOpen={(group) => {
-              // A synced section (the footer) has its own panel: its options come from its file
-              if (isSynced(data, group)) {
-                setSelected(group);
-                return;
-              }
-              setThemeGroup(group);
-              setSelected("theme");
-            }}
-          />
-
-          <div className="mt-auto border-t border-[#D8DFE8] p-2">
-            <button
-              type="button"
-              onClick={() => {
-                setThemeGroup("colors");
-                setSelected("theme");
-              }}
-              className={`w-full rounded-lg px-2 py-2 text-left text-sm ${
-                selected === "theme" ? "bg-[#EEF1F6]" : "hover:bg-[#F7F8FA]"
+          <div className="relative flex min-h-0 flex-1">
+            {/* Side panel: list view and edit view slide inside the same panel */}
+            <aside
+              className={`absolute inset-y-0 left-0 z-30 w-[340px] max-w-[90vw] shrink-0 overflow-hidden border-r border-[#D8DFE8] bg-white shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+                panelOpen ? "translate-x-0" : "-translate-x-full"
               }`}
             >
-              Theme settings (colors, fonts, buttons)
-            </button>
-          </div>
-        </div>
+              <div
+                className={`flex h-full w-[300%] transition-transform duration-200 ease-out motion-reduce:transition-none ${
+                  panelView === 2
+                    ? "-translate-x-2/3"
+                    : panelView === 1
+                      ? "-translate-x-1/3"
+                      : "translate-x-0"
+                }`}
+              >
+                {/* List view (keeps its scroll position while editing) */}
+                <div
+                  className="flex h-full w-1/3 flex-col overflow-y-auto"
+                  inert={panelView !== 0}
+                  aria-hidden={panelView !== 0}
+                >
+                  <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-[#161C2C]">
+                    {PAGE_LABELS[page]}
+                  </h2>
 
-        {/* Edit view */}
-        <div className="flex h-full w-1/3 flex-col" inert={panelView !== 1} aria-hidden={panelView !== 1}>
-          <div className="flex shrink-0 items-center gap-2 border-b border-[#D8DFE8] px-3 py-3">
-            <button
-              type="button"
-              onClick={() => setSelected(null)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
-              aria-label="Back to sections"
-              title="Back (Esc)"
-            >
-              <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                <path d="M19 12H5M11 6l-6 6 6 6" />
-              </svg>
-            </button>
+                  <GroupHeading>Header</GroupHeading>
 
-            <div className="min-w-0">
-              <h2 className="truncate font-semibold leading-tight">{editTitle}</h2>
-              <p className="truncate text-xs text-[#8A94A8]">{editSubtitle}</p>
-            </div>
-          </div>
-
-          <div ref={editScrollRef} className={`min-h-0 flex-1 overflow-y-auto px-4`}>
-            {shown === "theme" ? (
-              <GroupedFields
-                key={`theme-${themeGroup}`}
-                fields={schema.settings}
-                values={data.settings}
-                groups={(schema.theme_groups || [{ id: "store", label: "Store" }]).filter(
-                  // Synced sections (header, footer) are edited in their own panels (in the sections list)
-                  (group) => !isSynced(data, group.id)
-                )}
-                initialOpen={themeGroup}
-                collections={collections}
-                onChange={(key, value) =>
-                  update((d) => {
-                    d.settings[key] = value;
-                  }, `t:${key}`)
-                }
-              />
-            ) : shownSection ? (
-              <GroupedFields
-                key={shown}
-                fields={shownSpec.settings}
-                values={shownSection.settings}
-                groups={schema.groups || [{ id: "content", label: "Content" }]}
-                collections={collections}
-                products={products}
-                onChange={(key, value) =>
-                  update((d) => {
-                    sectionIn(d, page, shown).settings[key] = value;
-                  }, `s:${shown}:${key}`)
-                }
-                extra={
-              <>
-                {shownSpec.blocks && (
-                  <SectionBlocks
-                    key={`blocks-${shown}`}
-                    sectionId={shown}
-                    spec={shownSpec}
-                    blocks={shownSection.blocks || []}
-                    drag={drag}
-                    dropTarget={dropTarget}
-                    startDrag={startDrag}
-                    onChange={(mutate) => updateBlocks(shown, mutate)}
-                    onOpen={(index) => setSelectedBlock(index)}
-                    onDuplicate={(index) => duplicateBlock(shown, index)}
-                    onToggle={(index) => toggleBlockHidden(shown, index)}
-                    onRemove={(index) => removeBlock(shown, index)}
+                  <LayoutRows
+                    part="top"
+                    selected={selected}
+                    themeGroup={themeGroup}
+                    synced={data.sections}
+                    onOpen={(group) => {
+                      // A synced section (the header) has its own panel: its options come from its file
+                      if (isSynced(data, group)) {
+                        setSelected(group);
+                        return;
+                      }
+                      setThemeGroup(group);
+                      setSelected("theme");
+                    }}
                   />
-                )}
 
-                {blockTargets.length > 0 && (
-                  <div className="mt-4 rounded-lg border border-dashed border-[#C9D1DD] bg-[#F7F8FA] p-2">
-                    <p className="px-1 pb-1.5 text-[11px] font-medium text-[#53627E]">Drop on a section to move the block there</p>
+                  <GroupHeading>Template</GroupHeading>
 
-                    <ul className="grid gap-1">
-                      {blockTargets.map((id) => (
+                  <ul className="px-2">
+                    {template.order.map((id, i) => {
+                      const s = template.sections[id];
+
+                      const spec = schema.sections[s.type];
+
+                      const name = s.settings.heading || spec.name;
+
+                      const canRename = "heading" in spec.settings;
+
+                      const lineHere = dropTarget?.kind === "section" && dropTarget.id === id;
+
+                      const blockInto = dropTarget?.kind === "into" && dropTarget.id === id;
+
+                      const isSelected = selected === id;
+
+                      const showType =
+                        s.type !== "custom" &&
+                        name.trim().toLowerCase() !== spec.name.toLowerCase();
+
+                      const menuOpen = rowMenu === id;
+
+                      // Actions appear on hover/focus (always on touch screens); stay visible while the menu is open
+                      const reveal = menuOpen
+                        ? "opacity-100"
+                        : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100";
+
+                      return (
                         <li
                           key={id}
                           data-drop-section={id}
-                          className={`truncate rounded-md border bg-white px-2.5 py-2 text-sm ${
-                            dropTarget?.kind === "into" && dropTarget.id === id
-                              ? "border-[#141b2d] ring-2 ring-[#141b2d]/20"
-                              : "border-[#D8DFE8]"
-                          }`}
+                          className={`relative ${drag?.kind === "section" && drag.id === id ? "opacity-40" : ""}`}
                         >
-                          {template.sections[id].settings.heading || schema.sections[template.sections[id].type].name}
+                          {lineHere && <DropLine after={dropTarget.after} />}
+
+                          <div
+                            className={`group flex h-9 items-center gap-2 rounded-md pl-1.5 pr-1 text-sm ${
+                              blockInto
+                                ? "bg-[#EEF1F6] ring-1 ring-[#141b2d]/30"
+                                : isSelected
+                                  ? "bg-[#EEF1F6]"
+                                  : "hover:bg-[#F5F6F8]"
+                            }`}
+                          >
+                            {/* The type icon turns into the drag handle on hover */}
+                            <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+                              <svg
+                                {...iconProps}
+                                className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
+                                  s.hidden ? "text-[#C2C9D6]" : "text-[#8A94A8]"
+                                }`}
+                              >
+                                {SECTION_ICONS[s.type] || SECTION_ICONS.custom}
+                              </svg>
+                              <span className="invisible absolute inset-0 flex items-center justify-center group-hover:visible group-focus-within:visible [@media(hover:none)]:visible">
+                                <DragHandle
+                                  label={`Move ${name}`}
+                                  onPointerDown={(e) => startDrag(e, { kind: "section", id })}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "ArrowUp" && i > 0) {
+                                      e.preventDefault();
+                                      moveSection(id, -1);
+                                    }
+                                    if (e.key === "ArrowDown" && i < template.order.length - 1) {
+                                      e.preventDefault();
+                                      moveSection(id, 1);
+                                    }
+                                  }}
+                                />
+                              </span>
+                            </span>
+
+                            {renaming === id ? (
+                              <input
+                                autoFocus
+                                value={renameValue}
+                                maxLength={200}
+                                aria-label="Section name"
+                                onChange={(e) => setRenameValue(e.target.value)}
+                                onBlur={finishRename}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") finishRename();
+                                  if (e.key === "Escape") {
+                                    e.preventDefault();
+                                    setRenaming(null);
+                                  }
+                                }}
+                                className="h-7 min-w-0 flex-1 rounded border border-[#161C2C] bg-white px-2 text-sm outline-none"
+                              />
+                            ) : (
+                              <button
+                                type="button"
+                                className="flex min-w-0 flex-1 items-baseline gap-1.5 text-left"
+                                onClick={() => setSelected(id)}
+                                onDoubleClick={() => canRename && startRename(id)}
+                                title={showType ? `${name} (${spec.name})` : name}
+                              >
+                                <span
+                                  className={`truncate ${s.hidden ? "text-[#A3ADBF]" : "text-[#161C2C]"} ${isSelected ? "font-medium" : ""}`}
+                                >
+                                  {name}
+                                </span>
+                                {showType && (
+                                  <span className="shrink-0 truncate text-xs text-[#A3ADBF]">
+                                    {spec.name}
+                                  </span>
+                                )}
+                              </button>
+                            )}
+
+                            {renaming !== id && !spec.required && (
+                              <div className="flex shrink-0 items-center">
+                                {/* Hidden sections keep the crossed-out eye visible */}
+                                <button
+                                  type="button"
+                                  onClick={() => toggleHidden(id)}
+                                  className={`${iconButton} ${s.hidden ? "opacity-100" : reveal}`}
+                                  aria-label={s.hidden ? `Show ${name}` : `Hide ${name}`}
+                                  aria-pressed={!s.hidden}
+                                  title={s.hidden ? "Hidden. Click to show" : "Hide"}
+                                >
+                                  <EyeIcon hidden={s.hidden} />
+                                </button>
+
+                                <div className={`relative ${reveal}`}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setRowMenu(menuOpen ? null : id)}
+                                    className={iconButton}
+                                    aria-label={`More actions for ${name}`}
+                                    aria-haspopup="menu"
+                                    aria-expanded={menuOpen}
+                                  >
+                                    <svg
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                      className="h-4 w-4"
+                                      aria-hidden="true"
+                                    >
+                                      <circle cx="5" cy="12" r="1.6" />
+                                      <circle cx="12" cy="12" r="1.6" />
+                                      <circle cx="19" cy="12" r="1.6" />
+                                    </svg>
+                                  </button>
+
+                                  {menuOpen && (
+                                    <div
+                                      role="menu"
+                                      data-row-menu
+                                      className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-[#E3E7ED] bg-white py-1 text-sm shadow-lg"
+                                    >
+                                      {canRename && (
+                                        <button
+                                          type="button"
+                                          role="menuitem"
+                                          onClick={() => {
+                                            setRowMenu(null);
+                                            startRename(id);
+                                          }}
+                                          className="block w-full px-3 py-1.5 text-left hover:bg-[#F5F6F8]"
+                                        >
+                                          Rename
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => {
+                                          setRowMenu(null);
+                                          duplicateSection(id);
+                                        }}
+                                        className="block w-full px-3 py-1.5 text-left hover:bg-[#F5F6F8]"
+                                      >
+                                        Duplicate
+                                      </button>
+                                      <div className="my-1 h-px bg-[#EEF0F4]" />
+                                      <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => {
+                                          setRowMenu(null);
+                                          removeSection(id);
+                                        }}
+                                        className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-red-50"
+                                      >
+                                        Delete
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </li>
-                      ))}
-                    </ul>
+                      );
+                    })}
+                  </ul>
+
+                  {template.order.length === 0 && (
+                    <p className="px-4 py-2 text-xs text-[#53627E]">
+                      No sections yet. Your store shows a simple default layout until you add one.
+                    </p>
+                  )}
+
+                  {/* Add section */}
+                  <div className="px-2 pb-3 pt-1">
+                    {adding ? (
+                      <div className="rounded-xl border border-[#D8DFE8] bg-[#F7F8FA] p-3">
+                        <label
+                          className="block text-xs font-medium text-[#30466F]"
+                          htmlFor="new-section-name"
+                        >
+                          Section name
+                        </label>
+
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <input
+                            id="new-section-name"
+                            autoFocus
+                            value={newName}
+                            maxLength={200}
+                            placeholder="e.g. Our story"
+                            onChange={(e) => setNewName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addCustomSection();
+                              }
+                              if (e.key === "Escape") {
+                                setAdding(false);
+                                setNewName("");
+                              }
+                            }}
+                            className="h-9 min-w-0 flex-1 rounded-lg border border-[#D8DFE8] bg-white px-2.5 text-sm outline-none focus:border-[#161C2C]"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={addCustomSection}
+                            disabled={!newName.trim()}
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#161C2C] text-white hover:bg-[#252E45] disabled:opacity-30"
+                            aria-label="Add section"
+                            title="Add section"
+                          >
+                            <svg {...iconProps} strokeWidth="2.2" className="h-4 w-4">
+                              <path d="m5 12.5 4.5 4.5L19 7.5" />
+                            </svg>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAdding(false);
+                              setNewName("");
+                            }}
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
+                            aria-label="Cancel"
+                            title="Cancel"
+                          >
+                            <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
+                              <path d="M6 6l12 12M18 6L6 18" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {templateTypes.length > 0 && (
+                          <>
+                            <p className="mt-3 text-[11px] text-[#53627E]">
+                              Or start from a template:
+                            </p>
+
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                              {templateTypes.map(([type, spec]) => (
+                                <button
+                                  key={type}
+                                  type="button"
+                                  onClick={() => addTemplateSection(type)}
+                                  className="rounded-full border border-[#D8DFE8] bg-white px-2.5 py-1 text-xs text-[#30466F] hover:border-[#161C2C] hover:text-[#161C2C]"
+                                >
+                                  {spec.name}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setAdding(true)}
+                        className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-sm font-medium text-[#30466F] hover:bg-[#F5F6F8] hover:text-[#161C2C]"
+                      >
+                        <span
+                          className="flex h-5 w-5 items-center justify-center"
+                          aria-hidden="true"
+                        >
+                          <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                        </span>
+                        Add section
+                      </button>
+                    )}
                   </div>
-                )}
-              </>
-                }
-              />
-            ) : null}
-          </div>
 
-          {shownSection && (
-            <div className="flex shrink-0 items-center gap-1 border-t border-[#D8DFE8] bg-white px-3 py-2">
-              <button
-                type="button"
-                onClick={() => resetSection(shown)}
-                className="rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
-              >
-                Reset to default
-              </button>
+                  <GroupHeading>Footer</GroupHeading>
 
-              <span className="flex-1" />
+                  <LayoutRows
+                    part="bottom"
+                    selected={selected}
+                    themeGroup={themeGroup}
+                    synced={data.sections}
+                    onOpen={(group) => {
+                      // A synced section (the footer) has its own panel: its options come from its file
+                      if (isSynced(data, group)) {
+                        setSelected(group);
+                        return;
+                      }
+                      setThemeGroup(group);
+                      setSelected("theme");
+                    }}
+                  />
 
-              {!shownSpec.required && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => duplicateSection(shown)}
-                    className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
-                  >
-                    <svg {...iconProps} className="h-3.5 w-3.5">
-                      <rect x="8" y="8" width="13" height="13" rx="2" />
-                      <path d="M4 16V5a2 2 0 0 1 2-2h11" />
-                    </svg>
-                    Duplicate
-                  </button>
+                  <div className="mt-auto border-t border-[#D8DFE8] p-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setThemeGroup("colors");
+                        setSelected("theme");
+                      }}
+                      className={`w-full rounded-lg px-2 py-2 text-left text-sm ${
+                        selected === "theme" ? "bg-[#EEF1F6]" : "hover:bg-[#F7F8FA]"
+                      }`}
+                    >
+                      Theme settings (colors, fonts, buttons)
+                    </button>
+                  </div>
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() => removeSection(shown)}
-                    className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
-                  >
-                    <svg {...iconProps} className="h-3.5 w-3.5">
-                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                    </svg>
-                    Delete
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Block view */}
-        <div className="flex h-full w-1/3 flex-col" inert={panelView !== 2} aria-hidden={panelView !== 2}>
-          <div className="flex shrink-0 items-center gap-2 border-b border-[#D8DFE8] px-3 py-3">
-            <button
-              type="button"
-              onClick={() => setSelectedBlock(null)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
-              aria-label="Back to section"
-              title="Back (Esc)"
-            >
-              <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                <path d="M19 12H5M11 6l-6 6 6 6" />
-              </svg>
-            </button>
-
-            <div className="min-w-0">
-              <h2 className="truncate font-semibold leading-tight">{shownBlockSpec?.name || "Block"}</h2>
-              <p className="truncate text-xs text-[#8A94A8]">
-                in {shownSection ? shownSection.settings.heading || shownSpec.name : ""}
-                {shownBlock?.hidden ? " · Hidden" : ""}
-              </p>
-            </div>
-          </div>
-
-          <div ref={blockScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4">
-            {shownBlock && shownBlockSpec && (
-              <GroupedFields
-                key={`${shown}-${shownBlockIndex}-${shownBlock.type}`}
-                fields={shownBlockSpec.settings}
-                values={shownBlock.settings}
-                groups={schema.groups || [{ id: "content", label: "Content" }]}
-                collections={collections}
-                products={products}
-                onChange={(key, value) =>
-                  updateBlocks(shown, (list) => {
-                    list[shownBlockIndex].settings[key] = value;
-                  }, `b:${shown}:${shownBlockIndex}:${key}`)
-                }
-              />
-            )}
-          </div>
-
-          {shownBlock && (
-            <div className="flex shrink-0 items-center gap-1 border-t border-[#D8DFE8] bg-white px-3 py-2">
-              <button
-                type="button"
-                onClick={() => toggleBlockHidden(shown, shownBlockIndex)}
-                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
-              >
-                <EyeIcon hidden={!shownBlock.hidden} />
-                {shownBlock.hidden ? "Show" : "Hide"}
-              </button>
-
-              <span className="flex-1" />
-
-              <button
-                type="button"
-                onClick={() => duplicateBlock(shown, shownBlockIndex)}
-                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
-              >
-                <svg {...iconProps} className="h-3.5 w-3.5">
-                  <rect x="8" y="8" width="13" height="13" rx="2" />
-                  <path d="M4 16V5a2 2 0 0 1 2-2h11" />
-                </svg>
-                Duplicate
-              </button>
-
-              {/* A section's required blocks (e.g. Product information) can be hidden, not deleted */}
-              {!shownSpec.required_blocks?.includes(shownBlock.type) && (
-                <button
-                  type="button"
-                  onClick={() => removeBlock(shown, shownBlockIndex)}
-                  className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                {/* Edit view */}
+                <div
+                  className="flex h-full w-1/3 flex-col"
+                  inert={panelView !== 1}
+                  aria-hidden={panelView !== 1}
                 >
-                  <svg {...iconProps} className="h-3.5 w-3.5">
-                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                  </svg>
-                  Delete
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-          </div>
-        </aside>
+                  <div className="flex shrink-0 items-center gap-2 border-b border-[#D8DFE8] px-3 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelected(null)}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                      aria-label="Back to sections"
+                      title="Back (Esc)"
+                    >
+                      <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
+                        <path d="M19 12H5M11 6l-6 6 6 6" />
+                      </svg>
+                    </button>
 
-        {/* Preview */}
-        <main className="flex min-w-0 flex-1 flex-col p-4">
-          <div className="mb-2 flex items-center justify-between text-xs text-[#53627E]">
-            <span>
-              {previewError
-                ? `Preview not updated: ${previewError}`
-                : `${(page === "blog" || page === "article") && !blogPosts.length ? "Sample posts until you publish one. " : ""}${
-                    dirty
-                      ? editMode
-                        ? "Live preview. Changes save automatically. Click or drag sections here to edit them."
-                        : "Live preview. Changes save automatically. Turn on Edit mode to pick sections here."
-                      : editMode
-                      ? "Live preview. Click or drag sections here to edit them."
-                      : "Live preview. Turn on Edit mode to pick sections here."
-                  }`}
-            </span>
+                    <div className="min-w-0">
+                      <h2 className="truncate font-semibold leading-tight">{editTitle}</h2>
+                      <p className="truncate text-xs text-[#8A94A8]">{editSubtitle}</p>
+                    </div>
+                  </div>
 
-            <div className="flex items-center gap-3">
-              {/* Edit mode: On = clicking the preview selects sections; Off = the preview works like the store */}
-              <button
-                type="button"
-                aria-pressed={editMode}
-                onClick={() => setEditMode((on) => !on)}
-                title="Click sections in the preview to edit them"
-                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  editMode
-                    ? "border-[#161C2C] bg-[#161C2C] text-white"
-                    : "border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
-                }`}
-              >
-                <svg {...iconProps} className="h-3.5 w-3.5">
-                  <path d="M4 3l7 17 2.5-7.5L21 10z" />
-                </svg>
-                Edit mode
-                <span className="font-semibold">{editMode ? "On" : "Off"}</span>
-              </button>
+                  <div ref={editScrollRef} className={`min-h-0 flex-1 overflow-y-auto px-4`}>
+                    {shown === "theme" ? (
+                      <GroupedFields
+                        key={`theme-${themeGroup}`}
+                        fields={schema.settings}
+                        values={data.settings}
+                        groups={(schema.theme_groups || [{ id: "store", label: "Store" }]).filter(
+                          // Synced sections (header, footer) are edited in their own panels (in the sections list)
+                          (group) => !isSynced(data, group.id)
+                        )}
+                        initialOpen={themeGroup}
+                        collections={collections}
+                        onChange={(key, value) =>
+                          update((d) => {
+                            d.settings[key] = value;
+                          }, `t:${key}`)
+                        }
+                      />
+                    ) : shownSection ? (
+                      <GroupedFields
+                        key={shown}
+                        fields={shownSpec.settings}
+                        values={shownSection.settings}
+                        groups={schema.groups || [{ id: "content", label: "Content" }]}
+                        collections={collections}
+                        products={products}
+                        onChange={(key, value) =>
+                          update((d) => {
+                            sectionIn(d, page, shown).settings[key] = value;
+                          }, `s:${shown}:${key}`)
+                        }
+                        extra={
+                          <>
+                            {shownSpec.blocks && (
+                              <SectionBlocks
+                                key={`blocks-${shown}`}
+                                sectionId={shown}
+                                spec={shownSpec}
+                                blocks={shownSection.blocks || []}
+                                drag={drag}
+                                dropTarget={dropTarget}
+                                startDrag={startDrag}
+                                onChange={(mutate) => updateBlocks(shown, mutate)}
+                                onOpen={(index) => setSelectedBlock(index)}
+                                onDuplicate={(index) => duplicateBlock(shown, index)}
+                                onToggle={(index) => toggleBlockHidden(shown, index)}
+                                onRemove={(index) => removeBlock(shown, index)}
+                              />
+                            )}
 
-              <div className="flex rounded-lg border border-[#D8DFE8] bg-white p-0.5" role="radiogroup" aria-label="Preview size">
-                {[
-                  ["desktop", "Desktop", "M3 4h18v12H3zM8 20h8M12 16v4"],
-                  ["mobile", "Mobile", "M7 2h10v20H7zM11 18h2"],
-                ].map(([id, name, path]) => (
+                            {blockTargets.length > 0 && (
+                              <div className="mt-4 rounded-lg border border-dashed border-[#C9D1DD] bg-[#F7F8FA] p-2">
+                                <p className="px-1 pb-1.5 text-[11px] font-medium text-[#53627E]">
+                                  Drop on a section to move the block there
+                                </p>
+
+                                <ul className="grid gap-1">
+                                  {blockTargets.map((id) => (
+                                    <li
+                                      key={id}
+                                      data-drop-section={id}
+                                      className={`truncate rounded-md border bg-white px-2.5 py-2 text-sm ${
+                                        dropTarget?.kind === "into" && dropTarget.id === id
+                                          ? "border-[#141b2d] ring-2 ring-[#141b2d]/20"
+                                          : "border-[#D8DFE8]"
+                                      }`}
+                                    >
+                                      {template.sections[id].settings.heading ||
+                                        schema.sections[template.sections[id].type].name}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </>
+                        }
+                      />
+                    ) : null}
+                  </div>
+
+                  {shownSection && (
+                    <div className="flex shrink-0 items-center gap-1 border-t border-[#D8DFE8] bg-white px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => resetSection(shown)}
+                        className="rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                      >
+                        Reset to default
+                      </button>
+
+                      <span className="flex-1" />
+
+                      {!shownSpec.required && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => duplicateSection(shown)}
+                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                          >
+                            <svg {...iconProps} className="h-3.5 w-3.5">
+                              <rect x="8" y="8" width="13" height="13" rx="2" />
+                              <path d="M4 16V5a2 2 0 0 1 2-2h11" />
+                            </svg>
+                            Duplicate
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => removeSection(shown)}
+                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                          >
+                            <svg {...iconProps} className="h-3.5 w-3.5">
+                              <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                            </svg>
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Block view */}
+                <div
+                  className="flex h-full w-1/3 flex-col"
+                  inert={panelView !== 2}
+                  aria-hidden={panelView !== 2}
+                >
+                  <div className="flex shrink-0 items-center gap-2 border-b border-[#D8DFE8] px-3 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBlock(null)}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                      aria-label="Back to section"
+                      title="Back (Esc)"
+                    >
+                      <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
+                        <path d="M19 12H5M11 6l-6 6 6 6" />
+                      </svg>
+                    </button>
+
+                    <div className="min-w-0">
+                      <h2 className="truncate font-semibold leading-tight">
+                        {shownBlockSpec?.name || "Block"}
+                      </h2>
+                      <p className="truncate text-xs text-[#8A94A8]">
+                        in {shownSection ? shownSection.settings.heading || shownSpec.name : ""}
+                        {shownBlock?.hidden ? " · Hidden" : ""}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div ref={blockScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4">
+                    {shownBlock && shownBlockSpec && (
+                      <GroupedFields
+                        key={`${shown}-${shownBlockIndex}-${shownBlock.type}`}
+                        fields={shownBlockSpec.settings}
+                        values={shownBlock.settings}
+                        groups={schema.groups || [{ id: "content", label: "Content" }]}
+                        collections={collections}
+                        products={products}
+                        onChange={(key, value) =>
+                          updateBlocks(
+                            shown,
+                            (list) => {
+                              list[shownBlockIndex].settings[key] = value;
+                            },
+                            `b:${shown}:${shownBlockIndex}:${key}`
+                          )
+                        }
+                      />
+                    )}
+                  </div>
+
+                  {shownBlock && (
+                    <div className="flex shrink-0 items-center gap-1 border-t border-[#D8DFE8] bg-white px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleBlockHidden(shown, shownBlockIndex)}
+                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                      >
+                        <EyeIcon hidden={!shownBlock.hidden} />
+                        {shownBlock.hidden ? "Show" : "Hide"}
+                      </button>
+
+                      <span className="flex-1" />
+
+                      <button
+                        type="button"
+                        onClick={() => duplicateBlock(shown, shownBlockIndex)}
+                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                      >
+                        <svg {...iconProps} className="h-3.5 w-3.5">
+                          <rect x="8" y="8" width="13" height="13" rx="2" />
+                          <path d="M4 16V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                        Duplicate
+                      </button>
+
+                      {/* A section's required blocks (e.g. Product information) can be hidden, not deleted */}
+                      {!shownSpec.required_blocks?.includes(shownBlock.type) && (
+                        <button
+                          type="button"
+                          onClick={() => removeBlock(shown, shownBlockIndex)}
+                          className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                        >
+                          <svg {...iconProps} className="h-3.5 w-3.5">
+                            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                          </svg>
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </aside>
+
+            {/* Preview */}
+            <main className="flex min-w-0 flex-1 flex-col p-4">
+              <div className="mb-2 flex items-center justify-between text-xs text-[#53627E]">
+                <span>
+                  {previewError
+                    ? `Preview not updated: ${previewError}`
+                    : `${(page === "blog" || page === "article") && !blogPosts.length ? "Sample posts until you publish one. " : ""}${
+                        dirty
+                          ? editMode
+                            ? "Live preview. Changes save automatically. Click or drag sections here to edit them."
+                            : "Live preview. Changes save automatically. Turn on Edit mode to pick sections here."
+                          : editMode
+                            ? "Live preview. Click or drag sections here to edit them."
+                            : "Live preview. Turn on Edit mode to pick sections here."
+                      }`}
+                </span>
+
+                <div className="flex items-center gap-3">
+                  {/* Edit mode: On = clicking the preview selects sections; Off = the preview works like the store */}
                   <button
-                    key={id}
                     type="button"
-                    role="radio"
-                    aria-checked={device === id}
-                    onClick={() => setDevice(id)}
-                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${
-                      device === id ? "bg-[#161C2C] text-white" : "text-[#53627E] hover:text-[#161C2C]"
+                    aria-pressed={editMode}
+                    onClick={() => setEditMode((on) => !on)}
+                    title="Click sections in the preview to edit them"
+                    className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
+                      editMode
+                        ? "border-[#161C2C] bg-[#161C2C] text-white"
+                        : "border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
                     }`}
                   >
                     <svg {...iconProps} className="h-3.5 w-3.5">
-                      <path d={path} />
+                      <path d="M4 3l7 17 2.5-7.5L21 10z" />
                     </svg>
-                    {name}
+                    Edit mode
+                    <span className="font-semibold">{editMode ? "On" : "Off"}</span>
                   </button>
-                ))}
+
+                  <div
+                    className="flex rounded-lg border border-[#D8DFE8] bg-white p-0.5"
+                    role="radiogroup"
+                    aria-label="Preview size"
+                  >
+                    {[
+                      ["desktop", "Desktop", "M3 4h18v12H3zM8 20h8M12 16v4"],
+                      ["mobile", "Mobile", "M7 2h10v20H7zM11 18h2"],
+                    ].map(([id, name, path]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        role="radio"
+                        aria-checked={device === id}
+                        onClick={() => setDevice(id)}
+                        className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${
+                          device === id
+                            ? "bg-[#161C2C] text-white"
+                            : "text-[#53627E] hover:text-[#161C2C]"
+                        }`}
+                      >
+                        <svg {...iconProps} className="h-3.5 w-3.5">
+                          <path d={path} />
+                        </svg>
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="hover:text-[#161C2C]"
+                    onClick={() => setPreviewKey((k) => k + 1)}
+                  >
+                    Refresh
+                  </button>
+                </div>
               </div>
 
+              {/* Every page: rendered from the unsaved layout, patched section by section as it changes */}
+              {previewHtml ? (
+                <iframe
+                  key={previewKey}
+                  ref={iframeRef}
+                  title="Store preview"
+                  srcDoc={previewHtml}
+                  // Theme code is written by store owners: keep it off this origin
+                  sandbox="allow-scripts allow-forms allow-popups"
+                  className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#D8DFE8] bg-white transition-[width] duration-200 ${
+                    device === "mobile" ? "w-[390px] max-w-full" : "w-full"
+                  } ${drag ? "pointer-events-none" : ""}`}
+                />
+              ) : (
+                <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#D8DFE8] text-sm text-[#53627E]">
+                  Loading preview...
+                </div>
+              )}
+            </main>
+          </div>
+          {contextMenu && (
+            <div
+              role="menu"
+              style={{
+                left: Math.min(contextMenu.x, window.innerWidth - 168),
+                top: Math.min(contextMenu.y, window.innerHeight - 56),
+              }}
+              className="fixed z-50 w-40 rounded-lg border border-[#D8DFE8] bg-white p-1 shadow-lg"
+              onContextMenu={(e) => e.preventDefault()}
+            >
               <button
                 type="button"
-                className="hover:text-[#161C2C]"
-                onClick={() => setPreviewKey((k) => k + 1)}
+                role="menuitem"
+                onClick={() => {
+                  window.open(
+                    `/editor-demo?file=${encodeURIComponent(contextMenu.file)}`,
+                    "_blank",
+                    "noopener"
+                  );
+                  setContextMenu(null);
+                }}
+                className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F7F8FA]"
               >
-                Refresh
+                Edit code
               </button>
             </div>
-          </div>
-
-          {/* Every page: rendered from the unsaved layout, patched section by section as it changes */}
-          {previewHtml ? (
-            <iframe
-              key={previewKey}
-              ref={iframeRef}
-              title="Store preview"
-              srcDoc={previewHtml}
-              // Theme code is written by store owners: keep it off this origin
-              sandbox="allow-scripts allow-forms allow-popups"
-              className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#D8DFE8] bg-white transition-[width] duration-200 ${
-                device === "mobile" ? "w-[390px] max-w-full" : "w-full"
-              } ${drag ? "pointer-events-none" : ""}`}
-            />
-          ) : (
-            <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#D8DFE8] text-sm text-[#53627E]">
-              Loading preview...
-            </div>
           )}
-        </main>
-      </div>
-      {contextMenu && (
-        <div
-          role="menu"
-          style={{
-            left: Math.min(contextMenu.x, window.innerWidth - 168),
-            top: Math.min(contextMenu.y, window.innerHeight - 56),
-          }}
-          className="fixed z-50 w-40 rounded-lg border border-[#D8DFE8] bg-white p-1 shadow-lg"
-          onContextMenu={(e) => e.preventDefault()}
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              window.open(`/editor-demo?file=${encodeURIComponent(contextMenu.file)}`, "_blank", "noopener");
-              setContextMenu(null);
-            }}
-            className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F7F8FA]"
-          >
-            Edit code
-          </button>
         </div>
-      )}
-    </div>
-    </UploadsContext.Provider>
+      </UploadsContext.Provider>
     </FontsContext.Provider>
   );
 }
@@ -2708,7 +2962,10 @@ function FontPicker({ value, allowTheme, onChange, label }) {
 
   const current = fonts.find((f) => f.key === value);
 
-  const options = [...(allowTheme ? [{ key: "", label: "Use theme font", stack: "inherit" }] : []), ...fonts];
+  const options = [
+    ...(allowTheme ? [{ key: "", label: "Use theme font", stack: "inherit" }] : []),
+    ...fonts,
+  ];
 
   return (
     <div ref={ref} className="relative">
@@ -2729,7 +2986,10 @@ function FontPicker({ value, allowTheme, onChange, label }) {
       </button>
 
       {open && (
-        <ul role="listbox" className="absolute left-0 right-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border border-[#D8DFE8] bg-white py-1 shadow-lg">
+        <ul
+          role="listbox"
+          className="absolute left-0 right-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border border-[#D8DFE8] bg-white py-1 shadow-lg"
+        >
           {options.map((font) => (
             <li key={font.key || "theme"}>
               <button
@@ -2746,7 +3006,9 @@ function FontPicker({ value, allowTheme, onChange, label }) {
                 style={{ fontFamily: font.stack }}
               >
                 {font.label}
-                {font.google && <span className="font-sans text-[10px] uppercase text-[#A3ADBF]">Google</span>}
+                {font.google && (
+                  <span className="font-sans text-[10px] uppercase text-[#A3ADBF]">Google</span>
+                )}
               </button>
             </li>
           ))}
@@ -2801,7 +3063,9 @@ function FontSizeInput({ spec, value, onChange }) {
           className="h-full min-w-0 flex-1 px-3 text-sm outline-none"
           aria-label={spec.label}
         />
-        <span className="border-l border-[#D8DFE8] bg-[#F7F8FA] px-3 text-xs leading-10 text-[#53627E]">{spec.unit || "px"}</span>
+        <span className="border-l border-[#D8DFE8] bg-[#F7F8FA] px-3 text-xs leading-10 text-[#53627E]">
+          {spec.unit || "px"}
+        </span>
       </div>
     </div>
   );
@@ -2838,7 +3102,8 @@ function LinkPicker({ value, collections, products, onChange, label }) {
   const choose = (next) => {
     setKind(next);
     if (next === "page") onChange("/collections/all");
-    else if (next === "collection") onChange(collections[0] ? `/collections/${collections[0].id}` : "");
+    else if (next === "collection")
+      onChange(collections[0] ? `/collections/${collections[0].id}` : "");
     else if (next === "product") onChange(products[0] ? `/products/${products[0].id}` : "");
     else if (next === "email") onChange("mailto:");
     else if (next === "phone") onChange("tel:");
@@ -2847,7 +3112,12 @@ function LinkPicker({ value, collections, products, onChange, label }) {
 
   return (
     <div className="grid gap-1.5">
-      <select className={inputClass} value={kind} onChange={(e) => choose(e.target.value)} aria-label={`${label}: link type`}>
+      <select
+        className={inputClass}
+        value={kind}
+        onChange={(e) => choose(e.target.value)}
+        aria-label={`${label}: link type`}
+      >
         {LINK_KINDS.map(([id, name]) => (
           <option key={id} value={id}>
             {name}
@@ -2856,7 +3126,12 @@ function LinkPicker({ value, collections, products, onChange, label }) {
       </select>
 
       {kind === "page" && (
-        <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value)} aria-label={label}>
+        <select
+          className={inputClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+        >
           {PAGES_TO_LINK.map(([path, name]) => (
             <option key={path} value={path}>
               {name}
@@ -2866,18 +3141,29 @@ function LinkPicker({ value, collections, products, onChange, label }) {
       )}
 
       {kind === "collection" && (
-        <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value)} aria-label={label}>
+        <select
+          className={inputClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+        >
           {collections.length === 0 && <option value="">No collections yet</option>}
           {collections.map((c) => (
             <option key={c.id} value={`/collections/${c.id}`}>
-              {c.name}{c.status === "draft" ? " (Draft, hidden on store)" : ""}
+              {c.name}
+              {c.status === "draft" ? " (Draft, hidden on store)" : ""}
             </option>
           ))}
         </select>
       )}
 
       {kind === "product" && (
-        <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value)} aria-label={label}>
+        <select
+          className={inputClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+        >
           {products.length === 0 && <option value="">No products yet</option>}
           {products.map((p) => (
             <option key={p.id} value={`/products/${p.id}`}>
@@ -2924,7 +3210,9 @@ function LinkPicker({ value, collections, products, onChange, label }) {
 
 // An option that was changed from the theme default gets a small reset link
 function isOverridden(spec, value) {
-  return spec.theme_default && JSON.stringify(value ?? spec.default) !== JSON.stringify(spec.default);
+  return (
+    spec.theme_default && JSON.stringify(value ?? spec.default) !== JSON.stringify(spec.default)
+  );
 }
 
 function ResetToTheme({ spec, value, onChange }) {
@@ -2948,8 +3236,8 @@ function isShown(spec, values) {
     expected === "*"
       ? Boolean(values[key])
       : Array.isArray(expected)
-      ? expected.includes(values[key])
-      : values[key] === expected
+        ? expected.includes(values[key])
+        : values[key] === expected
   );
 }
 
@@ -2980,7 +3268,16 @@ function Fields({ fields, values, collections, products = [], onChange }) {
 }
 
 // Section options in collapsible groups; "Content" starts open, `extra` (blocks) goes at its end
-function GroupedFields({ fields, values, groups, collections, products, onChange, extra, initialOpen = "content" }) {
+function GroupedFields({
+  fields,
+  values,
+  groups,
+  collections,
+  products,
+  onChange,
+  extra,
+  initialOpen = "content",
+}) {
   const [open, setOpen] = useState({ [initialOpen]: true });
 
   const handlerFor = useOptionHandlers(onChange);
@@ -3008,7 +3305,10 @@ function GroupedFields({ fields, values, groups, collections, products, onChange
             >
               {group.label}
 
-              <svg {...iconProps} className={`h-4 w-4 text-[#8A94A8] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
+              <svg
+                {...iconProps}
+                className={`h-4 w-4 text-[#8A94A8] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              >
                 <path d="m6 9 6 6 6-6" />
               </svg>
             </button>
@@ -3039,15 +3339,13 @@ function GroupedFields({ fields, values, groups, collections, products, onChange
 }
 
 function Help({ spec }) {
-  return spec.help ? <span className="mt-1 block text-[11px] leading-snug text-[#8A94A8]">{spec.help}</span> : null;
+  return spec.help ? (
+    <span className="mt-1 block text-[11px] leading-snug text-[#8A94A8]">{spec.help}</span>
+  ) : null;
 }
 
 const Field = memo(function Field({ spec, value, collections, products = [], onChange }) {
-  const label = (
-    <span className="mb-1 block text-xs font-medium text-[#30466F]">
-      {spec.label}
-    </span>
-  );
+  const label = <span className="mb-1 block text-xs font-medium text-[#30466F]">{spec.label}</span>;
 
   switch (spec.type) {
     case "checkbox":
@@ -3112,10 +3410,21 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
                 const n = Number(e.target.value);
                 if (e.target.value !== "" && !Number.isNaN(n)) onChange(Math.round(n));
               }}
-              onBlur={(e) => onChange(Math.min(spec.max, Math.max(spec.min, Math.round(Number(e.target.value) || spec.min))))}
+              onBlur={(e) =>
+                onChange(
+                  Math.min(
+                    spec.max,
+                    Math.max(spec.min, Math.round(Number(e.target.value) || spec.min))
+                  )
+                )
+              }
               className="h-full min-w-0 flex-1 px-3 text-sm outline-none"
             />
-            {spec.unit && <span className="border-l border-[#D8DFE8] bg-[#F7F8FA] px-3 text-xs leading-10 text-[#53627E]">{spec.unit}</span>}
+            {spec.unit && (
+              <span className="border-l border-[#D8DFE8] bg-[#F7F8FA] px-3 text-xs leading-10 text-[#53627E]">
+                {spec.unit}
+              </span>
+            )}
           </div>
 
           <Help spec={spec} />
@@ -3128,7 +3437,11 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
           <div>
             {label}
 
-            <div className="flex rounded-lg border border-[#D8DFE8] bg-[#F7F8FA] p-0.5" role="radiogroup" aria-label={spec.label}>
+            <div
+              className="flex rounded-lg border border-[#D8DFE8] bg-[#F7F8FA] p-0.5"
+              role="radiogroup"
+              aria-label={spec.label}
+            >
               {spec.options.map((o) => (
                 <button
                   key={o}
@@ -3137,7 +3450,9 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
                   aria-checked={value === o}
                   onClick={() => onChange(o)}
                   className={`min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
-                    value === o ? "bg-white text-[#161C2C] shadow-sm" : "text-[#53627E] hover:text-[#161C2C]"
+                    value === o
+                      ? "bg-white text-[#161C2C] shadow-sm"
+                      : "text-[#53627E] hover:text-[#161C2C]"
                   }`}
                 >
                   {optionLabel(spec, o)}
@@ -3154,11 +3469,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
         <label className="block">
           {label}
 
-          <select
-            className={inputClass}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          >
+          <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value)}>
             {spec.options.map((o) => (
               <option key={o} value={o}>
                 {optionLabel(spec, o)}
@@ -3183,9 +3494,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
               className="h-10 w-12 rounded border border-[#D8DFE8]"
             />
 
-            <span className="text-sm tabular-nums">
-              {value}
-            </span>
+            <span className="text-sm tabular-nums">{value}</span>
           </div>
 
           <Help spec={spec} />
@@ -3206,7 +3515,9 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
               aria-label={spec.label}
             />
 
-            <span className="min-w-0 flex-1 text-sm tabular-nums text-[#53627E]">{value || "None"}</span>
+            <span className="min-w-0 flex-1 text-sm tabular-nums text-[#53627E]">
+              {value || "None"}
+            </span>
 
             <button
               type="button"
@@ -3227,7 +3538,12 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
         <div>
           {label}
 
-          <FontPicker value={value || ""} allowTheme={Boolean(spec.theme_default)} onChange={onChange} label={spec.label} />
+          <FontPicker
+            value={value || ""}
+            allowTheme={Boolean(spec.theme_default)}
+            onChange={onChange}
+            label={spec.label}
+          />
 
           <Help spec={spec} />
         </div>
@@ -3266,16 +3582,13 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
         <label className="block">
           {label}
 
-          <select
-            className={inputClass}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          >
+          <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value)}>
             <option value="">Newest products</option>
 
             {collections.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}{c.status === "draft" ? " (Draft, hidden on store)" : ""}
+                {c.name}
+                {c.status === "draft" ? " (Draft, hidden on store)" : ""}
               </option>
             ))}
           </select>
@@ -3300,7 +3613,12 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
         <div>
           {label}
 
-          <ProductPicker value={value || []} products={products} max={spec.max || 24} onChange={onChange} />
+          <ProductPicker
+            value={value || []}
+            products={products}
+            max={spec.max || 24}
+            onChange={onChange}
+          />
 
           <Help spec={spec} />
         </div>
@@ -3313,7 +3631,11 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
 
           <ProductPicker
             value={value || []}
-            products={collections.map((c) => ({ id: c.id, title: c.name, status: c.status || "active" }))}
+            products={collections.map((c) => ({
+              id: c.id,
+              title: c.name,
+              status: c.status || "active",
+            }))}
             max={spec.max || 12}
             noun="collections"
             onChange={onChange}
@@ -3347,8 +3669,8 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
           />
 
           <span className="mt-1 block text-[11px] leading-snug text-[#53627E]">
-            Scripts and unsafe code are removed when you save. Embeds work from Google Maps,
-            Google Forms, Spotify, SoundCloud and Calendly.
+            Scripts and unsafe code are removed when you save. Embeds work from Google Maps, Google
+            Forms, Spotify, SoundCloud and Calendly.
           </span>
         </label>
       );
@@ -3362,7 +3684,11 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
           <textarea
             rows={spec.type === "menu" ? 5 : 3}
             value={value}
-            placeholder={spec.type === "menu" ? "Shop all | /collections/all\nContact | mailto:hello@example.com" : ""}
+            placeholder={
+              spec.type === "menu"
+                ? "Shop all | /collections/all\nContact | mailto:hello@example.com"
+                : ""
+            }
             spellCheck={spec.type !== "menu"}
             onChange={(e) => onChange(e.target.value)}
             className="w-full rounded-lg border border-[#D8DFE8] px-3 py-2 text-sm outline-none focus:border-[#161C2C]"
@@ -3382,7 +3708,11 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
             className={inputClass}
             value={value}
             placeholder={
-              spec.type === "url" ? "/collections/all" : spec.type === "anchor" ? "e.g. our-story" : ""
+              spec.type === "url"
+                ? "/collections/all"
+                : spec.type === "anchor"
+                  ? "e.g. our-story"
+                  : ""
             }
             onChange={(e) => onChange(e.target.value)}
           />
@@ -3396,7 +3726,11 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
 // Short summary shown on a block row
 function blockTitle(block, blockSpec, i) {
   const s = block.settings || {};
-  const strip = (html) => (html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  const strip = (html) =>
+    (html || "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   const text =
     s.heading ||
     s.title ||
@@ -3406,8 +3740,12 @@ function blockTitle(block, blockSpec, i) {
     (s.items ? s.items.split("\n").find((line) => line.trim()) : "") ||
     s.address ||
     s.alt ||
-    (s.products?.length ? `${s.products.length} product${s.products.length === 1 ? "" : "s"}` : "") ||
-    (s.collections?.length ? `${s.collections.length} collection${s.collections.length === 1 ? "" : "s"}` : "") ||
+    (s.products?.length
+      ? `${s.products.length} product${s.products.length === 1 ? "" : "s"}`
+      : "") ||
+    (s.collections?.length
+      ? `${s.collections.length} collection${s.collections.length === 1 ? "" : "s"}`
+      : "") ||
     (block.type === "spacer" ? `${s.height}px` : "") ||
     s.url ||
     "";
@@ -3415,7 +3753,19 @@ function blockTitle(block, blockSpec, i) {
 }
 
 // The blocks of a section: add any type, open one to edit it, drag to reorder or onto another section
-function SectionBlocks({ sectionId, spec, blocks, drag, dropTarget, startDrag, onChange, onOpen, onDuplicate, onToggle, onRemove }) {
+function SectionBlocks({
+  sectionId,
+  spec,
+  blocks,
+  drag,
+  dropTarget,
+  startDrag,
+  onChange,
+  onOpen,
+  onDuplicate,
+  onToggle,
+  onRemove,
+}) {
   const types = Object.entries(spec.blocks);
 
   const [menu, setMenu] = useState(false);
@@ -3424,10 +3774,13 @@ function SectionBlocks({ sectionId, spec, blocks, drag, dropTarget, startDrag, o
 
   // Some types have their own limit (e.g. at most 8 slides)
   const atLimit = (type) =>
-    spec.type_limits?.[type] !== undefined && blocks.filter((b) => b.type === type).length >= spec.type_limits[type];
+    spec.type_limits?.[type] !== undefined &&
+    blocks.filter((b) => b.type === type).length >= spec.type_limits[type];
 
   function add(type, blockSpec) {
-    onChange((list) => list.push({ type, hidden: false, settings: defaultsOf(blockSpec.settings) }));
+    onChange((list) =>
+      list.push({ type, hidden: false, settings: defaultsOf(blockSpec.settings) })
+    );
     setMenu(false);
     onOpen(blocks.length);
   }
@@ -3444,7 +3797,10 @@ function SectionBlocks({ sectionId, spec, blocks, drag, dropTarget, startDrag, o
     <div className="border-t border-[#EEF0F4] pt-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">
-          Blocks <span className="font-normal text-[#8A94A8]">({blocks.length}/{spec.max_blocks})</span>
+          Blocks{" "}
+          <span className="font-normal text-[#8A94A8]">
+            ({blocks.length}/{spec.max_blocks})
+          </span>
         </h3>
 
         <button
@@ -3459,14 +3815,21 @@ function SectionBlocks({ sectionId, spec, blocks, drag, dropTarget, startDrag, o
       </div>
 
       {menu && (
-        <div className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-[#D8DFE8] bg-[#F7F8FA] p-2" role="menu">
+        <div
+          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-[#D8DFE8] bg-[#F7F8FA] p-2"
+          role="menu"
+        >
           {types.map(([type, blockSpec]) => (
             <button
               key={type}
               type="button"
               role="menuitem"
               disabled={atLimit(type)}
-              title={atLimit(type) ? `Up to ${spec.type_limits[type]} ${blockSpec.name.toLowerCase()}s` : undefined}
+              title={
+                atLimit(type)
+                  ? `Up to ${spec.type_limits[type]} ${blockSpec.name.toLowerCase()}s`
+                  : undefined
+              }
               onClick={() => add(type, blockSpec)}
               className="truncate rounded-md border border-[#D8DFE8] bg-white px-2 py-1.5 text-left text-xs text-[#161C2C] hover:border-[#161C2C] disabled:opacity-40 disabled:hover:border-[#D8DFE8]"
             >
@@ -3485,9 +3848,13 @@ function SectionBlocks({ sectionId, spec, blocks, drag, dropTarget, startDrag, o
           {blocks.map((block, i) => {
             const blockSpec = spec.blocks[block.type];
 
-            const lineHere = dropTarget?.kind === "block" && dropTarget.sectionId === sectionId && dropTarget.index === i;
+            const lineHere =
+              dropTarget?.kind === "block" &&
+              dropTarget.sectionId === sectionId &&
+              dropTarget.index === i;
 
-            const dragging = drag?.kind === "block" && drag.sectionId === sectionId && drag.index === i;
+            const dragging =
+              drag?.kind === "block" && drag.sectionId === sectionId && drag.index === i;
 
             if (!blockSpec) return null;
 
@@ -3573,7 +3940,8 @@ function SectionBlocks({ sectionId, spec, blocks, drag, dropTarget, startDrag, o
 
       {blocks.length > 0 && (
         <p className="mt-2 text-[11px] text-[#A3ADBF]">
-          Click a block to edit it. Drag by the handle to reorder, or onto another section that appears below.
+          Click a block to edit it. Drag by the handle to reorder, or onto another section that
+          appears below.
         </p>
       )}
     </div>
@@ -3678,8 +4046,12 @@ function ImageUpload({ value, onChange }) {
     onChange(token);
 
     uploads?.begin();
-    const name = file.name.replace(/\.[^.]+$/, "") + (prepared.blob.type === "image/webp" ? ".webp" : "");
-    const res = await uploadThemeImage(new File([prepared.blob], name || "image", { type: prepared.blob.type || file.type }), setProgress);
+    const name =
+      file.name.replace(/\.[^.]+$/, "") + (prepared.blob.type === "image/webp" ? ".webp" : "");
+    const res = await uploadThemeImage(
+      new File([prepared.blob], name || "image", { type: prepared.blob.type || file.type }),
+      setProgress
+    );
     uploads?.end();
 
     if (res.ok) {
@@ -3707,7 +4079,10 @@ function ImageUpload({ value, onChange }) {
 
           {progress !== null && (
             <div className="absolute inset-x-0 top-0 h-1 bg-black/10" aria-label="Uploading">
-              <div className="h-full bg-[#161C2C] transition-[width] duration-150" style={{ width: `${Math.round(progress * 100)}%` }} />
+              <div
+                className="h-full bg-[#161C2C] transition-[width] duration-150"
+                style={{ width: `${Math.round(progress * 100)}%` }}
+              />
             </div>
           )}
 
@@ -3802,7 +4177,9 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
       )}
 
       {products.length === 0 ? (
-        <p className="px-3 py-2.5 text-xs text-[#53627E]">Add {noun} first, then choose them here.</p>
+        <p className="px-3 py-2.5 text-xs text-[#53627E]">
+          Add {noun} first, then choose them here.
+        </p>
       ) : value.length >= max ? (
         <p className="px-3 py-2.5 text-xs text-[#53627E]">You've chosen the maximum of {max}.</p>
       ) : (
@@ -3825,7 +4202,9 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
                   <span className="min-w-0 truncate">{p.title}</span>
 
                   {p.status !== "active" && (
-                    <span className="shrink-0 text-[10px] uppercase text-[#A3ADBF]">{p.status}</span>
+                    <span className="shrink-0 text-[10px] uppercase text-[#A3ADBF]">
+                      {p.status}
+                    </span>
                   )}
                 </button>
               </li>
@@ -3918,15 +4297,35 @@ function RichTextEditor({ value, onChange }) {
 
 // The page's fixed parts. They are theme-wide, so they open the matching group of Theme settings.
 const LAYOUT_ROWS = [
-  { part: "top", group: "announcement", name: "Announcement bar", hint: "Banner above the header", icon: "M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6" },
-  { part: "top", group: "header", name: "Header", hint: "Logo and navigation", icon: "M3 5h18v5H3zM7 15h10M9 19h6" },
-  { part: "bottom", group: "footer", name: "Footer", hint: "Links, social and copyright", icon: "M3 14h18v5H3zM7 9h10M9 5h6" },
+  {
+    part: "top",
+    group: "announcement",
+    name: "Announcement bar",
+    hint: "Banner above the header",
+    icon: "M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6",
+  },
+  {
+    part: "top",
+    group: "header",
+    name: "Header",
+    hint: "Logo and navigation",
+    icon: "M3 5h18v5H3zM7 15h10M9 19h6",
+  },
+  {
+    part: "bottom",
+    group: "footer",
+    name: "Footer",
+    hint: "Links, social and copyright",
+    icon: "M3 14h18v5H3zM7 9h10M9 5h6",
+  },
 ];
 
 // A labelled group in the sections list (Header / Template / Footer), divided from the one above
 function GroupHeading({ children }) {
   return (
-    <h3 className="mt-2 border-t border-[#E3E7ED] px-4 pb-1.5 pt-4 text-sm font-semibold text-[#161C2C]">{children}</h3>
+    <h3 className="mt-2 border-t border-[#E3E7ED] px-4 pb-1.5 pt-4 text-sm font-semibold text-[#161C2C]">
+      {children}
+    </h3>
   );
 }
 
@@ -3936,8 +4335,9 @@ function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) {
   return (
     <ul className={`px-2 ${part === "top" ? "mb-1" : "mt-1"}`}>
       {rows.map((row) => {
-        const active =
-          synced?.[row.group] ? selected === row.group : selected === "theme" && themeGroup === row.group;
+        const active = synced?.[row.group]
+          ? selected === row.group
+          : selected === "theme" && themeGroup === row.group;
 
         return (
           <li key={row.group}>

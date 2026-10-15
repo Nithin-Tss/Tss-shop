@@ -19,7 +19,9 @@ const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
 // Returns why a photo can't be added, or "" when it's fine
 function photoError(file) {
   // Some browsers leave file.type empty, so fall back to the extension
-  const isAllowedType = file.type ? PHOTO_TYPES.includes(file.type) : PHOTO_EXTENSIONS.test(file.name);
+  const isAllowedType = file.type
+    ? PHOTO_TYPES.includes(file.type)
+    : PHOTO_EXTENSIONS.test(file.name);
   if (!isAllowedType) return "Not a supported image. Use JPG, PNG or WEBP.";
   if (file.size > MAX_PHOTO_SIZE) return "Image is too large. Maximum size is 5MB.";
   return "";
@@ -44,9 +46,24 @@ const cleanHandle = (text) =>
 
 // Product.status values, and how they read in the top bar and the Visibility card
 const STATUSES = [
-  { value: "active", label: "Active", text: "Shoppers can find and buy it", badge: "bg-emerald-100 text-emerald-800" },
-  { value: "draft", label: "Draft", text: "Only you can see it", badge: "bg-slate-100 text-slate-600" },
-  { value: "archived", label: "Archived", text: "Hidden and kept for your records", badge: "bg-amber-100 text-amber-800" },
+  {
+    value: "active",
+    label: "Active",
+    text: "Shoppers can find and buy it",
+    badge: "bg-emerald-100 text-emerald-800",
+  },
+  {
+    value: "draft",
+    label: "Draft",
+    text: "Only you can see it",
+    badge: "bg-slate-100 text-slate-600",
+  },
+  {
+    value: "archived",
+    label: "Archived",
+    text: "Hidden and kept for your records",
+    badge: "bg-amber-100 text-amber-800",
+  },
 ];
 
 // Product.theme_template values
@@ -63,7 +80,8 @@ const TARGET_SALES_CHANNELS = [
 ];
 
 // Lists from the API come back either as an array or as { results }
-const listOf = (res) => (Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.results) ? res.data.results : []);
+const listOf = (res) =>
+  Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.results) ? res.data.results : [];
 
 // Categories in dropdown order: each top-level category followed by its subcategories
 function categoryOptions(categories) {
@@ -123,7 +141,9 @@ const withError = (error) => (error ? "border-red-400" : "");
 function MoneyInput({ value, onChange, placeholder = "0.00", error }) {
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+        $
+      </span>
       <input
         type="number"
         min="0"
@@ -153,7 +173,10 @@ function ChipInput({ values, onChange, placeholder }) {
   return (
     <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-2 py-1.5 focus-within:border-[#141b2d] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#141b2d]/[0.07]">
       {values.map((v) => (
-        <span key={v} className="inline-flex items-center gap-1 rounded-full bg-[#141b2d] px-2.5 py-0.5 text-xs font-medium text-white">
+        <span
+          key={v}
+          className="inline-flex items-center gap-1 rounded-full bg-[#141b2d] px-2.5 py-0.5 text-xs font-medium text-white"
+        >
           {v}
           <button
             type="button"
@@ -167,7 +190,9 @@ function ChipInput({ values, onChange, placeholder }) {
       ))}
       <input
         value={draft}
-        onChange={(e) => (e.target.value.endsWith(",") ? add(e.target.value) : setDraft(e.target.value))}
+        onChange={(e) =>
+          e.target.value.endsWith(",") ? add(e.target.value) : setDraft(e.target.value)
+        }
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -542,8 +567,8 @@ function CollectionsPicker({
                 {isCreating
                   ? "Adding collection..."
                   : searchQuery.trim()
-                  ? `Add "${searchQuery.trim()}"`
-                  : "Add new collection"}
+                    ? `Add "${searchQuery.trim()}"`
+                    : "Add new collection"}
               </span>
             </button>
           )}
@@ -702,15 +727,26 @@ export function ProductForm({ productId }) {
       setLocations(locationList);
       setCategories(listOf(categoriesRes));
       const storeCollectionList = listOf(collectionsRes);
-      setStoreCollections(storeCollectionList.filter((c) => c.type !== "automated").map((c) => c.name));
-      setAutomatedCollections(storeCollectionList.filter((c) => c.type === "automated").map((c) => c.name));
+      setStoreCollections(
+        storeCollectionList.filter((c) => c.type !== "automated").map((c) => c.name)
+      );
+      setAutomatedCollections(
+        storeCollectionList.filter((c) => c.type === "automated").map((c) => c.name)
+      );
       setChannels(channelList);
 
-      const lists = { locations: locationsRes, categories: categoriesRes, collections: collectionsRes, channels: channelsRes };
+      const lists = {
+        locations: locationsRes,
+        categories: categoriesRes,
+        collections: collectionsRes,
+        channels: channelsRes,
+      };
       const failed = Object.keys(lists).filter((key) => !lists[key].ok);
       setFailedLists(failed);
       if (failed.length) {
-        setError(`Some of your store's lists couldn't be loaded: ${lists[failed[0]].error} Reload the page to try again.`);
+        setError(
+          `Some of your store's lists couldn't be loaded: ${lists[failed[0]].error} Reload the page to try again.`
+        );
       }
 
       if (!editing) {
@@ -750,8 +786,25 @@ export function ProductForm({ productId }) {
   useEffect(() => () => photos.forEach((p) => p.file && URL.revokeObjectURL(p.url)), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const snapshot = JSON.stringify([
-    name, about, photos.map((p) => p.id), price, sku, locationId, quantity, categoryId, productType,
-    vendor, collections, tags, status, channelIds, pageLayout, seoTitle, seoDescription, handle, extra,
+    name,
+    about,
+    photos.map((p) => p.id),
+    price,
+    sku,
+    locationId,
+    quantity,
+    categoryId,
+    productType,
+    vendor,
+    collections,
+    tags,
+    status,
+    channelIds,
+    pageLayout,
+    seoTitle,
+    seoDescription,
+    handle,
+    extra,
   ]);
   useEffect(() => {
     if (!needsBaseline) return;
@@ -800,7 +853,11 @@ export function ProductForm({ productId }) {
 
     setPhotos((prev) => [
       ...prev,
-      ...images.map((file) => ({ id: `${file.name}-${file.lastModified}-${Math.random()}`, file, url: URL.createObjectURL(file) })),
+      ...images.map((file) => ({
+        id: `${file.name}-${file.lastModified}-${Math.random()}`,
+        file,
+        url: URL.createObjectURL(file),
+      })),
     ]);
   };
 
@@ -815,7 +872,9 @@ export function ProductForm({ productId }) {
     setPhotos((prev) => [prev.find((p) => p.id === id), ...prev.filter((p) => p.id !== id)]);
 
   const toggleCollection = (collection) =>
-    setCollections((prev) => (prev.includes(collection) ? prev.filter((c) => c !== collection) : [...prev, collection]));
+    setCollections((prev) =>
+      prev.includes(collection) ? prev.filter((c) => c !== collection) : [...prev, collection]
+    );
 
   const isChannelChecked = (ch) => {
     if (channelIds.includes(ch.id)) return true;
@@ -900,7 +959,9 @@ export function ProductForm({ productId }) {
     // Edit mode only writes stock that actually changed
     // Roles without inventory rights never send stock
     const stockChanged =
-      canSetStock && quantity !== "" && (!editing || Number(quantity) !== stockByLocation[locationId]);
+      canSetStock &&
+      quantity !== "" &&
+      (!editing || Number(quantity) !== stockByLocation[locationId]);
 
     // Sent for the active store: lib/api adds its id to every request (X-Store-Id)
     const payload = {
@@ -942,7 +1003,10 @@ export function ProductForm({ productId }) {
 
     if (!res.ok) {
       const firstFieldErr = Object.values(res.fieldErrors || {})[0];
-      fail(res.formError || firstFieldErr || "Please fix the highlighted fields.", res.fieldErrors || {});
+      fail(
+        res.formError || firstFieldErr || "Please fix the highlighted fields.",
+        res.fieldErrors || {}
+      );
       return;
     }
 
@@ -984,7 +1048,9 @@ export function ProductForm({ productId }) {
   const currentHandle = handle || slugify(name) || "product-handle";
   const shownSeoTitle = seoTitle || name || "Your product name";
   const shownSeoDescription =
-    seoDescription || about || "Add a short description so shoppers know what makes this product special.";
+    seoDescription ||
+    about ||
+    "Add a short description so shoppers know what makes this product special.";
 
   if (loading || loadError) {
     return (
@@ -1028,26 +1094,32 @@ export function ProductForm({ productId }) {
                 >
                   <span aria-hidden>←</span> Back
                 </button>
-                <h1 className="truncate text-lg font-bold">{name.trim() || (editing ? "Product" : "New product")}</h1>
-                <span className={`hidden sm:inline rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusInfo.badge}`}>
+                <h1 className="truncate text-lg font-bold">
+                  {name.trim() || (editing ? "Product" : "New product")}
+                </h1>
+                <span
+                  className={`hidden sm:inline rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusInfo.badge}`}
+                >
                   {statusInfo.label}
                 </span>
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
                 {!canEdit && (
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">View only</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                    View only
+                  </span>
                 )}
                 {editing ? (
                   canDelete && (
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    disabled={deleting || saving}
-                    className="h-9 rounded-full border border-red-200 px-4 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
-                  >
-                    {deleting ? "Deleting..." : "Delete"}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={deleting || saving}
+                      className="h-9 rounded-full border border-red-200 px-4 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                    >
+                      {deleting ? "Deleting..." : "Delete"}
+                    </button>
                   )
                 ) : (
                   <button
@@ -1059,15 +1131,15 @@ export function ProductForm({ productId }) {
                   </button>
                 )}
                 {canEdit && (
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving || deleting}
-                  className="h-9 rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
-                  style={{ backgroundColor: NAVY }}
-                >
-                  {saving ? "Saving..." : editing ? "Save changes" : "Save product"}
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={saving || deleting}
+                    className="h-9 rounded-full px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+                    style={{ backgroundColor: NAVY }}
+                  >
+                    {saving ? "Saving..." : editing ? "Save changes" : "Save product"}
+                  </button>
                 )}
               </div>
             </div>
@@ -1088,406 +1160,502 @@ export function ProductForm({ productId }) {
             </div>
 
             {error && (
-              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
             )}
             {savedMessage && (
-              <div role="status" className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <div
+                role="status"
+                className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+              >
                 {savedMessage}
               </div>
             )}
 
             {/* View-only roles: every field and button inside is disabled */}
             <fieldset disabled={!canEdit} className="m-0 min-w-0 border-0 p-0">
-            <div className="space-y-6">
-              {/* 1 BASIC INFO */}
-              <Card title="Basic info" hint="Give your product a clear name and describe it in a few simple sentences.">
-                <div className="space-y-4">
-                  <Field label="Product name" error={fieldErrors.title}>
-                    <input
-                      value={name}
-                      onChange={(e) => changeName(e.target.value)}
-                      placeholder="e.g. Zonzo Chardonnay 2023 750ml"
-                      className={`${inputClass} ${withError(fieldErrors.title)}`}
-                      autoFocus
-                    />
-                  </Field>
+              <div className="space-y-6">
+                {/* 1 BASIC INFO */}
+                <Card
+                  title="Basic info"
+                  hint="Give your product a clear name and describe it in a few simple sentences."
+                >
+                  <div className="space-y-4">
+                    <Field label="Product name" error={fieldErrors.title}>
+                      <input
+                        value={name}
+                        onChange={(e) => changeName(e.target.value)}
+                        placeholder="e.g. Zonzo Chardonnay 2023 750ml"
+                        className={`${inputClass} ${withError(fieldErrors.title)}`}
+                        autoFocus
+                      />
+                    </Field>
 
-                  <Field label="About this product" help={`${about.length} characters`} error={fieldErrors.description}>
-                    <textarea
-                      value={about}
-                      onChange={(e) => setAbout(e.target.value)}
-                      rows={6}
-                      placeholder="Tell shoppers what it is, what it's made of and why they'll love it."
-                      className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors.description)}`}
-                    />
-                  </Field>
-                </div>
-              </Card>
-
-              {/* 2 PHOTOS */}
-              <Card title="Photos" hint="Add clear photos of the product. The first photo is the main one shoppers see.">
-                <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-                  {photos.map((photo, i) => (
-                    <div
-                      key={photo.id}
-                      className={`group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-50 ${
-                        i === 0 ? "col-span-2 row-span-2" : ""
-                      }`}
-                    >
-                      <img src={photo.url} alt="" className="h-full w-full object-cover" />
-                      {i === 0 && (
-                        <span className="absolute left-2 top-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold">Cover</span>
-                      )}
-                      <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-black/50 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-                        {i !== 0 && (
-                          <button type="button" onClick={() => makeCover(photo.id)} className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold">
-                            Make cover
-                          </button>
-                        )}
-                        <button type="button" onClick={() => removePhoto(photo.id)} className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-red-600">
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <label
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setDragging(true);
-                    }}
-                    onDragLeave={() => setDragging(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setDragging(false);
-                      addPhotos(e.dataTransfer.files);
-                    }}
-                    className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center transition ${
-                      photos.length ? "aspect-square" : "col-span-3 py-10 sm:col-span-5"
-                    } ${dragging ? "border-[#141b2d] bg-slate-50" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"}`}
-                  >
-                    <span className="text-2xl text-slate-400">＋</span>
-                    <span className="text-xs font-semibold text-slate-700">{photos.length ? "Add" : "Upload photos"}</span>
-                    {!photos.length && <span className="text-xs text-slate-500">or drag and drop images here</span>}
-                    <input
-                      type="file"
-                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => {
-                        addPhotos(e.target.files);
-                        // Reset so choosing the same file again still triggers onChange
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                </div>
-
-                {photoErrors.length > 0 && (
-                  <div role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                    {photoErrors.length > 1 && (
-                      <p className="mb-1 font-semibold">{photoErrors.length} files weren't added:</p>
-                    )}
-                    <ul className="space-y-0.5">
-                      {photoErrors.map((item, i) => (
-                        <li key={`${item.name}-${i}`}>
-                          <span className="font-medium break-all">{item.name}</span>: {item.message}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <FieldError message={fieldErrors.images} />
-              </Card>
-
-              {/* 3 PRICING */}
-              <Card title="Pricing" hint="Set what shoppers pay for this product.">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Field label="Selling price" error={fieldErrors.price}>
-                    <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
-                  </Field>
-                </div>
-              </Card>
-
-              {/* 4 STOCK */}
-              <Card title="Stock" hint="Enter how many you have, plus your own codes to keep track of it.">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Field label="SKU" help="Your own stock code" error={fieldErrors.sku}>
-                    <input
-                      value={sku}
-                      onChange={(e) => setSku(e.target.value)}
-                      placeholder="e.g. WINE-ZC-750"
-                      className={`${inputClass} ${withError(fieldErrors.sku)}`}
-                    />
-                  </Field>
-                  {!canSeeStock ? (
-                    <p className="text-sm text-slate-500 sm:col-span-2 sm:self-end">
-                      Stock levels are managed by people with inventory access.
-                    </p>
-                  ) : (
-                  <>
-                  <div>
                     <Field
-                      label="Location"
-                      help={locations.length ? "Where this stock is kept" : undefined}
-                      error={fieldErrors.location}
+                      label="About this product"
+                      help={`${about.length} characters`}
+                      error={fieldErrors.description}
                     >
-                      <select
-                        value={locationId}
-                        onChange={(e) => chooseLocation(e.target.value)}
-                        disabled={!locations.length}
-                        className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.location)}`}
+                      <textarea
+                        value={about}
+                        onChange={(e) => setAbout(e.target.value)}
+                        rows={6}
+                        placeholder="Tell shoppers what it is, what it's made of and why they'll love it."
+                        className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors.description)}`}
+                      />
+                    </Field>
+                  </div>
+                </Card>
+
+                {/* 2 PHOTOS */}
+                <Card
+                  title="Photos"
+                  hint="Add clear photos of the product. The first photo is the main one shoppers see."
+                >
+                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+                    {photos.map((photo, i) => (
+                      <div
+                        key={photo.id}
+                        className={`group relative aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-50 ${
+                          i === 0 ? "col-span-2 row-span-2" : ""
+                        }`}
                       >
-                        {locations.length ? (
-                          locations.map((l) => (
-                            <option key={l.id} value={l.id}>
-                              {l.name}
-                            </option>
-                          ))
-                        ) : (
-                          <option value="">No locations yet</option>
+                        <img src={photo.url} alt="" className="h-full w-full object-cover" />
+                        {i === 0 && (
+                          <span className="absolute left-2 top-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold">
+                            Cover
+                          </span>
                         )}
+                        <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-black/50 to-transparent p-1.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                          {i !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => makeCover(photo.id)}
+                              className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold"
+                            >
+                              Make cover
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(photo.id)}
+                            className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-red-600"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <label
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setDragging(true);
+                      }}
+                      onDragLeave={() => setDragging(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragging(false);
+                        addPhotos(e.dataTransfer.files);
+                      }}
+                      className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center transition ${
+                        photos.length ? "aspect-square" : "col-span-3 py-10 sm:col-span-5"
+                      } ${dragging ? "border-[#141b2d] bg-slate-50" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"}`}
+                    >
+                      <span className="text-2xl text-slate-400">＋</span>
+                      <span className="text-xs font-semibold text-slate-700">
+                        {photos.length ? "Add" : "Upload photos"}
+                      </span>
+                      {!photos.length && (
+                        <span className="text-xs text-slate-500">or drag and drop images here</span>
+                      )}
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          addPhotos(e.target.files);
+                          // Reset so choosing the same file again still triggers onChange
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {photoErrors.length > 0 && (
+                    <div
+                      role="alert"
+                      className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+                    >
+                      {photoErrors.length > 1 && (
+                        <p className="mb-1 font-semibold">
+                          {photoErrors.length} files weren't added:
+                        </p>
+                      )}
+                      <ul className="space-y-0.5">
+                        {photoErrors.map((item, i) => (
+                          <li key={`${item.name}-${i}`}>
+                            <span className="font-medium break-all">{item.name}</span>:{" "}
+                            {item.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <FieldError message={fieldErrors.images} />
+                </Card>
+
+                {/* 3 PRICING */}
+                <Card title="Pricing" hint="Set what shoppers pay for this product.">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <Field label="Selling price" error={fieldErrors.price}>
+                      <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
+                    </Field>
+                  </div>
+                </Card>
+
+                {/* 4 STOCK */}
+                <Card
+                  title="Stock"
+                  hint="Enter how many you have, plus your own codes to keep track of it."
+                >
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <Field label="SKU" help="Your own stock code" error={fieldErrors.sku}>
+                      <input
+                        value={sku}
+                        onChange={(e) => setSku(e.target.value)}
+                        placeholder="e.g. WINE-ZC-750"
+                        className={`${inputClass} ${withError(fieldErrors.sku)}`}
+                      />
+                    </Field>
+                    {!canSeeStock ? (
+                      <p className="text-sm text-slate-500 sm:col-span-2 sm:self-end">
+                        Stock levels are managed by people with inventory access.
+                      </p>
+                    ) : (
+                      <>
+                        <div>
+                          <Field
+                            label="Location"
+                            help={locations.length ? "Where this stock is kept" : undefined}
+                            error={fieldErrors.location}
+                          >
+                            <select
+                              value={locationId}
+                              onChange={(e) => chooseLocation(e.target.value)}
+                              disabled={!locations.length}
+                              className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.location)}`}
+                            >
+                              {locations.length ? (
+                                locations.map((l) => (
+                                  <option key={l.id} value={l.id}>
+                                    {l.name}
+                                  </option>
+                                ))
+                              ) : (
+                                <option value="">No locations yet</option>
+                              )}
+                            </select>
+                          </Field>
+                          {!locations.length && !fieldErrors.location && (
+                            <span className="mt-1 block text-xs text-slate-500">
+                              Add one under{" "}
+                              <Link
+                                to="/admin/online-store/inventory"
+                                className="font-medium text-[#141b2d] underline"
+                              >
+                                Inventory
+                              </Link>
+                            </span>
+                          )}
+                        </div>
+                        <Field
+                          label="Quantity"
+                          help={
+                            canSetStock ? undefined : "Your role can see stock but not change it"
+                          }
+                          error={fieldErrors.quantity}
+                        >
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            disabled={!canSetStock}
+                            placeholder="0"
+                            className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.quantity)}`}
+                          />
+                        </Field>
+                      </>
+                    )}
+                  </div>
+                </Card>
+
+                {/* 5 ORGANIZE */}
+                <Card
+                  title="Organize"
+                  hint="Add a category, vendor, collections and tags so the product is easy to find and sort."
+                >
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="Category" error={fieldErrors.category_id}>
+                      <select
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.target.value)}
+                        className={`${inputClass} ${withError(fieldErrors.category_id)}`}
+                      >
+                        <option value="">
+                          {categoryRows.length ? "No category" : "No categories yet"}
+                        </option>
+                        {categoryRows.map((row) => (
+                          <option key={row.id} value={row.id}>
+                            {row.label}
+                          </option>
+                        ))}
                       </select>
                     </Field>
-                    {!locations.length && !fieldErrors.location && (
-                      <span className="mt-1 block text-xs text-slate-500">
-                        Add one under{" "}
-                        <Link to="/admin/online-store/inventory" className="font-medium text-[#141b2d] underline">
-                          Inventory
-                        </Link>
-                      </span>
-                    )}
-                  </div>
-                  <Field
-                    label="Quantity"
-                    help={canSetStock ? undefined : "Your role can see stock but not change it"}
-                    error={fieldErrors.quantity}
-                  >
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      disabled={!canSetStock}
-                      placeholder="0"
-                      className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.quantity)}`}
-                    />
-                  </Field>
-                  </>
-                  )}
-                </div>
-              </Card>
-
-              {/* 5 ORGANIZE */}
-              <Card title="Organize" hint="Add a category, vendor, collections and tags so the product is easy to find and sort.">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Field label="Category" error={fieldErrors.category_id}>
-                    <select
-                      value={categoryId}
-                      onChange={(e) => setCategoryId(e.target.value)}
-                      className={`${inputClass} ${withError(fieldErrors.category_id)}`}
-                    >
-                      <option value="">{categoryRows.length ? "No category" : "No categories yet"}</option>
-                      {categoryRows.map((row) => (
-                        <option key={row.id} value={row.id}>
-                          {row.label}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Product type" error={fieldErrors.product_type}>
-                    <input
-                      value={productType}
-                      onChange={(e) => setProductType(e.target.value)}
-                      placeholder="e.g. White wine"
-                      className={`${inputClass} ${withError(fieldErrors.product_type)}`}
-                    />
-                  </Field>
-                  <Field label="Vendor" error={fieldErrors.vendor}>
-                    <input
-                      value={vendor}
-                      onChange={(e) => setVendor(e.target.value)}
-                      placeholder="e.g. Sipnow"
-                      className={`${inputClass} ${withError(fieldErrors.vendor)}`}
-                    />
-                  </Field>
-                  <div>
-                    <CollectionsPicker
-                      selectedCollections={collections.filter((c) => !automatedCollections.includes(c))}
-                      onChange={(picked) => setCollections([...picked, ...collections.filter((c) => automatedCollections.includes(c))])}
-                      availableCollections={storeCollections}
-                      onCollectionCreated={(newCol) => {
-                        setStoreCollections((prev) => (prev.includes(newCol) ? prev : [...prev, newCol]));
-                      }}
-                      error={fieldErrors.collections}
-                    />
-                    {collections.some((c) => automatedCollections.includes(c)) && (
-                      <p className="mt-1.5 text-[12px] text-slate-500">
-                        Also in, by their conditions: {collections.filter((c) => automatedCollections.includes(c)).join(", ")}
-                      </p>
-                    )}
-                  </div>
-                  <div className="sm:col-span-2">
-                    <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">Tags</span>
-                    <ChipInput values={tags} onChange={setTags} placeholder="Type a tag and press Enter" />
-                    <FieldError message={fieldErrors.tags} />
-                  </div>
-                </div>
-              </Card>
-
-              {/* EXTRA DETAILS */}
-              <Card title="Additional details" hint="Optional notes about this product. Fill in only what applies; empty fields are left out.">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {withLabels(fieldLabels).map((f) => (
-                    <Field key={f.key} label={f.label} error={fieldErrors[f.key]}>
-                      <textarea
-                        value={extra[f.key]}
-                        onChange={(e) => setExtra((prev) => ({ ...prev, [f.key]: e.target.value }))}
-                        rows={2}
-                        className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors[f.key])}`}
-                      />
-                    </Field>
-                  ))}
-                </div>
-              </Card>
-
-              {/* 6 VISIBILITY */}
-              <Card title="Visibility" hint="Choose whether shoppers can see this product now, or keep it hidden for later.">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  {STATUSES.map((opt) => (
-                    <label
-                      key={opt.value}
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${
-                        status === opt.value ? "border-[#141b2d] bg-[#EEF1F8] ring-1 ring-[#141b2d]" : "border-[#DDE1EA] hover:bg-slate-50"
-                      }`}
-                    >
+                    <Field label="Product type" error={fieldErrors.product_type}>
                       <input
-                        type="radio"
-                        name="visibility"
-                        value={opt.value}
-                        checked={status === opt.value}
-                        onChange={() => setStatus(opt.value)}
-                        className="mt-0.5 accent-[#141b2d]"
+                        value={productType}
+                        onChange={(e) => setProductType(e.target.value)}
+                        placeholder="e.g. White wine"
+                        className={`${inputClass} ${withError(fieldErrors.product_type)}`}
                       />
-                      <span>
-                        <span className="block text-sm font-semibold">{opt.label}</span>
-                        <span className="block text-xs text-slate-500">{opt.text}</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                <FieldError message={fieldErrors.status} />
-              </Card>
-
-              {/* 7 SALES CHANNELS */}
-              <Card title="Sales channels" hint="Choose where you want to sell this product.">
-                {displayedChannels.length ? (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {displayedChannels.map((ch) => {
-                      const checked = isChannelChecked(ch);
-                      return (
-                        <label
-                          key={ch.id}
-                          className="flex cursor-pointer items-center justify-between rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-4 py-3 text-sm font-medium transition hover:border-[#141b2d] hover:bg-white"
-                        >
-                          <span className="text-[#141b2d]">{ch.name}</span>
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggleChannel(ch)}
-                            className="h-4 w-4 accent-[#141b2d] cursor-pointer rounded"
-                          />
-                        </label>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-500">Loading your sales channels…</p>
-                )}
-                <FieldError message={fieldErrors.sales_channels} />
-              </Card>
-
-              {/* 8 PAGE LAYOUT */}
-              <Card title="Page layout" hint="Choose which product page template your store uses for this product.">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Field label="Product page template" error={fieldErrors.theme_template}>
-                    <select
-                      value={pageLayout}
-                      onChange={(e) => setPageLayout(e.target.value)}
-                      className={`${inputClass} ${withError(fieldErrors.theme_template)}`}
-                    >
-                      {PAGE_LAYOUTS.map((layout) => (
-                        <option key={layout.value} value={layout.value}>
-                          {layout.label}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                </div>
-              </Card>
-
-              {/* 9 GOOGLE PREVIEW */}
-              <Card
-                title="Google preview"
-                hint="This is how the product may look on Google. Edit it if you want to change it."
-                action={
-                  <button
-                    type="button"
-                    onClick={() => setEditingSeo((v) => !v)}
-                    className="h-8 rounded-full border border-[#141b2d]/20 bg-white px-3.5 text-xs font-semibold text-[#141b2d] hover:bg-[#141b2d] hover:text-white"
-                  >
-                    {editingSeo ? "Done" : "Edit"}
-                  </button>
-                }
-              >
-                <div className="rounded-lg border border-[#DDE1EA] bg-white p-4 shadow-sm">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-slate-800">{storeBrand}</p>
-                  <p className="break-all text-xs text-slate-600">
-                    {storeDomain} › products › {currentHandle}
-                  </p>
-                  <p className="mt-0.5 truncate text-lg text-[#1a0dab]">{shownSeoTitle}</p>
-                  <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
-                  {price !== "" && !isNaN(Number(price)) && (
-                    <p className="mt-1 text-xs text-slate-500">${Number(price).toFixed(2)} AUD</p>
-                  )}
-                </div>
-
-                {(editingSeo || fieldErrors.seo_title || fieldErrors.seo_description || fieldErrors.handle) && (
-                  <div className="mt-4 space-y-4">
-                    <Field label="SEO title" help={`${seoTitle.length} of 70 characters`} error={fieldErrors.seo_title}>
+                    </Field>
+                    <Field label="Vendor" error={fieldErrors.vendor}>
                       <input
-                        value={seoTitle}
-                        maxLength={70}
-                        onChange={(e) => setSeoTitle(e.target.value)}
-                        placeholder={name}
-                        className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
+                        value={vendor}
+                        onChange={(e) => setVendor(e.target.value)}
+                        placeholder="e.g. Sipnow"
+                        className={`${inputClass} ${withError(fieldErrors.vendor)}`}
                       />
                     </Field>
-                    <Field label="SEO description" help={`${seoDescription.length} of 160 characters`} error={fieldErrors.seo_description}>
-                      <textarea
-                        value={seoDescription}
-                        maxLength={160}
-                        rows={3}
-                        onChange={(e) => setSeoDescription(e.target.value)}
-                        className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
+                    <div>
+                      <CollectionsPicker
+                        selectedCollections={collections.filter(
+                          (c) => !automatedCollections.includes(c)
+                        )}
+                        onChange={(picked) =>
+                          setCollections([
+                            ...picked,
+                            ...collections.filter((c) => automatedCollections.includes(c)),
+                          ])
+                        }
+                        availableCollections={storeCollections}
+                        onCollectionCreated={(newCol) => {
+                          setStoreCollections((prev) =>
+                            prev.includes(newCol) ? prev : [...prev, newCol]
+                          );
+                        }}
+                        error={fieldErrors.collections}
                       />
-                    </Field>
-                    <Field label="URL handle" help={`${storeDomain}/products/${currentHandle}`} error={fieldErrors.handle}>
-                      <div className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 transition focus-within:border-[#141b2d] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#141b2d]/[0.07] ${withError(fieldErrors.handle)}`}>
-                        <span className="select-none text-sm text-slate-500">products/</span>
-                        <input
-                          value={handle}
-                          onChange={(e) => setHandle(cleanHandle(e.target.value))}
-                          placeholder={slugify(name)}
-                          className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                      {collections.some((c) => automatedCollections.includes(c)) && (
+                        <p className="mt-1.5 text-[12px] text-slate-500">
+                          Also in, by their conditions:{" "}
+                          {collections.filter((c) => automatedCollections.includes(c)).join(", ")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="sm:col-span-2">
+                      <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">
+                        Tags
+                      </span>
+                      <ChipInput
+                        values={tags}
+                        onChange={setTags}
+                        placeholder="Type a tag and press Enter"
+                      />
+                      <FieldError message={fieldErrors.tags} />
+                    </div>
+                  </div>
+                </Card>
+
+                {/* EXTRA DETAILS */}
+                <Card
+                  title="Additional details"
+                  hint="Optional notes about this product. Fill in only what applies; empty fields are left out."
+                >
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {withLabels(fieldLabels).map((f) => (
+                      <Field key={f.key} label={f.label} error={fieldErrors[f.key]}>
+                        <textarea
+                          value={extra[f.key]}
+                          onChange={(e) =>
+                            setExtra((prev) => ({ ...prev, [f.key]: e.target.value }))
+                          }
+                          rows={2}
+                          className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors[f.key])}`}
                         />
-                      </div>
+                      </Field>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* 6 VISIBILITY */}
+                <Card
+                  title="Visibility"
+                  hint="Choose whether shoppers can see this product now, or keep it hidden for later."
+                >
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {STATUSES.map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${
+                          status === opt.value
+                            ? "border-[#141b2d] bg-[#EEF1F8] ring-1 ring-[#141b2d]"
+                            : "border-[#DDE1EA] hover:bg-slate-50"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="visibility"
+                          value={opt.value}
+                          checked={status === opt.value}
+                          onChange={() => setStatus(opt.value)}
+                          className="mt-0.5 accent-[#141b2d]"
+                        />
+                        <span>
+                          <span className="block text-sm font-semibold">{opt.label}</span>
+                          <span className="block text-xs text-slate-500">{opt.text}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  <FieldError message={fieldErrors.status} />
+                </Card>
+
+                {/* 7 SALES CHANNELS */}
+                <Card title="Sales channels" hint="Choose where you want to sell this product.">
+                  {displayedChannels.length ? (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      {displayedChannels.map((ch) => {
+                        const checked = isChannelChecked(ch);
+                        return (
+                          <label
+                            key={ch.id}
+                            className="flex cursor-pointer items-center justify-between rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-4 py-3 text-sm font-medium transition hover:border-[#141b2d] hover:bg-white"
+                          >
+                            <span className="text-[#141b2d]">{ch.name}</span>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleChannel(ch)}
+                              className="h-4 w-4 accent-[#141b2d] cursor-pointer rounded"
+                            />
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500">Loading your sales channels…</p>
+                  )}
+                  <FieldError message={fieldErrors.sales_channels} />
+                </Card>
+
+                {/* 8 PAGE LAYOUT */}
+                <Card
+                  title="Page layout"
+                  hint="Choose which product page template your store uses for this product."
+                >
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="Product page template" error={fieldErrors.theme_template}>
+                      <select
+                        value={pageLayout}
+                        onChange={(e) => setPageLayout(e.target.value)}
+                        className={`${inputClass} ${withError(fieldErrors.theme_template)}`}
+                      >
+                        {PAGE_LAYOUTS.map((layout) => (
+                          <option key={layout.value} value={layout.value}>
+                            {layout.label}
+                          </option>
+                        ))}
+                      </select>
                     </Field>
                   </div>
-                )}
-              </Card>
-            </div>
+                </Card>
+
+                {/* 9 GOOGLE PREVIEW */}
+                <Card
+                  title="Google preview"
+                  hint="This is how the product may look on Google. Edit it if you want to change it."
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => setEditingSeo((v) => !v)}
+                      className="h-8 rounded-full border border-[#141b2d]/20 bg-white px-3.5 text-xs font-semibold text-[#141b2d] hover:bg-[#141b2d] hover:text-white"
+                    >
+                      {editingSeo ? "Done" : "Edit"}
+                    </button>
+                  }
+                >
+                  <div className="rounded-lg border border-[#DDE1EA] bg-white p-4 shadow-sm">
+                    <p className="text-sm font-semibold uppercase tracking-wide text-slate-800">
+                      {storeBrand}
+                    </p>
+                    <p className="break-all text-xs text-slate-600">
+                      {storeDomain} › products › {currentHandle}
+                    </p>
+                    <p className="mt-0.5 truncate text-lg text-[#1a0dab]">{shownSeoTitle}</p>
+                    <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
+                    {price !== "" && !isNaN(Number(price)) && (
+                      <p className="mt-1 text-xs text-slate-500">${Number(price).toFixed(2)} AUD</p>
+                    )}
+                  </div>
+
+                  {(editingSeo ||
+                    fieldErrors.seo_title ||
+                    fieldErrors.seo_description ||
+                    fieldErrors.handle) && (
+                    <div className="mt-4 space-y-4">
+                      <Field
+                        label="SEO title"
+                        help={`${seoTitle.length} of 70 characters`}
+                        error={fieldErrors.seo_title}
+                      >
+                        <input
+                          value={seoTitle}
+                          maxLength={70}
+                          onChange={(e) => setSeoTitle(e.target.value)}
+                          placeholder={name}
+                          className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
+                        />
+                      </Field>
+                      <Field
+                        label="SEO description"
+                        help={`${seoDescription.length} of 160 characters`}
+                        error={fieldErrors.seo_description}
+                      >
+                        <textarea
+                          value={seoDescription}
+                          maxLength={160}
+                          rows={3}
+                          onChange={(e) => setSeoDescription(e.target.value)}
+                          className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
+                        />
+                      </Field>
+                      <Field
+                        label="URL handle"
+                        help={`${storeDomain}/products/${currentHandle}`}
+                        error={fieldErrors.handle}
+                      >
+                        <div
+                          className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 transition focus-within:border-[#141b2d] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#141b2d]/[0.07] ${withError(fieldErrors.handle)}`}
+                        >
+                          <span className="select-none text-sm text-slate-500">products/</span>
+                          <input
+                            value={handle}
+                            onChange={(e) => setHandle(cleanHandle(e.target.value))}
+                            placeholder={slugify(name)}
+                            className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                          />
+                        </div>
+                      </Field>
+                    </div>
+                  )}
+                </Card>
+              </div>
             </fieldset>
 
             {editing && (

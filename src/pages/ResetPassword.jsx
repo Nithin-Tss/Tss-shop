@@ -117,9 +117,7 @@ export default function ResetPassword() {
           <span aria-hidden="true">←</span> Back to Sign In
         </Link>
 
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-          Reset password
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Reset password</h1>
 
         {status === "checking" && (
           <p className="mt-3 text-sm leading-6 text-slate-600" role="status">
@@ -169,7 +167,10 @@ export default function ResetPassword() {
 
             <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
               <div>
-                <label htmlFor="newPassword" className="mb-2 block text-sm font-medium text-slate-700">
+                <label
+                  htmlFor="newPassword"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
                   New Password
                 </label>
 
@@ -190,7 +191,10 @@ export default function ResetPassword() {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-slate-700">
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-2 block text-sm font-medium text-slate-700"
+                >
                   Confirm New Password
                 </label>
 

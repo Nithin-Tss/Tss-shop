@@ -15,9 +15,7 @@ function getHeaders(extraHeaders = {}) {
     }
     const storeId =
       session?.storeId ||
-      (typeof localStorage !== "undefined"
-        ? localStorage.getItem("tss-store-id")
-        : null);
+      (typeof localStorage !== "undefined" ? localStorage.getItem("tss-store-id") : null);
     if (storeId) {
       headers["X-Store-Id"] = storeId;
     }
@@ -124,7 +122,11 @@ export async function syncAccess({ force = false } = {}) {
     const stores = await res.json();
     const current = getSession();
     // Only write when something changed, so pages don't re-render for nothing
-    if (Array.isArray(stores) && current && JSON.stringify(stores) !== JSON.stringify(current.stores)) {
+    if (
+      Array.isArray(stores) &&
+      current &&
+      JSON.stringify(stores) !== JSON.stringify(current.stores)
+    ) {
       setStores(stores);
     }
   } catch {}
@@ -142,7 +144,8 @@ async function send(path, { method, headers, body }) {
   const request = () => {
     const allHeaders = getHeaders(headers);
     // Files go as multipart: the browser sets that Content-Type (with its boundary) itself
-    if (typeof FormData !== "undefined" && body instanceof FormData) delete allHeaders["Content-Type"];
+    if (typeof FormData !== "undefined" && body instanceof FormData)
+      delete allHeaders["Content-Type"];
     return fetch(`${API_URL}${path}`, { method, headers: allHeaders, body });
   };
 
@@ -201,11 +204,7 @@ export async function apiRequest(path, options = {}) {
     res = await send(path, {
       method,
       headers,
-      body: body
-        ? typeof body === "string"
-          ? body
-          : JSON.stringify(body)
-        : undefined,
+      body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
     });
   } catch {
     throw new Error("Unable to reach the server. Is the backend running?");
@@ -302,9 +301,7 @@ async function sendForm(method, path, body, customHeaders) {
     fieldErrors,
     formError:
       nonField ||
-      (Object.keys(fieldErrors).length
-        ? ""
-        : "Something went wrong. Please try again."),
+      (Object.keys(fieldErrors).length ? "" : "Something went wrong. Please try again."),
   };
 }
 
@@ -366,7 +363,10 @@ export async function openStorefront(path = "/") {
     sessionStorage.setItem(RETURN_KEY, JSON.stringify({ url: here(), scrollY: window.scrollY }));
   } catch {}
 
-  const res = await apiPost("/api/v1/themes/storefront-link/", { path, return_url: window.location.href });
+  const res = await apiPost("/api/v1/themes/storefront-link/", {
+    path,
+    return_url: window.location.href,
+  });
   if (res.ok) {
     window.location.assign(res.data.url); // assign, not replace: Back returns to this admin page
     return;

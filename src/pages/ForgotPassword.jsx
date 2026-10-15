@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiPost } from "@/lib/api";
@@ -51,26 +50,16 @@ export default function ForgotPassword() {
           ✉
         </div>
 
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-          Forgot password?
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Forgot password?</h1>
 
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          No worries. Enter your registered email address and we'll help you
-          reset your password.
+          No worries. Enter your registered email address and we'll help you reset your password.
         </p>
 
         {sentMessage ? (
-          <div
-            role="status"
-            className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4"
-          >
-            <p className="font-semibold text-green-800">
-              Check your email
-            </p>
-            <p className="mt-1 text-sm text-green-700">
-              {sentMessage}
-            </p>
+          <div role="status" className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4">
+            <p className="font-semibold text-green-800">Check your email</p>
+            <p className="mt-1 text-sm text-green-700">{sentMessage}</p>
             <button
               type="button"
               onClick={() => setSentMessage("")}
@@ -82,10 +71,7 @@ export default function ForgotPassword() {
         ) : (
           <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
             <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
                 Email address
               </label>
 
@@ -108,11 +94,7 @@ export default function ForgotPassword() {
                 }`}
               />
 
-              {error && (
-                <p className="mt-1 text-xs text-red-500">
-                  {error}
-                </p>
-              )}
+              {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
             </div>
 
             <button
@@ -127,17 +109,12 @@ export default function ForgotPassword() {
 
         <p className="mt-8 text-center text-sm text-slate-600">
           Remember your password?{" "}
-          <Link
-            to="/auth/signin"
-            className="font-semibold text-slate-900 hover:underline"
-          >
+          <Link to="/auth/signin" className="font-semibold text-slate-900 hover:underline">
             Sign in
           </Link>
         </p>
 
-        <p className="mt-8 text-center text-xs tracking-wide text-slate-400">
-          Store
-        </p>
+        <p className="mt-8 text-center text-xs tracking-wide text-slate-400">Store</p>
       </div>
     </div>
   );

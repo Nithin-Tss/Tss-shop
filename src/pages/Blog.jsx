@@ -39,8 +39,8 @@ export default function Blog() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-300">
-            Discover helpful insights, practical tips, and ideas to help you
-            build and grow your online business.
+            Discover helpful insights, practical tips, and ideas to help you build and grow your
+            online business.
           </p>
         </div>
       </section>
@@ -53,9 +53,7 @@ export default function Blog() {
               Latest articles
             </p>
 
-            <h2 className="mt-2 text-3xl font-bold text-gray-900">
-              From the TSS Shop team
-            </h2>
+            <h2 className="mt-2 text-3xl font-bold text-gray-900">From the TSS Shop team</h2>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -69,27 +67,16 @@ export default function Blog() {
                 </div>
 
                 <div className="p-6">
-                  <p className="text-sm font-semibold text-[#D98324]">
-                    {post.category}
-                  </p>
+                  <p className="text-sm font-semibold text-[#D98324]">{post.category}</p>
 
-                  <h3 className="mt-3 text-xl font-bold leading-7 text-gray-900">
-                    {post.title}
-                  </h3>
+                  <h3 className="mt-3 text-xl font-bold leading-7 text-gray-900">{post.title}</h3>
 
-                  <p className="mt-3 text-sm leading-6 text-gray-600">
-                    {post.excerpt}
-                  </p>
+                  <p className="mt-3 text-sm leading-6 text-gray-600">{post.excerpt}</p>
 
                   <div className="mt-6 flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
-                      {post.date}
-                    </span>
+                    <span className="text-xs text-gray-500">{post.date}</span>
 
-                    <Link
-                      to="#"
-                      className="text-sm font-semibold text-[#D98324] hover:underline"
-                    >
+                    <Link to="#" className="text-sm font-semibold text-[#D98324] hover:underline">
                       Read more →
                     </Link>
                   </div>

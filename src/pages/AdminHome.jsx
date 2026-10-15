@@ -55,9 +55,25 @@ function Icon({ name, className = "h-5 w-5" }) {
 // `permission`: shown only to roles that can use what the link opens (see can() in lib/auth.js).
 // "View store" has none: any member of the store may look at it.
 const quickActions = [
-  { label: "Add product", icon: "products", to: `${BASE}/products/new`, permission: "products.manage" },
-  { label: "Import products", icon: "upload", to: `${BASE}/products`, state: { openImport: true }, permission: "products.manage" },
-  { label: "Create discount", icon: "discounts", to: `${BASE}/discounts`, permission: "discounts.manage" },
+  {
+    label: "Add product",
+    icon: "products",
+    to: `${BASE}/products/new`,
+    permission: "products.manage",
+  },
+  {
+    label: "Import products",
+    icon: "upload",
+    to: `${BASE}/products`,
+    state: { openImport: true },
+    permission: "products.manage",
+  },
+  {
+    label: "Create discount",
+    icon: "discounts",
+    to: `${BASE}/discounts`,
+    permission: "discounts.manage",
+  },
   { label: "Add banner", icon: "image", to: `${BASE}/customize`, permission: "themes.manage" },
   { label: "View store", icon: "store", storefront: "/" },
 ];
@@ -73,8 +89,10 @@ const tips = [
 ];
 
 // Lists from the API come back either as an array or as { results, count }
-const listOf = (res) => (Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.results) ? res.data.results : []);
-const countOf = (res) => (typeof res?.data?.count === "number" ? res.data.count : listOf(res).length);
+const listOf = (res) =>
+  Array.isArray(res?.data) ? res.data : Array.isArray(res?.data?.results) ? res.data.results : [];
+const countOf = (res) =>
+  typeof res?.data?.count === "number" ? res.data.count : listOf(res).length;
 
 const isToday = (value) => value && new Date(value).toDateString() === new Date().toDateString();
 
@@ -111,7 +129,9 @@ export default function AdminHomePage() {
       if (cancelled) return;
       const orders = ordersRes?.ok ? listOf(ordersRes) : [];
       setStats({
-        sales: orders.filter((o) => isToday(o.created_at)).reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0),
+        sales: orders
+          .filter((o) => isToday(o.created_at))
+          .reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0),
         orders: ordersRes?.ok ? countOf(ordersRes) : 0,
         visitors: 0, // no visitor tracking yet
         products: productsRes?.ok ? countOf(productsRes) : 0,
@@ -175,7 +195,12 @@ export default function AdminHomePage() {
   const progress = steps.length ? Math.round((doneCount / steps.length) * 100) : 100;
 
   const statCards = [
-    { label: "Today's sales", value: `$${stats.sales.toFixed(2)}`, icon: "cash", permission: "orders.view" },
+    {
+      label: "Today's sales",
+      value: `$${stats.sales.toFixed(2)}`,
+      icon: "cash",
+      permission: "orders.view",
+    },
     { label: "Orders", value: stats.orders, icon: "orders", permission: "orders.view" },
     { label: "Visitors", value: stats.visitors, icon: "customers", permission: "reports.view" },
     { label: "Products", value: stats.products, icon: "products", permission: "products.view" },
@@ -184,40 +209,34 @@ export default function AdminHomePage() {
 
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
-
       <AdminHeader />
-
 
       {/* BODY */}
       <div className="flex min-h-[calc(100vh-72px)]">
-
         {/* SIDEBAR */}
         <AdminSidebar />
-
 
         {/* MAIN CONTENT */}
         <main className="flex-1 overflow-hidden bg-[#F7F8FA] px-4 py-6 sm:px-6 lg:px-9">
           <div className="mx-auto max-w-[1180px] space-y-6">
-
             {/* PLAN PILL (choosing a plan is the owner's) */}
             {can(session, "store.manage") && (
-            <div className="flex justify-end">
-              <div className="flex items-center gap-1 rounded-full border border-[#E3E7ED] bg-white p-1 pl-3.5 shadow-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                </span>
-                <span className="ml-1.5 mr-2 text-sm text-[#53627E]">Pick a plan to go live</span>
-                <Link
-                  to={`${BASE}/settings`}
-                  className="rounded-full bg-[#141b2d] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#252E45] transition"
-                >
-                  Select a plan
-                </Link>
+              <div className="flex justify-end">
+                <div className="flex items-center gap-1 rounded-full border border-[#E3E7ED] bg-white p-1 pl-3.5 shadow-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="ml-1.5 mr-2 text-sm text-[#53627E]">Pick a plan to go live</span>
+                  <Link
+                    to={`${BASE}/settings`}
+                    className="rounded-full bg-[#141b2d] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                  >
+                    Select a plan
+                  </Link>
+                </div>
               </div>
-            </div>
             )}
-
 
             {/* WELCOME BANNER */}
             <section className="relative overflow-hidden rounded-2xl bg-[#141b2d] px-6 py-7 text-white shadow-[0_10px_30px_-12px_rgba(20,27,45,0.45)] sm:px-8">
@@ -226,9 +245,15 @@ export default function AdminHomePage() {
 
               <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-sm text-slate-300">{greeting()}, {firstName}</p>
+                  <p className="text-sm text-slate-300">
+                    {greeting()}, {firstName}
+                  </p>
                   <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-[28px]">
-                    {steps.length ? <>Let&apos;s get {storeName} ready to sell</> : <>Welcome to {storeName}</>}
+                    {steps.length ? (
+                      <>Let&apos;s get {storeName} ready to sell</>
+                    ) : (
+                      <>Welcome to {storeName}</>
+                    )}
                   </h1>
                   <p className="mt-2 max-w-lg text-sm text-slate-300">
                     {hasNoAccess
@@ -240,139 +265,155 @@ export default function AdminHomePage() {
                 </div>
 
                 {steps.length > 0 && (
-                <div className="w-full md:w-72">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">
-                      {doneCount} of {steps.length} setup steps done
-                    </span>
-                    <span className="text-slate-300">{progress}%</span>
+                  <div className="w-full md:w-72">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">
+                        {doneCount} of {steps.length} setup steps done
+                      </span>
+                      <span className="text-slate-300">{progress}%</span>
+                    </div>
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15">
+                      <div
+                        className="h-full rounded-full bg-emerald-400 transition-all duration-500"
+                        style={{ width: `${Math.max(progress, 3)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15">
-                    <div
-                      className="h-full rounded-full bg-emerald-400 transition-all duration-500"
-                      style={{ width: `${Math.max(progress, 3)}%` }}
-                    />
-                  </div>
-                </div>
                 )}
               </div>
             </section>
 
-
             {/* NO ROLES: nothing below would work for them */}
             {hasNoAccess && (
               <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <h2 className="text-base font-semibold text-[#161C2C]">You don&apos;t have access to anything here yet</h2>
+                <h2 className="text-base font-semibold text-[#161C2C]">
+                  You don&apos;t have access to anything here yet
+                </h2>
                 <p className="mt-1 text-sm text-[#53627E]">
-                  Your account is part of {storeName}, but none of your roles give you access to its products, orders
-                  or settings. Ask the store owner to give you a role under Settings → Users.
+                  Your account is part of {storeName}, but none of your roles give you access to its
+                  products, orders or settings. Ask the store owner to give you a role under
+                  Settings → Users.
                 </p>
               </section>
             )}
 
-
             {/* QUICK STATS */}
             {statCards.length > 0 && (
-            <section
-              className={`grid grid-cols-2 gap-4 ${
-                statCards.length >= 4 ? "lg:grid-cols-4" : statCards.length === 3 ? "lg:grid-cols-3" : ""
-              }`}
-            >
-              {statCards.map((card) => (
-                <div
-                  key={card.label}
-                  className="rounded-2xl border border-[#E3E7ED] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#53627E]">{card.label}</span>
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F5F8] text-[#30466F]">
-                      <Icon name={card.icon} className="h-4 w-4" />
-                    </span>
+              <section
+                className={`grid grid-cols-2 gap-4 ${
+                  statCards.length >= 4
+                    ? "lg:grid-cols-4"
+                    : statCards.length === 3
+                      ? "lg:grid-cols-3"
+                      : ""
+                }`}
+              >
+                {statCards.map((card) => (
+                  <div
+                    key={card.label}
+                    className="rounded-2xl border border-[#E3E7ED] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#53627E]">{card.label}</span>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F5F8] text-[#30466F]">
+                        <Icon name={card.icon} className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <p className="mt-3 text-2xl font-semibold tracking-tight text-[#161C2C]">
+                      {card.value}
+                    </p>
                   </div>
-                  <p className="mt-3 text-2xl font-semibold tracking-tight text-[#161C2C]">{card.value}</p>
-                </div>
-              ))}
-            </section>
+                ))}
+              </section>
             )}
-
 
             {/* QUICK ACTIONS */}
             {actions.length > 0 && (
-            <section className="rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
-              <h2 className="text-base font-semibold text-[#161C2C]">Quick actions</h2>
-              <div className="mt-4 grid grid-cols-3 gap-y-5 sm:grid-cols-5">
-                {actions.map((action) => (
-                  <Link
-                    key={action.label}
-                    to={action.to || "#"}
-                    state={action.state}
-                    // "View store" opens the store in this tab (with its "Back to admin" bar)
-                    onClick={action.storefront ? (e) => { e.preventDefault(); openStorefront(action.storefront); } : undefined}
-                    className="group flex flex-col items-center gap-2 text-center"
-                  >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E3E7ED] bg-[#F7F8FA] text-[#141b2d] transition group-hover:-translate-y-0.5 group-hover:border-[#141b2d] group-hover:bg-[#141b2d] group-hover:text-white">
-                      <Icon name={action.icon} />
-                    </span>
-                    <span className="text-xs font-medium text-[#53627E] group-hover:text-[#161C2C] sm:text-sm">
-                      {action.label}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
+              <section className="rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+                <h2 className="text-base font-semibold text-[#161C2C]">Quick actions</h2>
+                <div className="mt-4 grid grid-cols-3 gap-y-5 sm:grid-cols-5">
+                  {actions.map((action) => (
+                    <Link
+                      key={action.label}
+                      to={action.to || "#"}
+                      state={action.state}
+                      // "View store" opens the store in this tab (with its "Back to admin" bar)
+                      onClick={
+                        action.storefront
+                          ? (e) => {
+                              e.preventDefault();
+                              openStorefront(action.storefront);
+                            }
+                          : undefined
+                      }
+                      className="group flex flex-col items-center gap-2 text-center"
+                    >
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E3E7ED] bg-[#F7F8FA] text-[#141b2d] transition group-hover:-translate-y-0.5 group-hover:border-[#141b2d] group-hover:bg-[#141b2d] group-hover:text-white">
+                        <Icon name={action.icon} />
+                      </span>
+                      <span className="text-xs font-medium text-[#53627E] group-hover:text-[#161C2C] sm:text-sm">
+                        {action.label}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
             )}
 
-
             {/* CHECKLIST + TIP */}
-            <div className={`grid grid-cols-1 items-start gap-6 ${steps.length ? "lg:grid-cols-3" : ""}`}>
-
+            <div
+              className={`grid grid-cols-1 items-start gap-6 ${steps.length ? "lg:grid-cols-3" : ""}`}
+            >
               {/* SETUP CHECKLIST */}
               {steps.length > 0 && (
-              <section className="overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm lg:col-span-2">
-                <div className="flex items-center justify-between border-b border-[#E3E7ED] px-4 py-2.5">
-                  <h2 className="text-sm font-semibold text-[#161C2C]">Setup checklist</h2>
-                  <span className="text-xs text-[#53627E]">
-                    {doneCount}/{steps.length} complete
-                  </span>
-                </div>
+                <section className="overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm lg:col-span-2">
+                  <div className="flex items-center justify-between border-b border-[#E3E7ED] px-4 py-2.5">
+                    <h2 className="text-sm font-semibold text-[#161C2C]">Setup checklist</h2>
+                    <span className="text-xs text-[#53627E]">
+                      {doneCount}/{steps.length} complete
+                    </span>
+                  </div>
 
-                <ol className="grid grid-cols-2 gap-2.5 p-3 md:grid-cols-3 2xl:grid-cols-6">
-                  {steps.map((step, i) => {
-                    const isNext = i === nextIndex;
-                    return (
-                      <li key={step.title} className="min-w-0">
-                        <Link
-                          to={step.to}
-                          className={`flex h-full min-w-0 items-start gap-2.5 rounded-xl border px-3 py-2.5 transition hover:-translate-y-0.5 hover:shadow-md ${
-                            isNext
-                              ? "border-[#141b2d] bg-[#F4F6FA]"
-                              : "border-[#E3E7ED] bg-white hover:border-[#C9D1DD]"
-                          }`}
-                        >
-                          <span
-                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                              step.done
-                                ? "border-emerald-500 bg-emerald-500 text-white"
-                                : isNext
-                                  ? "border-[#141b2d]"
-                                  : "border-[#CBD3DF]"
+                  <ol className="grid grid-cols-2 gap-2.5 p-3 md:grid-cols-3 2xl:grid-cols-6">
+                    {steps.map((step, i) => {
+                      const isNext = i === nextIndex;
+                      return (
+                        <li key={step.title} className="min-w-0">
+                          <Link
+                            to={step.to}
+                            className={`flex h-full min-w-0 items-start gap-2.5 rounded-xl border px-3 py-2.5 transition hover:-translate-y-0.5 hover:shadow-md ${
+                              isNext
+                                ? "border-[#141b2d] bg-[#F4F6FA]"
+                                : "border-[#E3E7ED] bg-white hover:border-[#C9D1DD]"
                             }`}
                           >
-                            {step.done && <Icon name="check" className="h-3 w-3" />}
-                          </span>
+                            <span
+                              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                                step.done
+                                  ? "border-emerald-500 bg-emerald-500 text-white"
+                                  : isNext
+                                    ? "border-[#141b2d]"
+                                    : "border-[#CBD3DF]"
+                              }`}
+                            >
+                              {step.done && <Icon name="check" className="h-3 w-3" />}
+                            </span>
 
-                          <span className={`min-w-0 ${step.done ? "opacity-60" : ""}`}>
-                            <span className="block truncate text-sm font-semibold text-[#161C2C]">{step.title}</span>
-                            <span className="mt-0.5 block truncate text-xs text-[#53627E]">{step.help}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </section>
+                            <span className={`min-w-0 ${step.done ? "opacity-60" : ""}`}>
+                              <span className="block truncate text-sm font-semibold text-[#161C2C]">
+                                {step.title}
+                              </span>
+                              <span className="mt-0.5 block truncate text-xs text-[#53627E]">
+                                {step.help}
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </section>
               )}
-
 
               {/* TIP */}
               <aside className="rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm transition hover:shadow-md">
@@ -384,14 +425,10 @@ export default function AdminHomePage() {
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-[#53627E]">{tip}</p>
               </aside>
-
             </div>
-
           </div>
         </main>
-
       </div>
-
     </div>
   );
 }

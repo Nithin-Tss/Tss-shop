@@ -17,20 +17,15 @@ const lineIcon = {
 export default function ContentPage() {
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
-
       <AdminHeader />
-
 
       {/* BODY */}
       <div className="flex min-h-[calc(100vh-72px)]">
-
         {/* SIDEBAR */}
         <AdminSidebar />
 
-
         {/* MAIN CONTENT */}
         <main className="flex-1 bg-[#F7F8FA] px-6 lg:px-8 py-6 overflow-hidden">
-
           {/* TITLE + ACTIONS */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
@@ -55,10 +50,8 @@ export default function ContentPage() {
             </div>
           </div>
 
-
           {/* DEFINITIONS CARD */}
           <section className="mt-5 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
-
             {/* Toolbar */}
             <div className="flex items-center gap-3 border-b border-[#E3E7ED] px-4 py-3">
               <button
@@ -109,20 +102,13 @@ export default function ContentPage() {
               </div>
             </div>
 
-
             {/* Empty state */}
             <div className="px-6 py-12 text-center">
-              <h2 className="text-xl font-semibold text-[#161C2C]">
-                No definitions found
-              </h2>
+              <h2 className="text-xl font-semibold text-[#161C2C]">No definitions found</h2>
 
-              <p className="mt-3 text-sm text-[#53627E]">
-                Try changing the filters or search term
-              </p>
+              <p className="mt-3 text-sm text-[#53627E]">Try changing the filters or search term</p>
             </div>
-
           </section>
-
 
           {/* LEARN MORE */}
           <p className="mt-8 text-center text-sm font-medium text-[#161C2C]">
@@ -130,11 +116,8 @@ export default function ContentPage() {
               Learn more about metaobjects
             </a>
           </p>
-
         </main>
-
       </div>
-
     </div>
   );
 }
@@ -190,12 +173,22 @@ export function BlogPostsPage() {
     setBusy(true);
     setError("");
     try {
-      const body = { ...form, tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean) };
+      const body = {
+        ...form,
+        tags: form.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+      };
       const saved = await saveBlogPost(editing.id, body);
       setPosts((list) => [saved, ...(list || []).filter((p) => p.id !== saved.id)]);
       setEditing(saved);
       setForm({ ...EMPTY_POST, ...saved, tags: saved.tags.join(", ") });
-      setNotice(saved.status === "published" ? "Saved. The post is live on your store." : "Saved as a draft.");
+      setNotice(
+        saved.status === "published"
+          ? "Saved. The post is live on your store."
+          : "Saved as a draft."
+      );
       // An open Customize editor shows the new post in its preview
       announceThemeChange("posts");
     } catch (e) {
@@ -262,17 +255,25 @@ export function BlogPostsPage() {
             </div>
           </div>
 
-          {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>}
-          {notice && <p className="mt-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-800">{notice}</p>}
+          {error && (
+            <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+          )}
+          {notice && (
+            <p className="mt-4 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-800">{notice}</p>
+          )}
 
           {!editing && (
             <section className="mt-5 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
               {posts === null ? (
-                <p className="px-6 py-10 text-center text-sm text-[#53627E]">{error ? "" : "Loading..."}</p>
+                <p className="px-6 py-10 text-center text-sm text-[#53627E]">
+                  {error ? "" : "Loading..."}
+                </p>
               ) : posts.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <h2 className="text-xl font-semibold">No blog posts yet</h2>
-                  <p className="mt-3 text-sm text-[#53627E]">Published posts appear on your store's blog.</p>
+                  <p className="mt-3 text-sm text-[#53627E]">
+                    Published posts appear on your store's blog.
+                  </p>
                 </div>
               ) : (
                 <table className="w-full text-left text-sm">
@@ -286,15 +287,25 @@ export function BlogPostsPage() {
                   </thead>
                   <tbody>
                     {posts.map((post) => (
-                      <tr key={post.id} onClick={() => open(post)} className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F7F8FA]">
+                      <tr
+                        key={post.id}
+                        onClick={() => open(post)}
+                        className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F7F8FA]"
+                      >
                         <td className="px-4 py-3 font-medium">{post.title}</td>
                         <td className="px-4 py-3">
-                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.status === "published" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}>
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.status === "published" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}
+                          >
                             {post.status === "published" ? "Published" : "Draft"}
                           </span>
                         </td>
-                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">{post.author}</td>
-                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">{postDate(post.published_at)}</td>
+                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">
+                          {post.author}
+                        </td>
+                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">
+                          {postDate(post.published_at)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -308,20 +319,46 @@ export function BlogPostsPage() {
               <section className="grid gap-4 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
                 <label>
                   <span className={fieldLabel}>Title</span>
-                  <input className={fieldClass} value={form.title} onChange={(e) => set("title")(e.target.value)} required maxLength={255} />
+                  <input
+                    className={fieldClass}
+                    value={form.title}
+                    onChange={(e) => set("title")(e.target.value)}
+                    required
+                    maxLength={255}
+                  />
                 </label>
                 <div>
                   <span className={fieldLabel}>Content</span>
-                  <RichTextEditor id="post-body" value={form.body} onChange={set("body")} placeholder="Write your post..." />
+                  <RichTextEditor
+                    id="post-body"
+                    value={form.body}
+                    onChange={set("body")}
+                    placeholder="Write your post..."
+                  />
                 </div>
                 <label>
                   <span className={fieldLabel}>Excerpt</span>
-                  <textarea className={fieldClass} rows={3} maxLength={1000} value={form.excerpt} onChange={(e) => set("excerpt")(e.target.value)} placeholder="A short summary shown on the blog page" />
+                  <textarea
+                    className={fieldClass}
+                    rows={3}
+                    maxLength={1000}
+                    value={form.excerpt}
+                    onChange={(e) => set("excerpt")(e.target.value)}
+                    placeholder="A short summary shown on the blog page"
+                  />
                 </label>
                 <label>
                   <span className={fieldLabel}>URL handle (slug)</span>
-                  <input className={fieldClass} value={form.handle} onChange={(e) => set("handle")(e.target.value)} placeholder="Made from the title when empty" maxLength={255} />
-                  <span className="mt-1 block text-xs text-[#53627E]">Address on your store: /blog/{form.handle || "…"}</span>
+                  <input
+                    className={fieldClass}
+                    value={form.handle}
+                    onChange={(e) => set("handle")(e.target.value)}
+                    placeholder="Made from the title when empty"
+                    maxLength={255}
+                  />
+                  <span className="mt-1 block text-xs text-[#53627E]">
+                    Address on your store: /blog/{form.handle || "…"}
+                  </span>
                 </label>
               </section>
 
@@ -329,21 +366,39 @@ export function BlogPostsPage() {
                 <section className="grid gap-3 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Visibility</span>
-                    <select className={fieldClass} value={form.status} onChange={(e) => set("status")(e.target.value)}>
+                    <select
+                      className={fieldClass}
+                      value={form.status}
+                      onChange={(e) => set("status")(e.target.value)}
+                    >
                       <option value="draft">Draft (hidden)</option>
                       <option value="published">Published</option>
                     </select>
                   </label>
-                  <button type="submit" disabled={busy} className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] disabled:opacity-50">
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] disabled:opacity-50"
+                  >
                     {busy ? "Saving..." : "Save"}
                   </button>
                   {editing.id && editing.status === "published" && (
-                    <a href={editing.url} target="_blank" rel="noopener noreferrer" className="text-center text-sm font-medium text-[#30466F] hover:underline">
+                    <a
+                      href={editing.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-center text-sm font-medium text-[#30466F] hover:underline"
+                    >
                       View on store
                     </a>
                   )}
                   {editing.id && (
-                    <button type="button" onClick={remove} disabled={busy} className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50">
+                    <button
+                      type="button"
+                      onClick={remove}
+                      disabled={busy}
+                      className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+                    >
                       Delete post
                     </button>
                   )}
@@ -351,23 +406,54 @@ export function BlogPostsPage() {
 
                 <section className="grid gap-3 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
                   <span className={fieldLabel}>Featured image</span>
-                  {form.cover_image && <img src={form.cover_image} alt="" className="aspect-[3/2] w-full rounded-lg object-cover" />}
-                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => upload(e.target.files[0])} className="text-xs" />
-                  <input className={fieldClass} value={form.cover_image} onChange={(e) => set("cover_image")(e.target.value)} placeholder="or paste an image link (https://...)" />
+                  {form.cover_image && (
+                    <img
+                      src={form.cover_image}
+                      alt=""
+                      className="aspect-[3/2] w-full rounded-lg object-cover"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => upload(e.target.files[0])}
+                    className="text-xs"
+                  />
+                  <input
+                    className={fieldClass}
+                    value={form.cover_image}
+                    onChange={(e) => set("cover_image")(e.target.value)}
+                    placeholder="or paste an image link (https://...)"
+                  />
                 </section>
 
                 <section className="grid gap-3 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Author</span>
-                    <input className={fieldClass} value={form.author} onChange={(e) => set("author")(e.target.value)} maxLength={120} />
+                    <input
+                      className={fieldClass}
+                      value={form.author}
+                      onChange={(e) => set("author")(e.target.value)}
+                      maxLength={120}
+                    />
                   </label>
                   <label>
                     <span className={fieldLabel}>Category</span>
-                    <input className={fieldClass} value={form.category} onChange={(e) => set("category")(e.target.value)} maxLength={120} />
+                    <input
+                      className={fieldClass}
+                      value={form.category}
+                      onChange={(e) => set("category")(e.target.value)}
+                      maxLength={120}
+                    />
                   </label>
                   <label>
                     <span className={fieldLabel}>Tags</span>
-                    <input className={fieldClass} value={form.tags} onChange={(e) => set("tags")(e.target.value)} placeholder="Separated by commas" />
+                    <input
+                      className={fieldClass}
+                      value={form.tags}
+                      onChange={(e) => set("tags")(e.target.value)}
+                      placeholder="Separated by commas"
+                    />
                   </label>
                 </section>
               </aside>

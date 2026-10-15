@@ -52,7 +52,9 @@ export default function VerifyEmail() {
     try {
       const result = await apiPost("/api/v1/auth/verify-email/resend/", {});
       setResendMessage(
-        result.ok ? result.data.message : result.formError || "Could not send the link. Please try again."
+        result.ok
+          ? result.data.message
+          : result.formError || "Could not send the link. Please try again."
       );
     } finally {
       setIsResending(false);
@@ -62,9 +64,7 @@ export default function VerifyEmail() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-12 flex items-center justify-center">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-          Verify email
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Verify email</h1>
 
         {status === "checking" && (
           <p className="mt-3 text-sm leading-6 text-slate-600" role="status">
@@ -75,9 +75,7 @@ export default function VerifyEmail() {
         {status === "verified" && (
           <div role="status" className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4">
             <p className="font-semibold text-green-800">Email verified</p>
-            <p className="mt-1 text-sm text-green-700">
-              Thanks! Your email address is confirmed.
-            </p>
+            <p className="mt-1 text-sm text-green-700">Thanks! Your email address is confirmed.</p>
             <Link
               to={signedIn ? "/profile" : "/auth/signin"}
               className="mt-3 inline-block text-sm font-semibold text-green-800 underline"
@@ -91,7 +89,8 @@ export default function VerifyEmail() {
           <div role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
             <p className="font-semibold text-red-800">This link can't be used</p>
             <p className="mt-1 text-sm text-red-700">
-              {error || "This verification link is invalid or has expired. Please request a new one."}
+              {error ||
+                "This verification link is invalid or has expired. Please request a new one."}
             </p>
 
             {signedIn ? (
@@ -113,7 +112,9 @@ export default function VerifyEmail() {
             )}
 
             {resendMessage && (
-              <p className="mt-2 text-sm text-slate-700" role="status">{resendMessage}</p>
+              <p className="mt-2 text-sm text-slate-700" role="status">
+                {resendMessage}
+              </p>
             )}
           </div>
         )}

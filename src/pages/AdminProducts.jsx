@@ -30,7 +30,12 @@ function validateFile(file) {
 // Product fields a file column can be mapped to. "aliases" are only used to
 // suggest a column; the user confirms or changes every mapping before importing.
 const IMPORT_FIELDS = [
-  { key: "title", label: "Title", required: true, aliases: ["title", "name", "product name", "product title"] },
+  {
+    key: "title",
+    label: "Title",
+    required: true,
+    aliases: ["title", "name", "product name", "product title"],
+  },
   { key: "description", label: "Description", aliases: ["description", "body", "about"] },
   { key: "price", label: "Price", aliases: ["price", "variant price"] },
   { key: "sku", label: "SKU", required: true, aliases: ["sku", "variant sku"] },
@@ -40,7 +45,11 @@ const IMPORT_FIELDS = [
   { key: "status", label: "Status", aliases: ["status"] },
   { key: "tags", label: "Tags", aliases: ["tags"] },
   { key: "collections", label: "Collections", aliases: ["collections", "collection"] },
-  { key: "quantity", label: "Quantity", aliases: ["quantity", "qty", "stock", "inventory", "variant inventory qty"] },
+  {
+    key: "quantity",
+    label: "Quantity",
+    aliases: ["quantity", "qty", "stock", "inventory", "variant inventory qty"],
+  },
   ...EXTRA_FIELDS.map((f) => ({
     key: f.key,
     label: f.label,
@@ -58,7 +67,9 @@ const splitList = (value) =>
 async function readSheet(file) {
   const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const table = sheet ? XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", blankrows: false }) : [];
+  const table = sheet
+    ? XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "", blankrows: false })
+    : [];
   const headers = (table[0] || []).map((h) => String(h).trim());
   return { headers, rows: table.slice(1) };
 }
@@ -287,7 +298,9 @@ function ImportProductsModal({ onClose, onImported }) {
           `${created} of ${rows.length} products imported before the import stopped. ` +
             (res.status === 401
               ? "Your session expired. Sign in again, then import the file again."
-              : res.formError || Object.values(res.fieldErrors || {})[0] || "The server rejected the file.")
+              : res.formError ||
+                Object.values(res.fieldErrors || {})[0] ||
+                "The server rejected the file.")
         );
         return;
       }
@@ -295,7 +308,9 @@ function ImportProductsModal({ onClose, onImported }) {
       created += res.data.created;
       skipped += res.data.skipped;
       res.data.errors.forEach((e) =>
-        failures.push(`Row ${start + e.index + 2} (${batch[e.index].title || "no title"}): ${e.message}`)
+        failures.push(
+          `Row ${start + e.index + 2} (${batch[e.index].title || "no title"}): ${e.message}`
+        )
       );
       processed += batch.length;
     }
@@ -328,7 +343,6 @@ function ImportProductsModal({ onClose, onImported }) {
         className="w-full max-w-140 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#E3E7ED] px-5 py-4">
           <h2 id="import-products-title" className="text-base font-semibold text-charcoal-navy">
@@ -346,7 +360,6 @@ function ImportProductsModal({ onClose, onImported }) {
           </button>
         </div>
 
-
         {/* Body */}
         <div className="px-5 py-5">
           <input
@@ -360,7 +373,8 @@ function ImportProductsModal({ onClose, onImported }) {
           {sheet ? (
             <div>
               <p className="text-sm text-[#53627E]">
-                Choose which column in <span className="font-medium text-charcoal-navy">{file.name}</span> fills each
+                Choose which column in{" "}
+                <span className="font-medium text-charcoal-navy">{file.name}</span> fills each
                 product field. {sheet.rows.length} {sheet.rows.length === 1 ? "row" : "rows"} found.
               </p>
               <div className="mt-3 max-h-[46vh] space-y-2 overflow-y-auto pr-1">
@@ -375,7 +389,9 @@ function ImportProductsModal({ onClose, onImported }) {
                         disabled={importing}
                         placeholder={field.label}
                         aria-label={`Name for ${field.label}`}
-                        onChange={(e) => setLabels((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                        onChange={(e) =>
+                          setLabels((prev) => ({ ...prev, [field.key]: e.target.value }))
+                        }
                         className="h-10 w-[38%] rounded-lg border border-dashed border-[#D8DFE8] bg-white px-3 text-sm text-charcoal-navy outline-none placeholder:text-[#7A869A] focus:border-[#141b2d]"
                       />
                     ) : (
@@ -391,7 +407,11 @@ function ImportProductsModal({ onClose, onImported }) {
                         const column = e.target.value === "" ? "" : Number(e.target.value);
                         setMapping((prev) => ({ ...prev, [field.key]: column }));
                         // Name an unnamed generic column after the file's column
-                        if (isRenamable(field.key) && column !== "" && !(labels[field.key] || "").trim()) {
+                        if (
+                          isRenamable(field.key) &&
+                          column !== "" &&
+                          !(labels[field.key] || "").trim()
+                        ) {
                           const header = sheet.headers[column];
                           if (header) setLabels((prev) => ({ ...prev, [field.key]: header }));
                         }
@@ -453,7 +473,8 @@ function ImportProductsModal({ onClose, onImported }) {
                 </svg>
               </span>
               <p className="mt-3 text-sm font-medium text-charcoal-navy">
-                <span className="underline underline-offset-2">Click to browse</span> or drag and drop
+                <span className="underline underline-offset-2">Click to browse</span> or drag and
+                drop
               </p>
               <p className="mt-1 text-xs text-[#53627E]">
                 Excel (.xlsx, .xls) or CSV (.csv), up to 10MB
@@ -462,11 +483,16 @@ function ImportProductsModal({ onClose, onImported }) {
           )}
 
           {importing && progress && (
-            <p role="status" className="mt-3 text-sm text-[#53627E]">{progress}</p>
+            <p role="status" className="mt-3 text-sm text-[#53627E]">
+              {progress}
+            </p>
           )}
 
           {error && (
-            <p role="alert" className="mt-3 flex items-start gap-2 rounded-lg bg-[#FDECEC] px-3 py-2 text-sm text-[#B42318]">
+            <p
+              role="alert"
+              className="mt-3 flex items-start gap-2 rounded-lg bg-[#FDECEC] px-3 py-2 text-sm text-[#B42318]"
+            >
               <svg {...lineIcon} strokeWidth="1.8" className="mt-0.5 h-4 w-4 shrink-0">
                 <circle cx="12" cy="12" r="9" />
                 <path d="M12 8v5M12 16h.01" />
@@ -475,7 +501,6 @@ function ImportProductsModal({ onClose, onImported }) {
             </p>
           )}
         </div>
-
 
         {/* Footer */}
         <div className="flex justify-end gap-3 border-t border-[#E3E7ED] bg-[#F7F8FA] px-5 py-4">
@@ -490,14 +515,17 @@ function ImportProductsModal({ onClose, onImported }) {
           <button
             type="button"
             disabled={sheet ? importing || missingRequired.length > 0 : !file}
-            title={missingRequired.length ? `Choose a column for ${missingRequired.map((f) => f.label).join(", ")}` : undefined}
+            title={
+              missingRequired.length
+                ? `Choose a column for ${missingRequired.map((f) => f.label).join(", ")}`
+                : undefined
+            }
             onClick={sheet ? handleImport : handleContinue}
             className="rounded-lg bg-[#141b2d] px-5 py-2.5 text-base font-semibold text-white hover:bg-[#252E45] transition disabled:cursor-not-allowed disabled:bg-[#C5CCD8] disabled:hover:bg-[#C5CCD8]"
           >
             {importing ? "Importing..." : sheet ? "Import" : "Continue"}
           </button>
         </div>
-
       </div>
     </div>
   );
@@ -510,7 +538,9 @@ export default function ProductsPage() {
   // What the user's roles allow here; the backend refuses the rest anyway
   const canManage = useCan("products.manage");
   const canDelete = useCan("products.delete");
-  const [isImportOpen, setIsImportOpen] = useState(Boolean(location.state?.openImport) && canManage);
+  const [isImportOpen, setIsImportOpen] = useState(
+    Boolean(location.state?.openImport) && canManage
+  );
   const [products, setProducts] = useState(() =>
     productsCache.items && productsCache.storeId === activeStoreId() ? productsCache.items : []
   );
@@ -544,13 +574,13 @@ export default function ProductsPage() {
       return next;
     });
 
-  const toggleAll = () =>
-    setSelected(allSelected ? new Set() : new Set(products.map((p) => p.id)));
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(products.map((p) => p.id)));
 
   const deleteSelected = async () => {
     const count = selected.size;
     if (!count || deleting) return;
-    if (!window.confirm(`Delete ${count} product${count === 1 ? "" : "s"}? This can't be undone.`)) return;
+    if (!window.confirm(`Delete ${count} product${count === 1 ? "" : "s"}? This can't be undone.`))
+      return;
 
     setDeleting(true);
     setNotice("");
@@ -565,7 +595,9 @@ export default function ProductsPage() {
       if (!res.ok) {
         setNotice(
           `${deleted} deleted. ${
-            res.status === 401 ? "Your session expired. Sign in again." : res.formError || "Something went wrong."
+            res.status === 401
+              ? "Your session expired. Sign in again."
+              : res.formError || "Something went wrong."
           }`
         );
         break;
@@ -589,30 +621,23 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-white text-charcoal-navy">
-
       <AdminHeader />
-
 
       {/* BODY */}
       <div className="flex min-h-[calc(100vh-72px)]">
-
         {/* SIDEBAR */}
         <AdminSidebar />
 
-
         {/* MAIN CONTENT */}
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F7F8FA] p-5 lg:p-6">
-
           {/* TITLE */}
           <h1 className="flex items-center gap-2.5 text-2xl font-bold text-charcoal-navy">
             <PageIcon name="products" />
             Products
           </h1>
 
-
           {/* PRODUCTS CARD */}
           <section className="mt-5 flex flex-1 flex-col overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
-
             {/* Tabs */}
             <div className="flex items-center gap-2 border-b border-[#E3E7ED] px-4 py-3">
               <button
@@ -630,7 +655,6 @@ export default function ProductsPage() {
                 +
               </button>
             </div>
-
 
             {products.length > 0 && (
               <div>
@@ -669,7 +693,10 @@ export default function ProductsPage() {
                   </div>
                 </div>
                 {notice && (
-                  <p role="status" className="mx-6 mb-3 rounded-lg bg-[#FFF6E5] px-3 py-2 text-sm text-[#7A4B00]">
+                  <p
+                    role="status"
+                    className="mx-6 mb-3 rounded-lg bg-[#FFF6E5] px-3 py-2 text-sm text-[#7A4B00]"
+                  >
                     {notice}
                   </p>
                 )}
@@ -687,7 +714,9 @@ export default function ProductsPage() {
                           />
                         </th>
                       )}
-                      <th className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium`}>Product</th>
+                      <th className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium`}>
+                        Product
+                      </th>
                       <th className="px-4 py-3 font-medium">Status</th>
                       <th className="px-4 py-3 font-medium">Category</th>
                       <th className="px-4 py-3 font-medium">SKU</th>
@@ -712,7 +741,9 @@ export default function ProductsPage() {
                             />
                           </td>
                         )}
-                        <td className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium text-charcoal-navy`}>
+                        <td
+                          className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium text-charcoal-navy`}
+                        >
                           <Link
                             to={`/admin/online-store/products/${product.id}`}
                             className="hover:underline"
@@ -723,7 +754,9 @@ export default function ProductsPage() {
                         <td className="px-4 py-3 capitalize text-[#53627E]">{product.status}</td>
                         <td className="px-4 py-3 text-[#53627E]">{product.category || "-"}</td>
                         <td className="px-4 py-3 text-[#53627E]">{product.sku || "-"}</td>
-                        <td className="px-6 py-3 text-right text-charcoal-navy">{product.price ?? "-"}</td>
+                        <td className="px-6 py-3 text-right text-charcoal-navy">
+                          {product.price ?? "-"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -739,89 +772,85 @@ export default function ProductsPage() {
 
             {/* Add your products */}
             {loaded && products.length === 0 && (
-            <div className="flex flex-1 items-center justify-between gap-10 px-6 py-12 sm:px-12 lg:pl-[14%] lg:pr-[8%]">
+              <div className="flex flex-1 items-center justify-between gap-10 px-6 py-12 sm:px-12 lg:pl-[14%] lg:pr-[8%]">
+                <div>
+                  <h2 className="text-[30px] font-semibold leading-tight text-charcoal-navy sm:text-[34px]">
+                    {canManage ? "Add your products" : "No products yet"}
+                  </h2>
 
-              <div>
-                <h2 className="text-[30px] font-semibold leading-tight text-charcoal-navy sm:text-[34px]">
-                  {canManage ? "Add your products" : "No products yet"}
-                </h2>
+                  <p className="mt-3 text-xl leading-relaxed text-[#53627E]">
+                    {canManage
+                      ? "Start by stocking your store with products your customers will love"
+                      : "Products added to this store will show up here."}
+                  </p>
 
-                <p className="mt-3 text-xl leading-relaxed text-[#53627E]">
-                  {canManage
-                    ? "Start by stocking your store with products your customers will love"
-                    : "Products added to this store will show up here."}
-                </p>
+                  {canManage && (
+                    <div className="mt-7 flex flex-wrap items-center gap-3">
+                      <Link
+                        to="/admin/online-store/products/new"
+                        className="flex items-center gap-2 rounded-lg bg-[#141b2d] px-7 py-3.5 text-[17px] font-semibold text-white hover:bg-[#252E45] transition"
+                      >
+                        <span className="text-2xl leading-none">+</span>
+                        Add product
+                      </Link>
 
-                {canManage && (
-                <div className="mt-7 flex flex-wrap items-center gap-3">
-                  <Link
-                    to="/admin/online-store/products/new"
-                    className="flex items-center gap-2 rounded-lg bg-[#141b2d] px-7 py-3.5 text-[17px] font-semibold text-white hover:bg-[#252E45] transition"
-                  >
-                    <span className="text-2xl leading-none">+</span>
-                    Add product
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsImportOpen(true)}
-                    className="flex items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-7 py-3.5 text-[17px] font-medium text-charcoal-navy hover:border-charcoal-navy transition"
-                  >
-                    <svg {...lineIcon} strokeWidth="1.8" className="h-5 w-5">
-                      <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
-                    </svg>
-                    Import
-                  </button>
-                </div>
-                )}
-              </div>
-
-
-              {/* Storefront mockup */}
-              <div
-                aria-hidden="true"
-                className="hidden xl:block w-105 shrink-0 overflow-hidden rounded-xl border border-[#E6E9EF] bg-white shadow-[0_12px_32px_-24px_rgba(20,27,45,0.3)]"
-              >
-                {/* Browser bar */}
-                <div className="flex items-center gap-3 border-b border-[#EEF0F4] bg-[#FAFBFC] px-4 py-2.5">
-                  <div className="flex gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
-                    <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
-                    <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
-                  </div>
-                  <span className="flex-1 rounded-md border border-[#EEF0F4] bg-white px-3 py-0.5 text-center text-[11px] text-[#8A94A8]">
-                    yourstore.com
-                  </span>
-                </div>
-
-                {/* Shop header */}
-                <div className="px-5 pb-1 pt-4">
-                  <span className="text-xs font-bold tracking-[0.2em] text-[#141b2d]">STORE</span>
-                </div>
-
-                {/* Product grid */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-5 p-5">
-                  {sampleProducts.map((product) => (
-                    <div key={product.name}>
-                      <div className="flex h-26 items-center justify-center rounded-lg bg-[#F5F6F8] text-[#53627E]">
-                        <span className="block h-9 w-9 [&>svg]:h-full [&>svg]:w-full [&>svg]:stroke-[1.25]">
-                          {product.icon}
-                        </span>
-                      </div>
-                      <p className="mt-2.5 text-[13px] font-medium text-charcoal-navy">{product.name}</p>
-                      <p className="text-xs text-[#8A94A8]">{product.price}</p>
+                      <button
+                        type="button"
+                        onClick={() => setIsImportOpen(true)}
+                        className="flex items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-7 py-3.5 text-[17px] font-medium text-charcoal-navy hover:border-charcoal-navy transition"
+                      >
+                        <svg {...lineIcon} strokeWidth="1.8" className="h-5 w-5">
+                          <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+                        </svg>
+                        Import
+                      </button>
                     </div>
-                  ))}
+                  )}
+                </div>
+
+                {/* Storefront mockup */}
+                <div
+                  aria-hidden="true"
+                  className="hidden xl:block w-105 shrink-0 overflow-hidden rounded-xl border border-[#E6E9EF] bg-white shadow-[0_12px_32px_-24px_rgba(20,27,45,0.3)]"
+                >
+                  {/* Browser bar */}
+                  <div className="flex items-center gap-3 border-b border-[#EEF0F4] bg-[#FAFBFC] px-4 py-2.5">
+                    <div className="flex gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
+                      <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
+                      <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
+                    </div>
+                    <span className="flex-1 rounded-md border border-[#EEF0F4] bg-white px-3 py-0.5 text-center text-[11px] text-[#8A94A8]">
+                      yourstore.com
+                    </span>
+                  </div>
+
+                  {/* Shop header */}
+                  <div className="px-5 pb-1 pt-4">
+                    <span className="text-xs font-bold tracking-[0.2em] text-[#141b2d]">STORE</span>
+                  </div>
+
+                  {/* Product grid */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-5 p-5">
+                    {sampleProducts.map((product) => (
+                      <div key={product.name}>
+                        <div className="flex h-26 items-center justify-center rounded-lg bg-[#F5F6F8] text-[#53627E]">
+                          <span className="block h-9 w-9 [&>svg]:h-full [&>svg]:w-full [&>svg]:stroke-[1.25]">
+                            {product.icon}
+                          </span>
+                        </div>
+                        <p className="mt-2.5 text-[13px] font-medium text-charcoal-navy">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-[#8A94A8]">{product.price}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-
-            </div>
             )}
-
           </section>
-
         </main>
-
       </div>
 
       {isImportOpen && (
@@ -834,7 +863,6 @@ export default function ProductsPage() {
           }}
         />
       )}
-
     </div>
   );
 }

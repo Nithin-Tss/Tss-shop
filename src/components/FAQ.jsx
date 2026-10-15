@@ -1,26 +1,21 @@
-
 import { useState } from "react";
 
 const faqItems = [
   {
     question: "Do I need a credit card to start?",
-    answer:
-      "No. You can start building your store without entering your credit card details.",
+    answer: "No. You can start building your store without entering your credit card details.",
   },
   {
     question: "Can I use my own domain name?",
-    answer:
-      "Yes. You can connect your existing domain name to your online store.",
+    answer: "Yes. You can connect your existing domain name to your online store.",
   },
   {
     question: "How do I get paid?",
-    answer:
-      "You can connect supported payment providers to accept payments from your customers.",
+    answer: "You can connect supported payment providers to accept payments from your customers.",
   },
   {
     question: "Can I move my products from another platform?",
-    answer:
-      "Yes. You can migrate your existing product information and store data to Store.",
+    answer: "Yes. You can migrate your existing product information and store data to Store.",
   },
   {
     question: "Can I cancel anytime?",
@@ -57,10 +52,7 @@ export default function FAQ() {
             const isOpen = openIndex === index;
 
             return (
-              <div
-                key={item.question}
-                className="border-b border-slate-200"
-              >
+              <div key={item.question} className="border-b border-slate-200">
                 <button
                   type="button"
                   onClick={() => handleToggle(index)}
@@ -74,9 +66,7 @@ export default function FAQ() {
 
                   <span
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xl font-bold transition ${
-                      isOpen
-                        ? "bg-blue-600 text-white"
-                        : "text-blue-600"
+                      isOpen ? "bg-blue-600 text-white" : "text-blue-600"
                     }`}
                     aria-hidden="true"
                   >

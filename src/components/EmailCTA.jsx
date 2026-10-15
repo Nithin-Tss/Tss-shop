@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ONBOARDING_PATH } from "@/lib/auth";
@@ -43,42 +42,37 @@ export default function EmailCTA() {
           </h2>
 
           <p className="mt-3 text-sm text-slate-300 sm:text-base">
-            Join thousands of entrepreneurs and create your online store in
-            minutes.
+            Join thousands of entrepreneurs and create your online store in minutes.
           </p>
 
           <form
-              onSubmit={handleSubmit}
-              className="mx-auto mt-7 flex max-w-2xl flex-col gap-3 sm:flex-row"
+            onSubmit={handleSubmit}
+            className="mx-auto mt-7 flex max-w-2xl flex-col gap-3 sm:flex-row"
+          >
+            <div className="flex-1">
+              <label htmlFor="cta-email" className="sr-only">
+                Email address
+              </label>
+
+              <input
+                id="cta-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="Enter your email"
+                className="h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              />
+
+              {error && <p className="mt-2 text-left text-sm text-red-300">{error}</p>}
+            </div>
+
+            <button
+              type="submit"
+              className="h-12 rounded-md bg-blue-600 px-6 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-[#081d46]"
             >
-              <div className="flex-1">
-                <label htmlFor="cta-email" className="sr-only">
-                  Email address
-                </label>
-
-                <input
-                  id="cta-email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="Enter your email"
-                  className="h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                />
-
-                {error && (
-                  <p className="mt-2 text-left text-sm text-red-300">
-                    {error}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="h-12 rounded-md bg-blue-600 px-6 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-[#081d46]"
-              >
-                Start free trial
-              </button>
-            </form>
+              Start free trial
+            </button>
+          </form>
         </div>
       </div>
     </section>

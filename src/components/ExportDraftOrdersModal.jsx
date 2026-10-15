@@ -20,9 +20,7 @@ export default function ExportDraftOrdersModal({
 
   // Date range state for "Draft orders by date"
   const todayStr = new Date().toISOString().slice(0, 10);
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const [startDate, setStartDate] = useState(thirtyDaysAgo);
   const [endDate, setEndDate] = useState(todayStr);
 
@@ -93,10 +91,7 @@ export default function ExportDraftOrdersModal({
     ];
 
     const rows = itemsToExport.map((d) => {
-      const itemCount = (d.details || []).reduce(
-        (acc, item) => acc + (item.quantity || 1),
-        0
-      );
+      const itemCount = (d.details || []).reduce((acc, item) => acc + (item.quantity || 1), 0);
       const itemsSummary = (d.details || [])
         .map(
           (item) =>
@@ -156,10 +151,7 @@ export default function ExportDraftOrdersModal({
       >
         {/* MODAL HEADER */}
         <div className="flex items-center justify-between border-b border-[#E1E3E5] px-6 py-4">
-          <h2
-            id="export-modal-title"
-            className="text-[17px] font-semibold text-[#202223]"
-          >
+          <h2 id="export-modal-title" className="text-[17px] font-semibold text-[#202223]">
             Export draft orders
           </h2>
           <button
@@ -168,12 +160,7 @@ export default function ExportDraftOrdersModal({
             aria-label="Close modal"
             className="rounded-lg p-1 text-[#5C5F62] hover:bg-[#F1F2F3] hover:text-[#202223] transition-colors focus:outline-none"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -240,9 +227,7 @@ export default function ExportDraftOrdersModal({
               ) : (
                 <div className="flex items-center gap-3 cursor-not-allowed select-none">
                   <span className="h-5 w-5 shrink-0 rounded-full bg-[#E5E7EB]" />
-                  <span className="text-sm text-[#8C9196]">
-                    Selected: 0 draft orders
-                  </span>
+                  <span className="text-sm text-[#8C9196]">Selected: 0 draft orders</span>
                 </div>
               )}
 
@@ -267,9 +252,7 @@ export default function ExportDraftOrdersModal({
               ) : (
                 <div className="flex items-center gap-3 cursor-not-allowed select-none">
                   <span className="h-5 w-5 shrink-0 rounded-full bg-[#E5E7EB]" />
-                  <span className="text-sm text-[#8C9196]">
-                    1 draft order matching your search
-                  </span>
+                  <span className="text-sm text-[#8C9196]">1 draft order matching your search</span>
                 </div>
               )}
 
@@ -286,18 +269,14 @@ export default function ExportDraftOrdersModal({
                   ) : (
                     <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
                   )}
-                  <span className="text-sm text-[#202223]">
-                    Draft orders by date
-                  </span>
+                  <span className="text-sm text-[#202223]">Draft orders by date</span>
                 </label>
 
                 {/* Date range pickers */}
                 {exportScope === "by_date" && (
                   <div className="ml-8 mt-3 flex flex-col sm:flex-row items-center gap-3 animate-in fade-in duration-100">
                     <div className="w-full sm:w-1/2">
-                      <label className="block text-xs font-medium text-[#5C5F62] mb-1">
-                        From
-                      </label>
+                      <label className="block text-xs font-medium text-[#5C5F62] mb-1">From</label>
                       <input
                         type="date"
                         value={startDate}
@@ -306,9 +285,7 @@ export default function ExportDraftOrdersModal({
                       />
                     </div>
                     <div className="w-full sm:w-1/2">
-                      <label className="block text-xs font-medium text-[#5C5F62] mb-1">
-                        To
-                      </label>
+                      <label className="block text-xs font-medium text-[#5C5F62] mb-1">To</label>
                       <input
                         type="date"
                         value={endDate}
@@ -324,9 +301,7 @@ export default function ExportDraftOrdersModal({
 
           {/* SECTION 2: EXPORT AS */}
           <div>
-            <h3 className="text-sm font-semibold text-[#202223] mb-3.5">
-              Export as
-            </h3>
+            <h3 className="text-sm font-semibold text-[#202223] mb-3.5">Export as</h3>
             <div className="space-y-3">
               {/* Excel / Numbers CSV */}
               <label

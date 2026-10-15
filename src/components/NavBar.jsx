@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 import React, { useState } from "react";
 import { ONBOARDING_PATH, useSession } from "@/lib/auth";
 
-
 export default function NavBar() {
   const session = useSession();
   const pathname = useLocation().pathname;
@@ -29,9 +28,7 @@ export default function NavBar() {
     <header className="w-full sticky top-0 z-50 bg-white shadow-xs">
       {/* 1. ANNOUNCEMENT BAR (hidden for signed-in users) */}
       {!isLoggedIn && (
-        <div
-          className="w-full bg-charcoal-navy text-white text-xs sm:text-sm py-2 px-4 flex items-center justify-between transition-all"
-        >
+        <div className="w-full bg-charcoal-navy text-white text-xs sm:text-sm py-2 px-4 flex items-center justify-between transition-all">
           <div className="hidden sm:block sm:w-28"></div>
 
           <div className="flex-1 flex items-center justify-center gap-2 text-center text-gray-200">
@@ -54,7 +51,6 @@ export default function NavBar() {
       {/* 2. MAIN NAVBAR */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 border-b border-gray-100">
-          
           {/* Left: Brand Logo & Desktop Nav Links */}
           <div className="flex items-center gap-8 lg:gap-12">
             <a href="#" className="flex items-center gap-1 group">
@@ -65,24 +61,25 @@ export default function NavBar() {
 
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              {navLinks.map((link) => 
-              link.isRoute ?(
-                <Link
-        
-                  key={link.name}
-                  to={link.href}
-                  className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150"
-                >
-                  {link.name}
-                  </Link>):(
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150" 
-                >
-                  {link.name}   
-                </a>
-              ))}
+              {navLinks.map((link) =>
+                link.isRoute ? (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150"
+                  >
+                    {link.name}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150"
+                  >
+                    {link.name}
+                  </a>
+                )
+              )}
             </nav>
           </div>
 
@@ -127,12 +124,7 @@ export default function NavBar() {
                   aria-label="Search"
                   title="Search"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -147,12 +139,23 @@ export default function NavBar() {
             {isLoggedIn ? (
               /* Account (signed in) */
               <Link
-  to={profileHref}
-  className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
->
+                to={profileHref}
+                className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-charcoal-navy text-white">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"
+                    />
                   </svg>
                 </span>
                 <span className="max-w-[160px] truncate">{userName}</span>
@@ -186,10 +189,15 @@ export default function NavBar() {
               aria-label="Toggle search"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </button>
-            
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
@@ -197,11 +205,21 @@ export default function NavBar() {
             >
               {mobileMenuOpen ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </button>
@@ -212,8 +230,18 @@ export default function NavBar() {
         {searchOpen && (
           <div className="md:hidden py-2 px-1 pb-3 border-b border-gray-100">
             <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 text-sm border border-gray-200">
-              <svg className="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="w-4 h-4 text-gray-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
               <input
                 type="text"
@@ -253,8 +281,19 @@ export default function NavBar() {
                   className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-slate-50"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-charcoal-navy text-white">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"
+                      />
                     </svg>
                   </span>
                   <span className="text-base font-medium text-slate-700">{userName}</span>

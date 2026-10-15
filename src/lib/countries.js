@@ -11,9 +11,7 @@ function getCountryFlag(countryCode) {
   if (!countryCode || countryCode.length !== 2) return "🌐";
   return countryCode
     .toUpperCase()
-    .replace(/./g, (char) =>
-      String.fromCodePoint(127397 + char.charCodeAt(0))
-    );
+    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 }
 
 const regionNames =
@@ -41,8 +39,7 @@ export const ALL_COUNTRIES = getCountries()
   .sort((a, b) => a.name.localeCompare(b.name));
 
 // Default country fallback
-export const DEFAULT_COUNTRY =
-  ALL_COUNTRIES.find((c) => c.code === "AU") ||
+export const DEFAULT_COUNTRY = ALL_COUNTRIES.find((c) => c.code === "AU") ||
   ALL_COUNTRIES[0] || {
     code: "AU",
     name: "Australia",
@@ -79,15 +76,11 @@ export function findCountry(query) {
   if (byCalling) return byCalling;
 
   // Starts with match
-  const byStarts = ALL_COUNTRIES.find((c) =>
-    c.name.toLowerCase().startsWith(q)
-  );
+  const byStarts = ALL_COUNTRIES.find((c) => c.name.toLowerCase().startsWith(q));
   if (byStarts) return byStarts;
 
   // Substring match
-  const byContains = ALL_COUNTRIES.find((c) =>
-    c.name.toLowerCase().includes(q)
-  );
+  const byContains = ALL_COUNTRIES.find((c) => c.name.toLowerCase().includes(q));
   if (byContains) return byContains;
 
   return DEFAULT_COUNTRY;
@@ -119,7 +112,10 @@ export function validatePhone(phone, countryCode) {
     }
 
     // 3. Fallback to isPossiblePhoneNumber
-    if (isPossiblePhoneNumber(clean, countryCode) || isPossiblePhoneNumber(withPrefix, countryCode)) {
+    if (
+      isPossiblePhoneNumber(clean, countryCode) ||
+      isPossiblePhoneNumber(withPrefix, countryCode)
+    ) {
       return { isValid: true };
     }
   } catch {
@@ -173,8 +169,7 @@ export function parseStoredPhone(storedPhone, savedCountryName = "Australia") {
     if (clean.startsWith("+")) {
       const parsed = parsePhoneNumberFromString(clean);
       if (parsed) {
-        const matchedCountry =
-          ALL_COUNTRIES.find((c) => c.code === parsed.country) || defaultC;
+        const matchedCountry = ALL_COUNTRIES.find((c) => c.code === parsed.country) || defaultC;
         return {
           nationalNumber: parsed.nationalNumber || clean,
           country: matchedCountry,

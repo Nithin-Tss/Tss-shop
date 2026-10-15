@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -30,7 +29,8 @@ const lineIcon = {
 const headerButton =
   "group inline-flex h-9 items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-3.5 text-sm font-medium text-[#161C2C] transition-colors duration-200 hover:border-[#141b2d] hover:bg-[#f1f3f7] hover:text-[#141b2d] active:bg-[#e7ebf2] focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[#141b2d]";
 
-const headerButtonIcon = "h-4 w-4 text-[#53627E] transition-colors duration-200 group-hover:text-[#141b2d]";
+const headerButtonIcon =
+  "h-4 w-4 text-[#53627E] transition-colors duration-200 group-hover:text-[#141b2d]";
 
 export default function OnlineStorePage() {
   const navigate = useNavigate();
@@ -48,21 +48,16 @@ export default function OnlineStorePage() {
 
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
-
       <AdminHeader />
-
 
       {/* BODY */}
       <div className="flex min-h-[calc(100vh-72px)]">
-
         {/* SIDEBAR */}
         <AdminSidebar />
-
 
         {/* MAIN CONTENT */}
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="mx-auto flex w-full max-w-[1160px] flex-1 flex-col px-4 pb-5 pt-5 sm:px-8">
-
             {/* BACK */}
             <button
               type="button"
@@ -75,7 +70,6 @@ export default function OnlineStorePage() {
               Back
             </button>
 
-
             {/* TITLE */}
             <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
@@ -84,30 +78,30 @@ export default function OnlineStorePage() {
                   Create your custom theme
                 </h1>
                 <p className="mt-1.5 text-sm text-[#53627E] sm:text-[15px]">
-                  Choose a template to get started. You can customize it later with your brand, products and style.
+                  Choose a template to get started. You can customize it later with your brand,
+                  products and style.
                 </p>
               </div>
 
               {canEditTheme && (
-              <div className="flex shrink-0 items-center gap-2">
-                {/* Theme customizer: sections, slides, colours */}
-                <Link to="/admin/online-store/customize" className={headerButton}>
-                  <svg {...lineIcon} className={headerButtonIcon}>
-                    <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
-                  </svg>
-                  Customize theme
-                </Link>
+                <div className="flex shrink-0 items-center gap-2">
+                  {/* Theme customizer: sections, slides, colours */}
+                  <Link to="/admin/online-store/customize" className={headerButton}>
+                    <svg {...lineIcon} className={headerButtonIcon}>
+                      <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
+                    </svg>
+                    Customize theme
+                  </Link>
 
-                <Link to="/editor-demo" className={headerButton}>
-                  <svg {...lineIcon} className={headerButtonIcon}>
-                    <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />
-                  </svg>
-                  Code Editor
-                </Link>
-              </div>
+                  <Link to="/editor-demo" className={headerButton}>
+                    <svg {...lineIcon} className={headerButtonIcon}>
+                      <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />
+                    </svg>
+                    Code Editor
+                  </Link>
+                </div>
               )}
             </div>
-
 
             {/* CATEGORIES: one line, scrolls sideways on small screens */}
             <div className="-mx-4 mt-5 overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 [&::-webkit-scrollbar]:hidden">
@@ -134,10 +128,8 @@ export default function OnlineStorePage() {
               </div>
             </div>
 
-
             {/* EMPTY STATE */}
             <section className="mt-5 flex min-h-[340px] flex-1 flex-col items-center justify-center rounded-2xl border border-[#EEF0F4] bg-[#fafbfc] px-6 py-10 text-center">
-
               {/* Illustration */}
               <div className="relative">
                 <div className="w-[234px] overflow-hidden rounded-xl border border-[#E5E9EF] bg-white">
@@ -188,9 +180,7 @@ export default function OnlineStorePage() {
                 Coming soon
               </span>
             </section>
-
           </div>
-
 
           {/* FOOTER */}
           <div className="sticky bottom-0 border-t border-[#EEF0F4] bg-white/90 backdrop-blur">
@@ -208,11 +198,8 @@ export default function OnlineStorePage() {
               </button>
             </div>
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 }

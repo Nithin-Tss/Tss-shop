@@ -155,12 +155,7 @@ export default function AdminReportExploration() {
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5C5F62] hover:bg-[#E5E7EB] hover:text-[#161C2C] transition-colors"
                   title="Back to Reports"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -434,12 +429,7 @@ export default function AdminReportExploration() {
                 <div className="flex items-center gap-3">
                   {/* Purple Sidekick/AI avatar icon matching screenshot */}
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 text-white shadow-xs">
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -519,11 +509,7 @@ export default function AdminReportExploration() {
                     {/* Soft circle with report sheet graphic */}
                     <div className="relative mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-[#F0F2F5]">
                       {/* Document Sheet Graphic with Bar Chart and Grid */}
-                      <svg
-                        className="h-16 w-12 drop-shadow-2xs"
-                        viewBox="0 0 48 64"
-                        fill="none"
-                      >
+                      <svg className="h-16 w-12 drop-shadow-2xs" viewBox="0 0 48 64" fill="none">
                         <rect
                           x="2"
                           y="2"
@@ -581,7 +567,8 @@ export default function AdminReportExploration() {
 
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-[#6B7280]">
-                          Visualization: <strong className="text-[#161C2C]">{visualizationType}</strong>
+                          Visualization:{" "}
+                          <strong className="text-[#161C2C]">{visualizationType}</strong>
                         </span>
                       </div>
                     </div>
@@ -601,30 +588,32 @@ export default function AdminReportExploration() {
                         </thead>
                         <tbody className="divide-y divide-[#F0F1F3]">
                           <tr>
-                            <td className="px-4 py-3 font-medium text-[#161C2C]">
-                              Online Store
-                            </td>
+                            <td className="px-4 py-3 font-medium text-[#161C2C]">Online Store</td>
                             {selectedMetrics.map((m) => (
-                              <td key={m} className="px-4 py-3 text-right tabular-nums text-[#374151]">
+                              <td
+                                key={m}
+                                className="px-4 py-3 text-right tabular-nums text-[#374151]"
+                              >
                                 {m.includes("sales") || m.includes("AOV")
                                   ? "$12,450.00"
                                   : m.includes("rate")
-                                  ? "3.2%"
-                                  : "1,240"}
+                                    ? "3.2%"
+                                    : "1,240"}
                               </td>
                             ))}
                           </tr>
                           <tr>
-                            <td className="px-4 py-3 font-medium text-[#161C2C]">
-                              Point of Sale
-                            </td>
+                            <td className="px-4 py-3 font-medium text-[#161C2C]">Point of Sale</td>
                             {selectedMetrics.map((m) => (
-                              <td key={m} className="px-4 py-3 text-right tabular-nums text-[#374151]">
+                              <td
+                                key={m}
+                                className="px-4 py-3 text-right tabular-nums text-[#374151]"
+                              >
                                 {m.includes("sales") || m.includes("AOV")
                                   ? "$4,820.00"
                                   : m.includes("rate")
-                                  ? "4.5%"
-                                  : "480"}
+                                    ? "4.5%"
+                                    : "480"}
                               </td>
                             ))}
                           </tr>
@@ -844,32 +833,34 @@ export default function AdminReportExploration() {
                         <p className="px-2 py-1 text-[11px] font-semibold text-[#8C9196] uppercase">
                           Add filter
                         </p>
-                        {["Sales channel is Online", "Order status is Paid", "Country is Australia"].map(
-                          (filter) => {
-                            const isSelected = selectedFilters.includes(filter);
-                            return (
-                              <button
-                                key={filter}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedFilters((prev) =>
-                                    prev.includes(filter)
-                                      ? prev.filter((f) => f !== filter)
-                                      : [...prev, filter]
-                                  );
-                                }}
-                                className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
-                                  isSelected
-                                    ? "bg-[#161C2C] text-white font-medium"
-                                    : "text-[#374151] hover:bg-[#F3F4F6]"
-                                }`}
-                              >
-                                <span>{filter}</span>
-                                {isSelected && <span>✓</span>}
-                              </button>
-                            );
-                          }
-                        )}
+                        {[
+                          "Sales channel is Online",
+                          "Order status is Paid",
+                          "Country is Australia",
+                        ].map((filter) => {
+                          const isSelected = selectedFilters.includes(filter);
+                          return (
+                            <button
+                              key={filter}
+                              type="button"
+                              onClick={() => {
+                                setSelectedFilters((prev) =>
+                                  prev.includes(filter)
+                                    ? prev.filter((f) => f !== filter)
+                                    : [...prev, filter]
+                                );
+                              }}
+                              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
+                                isSelected
+                                  ? "bg-[#161C2C] text-white font-medium"
+                                  : "text-[#374151] hover:bg-[#F3F4F6]"
+                              }`}
+                            >
+                              <span>{filter}</span>
+                              {isSelected && <span>✓</span>}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

@@ -77,7 +77,9 @@ export default function AdminCreateOrder() {
         }
         return;
       }
-      const res = await apiGet(`/api/v1/customers/?search=${encodeURIComponent(customerSearch.trim())}`);
+      const res = await apiGet(
+        `/api/v1/customers/?search=${encodeURIComponent(customerSearch.trim())}`
+      );
       if (!ignore && res.ok) {
         setCustomersList(Array.isArray(res.data) ? res.data : res.data?.results || []);
       }
@@ -138,16 +140,12 @@ export default function AdminCreateOrder() {
 
   const handleUpdateItemQuantity = (id, newQty) => {
     const qty = Math.max(1, parseInt(newQty, 10) || 1);
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
-    );
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item)));
   };
 
   const handleUpdateItemPrice = (id, newPrice) => {
     const price = Math.max(0, parseFloat(newPrice) || 0);
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, price } : item))
-    );
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, price } : item)));
   };
 
   const handleRemoveItem = (id) => {
@@ -170,17 +168,13 @@ export default function AdminCreateOrder() {
   };
 
   // Computations
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = Math.max(
     0,
     subtotal - (parseFloat(discountAmount) || 0) + (parseFloat(shippingAmount) || 0)
   );
 
-  const selectedCurrencyObj =
-    CURRENCIES.find((c) => c.code === currency) || CURRENCIES[0];
+  const selectedCurrencyObj = CURRENCIES.find((c) => c.code === currency) || CURRENCIES[0];
 
   const handleSaveOrder = async () => {
     if (items.length === 0) {
@@ -207,13 +201,15 @@ export default function AdminCreateOrder() {
       })),
     };
 
-    // If order items have null product (e.g. pure custom items not in DB), 
+    // If order items have null product (e.g. pure custom items not in DB),
     // we route to draft or create order with products
     const hasUnsavedCustomItems = items.some((it) => !it.productId);
 
     if (hasUnsavedCustomItems && !canCreateDrafts) {
       setSaving(false);
-      setError("Orders with custom items are saved as draft orders, and your role can't create those. Remove the custom items or ask for draft order access.");
+      setError(
+        "Orders with custom items are saved as draft orders, and your role can't create those. Remove the custom items or ask for draft order access."
+      );
       return;
     }
 
@@ -351,13 +347,9 @@ export default function AdminCreateOrder() {
                           className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-slate-900 truncate">
-                              {it.title}
-                            </p>
+                            <p className="font-semibold text-slate-900 truncate">{it.title}</p>
                             {it.sku && (
-                              <p className="text-xs text-slate-400 font-mono">
-                                SKU: {it.sku}
-                              </p>
+                              <p className="text-xs text-slate-400 font-mono">SKU: {it.sku}</p>
                             )}
                           </div>
 
@@ -372,9 +364,7 @@ export default function AdminCreateOrder() {
                                 min="0"
                                 step="0.01"
                                 value={it.price}
-                                onChange={(e) =>
-                                  handleUpdateItemPrice(it.id, e.target.value)
-                                }
+                                onChange={(e) => handleUpdateItemPrice(it.id, e.target.value)}
                                 className="w-20 px-2 py-1 text-sm border border-slate-200 rounded-md text-right outline-none focus:border-slate-500"
                               />
                             </div>
@@ -386,9 +376,7 @@ export default function AdminCreateOrder() {
                                 type="number"
                                 min="1"
                                 value={it.quantity}
-                                onChange={(e) =>
-                                  handleUpdateItemQuantity(it.id, e.target.value)
-                                }
+                                onChange={(e) => handleUpdateItemQuantity(it.id, e.target.value)}
                                 className="w-14 px-2 py-1 text-sm border border-slate-200 rounded-md text-center outline-none focus:border-slate-500"
                               />
                             </div>
@@ -540,9 +528,7 @@ export default function AdminCreateOrder() {
                     autoFocus
                   />
                 ) : (
-                  <p className="text-xs text-slate-500">
-                    {notes.trim() ? notes : "No notes"}
-                  </p>
+                  <p className="text-xs text-slate-500">{notes.trim() ? notes : "No notes"}</p>
                 )}
               </div>
 
@@ -556,11 +542,11 @@ export default function AdminCreateOrder() {
                       <p className="text-sm font-semibold text-slate-900">
                         {[selectedCustomer.first_name, selectedCustomer.last_name]
                           .filter(Boolean)
-                          .join(" ") || selectedCustomer.name || "Customer"}
+                          .join(" ") ||
+                          selectedCustomer.name ||
+                          "Customer"}
                       </p>
-                      <p className="text-xs text-slate-500">
-                        {selectedCustomer.email}
-                      </p>
+                      <p className="text-xs text-slate-500">{selectedCustomer.email}</p>
                     </div>
                     <button
                       type="button"
@@ -601,8 +587,7 @@ export default function AdminCreateOrder() {
                               className="p-2.5 hover:bg-slate-50 cursor-pointer text-xs"
                             >
                               <p className="font-semibold text-slate-900">
-                                {[c.first_name, c.last_name].filter(Boolean).join(" ") ||
-                                  c.email}
+                                {[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email}
                               </p>
                               <p className="text-slate-500">{c.email}</p>
                             </div>
@@ -631,9 +616,7 @@ export default function AdminCreateOrder() {
                 </div>
 
                 <div className="space-y-1.5 pt-1">
-                  <label className="block text-xs font-medium text-slate-600">
-                    Currency
-                  </label>
+                  <label className="block text-xs font-medium text-slate-600">Currency</label>
                   <div className="relative">
                     <select
                       value={currency}
@@ -734,12 +717,8 @@ export default function AdminCreateOrder() {
                           className="h-4 w-4 rounded border-slate-300 accent-[#161C2C]"
                         />
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            {prod.title}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {prod.category || "General"}
-                          </p>
+                          <p className="text-sm font-semibold text-slate-900">{prod.title}</p>
+                          <p className="text-xs text-slate-400">{prod.category || "General"}</p>
                         </div>
                       </div>
                       <span className="text-sm font-medium text-slate-700">
@@ -794,16 +773,12 @@ export default function AdminCreateOrder() {
 
             <form onSubmit={handleAddCustomItem} className="space-y-4 text-xs">
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
-                  Item Title
-                </label>
+                <label className="block font-medium text-slate-700 mb-1">Item Title</label>
                 <input
                   type="text"
                   required
                   value={customItemForm.title}
-                  onChange={(e) =>
-                    setCustomItemForm({ ...customItemForm, title: e.target.value })
-                  }
+                  onChange={(e) => setCustomItemForm({ ...customItemForm, title: e.target.value })}
                   placeholder="e.g. Gift wrapping or Custom product"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-slate-500 text-sm"
                   autoFocus
@@ -830,9 +805,7 @@ export default function AdminCreateOrder() {
                 </div>
 
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
-                    Quantity
-                  </label>
+                  <label className="block font-medium text-slate-700 mb-1">Quantity</label>
                   <input
                     type="number"
                     min="1"

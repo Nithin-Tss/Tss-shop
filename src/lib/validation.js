@@ -10,11 +10,27 @@ export const NAME_PATTERN = /^[a-zA-Z ]*$/;
 export const MOBILE_PATTERN = /^[0-9]{10}$/;
 
 const PASSWORD_RULES = [
-  { label: "At least 8 characters", error: "Password must contain at least 8 characters.", test: (p) => p.length >= 8 },
-  { label: "One uppercase letter", error: "Include at least one uppercase letter.", test: (p) => /[A-Z]/.test(p) },
-  { label: "One lowercase letter", error: "Include at least one lowercase letter.", test: (p) => /[a-z]/.test(p) },
+  {
+    label: "At least 8 characters",
+    error: "Password must contain at least 8 characters.",
+    test: (p) => p.length >= 8,
+  },
+  {
+    label: "One uppercase letter",
+    error: "Include at least one uppercase letter.",
+    test: (p) => /[A-Z]/.test(p),
+  },
+  {
+    label: "One lowercase letter",
+    error: "Include at least one lowercase letter.",
+    test: (p) => /[a-z]/.test(p),
+  },
   { label: "One number", error: "Include at least one number.", test: (p) => /[0-9]/.test(p) },
-  { label: "One special character", error: "Include at least one special character.", test: (p) => /[^A-Za-z0-9]/.test(p) },
+  {
+    label: "One special character",
+    error: "Include at least one special character.",
+    test: (p) => /[^A-Za-z0-9]/.test(p),
+  },
 ];
 
 // [{ label, valid }] for the live checklist under a password field

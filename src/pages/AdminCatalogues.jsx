@@ -12,26 +12,20 @@ export default function CataloguesPage() {
 
   return (
     <div className="min-h-screen bg-white text-[#161C2C]">
-
       <AdminHeader />
-
 
       {/* BODY */}
       <div className="flex min-h-[calc(100vh-72px)]">
-
         {/* SIDEBAR */}
         <AdminSidebar />
 
-
         {/* MAIN CONTENT */}
         <main className="flex flex-1 flex-col bg-[#F7F8FA] px-6 lg:px-8 py-6 overflow-hidden">
-
           {/* TITLE */}
           <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
             <PageIcon name="catalogues" />
             Catalogues
           </h1>
-
 
           {/* EMPTY STATE (shown while there are no catalogues) */}
           {catalogues.length === 0 && (
@@ -57,7 +51,10 @@ export default function CataloguesPage() {
                 </svg>
               </span>
 
-              <h2 id="catalogues-empty-heading" className="mt-5 text-xl font-semibold text-[#161C2C]">
+              <h2
+                id="catalogues-empty-heading"
+                className="mt-5 text-xl font-semibold text-[#161C2C]"
+              >
                 No catalogues yet
               </h2>
 
@@ -66,22 +63,19 @@ export default function CataloguesPage() {
               </p>
 
               {canManage && (
-              <button
-                type="button"
-                onClick={handleCreateCatalogue}
-                className="mt-6 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#161C2C] px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(22,28,44,0.25)] hover:bg-[#252E45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-2 transition"
-              >
-                <span className="text-base leading-none">+</span>
-                Create Catalogue
-              </button>
+                <button
+                  type="button"
+                  onClick={handleCreateCatalogue}
+                  className="mt-6 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#161C2C] px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(22,28,44,0.25)] hover:bg-[#252E45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-2 transition"
+                >
+                  <span className="text-base leading-none">+</span>
+                  Create Catalogue
+                </button>
               )}
             </section>
           )}
-
         </main>
-
       </div>
-
     </div>
   );
 }

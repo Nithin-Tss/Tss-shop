@@ -50,7 +50,10 @@ export function saveThemeCustomizer(data) {
 // With `section`, only that section's HTML (and the fonts stylesheet) -> { html, fonts }
 // `page`: index, product, collection, blog or article; `product`: the product the product page shows;
 // `article`: the handle of the post the article page shows
-export function previewTheme(data, { scroll = 0, selected = "", section = "", page = "index", product = "", article = "" } = {}) {
+export function previewTheme(
+  data,
+  { scroll = 0, selected = "", section = "", page = "index", product = "", article = "" } = {}
+) {
   const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected, page });
   if (section) query.set("section", section);
   if (product) query.set("product", product);
@@ -91,7 +94,8 @@ export function uploadThemeImage(file, onProgress) {
     if (storeId) xhr.setRequestHeader("X-Store-Id", storeId);
 
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress?.(e.loaded / e.total);
-    xhr.onerror = () => resolve({ ok: false, error: "Unable to reach the server. Please try again." });
+    xhr.onerror = () =>
+      resolve({ ok: false, error: "Unable to reach the server. Please try again." });
     xhr.onload = () => {
       if (xhr.status === 401) {
         apiUpload(`${BASE}/images/`, "image", file).then(resolve);
@@ -104,7 +108,11 @@ export function uploadThemeImage(file, onProgress) {
         data = null;
       }
       if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true, data });
-      else resolve({ ok: false, error: data?.image || data?.detail || "Upload failed. Please try again." });
+      else
+        resolve({
+          ok: false,
+          error: data?.image || data?.detail || "Upload failed. Please try again.",
+        });
     };
 
     const form = new FormData();
@@ -129,7 +137,13 @@ export function getSyncedSections() {
 export function saveSyncedFile(path, content, baseVersion) {
   return apiRequest(`${BASE}/files/`, {
     method: "POST",
-    body: { path, content, base_version: baseVersion ?? null, client: SYNC_CLIENT, started_at: Date.now() },
+    body: {
+      path,
+      content,
+      base_version: baseVersion ?? null,
+      client: SYNC_CLIENT,
+      started_at: Date.now(),
+    },
   });
 }
 
@@ -139,13 +153,18 @@ export function getSectionHistory(name) {
 }
 
 export function restoreSectionVersion(name, index) {
-  return apiRequest(`${BASE}/sections/${name}/history/`, { method: "POST", body: { index, client: SYNC_CLIENT } });
+  return apiRequest(`${BASE}/sections/${name}/history/`, {
+    method: "POST",
+    body: { index, client: SYNC_CLIENT },
+  });
 }
 
 // "Change made -> preview updated" times, for the average / slowest report
 export function postSyncTiming(kind, ms) {
   console.info(`[footer sync] ${kind}: ${Math.round(ms)} ms`);
-  return apiRequest(`${BASE}/sync-timings/`, { method: "POST", body: { kind, ms } }).catch(() => null);
+  return apiRequest(`${BASE}/sync-timings/`, { method: "POST", body: { kind, ms } }).catch(
+    () => null
+  );
 }
 
 export function getSyncTimings() {

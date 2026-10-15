@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import NavBar from "@/components/NavBar";
@@ -134,9 +133,7 @@ export default function OnboardingPage() {
 
   const toggleOption = (id) => {
     setSelectedGoals((prev) =>
-      prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
@@ -212,8 +209,7 @@ export default function OnboardingPage() {
               </h1>
 
               <p className="mx-auto max-w-xl text-[15px] leading-relaxed text-gray-500">
-                Select all that apply. We&apos;ll personalize your setup based
-                on your goals.
+                Select all that apply. We&apos;ll personalize your setup based on your goals.
               </p>
             </div>
 
@@ -326,7 +322,10 @@ export default function OnboardingPage() {
             )}
 
             {storeError && (
-              <p role="alert" className="mx-auto mb-4 max-w-[600px] rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p
+                role="alert"
+                className="mx-auto mb-4 max-w-[600px] rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+              >
                 {storeError}
               </p>
             )}
@@ -345,9 +344,7 @@ export default function OnboardingPage() {
                     {theme.icon}
                   </span>
 
-                  <span className="block text-base font-semibold leading-snug">
-                    {theme.title}
-                  </span>
+                  <span className="block text-base font-semibold leading-snug">{theme.title}</span>
 
                   <span className="mt-2 block text-sm leading-normal text-gray-500">
                     {theme.desc}

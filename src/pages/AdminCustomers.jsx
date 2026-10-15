@@ -84,9 +84,7 @@ export default function AdminCustomers() {
       ? `/api/v1/customers/addresses/${editingAddress.id}/`
       : "/api/v1/customers/addresses/";
 
-    const res = isEdit
-      ? await apiPatch(url, payload)
-      : await apiPost(url, payload);
+    const res = isEdit ? await apiPatch(url, payload) : await apiPost(url, payload);
 
     setSavingAddress(false);
 
@@ -178,8 +176,7 @@ export default function AdminCustomers() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const allSelected =
-    customers.length > 0 && selectedIds.size === customers.length;
+  const allSelected = customers.length > 0 && selectedIds.size === customers.length;
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -282,9 +279,7 @@ export default function AdminCustomers() {
               <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-700 text-sm">
                 👓
               </div>
-              <span className="text-sm font-medium text-slate-700">
-                Describe your segment
-              </span>
+              <span className="text-sm font-medium text-slate-700">Describe your segment</span>
             </div>
             <span className="text-slate-400 text-sm">⌄</span>
           </div>
@@ -378,12 +373,9 @@ export default function AdminCustomers() {
                     customers.map((c) => {
                       const isSelected = selectedIds.has(c.id);
                       const fullName =
-                        [c.first_name, c.last_name].filter(Boolean).join(" ") ||
-                        c.name ||
-                        c.email;
+                        [c.first_name, c.last_name].filter(Boolean).join(" ") || c.name || c.email;
 
-                      const isSubscribed =
-                        c.email_subscription_status === "subscribed";
+                      const isSubscribed = c.email_subscription_status === "subscribed";
 
                       return (
                         <tr
@@ -430,16 +422,12 @@ export default function AdminCustomers() {
                           {/* Location */}
                           <td className="py-3.5 px-3 text-slate-700 text-xs sm:text-sm">
                             {c.location ||
-                              [c.city, c.state, c.country]
-                                .filter(Boolean)
-                                .join(", ") ||
+                              [c.city, c.state, c.country].filter(Boolean).join(", ") ||
                               "—"}
                           </td>
 
                           {/* Orders count */}
-                          <td className="py-3.5 px-3 text-slate-800">
-                            {c.orders_count ?? 0}
-                          </td>
+                          <td className="py-3.5 px-3 text-slate-800">{c.orders_count ?? 0}</td>
 
                           {/* Amount spent */}
                           <td className="py-3.5 px-3 font-medium text-slate-900">
@@ -471,9 +459,7 @@ export default function AdminCustomers() {
                       <td colSpan={7} className="py-16 text-center text-slate-500">
                         <div className="flex flex-col items-center justify-center space-y-2">
                           <NavIcon name="customers" className="h-8 w-8 text-slate-300" />
-                          <p className="text-sm font-medium text-slate-700">
-                            No customers found
-                          </p>
+                          <p className="text-sm font-medium text-slate-700">No customers found</p>
                           <p className="text-xs text-slate-400 max-w-sm">
                             {searchQuery
                               ? `No customers matching "${searchQuery}".`
@@ -522,9 +508,7 @@ export default function AdminCustomers() {
             <form onSubmit={handleCreateCustomer} className="space-y-3.5 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
-                    First Name
-                  </label>
+                  <label className="block font-medium text-slate-700 mb-1">First Name</label>
                   <input
                     type="text"
                     value={customerForm.firstName}
@@ -536,15 +520,11 @@ export default function AdminCustomers() {
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
-                    Last Name
-                  </label>
+                  <label className="block font-medium text-slate-700 mb-1">Last Name</label>
                   <input
                     type="text"
                     value={customerForm.lastName}
-                    onChange={(e) =>
-                      setCustomerForm({ ...customerForm, lastName: e.target.value })
-                    }
+                    onChange={(e) => setCustomerForm({ ...customerForm, lastName: e.target.value })}
                     placeholder="e.g. Doe"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-slate-500 text-sm"
                   />
@@ -552,25 +532,19 @@ export default function AdminCustomers() {
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
-                  Email Address *
-                </label>
+                <label className="block font-medium text-slate-700 mb-1">Email Address *</label>
                 <input
                   type="email"
                   required
                   value={customerForm.email}
-                  onChange={(e) =>
-                    setCustomerForm({ ...customerForm, email: e.target.value })
-                  }
+                  onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
                   placeholder="e.g. john.doe@example.com"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-slate-500 text-sm"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
-                  Email Subscription
-                </label>
+                <label className="block font-medium text-slate-700 mb-1">Email Subscription</label>
                 <select
                   value={customerForm.emailSubscriptionStatus}
                   onChange={(e) =>
@@ -588,43 +562,31 @@ export default function AdminCustomers() {
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
-                    City
-                  </label>
+                  <label className="block font-medium text-slate-700 mb-1">City</label>
                   <input
                     type="text"
                     value={customerForm.city}
-                    onChange={(e) =>
-                      setCustomerForm({ ...customerForm, city: e.target.value })
-                    }
+                    onChange={(e) => setCustomerForm({ ...customerForm, city: e.target.value })}
                     placeholder="e.g. Wollert"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-slate-500 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
-                    State
-                  </label>
+                  <label className="block font-medium text-slate-700 mb-1">State</label>
                   <input
                     type="text"
                     value={customerForm.state}
-                    onChange={(e) =>
-                      setCustomerForm({ ...customerForm, state: e.target.value })
-                    }
+                    onChange={(e) => setCustomerForm({ ...customerForm, state: e.target.value })}
                     placeholder="e.g. VIC"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-slate-500 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
-                    Country
-                  </label>
+                  <label className="block font-medium text-slate-700 mb-1">Country</label>
                   <input
                     type="text"
                     value={customerForm.country}
-                    onChange={(e) =>
-                      setCustomerForm({ ...customerForm, country: e.target.value })
-                    }
+                    onChange={(e) => setCustomerForm({ ...customerForm, country: e.target.value })}
                     placeholder="e.g. Australia"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-slate-500 text-sm"
                   />
@@ -666,7 +628,9 @@ export default function AdminCustomers() {
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-slate-900 leading-tight">
-                    {[selectedCustomer.first_name, selectedCustomer.last_name].filter(Boolean).join(" ") ||
+                    {[selectedCustomer.first_name, selectedCustomer.last_name]
+                      .filter(Boolean)
+                      .join(" ") ||
                       selectedCustomer.name ||
                       "Customer"}
                   </h2>
@@ -691,7 +655,9 @@ export default function AdminCustomers() {
                 <div>
                   <span className="text-slate-400 font-medium block">Subscription</span>
                   <span className="font-semibold text-slate-800 capitalize mt-0.5 inline-block">
-                    {selectedCustomer.email_subscription_status === "subscribed" ? "Subscribed" : "Not subscribed"}
+                    {selectedCustomer.email_subscription_status === "subscribed"
+                      ? "Subscribed"
+                      : "Not subscribed"}
                   </span>
                 </div>
                 <div>
@@ -769,7 +735,10 @@ export default function AdminCustomers() {
               {loadingAddresses ? (
                 <div className="space-y-3">
                   {[1, 2].map((i) => (
-                    <div key={i} className="animate-pulse rounded-xl border border-slate-200 p-4 space-y-2 bg-white">
+                    <div
+                      key={i}
+                      className="animate-pulse rounded-xl border border-slate-200 p-4 space-y-2 bg-white"
+                    >
                       <div className="h-4 w-24 bg-slate-200 rounded" />
                       <div className="h-4 w-40 bg-slate-100 rounded" />
                       <div className="h-4 w-32 bg-slate-100 rounded" />
@@ -779,7 +748,9 @@ export default function AdminCustomers() {
               ) : customerAddresses.length > 0 ? (
                 <div className="space-y-3">
                   {customerAddresses.map((addr) => {
-                    const recipientName = [addr.first_name, addr.last_name].filter(Boolean).join(" ");
+                    const recipientName = [addr.first_name, addr.last_name]
+                      .filter(Boolean)
+                      .join(" ");
                     return (
                       <div
                         key={addr.id}

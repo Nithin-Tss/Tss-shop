@@ -37,7 +37,9 @@ export async function saveFieldLabels(labels) {
 export function useFieldLabels() {
   const [labels, setLabels] = useState({});
   useEffect(() => {
-    fetchFieldLabels().then(setLabels).catch(() => {});
+    fetchFieldLabels()
+      .then(setLabels)
+      .catch(() => {});
   }, []);
   return labels;
 }

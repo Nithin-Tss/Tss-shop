@@ -64,11 +64,7 @@ function renderPaymentBadge(status) {
 
 function renderFulfillmentBadge(status) {
   const s = String(status || "unfulfilled").toLowerCase();
-  if (
-    s.includes("fulfilled") &&
-    !s.includes("unfulfilled") &&
-    !s.includes("partial")
-  ) {
+  if (s.includes("fulfilled") && !s.includes("unfulfilled") && !s.includes("partial")) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
         <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -145,10 +141,7 @@ export default function OrderHistory() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
-                <Link
-                  to="/"
-                  className="hover:text-slate-900 transition flex items-center gap-1"
-                >
+                <Link to="/" className="hover:text-slate-900 transition flex items-center gap-1">
                   <span>←</span>
                   <span>Store</span>
                 </Link>
@@ -159,11 +152,8 @@ export default function OrderHistory() {
                 Order History
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                Welcome back,{" "}
-                <span className="font-semibold text-slate-800">{userName}</span>
-                {user?.email && (
-                  <span className="text-slate-400"> ({user.email})</span>
-                )}
+                Welcome back, <span className="font-semibold text-slate-800">{userName}</span>
+                {user?.email && <span className="text-slate-400"> ({user.email})</span>}
               </p>
             </div>
 
@@ -216,8 +206,8 @@ export default function OrderHistory() {
               You haven't placed any orders yet
             </h2>
             <p className="mt-1.5 text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-              When you place an order, its details, tracking status, and receipts
-              will appear right here.
+              When you place an order, its details, tracking status, and receipts will appear right
+              here.
             </p>
             <Link
               to="/"
@@ -246,19 +236,14 @@ export default function OrderHistory() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {orders.map((order) => (
-                      <tr
-                        key={order.id}
-                        className="hover:bg-slate-50/70 transition"
-                      >
+                      <tr key={order.id} className="hover:bg-slate-50/70 transition">
                         <td className="py-4 px-4 sm:px-6 font-semibold text-slate-900 font-mono">
                           {order.order_number || `#${order.id?.slice(0, 8)}`}
                         </td>
                         <td className="py-4 px-4 text-slate-600">
                           {formatOrderDate(order.created_at)}
                         </td>
-                        <td className="py-4 px-4">
-                          {renderPaymentBadge(order.status)}
-                        </td>
+                        <td className="py-4 px-4">{renderPaymentBadge(order.status)}</td>
                         <td className="py-4 px-4">
                           {renderFulfillmentBadge(order.fulfillment_status)}
                         </td>
@@ -298,9 +283,7 @@ export default function OrderHistory() {
                     </span>
                   </div>
 
-                  <div className="text-xs text-slate-500">
-                    {formatOrderDate(order.created_at)}
-                  </div>
+                  <div className="text-xs text-slate-500">{formatOrderDate(order.created_at)}</div>
 
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     {renderPaymentBadge(order.status)}
@@ -333,8 +316,7 @@ export default function OrderHistory() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-bold text-slate-900 font-mono">
-                    {selectedOrder.order_number ||
-                      `#${selectedOrder.id?.slice(0, 8)}`}
+                    {selectedOrder.order_number || `#${selectedOrder.id?.slice(0, 8)}`}
                   </h3>
                   {renderPaymentBadge(selectedOrder.status)}
                 </div>
@@ -356,21 +338,14 @@ export default function OrderHistory() {
             <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
               {/* Status bar */}
               <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <span className="text-slate-600 font-medium">
-                  Fulfillment Status
-                </span>
-                <div>
-                  {renderFulfillmentBadge(selectedOrder.fulfillment_status)}
-                </div>
+                <span className="text-slate-600 font-medium">Fulfillment Status</span>
+                <div>{renderFulfillmentBadge(selectedOrder.fulfillment_status)}</div>
               </div>
 
               {/* Order Items */}
               <div>
-                <h4 className="font-bold text-slate-900 text-sm mb-3">
-                  Items Ordered
-                </h4>
-                {Array.isArray(selectedOrder.items) &&
-                selectedOrder.items.length > 0 ? (
+                <h4 className="font-bold text-slate-900 text-sm mb-3">Items Ordered</h4>
+                {Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 ? (
                   <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
                     {selectedOrder.items.map((item, idx) => (
                       <div
@@ -398,8 +373,7 @@ export default function OrderHistory() {
                         </div>
                         <div className="font-semibold text-slate-900 text-xs sm:text-sm">
                           {formatCurrency(
-                            item.total ||
-                              (item.quantity || 1) * (item.unit_price || 0),
+                            item.total || (item.quantity || 1) * (item.unit_price || 0),
                             selectedOrder.currency_code
                           )}
                         </div>
@@ -419,10 +393,7 @@ export default function OrderHistory() {
                   <div className="flex justify-between text-slate-600">
                     <span>Subtotal</span>
                     <span>
-                      {formatCurrency(
-                        selectedOrder.subtotal,
-                        selectedOrder.currency_code
-                      )}
+                      {formatCurrency(selectedOrder.subtotal, selectedOrder.currency_code)}
                     </span>
                   </div>
                 )}
@@ -430,11 +401,7 @@ export default function OrderHistory() {
                   <div className="flex justify-between text-emerald-700">
                     <span>Discount</span>
                     <span>
-                      -
-                      {formatCurrency(
-                        selectedOrder.discount_amount,
-                        selectedOrder.currency_code
-                      )}
+                      -{formatCurrency(selectedOrder.discount_amount, selectedOrder.currency_code)}
                     </span>
                   </div>
                 )}
@@ -442,10 +409,7 @@ export default function OrderHistory() {
                   <div className="flex justify-between text-slate-600">
                     <span>Shipping</span>
                     <span>
-                      {formatCurrency(
-                        selectedOrder.shipping_amount,
-                        selectedOrder.currency_code
-                      )}
+                      {formatCurrency(selectedOrder.shipping_amount, selectedOrder.currency_code)}
                     </span>
                   </div>
                 )}
@@ -453,21 +417,13 @@ export default function OrderHistory() {
                   <div className="flex justify-between text-slate-600">
                     <span>Tax</span>
                     <span>
-                      {formatCurrency(
-                        selectedOrder.tax_amount,
-                        selectedOrder.currency_code
-                      )}
+                      {formatCurrency(selectedOrder.tax_amount, selectedOrder.currency_code)}
                     </span>
                   </div>
                 )}
                 <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-sm">
                   <span>Total</span>
-                  <span>
-                    {formatCurrency(
-                      selectedOrder.total,
-                      selectedOrder.currency_code
-                    )}
-                  </span>
+                  <span>{formatCurrency(selectedOrder.total, selectedOrder.currency_code)}</span>
                 </div>
               </div>
             </div>

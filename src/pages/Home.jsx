@@ -14,8 +14,8 @@ export default function HomePage() {
       <StoreBuilder />
       <FAQ />
       <EmailCTA />
-       <WhyChooseShop />
-       <Footer/>
+      <WhyChooseShop />
+      <Footer />
     </main>
   );
 }

@@ -2,15 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiDelete, apiGet, apiPatch, apiPost, logout } from "@/lib/api";
 import { getSession, setTokens, setUser, useSession } from "@/lib/auth";
-import {
-  MOBILE_PATTERN,
-  NAME_PATTERN,
-  emailError,
-} from "@/lib/validation";
-import {
-  PasswordChecklist,
-  PasswordInput,
-} from "@/components/PasswordFields";
+import { MOBILE_PATTERN, NAME_PATTERN, emailError } from "@/lib/validation";
+import { PasswordChecklist, PasswordInput } from "@/components/PasswordFields";
 import AddressModal from "@/components/AddressModal";
 import DeleteAddressModal from "@/components/DeleteAddressModal";
 
@@ -34,9 +27,7 @@ export default function AccountPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
-  const [profileData, setProfileData] = useState(() =>
-    profileFromUser(getSession()?.user)
-  );
+  const [profileData, setProfileData] = useState(() => profileFromUser(getSession()?.user));
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -134,18 +125,14 @@ export default function AccountPage() {
       ? `/api/v1/customers/addresses/${editingAddress.id}/`
       : "/api/v1/customers/addresses/";
 
-    const res = isEdit
-      ? await apiPatch(url, formData)
-      : await apiPost(url, formData);
+    const res = isEdit ? await apiPatch(url, formData) : await apiPost(url, formData);
 
     setIsSavingAddress(false);
 
     if (res.ok) {
       setShowAddressModal(false);
       setEditingAddress(null);
-      setAddressMessage(
-        isEdit ? "Address updated successfully." : "Address added successfully."
-      );
+      setAddressMessage(isEdit ? "Address updated successfully." : "Address added successfully.");
       setAddressError("");
       loadAddresses();
     } else {
@@ -164,9 +151,7 @@ export default function AccountPage() {
   const handleConfirmDeleteAddress = async () => {
     if (!deletingAddress) return;
     setIsDeletingAddress(true);
-    const res = await apiDelete(
-      `/api/v1/customers/addresses/${deletingAddress.id}/`
-    );
+    const res = await apiDelete(`/api/v1/customers/addresses/${deletingAddress.id}/`);
     setIsDeletingAddress(false);
     setDeletingAddress(null);
 
@@ -182,28 +167,18 @@ export default function AccountPage() {
   const handleSetDefaultAddress = async (addr) => {
     setAddressMessage("");
     setAddressError("");
-    const res = await apiPost(
-      `/api/v1/customers/addresses/${addr.id}/set-default/`,
-      {}
-    );
+    const res = await apiPost(`/api/v1/customers/addresses/${addr.id}/set-default/`, {});
     if (res.ok) {
-      setAddressMessage(
-        `Default ${addr.address_type || "shipping"} address updated.`
-      );
+      setAddressMessage(`Default ${addr.address_type || "shipping"} address updated.`);
       loadAddresses();
     } else {
-      setAddressError(
-        res.formError || res.error || "Failed to set default address."
-      );
+      setAddressError(res.formError || res.error || "Failed to set default address.");
     }
   };
 
   const handleProfileChange = (event) => {
     const { name, value } = event.target;
-    if (
-      (name === "firstName" || name === "lastName") &&
-      !NAME_PATTERN.test(value)
-    ) {
+    if ((name === "firstName" || name === "lastName") && !NAME_PATTERN.test(value)) {
       return;
     }
 
@@ -360,10 +335,7 @@ export default function AccountPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
-                <Link
-                  to="/"
-                  className="hover:text-slate-900 transition flex items-center gap-1"
-                >
+                <Link to="/" className="hover:text-slate-900 transition flex items-center gap-1">
                   <span>←</span>
                   <span>Store</span>
                 </Link>
@@ -374,11 +346,8 @@ export default function AccountPage() {
                 My Account
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                Welcome back,{" "}
-                <span className="font-semibold text-slate-800">{userName}</span>
-                {user?.email && (
-                  <span className="text-slate-400"> ({user.email})</span>
-                )}
+                Welcome back, <span className="font-semibold text-slate-800">{userName}</span>
+                {user?.email && <span className="text-slate-400"> ({user.email})</span>}
               </p>
             </div>
 
@@ -446,9 +415,7 @@ export default function AccountPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-slate-100 gap-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  Customer Details
-                </h2>
+                <h2 className="text-lg font-bold text-slate-900">Customer Details</h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
                   Your personal identity and contact information.
                 </p>
@@ -523,7 +490,10 @@ export default function AccountPage() {
                       </span>
                     )}
                   </div>
-                  <span className="mt-1 block text-sm font-semibold text-slate-800 truncate" title={profileData.email}>
+                  <span
+                    className="mt-1 block text-sm font-semibold text-slate-800 truncate"
+                    title={profileData.email}
+                  >
                     {profileData.email || "—"}
                   </span>
                   {user && !user.emailVerified && (
@@ -600,9 +570,7 @@ export default function AccountPage() {
                       placeholder="jane@example.com"
                       className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
                     />
-                    {errors.email && (
-                      <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-                    )}
+                    {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
                   </div>
 
                   <div>
@@ -732,9 +700,7 @@ export default function AccountPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-slate-100 gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Saved Addresses
-                  </h2>
+                  <h2 className="text-lg font-bold text-slate-900">Saved Addresses</h2>
                   <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
                     {addresses.length}
                   </span>
@@ -790,12 +756,9 @@ export default function AccountPage() {
                 </div>
               ) : addresses.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center bg-slate-50/50">
-                  <h3 className="text-sm font-bold text-slate-800">
-                    No saved addresses
-                  </h3>
+                  <h3 className="text-sm font-bold text-slate-800">No saved addresses</h3>
                   <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
-                    You haven't saved any addresses yet. Add an address to use
-                    during checkout.
+                    You haven't saved any addresses yet. Add an address to use during checkout.
                   </p>
                   <button
                     type="button"
@@ -848,13 +811,9 @@ export default function AccountPage() {
                           <p>{addr.address_line_1}</p>
                           {addr.address_line_2 && <p>{addr.address_line_2}</p>}
                           <p>
-                            {[addr.city, addr.state, addr.postal_code]
-                              .filter(Boolean)
-                              .join(", ")}
+                            {[addr.city, addr.state, addr.postal_code].filter(Boolean).join(", ")}
                           </p>
-                          <p className="font-semibold text-slate-900">
-                            {addr.country}
-                          </p>
+                          <p className="font-semibold text-slate-900">{addr.country}</p>
                         </div>
 
                         {/* Phone */}
