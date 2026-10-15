@@ -2,8 +2,8 @@
 
 /* Brand colors */
 @theme {
-  /* #161C2C — a very deep, dark charcoal-navy */
-  --color-charcoal-navy: #161c2c;
+  /* #0B1020 — a very deep, dark charcoal-navy */
+  --color-charcoal-navy: #0b1020;
 }
 
 /* Global reset */
@@ -19,7 +19,7 @@ html {
 body {
   margin: 0;
   background: #ffffff;
-  color: #0f172a;
+  color: #0b1020;
   font-family: Arial, Helvetica, sans-serif;
 }
 

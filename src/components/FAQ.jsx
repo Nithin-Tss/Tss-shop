@@ -36,7 +36,7 @@ export default function FAQ() {
       <div className="mx-auto max-w-6xl">
         {/* Section Badge */}
         <div className="mb-3 flex justify-center">
-          <span className="rounded-full bg-blue-100 px-4 py-1 text-sm font-semibold text-blue-600">
+          <span className="rounded-full bg-blue-100 px-4 py-1 text-sm font-semibold text-violet-600">
             FAQ
           </span>
         </div>
@@ -66,7 +66,7 @@ export default function FAQ() {
 
                   <span
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xl font-bold transition ${
-                      isOpen ? "bg-blue-600 text-white" : "text-blue-600"
+                      isOpen ? "bg-violet-600 text-white" : "text-violet-600"
                     }`}
                     aria-hidden="true"
                   >

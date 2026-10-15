@@ -170,14 +170,14 @@ export default function AdminReports() {
     "inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E5E7EB] bg-white text-[#4B5563] transition-colors hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40";
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#161C2C] font-sans">
+    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020] font-sans">
       <AdminHeader />
 
       {/* FEEDBACK TOAST */}
       {notice && (
         <div
           role="status"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all"
         >
           <span>{notice}</span>
           <button
@@ -214,7 +214,7 @@ export default function AdminReports() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <h1 className="text-[20px] font-bold tracking-tight text-[#161C2C]">Reports</h1>
+              <h1 className="text-[20px] font-bold tracking-tight text-[#0B1020]">Reports</h1>
             </div>
 
             <Link
@@ -252,7 +252,7 @@ export default function AdminReports() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search reports"
                     aria-label="Search reports"
-                    className="h-9 w-full rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-8 text-[14px] text-[#161C2C] outline-none transition placeholder:text-[#9CA3AF] hover:border-[#D1D5DB] focus:border-[#161C2C] focus:ring-1 focus:ring-[#161C2C]"
+                    className="h-9 w-full rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-8 text-[14px] text-[#0B1020] outline-none transition placeholder:text-[#9CA3AF] hover:border-[#D1D5DB] focus:border-[#0B1020] focus:ring-1 focus:ring-[#0B1020]"
                   />
                   {searchQuery && (
                     <button
@@ -272,7 +272,7 @@ export default function AdminReports() {
                   onClick={() => handleToggleSort("name")}
                   title={`Sort by name (${sortOrder === "asc" ? "ascending" : "descending"})`}
                   aria-label="Sort reports"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F9FAFB] hover:text-[#161C2C] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#161C2C]"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F9FAFB] hover:text-[#0B1020] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0B1020]"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -293,7 +293,7 @@ export default function AdminReports() {
                     type="button"
                     onClick={() => setIsCreatedByOpen((prev) => !prev)}
                     className={`inline-flex items-center gap-1.5 rounded-lg border border-[#D1D5DB] bg-white px-3 py-1 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] ${
-                      selectedCreator !== "all" ? "border-[#161C2C] bg-[#F4F6F8]" : ""
+                      selectedCreator !== "all" ? "border-[#0B1020] bg-[#F4F6F8]" : ""
                     }`}
                     aria-expanded={isCreatedByOpen}
                   >
@@ -325,7 +325,7 @@ export default function AdminReports() {
                         }}
                         className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                           selectedCreator === "all"
-                            ? "font-semibold text-[#161C2C] bg-[#F3F4F6]"
+                            ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
                             : "text-[#374151] hover:bg-[#F9FAFB]"
                         }`}
                       >
@@ -342,7 +342,7 @@ export default function AdminReports() {
                           }}
                           className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                             selectedCreator === creator
-                              ? "font-semibold text-[#161C2C] bg-[#F3F4F6]"
+                              ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
                               : "text-[#374151] hover:bg-[#F9FAFB]"
                           }`}
                         >
@@ -360,7 +360,7 @@ export default function AdminReports() {
                     type="button"
                     onClick={() => setIsCategoryOpen((prev) => !prev)}
                     className={`inline-flex items-center gap-1.5 rounded-lg border border-[#D1D5DB] bg-white px-3 py-1 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] ${
-                      selectedCategory !== "all" ? "border-[#161C2C] bg-[#F4F6F8]" : ""
+                      selectedCategory !== "all" ? "border-[#0B1020] bg-[#F4F6F8]" : ""
                     }`}
                     aria-expanded={isCategoryOpen}
                   >
@@ -392,7 +392,7 @@ export default function AdminReports() {
                         }}
                         className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                           selectedCategory === "all"
-                            ? "font-semibold text-[#161C2C] bg-[#F3F4F6]"
+                            ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
                             : "text-[#374151] hover:bg-[#F9FAFB]"
                         }`}
                       >
@@ -409,7 +409,7 @@ export default function AdminReports() {
                           }}
                           className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                             selectedCategory === cat
-                              ? "font-semibold text-[#161C2C] bg-[#F3F4F6]"
+                              ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
                               : "text-[#374151] hover:bg-[#F9FAFB]"
                           }`}
                         >
@@ -430,7 +430,7 @@ export default function AdminReports() {
                       setSelectedCreator("all");
                       setSearchQuery("");
                     }}
-                    className="text-[12px] text-[#6B7280] hover:text-[#161C2C] hover:underline"
+                    className="text-[12px] text-[#6B7280] hover:text-[#0B1020] hover:underline"
                   >
                     Clear filters
                   </button>
@@ -442,9 +442,9 @@ export default function AdminReports() {
             <div className="overflow-x-auto min-h-[300px]">
               <table className="w-full min-w-[640px] border-collapse text-left text-[14px]">
                 <thead>
-                  <tr className="border-b border-[#E5E7EB] bg-[#FAFBFD]">
+                  <tr className="border-b border-[#E5E7EB] bg-[#FAF8FF]">
                     <th
-                      className={`${headCell} cursor-pointer hover:text-[#161C2C]`}
+                      className={`${headCell} cursor-pointer hover:text-[#0B1020]`}
                       onClick={() => handleToggleSort("name")}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -456,7 +456,7 @@ export default function AdminReports() {
                     </th>
                     <th className={headCell}>Category</th>
                     <th
-                      className={`${headCell} cursor-pointer hover:text-[#161C2C]`}
+                      className={`${headCell} cursor-pointer hover:text-[#0B1020]`}
                       onClick={() => handleToggleSort("last_viewed")}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -526,7 +526,7 @@ export default function AdminReports() {
                               />
                             </svg>
                           </div>
-                          <h3 className="mb-1 text-[16px] font-semibold text-[#161C2C]">
+                          <h3 className="mb-1 text-[16px] font-semibold text-[#0B1020]">
                             {searchQuery || selectedCategory !== "all" || selectedCreator !== "all"
                               ? "No matching reports"
                               : "No reports found"}
@@ -546,7 +546,7 @@ export default function AdminReports() {
                                 setSelectedCategory("all");
                                 setSelectedCreator("all");
                               }}
-                              className="inline-flex items-center justify-center rounded-lg bg-[#161C2C] px-4 py-2 text-[13px] font-medium text-white hover:bg-[#262E42]"
+                              className="inline-flex items-center justify-center rounded-lg bg-[#0B1020] px-4 py-2 text-[13px] font-medium text-white hover:bg-[#262E42]"
                             >
                               Clear filters
                             </button>
@@ -564,7 +564,7 @@ export default function AdminReports() {
                         className="h-12 transition-colors hover:bg-[#F9FAFB] cursor-pointer"
                       >
                         {/* Name */}
-                        <td className="px-4 py-3 font-medium text-[#161C2C] hover:underline">
+                        <td className="px-4 py-3 font-medium text-[#0B1020] hover:underline">
                           <div className="flex items-center gap-1.5">
                             <span>{report.name}</span>
                             {report.description && (
@@ -644,7 +644,7 @@ export default function AdminReports() {
           <div className="pb-6 pt-6 text-center">
             <a
               href="#learn-more"
-              className="text-[12px] text-[#6B7280] underline underline-offset-2 transition-colors hover:text-[#161C2C]"
+              className="text-[12px] text-[#6B7280] underline underline-offset-2 transition-colors hover:text-[#0B1020]"
             >
               Learn more about the new reporting experience
             </a>

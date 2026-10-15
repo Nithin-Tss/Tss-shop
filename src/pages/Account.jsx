@@ -367,7 +367,7 @@ export default function AccountPage() {
           <div className="mt-6 flex items-center gap-2">
             <Link
               to="/account"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#161C2C] text-white shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#0B1020] text-white shadow-xs"
             >
               <span>👤</span>
               <span>Account & Addresses</span>
@@ -503,7 +503,7 @@ export default function AccountPage() {
                       type="button"
                       onClick={handleResendVerification}
                       disabled={isResending}
-                      className="mt-1 text-[11px] text-blue-600 hover:underline font-medium disabled:opacity-50"
+                      className="mt-1 text-[11px] text-violet-600 hover:underline font-medium disabled:opacity-50"
                     >
                       {isResending ? "Sending..." : "Send verification link"}
                     </button>
@@ -609,7 +609,7 @@ export default function AccountPage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="px-5 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-[#252E45] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
                   >
                     {isSaving ? "Saving..." : "Save Details"}
                   </button>
@@ -686,7 +686,7 @@ export default function AccountPage() {
                   <button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="px-5 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-[#252E45] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
                   >
                     {isChangingPassword ? "Updating..." : "Update Password"}
                   </button>
@@ -715,7 +715,7 @@ export default function AccountPage() {
               <button
                 type="button"
                 onClick={handleOpenAddAddress}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#252E45] shadow-xs cursor-pointer self-start sm:self-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#1C2347] shadow-xs cursor-pointer self-start sm:self-auto"
               >
                 <span>⊕</span>
                 <span>Add Address</span>
@@ -765,7 +765,7 @@ export default function AccountPage() {
                   <button
                     type="button"
                     onClick={handleOpenAddAddress}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#161C2C] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#252E45] shadow-xs cursor-pointer"
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#0B1020] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1C2347] shadow-xs cursor-pointer"
                   >
                     <span>⊕</span>
                     <span>Add your first address</span>
@@ -834,7 +834,7 @@ export default function AccountPage() {
                             <button
                               type="button"
                               onClick={() => handleSetDefaultAddress(addr)}
-                              className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition hover:underline cursor-pointer"
+                              className="text-xs font-semibold text-violet-600 hover:text-violet-800 transition hover:underline cursor-pointer"
                             >
                               Set as default
                             </button>

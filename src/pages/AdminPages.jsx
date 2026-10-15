@@ -18,7 +18,7 @@ const EMPTY_PAGE = {
 };
 
 const fieldClass =
-  "w-full rounded-lg border border-[#D8DFE8] bg-white px-3 py-2 text-sm text-[#161C2C] outline-none focus:border-[#161C2C]";
+  "w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-2 text-sm text-[#0B1020] outline-none focus:border-[#0B1020]";
 const fieldLabel = "mb-1 block text-[13px] font-medium text-[#4A5160]";
 
 const pageDate = (value) => (value ? new Date(value).toLocaleDateString() : "");
@@ -85,13 +85,13 @@ export default function AdminPages() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#161C2C]">
+    <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
-        <main className="flex-1 overflow-hidden bg-[#F7F8FA] px-6 py-6 lg:px-8">
+        <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="pages" />
               {editing ? (editing.id ? "Edit page" : "Add page") : "Pages"}
             </h1>
@@ -108,7 +108,7 @@ export default function AdminPages() {
                 <button
                   type="button"
                   onClick={() => open({})}
-                  className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45]"
+                  className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
                 >
                   Add page
                 </button>
@@ -124,28 +124,28 @@ export default function AdminPages() {
           )}
 
           {!editing && (
-            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
               {pages === null ? (
-                <p className="px-6 py-10 text-center text-sm text-[#53627E]">
+                <p className="px-6 py-10 text-center text-sm text-[#4C4F7A]">
                   {error ? "" : "Loading..."}
                 </p>
               ) : pages.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <h2 className="text-xl font-semibold">Add your first page</h2>
-                  <p className="mt-3 text-sm text-[#53627E]">
+                  <p className="mt-3 text-sm text-[#4C4F7A]">
                     Write pages like About us or Shipping policy and show them on your store.
                   </p>
                   <button
                     type="button"
                     onClick={() => open({})}
-                    className="mt-5 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45]"
+                    className="mt-5 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
                   >
                     Add page
                   </button>
                 </div>
               ) : (
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b border-[#E3E7ED] text-[13px] text-[#53627E]">
+                  <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
                     <tr>
                       <th className="px-4 py-3 font-medium">Title</th>
                       <th className="px-4 py-3 font-medium">Visibility</th>
@@ -158,7 +158,7 @@ export default function AdminPages() {
                       <tr
                         key={page.id}
                         onClick={() => open(page)}
-                        className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F7F8FA]"
+                        className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
                       >
                         <td className="px-4 py-3 font-medium">{page.title}</td>
                         <td className="px-4 py-3">
@@ -168,10 +168,10 @@ export default function AdminPages() {
                             {page.status === "visible" ? "Visible" : "Hidden"}
                           </span>
                         </td>
-                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">
+                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
                           /pages/{page.handle}
                         </td>
-                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">
+                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
                           {pageDate(page.updatedAt)}
                         </td>
                       </tr>
@@ -184,7 +184,7 @@ export default function AdminPages() {
 
           {editing && (
             <form onSubmit={save} className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-              <section className="grid gap-4 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+              <section className="grid gap-4 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
                 <label>
                   <span className={fieldLabel}>Title</span>
                   <input
@@ -206,11 +206,11 @@ export default function AdminPages() {
                   />
                 </div>
 
-                <div className="grid gap-3 rounded-xl border border-[#E3E7ED] p-4">
+                <div className="grid gap-3 rounded-xl border border-[#E4DEFB] p-4">
                   <h2 className="text-sm font-semibold">Search engine listing</h2>
-                  <p className="text-xs text-[#53627E]">
+                  <p className="text-xs text-[#4C4F7A]">
                     {form.seo_title || form.title || "Page title"} -{" "}
-                    <span className="text-[#30466F]">/pages/{form.handle || "..."}</span>
+                    <span className="text-[#3B3F8F]">/pages/{form.handle || "..."}</span>
                   </p>
                   <label>
                     <span className={fieldLabel}>Page title</span>
@@ -241,7 +241,7 @@ export default function AdminPages() {
                       placeholder="Made from the title when empty"
                       maxLength={255}
                     />
-                    <span className="mt-1 block text-xs text-[#53627E]">
+                    <span className="mt-1 block text-xs text-[#4C4F7A]">
                       Address on your store: /pages/{form.handle || "..."}
                     </span>
                   </label>
@@ -249,7 +249,7 @@ export default function AdminPages() {
               </section>
 
               <aside className="grid content-start gap-4">
-                <section className="grid gap-3 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Visibility</span>
                     <select
@@ -264,7 +264,7 @@ export default function AdminPages() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] disabled:opacity-50"
+                    className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
                   >
                     {busy ? "Saving..." : "Save"}
                   </button>
@@ -273,7 +273,7 @@ export default function AdminPages() {
                       href={editing.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-center text-sm font-medium text-[#30466F] hover:underline"
+                      className="text-center text-sm font-medium text-[#3B3F8F] hover:underline"
                     >
                       View on store
                     </a>
@@ -290,9 +290,9 @@ export default function AdminPages() {
                   )}
                 </section>
 
-                <section className="grid gap-2 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+                <section className="grid gap-2 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
                   <span className={fieldLabel}>Theme template</span>
-                  <p className="text-xs text-[#53627E]">
+                  <p className="text-xs text-[#4C4F7A]">
                     Pages use the Page template. Change its layout in Customize (Page), or edit
                     templates/page.liquid and sections/main-page.liquid in the code editor.
                   </p>

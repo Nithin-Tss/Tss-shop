@@ -13,17 +13,17 @@ const lineIcon = {
 const card =
   "rounded-xl border border-[#e5e7eb] bg-white p-5 shadow-[0_1px_2px_rgba(20,27,45,0.04)] transition-shadow duration-200 hover:shadow-[0_4px_14px_-6px_rgba(20,27,45,0.12)]";
 
-const cardHeading = "text-sm font-semibold text-[#141b2d]";
+const cardHeading = "text-sm font-semibold text-[#0B1020]";
 
 const outlineButton =
-  "inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3.5 text-sm font-medium text-[#141b2d] transition-colors duration-200 hover:border-[#141b2d] hover:bg-[#f1f3f7]";
+  "inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3.5 text-sm font-medium text-[#0B1020] transition-colors duration-200 hover:border-[#0B1020] hover:bg-[#f1f3f7]";
 
 const chip =
-  "inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 text-[13px] font-medium text-[#141b2d] transition-colors duration-200 hover:border-[#141b2d] hover:bg-[#f1f3f7]";
+  "inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 text-[13px] font-medium text-[#0B1020] transition-colors duration-200 hover:border-[#0B1020] hover:bg-[#f1f3f7]";
 
 function Chevron() {
   return (
-    <svg {...lineIcon} className="h-3.5 w-3.5 text-[#53627E]">
+    <svg {...lineIcon} className="h-3.5 w-3.5 text-[#4C4F7A]">
       <path d="m6 9 6 6 6-6" />
     </svg>
   );
@@ -40,7 +40,7 @@ function EmptyIcon() {
 
 export default function AnalyticsPage() {
   return (
-    <div className="min-h-screen bg-[#f7f8fa] text-[#141b2d]">
+    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-72px)]">
@@ -50,12 +50,12 @@ export default function AnalyticsPage() {
           <header className="border-b border-[#e5e7eb] bg-white">
             <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div className="min-w-0">
-                <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#141b2d]">
+                <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#0B1020]">
                   <PageIcon name="analytics" />
                   Analytics
                 </h1>
 
-                <p className="mt-0.5 text-[13px] text-[#53627E]">Last refreshed: —</p>
+                <p className="mt-0.5 text-[13px] text-[#4C4F7A]">Last refreshed: —</p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export default function AnalyticsPage() {
 
                 <button
                   type="button"
-                  className="inline-flex h-9 items-center rounded-lg bg-[#141b2d] px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#252E45]"
+                  className="inline-flex h-9 items-center rounded-lg bg-[#0B1020] px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1C2347]"
                 >
                   New exploration
                 </button>
@@ -82,9 +82,9 @@ export default function AnalyticsPage() {
           </header>
 
           <div className="mx-auto max-w-[1280px] px-4 py-5 sm:px-6">
-            <div className="rounded-xl bg-[#f1f3f7] px-4 py-3 text-[13px] text-[#141b2d]">
+            <div className="rounded-xl bg-[#f1f3f7] px-4 py-3 text-[13px] text-[#0B1020]">
               Analytics provides insights into your store performance.
-              <button type="button" className="ml-1.5 font-semibold text-[#141b2d] hover:underline">
+              <button type="button" className="ml-1.5 font-semibold text-[#0B1020] hover:underline">
                 Learn more
               </button>
             </div>
@@ -114,11 +114,11 @@ export default function AnalyticsPage() {
               <section className={card}>
                 <h2 className={cardHeading}>Total sales</h2>
 
-                <div className="mt-4 flex h-[340px] items-center justify-center rounded-lg bg-[#f7f8fa]">
+                <div className="mt-4 flex h-[340px] items-center justify-center rounded-lg bg-[#F5F3FF]">
                   <div className="flex flex-col items-center text-center">
                     <EmptyIcon />
 
-                    <p className="mt-2 text-[13px] text-[#53627E]">No sales data available</p>
+                    <p className="mt-2 text-[13px] text-[#4C4F7A]">No sales data available</p>
                   </div>
                 </div>
               </section>
@@ -156,7 +156,7 @@ function MetricCard({ title }) {
     <div className={card}>
       <h2 className={cardHeading}>{title}</h2>
 
-      <p className="mt-2 text-2xl font-bold text-[#141b2d]">—</p>
+      <p className="mt-2 text-2xl font-bold text-[#0B1020]">—</p>
 
       <div className="mt-4 h-px bg-[#e5e7eb]" />
     </div>
@@ -166,9 +166,9 @@ function MetricCard({ title }) {
 function BreakdownRow({ label }) {
   return (
     <div className="flex h-11 items-center justify-between px-1">
-      <span className="text-sm text-[#141b2d]">{label}</span>
+      <span className="text-sm text-[#0B1020]">{label}</span>
 
-      <span className="text-sm font-semibold text-[#141b2d]">—</span>
+      <span className="text-sm font-semibold text-[#0B1020]">—</span>
     </div>
   );
 }
@@ -178,10 +178,10 @@ function EmptyCard({ title }) {
     <div className={card}>
       <h2 className={cardHeading}>{title}</h2>
 
-      <div className="mt-4 flex h-36 flex-col items-center justify-center rounded-lg bg-[#f7f8fa]">
+      <div className="mt-4 flex h-36 flex-col items-center justify-center rounded-lg bg-[#F5F3FF]">
         <EmptyIcon />
 
-        <span className="mt-2 text-[13px] text-[#53627E]">No data available</span>
+        <span className="mt-2 text-[13px] text-[#4C4F7A]">No data available</span>
       </div>
     </div>
   );

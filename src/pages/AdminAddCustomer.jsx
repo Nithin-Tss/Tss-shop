@@ -134,7 +134,7 @@ export default function AdminAddCustomer() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] text-[#161C2C]">
+    <div className="min-h-screen bg-[#F1F2F4] text-[#0B1020]">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -170,7 +170,7 @@ export default function AdminAddCustomer() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-2 rounded-lg bg-[#161C2C] hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
+                className="px-5 py-2 rounded-lg bg-[#0B1020] hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -295,7 +295,7 @@ export default function AdminAddCustomer() {
                       type="checkbox"
                       checked={marketingEmail}
                       onChange={(e) => setMarketingEmail(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-[#161C2C]"
+                      className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
                     />
                     <span className="text-xs text-slate-600">
                       Customer agreed to receive marketing emails.
@@ -307,7 +307,7 @@ export default function AdminAddCustomer() {
                       type="checkbox"
                       checked={marketingSms}
                       onChange={(e) => setMarketingSms(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-[#161C2C]"
+                      className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
                     />
                     <span className="text-xs text-slate-600">
                       Customer agreed to receive SMS marketing text messages.
@@ -319,7 +319,7 @@ export default function AdminAddCustomer() {
                       type="checkbox"
                       checked={marketingWhatsApp}
                       onChange={(e) => setMarketingWhatsApp(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-[#161C2C]"
+                      className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
                     />
                     <span className="text-xs text-slate-600">
                       Customer agreed to receive WhatsApp marketing messages.

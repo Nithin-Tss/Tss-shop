@@ -612,7 +612,7 @@ export default function AddressModal({
                 name="is_default"
                 checked={formData.is_default}
                 onChange={handleChange}
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#161C2C]"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
               />
               <div className="text-xs">
                 <span className="font-semibold text-slate-800">
@@ -639,7 +639,7 @@ export default function AddressModal({
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-lg bg-[#161C2C] hover:bg-[#252E45] text-white font-semibold transition disabled:opacity-50 shadow-xs flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2 rounded-lg bg-[#0B1020] hover:bg-[#1C2347] text-white font-semibold transition disabled:opacity-50 shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
               {saving ? (
                 <>

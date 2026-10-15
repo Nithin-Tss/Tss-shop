@@ -28,8 +28,8 @@ function renderDraftStatusBadge(status) {
 
   if (s === "completed" || s === "closed") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#161C2C]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#161C2C]" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#0B1020]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#0B1020]" />
         Completed
       </span>
     );
@@ -131,7 +131,7 @@ export default function AdminDrafts() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#161C2C]">
+    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -143,7 +143,7 @@ export default function AdminDrafts() {
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & ACTION BAR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="orders" />
               Drafts
             </h1>
@@ -152,7 +152,7 @@ export default function AdminDrafts() {
               <button
                 type="button"
                 onClick={() => setIsExportModalOpen(true)}
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#D8DFE8] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition cursor-pointer"
+                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition cursor-pointer"
               >
                 Export
               </button>
@@ -160,7 +160,7 @@ export default function AdminDrafts() {
               {canCreateOrder && (
                 <Link
                   to="/admin/online-store/orders/create"
-                  className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                  className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
                 >
                   Create order
                 </Link>
@@ -169,13 +169,13 @@ export default function AdminDrafts() {
           </div>
 
           {/* DRAFTS TABLE CARD */}
-          <section className="rounded-2xl border border-[#E3E7ED] bg-white shadow-sm overflow-hidden">
+          <section className="rounded-2xl border border-[#E4DEFB] bg-white shadow-sm overflow-hidden">
             {/* TABS & SEARCH BAR */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7ED] px-4 py-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4DEFB] px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 rounded-lg bg-[#EEF1F6] px-3.5 py-1.5 text-sm font-medium text-[#161C2C]"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#EDE9FE] px-3.5 py-1.5 text-sm font-medium text-[#0B1020]"
                 >
                   <span>All</span>
                   <span className="text-xs text-slate-500">↕</span>
@@ -183,14 +183,14 @@ export default function AdminDrafts() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#D8DFE8] bg-white px-3 text-sm">
+                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm">
                   <span className="text-slate-400">⌕</span>
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search and filter"
-                    className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#161C2C] placeholder:text-slate-400"
+                    className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#0B1020] placeholder:text-slate-400"
                   />
                   {searchQuery && (
                     <button
@@ -206,7 +206,7 @@ export default function AdminDrafts() {
                 <button
                   type="button"
                   title="Table columns"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-slate-600 hover:bg-[#F3F6FA] transition shrink-0"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-slate-600 hover:bg-[#F3F0FF] transition shrink-0"
                 >
                   ▥
                 </button>
@@ -215,15 +215,15 @@ export default function AdminDrafts() {
 
             {/* RESPONSIVE TABLE */}
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm text-[#161C2C]">
+              <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
                 <thead>
-                  <tr className="border-b border-[#E3E7ED] bg-[#FAFBFD] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
+                  <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
                     <th className="py-3.5 pl-5 pr-3 w-10">
                       <input
                         type="checkbox"
                         checked={allSelected}
                         onChange={handleSelectAll}
-                        className="h-4 w-4 rounded border-slate-300 accent-[#161C2C] cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
                       />
                     </th>
                     <th className="py-3.5 px-3">
@@ -243,7 +243,7 @@ export default function AdminDrafts() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-[#E3E7ED]">
+                <tbody className="divide-y divide-[#E4DEFB]">
                   {loading ? (
                     // SKELETON
                     [...Array(4)].map((_, i) => (
@@ -280,7 +280,7 @@ export default function AdminDrafts() {
                         <tr
                           key={d.id}
                           className={`transition-colors whitespace-nowrap hover:bg-[#F9FAFC] ${
-                            isSelected ? "bg-[#F3F6FA]" : ""
+                            isSelected ? "bg-[#F3F0FF]" : ""
                           }`}
                         >
                           {/* Checkbox */}
@@ -289,12 +289,12 @@ export default function AdminDrafts() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelect(d.id)}
-                              className="h-4 w-4 rounded border-slate-300 accent-[#161C2C] cursor-pointer"
+                              className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
                             />
                           </td>
 
                           {/* Draft number */}
-                          <td className="py-3.5 px-3 font-semibold text-[#161C2C]">
+                          <td className="py-3.5 px-3 font-semibold text-[#0B1020]">
                             <span className="hover:underline cursor-pointer">
                               {d.draft_number || `#D${d.id?.slice(0, 4)}`}
                             </span>
@@ -321,7 +321,7 @@ export default function AdminDrafts() {
                           </td>
 
                           {/* Total */}
-                          <td className="py-3.5 pl-3 pr-6 text-right font-medium text-[#161C2C]">
+                          <td className="py-3.5 pl-3 pr-6 text-right font-medium text-[#0B1020]">
                             ${parseFloat(d.total || 0).toFixed(2)} {curr}
                           </td>
                         </tr>
@@ -343,7 +343,7 @@ export default function AdminDrafts() {
                           {canCreateDraft && (
                             <Link
                               to="/admin/online-store/orders/create"
-                              className="mt-3 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-slate-800 transition"
+                              className="mt-3 px-4 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-slate-800 transition"
                             >
                               Create draft order
                             </Link>
@@ -358,14 +358,14 @@ export default function AdminDrafts() {
 
             {/* TABLE PAGINATION FOOTER */}
             {filteredDrafts.length > 0 && (
-              <div className="flex items-center justify-between gap-4 border-t border-[#E3E7ED] px-4 py-3 text-xs text-slate-500">
+              <div className="flex items-center justify-between gap-4 border-t border-[#E4DEFB] px-4 py-3 text-xs text-slate-500">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     disabled={currentPage <= 1}
                     onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                     aria-label="Previous page"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#D8DFE8] bg-white text-slate-600 hover:bg-[#F3F6FA] disabled:pointer-events-none disabled:opacity-40"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#DDD6FE] bg-white text-slate-600 hover:bg-[#F3F0FF] disabled:pointer-events-none disabled:opacity-40"
                   >
                     ‹
                   </button>
@@ -374,7 +374,7 @@ export default function AdminDrafts() {
                     disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                     aria-label="Next page"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#D8DFE8] bg-white text-slate-600 hover:bg-[#F3F6FA] disabled:pointer-events-none disabled:opacity-40"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#DDD6FE] bg-white text-slate-600 hover:bg-[#F3F0FF] disabled:pointer-events-none disabled:opacity-40"
                   >
                     ›
                   </button>
@@ -391,7 +391,7 @@ export default function AdminDrafts() {
           </section>
 
           {/* LEARN MORE FOOTER */}
-          <p className="mt-8 text-center text-sm font-medium text-[#161C2C]">
+          <p className="mt-8 text-center text-sm font-medium text-[#0B1020]">
             <a href="#" className="hover:underline text-slate-700 hover:text-slate-900">
               Learn more about creating draft orders
             </a>

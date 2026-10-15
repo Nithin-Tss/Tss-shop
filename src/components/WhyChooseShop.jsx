@@ -54,7 +54,7 @@ export default function WhyChooseVendra() {
               <div
                 className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full ${feature.iconBackground}`}
               >
-                <span className="text-3xl font-bold text-blue-600" aria-hidden="true">
+                <span className="text-3xl font-bold text-violet-600" aria-hidden="true">
                   {feature.icon}
                 </span>
               </div>

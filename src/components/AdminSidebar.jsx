@@ -447,7 +447,7 @@ export default function AdminSidebar() {
   useSidebarScroll(navRef, path);
 
   return (
-    <aside className="hidden md:block w-[256px] shrink-0 bg-[#141b2d] text-white select-none">
+    <aside className="hidden md:block w-[256px] shrink-0 bg-[#0B1020] text-white select-none">
       {/* Stays in view below the 72px header while long pages scroll */}
       <div className="sticky top-[72px] flex h-[calc(100vh-72px)] flex-col">
         <nav
@@ -583,7 +583,7 @@ function useDismiss(ref, open, close) {
 function StoreAvatar({ name, size = "h-7 w-7 text-xs" }) {
   return (
     <span
-      className={`flex shrink-0 items-center justify-center rounded-lg bg-[#30466F] font-bold uppercase text-white ${size}`}
+      className={`flex shrink-0 items-center justify-center rounded-lg bg-[#3B3F8F] font-bold uppercase text-white ${size}`}
     >
       {(name || "S").trim().charAt(0)}
     </span>
@@ -657,22 +657,22 @@ function StoresDialog({ stores, activeId, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#161C2C]/50 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1020]/50 px-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="all-stores-title"
-        className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-xl"
+        className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#E3E7ED] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#E4DEFB] px-5 py-4">
           <div>
-            <h2 id="all-stores-title" className="text-base font-semibold text-[#161C2C]">
+            <h2 id="all-stores-title" className="text-base font-semibold text-[#0B1020]">
               All stores
             </h2>
-            <p className="text-sm text-[#53627E]">
+            <p className="text-sm text-[#4C4F7A]">
               {stores.length} {stores.length === 1 ? "store" : "stores"} on your account
             </p>
           </div>
@@ -680,7 +680,7 @@ function StoresDialog({ stores, activeId, onClose }) {
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] transition"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] transition"
           >
             <svg {...headerIcon} className="h-4 w-4">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -714,23 +714,23 @@ function StoresDialog({ stores, activeId, onClose }) {
                           setEditingId(null);
                         }
                       }}
-                      className="h-9 w-full rounded-lg border border-[#141b2d] px-3 text-sm outline-none focus:ring-4 focus:ring-[#141b2d]/[0.08]"
+                      className="h-9 w-full rounded-lg border border-[#0B1020] px-3 text-sm outline-none focus:ring-4 focus:ring-[#0B1020]/[0.08]"
                     />
                   ) : (
                     <>
-                      <p className="truncate text-sm font-semibold text-[#161C2C]">
+                      <p className="truncate text-sm font-semibold text-[#0B1020]">
                         {store.storeName}
                       </p>
                       <div className="mt-0.5 flex items-center gap-2 text-xs">
                         <span
                           className={`rounded-full px-2 py-0.5 font-medium ${
-                            live ? "bg-emerald-50 text-emerald-700" : "bg-[#EEF1F6] text-[#53627E]"
+                            live ? "bg-emerald-50 text-emerald-700" : "bg-[#EDE9FE] text-[#4C4F7A]"
                           }`}
                         >
                           {storeStatus(store)}
                         </span>
                         {store.storeId === activeId && (
-                          <span className="text-[#53627E]">Current store</span>
+                          <span className="text-[#4C4F7A]">Current store</span>
                         )}
                       </div>
                     </>
@@ -745,14 +745,14 @@ function StoresDialog({ stores, activeId, onClose }) {
                           type="button"
                           disabled={busy}
                           onClick={() => saveRename(store)}
-                          className="rounded-lg bg-[#141b2d] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#252E45] transition disabled:opacity-60"
+                          className="rounded-lg bg-[#0B1020] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#1C2347] transition disabled:opacity-60"
                         >
                           Save
                         </button>
                         <button
                           type="button"
                           onClick={() => setEditingId(null)}
-                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#53627E] hover:bg-[#F3F6FA] transition"
+                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] transition"
                         >
                           Cancel
                         </button>
@@ -763,7 +763,7 @@ function StoresDialog({ stores, activeId, onClose }) {
                           type="button"
                           disabled={busy}
                           onClick={() => startRename(store)}
-                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition disabled:opacity-60"
+                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition disabled:opacity-60"
                         >
                           Rename
                         </button>
@@ -821,7 +821,7 @@ function StoreSwitcher() {
   };
 
   const itemClass =
-    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-[#161C2C] hover:bg-[#F3F6FA] transition";
+    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-[#0B1020] hover:bg-[#F3F0FF] transition";
 
   return (
     <div ref={menuRef} className="relative min-w-0">
@@ -830,10 +830,10 @@ function StoreSwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 min-w-0 items-center gap-2 rounded-lg border border-[#E3E7ED] bg-white px-2 hover:border-[#C9D1DD] hover:bg-[#F7F8FA] transition"
+        className="flex h-10 min-w-0 items-center gap-2 rounded-lg border border-[#E4DEFB] bg-white px-2 hover:border-[#C9D1DD] hover:bg-[#F5F3FF] transition"
       >
         <StoreAvatar name={active?.storeName} />
-        <span className="hidden max-w-[160px] truncate text-sm font-semibold text-[#161C2C] sm:inline">
+        <span className="hidden max-w-[160px] truncate text-sm font-semibold text-[#0B1020] sm:inline">
           {active?.storeName || "No store yet"}
         </span>
         <svg
@@ -847,9 +847,9 @@ function StoreSwitcher() {
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-[calc(100%+8px)] z-50 w-64 rounded-xl border border-[#E3E7ED] bg-white p-1.5 shadow-lg shadow-[#141b2d]/10"
+          className="absolute left-0 top-[calc(100%+8px)] z-50 w-64 rounded-xl border border-[#E4DEFB] bg-white p-1.5 shadow-lg shadow-[#0B1020]/10"
         >
-          <p className="px-2.5 pb-1 pt-1.5 text-xs font-medium uppercase tracking-wide text-[#8A94A8]">
+          <p className="px-2.5 pb-1 pt-1.5 text-xs font-medium uppercase tracking-wide text-[#8B8FB8]">
             Your stores
           </p>
 
@@ -869,7 +869,7 @@ function StoreSwitcher() {
                   <svg
                     {...headerIcon}
                     strokeWidth="2.2"
-                    className="h-4 w-4 shrink-0 text-[#141b2d]"
+                    className="h-4 w-4 shrink-0 text-[#0B1020]"
                   >
                     <path d="m5 12.5 4.5 4.5L19 7.5" />
                   </svg>
@@ -878,7 +878,7 @@ function StoreSwitcher() {
             ))}
           </div>
 
-          <div className="my-1 h-px bg-[#E3E7ED]" />
+          <div className="my-1 h-px bg-[#E4DEFB]" />
 
           {stores.length > 0 && (
             <button
@@ -908,7 +908,7 @@ function StoreSwitcher() {
             }}
             className={`${itemClass} font-semibold`}
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-dashed border-[#C9D1DD] text-[#141b2d]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-dashed border-[#C9D1DD] text-[#0B1020]">
               <svg {...headerIcon} strokeWidth="2" className="h-4 w-4">
                 <path d="M12 5v14M5 12h14" />
               </svg>
@@ -947,7 +947,7 @@ function ProfileMenu() {
   };
 
   const itemClass =
-    "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-[#161C2C] hover:bg-[#F3F6FA] transition";
+    "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-[#0B1020] hover:bg-[#F3F0FF] transition";
 
   return (
     <div ref={menuRef} className="relative">
@@ -956,12 +956,12 @@ function ProfileMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-11 items-center gap-2.5 rounded-full py-1 pl-1 pr-2 hover:bg-[#F3F6FA] transition sm:pr-3"
+        className="flex h-11 items-center gap-2.5 rounded-full py-1 pl-1 pr-2 hover:bg-[#F3F0FF] transition sm:pr-3"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#141b2d] text-sm font-semibold text-white">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0B1020] text-sm font-semibold text-white">
           A
         </span>
-        <span className="hidden sm:inline text-sm font-medium text-[#161C2C]">Admin</span>
+        <span className="hidden sm:inline text-sm font-medium text-[#0B1020]">Admin</span>
         <svg
           {...headerIcon}
           className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
@@ -973,7 +973,7 @@ function ProfileMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+8px)] w-48 rounded-xl border border-[#E3E7ED] bg-white p-1.5 shadow-lg shadow-[#141b2d]/10"
+          className="absolute right-0 top-[calc(100%+8px)] w-48 rounded-xl border border-[#E4DEFB] bg-white p-1.5 shadow-lg shadow-[#0B1020]/10"
         >
           <Link
             role="menuitem"
@@ -999,7 +999,7 @@ function ProfileMenu() {
             </svg>
             Settings
           </Link>
-          <div className="my-1 h-px bg-[#E3E7ED]" />
+          <div className="my-1 h-px bg-[#E4DEFB]" />
           <button
             type="button"
             role="menuitem"
@@ -1028,9 +1028,9 @@ export function AdminHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 flex h-[72px] items-center gap-3 border-b border-[#EEF0F4] bg-white px-4 text-[#161C2C] shadow-[0_1px_8px_rgba(20,27,45,0.05)] sm:gap-6 sm:px-7">
+    <header className="sticky top-0 z-40 flex h-[72px] items-center gap-3 border-b border-[#EEF0F4] bg-white px-4 text-[#0B1020] shadow-[0_1px_8px_rgba(20,27,45,0.05)] sm:gap-6 sm:px-7">
       <Link to={`${BASE}/home`} className="flex shrink-0 items-center gap-2.5">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#141b2d] text-xl font-extrabold text-white">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0B1020] text-xl font-extrabold text-white">
           S
         </span>
         <span className="hidden text-[22px] font-extrabold tracking-tight lg:inline">Store</span>
@@ -1040,10 +1040,10 @@ export function AdminHeader() {
 
       {/* Search: grows to fill the middle, narrower on small screens */}
       <div className="flex flex-1 justify-center">
-        <label className="group flex h-11 w-full max-w-[560px] items-center gap-2.5 rounded-full border border-transparent bg-[#F3F5F8] px-4 transition focus-within:border-[#141b2d]/40 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(20,27,45,0.08)]">
+        <label className="group flex h-11 w-full max-w-[560px] items-center gap-2.5 rounded-full border border-transparent bg-[#F3F5F8] px-4 transition focus-within:border-[#0B1020]/40 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(20,27,45,0.08)]">
           <svg
             {...headerIcon}
-            className="h-[18px] w-[18px] shrink-0 text-slate-500 group-focus-within:text-[#141b2d]"
+            className="h-[18px] w-[18px] shrink-0 text-slate-500 group-focus-within:text-[#0B1020]"
           >
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
@@ -1051,7 +1051,7 @@ export function AdminHeader() {
           <input
             type="text"
             placeholder="Search anything..."
-            className="w-full min-w-0 bg-transparent text-sm text-[#161C2C] outline-none placeholder:text-slate-500"
+            className="w-full min-w-0 bg-transparent text-sm text-[#0B1020] outline-none placeholder:text-slate-500"
           />
         </label>
       </div>
@@ -1060,7 +1060,7 @@ export function AdminHeader() {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#161C2C] hover:bg-[#F3F6FA] transition"
+          className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#0B1020] hover:bg-[#F3F0FF] transition"
         >
           <svg {...headerIcon} className="h-5 w-5">
             <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />

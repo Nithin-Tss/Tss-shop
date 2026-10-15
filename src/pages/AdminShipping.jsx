@@ -6,7 +6,7 @@ import { useCan } from "@/lib/auth";
 export default function ShippingPage() {
   const canManage = useCan("shipping.manage");
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#161C2C]">
+    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-72px)]">
@@ -14,8 +14,8 @@ export default function ShippingPage() {
 
         <main className="min-w-0 flex-1">
           {/* HEADER */}
-          <header className="flex items-center justify-between border-b border-slate-200 bg-[#F7F8FA] px-6 py-5">
-            <div className="flex items-center gap-2.5 text-[#161C2C]">
+          <header className="flex items-center justify-between border-b border-slate-200 bg-[#F5F3FF] px-6 py-5">
+            <div className="flex items-center gap-2.5 text-[#0B1020]">
               <PageIcon name="shipping" />
 
               <h1 className="text-xl font-semibold">Shipping</h1>
@@ -77,7 +77,7 @@ export default function ShippingPage() {
                   {canManage && (
                     <button
                       type="button"
-                      className="mt-5 rounded-lg bg-[#161C2C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45]"
+                      className="mt-5 rounded-lg bg-[#0B1020] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1C2347]"
                     >
                       Add shipping rate
                     </button>
@@ -106,7 +106,7 @@ export default function ShippingPage() {
               {canManage && (
                 <button
                   type="button"
-                  className="rounded-lg bg-[#161C2C] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#252E45]"
+                  className="rounded-lg bg-[#0B1020] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1C2347]"
                 >
                   Save
                 </button>

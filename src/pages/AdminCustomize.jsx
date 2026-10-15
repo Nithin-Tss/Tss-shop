@@ -52,13 +52,13 @@ const MAIN_SECTION = {
 };
 
 const inputClass =
-  "h-10 w-full rounded-lg border border-[#D8DFE8] bg-white px-3 text-sm outline-none focus:border-[#161C2C]";
+  "h-10 w-full rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm outline-none focus:border-[#0B1020]";
 
 const smallButton =
-  "rounded-md border border-[#D8DFE8] bg-white px-2 py-1 text-xs text-[#30466F] hover:border-[#161C2C] disabled:opacity-30";
+  "rounded-md border border-[#DDD6FE] bg-white px-2 py-1 text-xs text-[#3B3F8F] hover:border-[#0B1020] disabled:opacity-30";
 
 const iconButton =
-  "flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#53627E] hover:bg-white hover:text-[#161C2C]";
+  "flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#4C4F7A] hover:bg-white hover:text-[#0B1020]";
 
 const newSectionId = (type) => `${type}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -172,7 +172,7 @@ function DropLine({ after }) {
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute left-1 right-1 z-10 h-[3px] rounded-full bg-[#141b2d] shadow-[0_0_0_3px_rgba(20,27,45,0.12)]"
+      className="pointer-events-none absolute left-1 right-1 z-10 h-[3px] rounded-full bg-[#0B1020] shadow-[0_0_0_3px_rgba(20,27,45,0.12)]"
       style={{ top: after ? "calc(100% - 1px)" : "-2px" }}
     />
   );
@@ -184,7 +184,7 @@ function DragHandle({ label, onPointerDown, onKeyDown }) {
       type="button"
       onPointerDown={onPointerDown}
       onKeyDown={onKeyDown}
-      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-[#A3ADBF] hover:text-[#161C2C] active:cursor-grabbing"
+      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-[#A3ADBF] hover:text-[#0B1020] active:cursor-grabbing"
       aria-label={label}
       title="Drag to reorder (or use the arrow keys)"
     >
@@ -2001,10 +2001,10 @@ export default function AdminCustomizePage() {
     <FontsContext.Provider value={schema.fonts || []}>
       <UploadsContext.Provider value={uploads}>
         <div
-          className={`flex h-screen flex-col bg-[#F7F8FA] text-[#161C2C] ${drag ? "cursor-grabbing select-none" : ""}`}
+          className={`flex h-screen flex-col bg-[#F5F3FF] text-[#0B1020] ${drag ? "cursor-grabbing select-none" : ""}`}
         >
           {/* Top bar */}
-          <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#D8DFE8] bg-white px-4">
+          <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#DDD6FE] bg-white px-4">
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 to="/admin/online-store"
@@ -2012,7 +2012,7 @@ export default function AdminCustomizePage() {
                   if (dirty && !window.confirm("Leave without saving? Your changes will be lost."))
                     e.preventDefault();
                 }}
-                className="text-sm text-[#53627E] hover:text-[#161C2C]"
+                className="text-sm text-[#4C4F7A] hover:text-[#0B1020]"
               >
                 ← Online store
               </Link>
@@ -2024,7 +2024,7 @@ export default function AdminCustomizePage() {
               <button
                 type="button"
                 onClick={() => setPanelOpen((v) => !v)}
-                className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm hover:border-[#161C2C] lg:hidden"
+                className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-[#0B1020] lg:hidden"
                 aria-expanded={panelOpen}
               >
                 {panelOpen ? "Hide panel" : "Sections"}
@@ -2034,7 +2034,7 @@ export default function AdminCustomizePage() {
                 <button
                   type="button"
                   onClick={goBack}
-                  className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm hover:border-[#161C2C]"
+                  className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-[#0B1020]"
                   title="Back to the page you came from"
                 >
                   &larr; {PAGE_LABELS[backStack[backStack.length - 1].page] || "Back"}
@@ -2049,7 +2049,7 @@ export default function AdminCustomizePage() {
                   setAdding(false);
                   setBackStack([]);
                 }}
-                className="h-9 rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
+                className="h-9 rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
                 aria-label="Page to edit"
               >
                 {schema.pages.map((p) => (
@@ -2064,7 +2064,7 @@ export default function AdminCustomizePage() {
                 <select
                   value={sampleArticle}
                   onChange={(e) => setSampleArticle(e.target.value)}
-                  className="h-9 max-w-[200px] rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
+                  className="h-9 max-w-[200px] rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
                   aria-label="Post to preview"
                 >
                   {blogPosts.map((p) => (
@@ -2080,7 +2080,7 @@ export default function AdminCustomizePage() {
                 <select
                   value={samplePage}
                   onChange={(e) => setSamplePage(e.target.value)}
-                  className="h-9 max-w-[200px] rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
+                  className="h-9 max-w-[200px] rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
                   aria-label="Page to preview"
                 >
                   {storePages.map((p) => (
@@ -2096,7 +2096,7 @@ export default function AdminCustomizePage() {
                 target="_blank"
                 rel="noopener"
                 title="Open the theme code in a new tab; the two stay in step"
-                className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
+                className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 hover:border-[#0B1020]"
               >
                 Edit code
               </a>
@@ -2109,18 +2109,18 @@ export default function AdminCustomizePage() {
                     e.preventDefault();
                     openStorefront(new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/");
                   }}
-                  className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm leading-9 hover:border-[#161C2C]"
+                  className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 hover:border-[#0B1020]"
                 >
                   View store
                 </a>
               )}
 
-              <div className="flex items-center rounded-lg border border-[#D8DFE8]">
+              <div className="flex items-center rounded-lg border border-[#DDD6FE]">
                 <button
                   type="button"
                   onClick={undo}
                   disabled={!historyRef.current.past.length}
-                  className="flex h-9 w-9 items-center justify-center text-[#53627E] hover:text-[#161C2C] disabled:opacity-30"
+                  className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-[#0B1020] disabled:opacity-30"
                   aria-label="Undo"
                   title="Undo (Ctrl+Z)"
                 >
@@ -2129,12 +2129,12 @@ export default function AdminCustomizePage() {
                     <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
                   </svg>
                 </button>
-                <span className="h-5 w-px bg-[#D8DFE8]" />
+                <span className="h-5 w-px bg-[#DDD6FE]" />
                 <button
                   type="button"
                   onClick={redo}
                   disabled={!historyRef.current.future.length}
-                  className="flex h-9 w-9 items-center justify-center text-[#53627E] hover:text-[#161C2C] disabled:opacity-30"
+                  className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-[#0B1020] disabled:opacity-30"
                   aria-label="Redo"
                   title="Redo (Ctrl+Shift+Z)"
                 >
@@ -2151,7 +2151,7 @@ export default function AdminCustomizePage() {
                 className="hidden min-w-0 items-center gap-1.5 text-xs sm:flex"
               >
                 {saveState === "saved" && (
-                  <span className="flex items-center gap-1 text-[#53627E]">
+                  <span className="flex items-center gap-1 text-[#4C4F7A]">
                     <svg {...iconProps} strokeWidth="2.2" className="h-3.5 w-3.5 text-emerald-600">
                       <path d="m5 12.5 4.5 4.5L19 7.5" />
                     </svg>
@@ -2159,8 +2159,8 @@ export default function AdminCustomizePage() {
                   </span>
                 )}
                 {(saveState === "pending" || saveState === "saving") && (
-                  <span className="flex items-center gap-1.5 text-[#53627E]">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#8A94A8]" />
+                  <span className="flex items-center gap-1.5 text-[#4C4F7A]">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#8B8FB8]" />
                     Saving...
                   </span>
                 )}
@@ -2193,7 +2193,7 @@ export default function AdminCustomizePage() {
                 type="button"
                 onClick={() => engineRef.current.flushSave()}
                 disabled={!dirty || saveState === "saving"}
-                className="h-9 rounded-lg bg-[#161C2C] px-4 text-sm font-semibold text-white hover:bg-[#252E45] disabled:opacity-40"
+                className="h-9 rounded-lg bg-[#0B1020] px-4 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-40"
                 title="Changes save automatically; this saves right away"
               >
                 Save
@@ -2225,7 +2225,7 @@ export default function AdminCustomizePage() {
           <div className="relative flex min-h-0 flex-1">
             {/* Side panel: list view and edit view slide inside the same panel */}
             <aside
-              className={`absolute inset-y-0 left-0 z-30 w-[340px] max-w-[90vw] shrink-0 overflow-hidden border-r border-[#D8DFE8] bg-white shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+              className={`absolute inset-y-0 left-0 z-30 w-[340px] max-w-[90vw] shrink-0 overflow-hidden border-r border-[#DDD6FE] bg-white shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${
                 panelOpen ? "translate-x-0" : "-translate-x-full"
               }`}
             >
@@ -2244,7 +2244,7 @@ export default function AdminCustomizePage() {
                   inert={panelView !== 0}
                   aria-hidden={panelView !== 0}
                 >
-                  <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-[#161C2C]">
+                  <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-[#0B1020]">
                     {PAGE_LABELS[page]}
                   </h2>
 
@@ -2306,9 +2306,9 @@ export default function AdminCustomizePage() {
                           <div
                             className={`group flex h-9 items-center gap-2 rounded-md pl-1.5 pr-1 text-sm ${
                               blockInto
-                                ? "bg-[#EEF1F6] ring-1 ring-[#141b2d]/30"
+                                ? "bg-[#EDE9FE] ring-1 ring-[#0B1020]/30"
                                 : isSelected
-                                  ? "bg-[#EEF1F6]"
+                                  ? "bg-[#EDE9FE]"
                                   : "hover:bg-[#F5F6F8]"
                             }`}
                           >
@@ -2317,7 +2317,7 @@ export default function AdminCustomizePage() {
                               <svg
                                 {...iconProps}
                                 className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
-                                  s.hidden ? "text-[#C2C9D6]" : "text-[#8A94A8]"
+                                  s.hidden ? "text-[#C2C9D6]" : "text-[#8B8FB8]"
                                 }`}
                               >
                                 {SECTION_ICONS[s.type] || SECTION_ICONS.custom}
@@ -2355,7 +2355,7 @@ export default function AdminCustomizePage() {
                                     setRenaming(null);
                                   }
                                 }}
-                                className="h-7 min-w-0 flex-1 rounded border border-[#161C2C] bg-white px-2 text-sm outline-none"
+                                className="h-7 min-w-0 flex-1 rounded border border-[#0B1020] bg-white px-2 text-sm outline-none"
                               />
                             ) : (
                               <button
@@ -2366,7 +2366,7 @@ export default function AdminCustomizePage() {
                                 title={showType ? `${name} (${spec.name})` : name}
                               >
                                 <span
-                                  className={`truncate ${s.hidden ? "text-[#A3ADBF]" : "text-[#161C2C]"} ${isSelected ? "font-medium" : ""}`}
+                                  className={`truncate ${s.hidden ? "text-[#A3ADBF]" : "text-[#0B1020]"} ${isSelected ? "font-medium" : ""}`}
                                 >
                                   {name}
                                 </span>
@@ -2417,7 +2417,7 @@ export default function AdminCustomizePage() {
                                     <div
                                       role="menu"
                                       data-row-menu
-                                      className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-[#E3E7ED] bg-white py-1 text-sm shadow-lg"
+                                      className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-[#E4DEFB] bg-white py-1 text-sm shadow-lg"
                                     >
                                       {canRename && (
                                         <button
@@ -2467,7 +2467,7 @@ export default function AdminCustomizePage() {
                   </ul>
 
                   {template.order.length === 0 && (
-                    <p className="px-4 py-2 text-xs text-[#53627E]">
+                    <p className="px-4 py-2 text-xs text-[#4C4F7A]">
                       No sections yet. Your store shows a simple default layout until you add one.
                     </p>
                   )}
@@ -2475,9 +2475,9 @@ export default function AdminCustomizePage() {
                   {/* Add section */}
                   <div className="px-2 pb-3 pt-1">
                     {adding ? (
-                      <div className="rounded-xl border border-[#D8DFE8] bg-[#F7F8FA] p-3">
+                      <div className="rounded-xl border border-[#DDD6FE] bg-[#F5F3FF] p-3">
                         <label
-                          className="block text-xs font-medium text-[#30466F]"
+                          className="block text-xs font-medium text-[#3B3F8F]"
                           htmlFor="new-section-name"
                         >
                           Section name
@@ -2501,14 +2501,14 @@ export default function AdminCustomizePage() {
                                 setNewName("");
                               }
                             }}
-                            className="h-9 min-w-0 flex-1 rounded-lg border border-[#D8DFE8] bg-white px-2.5 text-sm outline-none focus:border-[#161C2C]"
+                            className="h-9 min-w-0 flex-1 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-sm outline-none focus:border-[#0B1020]"
                           />
 
                           <button
                             type="button"
                             onClick={addCustomSection}
                             disabled={!newName.trim()}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#161C2C] text-white hover:bg-[#252E45] disabled:opacity-30"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1020] text-white hover:bg-[#1C2347] disabled:opacity-30"
                             aria-label="Add section"
                             title="Add section"
                           >
@@ -2523,7 +2523,7 @@ export default function AdminCustomizePage() {
                               setAdding(false);
                               setNewName("");
                             }}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-[#0B1020] hover:text-[#0B1020]"
                             aria-label="Cancel"
                             title="Cancel"
                           >
@@ -2535,7 +2535,7 @@ export default function AdminCustomizePage() {
 
                         {templateTypes.length > 0 && (
                           <>
-                            <p className="mt-3 text-[11px] text-[#53627E]">
+                            <p className="mt-3 text-[11px] text-[#4C4F7A]">
                               Or start from a template:
                             </p>
 
@@ -2545,7 +2545,7 @@ export default function AdminCustomizePage() {
                                   key={type}
                                   type="button"
                                   onClick={() => addTemplateSection(type)}
-                                  className="rounded-full border border-[#D8DFE8] bg-white px-2.5 py-1 text-xs text-[#30466F] hover:border-[#161C2C] hover:text-[#161C2C]"
+                                  className="rounded-full border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-[#3B3F8F] hover:border-[#0B1020] hover:text-[#0B1020]"
                                 >
                                   {spec.name}
                                 </button>
@@ -2558,7 +2558,7 @@ export default function AdminCustomizePage() {
                       <button
                         type="button"
                         onClick={() => setAdding(true)}
-                        className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-sm font-medium text-[#30466F] hover:bg-[#F5F6F8] hover:text-[#161C2C]"
+                        className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-sm font-medium text-[#3B3F8F] hover:bg-[#F5F6F8] hover:text-[#0B1020]"
                       >
                         <span
                           className="flex h-5 w-5 items-center justify-center"
@@ -2591,7 +2591,7 @@ export default function AdminCustomizePage() {
                     }}
                   />
 
-                  <div className="mt-auto border-t border-[#D8DFE8] p-2">
+                  <div className="mt-auto border-t border-[#DDD6FE] p-2">
                     <button
                       type="button"
                       onClick={() => {
@@ -2599,7 +2599,7 @@ export default function AdminCustomizePage() {
                         setSelected("theme");
                       }}
                       className={`w-full rounded-lg px-2 py-2 text-left text-sm ${
-                        selected === "theme" ? "bg-[#EEF1F6]" : "hover:bg-[#F7F8FA]"
+                        selected === "theme" ? "bg-[#EDE9FE]" : "hover:bg-[#F5F3FF]"
                       }`}
                     >
                       Theme settings (colors, fonts, buttons)
@@ -2613,11 +2613,11 @@ export default function AdminCustomizePage() {
                   inert={panelView !== 1}
                   aria-hidden={panelView !== 1}
                 >
-                  <div className="flex shrink-0 items-center gap-2 border-b border-[#D8DFE8] px-3 py-3">
+                  <div className="flex shrink-0 items-center gap-2 border-b border-[#DDD6FE] px-3 py-3">
                     <button
                       type="button"
                       onClick={() => setSelected(null)}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
                       aria-label="Back to sections"
                       title="Back (Esc)"
                     >
@@ -2628,7 +2628,7 @@ export default function AdminCustomizePage() {
 
                     <div className="min-w-0">
                       <h2 className="truncate font-semibold leading-tight">{editTitle}</h2>
-                      <p className="truncate text-xs text-[#8A94A8]">{editSubtitle}</p>
+                      <p className="truncate text-xs text-[#8B8FB8]">{editSubtitle}</p>
                     </div>
                   </div>
 
@@ -2683,8 +2683,8 @@ export default function AdminCustomizePage() {
                             )}
 
                             {blockTargets.length > 0 && (
-                              <div className="mt-4 rounded-lg border border-dashed border-[#C9D1DD] bg-[#F7F8FA] p-2">
-                                <p className="px-1 pb-1.5 text-[11px] font-medium text-[#53627E]">
+                              <div className="mt-4 rounded-lg border border-dashed border-[#C9D1DD] bg-[#F5F3FF] p-2">
+                                <p className="px-1 pb-1.5 text-[11px] font-medium text-[#4C4F7A]">
                                   Drop on a section to move the block there
                                 </p>
 
@@ -2695,8 +2695,8 @@ export default function AdminCustomizePage() {
                                       data-drop-section={id}
                                       className={`truncate rounded-md border bg-white px-2.5 py-2 text-sm ${
                                         dropTarget?.kind === "into" && dropTarget.id === id
-                                          ? "border-[#141b2d] ring-2 ring-[#141b2d]/20"
-                                          : "border-[#D8DFE8]"
+                                          ? "border-[#0B1020] ring-2 ring-[#0B1020]/20"
+                                          : "border-[#DDD6FE]"
                                       }`}
                                     >
                                       {template.sections[id].settings.heading ||
@@ -2713,11 +2713,11 @@ export default function AdminCustomizePage() {
                   </div>
 
                   {shownSection && (
-                    <div className="flex shrink-0 items-center gap-1 border-t border-[#D8DFE8] bg-white px-3 py-2">
+                    <div className="flex shrink-0 items-center gap-1 border-t border-[#DDD6FE] bg-white px-3 py-2">
                       <button
                         type="button"
                         onClick={() => resetSection(shown)}
-                        className="rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                        className="rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
                       >
                         Reset to default
                       </button>
@@ -2729,7 +2729,7 @@ export default function AdminCustomizePage() {
                           <button
                             type="button"
                             onClick={() => duplicateSection(shown)}
-                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
                           >
                             <svg {...iconProps} className="h-3.5 w-3.5">
                               <rect x="8" y="8" width="13" height="13" rx="2" />
@@ -2760,11 +2760,11 @@ export default function AdminCustomizePage() {
                   inert={panelView !== 2}
                   aria-hidden={panelView !== 2}
                 >
-                  <div className="flex shrink-0 items-center gap-2 border-b border-[#D8DFE8] px-3 py-3">
+                  <div className="flex shrink-0 items-center gap-2 border-b border-[#DDD6FE] px-3 py-3">
                     <button
                       type="button"
                       onClick={() => setSelectedBlock(null)}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
                       aria-label="Back to section"
                       title="Back (Esc)"
                     >
@@ -2777,7 +2777,7 @@ export default function AdminCustomizePage() {
                       <h2 className="truncate font-semibold leading-tight">
                         {shownBlockSpec?.name || "Block"}
                       </h2>
-                      <p className="truncate text-xs text-[#8A94A8]">
+                      <p className="truncate text-xs text-[#8B8FB8]">
                         in {shownSection ? shownSection.settings.heading || shownSpec.name : ""}
                         {shownBlock?.hidden ? " · Hidden" : ""}
                       </p>
@@ -2807,11 +2807,11 @@ export default function AdminCustomizePage() {
                   </div>
 
                   {shownBlock && (
-                    <div className="flex shrink-0 items-center gap-1 border-t border-[#D8DFE8] bg-white px-3 py-2">
+                    <div className="flex shrink-0 items-center gap-1 border-t border-[#DDD6FE] bg-white px-3 py-2">
                       <button
                         type="button"
                         onClick={() => toggleBlockHidden(shown, shownBlockIndex)}
-                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
                       >
                         <EyeIcon hidden={!shownBlock.hidden} />
                         {shownBlock.hidden ? "Show" : "Hide"}
@@ -2822,7 +2822,7 @@ export default function AdminCustomizePage() {
                       <button
                         type="button"
                         onClick={() => duplicateBlock(shown, shownBlockIndex)}
-                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C]"
+                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
                       >
                         <svg {...iconProps} className="h-3.5 w-3.5">
                           <rect x="8" y="8" width="13" height="13" rx="2" />
@@ -2852,7 +2852,7 @@ export default function AdminCustomizePage() {
 
             {/* Preview */}
             <main className="flex min-w-0 flex-1 flex-col p-4">
-              <div className="mb-2 flex items-center justify-between text-xs text-[#53627E]">
+              <div className="mb-2 flex items-center justify-between text-xs text-[#4C4F7A]">
                 <span>
                   {previewError
                     ? `Preview not updated: ${previewError}`
@@ -2874,10 +2874,10 @@ export default function AdminCustomizePage() {
                     aria-pressed={editMode}
                     onClick={() => setEditMode((on) => !on)}
                     title="Click sections in the preview to edit them"
-                    className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
+                    className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#0B1020]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
                       editMode
-                        ? "border-[#161C2C] bg-[#161C2C] text-white"
-                        : "border-[#D8DFE8] bg-white text-[#53627E] hover:border-[#161C2C] hover:text-[#161C2C]"
+                        ? "border-[#0B1020] bg-[#0B1020] text-white"
+                        : "border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-[#0B1020] hover:text-[#0B1020]"
                     }`}
                   >
                     <svg {...iconProps} className="h-3.5 w-3.5">
@@ -2888,7 +2888,7 @@ export default function AdminCustomizePage() {
                   </button>
 
                   <div
-                    className="flex rounded-lg border border-[#D8DFE8] bg-white p-0.5"
+                    className="flex rounded-lg border border-[#DDD6FE] bg-white p-0.5"
                     role="radiogroup"
                     aria-label="Preview size"
                   >
@@ -2904,8 +2904,8 @@ export default function AdminCustomizePage() {
                         onClick={() => setDevice(id)}
                         className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${
                           device === id
-                            ? "bg-[#161C2C] text-white"
-                            : "text-[#53627E] hover:text-[#161C2C]"
+                            ? "bg-[#0B1020] text-white"
+                            : "text-[#4C4F7A] hover:text-[#0B1020]"
                         }`}
                       >
                         <svg {...iconProps} className="h-3.5 w-3.5">
@@ -2918,7 +2918,7 @@ export default function AdminCustomizePage() {
 
                   <button
                     type="button"
-                    className="hover:text-[#161C2C]"
+                    className="hover:text-[#0B1020]"
                     onClick={() => setPreviewKey((k) => k + 1)}
                   >
                     Refresh
@@ -2935,12 +2935,12 @@ export default function AdminCustomizePage() {
                   srcDoc={previewHtml}
                   // Theme code is written by store owners: keep it off this origin
                   sandbox="allow-scripts allow-forms allow-popups"
-                  className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#D8DFE8] bg-white transition-[width] duration-200 ${
+                  className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#DDD6FE] bg-white transition-[width] duration-200 ${
                     device === "mobile" ? "w-[390px] max-w-full" : "w-full"
                   } ${drag ? "pointer-events-none" : ""}`}
                 />
               ) : (
-                <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#D8DFE8] text-sm text-[#53627E]">
+                <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#DDD6FE] text-sm text-[#4C4F7A]">
                   Loading preview...
                 </div>
               )}
@@ -2953,7 +2953,7 @@ export default function AdminCustomizePage() {
                 left: Math.min(contextMenu.x, window.innerWidth - 168),
                 top: Math.min(contextMenu.y, window.innerHeight - 56),
               }}
-              className="fixed z-50 w-40 rounded-lg border border-[#D8DFE8] bg-white p-1 shadow-lg"
+              className="fixed z-50 w-40 rounded-lg border border-[#DDD6FE] bg-white p-1 shadow-lg"
               onContextMenu={(e) => e.preventDefault()}
             >
               <button
@@ -2967,7 +2967,7 @@ export default function AdminCustomizePage() {
                   );
                   setContextMenu(null);
                 }}
-                className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F7F8FA]"
+                className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F5F3FF]"
               >
                 Edit code
               </button>
@@ -3047,7 +3047,7 @@ function FontPicker({ value, allowTheme, onChange, label }) {
         style={{ fontFamily: current?.stack }}
       >
         <span className="truncate">{current ? current.label : "Use theme font"}</span>
-        <svg {...iconProps} className="h-4 w-4 shrink-0 text-[#8A94A8]">
+        <svg {...iconProps} className="h-4 w-4 shrink-0 text-[#8B8FB8]">
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
@@ -3055,7 +3055,7 @@ function FontPicker({ value, allowTheme, onChange, label }) {
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 right-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border border-[#D8DFE8] bg-white py-1 shadow-lg"
+          className="absolute left-0 right-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border border-[#DDD6FE] bg-white py-1 shadow-lg"
         >
           {options.map((font) => (
             <li key={font.key || "theme"}>
@@ -3067,8 +3067,8 @@ function FontPicker({ value, allowTheme, onChange, label }) {
                   onChange(font.key);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-[15px] hover:bg-[#F7F8FA] ${
-                  font.key === value ? "bg-[#EEF1F6]" : ""
+                className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-[15px] hover:bg-[#F5F3FF] ${
+                  font.key === value ? "bg-[#EDE9FE]" : ""
                 }`}
                 style={{ fontFamily: font.stack }}
               >
@@ -3095,7 +3095,7 @@ function FontSizeInput({ spec, value, onChange }) {
         <button
           type="button"
           onClick={() => onChange(0)}
-          className={`rounded-md border px-2 py-1 text-[11px] ${!value ? "border-[#161C2C] bg-[#161C2C] text-white" : "border-[#D8DFE8] text-[#30466F] hover:border-[#161C2C]"}`}
+          className={`rounded-md border px-2 py-1 text-[11px] ${!value ? "border-[#0B1020] bg-[#0B1020] text-white" : "border-[#DDD6FE] text-[#3B3F8F] hover:border-[#0B1020]"}`}
         >
           Theme
         </button>
@@ -3104,14 +3104,14 @@ function FontSizeInput({ spec, value, onChange }) {
             key={name}
             type="button"
             onClick={() => onChange(size)}
-            className={`rounded-md border px-2 py-1 text-[11px] ${value === size ? "border-[#161C2C] bg-[#161C2C] text-white" : "border-[#D8DFE8] text-[#30466F] hover:border-[#161C2C]"}`}
+            className={`rounded-md border px-2 py-1 text-[11px] ${value === size ? "border-[#0B1020] bg-[#0B1020] text-white" : "border-[#DDD6FE] text-[#3B3F8F] hover:border-[#0B1020]"}`}
           >
             {name}
           </button>
         ))}
       </div>
 
-      <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#D8DFE8] bg-white focus-within:border-[#161C2C]">
+      <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#DDD6FE] bg-white focus-within:border-[#0B1020]">
         <input
           type="number"
           min={spec.min}
@@ -3130,7 +3130,7 @@ function FontSizeInput({ spec, value, onChange }) {
           className="h-full min-w-0 flex-1 px-3 text-sm outline-none"
           aria-label={spec.label}
         />
-        <span className="border-l border-[#D8DFE8] bg-[#F7F8FA] px-3 text-xs leading-10 text-[#53627E]">
+        <span className="border-l border-[#DDD6FE] bg-[#F5F3FF] px-3 text-xs leading-10 text-[#4C4F7A]">
           {spec.unit || "px"}
         </span>
       </div>
@@ -3289,7 +3289,7 @@ function ResetToTheme({ spec, value, onChange }) {
     <button
       type="button"
       onClick={() => onChange(structuredClone(spec.default))}
-      className="mt-1 text-[11px] font-medium text-[#30466F] underline-offset-2 hover:underline"
+      className="mt-1 text-[11px] font-medium text-[#3B3F8F] underline-offset-2 hover:underline"
     >
       Reset to theme default
     </button>
@@ -3344,14 +3344,14 @@ function GroupedFields({
             <button
               type="button"
               onClick={() => setOpen((current) => ({ ...current, [group.id]: !current[group.id] }))}
-              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-[#161C2C] hover:bg-[#F7F8FA]"
+              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-[#0B1020] hover:bg-[#F5F3FF]"
               aria-expanded={isOpen}
             >
               {group.label}
 
               <svg
                 {...iconProps}
-                className={`h-4 w-4 text-[#8A94A8] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                className={`h-4 w-4 text-[#8B8FB8] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               >
                 <path d="m6 9 6 6 6-6" />
               </svg>
@@ -3384,12 +3384,12 @@ function GroupedFields({
 
 function Help({ spec }) {
   return spec.help ? (
-    <span className="mt-1 block text-[11px] leading-snug text-[#8A94A8]">{spec.help}</span>
+    <span className="mt-1 block text-[11px] leading-snug text-[#8B8FB8]">{spec.help}</span>
   ) : null;
 }
 
 const Field = memo(function Field({ spec, value, collections, products = [], onChange }) {
-  const label = <span className="mb-1 block text-xs font-medium text-[#30466F]">{spec.label}</span>;
+  const label = <span className="mb-1 block text-xs font-medium text-[#3B3F8F]">{spec.label}</span>;
 
   switch (spec.type) {
     case "checkbox":
@@ -3405,7 +3405,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
                 checked={Boolean(value)}
                 onChange={(e) => onChange(e.target.checked)}
               />
-              <span className="h-5 w-9 rounded-full bg-[#CBD3DF] transition-colors peer-checked:bg-[#161C2C] peer-focus-visible:ring-2 peer-focus-visible:ring-[#161C2C]/30" />
+              <span className="h-5 w-9 rounded-full bg-[#CBD3DF] transition-colors peer-checked:bg-[#0B1020] peer-focus-visible:ring-2 peer-focus-visible:ring-[#0B1020]/30" />
               <span className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
             </span>
           </label>
@@ -3417,9 +3417,9 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
     case "range":
       return (
         <label className="block">
-          <span className="mb-1 flex items-center justify-between text-xs font-medium text-[#30466F]">
+          <span className="mb-1 flex items-center justify-between text-xs font-medium text-[#3B3F8F]">
             {spec.label}
-            <span className="tabular-nums text-[#53627E]">
+            <span className="tabular-nums text-[#4C4F7A]">
               {value}
               {spec.unit || ""}
             </span>
@@ -3432,7 +3432,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
             step={spec.step || 1}
             value={value}
             onChange={(e) => onChange(Number(e.target.value))}
-            className="w-full accent-[#161C2C]"
+            className="w-full accent-[#0B1020]"
           />
 
           <Help spec={spec} />
@@ -3444,7 +3444,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
         <label className="block">
           {label}
 
-          <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#D8DFE8] bg-white focus-within:border-[#161C2C]">
+          <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#DDD6FE] bg-white focus-within:border-[#0B1020]">
             <input
               type="number"
               min={spec.min}
@@ -3465,7 +3465,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
               className="h-full min-w-0 flex-1 px-3 text-sm outline-none"
             />
             {spec.unit && (
-              <span className="border-l border-[#D8DFE8] bg-[#F7F8FA] px-3 text-xs leading-10 text-[#53627E]">
+              <span className="border-l border-[#DDD6FE] bg-[#F5F3FF] px-3 text-xs leading-10 text-[#4C4F7A]">
                 {spec.unit}
               </span>
             )}
@@ -3482,7 +3482,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
             {label}
 
             <div
-              className="flex rounded-lg border border-[#D8DFE8] bg-[#F7F8FA] p-0.5"
+              className="flex rounded-lg border border-[#DDD6FE] bg-[#F5F3FF] p-0.5"
               role="radiogroup"
               aria-label={spec.label}
             >
@@ -3495,8 +3495,8 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
                   onClick={() => onChange(o)}
                   className={`min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
                     value === o
-                      ? "bg-white text-[#161C2C] shadow-sm"
-                      : "text-[#53627E] hover:text-[#161C2C]"
+                      ? "bg-white text-[#0B1020] shadow-sm"
+                      : "text-[#4C4F7A] hover:text-[#0B1020]"
                   }`}
                 >
                   {optionLabel(spec, o)}
@@ -3535,7 +3535,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
               type="color"
               value={value}
               onChange={(e) => onChange(e.target.value.toUpperCase())}
-              className="h-10 w-12 rounded border border-[#D8DFE8]"
+              className="h-10 w-12 rounded border border-[#DDD6FE]"
             />
 
             <span className="text-sm tabular-nums">{value}</span>
@@ -3555,11 +3555,11 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
               type="color"
               value={value || "#FFFFFF"}
               onChange={(e) => onChange(e.target.value.toUpperCase())}
-              className={`h-10 w-12 rounded border border-[#D8DFE8] ${value ? "" : "opacity-40"}`}
+              className={`h-10 w-12 rounded border border-[#DDD6FE] ${value ? "" : "opacity-40"}`}
               aria-label={spec.label}
             />
 
-            <span className="min-w-0 flex-1 text-sm tabular-nums text-[#53627E]">
+            <span className="min-w-0 flex-1 text-sm tabular-nums text-[#4C4F7A]">
               {value || "None"}
             </span>
 
@@ -3567,7 +3567,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
               type="button"
               disabled={!value}
               onClick={() => onChange("")}
-              className="rounded-md border border-[#D8DFE8] px-2 py-1 text-xs text-[#30466F] hover:border-[#161C2C] disabled:opacity-40"
+              className="rounded-md border border-[#DDD6FE] px-2 py-1 text-xs text-[#3B3F8F] hover:border-[#0B1020] disabled:opacity-40"
             >
               None
             </button>
@@ -3709,10 +3709,10 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
             spellCheck={false}
             placeholder='<iframe src="https://www.google.com/maps/embed?..."></iframe>'
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-[#D8DFE8] px-3 py-2 font-mono text-xs outline-none focus:border-[#161C2C]"
+            className="w-full rounded-lg border border-[#DDD6FE] px-3 py-2 font-mono text-xs outline-none focus:border-[#0B1020]"
           />
 
-          <span className="mt-1 block text-[11px] leading-snug text-[#53627E]">
+          <span className="mt-1 block text-[11px] leading-snug text-[#4C4F7A]">
             Scripts and unsafe code are removed when you save. Embeds work from Google Maps, Google
             Forms, Spotify, SoundCloud and Calendly.
           </span>
@@ -3735,7 +3735,7 @@ const Field = memo(function Field({ spec, value, collections, products = [], onC
             }
             spellCheck={spec.type !== "menu"}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-[#D8DFE8] px-3 py-2 text-sm outline-none focus:border-[#161C2C]"
+            className="w-full rounded-lg border border-[#DDD6FE] px-3 py-2 text-sm outline-none focus:border-[#0B1020]"
           />
 
           <Help spec={spec} />
@@ -3842,7 +3842,7 @@ function SectionBlocks({
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">
           Blocks{" "}
-          <span className="font-normal text-[#8A94A8]">
+          <span className="font-normal text-[#8B8FB8]">
             ({blocks.length}/{spec.max_blocks})
           </span>
         </h3>
@@ -3860,7 +3860,7 @@ function SectionBlocks({
 
       {menu && (
         <div
-          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-[#D8DFE8] bg-[#F7F8FA] p-2"
+          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-[#DDD6FE] bg-[#F5F3FF] p-2"
           role="menu"
         >
           {types.map(([type, blockSpec]) => (
@@ -3875,7 +3875,7 @@ function SectionBlocks({
                   : undefined
               }
               onClick={() => add(type, blockSpec)}
-              className="truncate rounded-md border border-[#D8DFE8] bg-white px-2 py-1.5 text-left text-xs text-[#161C2C] hover:border-[#161C2C] disabled:opacity-40 disabled:hover:border-[#D8DFE8]"
+              className="truncate rounded-md border border-[#DDD6FE] bg-white px-2 py-1.5 text-left text-xs text-[#0B1020] hover:border-[#0B1020] disabled:opacity-40 disabled:hover:border-[#DDD6FE]"
             >
               {blockSpec.name}
             </button>
@@ -3884,7 +3884,7 @@ function SectionBlocks({
       )}
 
       {blocks.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-[#D8DFE8] px-3 py-4 text-center text-xs text-[#53627E]">
+        <p className="rounded-lg border border-dashed border-[#DDD6FE] px-3 py-4 text-center text-xs text-[#4C4F7A]">
           No blocks yet. Use "+ Add block" to add text, images, buttons, lists and more.
         </p>
       ) : (
@@ -3908,7 +3908,7 @@ function SectionBlocks({
               <li
                 key={i}
                 data-drop-block={`${sectionId}|${i}`}
-                className={`relative rounded-lg border border-[#D8DFE8] bg-white ${dragging ? "opacity-40" : ""}`}
+                className={`relative rounded-lg border border-[#DDD6FE] bg-white ${dragging ? "opacity-40" : ""}`}
               >
                 {lineHere && <DropLine after={dropTarget.after} />}
 
@@ -4118,13 +4118,13 @@ function ImageUpload({ value, onChange }) {
   return (
     <div>
       {shown ? (
-        <div className="relative overflow-hidden rounded-lg border border-[#D8DFE8]">
+        <div className="relative overflow-hidden rounded-lg border border-[#DDD6FE]">
           <img src={shown} alt="" loading="lazy" className="h-28 w-full object-cover" />
 
           {progress !== null && (
             <div className="absolute inset-x-0 top-0 h-1 bg-black/10" aria-label="Uploading">
               <div
-                className="h-full bg-[#161C2C] transition-[width] duration-150"
+                className="h-full bg-[#0B1020] transition-[width] duration-150"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>
@@ -4140,7 +4140,7 @@ function ImageUpload({ value, onChange }) {
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={progress !== null}
-              className="rounded-md bg-white px-2 py-0.5 text-xs font-medium text-[#161C2C] disabled:opacity-60"
+              className="rounded-md bg-white px-2 py-0.5 text-xs font-medium text-[#0B1020] disabled:opacity-60"
             >
               Replace
             </button>
@@ -4164,9 +4164,9 @@ function ImageUpload({ value, onChange }) {
             e.preventDefault();
             choose(e.dataTransfer.files?.[0]);
           }}
-          className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#D8DFE8] text-xs text-[#53627E] hover:border-[#161C2C]"
+          className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#DDD6FE] text-xs text-[#4C4F7A] hover:border-[#0B1020]"
         >
-          <span className="font-medium text-[#161C2C]">Upload image</span>
+          <span className="font-medium text-[#0B1020]">Upload image</span>
           JPG, PNG or WEBP, up to 5MB
         </button>
       )}
@@ -4198,9 +4198,9 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
   );
 
   return (
-    <div className="rounded-lg border border-[#D8DFE8]">
+    <div className="rounded-lg border border-[#DDD6FE]">
       {value.length > 0 && (
-        <ul className="divide-y divide-[#EEF0F4] border-b border-[#D8DFE8]">
+        <ul className="divide-y divide-[#EEF0F4] border-b border-[#DDD6FE]">
           {value.map((id) => (
             <li key={id} className="flex items-center gap-2 px-3 py-2 text-sm">
               <span className="min-w-0 flex-1 truncate">
@@ -4210,7 +4210,7 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
               <button
                 type="button"
                 onClick={() => onChange(value.filter((v) => v !== id))}
-                className="text-xs text-[#53627E] hover:text-red-600"
+                className="text-xs text-[#4C4F7A] hover:text-red-600"
                 aria-label={`Remove ${byId[id]?.title || "item"}`}
               >
                 Remove
@@ -4221,18 +4221,18 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
       )}
 
       {products.length === 0 ? (
-        <p className="px-3 py-2.5 text-xs text-[#53627E]">
+        <p className="px-3 py-2.5 text-xs text-[#4C4F7A]">
           Add {noun} first, then choose them here.
         </p>
       ) : value.length >= max ? (
-        <p className="px-3 py-2.5 text-xs text-[#53627E]">You've chosen the maximum of {max}.</p>
+        <p className="px-3 py-2.5 text-xs text-[#4C4F7A]">You've chosen the maximum of {max}.</p>
       ) : (
         <div className="p-2">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${noun} to add`}
-            className="h-9 w-full rounded-md border border-[#D8DFE8] px-2.5 text-sm outline-none focus:border-[#161C2C]"
+            className="h-9 w-full rounded-md border border-[#DDD6FE] px-2.5 text-sm outline-none focus:border-[#0B1020]"
           />
 
           <ul className="mt-1 max-h-40 overflow-y-auto">
@@ -4241,7 +4241,7 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
                 <button
                   type="button"
                   onClick={() => onChange([...value, p.id])}
-                  className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-[#F7F8FA]"
+                  className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-[#F5F3FF]"
                 >
                   <span className="min-w-0 truncate">{p.title}</span>
 
@@ -4255,14 +4255,14 @@ function ProductPicker({ value, products, max, noun = "products", onChange }) {
             ))}
 
             {matches.length === 0 && (
-              <li className="px-2 py-1.5 text-xs text-[#53627E]">No matching {noun}.</li>
+              <li className="px-2 py-1.5 text-xs text-[#4C4F7A]">No matching {noun}.</li>
             )}
           </ul>
         </div>
       )}
 
       {value.some((id) => byId[id] && byId[id].status !== "active") && (
-        <p className="border-t border-[#D8DFE8] px-3 py-2 text-xs text-[#53627E]">
+        <p className="border-t border-[#DDD6FE] px-3 py-2 text-xs text-[#4C4F7A]">
           Only active products appear on your store.
         </p>
       )}
@@ -4307,8 +4307,8 @@ function RichTextEditor({ value, onChange }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#D8DFE8] focus-within:border-[#161C2C]">
-      <div className="flex flex-wrap gap-1 border-b border-[#D8DFE8] bg-[#F7F8FA] p-1">
+    <div className="overflow-hidden rounded-lg border border-[#DDD6FE] focus-within:border-[#0B1020]">
+      <div className="flex flex-wrap gap-1 border-b border-[#DDD6FE] bg-[#F5F3FF] p-1">
         {RICH_TEXT_TOOLS.map((tool) => (
           <button
             key={tool.title}
@@ -4317,7 +4317,7 @@ function RichTextEditor({ value, onChange }) {
             aria-label={tool.title}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => apply(tool)}
-            className={`h-7 min-w-7 rounded px-2 text-xs text-[#161C2C] hover:bg-white ${tool.className || ""}`}
+            className={`h-7 min-w-7 rounded px-2 text-xs text-[#0B1020] hover:bg-white ${tool.className || ""}`}
           >
             {tool.label}
           </button>
@@ -4366,7 +4366,7 @@ const LAYOUT_ROWS = [
 // A labelled group in the sections list (Header / Template / Footer), divided from the one above
 function GroupHeading({ children }) {
   return (
-    <h3 className="mt-2 border-t border-[#E3E7ED] px-4 pb-1.5 pt-4 text-sm font-semibold text-[#161C2C]">
+    <h3 className="mt-2 border-t border-[#E4DEFB] px-4 pb-1.5 pt-4 text-sm font-semibold text-[#0B1020]">
       {children}
     </h3>
   );
@@ -4388,10 +4388,10 @@ function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) {
               type="button"
               onClick={() => onOpen(row.group)}
               className={`flex h-9 w-full items-center gap-2 rounded-md pl-1.5 pr-1 text-left text-sm ${
-                active ? "bg-[#EEF1F6]" : "hover:bg-[#F5F6F8]"
+                active ? "bg-[#EDE9FE]" : "hover:bg-[#F5F6F8]"
               }`}
             >
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[#8A94A8]">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[#8B8FB8]">
                 <svg {...iconProps} className="h-4 w-4">
                   <path d={row.icon} />
                 </svg>
@@ -4409,7 +4409,7 @@ function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) {
 
 function CenteredMessage({ children }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F7F8FA] px-6 text-center text-sm text-[#53627E]">
+    <div className="flex min-h-screen items-center justify-center bg-[#F5F3FF] px-6 text-center text-sm text-[#4C4F7A]">
       <p>{children}</p>
     </div>
   );

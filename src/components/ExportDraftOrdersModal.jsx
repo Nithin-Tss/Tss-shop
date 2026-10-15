@@ -349,7 +349,7 @@ export default function ExportDraftOrdersModal({
           <button
             type="button"
             onClick={handleExecuteExport}
-            className="flex items-center gap-2 rounded-lg bg-[#202223] px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-[#303336] active:bg-[#161C2C] transition-colors focus:outline-none focus:ring-2 focus:ring-[#202223]/40"
+            className="flex items-center gap-2 rounded-lg bg-[#202223] px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-[#303336] active:bg-[#0B1020] transition-colors focus:outline-none focus:ring-2 focus:ring-[#202223]/40"
           >
             <svg
               className="h-4 w-4 text-white"

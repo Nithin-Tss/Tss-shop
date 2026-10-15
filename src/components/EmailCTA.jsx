@@ -29,11 +29,11 @@ export default function EmailCTA() {
     <section className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="relative mx-auto max-w-6xl overflow-hidden rounded-xl bg-gradient-to-r from-[#06142f] via-[#081d46] to-[#07152f] px-6 py-10 text-center shadow-sm sm:px-10 sm:py-12">
         {/* Decorative circles */}
-        <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-blue-700/20 blur-sm" />
+        <div className="pointer-events-none absolute -left-10 -top-10 h-32 w-32 rounded-full bg-violet-700/20 blur-sm" />
 
-        <div className="pointer-events-none absolute -bottom-12 -right-4 h-36 w-36 rounded-full bg-blue-600/20" />
+        <div className="pointer-events-none absolute -bottom-12 -right-4 h-36 w-36 rounded-full bg-violet-600/20" />
 
-        <div className="pointer-events-none absolute right-16 top-8 h-10 w-10 rounded-full bg-blue-600/20" />
+        <div className="pointer-events-none absolute right-16 top-8 h-10 w-10 rounded-full bg-violet-600/20" />
 
         {/* Content */}
         <div className="relative z-10 mx-auto max-w-3xl">
@@ -60,7 +60,7 @@ export default function EmailCTA() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="Enter your email"
-                className="h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
               />
 
               {error && <p className="mt-2 text-left text-sm text-red-300">{error}</p>}
@@ -68,7 +68,7 @@ export default function EmailCTA() {
 
             <button
               type="submit"
-              className="h-12 rounded-md bg-blue-600 px-6 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-[#081d46]"
+              className="h-12 rounded-md bg-violet-600 px-6 font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-[#081d46]"
             >
               Start free trial
             </button>

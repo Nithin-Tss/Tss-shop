@@ -5,11 +5,11 @@ import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/li
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
 
-const NAVY = "#141b2d";
+const NAVY = "#0B1020";
 const PRODUCTS_URL = "/admin/online-store/products";
 
 const inputClass =
-  "w-full h-11 rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#141b2d] focus:bg-white focus:ring-4 focus:ring-[#141b2d]/[0.07]";
+  "w-full h-11 rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#0B1020] focus:bg-white focus:ring-4 focus:ring-[#0B1020]/[0.07]";
 
 // Photos: JPG, PNG or WEBP, up to 5MB each
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -126,7 +126,7 @@ function Card({ title, hint, action, children }) {
       <div className="rounded-[22px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
         <header className="flex flex-wrap items-start justify-between gap-3 rounded-t-[21px] border-b border-[#E6E9F2] bg-[#EEF1F8] px-5 py-4 sm:px-6">
           <div className="min-w-0">
-            <h2 className="text-base font-bold tracking-tight text-[#141b2d]">{title}</h2>
+            <h2 className="text-base font-bold tracking-tight text-[#0B1020]">{title}</h2>
             {hint && <p className="mt-0.5 text-[13px] leading-snug text-[#55607A]">{hint}</p>}
           </div>
           {action && <div className="shrink-0 pt-0.5">{action}</div>}
@@ -140,7 +140,7 @@ function Card({ title, hint, action, children }) {
 function Field({ label, help, error, children, className = "" }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">{label}</span>
+      <span className="mb-1.5 block text-[13px] font-semibold text-[#0B1020]">{label}</span>
       {children}
       {error ? (
         <span className="mt-1 block text-xs text-red-600">{error}</span>
@@ -190,11 +190,11 @@ function ChipInput({ values, onChange, placeholder }) {
   };
 
   return (
-    <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-2 py-1.5 focus-within:border-[#141b2d] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#141b2d]/[0.07]">
+    <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-2 py-1.5 focus-within:border-[#0B1020] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0B1020]/[0.07]">
       {values.map((v) => (
         <span
           key={v}
-          className="inline-flex items-center gap-1 rounded-full bg-[#141b2d] px-2.5 py-0.5 text-xs font-medium text-white"
+          className="inline-flex items-center gap-1 rounded-full bg-[#0B1020] px-2.5 py-0.5 text-xs font-medium text-white"
         >
           {v}
           <button
@@ -359,7 +359,7 @@ function CollectionsPicker({
     <div className="relative" ref={dropdownRef}>
       {/* Header with Title and Circle Plus Icon (Screenshot 1) */}
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-[13px] font-semibold text-[#141b2d]">Collections</span>
+        <span className="text-[13px] font-semibold text-[#0B1020]">Collections</span>
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
@@ -386,7 +386,7 @@ function CollectionsPicker({
       {/* Selected Collections Box with Removable Tags (Screenshot 1) */}
       <div
         onClick={() => setIsOpen(true)}
-        className={`min-h-[58px] cursor-pointer rounded-lg border border-[#DDE1EA] bg-white p-2.5 transition focus-within:border-[#141b2d] ${
+        className={`min-h-[58px] cursor-pointer rounded-lg border border-[#DDE1EA] bg-white p-2.5 transition focus-within:border-[#0B1020] ${
           error ? "border-red-400" : "hover:border-slate-400"
         }`}
       >
@@ -505,7 +505,7 @@ function CollectionsPicker({
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => handleToggle(colName)}
-                      className="h-4 w-4 rounded border-gray-300 text-slate-900 focus:ring-0 cursor-pointer accent-[#141b2d]"
+                      className="h-4 w-4 rounded border-gray-300 text-slate-900 focus:ring-0 cursor-pointer accent-[#0B1020]"
                     />
                     <span className="text-sm text-slate-800">{colName}</span>
                   </label>
@@ -544,7 +544,7 @@ function CollectionsPicker({
                 <button
                   type="submit"
                   disabled={isCreating || !newCollectionName.trim()}
-                  className="rounded bg-[#141b2d] px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                  className="rounded bg-[#0B1020] px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
                 >
                   {isCreating ? "Adding..." : "Add"}
                 </button>
@@ -1247,7 +1247,7 @@ export function ProductForm({ productId }) {
 
           <div className="mx-auto max-w-[960px] px-3 py-8 sm:px-4">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold tracking-tight text-[#141b2d]">
+              <h2 className="text-2xl font-bold tracking-tight text-[#0B1020]">
                 {!canEdit ? "Product details" : editing ? "Edit product" : "Add a new product"}
               </h2>
               <p className="mt-1 text-sm text-[#55607A]">
@@ -1317,7 +1317,7 @@ export function ProductForm({ productId }) {
                       type="button"
                       onClick={() => mainFileInputRef.current?.click()}
                       disabled={saving}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-white px-3 py-1.5 text-xs font-semibold text-[#141b2d] shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-white px-3 py-1.5 text-xs font-semibold text-[#0B1020] shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <svg
                         className="h-3.5 w-3.5"
@@ -1375,8 +1375,8 @@ export function ProductForm({ productId }) {
                       }}
                       className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
                         dragging
-                          ? "border-[#141b2d] bg-[#EEF1F8]"
-                          : "border-[#DDE1EA] bg-[#FAFBFD] hover:bg-slate-50"
+                          ? "border-[#0B1020] bg-[#EEF1F8]"
+                          : "border-[#DDE1EA] bg-[#FAF8FF] hover:bg-slate-50"
                       }`}
                     >
                       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
@@ -1394,7 +1394,7 @@ export function ProductForm({ productId }) {
                           />
                         </svg>
                       </div>
-                      <p className="text-sm font-semibold text-[#141b2d]">Upload product images</p>
+                      <p className="text-sm font-semibold text-[#0B1020]">Upload product images</p>
                       <p className="mt-1 text-xs text-slate-500">
                         Drag and drop images here, or browse files from your computer
                       </p>
@@ -1405,7 +1405,7 @@ export function ProductForm({ productId }) {
                         type="button"
                         onClick={() => mainFileInputRef.current?.click()}
                         disabled={saving}
-                        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#141b2d] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1e2842] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#0B1020] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1e2842] disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <svg
                           className="h-3.5 w-3.5"
@@ -1433,9 +1433,9 @@ export function ProductForm({ productId }) {
                         return (
                           <div
                             key={photo.id}
-                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAFBFD] transition ${
+                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF8FF] transition ${
                               isCover
-                                ? "border-[#141b2d] ring-2 ring-[#141b2d]/15 col-span-2 row-span-2"
+                                ? "border-[#0B1020] ring-2 ring-[#0B1020]/15 col-span-2 row-span-2"
                                 : "border-[#DDE1EA] hover:border-slate-400"
                             }`}
                           >
@@ -1500,7 +1500,7 @@ export function ProductForm({ productId }) {
                             {/* Top Badges */}
                             <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
                               {isCover && (
-                                <span className="rounded-md bg-[#141b2d] px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                                <span className="rounded-md bg-[#0B1020] px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
                                   ★ Primary
                                 </span>
                               )}
@@ -1509,7 +1509,7 @@ export function ProductForm({ productId }) {
                                   Saved
                                 </span>
                               ) : (
-                                <span className="rounded-md bg-blue-600 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
+                                <span className="rounded-md bg-violet-600 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
                                   New preview
                                 </span>
                               )}
@@ -1536,7 +1536,7 @@ export function ProductForm({ productId }) {
                                     type="button"
                                     onClick={() => makeCover(photo.id)}
                                     disabled={saving}
-                                    className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-[#141b2d] shadow-sm transition disabled:opacity-50"
+                                    className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-[#0B1020] shadow-sm transition disabled:opacity-50"
                                     title="Set as primary product image"
                                   >
                                     Make primary
@@ -1583,11 +1583,11 @@ export function ProductForm({ productId }) {
                         }}
                         className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
                           dragging
-                            ? "border-[#141b2d] bg-[#EEF1F8]"
-                            : "border-[#DDE1EA] bg-[#FAFBFD] hover:border-slate-400 hover:bg-slate-50"
+                            ? "border-[#0B1020] bg-[#EEF1F8]"
+                            : "border-[#DDE1EA] bg-[#FAF8FF] hover:border-slate-400 hover:bg-slate-50"
                         } ${saving ? "pointer-events-none opacity-50" : ""}`}
                       >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-[#141b2d]">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-[#0B1020]">
                           <svg
                             className="h-4 w-4"
                             fill="none"
@@ -1602,7 +1602,7 @@ export function ProductForm({ productId }) {
                             />
                           </svg>
                         </div>
-                        <span className="text-xs font-semibold text-[#141b2d]">Add image</span>
+                        <span className="text-xs font-semibold text-[#0B1020]">Add image</span>
                         <span className="text-[10px] text-slate-400">or drop here</span>
                       </div>
                     </div>
@@ -1699,7 +1699,7 @@ export function ProductForm({ productId }) {
                               Add one under{" "}
                               <Link
                                 to="/admin/online-store/inventory"
-                                className="font-medium text-[#141b2d] underline"
+                                className="font-medium text-[#0B1020] underline"
                               >
                                 Inventory
                               </Link>
@@ -1794,7 +1794,7 @@ export function ProductForm({ productId }) {
                       )}
                     </div>
                     <div className="sm:col-span-2">
-                      <span className="mb-1.5 block text-[13px] font-semibold text-[#141b2d]">
+                      <span className="mb-1.5 block text-[13px] font-semibold text-[#0B1020]">
                         Tags
                       </span>
                       <ChipInput
@@ -1839,7 +1839,7 @@ export function ProductForm({ productId }) {
                         key={opt.value}
                         className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${
                           status === opt.value
-                            ? "border-[#141b2d] bg-[#EEF1F8] ring-1 ring-[#141b2d]"
+                            ? "border-[#0B1020] bg-[#EEF1F8] ring-1 ring-[#0B1020]"
                             : "border-[#DDE1EA] hover:bg-slate-50"
                         }`}
                       >
@@ -1849,7 +1849,7 @@ export function ProductForm({ productId }) {
                           value={opt.value}
                           checked={status === opt.value}
                           onChange={() => setStatus(opt.value)}
-                          className="mt-0.5 accent-[#141b2d]"
+                          className="mt-0.5 accent-[#0B1020]"
                         />
                         <span>
                           <span className="block text-sm font-semibold">{opt.label}</span>
@@ -1870,14 +1870,14 @@ export function ProductForm({ productId }) {
                         return (
                           <label
                             key={ch.id}
-                            className="flex cursor-pointer items-center justify-between rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-4 py-3 text-sm font-medium transition hover:border-[#141b2d] hover:bg-white"
+                            className="flex cursor-pointer items-center justify-between rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-4 py-3 text-sm font-medium transition hover:border-[#0B1020] hover:bg-white"
                           >
-                            <span className="text-[#141b2d]">{ch.name}</span>
+                            <span className="text-[#0B1020]">{ch.name}</span>
                             <input
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggleChannel(ch)}
-                              className="h-4 w-4 accent-[#141b2d] cursor-pointer rounded"
+                              className="h-4 w-4 accent-[#0B1020] cursor-pointer rounded"
                             />
                           </label>
                         );
@@ -1919,7 +1919,7 @@ export function ProductForm({ productId }) {
                     <button
                       type="button"
                       onClick={() => setEditingSeo((v) => !v)}
-                      className="h-8 rounded-full border border-[#141b2d]/20 bg-white px-3.5 text-xs font-semibold text-[#141b2d] hover:bg-[#141b2d] hover:text-white"
+                      className="h-8 rounded-full border border-[#0B1020]/20 bg-white px-3.5 text-xs font-semibold text-[#0B1020] hover:bg-[#0B1020] hover:text-white"
                     >
                       {editingSeo ? "Done" : "Edit"}
                     </button>
@@ -1976,7 +1976,7 @@ export function ProductForm({ productId }) {
                         error={fieldErrors.handle}
                       >
                         <div
-                          className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAFBFD] px-3.5 transition focus-within:border-[#141b2d] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#141b2d]/[0.07] ${withError(fieldErrors.handle)}`}
+                          className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-3.5 transition focus-within:border-[#0B1020] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0B1020]/[0.07] ${withError(fieldErrors.handle)}`}
                         >
                           <span className="select-none text-sm text-slate-500">products/</span>
                           <input

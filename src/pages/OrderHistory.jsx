@@ -66,8 +66,8 @@ function renderFulfillmentBadge(status) {
   const s = String(status || "unfulfilled").toLowerCase();
   if (s.includes("fulfilled") && !s.includes("unfulfilled") && !s.includes("partial")) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-violet-700 border border-blue-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
         Fulfilled
       </span>
     );
@@ -179,7 +179,7 @@ export default function OrderHistory() {
 
             <Link
               to="/account/orders"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#161C2C] text-white shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#0B1020] text-white shadow-xs"
             >
               <span>📦</span>
               <span>Order History</span>
@@ -211,7 +211,7 @@ export default function OrderHistory() {
             </p>
             <Link
               to="/"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#161C2C] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#252E45] shadow-xs cursor-pointer"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B1020] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#1C2347] shadow-xs cursor-pointer"
             >
               <span>Start shopping</span>
               <span>→</span>

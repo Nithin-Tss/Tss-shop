@@ -2,7 +2,7 @@ import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 export default function OverviewPage() {
   return (
-    <div className="min-h-screen bg-[#F7F8FA]">
+    <div className="min-h-screen bg-[#F5F3FF]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-72px)]">
@@ -12,7 +12,7 @@ export default function OverviewPage() {
           {/* Header */}
           <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-5">
             <div>
-              <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#161C2C]">
+              <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#0B1020]">
                 <PageIcon name="overview" />
                 Overview
               </h1>
@@ -20,7 +20,7 @@ export default function OverviewPage() {
               <p className="mt-1 text-sm text-slate-500">Store overview and performance summary</p>
             </div>
 
-            <button className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white">
+            <button className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white">
               View reports
             </button>
           </header>
@@ -39,7 +39,7 @@ export default function OverviewPage() {
             <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
               {/* Sales Overview */}
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 className="font-semibold text-[#161C2C]">Sales overview</h2>
+                <h2 className="font-semibold text-[#0B1020]">Sales overview</h2>
 
                 <div className="mt-5 flex h-72 items-center justify-center rounded-xl bg-slate-50">
                   <p className="text-sm text-slate-500">No sales data available</p>
@@ -48,7 +48,7 @@ export default function OverviewPage() {
 
               {/* Recent Activity */}
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 className="font-semibold text-[#161C2C]">Recent activity</h2>
+                <h2 className="font-semibold text-[#0B1020]">Recent activity</h2>
 
                 <div className="mt-5 flex h-72 items-center justify-center rounded-xl bg-slate-50">
                   <p className="text-sm text-slate-500">No activity available</p>
@@ -67,7 +67,7 @@ function OverviewCard({ title }) {
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <p className="text-sm font-medium text-slate-600">{title}</p>
 
-      <p className="mt-3 text-2xl font-bold text-[#161C2C]">—</p>
+      <p className="mt-3 text-2xl font-bold text-[#0B1020]">—</p>
 
       <div className="mt-5 h-[2px] bg-sky-400" />
     </section>

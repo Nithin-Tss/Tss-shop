@@ -250,7 +250,7 @@ export default function AdminCreateOrder() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] text-[#161C2C]">
+    <div className="min-h-screen bg-[#F1F2F4] text-[#0B1020]">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -286,7 +286,7 @@ export default function AdminCreateOrder() {
                 type="button"
                 onClick={handleSaveOrder}
                 disabled={saving}
-                className="px-5 py-2 rounded-lg bg-[#161C2C] hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
+                className="px-5 py-2 rounded-lg bg-[#0B1020] hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -405,7 +405,7 @@ export default function AdminCreateOrder() {
                       <button
                         type="button"
                         onClick={() => setShowCustomItemModal(true)}
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
+                        className="text-xs font-semibold text-violet-600 hover:text-violet-800 transition"
                       >
                         + Add custom item
                       </button>
@@ -413,7 +413,7 @@ export default function AdminCreateOrder() {
                       <button
                         type="button"
                         onClick={handleOpenProductModal}
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
+                        className="text-xs font-semibold text-violet-600 hover:text-violet-800 transition"
                       >
                         + Add product
                       </button>
@@ -714,7 +714,7 @@ export default function AdminCreateOrder() {
                               return next;
                             });
                           }}
-                          className="h-4 w-4 rounded border-slate-300 accent-[#161C2C]"
+                          className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
                         />
                         <div>
                           <p className="text-sm font-semibold text-slate-900">{prod.title}</p>
@@ -747,7 +747,7 @@ export default function AdminCreateOrder() {
                 type="button"
                 onClick={handleAddSelectedProducts}
                 disabled={selectedProductIds.size === 0}
-                className="px-4 py-2 rounded-lg bg-[#161C2C] disabled:opacity-50 text-white text-xs font-semibold"
+                className="px-4 py-2 rounded-lg bg-[#0B1020] disabled:opacity-50 text-white text-xs font-semibold"
               >
                 Add {selectedProductIds.size > 0 ? `(${selectedProductIds.size})` : ""}
               </button>
@@ -829,7 +829,7 @@ export default function AdminCreateOrder() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-[#161C2C] text-white font-semibold"
+                  className="px-4 py-2 rounded-lg bg-[#0B1020] text-white font-semibold"
                 >
                   Add item
                 </button>

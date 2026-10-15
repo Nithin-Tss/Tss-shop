@@ -263,12 +263,12 @@ export default function AdminCollections() {
   const cell = "px-4 align-middle";
   const headCell = "px-4 py-2.5 text-[12px] font-semibold text-[#6B7280] whitespace-nowrap";
   const darkButton =
-    "inline-flex items-center justify-center rounded-lg bg-[#161C2C] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#262E42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/30 focus-visible:ring-offset-2";
+    "inline-flex items-center justify-center rounded-lg bg-[#0B1020] px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#262E42] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/30 focus-visible:ring-offset-2";
   const pageButton =
     "inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E5E7EB] bg-white text-[#4B5563] transition-colors hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40";
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[#161C2C]">
+    <div className="min-h-screen bg-white font-sans text-[#0B1020]">
       <AdminHeader />
 
       {/* Feedback Toast */}
@@ -276,7 +276,7 @@ export default function AdminCollections() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
         >
           {feedback.type === "error" ? (
             <svg
@@ -325,14 +325,14 @@ export default function AdminCollections() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="min-w-0 flex-1 overflow-x-hidden bg-[#F7F8FA] px-4 py-6 sm:px-6">
+        <main className="min-w-0 flex-1 overflow-x-hidden bg-[#F5F3FF] px-4 py-6 sm:px-6">
           {/* Top Heading Row */}
           <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
               <span className="text-[18px] text-[#6B7280]" aria-hidden="true">
                 ⊞
               </span>
-              <h1 className="text-[20px] font-semibold tracking-tight text-[#161C2C]">
+              <h1 className="text-[20px] font-semibold tracking-tight text-[#0B1020]">
                 Collections
               </h1>
             </div>
@@ -352,7 +352,7 @@ export default function AdminCollections() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 rounded-lg bg-[#F3F4F6] px-3 py-1.5 text-[13px] font-medium text-[#161C2C] transition-colors hover:bg-[#E5E7EB]"
+                  className="flex items-center gap-1.5 rounded-lg bg-[#F3F4F6] px-3 py-1.5 text-[13px] font-medium text-[#0B1020] transition-colors hover:bg-[#E5E7EB]"
                 >
                   <span>All</span>
                   <svg
@@ -397,7 +397,7 @@ export default function AdminCollections() {
                     }}
                     placeholder="Search and filter"
                     aria-label="Search collections"
-                    className="h-9 w-full rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-8 text-[14px] text-[#161C2C] outline-none transition placeholder:text-[#9CA3AF] hover:border-[#D1D5DB] focus:border-[#161C2C] focus:ring-2 focus:ring-[#161C2C]/15"
+                    className="h-9 w-full rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-8 text-[14px] text-[#0B1020] outline-none transition placeholder:text-[#9CA3AF] hover:border-[#D1D5DB] focus:border-[#0B1020] focus:ring-2 focus:ring-[#0B1020]/15"
                   />
                   {searchQuery && (
                     <button
@@ -415,7 +415,7 @@ export default function AdminCollections() {
                   type="button"
                   title="View columns and filters"
                   aria-label="View columns and filters"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#6B7280] transition-colors hover:bg-[#F9FAFB] hover:text-[#161C2C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/15"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#6B7280] transition-colors hover:bg-[#F9FAFB] hover:text-[#0B1020] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/15"
                 >
                   <svg
                     className="h-4 w-4"
@@ -448,15 +448,15 @@ export default function AdminCollections() {
                           <button
                             type="button"
                             onClick={handleMasterCheckboxClick}
-                            className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/30"
+                            className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/30"
                             aria-label="Deselect all collections"
                           >
                             {isIndeterminate ? (
-                              <span className="flex h-4 w-4 items-center justify-center rounded bg-[#161C2C] text-white shadow-xs">
+                              <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-xs">
                                 <span className="h-0.5 w-2 rounded-full bg-white" />
                               </span>
                             ) : isAllSelected ? (
-                              <span className="flex h-4 w-4 items-center justify-center rounded bg-[#161C2C] text-white shadow-xs">
+                              <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-xs">
                                 <svg
                                   className="h-3 w-3"
                                   fill="none"
@@ -488,7 +488,7 @@ export default function AdminCollections() {
                               <button
                                 type="button"
                                 onClick={() => setIsSelectDropdownOpen((prev) => !prev)}
-                                className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-semibold text-[#202223] transition-colors hover:bg-[#F3F4F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/20"
+                                className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-semibold text-[#202223] transition-colors hover:bg-[#F3F4F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20"
                                 aria-expanded={isSelectDropdownOpen}
                               >
                                 <span>{selectedIds.length} selected</span>
@@ -554,7 +554,7 @@ export default function AdminCollections() {
                             <button
                               type="button"
                               onClick={() => handleBulkAction("Bulk edit")}
-                              className="inline-flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/20"
+                              className="inline-flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20"
                             >
                               Bulk edit
                             </button>
@@ -563,7 +563,7 @@ export default function AdminCollections() {
                             <button
                               type="button"
                               onClick={() => handleBulkAction("Include in sales channels")}
-                              className="inline-flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/20"
+                              className="inline-flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20"
                             >
                               Include in sales channels
                             </button>
@@ -572,7 +572,7 @@ export default function AdminCollections() {
                             <button
                               type="button"
                               onClick={() => handleBulkAction("Exclude from sales channels")}
-                              className="inline-flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/20"
+                              className="inline-flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20"
                             >
                               Exclude from sales channels
                             </button>
@@ -585,7 +585,7 @@ export default function AdminCollections() {
                                   e.stopPropagation();
                                   setIsMoreMenuOpen((prev) => !prev);
                                 }}
-                                className={`inline-flex h-[32px] w-[34px] items-center justify-center rounded-lg border border-[#D1D5DB] bg-white text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/20 ${
+                                className={`inline-flex h-[32px] w-[34px] items-center justify-center rounded-lg border border-[#D1D5DB] bg-white text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20 ${
                                   isMoreMenuOpen ? "bg-[#F3F4F6] border-[#9CA3AF]" : ""
                                 }`}
                                 aria-label="More bulk actions"
@@ -631,8 +631,8 @@ export default function AdminCollections() {
                               role="switch"
                               aria-checked={showOnlySelected}
                               onClick={() => setShowOnlySelected((prev) => !prev)}
-                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/20 ${
-                                showOnlySelected ? "bg-[#161C2C]" : "bg-[#D1D5DB]"
+                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20 ${
+                                showOnlySelected ? "bg-[#0B1020]" : "bg-[#D1D5DB]"
                               }`}
                             >
                               <span
@@ -660,7 +660,7 @@ export default function AdminCollections() {
                             type="button"
                             onClick={handleMasterCheckboxClick}
                             disabled={loading || paginatedCollections.length === 0}
-                            className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/30 disabled:opacity-40"
+                            className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/30 disabled:opacity-40"
                             aria-label="Select all collections"
                           >
                             <span className="h-4 w-4 rounded border border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
@@ -712,7 +712,7 @@ export default function AdminCollections() {
                           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-[22px] text-[#9CA3AF]">
                             ⊞
                           </div>
-                          <h3 className="mb-1 text-[16px] font-semibold text-[#161C2C]">
+                          <h3 className="mb-1 text-[16px] font-semibold text-[#0B1020]">
                             {error
                               ? "Couldn't load collections"
                               : showOnlySelected
@@ -777,11 +777,11 @@ export default function AdminCollections() {
                                   e.stopPropagation();
                                   handleToggleRow(col.id);
                                 }}
-                                className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/30"
+                                className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/30"
                                 aria-label={`Select ${col.name}`}
                               >
                                 {isSelected ? (
-                                  <span className="flex h-4 w-4 items-center justify-center rounded bg-[#161C2C] text-white shadow-xs">
+                                  <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-xs">
                                     <svg
                                       className="h-3 w-3"
                                       fill="none"
@@ -833,7 +833,7 @@ export default function AdminCollections() {
                               </div>
                               <Link
                                 to={`/admin/online-store/collections/${col.id}`}
-                                className="truncate font-medium text-[#161C2C] hover:underline"
+                                className="truncate font-medium text-[#0B1020] hover:underline"
                               >
                                 {col.name}
                               </Link>
@@ -876,7 +876,7 @@ export default function AdminCollections() {
                                   );
                                 }}
                                 aria-expanded={openChannelDropdownId === col.id}
-                                className="inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 tabular-nums text-[#374151] transition-colors hover:bg-[#F3F4F6] hover:text-[#161C2C]"
+                                className="inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 tabular-nums text-[#374151] transition-colors hover:bg-[#F3F4F6] hover:text-[#0B1020]"
                                 title="View sales channels"
                               >
                                 <span>
@@ -918,7 +918,7 @@ export default function AdminCollections() {
                                     col.sales_channels.map((channel, idx) => (
                                       <div
                                         key={channel.id || idx}
-                                        className="flex items-center gap-2 rounded-md px-3 py-2 text-[14px] text-[#161C2C] hover:bg-[#F9FAFB]"
+                                        className="flex items-center gap-2 rounded-md px-3 py-2 text-[14px] text-[#0B1020] hover:bg-[#F9FAFB]"
                                       >
                                         {renderChannelIcon(channel)}
                                         <span className="whitespace-nowrap">{channel.name}</span>
@@ -979,7 +979,7 @@ export default function AdminCollections() {
           <div className="pb-6 pt-6 text-center">
             <a
               href="#learn-more"
-              className="text-[12px] text-[#6B7280] underline underline-offset-2 transition-colors hover:text-[#161C2C]"
+              className="text-[12px] text-[#6B7280] underline underline-offset-2 transition-colors hover:text-[#0B1020]"
             >
               Learn more about collections
             </a>

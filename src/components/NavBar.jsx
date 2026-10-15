@@ -66,7 +66,7 @@ export default function NavBar() {
                   <Link
                     key={link.name}
                     to={link.href}
-                    className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150"
+                    className="text-sm font-medium text-slate-600 hover:text-violet-600 transition-colors duration-150"
                   >
                     {link.name}
                   </Link>
@@ -74,7 +74,7 @@ export default function NavBar() {
                   <a
                     key={link.name}
                     href={link.href}
-                    className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors duration-150"
+                    className="text-sm font-medium text-slate-600 hover:text-violet-600 transition-colors duration-150"
                   >
                     {link.name}
                   </a>
@@ -88,7 +88,7 @@ export default function NavBar() {
             {/* Search Toggle / Input */}
             <div className="relative flex items-center">
               {searchOpen ? (
-                <div className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm border border-gray-200 focus-within:border-blue-500 focus-within:bg-white transition-all">
+                <div className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm border border-gray-200 focus-within:border-violet-500 focus-within:bg-white transition-all">
                   <svg
                     className="w-4 h-4 text-gray-500 mr-2"
                     fill="none"
@@ -120,7 +120,7 @@ export default function NavBar() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-full transition-colors"
+                  className="p-2 text-slate-600 hover:text-violet-600 hover:bg-slate-50 rounded-full transition-colors"
                   aria-label="Search"
                   title="Search"
                 >
@@ -165,7 +165,7 @@ export default function NavBar() {
                 {/* Login Link */}
                 <Link
                   to="/auth/signin"
-                  className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors px-2 py-1"
+                  className="text-sm font-medium text-slate-700 hover:text-violet-600 transition-colors px-2 py-1"
                 >
                   Login
                 </Link>
@@ -173,7 +173,7 @@ export default function NavBar() {
                 {/* Create Store CTA Button */}
                 <Link
                   to={ONBOARDING_PATH}
-                  className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-150 inline-flex items-center justify-center whitespace-nowrap"
+                  className="bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-150 inline-flex items-center justify-center whitespace-nowrap"
                 >
                   Create Store
                 </Link>
@@ -265,7 +265,7 @@ export default function NavBar() {
                     key={link.name}
                     {...(link.isRoute ? { to: link.href } : { href: link.href })}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors"
+                    className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-violet-600 hover:bg-slate-50 transition-colors"
                   >
                     {link.name}
                   </Tag>
@@ -304,14 +304,14 @@ export default function NavBar() {
                 <Link
                   to="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors"
+                  className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-violet-600 hover:bg-slate-50 transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to={ONBOARDING_PATH}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-center shadow-sm transition-colors"
+                  className="w-full mt-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2.5 px-4 rounded-lg text-center shadow-sm transition-colors"
                 >
                   Create Store
                 </Link>

@@ -16,7 +16,7 @@ const lineIcon = {
 
 export default function ContentPage() {
   return (
-    <div className="min-h-screen bg-white text-[#161C2C]">
+    <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
 
       {/* BODY */}
@@ -25,10 +25,10 @@ export default function ContentPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 bg-[#F7F8FA] px-6 lg:px-8 py-6 overflow-hidden">
+        <main className="flex-1 bg-[#F5F3FF] px-6 lg:px-8 py-6 overflow-hidden">
           {/* TITLE + ACTIONS */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="content" />
               Metaobjects
             </h1>
@@ -36,14 +36,14 @@ export default function ContentPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#DDE3EA] transition"
+                className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#DDE3EA] transition"
               >
                 Manage
               </button>
 
               <button
                 type="button"
-                className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
               >
                 Add definition
               </button>
@@ -51,21 +51,21 @@ export default function ContentPage() {
           </div>
 
           {/* DEFINITIONS CARD */}
-          <section className="mt-5 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
+          <section className="mt-5 overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
             {/* Toolbar */}
-            <div className="flex items-center gap-3 border-b border-[#E3E7ED] px-4 py-3">
+            <div className="flex items-center gap-3 border-b border-[#E4DEFB] px-4 py-3">
               <button
                 type="button"
-                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition"
               >
                 Custom
-                <svg {...lineIcon} className="h-4 w-4 text-[#53627E]">
+                <svg {...lineIcon} className="h-4 w-4 text-[#4C4F7A]">
                   <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
                 </svg>
               </button>
 
               <div className="flex flex-1 items-center gap-2">
-                <svg {...lineIcon} className="h-4 w-4 shrink-0 text-[#53627E]">
+                <svg {...lineIcon} className="h-4 w-4 shrink-0 text-[#4C4F7A]">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-4-4" />
                 </svg>
@@ -73,15 +73,15 @@ export default function ContentPage() {
                 <input
                   type="text"
                   placeholder="Searching in metaobject definitions..."
-                  className="w-full bg-transparent text-sm text-[#161C2C] outline-none placeholder:text-slate-500"
+                  className="w-full bg-transparent text-sm text-[#0B1020] outline-none placeholder:text-slate-500"
                 />
               </div>
 
-              <div className="flex shrink-0 items-center gap-1 border-l border-[#E3E7ED] pl-3">
+              <div className="flex shrink-0 items-center gap-1 border-l border-[#E4DEFB] pl-3">
                 <button
                   type="button"
                   aria-label="Columns"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C] transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020] transition"
                 >
                   <svg {...lineIcon} className="h-[18px] w-[18px]">
                     <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -92,7 +92,7 @@ export default function ContentPage() {
                 <button
                   type="button"
                   aria-label="View"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#53627E] hover:bg-[#F3F6FA] hover:text-[#161C2C] transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020] transition"
                 >
                   <svg {...lineIcon} className="h-[18px] w-[18px]">
                     <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
@@ -104,14 +104,14 @@ export default function ContentPage() {
 
             {/* Empty state */}
             <div className="px-6 py-12 text-center">
-              <h2 className="text-xl font-semibold text-[#161C2C]">No definitions found</h2>
+              <h2 className="text-xl font-semibold text-[#0B1020]">No definitions found</h2>
 
-              <p className="mt-3 text-sm text-[#53627E]">Try changing the filters or search term</p>
+              <p className="mt-3 text-sm text-[#4C4F7A]">Try changing the filters or search term</p>
             </div>
           </section>
 
           {/* LEARN MORE */}
-          <p className="mt-8 text-center text-sm font-medium text-[#161C2C]">
+          <p className="mt-8 text-center text-sm font-medium text-[#0B1020]">
             <a href="#" className="hover:underline">
               Learn more about metaobjects
             </a>
@@ -139,7 +139,7 @@ const EMPTY_POST = {
 };
 
 const fieldClass =
-  "w-full rounded-lg border border-[#D8DFE8] bg-white px-3 py-2 text-sm text-[#161C2C] outline-none focus:border-[#161C2C]";
+  "w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-2 text-sm text-[#0B1020] outline-none focus:border-[#0B1020]";
 const fieldLabel = "mb-1 block text-[13px] font-medium text-[#4A5160]";
 
 const postDate = (value) => (value ? new Date(value).toLocaleDateString() : "");
@@ -224,13 +224,13 @@ export function BlogPostsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#161C2C]">
+    <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
-        <main className="flex-1 overflow-hidden bg-[#F7F8FA] px-6 py-6 lg:px-8">
+        <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="blog" />
               {editing ? (editing.id ? "Edit blog post" : "Add blog post") : "Blog posts"}
             </h1>
@@ -247,7 +247,7 @@ export function BlogPostsPage() {
                 <button
                   type="button"
                   onClick={() => open({})}
-                  className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45]"
+                  className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
                 >
                   Add blog post
                 </button>
@@ -263,21 +263,21 @@ export function BlogPostsPage() {
           )}
 
           {!editing && (
-            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
               {posts === null ? (
-                <p className="px-6 py-10 text-center text-sm text-[#53627E]">
+                <p className="px-6 py-10 text-center text-sm text-[#4C4F7A]">
                   {error ? "" : "Loading..."}
                 </p>
               ) : posts.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <h2 className="text-xl font-semibold">No blog posts yet</h2>
-                  <p className="mt-3 text-sm text-[#53627E]">
+                  <p className="mt-3 text-sm text-[#4C4F7A]">
                     Published posts appear on your store's blog.
                   </p>
                 </div>
               ) : (
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b border-[#E3E7ED] text-[13px] text-[#53627E]">
+                  <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
                     <tr>
                       <th className="px-4 py-3 font-medium">Title</th>
                       <th className="px-4 py-3 font-medium">Status</th>
@@ -290,7 +290,7 @@ export function BlogPostsPage() {
                       <tr
                         key={post.id}
                         onClick={() => open(post)}
-                        className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F7F8FA]"
+                        className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
                       >
                         <td className="px-4 py-3 font-medium">{post.title}</td>
                         <td className="px-4 py-3">
@@ -300,10 +300,10 @@ export function BlogPostsPage() {
                             {post.status === "published" ? "Published" : "Draft"}
                           </span>
                         </td>
-                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">
+                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
                           {post.author}
                         </td>
-                        <td className="hidden px-4 py-3 text-[#53627E] sm:table-cell">
+                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
                           {postDate(post.published_at)}
                         </td>
                       </tr>
@@ -316,7 +316,7 @@ export function BlogPostsPage() {
 
           {editing && (
             <form onSubmit={save} className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-              <section className="grid gap-4 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+              <section className="grid gap-4 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
                 <label>
                   <span className={fieldLabel}>Title</span>
                   <input
@@ -356,14 +356,14 @@ export function BlogPostsPage() {
                     placeholder="Made from the title when empty"
                     maxLength={255}
                   />
-                  <span className="mt-1 block text-xs text-[#53627E]">
+                  <span className="mt-1 block text-xs text-[#4C4F7A]">
                     Address on your store: /blog/{form.handle || "…"}
                   </span>
                 </label>
               </section>
 
               <aside className="grid content-start gap-4">
-                <section className="grid gap-3 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Visibility</span>
                     <select
@@ -378,7 +378,7 @@ export function BlogPostsPage() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] disabled:opacity-50"
+                    className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
                   >
                     {busy ? "Saving..." : "Save"}
                   </button>
@@ -387,7 +387,7 @@ export function BlogPostsPage() {
                       href={editing.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-center text-sm font-medium text-[#30466F] hover:underline"
+                      className="text-center text-sm font-medium text-[#3B3F8F] hover:underline"
                     >
                       View on store
                     </a>
@@ -404,7 +404,7 @@ export function BlogPostsPage() {
                   )}
                 </section>
 
-                <section className="grid gap-3 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
                   <span className={fieldLabel}>Featured image</span>
                   {form.cover_image && (
                     <img
@@ -427,7 +427,7 @@ export function BlogPostsPage() {
                   />
                 </section>
 
-                <section className="grid gap-3 rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Author</span>
                     <input

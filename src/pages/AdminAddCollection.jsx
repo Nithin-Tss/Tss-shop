@@ -85,14 +85,14 @@ function formatPrice(value) {
 
 const card =
   "rounded-xl border border-[#E3E5E8] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04)]";
-const cardTitle = "text-[15px] font-semibold text-[#161C2C]";
+const cardTitle = "text-[15px] font-semibold text-[#0B1020]";
 const labelClass = "mb-1.5 block text-[13px] font-medium text-[#4A5160]";
 const inputClass =
-  "w-full rounded-lg border border-[#D5D8DD] bg-white px-3 py-2.5 text-[14px] text-[#161C2C] outline-none transition placeholder:text-[#9AA0A9] focus:border-[#161C2C] focus:ring-2 focus:ring-[#161C2C]/10";
+  "w-full rounded-lg border border-[#D5D8DD] bg-white px-3 py-2.5 text-[14px] text-[#0B1020] outline-none transition placeholder:text-[#9AA0A9] focus:border-[#0B1020] focus:ring-2 focus:ring-[#0B1020]/10";
 const subtleButton =
   "inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#D5D8DD] bg-white px-3 py-2 text-[13px] font-medium text-[#30343B] transition hover:bg-[#F6F7F8] disabled:opacity-40";
 const iconButton =
-  "inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] transition hover:bg-[#F1F2F4] hover:text-[#161C2C]";
+  "inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#6B7280] transition hover:bg-[#F1F2F4] hover:text-[#0B1020]";
 
 function Icon({ d, className = "h-4 w-4" }) {
   return (
@@ -165,7 +165,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#D5D8DD] focus-within:border-[#161C2C] focus-within:ring-2 focus-within:ring-[#161C2C]/10">
+    <div className="overflow-hidden rounded-lg border border-[#D5D8DD] focus-within:border-[#0B1020] focus-within:ring-2 focus-within:ring-[#0B1020]/10">
       <div
         className="flex flex-wrap gap-0.5 border-b border-[#E3E5E8] bg-[#FAFAFB] px-1.5 py-1"
         role="toolbar"
@@ -179,7 +179,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
             aria-label={tool.label}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => apply(tool)}
-            className="rounded-md px-2 py-1 text-[12px] text-[#4A5160] hover:bg-[#EDEEF0] hover:text-[#161C2C]"
+            className="rounded-md px-2 py-1 text-[12px] text-[#4A5160] hover:bg-[#EDEEF0] hover:text-[#0B1020]"
           >
             {tool.text}
           </button>
@@ -194,7 +194,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
         suppressContentEditableWarning
         data-placeholder={placeholder}
         onInput={emit}
-        className="min-h-[120px] px-3 py-2.5 text-[14px] leading-relaxed text-[#161C2C] outline-none empty:before:pointer-events-none empty:before:text-[#9AA0A9] empty:before:content-[attr(data-placeholder)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+        className="min-h-[120px] px-3 py-2.5 text-[14px] leading-relaxed text-[#0B1020] outline-none empty:before:pointer-events-none empty:before:text-[#9AA0A9] empty:before:content-[attr(data-placeholder)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
       />
     </div>
   );
@@ -233,7 +233,7 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[#161C2C]/30 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[#0B1020]/30 p-0 sm:items-center sm:p-4"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -281,11 +281,11 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
                   type="checkbox"
                   checked={picked.has(p.id)}
                   onChange={() => toggle(p.id)}
-                  className="h-4 w-4 accent-[#161C2C]"
+                  className="h-4 w-4 accent-[#0B1020]"
                 />
                 <Thumb product={p} size="h-10 w-10" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] text-[#161C2C]">{p.title}</span>
+                  <span className="block truncate text-[14px] text-[#0B1020]">{p.title}</span>
                   <span className="block text-[12px] text-[#6B7280]">
                     {capitalize(p.status)}
                     {p.price ? ` · ${formatPrice(p.price)}` : ""}
@@ -305,7 +305,7 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
             <button
               type="button"
               onClick={() => onDone([...picked])}
-              className="rounded-lg bg-[#161C2C] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#262E42]"
+              className="rounded-lg bg-[#0B1020] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#262E42]"
             >
               Done
             </button>
@@ -631,7 +631,7 @@ export default function AdminAddCollection() {
   // ---------------------------------------------------------------- render
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] font-sans text-[#161C2C]">
+    <div className="min-h-screen bg-[#F1F2F4] font-sans text-[#0B1020]">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
@@ -668,7 +668,7 @@ export default function AdminAddCollection() {
                 type="button"
                 onClick={save}
                 disabled={!dirty || saving || loading}
-                className="rounded-lg bg-[#161C2C] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#262E42] disabled:cursor-not-allowed disabled:bg-[#D5D8DD] disabled:text-[#8A909A]"
+                className="rounded-lg bg-[#0B1020] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#262E42] disabled:cursor-not-allowed disabled:bg-[#D5D8DD] disabled:text-[#8A909A]"
               >
                 {saving ? "Saving…" : "Save"}
               </button>
@@ -843,7 +843,7 @@ export default function AdminAddCollection() {
                             aria-checked={viewMode === mode}
                             aria-label={`${capitalize(mode)} view`}
                             onClick={() => setViewMode(mode)}
-                            className={`flex h-7 w-7 items-center justify-center rounded-md ${viewMode === mode ? "bg-[#F1F2F4] text-[#161C2C]" : "text-[#9AA0A9] hover:text-[#4A5160]"}`}
+                            className={`flex h-7 w-7 items-center justify-center rounded-md ${viewMode === mode ? "bg-[#F1F2F4] text-[#0B1020]" : "text-[#9AA0A9] hover:text-[#4A5160]"}`}
                           >
                             <Icon d={ICONS[mode]} />
                           </button>
@@ -930,7 +930,7 @@ export default function AdminAddCollection() {
                           <div className="mb-2.5 aspect-square">
                             <Thumb product={p} />
                           </div>
-                          <p className="truncate text-[13px] font-medium text-[#161C2C]">
+                          <p className="truncate text-[13px] font-medium text-[#0B1020]">
                             {p.title}
                           </p>
                           <p className="text-[12px] text-[#6B7280]">
@@ -1051,7 +1051,7 @@ export default function AdminAddCollection() {
                           URL handle
                         </label>
                         <div
-                          className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-[#161C2C] ${errors.handle ? "border-red-400" : "border-[#D5D8DD]"}`}
+                          className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-[#0B1020] ${errors.handle ? "border-red-400" : "border-[#D5D8DD]"}`}
                         >
                           <span className="hidden max-w-[45%] truncate border-r border-[#E3E5E8] bg-[#FAFAFB] px-3 py-2.5 text-[13px] text-[#6B7280] sm:block">
                             {storeUrl}/collections/
@@ -1100,7 +1100,7 @@ export default function AdminAddCollection() {
                         role="radio"
                         aria-checked={form.type === value}
                         onClick={() => switchType(value)}
-                        className={`rounded-md py-1.5 text-[13px] font-medium transition ${form.type === value ? "bg-white text-[#161C2C] shadow-sm" : "text-[#6B7280] hover:text-[#161C2C]"}`}
+                        className={`rounded-md py-1.5 text-[13px] font-medium transition ${form.type === value ? "bg-white text-[#0B1020] shadow-sm" : "text-[#6B7280] hover:text-[#0B1020]"}`}
                       >
                         {label}
                       </button>
@@ -1144,7 +1144,7 @@ export default function AdminAddCollection() {
                                 name="match"
                                 checked={form.match === value}
                                 onChange={() => set("match", value)}
-                                className="accent-[#161C2C]"
+                                className="accent-[#0B1020]"
                               />
                               {label}
                             </label>
@@ -1258,7 +1258,7 @@ export default function AdminAddCollection() {
                                       form.excluded_products.filter((id) => id !== p.id)
                                     )
                                   }
-                                  className="shrink-0 text-[12px] text-[#4A5160] underline hover:text-[#161C2C]"
+                                  className="shrink-0 text-[12px] text-[#4A5160] underline hover:text-[#0B1020]"
                                 >
                                   Include
                                 </button>
@@ -1300,7 +1300,7 @@ export default function AdminAddCollection() {
                       aria-label="Show on the Online Store"
                       disabled={!onlineIds.length}
                       onClick={() => setOnlineStore(!onOnlineStore)}
-                      className={`relative h-5 w-9 rounded-full transition ${onOnlineStore ? "bg-[#161C2C]" : "bg-[#D5D8DD]"} disabled:opacity-40`}
+                      className={`relative h-5 w-9 rounded-full transition ${onOnlineStore ? "bg-[#0B1020]" : "bg-[#D5D8DD]"} disabled:opacity-40`}
                     >
                       <span
                         className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${onOnlineStore ? "left-[18px]" : "left-0.5"}`}
@@ -1359,7 +1359,7 @@ function ItemAction({ product, type, form, set, inline = false }) {
       className={
         inline
           ? iconButton
-          : "absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#4A5160] opacity-100 shadow-sm transition hover:text-[#161C2C] sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+          : "absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#4A5160] opacity-100 shadow-sm transition hover:text-[#0B1020] sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
       }
     >
       <Icon d={manual ? ICONS.x : ICONS.minus} />

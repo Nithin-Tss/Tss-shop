@@ -208,7 +208,7 @@ export default function AdminHomePage() {
   const actions = quickActions.filter(allowed);
 
   return (
-    <div className="min-h-screen bg-white text-[#161C2C]">
+    <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
 
       {/* BODY */}
@@ -217,20 +217,20 @@ export default function AdminHomePage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 overflow-hidden bg-[#F7F8FA] px-4 py-6 sm:px-6 lg:px-9">
+        <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-4 py-6 sm:px-6 lg:px-9">
           <div className="mx-auto max-w-[1180px] space-y-6">
             {/* PLAN PILL (choosing a plan is the owner's) */}
             {can(session, "store.manage") && (
               <div className="flex justify-end">
-                <div className="flex items-center gap-1 rounded-full border border-[#E3E7ED] bg-white p-1 pl-3.5 shadow-sm">
+                <div className="flex items-center gap-1 rounded-full border border-[#E4DEFB] bg-white p-1 pl-3.5 shadow-sm">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                   </span>
-                  <span className="ml-1.5 mr-2 text-sm text-[#53627E]">Pick a plan to go live</span>
+                  <span className="ml-1.5 mr-2 text-sm text-[#4C4F7A]">Pick a plan to go live</span>
                   <Link
                     to={`${BASE}/settings`}
-                    className="rounded-full bg-[#141b2d] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                    className="rounded-full bg-[#0B1020] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
                   >
                     Select a plan
                   </Link>
@@ -239,7 +239,7 @@ export default function AdminHomePage() {
             )}
 
             {/* WELCOME BANNER */}
-            <section className="relative overflow-hidden rounded-2xl bg-[#141b2d] px-6 py-7 text-white shadow-[0_10px_30px_-12px_rgba(20,27,45,0.45)] sm:px-8">
+            <section className="relative overflow-hidden rounded-2xl bg-[#0B1020] px-6 py-7 text-white shadow-[0_10px_30px_-12px_rgba(20,27,45,0.45)] sm:px-8">
               <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/[0.04]" />
               <div className="pointer-events-none absolute -bottom-24 right-24 h-48 w-48 rounded-full bg-white/[0.04]" />
 
@@ -286,10 +286,10 @@ export default function AdminHomePage() {
             {/* NO ROLES: nothing below would work for them */}
             {hasNoAccess && (
               <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <h2 className="text-base font-semibold text-[#161C2C]">
+                <h2 className="text-base font-semibold text-[#0B1020]">
                   You don&apos;t have access to anything here yet
                 </h2>
-                <p className="mt-1 text-sm text-[#53627E]">
+                <p className="mt-1 text-sm text-[#4C4F7A]">
                   Your account is part of {storeName}, but none of your roles give you access to its
                   products, orders or settings. Ask the store owner to give you a role under
                   Settings → Users.
@@ -311,15 +311,15 @@ export default function AdminHomePage() {
                 {statCards.map((card) => (
                   <div
                     key={card.label}
-                    className="rounded-2xl border border-[#E3E7ED] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+                    className="rounded-2xl border border-[#E4DEFB] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#53627E]">{card.label}</span>
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F5F8] text-[#30466F]">
+                      <span className="text-sm text-[#4C4F7A]">{card.label}</span>
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F5F8] text-[#3B3F8F]">
                         <Icon name={card.icon} className="h-4 w-4" />
                       </span>
                     </div>
-                    <p className="mt-3 text-2xl font-semibold tracking-tight text-[#161C2C]">
+                    <p className="mt-3 text-2xl font-semibold tracking-tight text-[#0B1020]">
                       {card.value}
                     </p>
                   </div>
@@ -329,8 +329,8 @@ export default function AdminHomePage() {
 
             {/* QUICK ACTIONS */}
             {actions.length > 0 && (
-              <section className="rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm">
-                <h2 className="text-base font-semibold text-[#161C2C]">Quick actions</h2>
+              <section className="rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+                <h2 className="text-base font-semibold text-[#0B1020]">Quick actions</h2>
                 <div className="mt-4 grid grid-cols-3 gap-y-5 sm:grid-cols-5">
                   {actions.map((action) => (
                     <Link
@@ -348,10 +348,10 @@ export default function AdminHomePage() {
                       }
                       className="group flex flex-col items-center gap-2 text-center"
                     >
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E3E7ED] bg-[#F7F8FA] text-[#141b2d] transition group-hover:-translate-y-0.5 group-hover:border-[#141b2d] group-hover:bg-[#141b2d] group-hover:text-white">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E4DEFB] bg-[#F5F3FF] text-[#0B1020] transition group-hover:-translate-y-0.5 group-hover:border-[#0B1020] group-hover:bg-[#0B1020] group-hover:text-white">
                         <Icon name={action.icon} />
                       </span>
-                      <span className="text-xs font-medium text-[#53627E] group-hover:text-[#161C2C] sm:text-sm">
+                      <span className="text-xs font-medium text-[#4C4F7A] group-hover:text-[#0B1020] sm:text-sm">
                         {action.label}
                       </span>
                     </Link>
@@ -366,10 +366,10 @@ export default function AdminHomePage() {
             >
               {/* SETUP CHECKLIST */}
               {steps.length > 0 && (
-                <section className="overflow-hidden rounded-2xl border border-[#E3E7ED] bg-white shadow-sm lg:col-span-2">
-                  <div className="flex items-center justify-between border-b border-[#E3E7ED] px-4 py-2.5">
-                    <h2 className="text-sm font-semibold text-[#161C2C]">Setup checklist</h2>
-                    <span className="text-xs text-[#53627E]">
+                <section className="overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm lg:col-span-2">
+                  <div className="flex items-center justify-between border-b border-[#E4DEFB] px-4 py-2.5">
+                    <h2 className="text-sm font-semibold text-[#0B1020]">Setup checklist</h2>
+                    <span className="text-xs text-[#4C4F7A]">
                       {doneCount}/{steps.length} complete
                     </span>
                   </div>
@@ -383,8 +383,8 @@ export default function AdminHomePage() {
                             to={step.to}
                             className={`flex h-full min-w-0 items-start gap-2.5 rounded-xl border px-3 py-2.5 transition hover:-translate-y-0.5 hover:shadow-md ${
                               isNext
-                                ? "border-[#141b2d] bg-[#F4F6FA]"
-                                : "border-[#E3E7ED] bg-white hover:border-[#C9D1DD]"
+                                ? "border-[#0B1020] bg-[#F4F6FA]"
+                                : "border-[#E4DEFB] bg-white hover:border-[#C9D1DD]"
                             }`}
                           >
                             <span
@@ -392,7 +392,7 @@ export default function AdminHomePage() {
                                 step.done
                                   ? "border-emerald-500 bg-emerald-500 text-white"
                                   : isNext
-                                    ? "border-[#141b2d]"
+                                    ? "border-[#0B1020]"
                                     : "border-[#CBD3DF]"
                               }`}
                             >
@@ -400,10 +400,10 @@ export default function AdminHomePage() {
                             </span>
 
                             <span className={`min-w-0 ${step.done ? "opacity-60" : ""}`}>
-                              <span className="block truncate text-sm font-semibold text-[#161C2C]">
+                              <span className="block truncate text-sm font-semibold text-[#0B1020]">
                                 {step.title}
                               </span>
-                              <span className="mt-0.5 block truncate text-xs text-[#53627E]">
+                              <span className="mt-0.5 block truncate text-xs text-[#4C4F7A]">
                                 {step.help}
                               </span>
                             </span>
@@ -416,14 +416,14 @@ export default function AdminHomePage() {
               )}
 
               {/* TIP */}
-              <aside className="rounded-2xl border border-[#E3E7ED] bg-white p-5 shadow-sm transition hover:shadow-md">
+              <aside className="rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm transition hover:shadow-md">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                     <Icon name="bulb" />
                   </span>
-                  <h2 className="text-base font-semibold text-[#161C2C]">Did you know?</h2>
+                  <h2 className="text-base font-semibold text-[#0B1020]">Did you know?</h2>
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-[#53627E]">{tip}</p>
+                <p className="mt-3 text-sm leading-relaxed text-[#4C4F7A]">{tip}</p>
               </aside>
             </div>
           </div>

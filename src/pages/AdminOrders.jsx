@@ -56,8 +56,8 @@ function renderPaymentStatusBadge(status) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#161C2C]">
-      <span className="w-1.5 h-1.5 rounded-full bg-[#161C2C]" />
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#0B1020]">
+      <span className="w-1.5 h-1.5 rounded-full bg-[#0B1020]" />
       Paid
     </span>
   );
@@ -86,8 +86,8 @@ function renderFulfillmentStatusBadge(status) {
 
   if (s.includes("fulfilled") || s === "closed") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#161C2C]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#161C2C]" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#0B1020]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#0B1020]" />
         Fulfilled
       </span>
     );
@@ -165,7 +165,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#161C2C]">
+    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -177,7 +177,7 @@ export default function AdminOrders() {
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & ACTION BAR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="orders" />
               Orders
             </h1>
@@ -185,14 +185,14 @@ export default function AdminOrders() {
             <div className="flex items-center gap-2.5">
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#D8DFE8] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition"
+                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition"
               >
                 Export
               </button>
 
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#D8DFE8] px-4 py-2 text-sm font-medium text-[#161C2C] hover:bg-[#F3F6FA] transition"
+                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition"
               >
                 More actions
                 <span className="text-xs">⌄</span>
@@ -201,7 +201,7 @@ export default function AdminOrders() {
               {canCreate && (
                 <Link
                   to="/admin/online-store/orders/create"
-                  className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                  className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
                 >
                   Create order
                 </Link>
@@ -210,13 +210,13 @@ export default function AdminOrders() {
           </div>
 
           {/* ORDERS TABLE CARD */}
-          <section className="rounded-2xl border border-[#E3E7ED] bg-white shadow-sm overflow-hidden">
+          <section className="rounded-2xl border border-[#E4DEFB] bg-white shadow-sm overflow-hidden">
             {/* TABS & SEARCH / FILTER HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E3E7ED] px-4 py-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4DEFB] px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-lg bg-[#EEF1F6] px-3.5 py-1.5 text-sm font-medium text-[#161C2C]"
+                  className="rounded-lg bg-[#EDE9FE] px-3.5 py-1.5 text-sm font-medium text-[#0B1020]"
                 >
                   All
                 </button>
@@ -224,14 +224,14 @@ export default function AdminOrders() {
 
               <div className="flex items-center gap-3">
                 {/* Search & Filter Input */}
-                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#D8DFE8] bg-white px-3 text-sm">
+                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm">
                   <span className="text-slate-400">⌕</span>
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search and filter"
-                    className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#161C2C] placeholder:text-slate-400"
+                    className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#0B1020] placeholder:text-slate-400"
                   />
                   {searchQuery && (
                     <button
@@ -248,7 +248,7 @@ export default function AdminOrders() {
                 <button
                   type="button"
                   title="Table columns"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-slate-600 hover:bg-[#F3F6FA] transition"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-slate-600 hover:bg-[#F3F0FF] transition"
                 >
                   ▥
                 </button>
@@ -256,8 +256,8 @@ export default function AdminOrders() {
             </div>
 
             {/* SECONDARY HEADER */}
-            <div className="px-5 py-3 border-b border-[#E3E7ED] bg-white flex items-center justify-between">
-              <span className="text-sm font-semibold text-[#161C2C]">Orders</span>
+            <div className="px-5 py-3 border-b border-[#E4DEFB] bg-white flex items-center justify-between">
+              <span className="text-sm font-semibold text-[#0B1020]">Orders</span>
               {selectedIds.size > 0 && (
                 <span className="text-xs font-medium text-slate-500">
                   {selectedIds.size} selected
@@ -267,15 +267,15 @@ export default function AdminOrders() {
 
             {/* RESPONSIVE TABLE WITH HORIZONTAL SCROLL */}
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm text-[#161C2C]">
+              <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
                 <thead>
-                  <tr className="border-b border-[#E3E7ED] bg-[#FAFBFD] text-xs font-medium text-slate-600 whitespace-nowrap select-none">
+                  <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-medium text-slate-600 whitespace-nowrap select-none">
                     <th className="py-3.5 pl-5 pr-3 w-10">
                       <input
                         type="checkbox"
                         checked={allSelected}
                         onChange={handleSelectAll}
-                        className="h-4 w-4 rounded border-slate-300 accent-[#161C2C] cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
                       />
                     </th>
                     <th className="py-3.5 px-3 font-semibold text-slate-700">Order</th>
@@ -301,7 +301,7 @@ export default function AdminOrders() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-[#E3E7ED]">
+                <tbody className="divide-y divide-[#E4DEFB]">
                   {loading ? (
                     // LOADING SKELETON ROWS
                     [...Array(6)].map((_, i) => (
@@ -367,7 +367,7 @@ export default function AdminOrders() {
                         <tr
                           key={order.id}
                           className={`transition-colors whitespace-nowrap hover:bg-[#F9FAFC] ${
-                            isSelected ? "bg-[#F3F6FA]" : ""
+                            isSelected ? "bg-[#F3F0FF]" : ""
                           }`}
                         >
                           {/* Checkbox */}
@@ -376,15 +376,15 @@ export default function AdminOrders() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelect(order.id)}
-                              className="h-4 w-4 rounded border-slate-300 accent-[#161C2C] cursor-pointer"
+                              className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
                             />
                           </td>
 
                           {/* Order Number */}
-                          <td className="py-3.5 px-3 font-semibold text-[#161C2C]">
+                          <td className="py-3.5 px-3 font-semibold text-[#0B1020]">
                             <Link
                               to={`/admin/online-store/orders/${order.id}`}
-                              className="hover:underline text-[#161C2C]"
+                              className="hover:underline text-[#0B1020]"
                             >
                               {order.order_number || `#${order.id?.slice(0, 6)}`}
                             </Link>
@@ -413,7 +413,7 @@ export default function AdminOrders() {
                           </td>
 
                           {/* Total */}
-                          <td className="py-3.5 px-3 text-right font-medium text-[#161C2C]">
+                          <td className="py-3.5 px-3 text-right font-medium text-[#0B1020]">
                             ${parseFloat(order.total || 0).toFixed(2)}
                           </td>
 
@@ -489,7 +489,7 @@ export default function AdminOrders() {
           </section>
 
           {/* LEARN MORE */}
-          <p className="mt-8 text-center text-sm font-medium text-[#161C2C]">
+          <p className="mt-8 text-center text-sm font-medium text-[#0B1020]">
             <a href="#" className="hover:underline text-slate-700 hover:text-slate-900">
               Learn more about orders
             </a>

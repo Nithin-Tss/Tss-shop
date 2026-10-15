@@ -6,7 +6,7 @@ import { useCan } from "@/lib/auth";
 export default function DiscountsPage() {
   const canManage = useCan("discounts.manage");
   return (
-    <div className="min-h-screen bg-[#F7F8FA]">
+    <div className="min-h-screen bg-[#F5F3FF]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-72px)]">
@@ -14,17 +14,17 @@ export default function DiscountsPage() {
 
         <main className="min-w-0 flex-1">
           {/* HEADER */}
-          <header className="flex items-center justify-between border-b border-slate-200 bg-[#F7F8FA] px-6 py-5">
-            <div className="flex items-center gap-2.5 text-[#161C2C]">
+          <header className="flex items-center justify-between border-b border-slate-200 bg-[#F5F3FF] px-6 py-5">
+            <div className="flex items-center gap-2.5 text-[#0B1020]">
               <PageIcon name="discounts" />
 
-              <h1 className="text-xl font-semibold text-[#161C2C]">Discounts</h1>
+              <h1 className="text-xl font-semibold text-[#0B1020]">Discounts</h1>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg bg-[#E5E5E5] px-4 py-2 text-sm font-medium text-[#161C2C]"
+                className="rounded-lg bg-[#E5E5E5] px-4 py-2 text-sm font-medium text-[#0B1020]"
               >
                 ⇧ Export
               </button>
@@ -32,7 +32,7 @@ export default function DiscountsPage() {
               {canManage && (
                 <button
                   type="button"
-                  className="rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white"
+                  className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white"
                 >
                   Create discount
                 </button>
@@ -47,7 +47,7 @@ export default function DiscountsPage() {
               <div className="flex h-14 items-center border-b border-slate-200">
                 <button
                   type="button"
-                  className="flex h-full items-center gap-2 px-5 text-sm font-medium text-[#161C2C]"
+                  className="flex h-full items-center gap-2 px-5 text-sm font-medium text-[#0B1020]"
                 >
                   All
                   <span>⌃</span>
@@ -98,7 +98,7 @@ export default function DiscountsPage() {
 
             {/* LEARN MORE */}
             <div className="pt-8 text-center">
-              <button type="button" className="text-sm font-medium text-[#161C2C] hover:underline">
+              <button type="button" className="text-sm font-medium text-[#0B1020] hover:underline">
                 Learn more about discounts
               </button>
             </div>

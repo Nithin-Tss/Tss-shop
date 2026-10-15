@@ -11,7 +11,7 @@ export default function CataloguesPage() {
   const handleCreateCatalogue = () => {};
 
   return (
-    <div className="min-h-screen bg-white text-[#161C2C]">
+    <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
 
       {/* BODY */}
@@ -20,9 +20,9 @@ export default function CataloguesPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex flex-1 flex-col bg-[#F7F8FA] px-6 lg:px-8 py-6 overflow-hidden">
+        <main className="flex flex-1 flex-col bg-[#F5F3FF] px-6 lg:px-8 py-6 overflow-hidden">
           {/* TITLE */}
-          <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+          <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
             <PageIcon name="catalogues" />
             Catalogues
           </h1>
@@ -31,9 +31,9 @@ export default function CataloguesPage() {
           {catalogues.length === 0 && (
             <section
               aria-labelledby="catalogues-empty-heading"
-              className="mt-5 flex flex-1 flex-col items-center justify-center rounded-2xl border border-[#D8DFE8]/80 bg-white px-6 py-14 text-center shadow-[0_1px_3px_rgba(22,28,44,0.05)] sm:py-16"
+              className="mt-5 flex flex-1 flex-col items-center justify-center rounded-2xl border border-[#DDD6FE]/80 bg-white px-6 py-14 text-center shadow-[0_1px_3px_rgba(22,28,44,0.05)] sm:py-16"
             >
-              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F7F8FA] text-[#161C2C] ring-1 ring-[#D8DFE8]">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F5F3FF] text-[#0B1020] ring-1 ring-[#DDD6FE]">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -53,12 +53,12 @@ export default function CataloguesPage() {
 
               <h2
                 id="catalogues-empty-heading"
-                className="mt-5 text-xl font-semibold text-[#161C2C]"
+                className="mt-5 text-xl font-semibold text-[#0B1020]"
               >
                 No catalogues yet
               </h2>
 
-              <p className="mt-1.5 max-w-[380px] text-sm text-[#53627E]">
+              <p className="mt-1.5 max-w-[380px] text-sm text-[#4C4F7A]">
                 Create your first catalogue to organize and showcase your products.
               </p>
 
@@ -66,7 +66,7 @@ export default function CataloguesPage() {
                 <button
                   type="button"
                   onClick={handleCreateCatalogue}
-                  className="mt-6 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#161C2C] px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(22,28,44,0.25)] hover:bg-[#252E45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#161C2C]/40 focus-visible:ring-offset-2 transition"
+                  className="mt-6 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#0B1020] px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(22,28,44,0.25)] hover:bg-[#1C2347] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/40 focus-visible:ring-offset-2 transition"
                 >
                   <span className="text-base leading-none">+</span>
                   Create Catalogue

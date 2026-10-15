@@ -514,7 +514,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     const isSelected = selected.path === item.path && selected.type === item.type;
     const rowClass = `group flex cursor-pointer items-center gap-1 py-[3px] pr-2 text-[14px] text-[#3b3b3b] ${
       isSelected
-        ? "border border-[#005fb8] bg-[#e4e6f1]"
+        ? "border border-[#6D28D9] bg-[#e4e6f1]"
         : "border border-transparent hover:bg-[#e8e8e8]"
     }`;
 
@@ -551,7 +551,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         onClick={() => openFile(item.path)}
       >
         <span className="truncate">{baseName(item.path)}</span>
-        {item.path in drafts && <span className="text-[10px] text-[#005fb8]">●</span>}
+        {item.path in drafts && <span className="text-[10px] text-[#6D28D9]">●</span>}
         <RowActions item={item} onRename={renameItem} onDelete={deleteItem} />
       </div>
     );
@@ -572,7 +572,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             <p className="text-red-600">{error}</p>
             <button
               onClick={load}
-              className="rounded border border-[#161C2C] px-4 py-1.5 hover:bg-[#161C2C] hover:text-white"
+              className="rounded border border-[#0B1020] px-4 py-1.5 hover:bg-[#0B1020] hover:text-white"
             >
               Retry
             </button>
@@ -603,7 +603,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               onClick={() => setPanel(b.id)}
               className={`flex h-12 w-12 items-center justify-center border-l-2 ${
                 panel === b.id
-                  ? "border-[#005fb8] text-[#3b3b3b]"
+                  ? "border-[#6D28D9] text-[#3b3b3b]"
                   : "border-transparent text-[#616161]"
               }`}
             >
@@ -682,7 +682,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search"
-                  className="w-full rounded border border-[#cecece] bg-white px-2 py-1 text-[13px] outline-none focus:border-[#005fb8]"
+                  className="w-full rounded border border-[#cecece] bg-white px-2 py-1 text-[13px] outline-none focus:border-[#6D28D9]"
                 />
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 text-[13px]">
@@ -721,13 +721,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                     }}
                     className={`flex cursor-pointer items-center gap-2 border-r border-[#e5e5e5] px-3 py-2 text-[13px] ${
                       active
-                        ? "border-t-2 border-t-[#005fb8] bg-white text-[#3b3b3b]"
+                        ? "border-t-2 border-t-[#6D28D9] bg-white text-[#3b3b3b]"
                         : "border-t-2 border-t-transparent text-[#6b6b6b]"
                     }`}
                   >
                     <span className="whitespace-nowrap">{baseName(path)}</span>
                     {path in drafts ? (
-                      <span className="text-[#005fb8]">●</span>
+                      <span className="text-[#6D28D9]">●</span>
                     ) : (
                       <button
                         className="rounded text-[#6b6b6b] hover:bg-[#e8e8e8]"
@@ -761,7 +761,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                   }
                   className={`rounded border px-2.5 py-1 ${
                     history?.name === activeSynced.name
-                      ? "border-[#161C2C] bg-[#161C2C] text-white"
+                      ? "border-[#0B1020] bg-[#0B1020] text-white"
                       : "border-[#cecece] hover:bg-[#e8e8e8]"
                   }`}
                   title="The last 20 versions of this file"
@@ -781,7 +781,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 onClick={() => setPreviewOpen((o) => !o)}
                 className={`rounded border px-2.5 py-1 ${
                   previewOpen
-                    ? "border-[#161C2C] bg-[#161C2C] text-white"
+                    ? "border-[#0B1020] bg-[#0B1020] text-white"
                     : "border-[#cecece] hover:bg-[#e8e8e8]"
                 }`}
               >
@@ -920,13 +920,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               <span className="font-bold uppercase text-[#3b3b3b]">Theme preview</span>
               <span className="flex gap-3">
                 <button
-                  className="hover:text-[#005fb8]"
+                  className="hover:text-[#6D28D9]"
                   onClick={() => setPreviewKey((k) => k + 1)}
                 >
                   Refresh
                 </button>
                 <a
-                  className="hover:text-[#005fb8]"
+                  className="hover:text-[#6D28D9]"
                   href={project.storefrontUrl}
                   onClick={(e) => {
                     e.preventDefault();
@@ -976,7 +976,7 @@ function RowActions({ item, onRename, onDelete }) {
     <span className="ml-auto hidden gap-2 text-[11px] text-[#6b6b6b] group-hover:flex">
       <button
         title="Rename"
-        className="hover:text-[#005fb8]"
+        className="hover:text-[#6D28D9]"
         onClick={(e) => {
           e.stopPropagation();
           onRename(item);

@@ -244,7 +244,7 @@ export default function AdminCustomers() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#161C2C]">
+    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -256,7 +256,7 @@ export default function AdminCustomers() {
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & TOP ACTION BAR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="customers" />
               Customers
             </h1>
@@ -265,7 +265,7 @@ export default function AdminCustomers() {
               {canManage && (
                 <Link
                   to="/admin/online-store/customers/new"
-                  className="flex items-center gap-2 rounded-lg bg-[#161C2C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#252E45] transition"
+                  className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
                 >
                   Add customer
                 </Link>
@@ -274,7 +274,7 @@ export default function AdminCustomers() {
           </div>
 
           {/* DESCRIBE YOUR SEGMENT BANNER */}
-          <div className="mb-5 rounded-2xl border border-[#E3E7ED] bg-white px-4 py-3 shadow-xs flex items-center justify-between cursor-pointer hover:bg-slate-50/70 transition">
+          <div className="mb-5 rounded-2xl border border-[#E4DEFB] bg-white px-4 py-3 shadow-xs flex items-center justify-between cursor-pointer hover:bg-slate-50/70 transition">
             <div className="flex items-center gap-3">
               <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-700 text-sm">
                 👓
@@ -285,17 +285,17 @@ export default function AdminCustomers() {
           </div>
 
           {/* CUSTOMERS TABLE CARD */}
-          <section className="rounded-2xl border border-[#E3E7ED] bg-white shadow-sm overflow-hidden">
+          <section className="rounded-2xl border border-[#E4DEFB] bg-white shadow-sm overflow-hidden">
             {/* SEARCH & CONTROLS HEADER */}
-            <div className="flex items-center justify-between gap-3 border-b border-[#E3E7ED] px-4 py-3">
-              <div className="flex items-center gap-2 w-full sm:w-80 h-9 rounded-lg border border-[#D8DFE8] bg-white px-3 text-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-[#E4DEFB] px-4 py-3">
+              <div className="flex items-center gap-2 w-full sm:w-80 h-9 rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm">
                 <span className="text-slate-400">⌕</span>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search customers"
-                  className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#161C2C] placeholder:text-slate-400"
+                  className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#0B1020] placeholder:text-slate-400"
                 />
                 {searchQuery && (
                   <button
@@ -311,7 +311,7 @@ export default function AdminCustomers() {
               <button
                 type="button"
                 title="Table columns"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D8DFE8] bg-white text-slate-600 hover:bg-[#F3F6FA] transition shrink-0"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-slate-600 hover:bg-[#F3F0FF] transition shrink-0"
               >
                 ▥
               </button>
@@ -319,15 +319,15 @@ export default function AdminCustomers() {
 
             {/* RESPONSIVE TABLE */}
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm text-[#161C2C]">
+              <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
                 <thead>
-                  <tr className="border-b border-[#E3E7ED] bg-[#FAFBFD] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
+                  <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
                     <th className="py-3.5 pl-5 pr-3 w-10">
                       <input
                         type="checkbox"
                         checked={allSelected}
                         onChange={handleSelectAll}
-                        className="h-4 w-4 rounded border-slate-300 accent-[#161C2C] cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
                       />
                     </th>
                     <th className="py-3.5 px-3">Customer name</th>
@@ -343,7 +343,7 @@ export default function AdminCustomers() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-[#E3E7ED]">
+                <tbody className="divide-y divide-[#E4DEFB]">
                   {loading ? (
                     // SKELETON LOADING
                     [...Array(6)].map((_, i) => (
@@ -381,7 +381,7 @@ export default function AdminCustomers() {
                         <tr
                           key={c.id}
                           className={`transition-colors whitespace-nowrap hover:bg-[#F9FAFC] ${
-                            isSelected ? "bg-[#F3F6FA]" : ""
+                            isSelected ? "bg-[#F3F0FF]" : ""
                           }`}
                         >
                           {/* Checkbox */}
@@ -390,7 +390,7 @@ export default function AdminCustomers() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelect(c.id)}
-                              className="h-4 w-4 rounded border-slate-300 accent-[#161C2C] cursor-pointer"
+                              className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
                             />
                           </td>
 
@@ -399,7 +399,7 @@ export default function AdminCustomers() {
                             <button
                               type="button"
                               onClick={() => handleSelectCustomer(c)}
-                              className="font-semibold text-slate-900 hover:text-blue-600 hover:underline cursor-pointer text-left"
+                              className="font-semibold text-slate-900 hover:text-violet-600 hover:underline cursor-pointer text-left"
                             >
                               {fullName}
                             </button>
@@ -468,7 +468,7 @@ export default function AdminCustomers() {
                           {canManage && (
                             <Link
                               to="/admin/online-store/customers/new"
-                              className="mt-3 px-4 py-2 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-slate-800 transition"
+                              className="mt-3 px-4 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-slate-800 transition"
                             >
                               Add customer
                             </Link>
@@ -604,7 +604,7 @@ export default function AdminCustomers() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-[#161C2C] disabled:opacity-50 text-white font-semibold"
+                  className="px-4 py-2 rounded-lg bg-[#0B1020] disabled:opacity-50 text-white font-semibold"
                 >
                   {saving ? "Saving..." : "Save customer"}
                 </button>
@@ -621,7 +621,7 @@ export default function AdminCustomers() {
             {/* Drawer Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#161C2C] text-white font-bold text-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B1020] text-white font-bold text-sm">
                   {[selectedCustomer.first_name?.[0], selectedCustomer.last_name?.[0]]
                     .filter(Boolean)
                     .join("") || "C"}
@@ -719,7 +719,7 @@ export default function AdminCustomers() {
                   <button
                     type="button"
                     onClick={handleOpenAddAddress}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161C2C] hover:bg-[#252E45] text-white text-xs font-semibold transition shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B1020] hover:bg-[#1C2347] text-white text-xs font-semibold transition shadow-xs"
                   >
                     <span>⊕</span>
                     <span>Add address</span>
@@ -806,7 +806,7 @@ export default function AdminCustomers() {
                                 <button
                                   type="button"
                                   onClick={() => handleSetDefaultAddress(addr)}
-                                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                                  className="text-xs font-semibold text-violet-600 hover:text-violet-800 hover:underline"
                                 >
                                   Set as default
                                 </button>
@@ -853,7 +853,7 @@ export default function AdminCustomers() {
                     <button
                       type="button"
                       onClick={handleOpenAddAddress}
-                      className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#161C2C] text-white text-xs font-semibold hover:bg-slate-800 transition"
+                      className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-slate-800 transition"
                     >
                       <span>⊕</span>
                       <span>Add address</span>

@@ -30,7 +30,7 @@ export default function Blog() {
       {/* Hero */}
       <section className="bg-[#071A2B] px-6 py-20 text-white">
         <div className="mx-auto max-w-6xl">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-[#D98324]">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-[#7C3AED]">
             TSS Shop Blog
           </p>
 
@@ -49,7 +49,7 @@ export default function Blog() {
       <section className="px-6 py-16">
         <div className="mx-auto max-w-6xl">
           <div className="mb-10">
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#D98324]">
+            <p className="text-sm font-semibold uppercase tracking-widest text-[#7C3AED]">
               Latest articles
             </p>
 
@@ -67,7 +67,7 @@ export default function Blog() {
                 </div>
 
                 <div className="p-6">
-                  <p className="text-sm font-semibold text-[#D98324]">{post.category}</p>
+                  <p className="text-sm font-semibold text-[#7C3AED]">{post.category}</p>
 
                   <h3 className="mt-3 text-xl font-bold leading-7 text-gray-900">{post.title}</h3>
 
@@ -76,7 +76,7 @@ export default function Blog() {
                   <div className="mt-6 flex items-center justify-between">
                     <span className="text-xs text-gray-500">{post.date}</span>
 
-                    <Link to="#" className="text-sm font-semibold text-[#D98324] hover:underline">
+                    <Link to="#" className="text-sm font-semibold text-[#7C3AED] hover:underline">
                       Read more →
                     </Link>
                   </div>

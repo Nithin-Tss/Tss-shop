@@ -27,10 +27,10 @@ const lineIcon = {
 };
 
 const headerButton =
-  "group inline-flex h-9 items-center gap-2 rounded-lg border border-[#D8DFE8] bg-white px-3.5 text-sm font-medium text-[#161C2C] transition-colors duration-200 hover:border-[#141b2d] hover:bg-[#f1f3f7] hover:text-[#141b2d] active:bg-[#e7ebf2] focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[#141b2d]";
+  "group inline-flex h-9 items-center gap-2 rounded-lg border border-[#DDD6FE] bg-white px-3.5 text-sm font-medium text-[#0B1020] transition-colors duration-200 hover:border-[#0B1020] hover:bg-[#f1f3f7] hover:text-[#0B1020] active:bg-[#e7ebf2] focus:outline-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[#0B1020]";
 
 const headerButtonIcon =
-  "h-4 w-4 text-[#53627E] transition-colors duration-200 group-hover:text-[#141b2d]";
+  "h-4 w-4 text-[#4C4F7A] transition-colors duration-200 group-hover:text-[#0B1020]";
 
 export default function OnlineStorePage() {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ export default function OnlineStorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#161C2C]">
+    <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
 
       {/* BODY */}
@@ -62,7 +62,7 @@ export default function OnlineStorePage() {
             <button
               type="button"
               onClick={goBack}
-              className="-ml-2 inline-flex self-start items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[#53627E] transition hover:bg-[#F3F5F8] hover:text-[#161C2C]"
+              className="-ml-2 inline-flex self-start items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[#4C4F7A] transition hover:bg-[#F3F5F8] hover:text-[#0B1020]"
             >
               <svg {...lineIcon} className="h-4 w-4">
                 <path d="M19 12H5M11 6l-6 6 6 6" />
@@ -73,11 +73,11 @@ export default function OnlineStorePage() {
             {/* TITLE */}
             <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <h1 className="flex items-center gap-2.5 text-[26px] font-semibold leading-tight tracking-tight text-[#161C2C] sm:text-[28px]">
+                <h1 className="flex items-center gap-2.5 text-[26px] font-semibold leading-tight tracking-tight text-[#0B1020] sm:text-[28px]">
                   <PageIcon name="themes" />
                   Create your custom theme
                 </h1>
-                <p className="mt-1.5 text-sm text-[#53627E] sm:text-[15px]">
+                <p className="mt-1.5 text-sm text-[#4C4F7A] sm:text-[15px]">
                   Choose a template to get started. You can customize it later with your brand,
                   products and style.
                 </p>
@@ -117,8 +117,8 @@ export default function OnlineStorePage() {
                       onClick={() => setSelectedCategory(category)}
                       className={`h-8 whitespace-nowrap rounded-full px-3.5 text-[13px] font-medium transition ${
                         active
-                          ? "bg-[#141b2d] text-white"
-                          : "border border-[#E3E7ED] bg-white text-[#53627E] hover:border-[#C9D1DD] hover:bg-[#F7F8FA] hover:text-[#161C2C]"
+                          ? "bg-[#0B1020] text-white"
+                          : "border border-[#E4DEFB] bg-white text-[#4C4F7A] hover:border-[#C9D1DD] hover:bg-[#F5F3FF] hover:text-[#0B1020]"
                       }`}
                     >
                       {category}
@@ -133,7 +133,7 @@ export default function OnlineStorePage() {
               {/* Illustration */}
               <div className="relative">
                 <div className="w-[234px] overflow-hidden rounded-xl border border-[#E5E9EF] bg-white">
-                  <div className="flex h-6 items-center gap-1.5 bg-[#141b2d] px-3">
+                  <div className="flex h-6 items-center gap-1.5 bg-[#0B1020] px-3">
                     <span className="h-2 w-2 rounded-full bg-white/80" />
                     <span className="h-2 w-2 rounded-full bg-white/80" />
                     <span className="h-2 w-2 rounded-full bg-white/80" />
@@ -141,7 +141,7 @@ export default function OnlineStorePage() {
 
                   <div className="p-4">
                     <div className="flex gap-4">
-                      <div className="flex h-16 w-[72px] items-center justify-center rounded-md bg-[#EEF1F6] text-[#8A94A8]">
+                      <div className="flex h-16 w-[72px] items-center justify-center rounded-md bg-[#EDE9FE] text-[#8B8FB8]">
                         <svg {...lineIcon} className="h-6 w-6">
                           <rect x="3" y="4" width="18" height="16" rx="2" />
                           <circle cx="9" cy="10" r="2" />
@@ -161,18 +161,18 @@ export default function OnlineStorePage() {
                   </div>
                 </div>
 
-                <span className="absolute -bottom-4 -right-5 flex h-[52px] w-[52px] items-center justify-center rounded-xl border-2 border-white bg-[#141b2d] text-[22px] font-bold text-white">
+                <span className="absolute -bottom-4 -right-5 flex h-[52px] w-[52px] items-center justify-center rounded-xl border-2 border-white bg-[#0B1020] text-[22px] font-bold text-white">
                   S
                 </span>
               </div>
 
-              <h2 className="mt-9 text-[22px] font-semibold text-[#161C2C] sm:text-2xl">Store</h2>
+              <h2 className="mt-9 text-[22px] font-semibold text-[#0B1020] sm:text-2xl">Store</h2>
 
-              <p className="mt-2 max-w-sm text-[15px] font-normal leading-relaxed text-[#53627E]">
+              <p className="mt-2 max-w-sm text-[15px] font-normal leading-relaxed text-[#4C4F7A]">
                 In future, we will add some photos here for you to choose from.
               </p>
 
-              <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-[#EEF1F6] px-3.5 py-1.5 text-[13px] font-medium text-[#53627E]">
+              <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-[#EDE9FE] px-3.5 py-1.5 text-[13px] font-medium text-[#4C4F7A]">
                 <svg {...lineIcon} className="h-3.5 w-3.5">
                   <circle cx="12" cy="12" r="9" />
                   <path d="M12 7v5l3 2" />
@@ -189,7 +189,7 @@ export default function OnlineStorePage() {
                 type="button"
                 disabled={!selectedTheme}
                 title={selectedTheme ? undefined : "Select a theme to continue"}
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#141b2d] px-5 text-sm font-semibold text-white transition hover:bg-[#252E45] disabled:cursor-not-allowed disabled:bg-[#C5CCD8]"
+                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#0B1020] px-5 text-sm font-semibold text-white transition hover:bg-[#1C2347] disabled:cursor-not-allowed disabled:bg-[#C5CCD8]"
               >
                 Continue
                 <svg {...lineIcon} strokeWidth="2" className="h-4 w-4">

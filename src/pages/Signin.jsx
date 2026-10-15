@@ -109,7 +109,7 @@ export default function SignInPage() {
 
           {/* Frontend Message */}
           {message && (
-            <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-violet-700">
               {message}
             </div>
           )}
@@ -132,7 +132,7 @@ export default function SignInPage() {
                 className={`w-full rounded-lg border px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
                   errors.email
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                    : "border-slate-300 focus:border-blue-500 focus:ring-blue-100"
+                    : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
                 }`}
               />
 
@@ -157,14 +157,14 @@ export default function SignInPage() {
                   className={`w-full rounded-lg border px-4 py-3 pr-20 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
                     errors.password
                       ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-100"
+                      : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
                   }`}
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword((previousValue) => !previousValue)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-violet-600 hover:text-violet-700"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -181,7 +181,7 @@ export default function SignInPage() {
                   name="rememberMe"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="h-4 w-4 accent-blue-600"
+                  className="h-4 w-4 accent-violet-600"
                 />
 
                 <span className="text-sm text-slate-600">Remember me</span>
@@ -189,7 +189,7 @@ export default function SignInPage() {
 
               <Link
                 to="/auth/forgot-password"
-                className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                className="text-sm font-medium text-violet-600 hover:text-violet-700 hover:underline"
               >
                 Forgot Password?
               </Link>
@@ -199,7 +199,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-7 w-full rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-7 w-full rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Signing In..." : "Sign In"}
             </button>
@@ -211,7 +211,7 @@ export default function SignInPage() {
 
             <Link
               to="/auth/signup"
-              className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-blue-600 px-5 py-3 font-semibold text-blue-600 transition hover:bg-blue-50"
+              className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-violet-600 px-5 py-3 font-semibold text-violet-600 transition hover:bg-blue-50"
             >
               Sign Up
             </Link>
