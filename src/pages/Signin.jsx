@@ -81,9 +81,7 @@ export default function SignInPage() {
       const next = new URLSearchParams(window.location.search).get("next");
       const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
       const target =
-        safeNext && safeNext.startsWith("/admin")
-          ? safeNext
-          : "/admin/online-store/home";
+        safeNext && safeNext.startsWith("/admin") ? safeNext : "/admin/online-store/home";
 
       navigate(target);
     } finally {
