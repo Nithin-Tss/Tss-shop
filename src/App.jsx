@@ -60,6 +60,7 @@ export default function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/account/orders" element={<OrderHistory />} />
           <Route path="/orders" element={<OrderHistory />} />
+          <Route path="/admin" element={<Navigate to="/admin/online-store/home" replace />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/online-store/home" element={<AdminHome />} />
           <Route path="/admin/online-store/settings" element={<AdminSettings />} />

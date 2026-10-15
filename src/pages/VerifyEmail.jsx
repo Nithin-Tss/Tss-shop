@@ -77,10 +77,10 @@ export default function VerifyEmail() {
             <p className="font-semibold text-green-800">Email verified</p>
             <p className="mt-1 text-sm text-green-700">Thanks! Your email address is confirmed.</p>
             <Link
-              to={signedIn ? "/profile" : "/auth/signin"}
+              to={signedIn ? "/" : "/auth/signin"}
               className="mt-3 inline-block text-sm font-semibold text-green-800 underline"
             >
-              {signedIn ? "Go to your profile" : "Sign in"}
+              {signedIn ? "Go to store" : "Sign in"}
             </Link>
           </div>
         )}
@@ -104,10 +104,10 @@ export default function VerifyEmail() {
               </button>
             ) : (
               <p className="mt-3 text-sm text-red-700">
-                <Link to="/auth/signin?next=/profile" className="font-semibold underline">
+                <Link to="/auth/signin" className="font-semibold underline">
                   Sign in
                 </Link>{" "}
-                to get a new link from your profile.
+                to get a new link.
               </p>
             )}
 

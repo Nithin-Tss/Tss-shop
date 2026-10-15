@@ -141,8 +141,8 @@ export default function SignUpPage() {
       }
 
       signIn(result.data);
-      setMessage("Account created. Let's set up your store...");
-      navigate("/auth/onboarding");
+      setMessage("Account created. Welcome to your store!");
+      navigate("/");
     } catch (error) {
       console.error("Signup failed:", error);
 

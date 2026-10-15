@@ -74,15 +74,18 @@ export default function SignInPage() {
         return;
       }
 
-      // New accounts set up a store first; existing ones go back to the page
-      // that sent them here (?next=, same-site paths only) or to their admin
-      const next = new URLSearchParams(window.location.search).get("next");
-      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
-
       signIn(result.data);
       setMessage("Signed in. Redirecting...");
 
-      navigate(safeNext || "/");
+      // When signing in with existing account, redirect to Admin page
+      const next = new URLSearchParams(window.location.search).get("next");
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+      const target =
+        safeNext && safeNext.startsWith("/admin")
+          ? safeNext
+          : "/admin/online-store/home";
+
+      navigate(target);
     } finally {
       setIsSubmitting(false);
     }
