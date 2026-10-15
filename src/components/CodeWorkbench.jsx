@@ -25,6 +25,15 @@ const EXT = ".liquid";
 // They are generated from what the customizer saved, and saving one updates the customizer.
 const isSettingsFile = (path) =>
   path === "config/settings_data.json" || /^templates\/[^/]+\.json$/.test(path);
+// What a new templates/page.<name>.liquid starts with
+const PAGE_TEMPLATE_STARTER = [
+  "{%- comment -%}",
+  "  Page template. `sections` is the HTML of this template's sections;",
+  "  `page` is the page being shown. Add your own Liquid around {{ sections }}.",
+  "{%- endcomment -%}",
+  "{{ sections }}",
+  "",
+].join("\n");
 // Pictures uploaded in the customizer (kept in the database), listed read-only
 const IMAGES_FILE = "assets/images.json";
 const languageOf = (path) => (path.toLowerCase().endsWith(".json") ? "json" : "liquid");
@@ -435,11 +444,19 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     const dir = targetFolder();
     const path = dir ? `${dir}/${name}` : name;
     if (path in project.files) return window.alert("A file with that name already exists.");
-    const saved = await run(() => saveThemeFile(path, ""));
+    // templates/page.<name>.liquid is a new page template: it starts with the basics, and shows in the
+    // customizer's page list (with its templates/page.<name>.json) once saved
+    const isPageTemplate = /^templates\/page\.[a-z0-9]+(-[a-z0-9]+)*\.liquid$/.test(path);
+    const content = isPageTemplate ? PAGE_TEMPLATE_STARTER : "";
+    const saved = await run(() => saveThemeFile(path, content));
     if (!saved) return;
-    setProject((p) => ({ ...p, files: { ...p.files, [path]: "" } }));
+    setProject((p) => ({ ...p, files: { ...p.files, [path]: content } }));
     if (dir) setExpanded((e) => new Set(e).add(dir));
     openFile(path);
+    if (isPageTemplate) {
+      refreshRef.current();
+      announceThemeChange("settings");
+    }
   }
 
   async function newFolder() {
@@ -501,6 +518,11 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     });
     setSelected({ type: "root", path: "" });
     setPreviewKey((k) => k + 1);
+    // A deleted page template takes its templates/page.<name>.json with it
+    if (/^templates\/page\.[^/]+\.liquid$/.test(item.path)) {
+      refreshRef.current();
+      announceThemeChange("settings");
+    }
   }
 
   function onKeyDown(e) {

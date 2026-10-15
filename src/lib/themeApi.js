@@ -85,7 +85,17 @@ export function deleteBlogPost(id) {
   return apiRequest(`${BASE}/posts/${id}/`, { method: "DELETE" });
 }
 
-// Pages -> [{ id, title, handle, body, status: "visible" | "hidden", seo_title, seo_description, published_at, url }]
+// Page templates -> { templates: [{ key: "page" | "page.contact", label, path, liquid_path }] }
+export function listPageTemplates() {
+  return apiRequest(`${BASE}/page-templates/`);
+}
+
+// A new template (a copy of Page): templates/page.<name>.liquid and .json -> { key, templates }
+export function createPageTemplate(name) {
+  return apiRequest(`${BASE}/page-templates/`, { method: "POST", body: { name } });
+}
+
+// Pages -> [{ id, title, handle, body, status: "visible" | "hidden", template, seo_title, seo_description, published_at, url }]
 export function listStorePages() {
   return apiRequest(`${BASE}/pages/`);
 }
