@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import LinkField from "@/components/LinkField";
+import { apiRequest } from "@/lib/api";
 import {
   deleteMenu,
   deleteUrlRedirect,
+  listBlogPosts,
   listMenus,
+  listStorePages,
   listUrlRedirects,
   saveMenu,
   saveUrlRedirect,
@@ -18,6 +22,26 @@ export default function AdminMenus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+
+  // What a link can point at: the store's collections, products, pages and blog posts
+  const [linkData, setLinkData] = useState({ collections: [], products: [], pages: [], posts: [] });
+
+  useEffect(() => {
+    const safe = (promise) => promise.catch(() => []);
+    Promise.all([
+      safe(apiRequest("/api/v1/catalog/collections/")),
+      safe(apiRequest("/api/v1/catalog/products/")),
+      safe(listStorePages()),
+      safe(listBlogPosts()),
+    ]).then(([collections, products, pages, posts]) =>
+      setLinkData({
+        collections,
+        products,
+        pages: pages.filter((p) => p.status === "visible"),
+        posts: posts.filter((p) => p.status === "published"),
+      })
+    );
+  }, []);
 
   // Edit / Create Menu mode: null (table view), or { id?, name, handle, items: [] }
   const [editingMenu, setEditingMenu] = useState(null);
@@ -510,12 +534,12 @@ export default function AdminMenus() {
 
                           {/* Item Link */}
                           <div className="flex-1 min-w-0">
-                            <input
-                              type="text"
+                            <LinkField
                               value={item.url}
-                              onChange={(e) => handleChangeItem(idx, "url", e.target.value)}
-                              placeholder="Destination URL (e.g. /, /collections/all)"
-                              className="w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-[#0B1020]"
+                              onChange={(url) => handleChangeItem(idx, "url", url)}
+                              {...linkData}
+                              label="Link"
+                              compact
                             />
                           </div>
 
@@ -563,15 +587,15 @@ export default function AdminMenus() {
                                   placeholder="Sub-link label"
                                   className="flex-1 rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
                                 />
-                                <input
-                                  type="text"
-                                  value={child.url}
-                                  onChange={(e) =>
-                                    handleChangeItem(idx, "url", e.target.value, cIdx)
-                                  }
-                                  placeholder="Sub-link URL"
-                                  className="flex-1 rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
-                                />
+                                <div className="min-w-0 flex-1">
+                                  <LinkField
+                                    value={child.url}
+                                    onChange={(url) => handleChangeItem(idx, "url", url, cIdx)}
+                                    {...linkData}
+                                    label="Sub-link"
+                                    compact
+                                  />
+                                </div>
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveItem(idx, cIdx)}
