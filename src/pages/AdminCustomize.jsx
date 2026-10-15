@@ -28,6 +28,7 @@ import {
   subscribeThemeEvents,
   SYNC_CLIENT,
   listBlogPosts,
+  listStorePages,
 } from "@/lib/themeApi";
 
 import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
@@ -38,6 +39,7 @@ const PAGE_LABELS = {
   collection: "Collection page",
   blog: "Blog page",
   article: "Article page",
+  page: "Page",
 };
 
 // Each page's own main section: selected when a store link opens that page in the preview
@@ -46,6 +48,7 @@ const MAIN_SECTION = {
   collection: "main-collection",
   blog: "main-blog",
   article: "main-article",
+  page: "main-page",
 };
 
 const inputClass =
@@ -220,6 +223,11 @@ export default function AdminCustomizePage() {
 
   const [sampleArticle, setSampleArticle] = useState(() => startParams.get("article") || "");
 
+  // Visible store pages (About us, ...), and the one the Page preview shows (its handle)
+  const [storePages, setStorePages] = useState([]);
+
+  const [samplePage, setSamplePage] = useState(() => startParams.get("handle") || "");
+
   const [products, setProducts] = useState([]);
 
   const [page, setPage] = useState(() =>
@@ -363,6 +371,29 @@ export default function AdminCustomizePage() {
   const sampleArticleRef = useRef("");
 
   sampleArticleRef.current = sampleArticle;
+
+  const samplePageRef = useRef("");
+
+  samplePageRef.current = samplePage;
+
+  // Pages written in Pages; the preview keeps its page while that page is still visible
+  const loadStorePages = useCallback(
+    () =>
+      listStorePages()
+        .then((all) => {
+          const visible = all.filter((p) => p.status === "visible");
+          setStorePages(visible);
+          setSamplePage((current) =>
+            visible.some((p) => p.handle === current) ? current : visible[0]?.handle || ""
+          );
+        })
+        .catch(() => setStorePages([])),
+    []
+  );
+
+  useEffect(() => {
+    loadStorePages();
+  }, [loadStorePages]);
 
   // Posts written in Blog posts; the article preview keeps its post while that post is still published
   const loadBlogPosts = useCallback(
@@ -522,8 +553,10 @@ export default function AdminCustomizePage() {
 
     if (page === "article") return sampleArticle ? `${base}/blog/${sampleArticle}` : "";
 
+    if (page === "page") return samplePage ? `${base}/pages/${samplePage}` : "";
+
     return `${base}/`;
-  }, [store, page, sampleProductId, sampleArticle]);
+  }, [store, page, sampleProductId, sampleArticle, samplePage]);
 
   // ---------------- Live preview (the page being edited) ----------------
   // The preview is rendered once; afterwards only the sections that changed are rendered
@@ -535,6 +568,7 @@ export default function AdminCustomizePage() {
       page: pageRef.current,
       product: pageRef.current === "product" ? sampleProductRef.current || "" : "",
       article: pageRef.current === "article" ? sampleArticleRef.current : "",
+      handle: pageRef.current === "page" ? samplePageRef.current : "",
     };
   }
 
@@ -904,6 +938,12 @@ export default function AdminCustomizePage() {
       setPreviewKey((k) => k + 1);
       return;
     }
+    // A page was saved or deleted (Pages screen)
+    if (kind === "pages") {
+      await loadStorePages();
+      setPreviewKey((k) => k + 1);
+      return;
+    }
     if (kind !== "settings") {
       setPreviewKey((k) => k + 1);
       return;
@@ -1264,7 +1304,7 @@ export default function AdminCustomizePage() {
   // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed
   useEffect(() => {
     if (status === "ready") engineRef.current.renderFull();
-  }, [status, page, previewKey, sampleArticle, sampleProductId]);
+  }, [status, page, previewKey, sampleArticle, sampleProductId, samplePage]);
 
   // The address remembers the page, its product or post, and the open section (a refresh shows them again)
   useEffect(() => {
@@ -1273,6 +1313,7 @@ export default function AdminCustomizePage() {
     put("page", page === "index" ? "" : page);
     put("product", page === "product" ? sampleProductId : "");
     put("article", page === "article" ? sampleArticle : "");
+    put("handle", page === "page" ? samplePage : "");
     put("section", selected);
     const query = params.toString();
     window.history.replaceState(
@@ -1280,7 +1321,7 @@ export default function AdminCustomizePage() {
       "",
       `${window.location.pathname}${query ? `?${query}` : ""}`
     );
-  }, [page, sampleProductId, sampleArticle, selected]);
+  }, [page, sampleProductId, sampleArticle, samplePage, selected]);
 
   // A store link followed in the preview ("/products/<id>", "/collections/all", "/blog/<handle>", "/"):
   // open that page's own template here, with Edit mode on and its main section (e.g. Product information)
@@ -1291,6 +1332,7 @@ export default function AdminCustomizePage() {
     if (first === "products" && second) next = "product";
     else if (first === "collections") next = "collection";
     else if (first === "blog") next = second && !third ? "article" : "blog";
+    else if (first === "pages" && second) next = "page";
     if (!dataRef.current?.templates[next]) return;
 
     setBackStack((stack) => [
@@ -1300,10 +1342,12 @@ export default function AdminCustomizePage() {
         selected: selectedRef.current,
         product: sampleProductRef.current,
         article: sampleArticleRef.current,
+        handle: samplePageRef.current,
       },
     ]);
     if (next === "product") setSampleProductId(second);
     if (next === "article") setSampleArticle(second);
+    if (next === "page") setSamplePage(second);
 
     const template = dataRef.current.templates[next];
     const main =
@@ -1321,6 +1365,7 @@ export default function AdminCustomizePage() {
     setBackStack((stack) => stack.slice(0, -1));
     if (previous.product) setSampleProductId(previous.product);
     if (previous.article) setSampleArticle(previous.article);
+    if (previous.handle) setSamplePage(previous.handle);
     setPage(previous.page);
     setAdding(false);
     setSelected(
@@ -2023,6 +2068,22 @@ export default function AdminCustomizePage() {
                   aria-label="Post to preview"
                 >
                   {blogPosts.map((p) => (
+                    <option key={p.id} value={p.handle}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {/* The Page page previews one store page at a time: pick which */}
+              {page === "page" && storePages.length > 0 && (
+                <select
+                  value={samplePage}
+                  onChange={(e) => setSamplePage(e.target.value)}
+                  className="h-9 max-w-[200px] rounded-lg border border-[#D8DFE8] bg-white px-2 text-sm"
+                  aria-label="Page to preview"
+                >
+                  {storePages.map((p) => (
                     <option key={p.id} value={p.handle}>
                       {p.title}
                     </option>
@@ -2795,7 +2856,7 @@ export default function AdminCustomizePage() {
                 <span>
                   {previewError
                     ? `Preview not updated: ${previewError}`
-                    : `${(page === "blog" || page === "article") && !blogPosts.length ? "Sample posts until you publish one. " : ""}${
+                    : `${(page === "blog" || page === "article") && !blogPosts.length ? "Sample posts until you publish one. " : ""}${page === "page" && !storePages.length ? "A sample page until you add one in Pages. " : ""}${
                         dirty
                           ? editMode
                             ? "Live preview. Changes save automatically. Click or drag sections here to edit them."

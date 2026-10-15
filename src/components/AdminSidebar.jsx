@@ -255,10 +255,9 @@ const menuGroups = [
   },
 ];
 
-// Pages has no admin screen yet, so it isn't a link
 const onlineStoreItems = [
   { icon: "themes", label: "Themes", href: BASE, exact: true, permission: "themes.view" },
-  { icon: "pages", label: "Pages" },
+  { icon: "pages", label: "Pages", href: `${BASE}/pages`, permission: "themes.manage" },
   { icon: "blog", label: "Blog Posts", href: `${BASE}/blog-posts`, permission: "themes.manage" },
 ];
 

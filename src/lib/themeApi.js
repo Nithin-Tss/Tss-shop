@@ -52,12 +52,21 @@ export function saveThemeCustomizer(data) {
 // `article`: the handle of the post the article page shows
 export function previewTheme(
   data,
-  { scroll = 0, selected = "", section = "", page = "index", product = "", article = "" } = {}
+  {
+    scroll = 0,
+    selected = "",
+    section = "",
+    page = "index",
+    product = "",
+    article = "",
+    handle = "",
+  } = {}
 ) {
   const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected, page });
   if (section) query.set("section", section);
   if (product) query.set("product", product);
   if (article) query.set("article", article);
+  if (handle) query.set("handle", handle);
   return apiRequest(`${BASE}/preview/?${query}`, { method: "POST", body: data });
 }
 
@@ -74,6 +83,21 @@ export function saveBlogPost(id, data) {
 
 export function deleteBlogPost(id) {
   return apiRequest(`${BASE}/posts/${id}/`, { method: "DELETE" });
+}
+
+// Pages -> [{ id, title, handle, body, status: "visible" | "hidden", seo_title, seo_description, published_at, url }]
+export function listStorePages() {
+  return apiRequest(`${BASE}/pages/`);
+}
+
+export function saveStorePage(id, data) {
+  return id
+    ? apiRequest(`${BASE}/pages/${id}/`, { method: "PATCH", body: data })
+    : apiRequest(`${BASE}/pages/`, { method: "POST", body: data });
+}
+
+export function deleteStorePage(id) {
+  return apiRequest(`${BASE}/pages/${id}/`, { method: "DELETE" });
 }
 
 // Save only what changed: { settings?, templates?: { index: { order?, sections?: { id: section | null } } } }
