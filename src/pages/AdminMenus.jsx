@@ -13,8 +13,6 @@ import {
 // Displays the Menus table matching the VENDRA admin UI, with dynamic backend
 // integration for Menus, Menu Items, and URL Redirects.
 
-const EMPTY_ITEM = { title: "", url: "", children: [] };
-
 export default function AdminMenus() {
   const [menus, setMenus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,8 +47,22 @@ export default function AdminMenus() {
     }
   };
 
+  // Initial load: `loading` already starts true, so no synchronous setState here.
   useEffect(() => {
-    fetchMenus();
+    let cancelled = false;
+    listMenus()
+      .then((data) => {
+        if (!cancelled) setMenus(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message || "Failed to load menus.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Open Create Menu form
@@ -265,7 +277,11 @@ export default function AdminMenus() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#161C2C]">
               <PageIcon name="menus" />
-              {editingMenu ? (editingMenu.isNew ? "Create menu" : `Edit ${editingMenu.name}`) : "Menus"}
+              {editingMenu
+                ? editingMenu.isNew
+                  ? "Create menu"
+                  : `Edit ${editingMenu.name}`
+                : "Menus"}
             </h1>
 
             {!editingMenu && (
@@ -332,9 +348,7 @@ export default function AdminMenus() {
                           <span className="text-[13px] text-slate-400">⇅</span>
                         </div>
                       </th>
-                      <th className="px-5 py-3.5 font-semibold text-slate-700">
-                        Menu items
-                      </th>
+                      <th className="px-5 py-3.5 font-semibold text-slate-700">Menu items</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E3E7ED]">
@@ -369,7 +383,8 @@ export default function AdminMenus() {
                         <td colSpan={2} className="px-5 py-12 text-center text-slate-500">
                           <p className="text-base font-medium">No menus found</p>
                           <p className="mt-1 text-sm text-slate-400">
-                            Create your first menu to define links for your header, footer, or navigation.
+                            Create your first menu to define links for your header, footer, or
+                            navigation.
                           </p>
                           <button
                             type="button"
@@ -407,7 +422,10 @@ export default function AdminMenus() {
                   </div>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-slate-700">
-                      Handle <span className="text-xs text-slate-400 font-normal">(optional identifier)</span>
+                      Handle{" "}
+                      <span className="text-xs text-slate-400 font-normal">
+                        (optional identifier)
+                      </span>
                     </label>
                     <input
                       type="text"
@@ -518,7 +536,13 @@ export default function AdminMenus() {
                             onClick={() => handleRemoveItem(idx)}
                             className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
                           >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg
+                              className="w-4 h-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
                               <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             </svg>
                           </button>
@@ -533,14 +557,18 @@ export default function AdminMenus() {
                                 <input
                                   type="text"
                                   value={child.title}
-                                  onChange={(e) => handleChangeItem(idx, "title", e.target.value, cIdx)}
+                                  onChange={(e) =>
+                                    handleChangeItem(idx, "title", e.target.value, cIdx)
+                                  }
                                   placeholder="Sub-link label"
                                   className="flex-1 rounded-lg border border-[#D8DFE8] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#161C2C]"
                                 />
                                 <input
                                   type="text"
                                   value={child.url}
-                                  onChange={(e) => handleChangeItem(idx, "url", e.target.value, cIdx)}
+                                  onChange={(e) =>
+                                    handleChangeItem(idx, "url", e.target.value, cIdx)
+                                  }
                                   placeholder="Sub-link URL"
                                   className="flex-1 rounded-lg border border-[#D8DFE8] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#161C2C]"
                                 />
@@ -549,7 +577,13 @@ export default function AdminMenus() {
                                   onClick={() => handleRemoveItem(idx, cIdx)}
                                   className="p-1 text-slate-400 hover:text-rose-600"
                                 >
-                                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <svg
+                                    className="w-3.5 h-3.5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                  >
                                     <path d="M18 6 6 18M6 6l12 12" />
                                   </svg>
                                 </button>
@@ -612,7 +646,13 @@ export default function AdminMenus() {
                     onClick={() => setShowRedirectsModal(false)}
                     className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
                   >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      className="w-5 h-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M18 6 6 18M6 6l12 12" />
                     </svg>
                   </button>
@@ -627,7 +667,10 @@ export default function AdminMenus() {
                   )}
 
                   {/* Add / Edit Redirect Form */}
-                  <form onSubmit={handleSaveRedirect} className="rounded-xl border border-slate-200 bg-[#FAFBFD] p-4 space-y-3">
+                  <form
+                    onSubmit={handleSaveRedirect}
+                    className="rounded-xl border border-slate-200 bg-[#FAFBFD] p-4 space-y-3"
+                  >
                     <p className="text-xs font-semibold text-slate-700">
                       {editingRedirect ? "Edit URL redirect" : "Create new URL redirect"}
                     </p>
@@ -640,7 +683,9 @@ export default function AdminMenus() {
                           type="text"
                           required
                           value={redirectForm.path}
-                          onChange={(e) => setRedirectForm({ ...redirectForm, path: e.target.value })}
+                          onChange={(e) =>
+                            setRedirectForm({ ...redirectForm, path: e.target.value })
+                          }
                           placeholder="/old-page-path"
                           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-[#161C2C]"
                         />
@@ -653,7 +698,9 @@ export default function AdminMenus() {
                           type="text"
                           required
                           value={redirectForm.target}
-                          onChange={(e) => setRedirectForm({ ...redirectForm, target: e.target.value })}
+                          onChange={(e) =>
+                            setRedirectForm({ ...redirectForm, target: e.target.value })
+                          }
                           placeholder="/new-page-path or https://..."
                           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-[#161C2C]"
                         />
@@ -677,7 +724,11 @@ export default function AdminMenus() {
                         disabled={savingRedirect}
                         className="rounded-lg bg-[#161C2C] px-3.5 py-1 text-xs font-semibold text-white hover:bg-[#252E45] disabled:opacity-50"
                       >
-                        {savingRedirect ? "Saving..." : editingRedirect ? "Update redirect" : "Add redirect"}
+                        {savingRedirect
+                          ? "Saving..."
+                          : editingRedirect
+                            ? "Update redirect"
+                            : "Add redirect"}
                       </button>
                     </div>
                   </form>
@@ -688,7 +739,9 @@ export default function AdminMenus() {
                       Existing redirects ({redirects.length})
                     </h3>
                     {loadingRedirects ? (
-                      <p className="text-xs text-slate-400 py-4 text-center">Loading redirects...</p>
+                      <p className="text-xs text-slate-400 py-4 text-center">
+                        Loading redirects...
+                      </p>
                     ) : redirects.length === 0 ? (
                       <p className="text-xs text-slate-400 py-6 text-center border border-dashed border-slate-200 rounded-xl">
                         No URL redirects configured yet.
@@ -701,7 +754,9 @@ export default function AdminMenus() {
                             className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 text-xs"
                           >
                             <div className="min-w-0 pr-3">
-                              <span className="font-mono font-medium text-slate-900">{red.path}</span>
+                              <span className="font-mono font-medium text-slate-900">
+                                {red.path}
+                              </span>
                               <span className="mx-2 text-slate-400">→</span>
                               <span className="font-mono text-slate-600">{red.target}</span>
                             </div>

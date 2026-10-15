@@ -330,9 +330,12 @@ function MenuItem({ item, path }) {
   const active = matches(path, item);
   const [open, setOpen] = useState(childActive);
 
-  useEffect(() => {
+  // Auto-expand when a child becomes active (adjust state during render, not in an effect).
+  const [prevChildActive, setPrevChildActive] = useState(childActive);
+  if (childActive !== prevChildActive) {
+    setPrevChildActive(childActive);
     if (childActive) setOpen(true);
-  }, [childActive]);
+  }
 
   return (
     <div>
