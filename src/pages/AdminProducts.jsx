@@ -1,13 +1,74 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import * as XLSX from "xlsx";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { getSession, useCan } from "@/lib/auth";
-import { EXTRA_FIELDS, fetchFieldLabels, isRenamable, saveFieldLabels } from "@/lib/productFields";
+import {
+  EXTRA_FIELDS,
+  fetchFieldLabels,
+  isRenamable,
+  saveFieldLabels,
+  withLabels,
+} from "@/lib/productFields";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const PAGE_SIZES = [25, 50, 100];
+
+// One CSV cell. Text starting with = + - @ would run as a formula in Excel, so it gets a ' first.
+function csvCell(value, { text = true } = {}) {
+  let v = value === null || value === undefined ? "" : String(value);
+  if (text && /^[=+\-@\t\r]/.test(v)) v = `'${v}`;
+  return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}
+
+// Every product field, in the order and with the names the Import mapping recognises, so an
+// export can be imported again. Empty fields stay as empty cells.
+function exportColumns(labels = {}) {
+  const list = (v) => (Array.isArray(v) ? v.join(", ") : v);
+  const fixed = [
+    ["Title", (p) => p.title],
+    ["Description", (p) => p.description],
+    ["Price", (p) => p.price, false],
+    ["SKU", (p) => p.sku],
+    ["Vendor", (p) => p.vendor],
+    ["Product type", (p) => p.product_type],
+    ["Category", (p) => p.category],
+    ["Status", (p) => p.status],
+    ["Tags", (p) => list(p.tags)],
+    ["Collections", (p) => list(p.collections)],
+    ["Quantity", (p) => p.quantity, false],
+  ];
+  const extra = withLabels(labels).map((f) => [f.label, (p) => p[f.key]]);
+  const more = [
+    ["SEO title", (p) => p.seo_title],
+    ["SEO description", (p) => p.seo_description],
+    ["Page layout", (p) => p.theme_template],
+    ["Images", (p) => (p.images || []).map((i) => i.url).join(", ")],
+    ["Created", (p) => p.createdAt, false],
+    ["Updated", (p) => p.updatedAt, false],
+  ];
+  return [...fixed, ...extra, ...more].map(([header, get, text = true]) => ({ header, get, text }));
+}
+
+function downloadProductsCsv(items, labels) {
+  const columns = exportColumns(labels);
+  const header = columns.map((c) => csvCell(c.header, { text: false })).join(",");
+  const lines = items.map((p) => columns.map((c) => csvCell(c.get(p), { text: c.text })).join(","));
+  // BOM so Excel opens UTF-8 correctly
+  const blob = new Blob(["\uFEFF" + [header, ...lines].join("\r\n")], {
+    type: "text/csv;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `products-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 const IMPORT_BATCH_SIZE = 200; // products per request; the server accepts up to 500
 
 function formatFileSize(bytes) {
@@ -65,6 +126,7 @@ const splitList = (value) =>
 
 // First sheet of the file as { headers: [string], rows: [[cell]] }
 async function readSheet(file) {
+  const XLSX = await import("xlsx");
   const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const table = sheet
@@ -550,6 +612,8 @@ export default function ProductsPage() {
   const [selected, setSelected] = useState(() => new Set());
   const [deleting, setDeleting] = useState(false);
   const [notice, setNotice] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
 
   const loadProducts = () =>
     apiGet("/api/v1/catalog/products/").then((res) => {
@@ -564,7 +628,11 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
-  const allSelected = products.length > 0 && selected.size === products.length;
+  const pageCount = Math.max(1, Math.ceil(products.length / pageSize));
+  const currentPage = Math.min(page, pageCount); // e.g. after deleting the last items on a page
+  const pageStart = (currentPage - 1) * pageSize;
+  const pageProducts = products.slice(pageStart, pageStart + pageSize);
+  const allSelected = pageProducts.length > 0 && pageProducts.every((p) => selected.has(p.id));
 
   const toggleOne = (id) =>
     setSelected((prev) => {
@@ -574,7 +642,22 @@ export default function ProductsPage() {
       return next;
     });
 
-  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(products.map((p) => p.id)));
+  // "Select all" covers the products on this page only, so a bulk delete never reaches unseen rows
+  const toggleAll = () =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      pageProducts.forEach((p) => (allSelected ? next.delete(p.id) : next.add(p.id)));
+      return next;
+    });
+
+  const exportCsv = async () => {
+    // The store's own names for the extra fields; the defaults if they can't be fetched
+    const labels = await fetchFieldLabels().catch(() => ({}));
+    downloadProductsCsv(
+      selected.size ? products.filter((p) => selected.has(p.id)) : products,
+      labels
+    );
+  };
 
   const deleteSelected = async () => {
     const count = selected.size;
@@ -663,6 +746,13 @@ export default function ProductsPage() {
                     {selected.size ? `${selected.size} selected` : `${products.length} products`}
                   </p>
                   <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={exportCsv}
+                      className="rounded-lg border border-[#DDD6FE] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-charcoal-navy transition"
+                    >
+                      {selected.size ? `Export ${selected.size}` : "Export"}
+                    </button>
                     {canDelete && selected.size > 0 && (
                       <button
                         type="button"
@@ -724,7 +814,7 @@ export default function ProductsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product) => (
+                    {pageProducts.map((product) => (
                       <tr
                         key={product.id}
                         className={`border-b border-[#E4DEFB] last:border-0 hover:bg-[#F5F3FF] ${
@@ -761,6 +851,53 @@ export default function ProductsPage() {
                     ))}
                   </tbody>
                 </table>
+
+                <nav
+                  aria-label="Pagination"
+                  className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E4DEFB] px-6 py-3 text-sm text-[#4C4F7A]"
+                >
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="products-page-size">Rows per page</label>
+                    <select
+                      id="products-page-size"
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setPage(1);
+                      }}
+                      className="rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-charcoal-navy"
+                    >
+                      {PAGE_SIZES.map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span>
+                      {pageStart + 1}-{Math.min(pageStart + pageSize, products.length)} of{" "}
+                      {products.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPage(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                      className="rounded-lg border border-[#DDD6FE] bg-white px-3 py-1.5 font-medium text-charcoal-navy hover:border-charcoal-navy transition disabled:opacity-40"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPage(currentPage + 1)}
+                      disabled={currentPage >= pageCount}
+                      className="rounded-lg border border-[#DDD6FE] bg-white px-3 py-1.5 font-medium text-charcoal-navy hover:border-charcoal-navy transition disabled:opacity-40"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </nav>
               </div>
             )}
 

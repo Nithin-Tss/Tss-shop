@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import * as XLSX from "xlsx";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { getSession, useCan } from "@/lib/auth";
@@ -27,6 +26,7 @@ function validateFile(file) {
 
 // First sheet of file as { headers: [string], rows: [[cell]] }
 async function readSheet(file) {
+  const XLSX = await import("xlsx");
   const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const table = sheet
