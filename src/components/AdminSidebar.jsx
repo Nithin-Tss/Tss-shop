@@ -147,6 +147,13 @@ export const navIcons = {
       <circle cx="12" cy="12" r="3" />
     </>
   ),
+  menus: (
+    <>
+      <rect width="18" height="14" x="3" y="5" rx="2" />
+      <line x1="7" y1="9" x2="17" y2="9" />
+      <line x1="7" y1="13" x2="13" y2="13" />
+    </>
+  ),
   chevron: <path d="m6 9 6 6 6-6" />,
 };
 
@@ -220,7 +227,13 @@ const menuGroups = [
         href: `${BASE}/inventory`,
         permission: "inventory.view",
       },
-      { icon: "content", label: "Content", href: `${BASE}/content` },
+      {
+        icon: "content",
+        label: "Content",
+        href: `${BASE}/content`,
+        match: [`${BASE}/content`, `${BASE}/menus`],
+        children: [{ label: "Menus", href: `${BASE}/content/menus` }],
+      },
     ],
   },
   {
@@ -316,6 +329,10 @@ function MenuItem({ item, path }) {
   const childActive = (item.children || []).some((child) => isUnder(path, child.href));
   const active = matches(path, item);
   const [open, setOpen] = useState(childActive);
+
+  useEffect(() => {
+    if (childActive) setOpen(true);
+  }, [childActive]);
 
   return (
     <div>

@@ -100,6 +100,40 @@ export function deleteStorePage(id) {
   return apiRequest(`${BASE}/pages/${id}/`, { method: "DELETE" });
 }
 
+// Menus -> [{ id, name, handle, items: [...], items_summary, items_count }]
+export function listMenus() {
+  return apiRequest(`${BASE}/menus/`);
+}
+
+export function getMenu(id) {
+  return apiRequest(`${BASE}/menus/${id}/`);
+}
+
+export function saveMenu(id, data) {
+  return id
+    ? apiRequest(`${BASE}/menus/${id}/`, { method: "PUT", body: data })
+    : apiRequest(`${BASE}/menus/`, { method: "POST", body: data });
+}
+
+export function deleteMenu(id) {
+  return apiRequest(`${BASE}/menus/${id}/`, { method: "DELETE" });
+}
+
+// URL Redirects -> [{ id, path, target, created_at, updated_at }]
+export function listUrlRedirects() {
+  return apiRequest(`${BASE}/redirects/`);
+}
+
+export function saveUrlRedirect(id, data) {
+  return id
+    ? apiRequest(`${BASE}/redirects/${id}/`, { method: "PATCH", body: data })
+    : apiRequest(`${BASE}/redirects/`, { method: "POST", body: data });
+}
+
+export function deleteUrlRedirect(id) {
+  return apiRequest(`${BASE}/redirects/${id}/`, { method: "DELETE" });
+}
+
 // Save only what changed: { settings?, templates?: { index: { order?, sections?: { id: section | null } } } }
 export function patchThemeSettings(changes) {
   return apiRequest(`${BASE}/settings/`, { method: "PATCH", body: changes });

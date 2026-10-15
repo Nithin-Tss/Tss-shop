@@ -23,6 +23,7 @@ const BlogPostsPage = lazy(() =>
   import("@/pages/AdminContent").then((m) => ({ default: m.BlogPostsPage }))
 );
 const StorePagesPage = lazy(() => import("@/pages/AdminPages"));
+const AdminMenus = lazy(() => import("@/pages/AdminMenus"));
 const AdminInventory = lazy(() => import("@/pages/AdminInventory"));
 const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
 const AdminDrafts = lazy(() => import("@/pages/AdminDrafts"));
@@ -66,6 +67,9 @@ export default function App() {
           <Route path="/admin/online-store/home" element={<AdminHome />} />
           <Route path="/admin/online-store/settings" element={<AdminSettings />} />
           <Route path="/admin/online-store/content" element={<AdminContent />} />
+          <Route path="/admin/online-store/content/menus" element={<AdminMenus />} />
+          <Route path="/admin/online-store/menus" element={<Navigate to="/admin/online-store/content/menus" replace />} />
+          <Route path="/admin/content/menus" element={<Navigate to="/admin/online-store/content/menus" replace />} />
           {/* Pages a role may not have (see can() in lib/auth.js); the API refuses them anyway */}
           <Route element={<RequirePermission permission="themes.view" />}>
             <Route path="/admin/online-store" element={<AdminOnlineStore />} />
