@@ -87,6 +87,21 @@ export function deleteBlogPost(id) {
   return apiRequest(`${BASE}/posts/${id}/`, { method: "DELETE" });
 }
 
+// Ready-made themes -> { applied: "classic", undo: "Classic" | null (name of the theme undo goes back to), presets: [{ slug, name, description, categories, swatches: [accent, background, text] }] }
+export function listThemePresets() {
+  return apiRequest(`${BASE}/presets/`);
+}
+
+// Go back to how the store was before the last theme was used -> { applied }
+export function undoThemePreset() {
+  return apiRequest(`${BASE}/presets/undo/`, { method: "POST", body: {} });
+}
+
+// Use a ready-made theme: its look and home layout replace the store's -> { applied }
+export function applyThemePreset(slug) {
+  return apiRequest(`${BASE}/presets/`, { method: "POST", body: { slug } });
+}
+
 // Page templates -> { templates: [{ key: "page" | "page.contact", label, path, liquid_path }] }
 export function listPageTemplates() {
   return apiRequest(`${BASE}/page-templates/`);

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { useCan } from "@/lib/auth";
+import { applyThemePreset, listThemePresets, undoThemePreset } from "@/lib/themeApi";
 
 const categories = [
   "All",
@@ -37,8 +38,76 @@ export default function OnlineStorePage() {
   // The customizer and code editor change the theme
   const canEditTheme = useCan("themes.manage");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  // No templates exist yet; Continue unlocks once one can be picked
-  const [selectedTheme] = useState(null);
+  const [presets, setPresets] = useState(null);
+  const [applied, setApplied] = useState("");
+  const [undo, setUndo] = useState(null);
+  const [notice, setNotice] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState(null);
+  const [applying, setApplying] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    listThemePresets()
+      .then((data) => {
+        if (cancelled) return;
+        setPresets(data.presets);
+        setApplied(data.applied);
+        setUndo(data.undo);
+      })
+      .catch(
+        (e) => !cancelled && (setPresets([]), setError(e.message || "Could not load themes."))
+      );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const shown = (presets || []).filter(
+    (p) => selectedCategory === "All" || p.categories.includes(selectedCategory)
+  );
+  const chosen = presets?.find((p) => p.slug === selectedTheme);
+
+  const undoLast = async () => {
+    if (applying) return;
+    if (
+      !window.confirm(
+        `Go back to ${undo}? This restores the look, home page layout and theme code from before.`
+      )
+    )
+      return;
+    setApplying(true);
+    setError("");
+    try {
+      const data = await undoThemePreset();
+      setApplied(data.applied);
+      setUndo(null);
+      setNotice("Your previous theme is back.");
+    } catch (e) {
+      setError(e.message || "Could not undo.");
+    }
+    setApplying(false);
+  };
+
+  const useTheme = async () => {
+    if (!chosen || applying) return;
+    if (
+      !window.confirm(
+        `Use the ${chosen.name} theme? Its colours, fonts, buttons and home page layout will replace your current ones. Your products, logo, menus and other pages are kept.`
+      )
+    )
+      return;
+    setApplying(true);
+    setError("");
+    try {
+      await applyThemePreset(chosen.slug);
+      setNotice("");
+      navigate("/admin/online-store/customize");
+    } catch (e) {
+      setError(e.message || "Could not apply the theme.");
+      setApplying(false);
+    }
+  };
 
   // Back to the previous page, or the admin home if this page was opened directly
   const goBack = () => {
@@ -128,57 +197,117 @@ export default function OnlineStorePage() {
               </div>
             </div>
 
-            {/* EMPTY STATE */}
-            <section className="mt-5 flex min-h-[340px] flex-1 flex-col items-center justify-center rounded-2xl border border-[#EEF0F4] bg-[#fafbfc] px-6 py-10 text-center">
-              {/* Illustration */}
-              <div className="relative">
-                <div className="w-[234px] overflow-hidden rounded-xl border border-[#E5E9EF] bg-white">
-                  <div className="flex h-6 items-center gap-1.5 bg-[#0B1020] px-3">
-                    <span className="h-2 w-2 rounded-full bg-white/80" />
-                    <span className="h-2 w-2 rounded-full bg-white/80" />
-                    <span className="h-2 w-2 rounded-full bg-white/80" />
-                  </div>
+            {/* THEME LIBRARY */}
+            <section className="mt-5 flex-1">
+              {undo && canEditTheme && (
+                <p className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#F5F3FF] px-3 py-2 text-sm text-[#4C4F7A]">
+                  You changed your theme recently.
+                  <button
+                    type="button"
+                    onClick={undoLast}
+                    disabled={applying}
+                    className="font-semibold text-[#0B1020] underline underline-offset-2 disabled:opacity-50"
+                  >
+                    Undo and go back to {undo}
+                  </button>
+                </p>
+              )}
+              {notice && (
+                <p
+                  role="status"
+                  className="mb-3 rounded-lg bg-[#ECFDF3] px-3 py-2 text-sm text-[#067647]"
+                >
+                  {notice}
+                </p>
+              )}
+              {error && (
+                <p
+                  role="alert"
+                  className="mb-3 rounded-lg bg-[#FEF2F2] px-3 py-2 text-sm text-[#B42318]"
+                >
+                  {error}
+                </p>
+              )}
+              {presets === null ? (
+                <p className="py-16 text-center text-sm text-[#4C4F7A]">Loading themes…</p>
+              ) : shown.length === 0 ? (
+                <p className="rounded-2xl border border-[#EEF0F4] bg-[#fafbfc] py-16 text-center text-sm text-[#4C4F7A]">
+                  No themes in this category yet.
+                </p>
+              ) : (
+                <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {shown.map((preset) => {
+                    const [accent, background, text] = preset.swatches;
+                    const active = selectedTheme === preset.slug;
 
-                  <div className="p-4">
-                    <div className="flex gap-4">
-                      <div className="flex h-16 w-[72px] items-center justify-center rounded-md bg-[#EDE9FE] text-[#8B8FB8]">
-                        <svg {...lineIcon} className="h-6 w-6">
-                          <rect x="3" y="4" width="18" height="16" rx="2" />
-                          <circle cx="9" cy="10" r="2" />
-                          <path d="m21 16-5-5-9 9" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 space-y-2.5 pt-1.5">
-                        <div className="h-2.5 rounded-full bg-[#E6EBF2]" />
-                        <div className="h-2.5 w-3/4 rounded-full bg-[#E6EBF2]" />
-                      </div>
-                    </div>
-                    <div className="mt-4 flex gap-2.5">
-                      <div className="h-2 w-[52px] rounded-full bg-[#E6EBF2]" />
-                      <div className="h-2 w-16 rounded-full bg-[#E6EBF2]" />
-                      <div className="h-2 w-10 rounded-full bg-[#E6EBF2]" />
-                    </div>
-                  </div>
-                </div>
+                    return (
+                      <li key={preset.slug}>
+                        <button
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => setSelectedTheme(preset.slug)}
+                          className={`block w-full rounded-2xl border bg-white p-3 text-left transition ${
+                            active
+                              ? "border-[#0B1020] ring-2 ring-[#0B1020]/15"
+                              : "border-[#E4DEFB] hover:border-[#C9D1DD]"
+                          }`}
+                        >
+                          {/* Mini storefront drawn from the theme's colours */}
+                          <div
+                            className="overflow-hidden rounded-xl border border-black/5"
+                            style={{ background, color: text }}
+                            aria-hidden="true"
+                          >
+                            <div className="flex items-center justify-between px-3 py-2">
+                              <span
+                                className="h-2 w-10 rounded-full"
+                                style={{ background: text }}
+                              />
+                              <span className="flex gap-1.5">
+                                <span
+                                  className="h-1.5 w-5 rounded-full opacity-50"
+                                  style={{ background: text }}
+                                />
+                                <span
+                                  className="h-1.5 w-5 rounded-full opacity-50"
+                                  style={{ background: text }}
+                                />
+                              </span>
+                            </div>
+                            <div
+                              className="mx-3 h-20 rounded-lg"
+                              style={{ background: accent, opacity: 0.9 }}
+                            />
+                            <div className="grid grid-cols-3 gap-2 p-3">
+                              {[0, 1, 2].map((i) => (
+                                <span
+                                  key={i}
+                                  className="h-10 rounded-md"
+                                  style={{ background: text, opacity: 0.1 }}
+                                />
+                              ))}
+                            </div>
+                          </div>
 
-                <span className="absolute -bottom-4 -right-5 flex h-[52px] w-[52px] items-center justify-center rounded-xl border-2 border-white bg-[#0B1020] text-[22px] font-bold text-white">
-                  S
-                </span>
-              </div>
-
-              <h2 className="mt-9 text-[22px] font-semibold text-[#0B1020] sm:text-2xl">Store</h2>
-
-              <p className="mt-2 max-w-sm text-[15px] font-normal leading-relaxed text-[#4C4F7A]">
-                In future, we will add some photos here for you to choose from.
-              </p>
-
-              <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-[#EDE9FE] px-3.5 py-1.5 text-[13px] font-medium text-[#4C4F7A]">
-                <svg {...lineIcon} className="h-3.5 w-3.5">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-                Coming soon
-              </span>
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <h3 className="text-[15px] font-semibold text-[#0B1020]">
+                              {preset.name}
+                            </h3>
+                            {applied === preset.slug && (
+                              <span className="rounded-full bg-[#EDE9FE] px-2.5 py-0.5 text-xs font-medium text-[#4C4F7A]">
+                                Current
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-1 text-[13px] leading-relaxed text-[#4C4F7A]">
+                            {preset.description}
+                          </p>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </section>
           </div>
 
@@ -187,11 +316,12 @@ export default function OnlineStorePage() {
             <div className="mx-auto flex max-w-[1160px] justify-end px-4 py-3 sm:px-8">
               <button
                 type="button"
-                disabled={!selectedTheme}
+                disabled={!selectedTheme || !canEditTheme || applying}
+                onClick={useTheme}
                 title={selectedTheme ? undefined : "Select a theme to continue"}
                 className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#0B1020] px-5 text-sm font-semibold text-white transition hover:bg-[#1C2347] disabled:cursor-not-allowed disabled:bg-[#C5CCD8]"
               >
-                Continue
+                {applying ? "Applying…" : "Use this theme"}
                 <svg {...lineIcon} strokeWidth="2" className="h-4 w-4">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
