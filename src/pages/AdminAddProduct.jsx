@@ -11,10 +11,10 @@ const PRODUCTS_URL = "/admin/online-store/products";
 const inputClass =
   "w-full h-11 rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#0B1020] focus:bg-white focus:ring-4 focus:ring-[#0B1020]/[0.07]";
 
-// Photos: JPG, PNG or WEBP, up to 5MB each
+// Photos: JPG, PNG or WEBP, up to 1MB each
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const PHOTO_EXTENSIONS = /\.(jpe?g|png|webp)$/i;
-const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+const MAX_PHOTO_SIZE = 1 * 1024 * 1024;
 
 // Returns why a photo can't be added, or "" when it's fine
 function photoError(file) {
@@ -23,7 +23,7 @@ function photoError(file) {
     ? PHOTO_TYPES.includes(file.type)
     : PHOTO_EXTENSIONS.test(file.name);
   if (!isAllowedType) return "Not a supported image. Use JPG, PNG or WEBP.";
-  if (file.size > MAX_PHOTO_SIZE) return "Image is too large. Maximum size is 5MB.";
+  if (file.size > MAX_PHOTO_SIZE) return "Image is too large. Maximum size is 1MB per image.";
   return "";
 }
 
@@ -879,7 +879,7 @@ export function ProductForm({ productId }) {
       if (message) {
         let detailedMsg = message;
         if (file.size > MAX_PHOTO_SIZE) {
-          detailedMsg = `File size (${formatFileSize(file.size)}) exceeds maximum allowed size of 5MB.`;
+          detailedMsg = `File size (${formatFileSize(file.size)}) exceeds the 1MB limit. Image is too large. Maximum size is 1MB per image.`;
         } else if (!file.type || !PHOTO_TYPES.includes(file.type)) {
           detailedMsg = `Unsupported format (${file.type || file.name.split(".").pop() || "unknown"}). Please use JPG, PNG, or WEBP.`;
         }
@@ -919,7 +919,7 @@ export function ProductForm({ productId }) {
     if (message) {
       let detailedMsg = message;
       if (file.size > MAX_PHOTO_SIZE) {
-        detailedMsg = `File size (${formatFileSize(file.size)}) exceeds maximum allowed size of 5MB.`;
+        detailedMsg = `File size (${formatFileSize(file.size)}) exceeds the 1MB limit. Image is too large. Maximum size is 1MB per image.`;
       } else if (!file.type || !PHOTO_TYPES.includes(file.type)) {
         detailedMsg = `Unsupported format (${file.type || file.name.split(".").pop() || "unknown"}). Please use JPG, PNG, or WEBP.`;
       }
@@ -1398,7 +1398,7 @@ export function ProductForm({ productId }) {
                         Drag and drop images here, or browse files from your computer
                       </p>
                       <p className="mt-0.5 text-[11px] text-slate-400">
-                        Accepted formats: JPG, PNG, WEBP (up to 5MB each)
+                        Accepted formats: JPG, PNG, WEBP (up to 1MB each)
                       </p>
                       <button
                         type="button"

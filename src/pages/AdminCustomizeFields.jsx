@@ -1149,7 +1149,7 @@ export function ImageUpload({ value, onChange }) {
 
     if (prepared.blob.size > MAX_IMAGE_SIZE) {
       setProgress(null);
-      setError("Image is too large. Maximum size is 5MB.");
+      setError("Image is too large. Maximum size is 1MB per image.");
       return;
     }
 
@@ -1238,7 +1238,7 @@ export function ImageUpload({ value, onChange }) {
           className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#DDD6FE] text-xs text-[#4C4F7A] hover:border-[#0B1020]"
         >
           <span className="font-medium text-[#0B1020]">Upload image</span>
-          JPG, PNG or WEBP, up to 5MB
+          JPG, PNG or WEBP, up to 1MB
         </button>
       )}
 

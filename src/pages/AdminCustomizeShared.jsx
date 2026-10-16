@@ -17,9 +17,9 @@ export const iconProps = {
   "aria-hidden": true,
 };
 
-// Images for banners and slides: JPG, PNG or WEBP up to 5MB (checked again by the server)
+// Images for banners and slides: JPG, PNG or WEBP up to 1MB (checked again by the server)
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-export const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+export const MAX_IMAGE_SIZE = 1 * 1024 * 1024;
 
 export function defaultsOf(fields) {
   return Object.fromEntries(
