@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import AssignMarketsModal from "@/components/AssignMarketsModal";
 
 export default function AdminAddCatalogue() {
   const navigate = useNavigate();
@@ -10,7 +11,6 @@ export default function AdminAddCatalogue() {
   const [status, setStatus] = useState("Active");
   const [markets, setMarkets] = useState([]);
   const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);
-  const [newMarketName, setNewMarketName] = useState("");
 
   // Pricing State
   const [currency, setCurrency] = useState("Store currency (AUD $)");
@@ -24,6 +24,27 @@ export default function AdminAddCatalogue() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Sort Popover State (Product Title / Created, A-Z / Z-A)
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("title"); // "title" | "created"
+  const [sortDirection, setSortDirection] = useState("asc"); // "asc" | "desc"
+  const sortMenuRef = useRef(null);
+
+  // Close sort menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(e.target)) {
+        setIsSortOpen(false);
+      }
+    };
+    if (isSortOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSortOpen]);
+
   // Feedback Toast
   const [toastMessage, setToastMessage] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -31,16 +52,6 @@ export default function AdminAddCatalogue() {
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  const handleAddMarket = (e) => {
-    e.preventDefault();
-    if (newMarketName.trim()) {
-      setMarkets((prev) => [...prev, newMarketName.trim()]);
-      setNewMarketName("");
-      setIsMarketModalOpen(false);
-      showToast("Market added to catalog.");
-    }
   };
 
   const handleRemoveMarket = (index) => {
@@ -421,63 +432,186 @@ export default function AdminAddCatalogue() {
                   </button>
                 </div>
 
-                {/* Right Action Icons */}
-                <div className="flex items-center gap-1 text-[#5C5F62]">
+                {/* Right Action Toolbar matching reference */}
+                <div className="flex items-center gap-1.5 text-[#5C5F62]">
                   {isSearchOpen && (
                     <input
                       type="text"
                       placeholder="Filter products..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="rounded-lg border border-[#D2D5D8] bg-white px-2.5 py-0.5 text-xs text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none w-36 sm:w-48"
+                      className="rounded-lg border border-[#D2D5D8] bg-white px-2.5 py-1 text-xs text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none w-36 sm:w-48 shadow-2xs"
                     />
                   )}
+
+                  {/* Combined Search & Filter Button */}
                   <button
                     type="button"
                     onClick={() => setIsSearchOpen((prev) => !prev)}
-                    className="p-1.5 rounded-md hover:bg-[#EFEFEF] hover:text-[#1A1A1A] transition"
-                    title="Search products"
-                    aria-label="Search products"
+                    className={`inline-flex items-center gap-1.5 rounded-lg border bg-white px-2.5 py-1.5 text-xs transition shadow-2xs ${
+                      isSearchOpen
+                        ? "border-[#1A1A1A] bg-[#F6F6F7]"
+                        : "border-[#D2D5D8] hover:bg-[#F6F6F7]"
+                    }`}
+                    title="Search and filter products"
+                    aria-label="Search and filter products"
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
+                    <svg
+                      className="h-3.5 w-3.5 text-[#303030]"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="6.5" cy="6.5" r="4.5" />
+                      <path d="M10 10L13.5 13.5" />
+                    </svg>
+                    <svg
+                      className="h-3.5 w-3.5 text-[#303030]"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    >
+                      <line x1="2" y1="4" x2="14" y2="4" />
+                      <line x1="2" y1="8" x2="11" y2="8" />
+                      <line x1="2" y1="12" x2="7" y2="12" />
                     </svg>
                   </button>
-                  <button
-                    type="button"
-                    className="p-1.5 rounded-md hover:bg-[#EFEFEF] hover:text-[#1A1A1A] transition"
-                    title="Filter options"
-                    aria-label="Filter options"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
+
+                  {/* Sort Button and Popover Dropdown */}
+                  <div className="relative" ref={sortMenuRef}>
+                    <button
+                      type="button"
+                      id="sort-products-btn"
+                      onClick={() => setIsSortOpen((prev) => !prev)}
+                      className={`inline-flex items-center justify-center rounded-lg border bg-white px-2 py-1.5 text-xs transition shadow-2xs ${
+                        isSortOpen
+                          ? "border-[#1A1A1A] bg-[#F6F6F7]"
+                          : "border-[#D2D5D8] hover:bg-[#F6F6F7]"
+                      }`}
+                      title="Sort products"
+                      aria-label="Sort products"
+                      aria-expanded={isSortOpen}
+                    >
+                      <svg
+                        className="h-3.5 w-3.5 text-[#303030]"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="p-1.5 rounded-md hover:bg-[#EFEFEF] hover:text-[#1A1A1A] transition"
-                    title="Sort products"
-                    aria-label="Sort products"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                      />
-                    </svg>
-                  </button>
+                      >
+                        <path d="M5 12.5V3.5M5 3.5L2.5 6M5 3.5L7.5 6" />
+                        <path d="M11 3.5V12.5M11 12.5L8.5 10M11 12.5L13.5 10" />
+                      </svg>
+                    </button>
+
+                    {/* SORT BY DROPDOWN POPOVER */}
+                    {isSortOpen && (
+                      <div
+                        id="sort-by-popover"
+                        role="menu"
+                        aria-orientation="vertical"
+                        className="absolute right-0 top-full mt-1.5 z-40 w-44 rounded-2xl border border-[#E1E3E5] bg-white p-2 shadow-xl"
+                      >
+                        <div className="px-2 pt-1 pb-2 text-[13px] font-semibold text-[#1A1A1A]">
+                          Sort by
+                        </div>
+
+                        {/* Radio: Product Title */}
+                        <button
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={sortBy === "title"}
+                          onClick={() => setSortBy("title")}
+                          className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] text-[#1A1A1A] hover:bg-[#F6F6F7] transition-colors"
+                        >
+                          <span
+                            className={`w-4 h-4 rounded-full transition-all shrink-0 ${
+                              sortBy === "title"
+                                ? "border-[4.5px] border-[#2C2C2E] bg-white"
+                                : "border border-[#8C9196] bg-white hover:border-[#5C5F62]"
+                            }`}
+                          />
+                          <span className="font-medium text-[#202223]">Product Title</span>
+                        </button>
+
+                        {/* Radio: Created */}
+                        <button
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={sortBy === "created"}
+                          onClick={() => setSortBy("created")}
+                          className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] text-[#1A1A1A] hover:bg-[#F6F6F7] transition-colors"
+                        >
+                          <span
+                            className={`w-4 h-4 rounded-full transition-all shrink-0 ${
+                              sortBy === "created"
+                                ? "border-[4.5px] border-[#2C2C2E] bg-white"
+                                : "border border-[#8C9196] bg-white hover:border-[#5C5F62]"
+                            }`}
+                          />
+                          <span className="font-normal text-[#202223]">Created</span>
+                        </button>
+
+                        {/* Divider */}
+                        <div className="border-t border-[#E1E3E5] my-1.5" />
+
+                        {/* Direction: Ascending (A-Z) */}
+                        <button
+                          type="button"
+                          onClick={() => setSortDirection("asc")}
+                          className={`flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] font-medium transition-colors ${
+                            sortDirection === "asc"
+                              ? "bg-[#EAEBED] text-[#1A1A1A]"
+                              : "text-[#202223] hover:bg-[#F6F6F7]"
+                          }`}
+                        >
+                          <svg
+                            className="h-3.5 w-3.5 text-[#1A1A1A] shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 16 16"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M8 13.5V2.5M8 2.5L3.5 7M8 2.5L12.5 7" />
+                          </svg>
+                          <span>A-Z</span>
+                        </button>
+
+                        {/* Direction: Descending (Z-A) */}
+                        <button
+                          type="button"
+                          onClick={() => setSortDirection("desc")}
+                          className={`flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] font-medium transition-colors ${
+                            sortDirection === "desc"
+                              ? "bg-[#EAEBED] text-[#1A1A1A]"
+                              : "text-[#202223] hover:bg-[#F6F6F7]"
+                          }`}
+                        >
+                          <svg
+                            className="h-3.5 w-3.5 text-[#1A1A1A] shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 16 16"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M8 2.5V13.5M8 13.5L3.5 9M8 13.5L12.5 9" />
+                          </svg>
+                          <span>Z-A</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -543,67 +677,14 @@ export default function AdminAddCatalogue() {
         </main>
       </div>
 
-      {/* ADD MARKET MODAL */}
+      {/* ASSIGN MARKETS MODAL */}
       {isMarketModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="add-market-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-        >
-          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl border border-[#E1E3E5]">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E1E3E5]">
-              <h3 id="add-market-modal-title" className="text-sm font-semibold text-[#1A1A1A]">
-                Add market
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsMarketModalOpen(false)}
-                className="text-[#5C5F62] hover:text-[#1A1A1A] text-lg font-bold"
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleAddMarket} className="mt-4 flex flex-col gap-3">
-              <div>
-                <label
-                  htmlFor="market-name-input"
-                  className="block text-xs font-semibold text-[#1A1A1A] mb-1"
-                >
-                  Market name *
-                </label>
-                <input
-                  id="market-name-input"
-                  type="text"
-                  required
-                  placeholder="e.g. Australia, United States, Europe"
-                  value={newMarketName}
-                  onChange={(e) => setNewMarketName(e.target.value)}
-                  className="w-full rounded-lg border border-[#D2D5D8] px-3 py-2 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none"
-                />
-              </div>
-
-              <div className="mt-2 flex items-center justify-end gap-2 pt-3 border-t border-[#E1E3E5]">
-                <button
-                  type="button"
-                  onClick={() => setIsMarketModalOpen(false)}
-                  className="rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-1.5 text-xs font-medium text-[#1A1A1A] hover:bg-[#F6F6F7] transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!newMarketName.trim()}
-                  className="rounded-lg bg-[#1A1A1A] px-3.5 py-1.5 text-xs font-medium text-white shadow-xs hover:bg-[#303030] transition disabled:opacity-50"
-                >
-                  Add market
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AssignMarketsModal
+          isOpen={isMarketModalOpen}
+          onClose={() => setIsMarketModalOpen(false)}
+          selectedMarkets={markets}
+          onConfirm={(selectedList) => setMarkets(selectedList)}
+        />
       )}
     </div>
   );
