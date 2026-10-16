@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
@@ -107,9 +107,10 @@ function CurrencyPicker({ value, onChange }) {
 }
 
 export default function AdminCreateOrder() {
+  const location = useLocation();
   const navigate = useNavigate();
-  // Custom items are saved as a draft order, which is its own permission
   const canCreateDrafts = useCan("draft_orders.manage");
+  const isDraftMode = new URLSearchParams(location.search).get("mode") === "draft";
 
   // Form states
   const [items, setItems] = useState([]);
@@ -263,10 +264,11 @@ export default function AdminCreateOrder() {
 
   // Computations
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const total = Math.max(
+  const orderTotal = Math.max(
     0,
     subtotal - (parseFloat(discountAmount) || 0) + (parseFloat(shippingAmount) || 0)
   );
+  const total = isDraftMode ? subtotal : orderTotal;
 
   const selectedCurrencyObj = CURRENCIES.find((c) => c.code === currency) || CURRENCIES[0];
 
@@ -299,15 +301,17 @@ export default function AdminCreateOrder() {
     // we route to draft or create order with products
     const hasUnsavedCustomItems = items.some((it) => !it.productId);
 
-    if (hasUnsavedCustomItems && !canCreateDrafts) {
+    const shouldCreateDraft = isDraftMode || hasUnsavedCustomItems;
+
+    if (shouldCreateDraft && !canCreateDrafts) {
       setSaving(false);
       setError(
-        "Orders with custom items are saved as draft orders, and your role can't create those. Remove the custom items or ask for draft order access."
+        "Your role can't create draft orders. Ask your administrator for draft order access."
       );
       return;
     }
 
-    if (hasUnsavedCustomItems) {
+    if (shouldCreateDraft) {
       if (!selectedCustomer?.id) {
         setSaving(false);
         setError("Select a customer before saving a draft order.");
@@ -364,20 +368,24 @@ export default function AdminCreateOrder() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2 text-slate-700">
               <Link
-                to="/admin/online-store/orders"
+                to={
+                  isDraftMode ? "/admin/online-store/orders/drafts" : "/admin/online-store/orders"
+                }
                 className="hover:text-slate-900 transition-colors flex items-center gap-1 text-slate-500 hover:underline"
               >
                 <NavIcon name="orders" className="h-4 w-4" />
                 <span>›</span>
               </Link>
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                Create order
+                {isDraftMode ? "Create draft order" : "Create order"}
               </h1>
             </div>
 
             <div className="flex items-center gap-3">
               <Link
-                to="/admin/online-store/orders"
+                to={
+                  isDraftMode ? "/admin/online-store/orders/drafts" : "/admin/online-store/orders"
+                }
                 className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 rounded-lg transition-colors"
               >
                 Discard
@@ -388,7 +396,7 @@ export default function AdminCreateOrder() {
                 disabled={saving}
                 className="px-5 py-2 rounded-lg bg-[#0B1020] hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
               >
-                {saving ? "Saving..." : "Save"}
+                {saving ? "Saving..." : isDraftMode ? "Save draft" : "Save"}
               </button>
             </div>
           </div>
@@ -536,53 +544,57 @@ export default function AdminCreateOrder() {
                     </span>
                   </div>
 
-                  {/* Add discount */}
-                  <div className="flex items-center justify-between text-slate-500">
-                    <div className="flex items-center gap-2">
-                      <span>Add discount</span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={discountAmount || ""}
-                        onChange={(e) => setDiscountAmount(e.target.value)}
-                        placeholder="0.00"
-                        className="w-20 px-2 py-0.5 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500"
-                      />
-                    </div>
-                    <span>
-                      {selectedCurrencyObj.symbol}
-                      {(parseFloat(discountAmount) || 0).toFixed(2)}
-                    </span>
-                  </div>
+                  {!isDraftMode && (
+                    <>
+                      {/* Add discount */}
+                      <div className="flex items-center justify-between text-slate-500">
+                        <div className="flex items-center gap-2">
+                          <span>Add discount</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={discountAmount || ""}
+                            onChange={(e) => setDiscountAmount(e.target.value)}
+                            placeholder="0.00"
+                            className="w-20 px-2 py-0.5 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500"
+                          />
+                        </div>
+                        <span>
+                          {selectedCurrencyObj.symbol}
+                          {(parseFloat(discountAmount) || 0).toFixed(2)}
+                        </span>
+                      </div>
 
-                  {/* Add shipping or delivery */}
-                  <div className="flex items-center justify-between text-slate-500">
-                    <div className="flex items-center gap-2">
-                      <span>Add shipping or delivery</span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={shippingAmount || ""}
-                        onChange={(e) => setShippingAmount(e.target.value)}
-                        placeholder="0.00"
-                        className="w-20 px-2 py-0.5 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500"
-                      />
-                    </div>
-                    <span>
-                      {selectedCurrencyObj.symbol}
-                      {(parseFloat(shippingAmount) || 0).toFixed(2)}
-                    </span>
-                  </div>
+                      {/* Add shipping or delivery */}
+                      <div className="flex items-center justify-between text-slate-500">
+                        <div className="flex items-center gap-2">
+                          <span>Add shipping or delivery</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={shippingAmount || ""}
+                            onChange={(e) => setShippingAmount(e.target.value)}
+                            placeholder="0.00"
+                            className="w-20 px-2 py-0.5 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500"
+                          />
+                        </div>
+                        <span>
+                          {selectedCurrencyObj.symbol}
+                          {(parseFloat(shippingAmount) || 0).toFixed(2)}
+                        </span>
+                      </div>
 
-                  {/* Estimated tax */}
-                  <div className="flex items-center justify-between text-slate-500">
-                    <span className="inline-flex items-center gap-1">
-                      Estimated tax <span className="text-xs">ⓘ</span>
-                    </span>
-                    <span>Not calculated</span>
-                  </div>
+                      {/* Estimated tax */}
+                      <div className="flex items-center justify-between text-slate-500">
+                        <span className="inline-flex items-center gap-1">
+                          Estimated tax <span className="text-xs">ⓘ</span>
+                        </span>
+                        <span>Not calculated</span>
+                      </div>
+                    </>
+                  )}
 
                   {/* Total */}
                   <div className="flex items-center justify-between pt-3 border-t border-slate-100 font-bold text-base text-slate-900">
@@ -596,9 +608,11 @@ export default function AdminCreateOrder() {
 
                 {/* Footer Note */}
                 <p className="text-xs text-slate-500 pt-2 border-t border-slate-100">
-                  {items.length === 0
-                    ? "Add a product to calculate total and view payment options"
-                    : "Taxes and additional duties calculated automatically at checkout."}
+                  {isDraftMode
+                    ? "Draft total includes item prices only. Shipping, order-level discounts, and taxes aren't stored on drafts."
+                    : items.length === 0
+                      ? "Add a product to calculate total and view payment options"
+                      : "Taxes and additional duties calculated automatically at checkout."}
                 </p>
               </div>
             </div>

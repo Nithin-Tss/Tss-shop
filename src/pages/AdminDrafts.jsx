@@ -157,12 +157,12 @@ export default function AdminDrafts() {
                 Export
               </button>
 
-              {canCreateOrder && (
+              {canCreateDraft && (
                 <Link
-                  to="/admin/online-store/orders/create"
+                  to="/admin/online-store/orders/create?mode=draft"
                   className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
                 >
-                  Create order
+                  Create draft order
                 </Link>
               )}
             </div>
@@ -342,7 +342,7 @@ export default function AdminDrafts() {
                           </p>
                           {canCreateDraft && (
                             <Link
-                              to="/admin/online-store/orders/create"
+                              to="/admin/online-store/orders/create?mode=draft"
                               className="mt-3 px-4 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-slate-800 transition"
                             >
                               Create draft order
