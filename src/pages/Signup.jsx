@@ -141,8 +141,9 @@ export default function SignUpPage() {
       }
 
       signIn(result.data);
-      setMessage("Account created. Welcome to your store!");
-      navigate("/");
+      setMessage("Account created. Let's set up your store...");
+      // A new account has no store yet: ask to create one or open a default "My Store"
+      navigate("/auth/stores");
     } catch (error) {
       console.error("Signup failed:", error);
 

@@ -219,25 +219,6 @@ export default function AdminHomePage() {
         {/* MAIN CONTENT */}
         <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-4 py-6 sm:px-6 lg:px-9">
           <div className="mx-auto max-w-[1180px] space-y-6">
-            {/* PLAN PILL (choosing a plan is the owner's) */}
-            {can(session, "store.manage") && (
-              <div className="flex justify-end">
-                <div className="flex items-center gap-1 rounded-full border border-[#E4DEFB] bg-white p-1 pl-3.5 shadow-sm">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                  </span>
-                  <span className="ml-1.5 mr-2 text-sm text-[#4C4F7A]">Pick a plan to go live</span>
-                  <Link
-                    to={`${BASE}/settings`}
-                    className="rounded-full bg-[#0B1020] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
-                  >
-                    Select a plan
-                  </Link>
-                </div>
-              </div>
-            )}
-
             {/* WELCOME BANNER */}
             <section className="relative overflow-hidden rounded-2xl bg-[#0B1020] px-6 py-7 text-white shadow-[0_10px_30px_-12px_rgba(20,27,45,0.45)] sm:px-8">
               <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/[0.04]" />

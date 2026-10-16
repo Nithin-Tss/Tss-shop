@@ -4,6 +4,7 @@ import { Link, Navigate, Outlet, Route, Routes, useLocation } from "react-router
 import Home from "@/pages/Home";
 const Signin = lazy(() => import("@/pages/Signin"));
 const Signup = lazy(() => import("@/pages/Signup"));
+const StoreSelect = lazy(() => import("@/pages/StoreSelect"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const Account = lazy(() => import("@/pages/Account"));
 const OrderHistory = lazy(() => import("@/pages/OrderHistory"));
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/auth/signin" element={<Signin />} />
         <Route path="/auth/signup" element={<Signup />} />
+        <Route path="/auth/stores" element={<StoreSelect />} />
         <Route path="/auth/onboarding" element={<Onboarding />} />
         {/* Admin pages and the profile need a signed-in user; otherwise go to sign-in first */}
         <Route element={<RequireSignIn />}>

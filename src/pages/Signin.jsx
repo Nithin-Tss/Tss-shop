@@ -77,13 +77,11 @@ export default function SignInPage() {
       signIn(result.data);
       setMessage("Signed in. Redirecting...");
 
-      // When signing in with existing account, redirect to Admin page
+      // Next: pick which store to open (or create one); a page they were sent here from is kept
       const next = new URLSearchParams(window.location.search).get("next");
-      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
-      const target =
-        safeNext && safeNext.startsWith("/admin") ? safeNext : "/admin/online-store/home";
+      const safeNext = next && next.startsWith("/admin") && !next.startsWith("//") ? next : null;
 
-      navigate(target);
+      navigate(safeNext ? `/auth/stores?next=${encodeURIComponent(safeNext)}` : "/auth/stores");
     } finally {
       setIsSubmitting(false);
     }
