@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { apiDelete, apiGet, apiPatch, apiPost, logout } from "@/lib/api";
+import { apiGet, apiPatch, apiPost, logout } from "@/lib/api";
 import { getSession, setTokens, setUser, useSession } from "@/lib/auth";
 import { MOBILE_PATTERN, NAME_PATTERN, emailError } from "@/lib/validation";
 import { PasswordChecklist, PasswordInput } from "@/components/PasswordFields";
-import AddressModal from "@/components/AddressModal";
-import DeleteAddressModal from "@/components/DeleteAddressModal";
 
 function profileFromUser(user) {
   return {
@@ -43,17 +41,6 @@ export default function AccountPage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-  // Address Management State
-  const [addresses, setAddresses] = useState([]);
-  const [loadingAddresses, setLoadingAddresses] = useState(true);
-  const [addressMessage, setAddressMessage] = useState("");
-  const [addressError, setAddressError] = useState("");
-  const [showAddressModal, setShowAddressModal] = useState(false);
-  const [editingAddress, setEditingAddress] = useState(null);
-  const [deletingAddress, setDeletingAddress] = useState(null);
-  const [isSavingAddress, setIsSavingAddress] = useState(false);
-  const [isDeletingAddress, setIsDeletingAddress] = useState(false);
-  const [modalApiError, setModalApiError] = useState("");
 
   // Load profile from /api/v1/auth/me/
   useEffect(() => {
@@ -90,95 +77,7 @@ export default function AccountPage() {
     };
   }, [session?.token]);
 
-  // Load addresses from /api/v1/customers/addresses/?customer=me
-  const loadAddresses = async () => {
-    setLoadingAddresses(true);
-    const res = await apiGet("/api/v1/customers/addresses/?customer=me");
-    if (res.ok && Array.isArray(res.data)) {
-      setAddresses(res.data);
-    } else {
-      setAddresses([]);
-    }
-    setLoadingAddresses(false);
-  };
 
-  useEffect(() => {
-    // loadingAddresses already starts true, so the synchronous set is a no-op here
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadAddresses();
-  }, []);
-
-  const handleOpenAddAddress = () => {
-    setEditingAddress(null);
-    setModalApiError("");
-    setShowAddressModal(true);
-  };
-
-  const handleOpenEditAddress = (addr) => {
-    setEditingAddress(addr);
-    setModalApiError("");
-    setShowAddressModal(true);
-  };
-
-  const handleSaveAddress = async (formData) => {
-    setIsSavingAddress(true);
-    setModalApiError("");
-
-    const isEdit = Boolean(editingAddress);
-    const url = isEdit
-      ? `/api/v1/customers/addresses/${editingAddress.id}/`
-      : "/api/v1/customers/addresses/";
-
-    const res = isEdit ? await apiPatch(url, formData) : await apiPost(url, formData);
-
-    setIsSavingAddress(false);
-
-    if (res.ok) {
-      setShowAddressModal(false);
-      setEditingAddress(null);
-      setAddressMessage(isEdit ? "Address updated successfully." : "Address added successfully.");
-      setAddressError("");
-      loadAddresses();
-    } else {
-      const err =
-        res.formError ||
-        (res.fieldErrors && Object.values(res.fieldErrors)[0]) ||
-        "Failed to save address. Please check required fields.";
-      setModalApiError(err);
-    }
-  };
-
-  const handleOpenDeleteAddress = (addr) => {
-    setDeletingAddress(addr);
-  };
-
-  const handleConfirmDeleteAddress = async () => {
-    if (!deletingAddress) return;
-    setIsDeletingAddress(true);
-    const res = await apiDelete(`/api/v1/customers/addresses/${deletingAddress.id}/`);
-    setIsDeletingAddress(false);
-    setDeletingAddress(null);
-
-    if (res.ok) {
-      setAddressMessage("Address deleted successfully.");
-      setAddressError("");
-      loadAddresses();
-    } else {
-      setAddressError(res.error || "Failed to delete address.");
-    }
-  };
-
-  const handleSetDefaultAddress = async (addr) => {
-    setAddressMessage("");
-    setAddressError("");
-    const res = await apiPost(`/api/v1/customers/addresses/${addr.id}/set-default/`, {});
-    if (res.ok) {
-      setAddressMessage(`Default ${addr.address_type || "shipping"} address updated.`);
-      loadAddresses();
-    } else {
-      setAddressError(res.formError || res.error || "Failed to set default address.");
-    }
-  };
 
   const handleProfileChange = (event) => {
     const { name, value } = event.target;
@@ -386,20 +285,12 @@ export default function AccountPage() {
 
           {/* Subnav Tabs */}
           <div className="mt-6 flex items-center gap-2">
-            <Link
-              to="/account"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#0B1020] text-white shadow-xs"
+            <span
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-[#0B1020] text-white shadow-xs"
             >
               <span>👤</span>
               <span>Account & Addresses</span>
-            </Link>
-
-            <Link
-              to="/account/orders"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200"
-            >
-              <span>Order History</span>
-            </Link>
+            </span>
           </div>
         </div>
 
@@ -716,201 +607,8 @@ export default function AccountPage() {
             )}
           </div>
 
-          {/* ================================================= */}
-          {/* 2. SAVED ADDRESSES SECTION                        */}
-          {/* ================================================= */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-slate-100 gap-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-slate-900">Saved Addresses</h2>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
-                    {addresses.length}
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                  Manage your delivery and billing addresses for quick checkout.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleOpenAddAddress}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#1C2347] shadow-xs cursor-pointer self-start sm:self-auto"
-              >
-                <span>⊕</span>
-                <span>Add Address</span>
-              </button>
-            </div>
-
-            {/* Address Feedback Banners */}
-            {addressMessage && (
-              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs sm:text-sm text-emerald-800 flex items-center justify-between">
-                <span>✓ {addressMessage}</span>
-                <button
-                  type="button"
-                  onClick={() => setAddressMessage("")}
-                  className="text-emerald-500 hover:text-emerald-700 font-bold ml-2"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-
-            {addressError && (
-              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs sm:text-sm text-red-700 flex items-center justify-between">
-                <span>{addressError}</span>
-                <button
-                  type="button"
-                  onClick={() => setAddressError("")}
-                  className="text-red-500 hover:text-red-700 font-bold ml-2"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-
-            {/* Address List */}
-            <div className="mt-6">
-              {loadingAddresses ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="h-40 rounded-xl bg-slate-100 animate-pulse" />
-                  <div className="h-40 rounded-xl bg-slate-100 animate-pulse" />
-                </div>
-              ) : addresses.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center bg-slate-50/50">
-                  <h3 className="text-sm font-bold text-slate-800">No saved addresses</h3>
-                  <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
-                    You haven't saved any addresses yet. Add an address to use during checkout.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleOpenAddAddress}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#0B1020] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1C2347] shadow-xs cursor-pointer"
-                  >
-                    <span>⊕</span>
-                    <span>Add your first address</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {addresses.map((addr) => (
-                    <div
-                      key={addr.id}
-                      className={`relative flex flex-col justify-between rounded-xl border p-5 transition bg-white shadow-xs ${
-                        addr.is_default
-                          ? "border-slate-800 ring-1 ring-slate-800"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
-                    >
-                      <div>
-                        {/* Badges */}
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                          {addr.is_default && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-2.5 py-0.5 text-[11px] font-semibold text-white">
-                              <span>★</span>
-                              <span>Default {addr.address_type}</span>
-                            </span>
-                          )}
-
-                          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-700 capitalize">
-                            {addr.address_type} Address
-                          </span>
-                        </div>
-
-                        {/* Recipient Name */}
-                        <h4 className="text-sm font-bold text-slate-900">
-                          {addr.first_name} {addr.last_name}
-                        </h4>
-
-                        {addr.company && (
-                          <p className="text-xs font-medium text-slate-500 mt-0.5">
-                            {addr.company}
-                          </p>
-                        )}
-
-                        {/* Address Lines */}
-                        <div className="text-xs text-slate-700 mt-2 leading-relaxed space-y-0.5">
-                          <p>{addr.address_line_1}</p>
-                          {addr.address_line_2 && <p>{addr.address_line_2}</p>}
-                          <p>
-                            {[addr.city, addr.state, addr.postal_code].filter(Boolean).join(", ")}
-                          </p>
-                          <p className="font-semibold text-slate-900">{addr.country}</p>
-                        </div>
-
-                        {/* Phone */}
-                        {addr.phone && (
-                          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5 font-mono">
-                            <span>📞</span>
-                            <span>{addr.phone}</span>
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Card Footer Actions */}
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <div>
-                          {!addr.is_default ? (
-                            <button
-                              type="button"
-                              onClick={() => handleSetDefaultAddress(addr)}
-                              className="text-xs font-semibold text-violet-600 hover:text-violet-800 transition hover:underline cursor-pointer"
-                            >
-                              Set as default
-                            </button>
-                          ) : (
-                            <span className="text-[11px] text-slate-400 font-medium">
-                              Primary address
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditAddress(addr)}
-                            className="text-xs font-semibold text-slate-600 hover:text-slate-900 transition hover:underline cursor-pointer"
-                          >
-                            Edit
-                          </button>
-                          <span className="text-slate-300">|</span>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenDeleteAddress(addr)}
-                            className="text-xs font-semibold text-red-600 hover:text-red-800 transition hover:underline cursor-pointer"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
-
-      {/* Address Management Modals */}
-      <AddressModal
-        isOpen={showAddressModal}
-        onClose={() => setShowAddressModal(false)}
-        onSave={handleSaveAddress}
-        initialData={editingAddress}
-        title={editingAddress ? "Edit Address" : "Add New Address"}
-        saving={isSavingAddress}
-        apiError={modalApiError}
-      />
-
-      <DeleteAddressModal
-        isOpen={Boolean(deletingAddress)}
-        onClose={() => setDeletingAddress(null)}
-        onConfirm={handleConfirmDeleteAddress}
-        address={deletingAddress}
-        deleting={isDeletingAddress}
-      />
     </main>
   );
 }
