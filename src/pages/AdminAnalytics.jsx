@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 
 const lineIcon = {
@@ -71,12 +72,12 @@ export default function AnalyticsPage() {
                   Try targets <Chevron />
                 </button>
 
-                <button
-                  type="button"
+                <Link
+                  to="/admin/online-store/reports/new"
                   className="inline-flex h-9 items-center rounded-lg bg-[#0B1020] px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1C2347]"
                 >
                   New exploration
-                </button>
+                </Link>
               </div>
             </div>
           </header>

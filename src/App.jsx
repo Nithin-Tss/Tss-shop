@@ -145,6 +145,7 @@ export default function App() {
             <Route path="/admin/online-store/overview" element={<AdminOverview />} />
             <Route path="/admin/online-store/reports" element={<AdminReports />} />
             <Route path="/admin/online-store/reports/new" element={<AdminReportExploration />} />
+            <Route path="/admin/online-store/analytics/new" element={<AdminReportExploration />} />
             <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
           </Route>
           <Route element={<RequirePermission permission="orders.manage" />}>
