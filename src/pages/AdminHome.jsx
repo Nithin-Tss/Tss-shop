@@ -337,7 +337,7 @@ export default function AdminHomePage() {
                       key={action.label}
                       to={action.to || "#"}
                       state={action.state}
-                      // "View store" opens the store in this tab (with its "Back to admin" bar)
+                      // "View store" opens the store in a new tab (with its "Back to admin" bar)
                       onClick={
                         action.storefront
                           ? (e) => {

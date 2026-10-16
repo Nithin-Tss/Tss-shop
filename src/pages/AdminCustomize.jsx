@@ -205,6 +205,9 @@ export default function AdminCustomizePage() {
 
   const [products, setProducts] = useState([]);
 
+  // Why products or collections couldn't be loaded: {products?, collections?}
+  const [catalogErrors, setCatalogErrors] = useState({});
+
   const [page, setPage] = useState(() =>
     isPageKey(startParams.get("page")) ? startParams.get("page") : "index"
   );
@@ -389,7 +392,17 @@ export default function AdminCustomizePage() {
   // What the server last saved, to send only the changes
   const lastSavedRef = useRef(null);
 
-  const saveRef = useRef({ timer: 0, saving: false, again: false, retryDelay: 2000, uploads: 0 });
+  const saveRef = useRef({
+    timer: 0,
+    saving: false,
+    again: false,
+    retryDelay: 2000,
+    uploads: 0,
+    external: false, // the code editor saved while this was saving: load its change afterwards
+  });
+
+  // Several code editor saves in a row each load the settings: only the newest reply is used
+  const externalSeqRef = useRef(0);
 
   // Undo / redo: snapshots of the (immutable) theme data
   const historyRef = useRef({ past: [], future: [], lastKey: null, lastTime: 0 });
@@ -480,9 +493,13 @@ export default function AdminCustomizePage() {
   // Products and collections only fill the pickers, so they load after the editor opens
   // instead of holding it up (the product list is the largest response).
   useEffect(() => {
+    // A failed load leaves the picker empty: keep why, so it says so instead of "Add products first"
     apiRequest("/api/v1/catalog/collections/")
       .then(setCollections)
-      .catch(() => setCollections([]));
+      .catch((e) => {
+        setCollections([]);
+        setCatalogErrors((errors) => ({ ...errors, collections: catalogError(e, "collections") }));
+      });
     apiRequest("/api/v1/catalog/products/")
       .then((productData) => {
         setProducts(productData);
@@ -493,7 +510,10 @@ export default function AdminCustomizePage() {
             : productData.find((p) => p.status === "active")?.id || null
         );
       })
-      .catch(() => setProducts([]));
+      .catch((e) => {
+        setProducts([]);
+        setCatalogErrors((errors) => ({ ...errors, products: catalogError(e, "products") }));
+      });
   }, []);
 
   // Warn before leaving with unsaved changes
@@ -888,12 +908,29 @@ export default function AdminCustomizePage() {
       }
     } finally {
       state.saving = false;
+      if (state.external) {
+        state.external = false;
+        engineRef.current.externalChange("settings");
+      }
     }
   }
 
   function scheduleSave(delay = 900) {
     const state = saveRef.current;
     clearTimeout(state.timer);
+    // Nothing differs from what is saved (e.g. the code editor's change was just loaded): nothing to
+    // save, so don't show "unsaved" or warn on leaving
+    const saved = lastSavedRef.current;
+    if (
+      !state.saving &&
+      saved &&
+      dataRef.current &&
+      !diffForSave(saved.data, dataRef.current) &&
+      JSON.stringify(customizerRef.current) === JSON.stringify(saved.customizer)
+    ) {
+      setSaveState("saved");
+      return;
+    }
     setSaveState((current) => (current === "saving" ? current : "pending"));
     state.timer = setTimeout(() => engineRef.current.flushSave(), delay);
   }
@@ -931,33 +968,54 @@ export default function AdminCustomizePage() {
       setPreviewKey((k) => k + 1);
       return;
     }
-    if (saveStateRef.current !== "saved" || saveRef.current.saving) {
-      setNotice(
-        "The code editor changed the settings. Your edits here are still saving; reload to see its changes."
-      );
+    const save = saveRef.current;
+    // A save is on its way: its reply would be older than the code editor's change, so load that afterwards
+    if (save.saving) {
+      save.external = true;
       return;
     }
+    const seq = ++externalSeqRef.current;
     try {
-      const fresh = { ...(await getThemeSettings()) };
-      if (saveStateRef.current !== "saved") return;
+      const fresh = await getThemeSettings();
+      // A newer change is being loaded (it wins), or a save started meanwhile (it loads this afterwards)
+      if (seq !== externalSeqRef.current) return;
+      if (save.saving) {
+        save.external = true;
+        return;
+      }
+      const base = lastSavedRef.current?.data;
+      const local = dataRef.current;
+      // Edits made here and not saved yet (not just a save that is scheduled) are kept on top
+      const unsaved = Boolean(base && local && diffForSave(base, local));
       // Synced sections keep their own shape (and are updated by their own events)
-      const synced = dataRef.current?.sections;
-      if (synced) fresh.sections = synced;
-      else delete fresh.sections;
-      lastSavedRef.current = { data: fresh, customizer: customizerRef.current };
+      const withSynced = (d, synced) => {
+        const out = { ...d };
+        if (synced) out.sections = synced;
+        else delete out.sections;
+        return out;
+      };
+      const next = withSynced(unsaved ? rebaseEdits(base, local, fresh) : fresh, local?.sections);
+      lastSavedRef.current = {
+        data: withSynced(fresh, (base || local)?.sections),
+        customizer: lastSavedRef.current?.customizer ?? customizerRef.current,
+      };
       historyRef.current = { past: [], future: [], lastKey: null, lastTime: 0 };
-      dataRef.current = fresh;
-      setData(fresh);
+      dataRef.current = next;
+      setData(next);
       setHistoryTick((t) => t + 1);
       // A page template deleted in the code editor: back to Page
-      if (!fresh.templates[pageRef.current]) setPage("page");
+      if (!next.templates[pageRef.current]) setPage("page");
       const open = selectedRef.current;
-      if (open && open !== "theme" && !fresh.templates[pageRef.current]?.sections[open]) {
+      if (open && open !== "theme" && !next.templates[pageRef.current]?.sections[open]) {
         setSelected(null);
         setSelectedBlock(null);
       }
       setPreviewKey((k) => k + 1);
-      setNotice("Updated from the code editor.");
+      setNotice(
+        unsaved
+          ? "Updated from the code editor. Your edits here that weren't saved yet are kept on top."
+          : "Updated from the code editor."
+      );
     } catch {
       // the next save or reload reports a problem
     }
@@ -2199,7 +2257,7 @@ export default function AdminCustomizePage() {
                     <a
                       href={previewUrl}
                       onClick={(e) => {
-                        // Same tab, with the "Back to admin" bar; the store path of the page being edited
+                        // New tab, with the "Back to admin" bar; the store path of the page being edited
                         e.preventDefault();
                         openStorefront(
                           new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/"
@@ -2768,6 +2826,7 @@ export default function AdminCustomizePage() {
                             groups={schema.groups || [{ id: "content", label: "Content" }]}
                             collections={collections}
                             products={products}
+                            catalogErrors={catalogErrors}
                             onChange={(key, value) =>
                               update((d) => {
                                 sectionIn(d, page, shown).settings[key] = value;
@@ -2903,6 +2962,7 @@ export default function AdminCustomizePage() {
                             groups={schema.groups || [{ id: "content", label: "Content" }]}
                             collections={collections}
                             products={products}
+                            catalogErrors={catalogErrors}
                             onChange={(key, value) =>
                               updateBlocks(
                                 shown,
@@ -3089,4 +3149,55 @@ export default function AdminCustomizePage() {
       </StorePagesContext.Provider>
     </FontsContext.Provider>
   );
+}
+
+// The code editor saved the settings (`remote`) while edits made here since the last save (`base` ->
+// `local`) were not saved yet: `remote` with those edits on top. Only the options, blocks and sections
+// changed here win; everything else is the code editor's, so saving the result loses neither side.
+function rebaseEdits(base, local, remote) {
+  const changed = (a, b) => JSON.stringify(a) !== JSON.stringify(b);
+  const merged = structuredClone(remote);
+
+  for (const [key, value] of Object.entries(local.settings || {})) {
+    if (changed(value, base.settings?.[key])) merged.settings[key] = value;
+  }
+
+  for (const [name, page] of Object.entries(local.templates || {})) {
+    const was = base.templates?.[name] || { order: [], sections: {} };
+    const into = (merged.templates[name] ||= { order: [], sections: {} });
+
+    for (const id of Object.keys(was.sections)) {
+      if (!(id in page.sections)) delete into.sections[id]; // removed here
+    }
+    for (const [id, section] of Object.entries(page.sections)) {
+      const before = was.sections[id];
+      if (!before) {
+        into.sections[id] = section; // added here
+      } else if (into.sections[id] && changed(section, before)) {
+        const target = into.sections[id]; // a section the code editor removed stays removed
+        for (const [key, value] of Object.entries(section)) {
+          if (key === "settings") {
+            for (const [option, v] of Object.entries(value || {})) {
+              if (changed(v, before.settings?.[option]))
+                target.settings = { ...target.settings, [option]: v };
+            }
+          } else if (changed(value, before[key])) {
+            target[key] = value; // blocks, hidden, ...
+          }
+        }
+      }
+    }
+
+    const order = changed(page.order, was.order)
+      ? [...page.order, ...into.order.filter((id) => !page.order.includes(id))]
+      : into.order;
+    into.order = order.filter((id) => id in into.sections);
+  }
+  return merged;
+}
+// Why a catalog list couldn't be loaded, for the pickers
+function catalogError(error, noun) {
+  return error?.status === 403
+    ? `Your role can't view ${noun}, so they can't be chosen here. Ask the store owner for access to ${noun}.`
+    : `Couldn't load ${noun}: ${error?.message || "request failed"}.`;
 }
