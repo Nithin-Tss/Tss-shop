@@ -35,9 +35,9 @@ function formatOrderDate(dateString) {
 }
 
 function renderPaymentStatusBadge(status) {
-  const s = (status || "paid").toLowerCase();
+  const s = (status || "pending").toLowerCase();
 
-  if (s.includes("pending") || s === "open" || s === "payment pending") {
+  if (s.includes("pending")) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFF4E5] text-[#B76E00] border border-[#FFE2B8]">
         <span className="w-1.5 h-1.5 rounded-full bg-[#B76E00]" />
@@ -46,11 +46,20 @@ function renderPaymentStatusBadge(status) {
     );
   }
 
-  if (s.includes("refund") || s === "cancelled") {
+  if (s === "partially_paid") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEF3E2] text-[#9A4B00] border border-[#FCD399]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#C25E00]" />
+        Partially paid
+      </span>
+    );
+  }
+
+  if (s === "partially_refunded" || s === "refunded") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
         <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-        {status}
+        {s === "refunded" ? "Refunded" : "Partially refunded"}
       </span>
     );
   }
@@ -419,7 +428,7 @@ export default function AdminOrders() {
 
                           {/* Payment status */}
                           <td className="py-3.5 px-3 text-center">
-                            {renderPaymentStatusBadge(order.status)}
+                            {renderPaymentStatusBadge(order.payment_status)}
                           </td>
 
                           {/* Fulfillment status */}

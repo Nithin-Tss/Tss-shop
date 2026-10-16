@@ -308,6 +308,12 @@ export default function AdminCreateOrder() {
     }
 
     if (hasUnsavedCustomItems) {
+      if (!selectedCustomer?.id) {
+        setSaving(false);
+        setError("Select a customer before saving a draft order.");
+        return;
+      }
+
       // Draft orders allow custom items without product ID
       const draftPayload = {
         customer: selectedCustomer?.id || null,
@@ -327,9 +333,9 @@ export default function AdminCreateOrder() {
       setSaving(false);
 
       if (res.ok) {
-        navigate("/admin/online-store/orders");
+        navigate("/admin/online-store/orders/drafts");
       } else {
-        setError(res.formError || res.fieldErrors?.items || "Failed to create order draft.");
+        setError(res.formError || res.fieldErrors?.details || "Failed to create order draft.");
       }
     } else {
       const res = await apiPost("/api/v1/orders/", payload);
