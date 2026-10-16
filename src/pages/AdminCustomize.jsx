@@ -254,6 +254,11 @@ export default function AdminCustomizePage() {
 
   const [sampleArticle, setSampleArticle] = useState(() => startParams.get("article") || "");
 
+  // The collection (handle or id) the Collection page preview shows; empty = all products
+  const [sampleCollection, setSampleCollection] = useState(
+    () => startParams.get("collection") || ""
+  );
+
   // Visible store pages (About us, ...), and the one the Page preview shows (its handle)
   const [storePages, setStorePages] = useState([]);
 
@@ -385,6 +390,8 @@ export default function AdminCustomizePage() {
 
   const sampleArticleRef = useRef("");
 
+  const sampleCollectionRef = useRef("");
+
   const samplePageRef = useRef("");
 
   // Keep the "latest value" refs in step after each commit (event handlers and timers read them)
@@ -398,6 +405,7 @@ export default function AdminCustomizePage() {
     pageRef.current = page;
     sampleProductRef.current = sampleProductId;
     sampleArticleRef.current = sampleArticle;
+    sampleCollectionRef.current = sampleCollection;
     samplePageRef.current = samplePage;
   });
 
@@ -580,7 +588,7 @@ export default function AdminCustomizePage() {
     }
 
     if (page === "collection") {
-      return `${base}/collections/all`;
+      return `${base}/collections/${sampleCollection || "all"}`;
     }
 
     if (page === "blog") return `${base}/blog`;
@@ -590,7 +598,7 @@ export default function AdminCustomizePage() {
     if (basePage(page) === "page") return samplePage ? `${base}/pages/${samplePage}` : "";
 
     return `${base}/`;
-  }, [store, page, sampleProductId, sampleArticle, samplePage]);
+  }, [store, page, sampleProductId, sampleArticle, sampleCollection, samplePage]);
 
   // ---------------- Live preview (the page being edited) ----------------
   // The preview is rendered once; afterwards only the sections that changed are rendered
@@ -602,6 +610,7 @@ export default function AdminCustomizePage() {
       page: pageRef.current,
       product: pageRef.current === "product" ? sampleProductRef.current || "" : "",
       article: pageRef.current === "article" ? sampleArticleRef.current : "",
+      collection: pageRef.current === "collection" ? sampleCollectionRef.current : "",
       handle: basePage(pageRef.current) === "page" ? samplePageRef.current : "",
     };
   }
@@ -1345,7 +1354,7 @@ export default function AdminCustomizePage() {
   // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed
   useEffect(() => {
     if (status === "ready") engineRef.current.renderFull();
-  }, [status, page, previewKey, sampleArticle, sampleProductId, samplePage]);
+  }, [status, page, previewKey, sampleArticle, sampleProductId, sampleCollection, samplePage]);
 
   // The address remembers the page, its product or post, and the open section (a refresh shows them again)
   useEffect(() => {
@@ -1354,6 +1363,7 @@ export default function AdminCustomizePage() {
     put("page", page === "index" ? "" : page);
     put("product", page === "product" ? sampleProductId : "");
     put("article", page === "article" ? sampleArticle : "");
+    put("collection", page === "collection" ? sampleCollection : "");
     put("handle", basePage(page) === "page" ? samplePage : "");
     put("section", selected);
     const query = params.toString();
@@ -1362,7 +1372,7 @@ export default function AdminCustomizePage() {
       "",
       `${window.location.pathname}${query ? `?${query}` : ""}`
     );
-  }, [page, sampleProductId, sampleArticle, samplePage, selected]);
+  }, [page, sampleProductId, sampleArticle, sampleCollection, samplePage, selected]);
 
   // A store link followed in the preview ("/products/<id>", "/collections/all", "/blog/<handle>", "/"):
   // open that page's own template here, with Edit mode on and its main section (e.g. Product information)
@@ -1383,9 +1393,11 @@ export default function AdminCustomizePage() {
         selected: selectedRef.current,
         product: sampleProductRef.current,
         article: sampleArticleRef.current,
+        collection: sampleCollectionRef.current,
         handle: samplePageRef.current,
       },
     ]);
+    if (next === "collection") setSampleCollection(second && second !== "all" ? second : "");
     if (next === "product") setSampleProductId(second);
     if (next === "article") setSampleArticle(second);
     if (next === "page") setSamplePage(second);
@@ -1407,6 +1419,7 @@ export default function AdminCustomizePage() {
     setBackStack((stack) => stack.slice(0, -1));
     if (previous.product) setSampleProductId(previous.product);
     if (previous.article) setSampleArticle(previous.article);
+    if (previous.page === "collection") setSampleCollection(previous.collection || "");
     if (previous.handle) setSamplePage(previous.handle);
     setPage(previous.page);
     setAdding(false);
