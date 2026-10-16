@@ -700,6 +700,7 @@ export const Field = memo(function Field({
       );
 
     case "image":
+    case "image_picker":
       return (
         <div>
           {label}
