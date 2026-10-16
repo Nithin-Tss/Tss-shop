@@ -1191,7 +1191,12 @@ export function ImageUpload({ value, onChange }) {
     <div>
       {shown ? (
         <div className="relative overflow-hidden rounded-lg border border-[#DDD6FE]">
-          <img src={shown} alt="" loading="lazy" className="h-28 w-full object-cover" />
+          <img
+            src={shown}
+            alt=""
+            loading="lazy"
+            className="h-28 w-full object-contain bg-[#F8F9FC] p-2"
+          />
 
           {progress !== null && (
             <div className="absolute inset-x-0 top-0 h-1 bg-black/10" aria-label="Uploading">
