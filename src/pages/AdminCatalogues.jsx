@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { useCan } from "@/lib/auth";
 
@@ -116,10 +117,6 @@ export default function CataloguesPage() {
     }, 3000);
   };
 
-  const handleCreateCatalogue = () => {
-    setIsCreateModalOpen(true);
-  };
-
   const handleSaveCatalogue = (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -226,13 +223,12 @@ export default function CataloguesPage() {
               </button>
 
               {canManage && (
-                <button
-                  type="button"
-                  onClick={handleCreateCatalogue}
+                <Link
+                  to="/admin/online-store/catalogues/new"
                   className="rounded-lg bg-[#1A1A1A] px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs hover:bg-[#303030] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                 >
                   Create catalog
-                </button>
+                </Link>
               )}
             </div>
           </div>
@@ -262,13 +258,12 @@ export default function CataloguesPage() {
 
                 {/* Create catalog Action Button */}
                 {canManage && (
-                  <button
-                    type="button"
-                    onClick={handleCreateCatalogue}
+                  <Link
+                    to="/admin/online-store/catalogues/new"
                     className="mt-5 inline-flex items-center justify-center rounded-lg bg-[#1A1A1A] px-4 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-[#303030] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                   >
                     Create catalog
-                  </button>
+                  </Link>
                 )}
               </section>
 

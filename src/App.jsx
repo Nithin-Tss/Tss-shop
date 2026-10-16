@@ -18,6 +18,7 @@ const AdminProductDetails = lazy(() => import("@/pages/AdminProductDetails"));
 const AdminCollections = lazy(() => import("@/pages/AdminCollections"));
 const AdminAddCollection = lazy(() => import("@/pages/AdminAddCollection"));
 const AdminCatalogues = lazy(() => import("@/pages/AdminCatalogues"));
+const AdminAddCatalogue = lazy(() => import("@/pages/AdminAddCatalogue"));
 const AdminContent = lazy(() => import("@/pages/AdminContent"));
 const BlogPostsPage = lazy(() =>
   import("@/pages/AdminContent").then((m) => ({ default: m.BlogPostsPage }))
@@ -104,6 +105,8 @@ export default function App() {
               path="/admin/online-store/collections/:collectionId"
               element={<AdminAddCollection />}
             />
+            <Route path="/admin/online-store/catalogues/new" element={<AdminAddCatalogue />} />
+            <Route path="/admin/online-store/catalogs/new" element={<AdminAddCatalogue />} />
           </Route>
           <Route element={<RequirePermission permission="inventory.view" />}>
             <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
