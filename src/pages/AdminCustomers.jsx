@@ -273,17 +273,6 @@ export default function AdminCustomers() {
             </div>
           </div>
 
-          {/* DESCRIBE YOUR SEGMENT BANNER */}
-          <div className="mb-5 rounded-2xl border border-[#E4DEFB] bg-white px-4 py-3 shadow-xs flex items-center justify-between cursor-pointer hover:bg-slate-50/70 transition">
-            <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-700 text-sm">
-                👓
-              </div>
-              <span className="text-sm font-medium text-slate-700">Describe your segment</span>
-            </div>
-            <span className="text-slate-400 text-sm">⌄</span>
-          </div>
-
           {/* CUSTOMERS TABLE CARD */}
           <section className="rounded-2xl border border-[#E4DEFB] bg-white shadow-sm overflow-hidden">
             {/* SEARCH & CONTROLS HEADER */}
@@ -441,7 +430,7 @@ export default function AdminCustomers() {
                               onClick={() => handleSelectCustomer(c)}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
                             >
-                              <span>📍</span>
+                              <NavIcon name="location" className="h-4 w-4" />
                               <span>Manage addresses</span>
                               {Array.isArray(c.addresses) && c.addresses.length > 0 && (
                                 <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white text-slate-800 font-bold border border-slate-200">
