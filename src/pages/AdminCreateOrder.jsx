@@ -18,14 +18,16 @@ function buildCurrencies() {
     const names = new Intl.DisplayNames(["en"], { type: "currency" });
     const list = Intl.supportedValuesOf("currency").map((code) => {
       const symbol =
-        new Intl.NumberFormat("en", { style: "currency", currency: code, currencyDisplay: "narrowSymbol" })
+        new Intl.NumberFormat("en", {
+          style: "currency",
+          currency: code,
+          currencyDisplay: "narrowSymbol",
+        })
           .formatToParts(0)
           .find((part) => part.type === "currency")?.value || code;
       return { code, symbol, label: `${names.of(code) || code} (${code} ${symbol})` };
     });
-    return list.length
-      ? list.sort((a, b) => a.label.localeCompare(b.label))
-      : FALLBACK_CURRENCIES;
+    return list.length ? list.sort((a, b) => a.label.localeCompare(b.label)) : FALLBACK_CURRENCIES;
   } catch {
     return FALLBACK_CURRENCIES;
   }
@@ -78,7 +80,9 @@ function CurrencyPicker({ value, onChange }) {
             className="w-full border-b border-slate-200 px-3 py-2 text-xs outline-none rounded-t-lg"
           />
           <ul className="max-h-60 overflow-y-auto py-1">
-            {shown.length === 0 && <li className="px-3 py-2 text-xs text-slate-500">No currency found</li>}
+            {shown.length === 0 && (
+              <li className="px-3 py-2 text-xs text-slate-500">No currency found</li>
+            )}
             {shown.map((c) => (
               <li key={c.code}>
                 <button

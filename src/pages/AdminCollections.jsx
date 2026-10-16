@@ -492,8 +492,9 @@ export default function AdminCollections() {
                               >
                                 <span>{selectedIds.length} selected</span>
                                 <svg
-                                  className={`h-3.5 w-3.5 text-[#5C5F62] transition-transform duration-150 ${isSelectDropdownOpen ? "rotate-180" : ""
-                                    }`}
+                                  className={`h-3.5 w-3.5 text-[#5C5F62] transition-transform duration-150 ${
+                                    isSelectDropdownOpen ? "rotate-180" : ""
+                                  }`}
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -583,8 +584,9 @@ export default function AdminCollections() {
                                   e.stopPropagation();
                                   setIsMoreMenuOpen((prev) => !prev);
                                 }}
-                                className={`inline-flex h-[32px] w-[34px] items-center justify-center rounded-lg border border-[#D1D5DB] bg-white text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20 ${isMoreMenuOpen ? "bg-[#F3F4F6] border-[#9CA3AF]" : ""
-                                  }`}
+                                className={`inline-flex h-[32px] w-[34px] items-center justify-center rounded-lg border border-[#D1D5DB] bg-white text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] active:bg-[#ECEEF0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20 ${
+                                  isMoreMenuOpen ? "bg-[#F3F4F6] border-[#9CA3AF]" : ""
+                                }`}
                                 aria-label="More bulk actions"
                                 aria-expanded={isMoreMenuOpen}
                               >
@@ -628,12 +630,14 @@ export default function AdminCollections() {
                               role="switch"
                               aria-checked={showOnlySelected}
                               onClick={() => setShowOnlySelected((prev) => !prev)}
-                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20 ${showOnlySelected ? "bg-[#0B1020]" : "bg-[#D1D5DB]"
-                                }`}
+                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1020]/20 ${
+                                showOnlySelected ? "bg-[#0B1020]" : "bg-[#D1D5DB]"
+                              }`}
                             >
                               <span
-                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showOnlySelected ? "translate-x-4" : "translate-x-0"
-                                  }`}
+                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                                  showOnlySelected ? "translate-x-4" : "translate-x-0"
+                                }`}
                               />
                             </button>
                             <span
@@ -759,8 +763,9 @@ export default function AdminCollections() {
                         <tr
                           key={col.id}
                           onClick={(e) => openCollection(e, col.id)}
-                          className={`h-14 cursor-pointer transition-colors hover:bg-[#F9FAFB] ${isSelected ? "bg-[#F9FAFB]" : ""
-                            }`}
+                          className={`h-14 cursor-pointer transition-colors hover:bg-[#F9FAFB] ${
+                            isSelected ? "bg-[#F9FAFB]" : ""
+                          }`}
                         >
                           {/* Checkbox */}
                           <td className={`${cell} w-12 text-center`}>
@@ -850,11 +855,11 @@ export default function AdminCollections() {
                           <td className={`${cell} max-w-xs truncate text-[#6B7280]`}>
                             {col.type === "automated" && col.rules?.length
                               ? col.rules
-                                .map(
-                                  (r) =>
-                                    `${r.field.replace(/_/g, " ")} ${r.operator.replace(/_/g, " ")} ${r.value}`
-                                )
-                                .join(col.match === "any" ? " or " : " and ")
+                                  .map(
+                                    (r) =>
+                                      `${r.field.replace(/_/g, " ")} ${r.operator.replace(/_/g, " ")} ${r.value}`
+                                  )
+                                  .join(col.match === "any" ? " or " : " and ")
                               : "—"}
                           </td>
 
@@ -878,8 +883,9 @@ export default function AdminCollections() {
                                     (col.sales_channels ? col.sales_channels.length : 0)}
                                 </span>
                                 <svg
-                                  className={`h-3.5 w-3.5 text-[#9CA3AF] transition-transform duration-150 ${openChannelDropdownId === col.id ? "rotate-180" : ""
-                                    }`}
+                                  className={`h-3.5 w-3.5 text-[#9CA3AF] transition-transform duration-150 ${
+                                    openChannelDropdownId === col.id ? "rotate-180" : ""
+                                  }`}
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -899,12 +905,13 @@ export default function AdminCollections() {
                                 <div
                                   ref={channelDropdownRef}
                                   onClick={(e) => e.stopPropagation()}
-                                  className={`absolute right-0 z-40 min-w-[210px] rounded-lg border border-[#E5E7EB] bg-white p-1 text-left shadow-lg ${paginatedCollections.indexOf(col) >=
+                                  className={`absolute right-0 z-40 min-w-[210px] rounded-lg border border-[#E5E7EB] bg-white p-1 text-left shadow-lg ${
+                                    paginatedCollections.indexOf(col) >=
                                       paginatedCollections.length - 2 &&
-                                      paginatedCollections.length > 2
+                                    paginatedCollections.length > 2
                                       ? "bottom-full mb-2"
                                       : "top-full mt-2"
-                                    }`}
+                                  }`}
                                 >
                                   {col.sales_channels && col.sales_channels.length > 0 ? (
                                     col.sales_channels.map((channel, idx) => (
@@ -957,9 +964,9 @@ export default function AdminCollections() {
                   {displayedCollections.length === 0
                     ? "0-0"
                     : `${(currentPage - 1) * pageSize + 1}-${Math.min(
-                      currentPage * pageSize,
-                      displayedCollections.length
-                    )}`}
+                        currentPage * pageSize,
+                        displayedCollections.length
+                      )}`}
                 </span>
               </div>
 
