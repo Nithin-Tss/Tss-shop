@@ -87,19 +87,29 @@ export function deleteBlogPost(id) {
   return apiRequest(`${BASE}/posts/${id}/`, { method: "DELETE" });
 }
 
-// Ready-made themes -> { applied: "classic", undo: "Classic" | null (name of the theme undo goes back to), presets: [{ slug, name, description, categories, swatches: [accent, background, text] }] }
-export function listThemePresets() {
-  return apiRequest(`${BASE}/presets/`);
+// The store's themes: one published, the rest drafts, and the ready-made designs to add
+// -> { themes: [{ id, name, preset, published, updated_at }], presets: [{ slug, name, description, categories, swatches }], max }
+export function getThemeLibrary() {
+  return apiRequest(`${BASE}/library/`);
 }
 
-// Go back to how the store was before the last theme was used -> { applied }
-export function undoThemePreset() {
-  return apiRequest(`${BASE}/presets/undo/`, { method: "POST", body: {} });
+// Add a theme: source is a preset slug, "blank" (your own, from the starter) or a theme id (a copy).
+// The store's first theme is published; later ones are drafts. -> { id, name, preset, published }
+export function addTheme(source, name) {
+  return apiRequest(`${BASE}/library/`, { method: "POST", body: { source, name } });
 }
 
-// Use a ready-made theme: its look and home layout replace the store's -> { applied }
-export function applyThemePreset(slug) {
-  return apiRequest(`${BASE}/presets/`, { method: "POST", body: { slug } });
+export function renameTheme(id, name) {
+  return apiRequest(`${BASE}/library/${id}/`, { method: "PATCH", body: { name } });
+}
+
+export function deleteTheme(id) {
+  return apiRequest(`${BASE}/library/${id}/`, { method: "DELETE" });
+}
+
+// Make a draft the live theme; the one that was live becomes a draft
+export function publishTheme(id) {
+  return apiRequest(`${BASE}/library/${id}/publish/`, { method: "POST", body: {} });
 }
 
 // Page templates -> { templates: [{ key: "page" | "page.contact", label, path, liquid_path }] }

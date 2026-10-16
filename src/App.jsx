@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Link, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
+import EditingThemeBar from "@/components/EditingThemeBar";
 import Home from "@/pages/Home";
 const Signin = lazy(() => import("@/pages/Signin"));
 const Signup = lazy(() => import("@/pages/Signup"));
@@ -85,11 +86,27 @@ export default function App() {
             <Route path="/admin/online-store" element={<AdminOnlineStore />} />
           </Route>
           <Route element={<RequirePermission permission="themes.manage" />}>
-            <Route path="/admin/online-store/customize" element={<AdminCustomize />} />
+            <Route
+              path="/admin/online-store/customize"
+              element={
+                <>
+                  <AdminCustomize />
+                  <EditingThemeBar />
+                </>
+              }
+            />
             <Route path="/admin/online-store/pages" element={<StorePagesPage />} />
             <Route path="/admin/online-store/blog-posts" element={<BlogPostsPage />} />
             {/* Theme code editor: it saves theme files */}
-            <Route path="/editor-demo" element={<EditorDemo />} />
+            <Route
+              path="/editor-demo"
+              element={
+                <>
+                  <EditorDemo />
+                  <EditingThemeBar />
+                </>
+              }
+            />
           </Route>
           <Route element={<RequirePermission permission="products.view" />}>
             <Route path="/admin/online-store/products" element={<AdminProducts />} />

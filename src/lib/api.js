@@ -1,4 +1,5 @@
 import { getActiveStore, getSession, setStores, setTokens, signOut } from "@/lib/auth";
+import { getEditingThemeId } from "@/lib/editingTheme";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -143,6 +144,12 @@ if (typeof window !== "undefined") {
 async function send(path, { method, headers, body }) {
   const request = () => {
     const allHeaders = getHeaders(headers);
+    // Theme calls work on the theme chosen on the Online store page (a draft), else the published one.
+    // The library calls manage all of the store's themes, so they don't pick one.
+    if (path.startsWith("/api/v1/themes/") && !path.startsWith("/api/v1/themes/library")) {
+      const themeId = getEditingThemeId();
+      if (themeId) allHeaders["X-Theme-Id"] = themeId;
+    }
     // Files go as multipart: the browser sets that Content-Type (with its boundary) itself
     if (typeof FormData !== "undefined" && body instanceof FormData)
       delete allHeaders["Content-Type"];

@@ -174,8 +174,8 @@ export default function OnboardingPage() {
       }
     }
 
-    // Custom: code editor (from the online store page); predefined: block customizer
-    navigate(themeId === "custom" ? "/admin/online-store" : "/admin/online-store/customize");
+    // Both choices open the theme library: pick a ready-made design, or create your own
+    navigate(themeId === "custom" ? "/admin/online-store?create=1" : "/admin/online-store");
   };
 
   const handleNext = () => {
