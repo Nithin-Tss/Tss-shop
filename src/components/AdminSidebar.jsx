@@ -194,6 +194,7 @@ const menuGroups = [
         permission: "orders.view",
         children: [
           { label: "Drafts", href: `${BASE}/orders/drafts`, permission: "draft_orders.view" },
+          { label: "Abandoned checkouts", href: `${BASE}/orders/abandoned-checkouts` },
         ],
       },
       {

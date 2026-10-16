@@ -27,6 +27,7 @@ const AdminMenus = lazy(() => import("@/pages/AdminMenus"));
 const AdminInventory = lazy(() => import("@/pages/AdminInventory"));
 const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
 const AdminDrafts = lazy(() => import("@/pages/AdminDrafts"));
+const AdminAbandonedCheckouts = lazy(() => import("@/pages/AdminAbandonedCheckouts"));
 const AdminCreateOrder = lazy(() => import("@/pages/AdminCreateOrder"));
 const AdminCustomers = lazy(() => import("@/pages/AdminCustomers"));
 const AdminAddCustomer = lazy(() => import("@/pages/AdminAddCustomer"));
@@ -109,6 +110,10 @@ export default function App() {
           </Route>
           <Route element={<RequirePermission permission="orders.view" />}>
             <Route path="/admin/online-store/orders" element={<AdminOrders />} />
+            <Route
+              path="/admin/online-store/orders/abandoned-checkouts"
+              element={<AdminAbandonedCheckouts />}
+            />
           </Route>
           <Route element={<RequirePermission permission="draft_orders.view" />}>
             <Route path="/admin/online-store/orders/drafts" element={<AdminDrafts />} />
