@@ -8,4 +8,14 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, "src") },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Stable vendor chunk: app deploys don't invalidate the cached React/router code
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+        },
+      },
+    },
+  },
 });
