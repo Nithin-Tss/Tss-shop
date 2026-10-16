@@ -610,11 +610,6 @@ export default function AdminCreateOrder() {
                   <span className="text-slate-400 text-xs">☍</span>
                 </div>
 
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-xs font-medium text-slate-700">
-                  <span>🌐</span>
-                  <span>Melb</span>
-                </div>
-
                 <div className="space-y-1.5 pt-1">
                   <label className="block text-xs font-medium text-slate-600">Currency</label>
                   <div className="relative">
