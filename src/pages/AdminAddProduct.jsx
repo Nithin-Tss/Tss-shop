@@ -45,7 +45,6 @@ function getFilenameFromUrl(url) {
     return "image";
   }
 }
-
 const slugify = (text) =>
   (text || "")
     .toString()
@@ -386,9 +385,8 @@ function CollectionsPicker({
       {/* Selected Collections Box with Removable Tags (Screenshot 1) */}
       <div
         onClick={() => setIsOpen(true)}
-        className={`min-h-[58px] cursor-pointer rounded-lg border border-[#DDE1EA] bg-white p-2.5 transition focus-within:border-[#0B1020] ${
-          error ? "border-red-400" : "hover:border-slate-400"
-        }`}
+        className={`min-h-[58px] cursor-pointer rounded-lg border border-[#DDE1EA] bg-white p-2.5 transition focus-within:border-[#0B1020] ${error ? "border-red-400" : "hover:border-slate-400"
+          }`}
       >
         {selectedCollections.length === 0 ? (
           <p className="flex items-center text-sm text-slate-400 select-none py-1">
@@ -1373,11 +1371,10 @@ export function ProductForm({ productId }) {
                         setDragging(false);
                         if (!saving) addPhotos(e.dataTransfer.files);
                       }}
-                      className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
-                        dragging
+                      className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${dragging
                           ? "border-[#0B1020] bg-[#EEF1F8]"
                           : "border-[#DDE1EA] bg-[#FAF8FF] hover:bg-slate-50"
-                      }`}
+                        }`}
                     >
                       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
                         <svg
@@ -1433,11 +1430,10 @@ export function ProductForm({ productId }) {
                         return (
                           <div
                             key={photo.id}
-                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF8FF] transition ${
-                              isCover
+                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF8FF] transition ${isCover
                                 ? "border-[#0B1020] ring-2 ring-[#0B1020]/15 col-span-2 row-span-2"
                                 : "border-[#DDE1EA] hover:border-slate-400"
-                            }`}
+                              }`}
                           >
                             {/* Image or Broken fallback */}
                             {isBroken ? (
@@ -1581,11 +1577,10 @@ export function ProductForm({ productId }) {
                         onClick={() => {
                           if (!saving) mainFileInputRef.current?.click();
                         }}
-                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
-                          dragging
+                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${dragging
                             ? "border-[#0B1020] bg-[#EEF1F8]"
                             : "border-[#DDE1EA] bg-[#FAF8FF] hover:border-slate-400 hover:bg-slate-50"
-                        } ${saving ? "pointer-events-none opacity-50" : ""}`}
+                          } ${saving ? "pointer-events-none opacity-50" : ""}`}
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-[#0B1020]">
                           <svg
@@ -1837,11 +1832,10 @@ export function ProductForm({ productId }) {
                     {STATUSES.map((opt) => (
                       <label
                         key={opt.value}
-                        className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${
-                          status === opt.value
+                        className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${status === opt.value
                             ? "border-[#0B1020] bg-[#EEF1F8] ring-1 ring-[#0B1020]"
                             : "border-[#DDE1EA] hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"
@@ -1943,52 +1937,52 @@ export function ProductForm({ productId }) {
                     fieldErrors.seo_title ||
                     fieldErrors.seo_description ||
                     fieldErrors.handle) && (
-                    <div className="mt-4 space-y-4">
-                      <Field
-                        label="SEO title"
-                        help={`${seoTitle.length} of 70 characters`}
-                        error={fieldErrors.seo_title}
-                      >
-                        <input
-                          value={seoTitle}
-                          maxLength={70}
-                          onChange={(e) => setSeoTitle(e.target.value)}
-                          placeholder={name}
-                          className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
-                        />
-                      </Field>
-                      <Field
-                        label="SEO description"
-                        help={`${seoDescription.length} of 160 characters`}
-                        error={fieldErrors.seo_description}
-                      >
-                        <textarea
-                          value={seoDescription}
-                          maxLength={160}
-                          rows={3}
-                          onChange={(e) => setSeoDescription(e.target.value)}
-                          className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
-                        />
-                      </Field>
-                      <Field
-                        label="URL handle"
-                        help={`${storeDomain}/products/${currentHandle}`}
-                        error={fieldErrors.handle}
-                      >
-                        <div
-                          className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-3.5 transition focus-within:border-[#0B1020] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0B1020]/[0.07] ${withError(fieldErrors.handle)}`}
+                      <div className="mt-4 space-y-4">
+                        <Field
+                          label="SEO title"
+                          help={`${seoTitle.length} of 70 characters`}
+                          error={fieldErrors.seo_title}
                         >
-                          <span className="select-none text-sm text-slate-500">products/</span>
                           <input
-                            value={handle}
-                            onChange={(e) => setHandle(cleanHandle(e.target.value))}
-                            placeholder={slugify(name)}
-                            className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                            value={seoTitle}
+                            maxLength={70}
+                            onChange={(e) => setSeoTitle(e.target.value)}
+                            placeholder={name}
+                            className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
                           />
-                        </div>
-                      </Field>
-                    </div>
-                  )}
+                        </Field>
+                        <Field
+                          label="SEO description"
+                          help={`${seoDescription.length} of 160 characters`}
+                          error={fieldErrors.seo_description}
+                        >
+                          <textarea
+                            value={seoDescription}
+                            maxLength={160}
+                            rows={3}
+                            onChange={(e) => setSeoDescription(e.target.value)}
+                            className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
+                          />
+                        </Field>
+                        <Field
+                          label="URL handle"
+                          help={`${storeDomain}/products/${currentHandle}`}
+                          error={fieldErrors.handle}
+                        >
+                          <div
+                            className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-3.5 transition focus-within:border-[#0B1020] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0B1020]/[0.07] ${withError(fieldErrors.handle)}`}
+                          >
+                            <span className="select-none text-sm text-slate-500">products/</span>
+                            <input
+                              value={handle}
+                              onChange={(e) => setHandle(cleanHandle(e.target.value))}
+                              placeholder={slugify(name)}
+                              className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                            />
+                          </div>
+                        </Field>
+                      </div>
+                    )}
                 </Card>
               </div>
             </fieldset>
