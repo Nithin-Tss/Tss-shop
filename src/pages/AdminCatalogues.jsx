@@ -17,7 +17,6 @@ function CatalogHeaderIcon({ className = "h-5 w-5 text-[#1A1A1A] shrink-0" }) {
     </svg>
   );
 }
-
 // Polaris PersonFilledIcon (20x20 viewBox)
 function PersonIcon({ className = "h-5 w-5 shrink-0" }) {
   return (
@@ -321,11 +320,10 @@ export default function CataloguesPage() {
                           <td className="px-4 py-3 font-medium text-[#1A1A1A]">{cat.name}</td>
                           <td className="px-4 py-3">
                             <span
-                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                cat.status === "Active"
+                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cat.status === "Active"
                                   ? "bg-[#E3F1DF] text-[#0D5B22]"
                                   : "bg-[#E4E5E7] text-[#616161]"
-                              }`}
+                                }`}
                             >
                               {cat.status}
                             </span>
