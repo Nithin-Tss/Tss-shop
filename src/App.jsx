@@ -39,6 +39,7 @@ const AdminReports = lazy(() => import("@/pages/AdminReports"));
 const AdminReportExploration = lazy(() => import("@/pages/AdminReportExploration"));
 const AdminAnalytics = lazy(() => import("@/pages/AdminAnalytics"));
 const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
+const AdminCreateDiscount = lazy(() => import("@/pages/AdminCreateDiscount"));
 const AdminShipping = lazy(() => import("@/pages/AdminShipping"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -157,6 +158,27 @@ export default function App() {
           </Route>
           <Route element={<RequirePermission permission="discounts.view" />}>
             <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
+            <Route path="/admin/online-store/discounts/new" element={<AdminCreateDiscount />} />
+<Route
+              path="/admin/online-store/discounts/new/:discountType"
+              element={<AdminCreateDiscount />}
+            />
+<Route
+              path="/admin/online-store/discounts/amount-off-products"
+              element={<AdminCreateDiscount initialType="amount-off-products" />}
+            />
+<Route
+              path="/admin/online-store/discounts/buy-x-get-y"
+              element={<AdminCreateDiscount initialType="buy-x-get-y" />}
+            />
+<Route
+              path="/admin/online-store/discounts/amount-off-order"
+              element={<AdminCreateDiscount initialType="amount-off-order" />}
+            />
+<Route
+              path="/admin/online-store/discounts/free-shipping"
+              element={<AdminCreateDiscount initialType="free-shipping" />}
+            />
           </Route>
           <Route element={<RequirePermission permission="shipping.view" />}>
             <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
