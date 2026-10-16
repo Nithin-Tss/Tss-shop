@@ -2199,7 +2199,7 @@ export default function AdminCustomizePage() {
                     <a
                       href={previewUrl}
                       onClick={(e) => {
-                        // Same tab, with the "Back to admin" bar; the store path of the page being edited
+                        // New tab, with the "Back to admin" bar; the store path of the page being edited
                         e.preventDefault();
                         openStorefront(
                           new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/"

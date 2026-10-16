@@ -347,7 +347,7 @@ export async function apiDelete(path, customHeaders = {}) {
 }
 
 /* ------------------------------------------------------------------ */
-/* "View store": the active store's storefront, in this same tab.       */
+/* "View store": the active store's storefront, in a new tab.        */
 /* The backend gives a link that shows its owner/staff a "Back to admin"*/
 /* bar on top of the store. The admin page and its scroll position are  */
 /* remembered here, and restored when the user comes back (the bar, or  */
@@ -359,22 +359,27 @@ const here = () => window.location.pathname + window.location.search;
 
 // `path` is a storefront path: "/", "/collections/all", "/products/<id>"
 export async function openStorefront(path = "/") {
-  try {
-    sessionStorage.setItem(RETURN_KEY, JSON.stringify({ url: here(), scrollY: window.scrollY }));
-  } catch {}
+  // Open the tab right away (inside the click) so popup blockers allow it; it is pointed at the store below
+  const tab = window.open("", "_blank");
 
   const res = await apiPost("/api/v1/themes/storefront-link/", {
     path,
     return_url: window.location.href,
   });
-  if (res.ok) {
-    window.location.assign(res.data.url); // assign, not replace: Back returns to this admin page
-    return;
+
+  let url = res.ok ? res.data.url : null;
+  if (!url) {
+    // The link couldn't be made: still open the store (just without the bar)
+    const store = getActiveStore(getSession());
+    if (store?.storeSlug) url = `${API_URL}/s/${store.storeSlug}${path}`;
   }
 
-  // The link couldn't be made: still open the store (just without the bar)
-  const store = getActiveStore(getSession());
-  if (store?.storeSlug) window.location.assign(`${API_URL}/s/${store.storeSlug}${path}`);
+  if (tab) {
+    if (url) tab.location.href = url;
+    else tab.close();
+  } else if (url) {
+    window.open(url, "_blank"); // blocked placeholder tab: try once more
+  }
 }
 
 // Called by every admin page (see AdminHeader): back from the store, scroll to where the user was
