@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { apiGet, apiPatch, syncAccess } from "@/lib/api";
-import { getActiveStore, getSession } from "@/lib/auth";
+import { useNavigate } from "react-router-dom";
+import { apiDelete, apiGet, apiPatch, syncAccess } from "@/lib/api";
+import { STORES_PATH, getActiveStore, getSession } from "@/lib/auth";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
 
@@ -87,7 +88,12 @@ export default function AdminSettings() {
 
   /* Loading and saving against the backend */
 
-  const storeId = getActiveStore(getSession())?.storeId;
+  const activeStore = getActiveStore(getSession());
+  const storeId = activeStore?.storeId;
+  // Only the store owner may change store details (the backend enforces this too)
+  const isOwner = activeStore?.role === "owner";
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(Boolean(storeId));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null); // { type: "ok" | "error", text }
@@ -146,7 +152,7 @@ export default function AdminSettings() {
      ========================================================= */
 
   const handleSave = async () => {
-    if (!storeId || saving) return;
+    if (!storeId || saving || !isOwner) return;
 
     setSaving(true);
     setMessage(null);
@@ -183,6 +189,36 @@ export default function AdminSettings() {
         res.status === 403
           ? "Only the store owner can change store settings."
           : res.formError || "Please fix the highlighted fields.",
+    });
+  };
+
+  const handleDeleteStore = async () => {
+    if (!storeId || deleting || !isOwner) return;
+
+    const name = storeName || activeStore?.storeName || "this store";
+    if (!window.confirm(`Delete "${name}"? The store will be closed and removed from your account.`))
+      return;
+    const typed = window.prompt(`Type the store name to confirm:\n${name}`);
+    if (typed === null) return;
+    if (typed.trim() !== name) {
+      setMessage({ type: "error", text: "The name didn't match, so the store was not deleted." });
+      return;
+    }
+
+    setDeleting(true);
+    setMessage(null);
+    const res = await apiDelete(`/api/v1/stores/${storeId}/`);
+
+    if (res.ok) {
+      await syncAccess({ force: true }); // the closed store drops out of the session
+      navigate(STORES_PATH);
+      return;
+    }
+
+    setDeleting(false);
+    setMessage({
+      type: "error",
+      text: res.error || "Could not delete the store.",
     });
   };
 
@@ -226,7 +262,12 @@ export default function AdminSettings() {
 
   const renderGeneral = () => {
     return (
-      <div className="space-y-5">
+      <fieldset disabled={!isOwner} className="min-w-0 space-y-5 border-0 p-0">
+        {!isOwner && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Only the store owner can view and edit store settings.
+          </div>
+        )}
         {saveBanner}
 
         {/* =====================================================
@@ -769,9 +810,30 @@ export default function AdminSettings() {
           </div>
         </section>
 
+        {/* DELETE STORE */}
+
+        <section className="rounded-2xl border border-red-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between gap-4 p-5">
+            <div>
+              <h2 className="text-base font-semibold text-red-700">Delete store</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Closes this store and removes it from your account.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleDeleteStore}
+              disabled={deleting || loading}
+              className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+            >
+              {deleting ? "Deleting…" : "Delete store"}
+            </button>
+          </div>
+        </section>
+
         {/* BOTTOM SAVE */}
 
-        <div className="flex justify-end pb-8">
+        <div className={`flex justify-end pb-8 ${isOwner ? "" : "hidden"}`}>
           <button
             type="button"
             onClick={handleSave}
@@ -781,7 +843,7 @@ export default function AdminSettings() {
             {saveLabel}
           </button>
         </div>
-      </div>
+      </fieldset>
     );
   };
 
@@ -914,7 +976,7 @@ export default function AdminSettings() {
 
                 {/* SAVE ONLY FOR GENERAL */}
 
-                {selectedSection === "General" && (
+                {selectedSection === "General" && isOwner && (
                   <button
                     type="button"
                     onClick={handleSave}
