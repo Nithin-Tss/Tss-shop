@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 
 export default function AdminReportExploration() {
@@ -423,7 +423,13 @@ export default function AdminReportExploration() {
                 <div className="flex items-center gap-3">
                   {/* Purple AI/Robot avatar icon matching reference screenshot */}
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white shadow-2xs">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
                       <rect x="4" y="6" width="16" height="12" rx="2" />
                       <circle cx="9" cy="12" r="1.5" fill="currentColor" />
                       <circle cx="15" cy="12" r="1.5" fill="currentColor" />

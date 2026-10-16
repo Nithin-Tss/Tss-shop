@@ -160,23 +160,23 @@ export default function App() {
           <Route element={<RequirePermission permission="discounts.view" />}>
             <Route path="/admin/online-store/discounts" element={<AdminDiscounts />} />
             <Route path="/admin/online-store/discounts/new" element={<AdminCreateDiscount />} />
-<Route
+            <Route
               path="/admin/online-store/discounts/new/:discountType"
               element={<AdminCreateDiscount />}
             />
-<Route
+            <Route
               path="/admin/online-store/discounts/amount-off-products"
               element={<AdminCreateDiscount initialType="amount-off-products" />}
             />
-<Route
+            <Route
               path="/admin/online-store/discounts/buy-x-get-y"
               element={<AdminCreateDiscount initialType="buy-x-get-y" />}
             />
-<Route
+            <Route
               path="/admin/online-store/discounts/amount-off-order"
               element={<AdminCreateDiscount initialType="amount-off-order" />}
             />
-<Route
+            <Route
               path="/admin/online-store/discounts/free-shipping"
               element={<AdminCreateDiscount initialType="free-shipping" />}
             />

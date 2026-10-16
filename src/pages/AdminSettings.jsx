@@ -196,7 +196,9 @@ export default function AdminSettings() {
     if (!storeId || deleting || !isOwner) return;
 
     const name = storeName || activeStore?.storeName || "this store";
-    if (!window.confirm(`Delete "${name}"? The store will be closed and removed from your account.`))
+    if (
+      !window.confirm(`Delete "${name}"? The store will be closed and removed from your account.`)
+    )
       return;
     const typed = window.prompt(`Type the store name to confirm:\n${name}`);
     if (typed === null) return;
