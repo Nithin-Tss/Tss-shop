@@ -41,7 +41,6 @@ export default function AccountPage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-
   // Load profile from /api/v1/auth/me/
   useEffect(() => {
     let ignore = false;
@@ -76,8 +75,6 @@ export default function AccountPage() {
       ignore = true;
     };
   }, [session?.token]);
-
-
 
   const handleProfileChange = (event) => {
     const { name, value } = event.target;
@@ -285,12 +282,13 @@ export default function AccountPage() {
 
           {/* Subnav Tabs */}
           <div className="mt-6 flex items-center gap-2">
-            <span
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-[#0B1020] text-white shadow-xs"
+            <Link
+              to="/account"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#0B1020] text-white shadow-xs"
             >
               <span>👤</span>
               <span>Account & Addresses</span>
-            </span>
+            </Link>
           </div>
         </div>
 
@@ -606,7 +604,6 @@ export default function AccountPage() {
               </form>
             )}
           </div>
-
         </div>
       </div>
     </main>
