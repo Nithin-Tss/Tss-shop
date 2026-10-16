@@ -24,31 +24,31 @@ const CURRENCIES = [
 const REGIONS = ["Australia", "India", "United States", "United Kingdom"];
 
 const settingsMenu = [
-  { icon: "⌂", label: "General" },
-  { icon: "▣", label: "Plan" },
-  { icon: "$", label: "Billing" },
-  { icon: "♙", label: "Users" },
-  { icon: "◇", label: "Roles", nested: true },
-  { icon: "▱", label: "Payments" },
-  { icon: "▾", label: "Checkout" },
-  { icon: "●", label: "Customer accounts" },
-  { icon: "▱", label: "Shipping and delivery" },
-  { icon: "♙", label: "Taxes and duties" },
-  { icon: "●", label: "Locations" },
-  { icon: "◉", label: "Markets" },
-  { icon: "▦", label: "Apps" },
-  { icon: "✣", label: "Sales channels" },
-  { icon: "▤", label: "Domains" },
-  { icon: "✣", label: "Customer events" },
-  { icon: "●", label: "Notifications" },
-  { icon: "▣", label: "Metafields and metaobjects" },
-  { icon: "A", label: "Languages" },
-  { icon: "▣", label: "Customer privacy" },
-  { icon: "▤", label: "Policies" },
+  { label: "General" },
+  { label: "Plan" },
+  { label: "Billing" },
+  { label: "Users" },
+  { label: "Roles", nested: true },
+  { label: "Payments" },
+  { label: "Checkout" },
+  { label: "Customer accounts" },
+  { label: "Shipping and delivery" },
+  { label: "Taxes and duties" },
+  { label: "Locations" },
+  { label: "Markets" },
+  { label: "Apps" },
+  { label: "Sales channels" },
+  { label: "Domains" },
+  { label: "Customer events" },
+  { label: "Notifications" },
+  { label: "Metafields and metaobjects" },
+  { label: "Languages" },
+  { label: "Customer privacy" },
+  { label: "Policies" },
 ];
 
-// Sidebar icons: outline shapes on a 24x24 grid (Lucide geometry), drawn in currentColor so they
-// follow the item's text color. The `icon` glyphs above are still used by the page header.
+// Settings icons (sidebar, page header, placeholder): outline shapes on a 24x24 grid (Lucide geometry), drawn in currentColor so they
+// follow the item's text color.
 const SETTINGS_ICONS = {
   General: (
     <>
@@ -197,12 +197,12 @@ const SETTINGS_ICONS = {
   ),
 };
 
-function SettingsIcon({ label }) {
+function SettingsIcon({ label, size = 18 }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -1029,8 +1029,8 @@ export default function AdminSettings() {
         <div className="flex min-h-[500px] items-center justify-center p-10">
           <div className="max-w-md text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-              <span className="text-2xl text-slate-500">
-                {settingsMenu.find((item) => item.label === selectedSection)?.icon}
+              <span className="text-slate-500">
+                <SettingsIcon label={selectedSection} size={28} />
               </span>
             </div>
 
@@ -1141,9 +1141,7 @@ export default function AdminSettings() {
 
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">
-                    {settingsMenu.find((item) => item.label === selectedSection)?.icon}
-                  </span>
+                  <SettingsIcon label={selectedSection} size={22} />
 
                   <h1 className="text-xl font-semibold">{selectedSection}</h1>
                 </div>
