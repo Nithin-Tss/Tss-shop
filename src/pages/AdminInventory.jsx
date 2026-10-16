@@ -1309,7 +1309,7 @@ export default function InventoryPage() {
             <div className="overflow-x-auto min-h-[300px] pb-16">
               <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
                 <thead>
-                  <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-semibold text-[#5C5F62] whitespace-nowrap select-none">
+                  <tr className="border-b border-[#E4DEFB] bg-white text-xs font-medium text-[#303030] whitespace-nowrap select-none">
                     <th className="py-3 pl-4 pr-2 w-10">
                       <input
                         type="checkbox"
@@ -1319,7 +1319,7 @@ export default function InventoryPage() {
                         className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
                       />
                     </th>
-                    <th className="py-3 px-3 min-w-[280px]">Product</th>
+                    <th className="py-3 pl-[60px] pr-3 min-w-[280px]">Product</th>
                     <th className="py-3 px-3 min-w-[200px]">SKU</th>
                     <th className="py-3 px-3 text-right min-w-[100px]">
                       <span
@@ -1353,7 +1353,14 @@ export default function InventoryPage() {
                         On hand
                       </span>
                     </th>
-                    <th className="py-3 pl-3 pr-6 text-right min-w-[90px]">Incoming</th>
+                    <th className="py-3 pl-3 pr-6 text-right min-w-[90px]">
+                      <span
+                        className="border-b border-dotted border-slate-400 cursor-help"
+                        title="Inventory on the way to your location"
+                      >
+                        Incoming
+                      </span>
+                    </th>
                   </tr>
                 </thead>
 
@@ -1427,7 +1434,7 @@ export default function InventoryPage() {
 
                           {/* SKU */}
                           <td className="py-2.5 px-3">
-                            <span className="font-mono text-xs text-[#4C4F7A] select-all tracking-tight">
+                            <span className="text-sm text-[#303030] select-all">
                               {item.sku || "—"}
                             </span>
                           </td>
