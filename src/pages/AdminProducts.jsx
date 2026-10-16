@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
@@ -14,6 +14,27 @@ import {
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const PAGE_SIZES = [25, 50, 100];
+
+const STATUS_TABS = [
+  { id: "all", label: "All" },
+  { id: "active", label: "Active" },
+  { id: "draft", label: "Draft" },
+  { id: "archived", label: "Archived" },
+];
+
+const SORT_OPTIONS = [
+  { value: "default", label: "Sort by" },
+  { value: "title_asc", label: "A to Z" },
+  { value: "title_desc", label: "Z to A" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+];
+
+function parseProductPrice(price) {
+  if (price === null || price === undefined || price === "") return 0;
+  const num = Number(String(price).replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(num) ? num : 0;
+}
 
 // One CSV cell. Text starting with = + - @ would run as a formula in Excel, so it gets a ' first.
 function csvCell(value, { text = true } = {}) {
@@ -614,6 +635,9 @@ export default function ProductsPage() {
   const [notice, setNotice] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("default");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadProducts = () =>
     apiGet("/api/v1/catalog/products/").then((res) => {
@@ -628,10 +652,56 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
-  const pageCount = Math.max(1, Math.ceil(products.length / pageSize));
+  const filteredAndSortedProducts = useMemo(() => {
+    let list = products;
+
+    if (statusFilter !== "all") {
+      list = list.filter((p) => (p.status || "").toLowerCase() === statusFilter.toLowerCase());
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(
+        (p) =>
+          (p.title || "").toLowerCase().includes(q) ||
+          (p.sku || "").toLowerCase().includes(q) ||
+          (p.category || "").toLowerCase().includes(q)
+      );
+    }
+
+    if (sortBy === "title_asc") {
+      list = [...list].sort((a, b) => {
+        const nameA = String(a.title || a.name || "")
+          .trim()
+          .toLowerCase();
+        const nameB = String(b.title || b.name || "")
+          .trim()
+          .toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    } else if (sortBy === "title_desc") {
+      list = [...list].sort((a, b) => {
+        const nameA = String(a.title || a.name || "")
+          .trim()
+          .toLowerCase();
+        const nameB = String(b.title || b.name || "")
+          .trim()
+          .toLowerCase();
+        return nameB.localeCompare(nameA);
+      });
+    } else if (sortBy === "price_asc") {
+      list = [...list].sort((a, b) => parseProductPrice(a.price) - parseProductPrice(b.price));
+    } else if (sortBy === "price_desc") {
+      list = [...list].sort((a, b) => parseProductPrice(b.price) - parseProductPrice(a.price));
+    }
+
+    return list;
+  }, [products, statusFilter, searchQuery, sortBy]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredAndSortedProducts.length / pageSize));
   const currentPage = Math.min(page, pageCount); // e.g. after deleting the last items on a page
   const pageStart = (currentPage - 1) * pageSize;
-  const pageProducts = products.slice(pageStart, pageStart + pageSize);
+  const pageProducts = filteredAndSortedProducts.slice(pageStart, pageStart + pageSize);
   const allSelected = pageProducts.length > 0 && pageProducts.every((p) => selected.has(p.id));
 
   const toggleOne = (id) =>
@@ -654,7 +724,7 @@ export default function ProductsPage() {
     // The store's own names for the extra fields; the defaults if they can't be fetched
     const labels = await fetchFieldLabels().catch(() => ({}));
     downloadProductsCsv(
-      selected.size ? products.filter((p) => selected.has(p.id)) : products,
+      selected.size ? products.filter((p) => selected.has(p.id)) : filteredAndSortedProducts,
       labels
     );
   };
@@ -721,29 +791,93 @@ export default function ProductsPage() {
 
           {/* PRODUCTS CARD */}
           <section className="mt-5 flex flex-1 flex-col overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
-            {/* Tabs */}
-            <div className="flex items-center gap-2 border-b border-[#E4DEFB] px-4 py-3">
-              <button
-                type="button"
-                className="rounded-lg bg-[#EDE9FE] px-3.5 py-1.5 text-[15px] font-medium text-charcoal-navy"
-              >
-                All
-              </button>
+            {/* Tabs & Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4DEFB] px-4 py-2.5">
+              {/* Status Filter Dropdown: "All ▼" */}
+              <div className="relative inline-flex items-center">
+                <select
+                  id="products-status-filter"
+                  aria-label="Filter by status"
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="h-8 appearance-none rounded-lg bg-[#EDE9FE] pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#E4DEFB] transition cursor-pointer"
+                >
+                  {STATUS_TABS.map((tab) => (
+                    <option key={tab.id} value={tab.id} className="bg-white text-charcoal-navy">
+                      {tab.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[8px] text-charcoal-navy">
+                  ▼
+                </span>
+              </div>
 
-              <button
-                type="button"
-                aria-label="Add view"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-lg text-[#4C4F7A] hover:bg-[#F3F0FF] transition"
-              >
-                +
-              </button>
+              <div className="flex items-center gap-2.5">
+                {/* Search */}
+                <div className="flex items-center gap-2 h-8 w-full sm:w-56 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-xs sm:text-sm">
+                  <span className="text-slate-400">⌕</span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Search and filter"
+                    aria-label="Search products"
+                    className="w-full bg-transparent outline-none text-xs text-[#0B1020] placeholder:text-slate-400"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setPage(1);
+                      }}
+                      aria-label="Clear search"
+                      className="text-xs text-slate-400 hover:text-slate-600"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Sort By Dropdown (compact) */}
+                <div className="relative shrink-0">
+                  <select
+                    id="products-sort-by"
+                    aria-label="Sort products"
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                      setPage(1);
+                    }}
+                    className="h-8 appearance-none rounded-lg border border-[#DDD6FE] bg-white pl-2.5 pr-6 text-xs font-medium text-charcoal-navy outline-none hover:border-charcoal-navy transition cursor-pointer"
+                  >
+                    {SORT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-[#4C4F7A]">
+                    ▼
+                  </span>
+                </div>
+              </div>
             </div>
 
             {products.length > 0 && (
               <div>
                 <div className="flex items-center justify-between px-6 py-4">
                   <p className="text-sm text-[#4C4F7A]">
-                    {selected.size ? `${selected.size} selected` : `${products.length} products`}
+                    {selected.size
+                      ? `${selected.size} selected`
+                      : `${filteredAndSortedProducts.length} product${filteredAndSortedProducts.length === 1 ? "" : "s"}`}
                   </p>
                   <div className="flex items-center gap-3">
                     <button
@@ -814,41 +948,52 @@ export default function ProductsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {pageProducts.map((product) => (
-                      <tr
-                        key={product.id}
-                        className={`border-b border-[#E4DEFB] last:border-0 hover:bg-[#F5F3FF] ${
-                          selected.has(product.id) ? "bg-[#F3F0FF]" : ""
-                        }`}
-                      >
-                        {canDelete && (
-                          <td className="w-10 py-3 pl-6">
-                            <input
-                              type="checkbox"
-                              aria-label={`Select ${product.title}`}
-                              checked={selected.has(product.id)}
-                              onChange={() => toggleOne(product.id)}
-                            />
-                          </td>
-                        )}
+                    {pageProducts.length === 0 ? (
+                      <tr>
                         <td
-                          className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium text-charcoal-navy`}
+                          colSpan={canDelete ? 6 : 5}
+                          className="px-6 py-10 text-center text-sm text-[#4C4F7A]"
                         >
-                          <Link
-                            to={`/admin/online-store/products/${product.id}`}
-                            className="hover:underline"
-                          >
-                            {product.title}
-                          </Link>
-                        </td>
-                        <td className="px-4 py-3 capitalize text-[#4C4F7A]">{product.status}</td>
-                        <td className="px-4 py-3 text-[#4C4F7A]">{product.category || "-"}</td>
-                        <td className="px-4 py-3 text-[#4C4F7A]">{product.sku || "-"}</td>
-                        <td className="px-6 py-3 text-right text-charcoal-navy">
-                          {product.price ?? "-"}
+                          No products found matching the selected filter.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      pageProducts.map((product) => (
+                        <tr
+                          key={product.id}
+                          className={`border-b border-[#E4DEFB] last:border-0 hover:bg-[#F5F3FF] ${
+                            selected.has(product.id) ? "bg-[#F3F0FF]" : ""
+                          }`}
+                        >
+                          {canDelete && (
+                            <td className="w-10 py-3 pl-6">
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${product.title}`}
+                                checked={selected.has(product.id)}
+                                onChange={() => toggleOne(product.id)}
+                              />
+                            </td>
+                          )}
+                          <td
+                            className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium text-charcoal-navy`}
+                          >
+                            <Link
+                              to={`/admin/online-store/products/${product.id}`}
+                              className="hover:underline"
+                            >
+                              {product.title}
+                            </Link>
+                          </td>
+                          <td className="px-4 py-3 capitalize text-[#4C4F7A]">{product.status}</td>
+                          <td className="px-4 py-3 text-[#4C4F7A]">{product.category || "-"}</td>
+                          <td className="px-4 py-3 text-[#4C4F7A]">{product.sku || "-"}</td>
+                          <td className="px-6 py-3 text-right text-charcoal-navy">
+                            {product.price ?? "-"}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
 
@@ -877,8 +1022,9 @@ export default function ProductsPage() {
 
                   <div className="flex items-center gap-3">
                     <span>
-                      {pageStart + 1}-{Math.min(pageStart + pageSize, products.length)} of{" "}
-                      {products.length}
+                      {filteredAndSortedProducts.length === 0
+                        ? "0 of 0"
+                        : `${pageStart + 1}-${Math.min(pageStart + pageSize, filteredAndSortedProducts.length)} of ${filteredAndSortedProducts.length}`}
                     </span>
                     <button
                       type="button"
