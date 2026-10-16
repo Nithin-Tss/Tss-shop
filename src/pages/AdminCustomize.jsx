@@ -1375,8 +1375,8 @@ export default function AdminCustomizePage() {
   }, [page, sampleProductId, sampleArticle, sampleCollection, samplePage, selected]);
 
   // A store link followed in the preview ("/products/<id>", "/collections/all", "/blog/<handle>", "/"):
-  // open that page's own template here, with Edit mode on and its main section (e.g. Product information)
-  // selected. The page it came from is kept for "Back".
+  // open that page's own template here. In Edit mode its main section (e.g. Product information) is
+  // selected; with Edit mode Off nothing is selected. The page it came from is kept for "Back".
   function openStorePage(path) {
     const [first, second, third] = path.split("/").filter(Boolean);
     let next = "index";
@@ -1408,8 +1408,8 @@ export default function AdminCustomizePage() {
       null;
     setPage(next);
     setAdding(false);
-    setSelected(main);
-    setEditMode(true);
+    // Only select the main section when Edit mode is already on; with it Off nothing gets selected
+    setSelected(editModeRef.current ? main : null);
   }
 
   // "Back": the page (and section) open before the last store link was followed
