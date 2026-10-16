@@ -1,16 +1,106 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
 
-const CURRENCIES = [
+// Every currency the browser knows, A to Z by name: { code, symbol, label }
+const FALLBACK_CURRENCIES = [
   { code: "AUD", symbol: "$", label: "Australian Dollar (AUD $)" },
   { code: "USD", symbol: "$", label: "US Dollar (USD $)" },
   { code: "INR", symbol: "₹", label: "Indian Rupee (INR ₹)" },
   { code: "EUR", symbol: "€", label: "Euro (EUR €)" },
   { code: "GBP", symbol: "£", label: "British Pound (GBP £)" },
 ];
+
+function buildCurrencies() {
+  try {
+    const names = new Intl.DisplayNames(["en"], { type: "currency" });
+    const list = Intl.supportedValuesOf("currency").map((code) => {
+      const symbol =
+        new Intl.NumberFormat("en", { style: "currency", currency: code, currencyDisplay: "narrowSymbol" })
+          .formatToParts(0)
+          .find((part) => part.type === "currency")?.value || code;
+      return { code, symbol, label: `${names.of(code) || code} (${code} ${symbol})` };
+    });
+    return list.length
+      ? list.sort((a, b) => a.label.localeCompare(b.label))
+      : FALLBACK_CURRENCIES;
+  } catch {
+    return FALLBACK_CURRENCIES;
+  }
+}
+
+const CURRENCIES = buildCurrencies();
+
+// Currency picker with a search box: type a name or code to narrow the list
+function CurrencyPicker({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const ref = useRef(null);
+  const selected = CURRENCIES.find((c) => c.code === value) || CURRENCIES[0];
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const shown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? CURRENCIES.filter((c) => c.label.toLowerCase().includes(q)) : CURRENCIES;
+  }, [query]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => {
+          setOpen((o) => !o);
+          setQuery("");
+        }}
+        className="w-full text-left bg-white px-3 py-2 text-xs rounded-lg border border-slate-300 text-slate-800 outline-none focus:border-slate-500 cursor-pointer pr-8"
+      >
+        {selected.label}
+      </button>
+      <span className="absolute right-3 top-2.5 text-slate-400 pointer-events-none text-xs">↕</span>
+      {open && (
+        <div className="absolute z-30 mt-1 w-full rounded-lg border border-slate-300 bg-white shadow-lg">
+          <input
+            type="text"
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search currency"
+            className="w-full border-b border-slate-200 px-3 py-2 text-xs outline-none rounded-t-lg"
+          />
+          <ul className="max-h-60 overflow-y-auto py-1">
+            {shown.length === 0 && <li className="px-3 py-2 text-xs text-slate-500">No currency found</li>}
+            {shown.map((c) => (
+              <li key={c.code}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(c.code);
+                    setOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 ${
+                    c.code === value ? "bg-slate-100 font-semibold" : ""
+                  }`}
+                >
+                  {c.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminCreateOrder() {
   const navigate = useNavigate();
@@ -612,22 +702,7 @@ export default function AdminCreateOrder() {
 
                 <div className="space-y-1.5 pt-1">
                   <label className="block text-xs font-medium text-slate-600">Currency</label>
-                  <div className="relative">
-                    <select
-                      value={currency}
-                      onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full appearance-none bg-white px-3 py-2 text-xs rounded-lg border border-slate-300 text-slate-800 outline-none focus:border-slate-500 cursor-pointer pr-8"
-                    >
-                      {CURRENCIES.map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="absolute right-3 top-2.5 text-slate-400 pointer-events-none text-xs">
-                      ↕
-                    </span>
-                  </div>
+                  <CurrencyPicker value={currency} onChange={setCurrency} />
                 </div>
               </div>
 
