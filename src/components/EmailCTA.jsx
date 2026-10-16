@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ONBOARDING_PATH } from "@/lib/auth";
+import { ONBOARDING_PATH, STORES_PATH, useSession } from "@/lib/auth";
 
 export default function EmailCTA() {
   const navigate = useNavigate();
+  const signedIn = Boolean(useSession()?.token);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
@@ -22,7 +23,7 @@ export default function EmailCTA() {
       return;
     }
 
-    navigate(ONBOARDING_PATH);
+    navigate(signedIn ? STORES_PATH : ONBOARDING_PATH);
   };
 
   return (
