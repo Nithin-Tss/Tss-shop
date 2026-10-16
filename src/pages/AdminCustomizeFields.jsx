@@ -363,6 +363,7 @@ export function GroupedFields({
   groups,
   collections,
   products,
+  catalogErrors,
   onChange,
   extra,
   initialOpen = "content",
@@ -411,6 +412,7 @@ export function GroupedFields({
                       value={values[key]}
                       collections={collections}
                       products={products}
+                      catalogErrors={catalogErrors}
                       onChange={handlerFor(key)}
                     />
                     <ResetToTheme spec={spec} value={values[key]} onChange={handlerFor(key)} />
@@ -433,7 +435,14 @@ export function Help({ spec }) {
   ) : null;
 }
 
-export const Field = memo(function Field({ spec, value, collections, products = [], onChange }) {
+export const Field = memo(function Field({
+  spec,
+  value,
+  collections,
+  products = [],
+  catalogErrors = {},
+  onChange,
+}) {
   const label = <span className="mb-1 block text-xs font-medium text-[#3B3F8F]">{spec.label}</span>;
 
   switch (spec.type) {
@@ -672,7 +681,7 @@ export const Field = memo(function Field({ spec, value, collections, products = 
           {label}
 
           <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value)}>
-            <option value="">Newest products</option>
+            <option value="">{spec.empty_label || "Newest products"}</option>
 
             {collections.map((c) => (
               <option key={c.id} value={c.id}>
@@ -681,6 +690,10 @@ export const Field = memo(function Field({ spec, value, collections, products = 
               </option>
             ))}
           </select>
+
+          {catalogErrors.collections && (
+            <p className="mt-1 text-xs text-red-600">{catalogErrors.collections}</p>
+          )}
 
           <Help spec={spec} />
         </label>
@@ -706,6 +719,7 @@ export const Field = memo(function Field({ spec, value, collections, products = 
             value={value || []}
             products={products}
             max={spec.max || 24}
+            error={catalogErrors.products}
             onChange={onChange}
           />
 
@@ -727,6 +741,7 @@ export const Field = memo(function Field({ spec, value, collections, products = 
             }))}
             max={spec.max || 12}
             noun="collections"
+            error={catalogErrors.collections}
             onChange={onChange}
           />
         </div>
@@ -1244,7 +1259,7 @@ export function ImageUpload({ value, onChange }) {
 }
 
 // Pick items one by one (products or collections); the order picked is the order shown
-export function ProductPicker({ value, products, max, noun = "products", onChange }) {
+export function ProductPicker({ value, products, max, noun = "products", error, onChange }) {
   const [query, setQuery] = useState("");
 
   const byId = Object.fromEntries(products.map((p) => [p.id, p]));
@@ -1276,7 +1291,9 @@ export function ProductPicker({ value, products, max, noun = "products", onChang
         </ul>
       )}
 
-      {products.length === 0 ? (
+      {error ? (
+        <p className="px-3 py-2.5 text-xs text-red-600">{error}</p>
+      ) : products.length === 0 ? (
         <p className="px-3 py-2.5 text-xs text-[#4C4F7A]">
           Add {noun} first, then choose them here.
         </p>
