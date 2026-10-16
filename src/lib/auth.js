@@ -14,6 +14,8 @@ import { useSyncExternalStore } from "react";
 
 // Where every "Create store" / "Start free" button leads
 export const ONBOARDING_PATH = "/auth/onboarding";
+// Signed-in users pick one of their stores (or create another) here instead
+export const STORES_PATH = "/auth/stores";
 
 const SESSION_KEY = "store_session";
 // The active store's id, kept on its own so it survives sign-out/sign-in (lib/api.js reads it too)

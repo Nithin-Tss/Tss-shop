@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
-import { ONBOARDING_PATH } from "@/lib/auth";
+import { ONBOARDING_PATH, STORES_PATH, useSession } from "@/lib/auth";
 
 export default function Hero() {
+  const signedIn = Boolean(useSession()?.token);
+
   return (
     <section className="relative overflow-hidden bg-white pt-12 pb-16 lg:pt-20 lg:pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,10 +27,10 @@ export default function Hero() {
             {/* CTA Buttons */}
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <Link
-                to={ONBOARDING_PATH}
+                to={signedIn ? STORES_PATH : ONBOARDING_PATH}
                 className="w-full sm:w-auto bg-charcoal-navy text-white font-medium px-8 py-3.5 rounded-xl hover:bg-charcoal-navy/90 transition shadow-md flex items-center justify-center space-x-2"
               >
-                <span>Start Free →</span>
+                <span>{signedIn ? "Open your stores →" : "Start Free →"}</span>
               </Link>
 
               <a
