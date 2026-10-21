@@ -294,7 +294,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
       onClick={(e) => e.stopPropagation()}
     >
       {/* 1. Action + Quantity Compound Control */}
-      <div className="flex h-9 items-center rounded-lg border border-[#8C9196] bg-white overflow-hidden shadow-2xs focus-within:border-[#0B1020] focus-within:ring-1 focus-within:ring-[#0B1020]">
+      <div className="flex h-9 items-center rounded-lg border border-[#8C9196] bg-white overflow-hidden shadow-2xs focus-within:border-charcoal-navy focus-within:ring-1 focus-within:ring-[#0B1020]">
         {/* Action dropdown: Set to / Add */}
         <div className="relative border-r border-[#DDD6FE] bg-white">
           <select
@@ -304,7 +304,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
               setActionType(next);
               setInputVal(next === "add" ? 0 : currentValue);
             }}
-            className="h-9 appearance-none bg-transparent pl-2.5 pr-6 text-xs sm:text-sm font-normal text-[#0B1020] outline-none cursor-pointer"
+            className="h-9 appearance-none bg-transparent pl-2.5 pr-6 text-xs sm:text-sm font-normal text-charcoal-navy outline-none cursor-pointer"
           >
             <option value="set">Set to</option>
             <option value="add">Add</option>
@@ -321,7 +321,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="h-9 w-14 sm:w-16 px-1.5 text-center text-sm font-medium text-[#0B1020] outline-none bg-white"
+          className="h-9 w-14 sm:w-16 px-1.5 text-center text-sm font-medium text-charcoal-navy outline-none bg-white"
         />
 
         {/* Micro Steppers (▲ / ▼) */}
@@ -351,7 +351,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
           value={item.locationName}
           disabled
           onChange={() => {}}
-          className="h-9 appearance-none rounded-lg border border-[#8C9196] bg-white pl-3 pr-7 text-xs sm:text-sm font-normal text-[#0B1020] outline-none shadow-2xs min-w-[130px]"
+          className="h-9 appearance-none rounded-lg border border-[#8C9196] bg-white pl-3 pr-7 text-xs sm:text-sm font-normal text-charcoal-navy outline-none shadow-2xs min-w-32.5"
         >
           <option value={item.locationName}>{item.locationName}</option>
         </select>
@@ -363,8 +363,8 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
           type="button"
           onClick={() => setShowReasonDropdown((prev) => !prev)}
           title={`Adjustment reason: ${reason}`}
-          className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020] transition shadow-2xs ${
-            showReasonDropdown ? "ring-1 ring-[#0B1020] border-[#0B1020]" : ""
+          className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy transition shadow-2xs ${
+            showReasonDropdown ? "ring-1 ring-[#0B1020] border-charcoal-navy" : ""
           }`}
         >
           <svg
@@ -383,7 +383,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         </button>
 
         {showReasonDropdown && (
-          <div className="absolute right-0 top-full mt-1.5 z-50 w-44 rounded-lg border border-[#E4DEFB] bg-white py-1 shadow-lg text-xs text-[#0B1020]">
+          <div className="absolute right-0 top-full mt-1.5 z-50 w-44 rounded-lg border border-[#E4DEFB] bg-white py-1 shadow-lg text-xs text-charcoal-navy">
             <div className="px-3 py-1 font-semibold text-[11px] text-[#4C4F7A] border-b border-[#F0F2F5]">
               Reason for adjustment
             </div>
@@ -415,7 +415,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         onKeyDown={handleKeyDown}
         placeholder="Note (optional)"
         aria-label="Note"
-        className="h-9 w-36 rounded-lg border border-[#8C9196] bg-white px-2.5 text-xs sm:text-sm text-[#0B1020] outline-none shadow-2xs focus:border-[#0B1020] focus:ring-1 focus:ring-[#0B1020]"
+        className="h-9 w-36 rounded-lg border border-[#8C9196] bg-white px-2.5 text-xs sm:text-sm text-charcoal-navy outline-none shadow-2xs focus:border-charcoal-navy focus:ring-1 focus:ring-[#0B1020]"
       />
 
       {/* 5. Confirm / Save Button */}
@@ -424,7 +424,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         onClick={handleConfirm}
         disabled={busy}
         title="Confirm quantity change"
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#0B1020] hover:bg-[#0B1020] hover:text-white transition shadow-2xs disabled:opacity-50"
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-charcoal-navy hover:bg-charcoal-navy hover:text-white transition shadow-2xs disabled:opacity-50"
       >
         <svg
           viewBox="0 0 24 24"
@@ -494,7 +494,7 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
   return (
     <div
       ref={popoverRef}
-      className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-xl border border-[#DDD6FE] bg-white p-3 shadow-[0_6px_22px_rgba(0,0,0,0.16)] text-left text-xs text-[#0B1020]"
+      className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-xl border border-[#DDD6FE] bg-white p-3 shadow-[0_6px_22px_rgba(0,0,0,0.16)] text-left text-xs text-charcoal-navy"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="mb-2 flex items-center justify-between">
@@ -563,7 +563,7 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             aria-label="Quantity to set aside"
-            className="h-8 w-14 rounded-lg border border-[#8C9196] bg-white px-1.5 text-center text-sm outline-none focus:border-[#0B1020]"
+            className="h-8 w-14 rounded-lg border border-[#8C9196] bg-white px-1.5 text-center text-sm outline-none focus:border-charcoal-navy"
           />
           <select
             value={reason}
@@ -580,7 +580,7 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
             type="button"
             disabled={busy}
             onClick={() => move(parseInt(quantity, 10) || 0, reason, false)}
-            className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-xs font-medium hover:bg-[#0B1020] hover:text-white transition disabled:opacity-50"
+            className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-xs font-medium hover:bg-charcoal-navy hover:text-white transition disabled:opacity-50"
           >
             Set aside
           </button>
@@ -624,7 +624,7 @@ function HistoryModal({ item, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[#E4DEFB] px-5 py-3">
-          <h2 id="history-modal-title" className="text-base font-semibold text-[#0B1020]">
+          <h2 id="history-modal-title" className="text-base font-semibold text-charcoal-navy">
             History · {item.title}
             {item.sku ? ` (${item.sku})` : ""}
           </h2>
@@ -632,7 +632,7 @@ function HistoryModal({ item, onClose }) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="text-lg text-[#4C4F7A] hover:text-[#0B1020]"
+            className="text-lg text-[#4C4F7A] hover:text-charcoal-navy"
           >
             ×
           </button>
@@ -663,7 +663,7 @@ function HistoryModal({ item, onClose }) {
                     </td>
                     <td
                       className={`px-3 py-2 text-right font-medium ${
-                        row.change < 0 ? "text-[#D82C0D]" : "text-[#0B1020]"
+                        row.change < 0 ? "text-[#D82C0D]" : "text-charcoal-navy"
                       }`}
                     >
                       {row.change > 0 ? `+${row.change}` : row.change}
@@ -792,7 +792,7 @@ function ImportModal({ onClose, onImportSuccess }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#E4DEFB] px-5 py-4">
-          <h2 id="import-modal-title" className="text-base font-semibold text-[#0B1020]">
+          <h2 id="import-modal-title" className="text-base font-semibold text-charcoal-navy">
             Import inventory
           </h2>
           <button
@@ -821,8 +821,9 @@ function ImportModal({ onClose, onImportSuccess }) {
           {sheet ? (
             <div>
               <p className="text-sm text-[#4C4F7A] mb-3">
-                Match columns in <span className="font-medium text-[#0B1020]">{file?.name}</span> to
-                inventory fields. Found {sheet.rows.length} rows.
+                Match columns in{" "}
+                <span className="font-medium text-charcoal-navy">{file?.name}</span> to inventory
+                fields. Found {sheet.rows.length} rows.
               </p>
               <div className="max-h-[46vh] space-y-2.5 overflow-y-auto pr-1">
                 {IMPORT_FIELDS.map((field) => (
@@ -830,7 +831,7 @@ function ImportModal({ onClose, onImportSuccess }) {
                     key={field.key}
                     className="flex items-center justify-between gap-3 text-sm"
                   >
-                    <span className="text-[#0B1020] font-medium">
+                    <span className="text-charcoal-navy font-medium">
                       {field.label}
                       {field.required && <span className="text-red-500"> *</span>}
                     </span>
@@ -841,7 +842,7 @@ function ImportModal({ onClose, onImportSuccess }) {
                         const col = e.target.value === "" ? "" : Number(e.target.value);
                         setMapping((prev) => ({ ...prev, [field.key]: col }));
                       }}
-                      className="h-9 w-[55%] rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm text-[#0B1020] outline-none focus:border-[#0B1020]"
+                      className="h-9 w-[55%] rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-charcoal-navy"
                     >
                       <option value="">Don&apos;t import</option>
                       {sheet.headers.map((h, i) => (
@@ -860,13 +861,13 @@ function ImportModal({ onClose, onImportSuccess }) {
                 📄
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-[#0B1020]">{file.name}</p>
+                <p className="truncate text-sm font-medium text-charcoal-navy">{file.name}</p>
                 <p className="text-xs text-[#4C4F7A]">{formatFileSize(file.size)}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setFile(null)}
-                className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-white hover:text-[#0B1020] transition"
+                className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-white hover:text-charcoal-navy transition"
               >
                 Remove
               </button>
@@ -887,16 +888,16 @@ function ImportModal({ onClose, onImportSuccess }) {
               }}
               className={`flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
                 isDragging
-                  ? "border-[#0B1020] bg-[#EDE9FE]"
+                  ? "border-charcoal-navy bg-[#EDE9FE]"
                   : error
                     ? "border-red-300 bg-red-50/20"
-                    : "border-[#DDD6FE] bg-[#FAF8FF] hover:border-[#0B1020] hover:bg-white"
+                    : "border-[#DDD6FE] bg-[#FAF8FF] hover:border-charcoal-navy hover:bg-white"
               }`}
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-[#DDD6FE] text-[#0B1020] shadow-2xs mb-2">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-[#DDD6FE] text-charcoal-navy shadow-2xs mb-2">
                 ⬆
               </span>
-              <p className="text-sm font-medium text-[#0B1020]">
+              <p className="text-sm font-medium text-charcoal-navy">
                 <span className="underline underline-offset-2">Click to browse</span> or drag and
                 drop
               </p>
@@ -919,7 +920,7 @@ function ImportModal({ onClose, onImportSuccess }) {
             type="button"
             disabled={importing}
             onClick={sheet ? () => setSheet(null) : onClose}
-            className="rounded-lg border border-[#DDD6FE] bg-white px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition"
+            className="rounded-lg border border-[#DDD6FE] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition"
           >
             {sheet ? "Back" : "Cancel"}
           </button>
@@ -927,7 +928,7 @@ function ImportModal({ onClose, onImportSuccess }) {
             type="button"
             disabled={sheet ? importing : !file}
             onClick={sheet ? handleImport : handleContinue}
-            className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition disabled:opacity-50"
+            className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition disabled:opacity-50"
           >
             {importing ? "Importing..." : sheet ? "Import" : "Continue"}
           </button>
@@ -1157,7 +1158,7 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-white text-charcoal-navy">
       <AdminHeader />
 
       {/* BODY LAYOUT */}
@@ -1169,7 +1170,7 @@ export default function InventoryPage() {
         <main className="flex-1 bg-[#F5F3FF] px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & ACTIONS */}
           <div className="mb-4 flex items-center justify-between">
-            <h1 className="flex items-center gap-2.5 text-[20px] sm:text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[20px] sm:text-[22px] font-bold text-charcoal-navy">
               <PageIcon name="inventory" />
               Inventory
             </h1>
@@ -1179,7 +1180,7 @@ export default function InventoryPage() {
                 type="button"
                 onClick={handleExport}
                 disabled={items.length === 0}
-                className="flex items-center gap-1.5 rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-[#0B1020] shadow-2xs hover:bg-[#F3F0FF] disabled:opacity-50 transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F0FF] disabled:opacity-50 transition cursor-pointer"
               >
                 Export
               </button>
@@ -1187,7 +1188,7 @@ export default function InventoryPage() {
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-[#0B1020] shadow-2xs hover:bg-[#F3F0FF] transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F0FF] transition cursor-pointer"
               >
                 Import
               </button>
@@ -1222,13 +1223,13 @@ export default function InventoryPage() {
                       setFilterTab(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="h-9 appearance-none rounded-lg border border-[#DDD6FE] bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-[#0B1020] outline-none hover:bg-[#F3F0FF] cursor-pointer"
+                    className="h-9 appearance-none rounded-lg border border-[#DDD6FE] bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#F3F0FF] cursor-pointer"
                   >
                     <option value="all">All</option>
                     <option value="in_stock">In stock</option>
                     <option value="out_of_stock">Out of stock</option>
                   </select>
-                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#4C4F7A] leading-[6px]">
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#4C4F7A] leading-1.5">
                     ▲▼
                   </span>
                 </div>
@@ -1257,7 +1258,7 @@ export default function InventoryPage() {
                       setCurrentPage(1);
                     }}
                     placeholder="Search and filter"
-                    className="h-9 w-full rounded-lg border border-[#DDD6FE] bg-white pl-9 pr-8 text-xs sm:text-sm text-[#0B1020] placeholder:text-slate-400 outline-none focus:border-[#0B1020] focus:ring-1 focus:ring-[#0B1020]"
+                    className="h-9 w-full rounded-lg border border-[#DDD6FE] bg-white pl-9 pr-8 text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400 outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#0B1020]"
                   />
                   {searchQuery && (
                     <button
@@ -1295,7 +1296,7 @@ export default function InventoryPage() {
 
             {/* SELECTION BAR */}
             {selectedIds.size > 0 && (
-              <div className="flex items-center justify-between border-b border-[#E4DEFB] bg-[#F7F9FC] px-5 py-2 text-xs font-medium text-[#0B1020]">
+              <div className="flex items-center justify-between border-b border-[#E4DEFB] bg-[#F7F9FC] px-5 py-2 text-xs font-medium text-charcoal-navy">
                 <span>{selectedIds.size} selected</span>
                 <button
                   type="button"
@@ -1308,8 +1309,8 @@ export default function InventoryPage() {
             )}
 
             {/* INVENTORY TABLE STRUCTURE */}
-            <div className="overflow-x-auto min-h-[300px] pb-16">
-              <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
+            <div className="overflow-x-auto min-h-75 pb-16">
+              <table className="w-full border-collapse text-left text-sm text-charcoal-navy">
                 <thead>
                   <tr className="border-b border-[#E4DEFB] bg-white text-xs font-medium text-[#303030] whitespace-nowrap select-none">
                     <th className="py-3 pl-4 pr-2 w-10">
@@ -1318,12 +1319,12 @@ export default function InventoryPage() {
                         checked={allOnPageSelected}
                         onChange={toggleSelectAll}
                         aria-label="Select all products on page"
-                        className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy cursor-pointer"
                       />
                     </th>
-                    <th className="py-3 pl-[60px] pr-3 min-w-[280px]">Product</th>
-                    <th className="py-3 px-3 min-w-[200px]">SKU</th>
-                    <th className="py-3 px-3 text-right min-w-[100px]">
+                    <th className="py-3 pl-15 pr-3 min-w-70">Product</th>
+                    <th className="py-3 px-3 min-w-50">SKU</th>
+                    <th className="py-3 px-3 text-right min-w-25">
                       <span
                         className="border-b border-dotted border-slate-400 cursor-help"
                         title="Unavailable inventory"
@@ -1331,7 +1332,7 @@ export default function InventoryPage() {
                         Unavailable
                       </span>
                     </th>
-                    <th className="py-3 px-3 text-right min-w-[100px]">
+                    <th className="py-3 px-3 text-right min-w-25">
                       <span
                         className="border-b border-dotted border-slate-400 cursor-help"
                         title="Committed to open orders"
@@ -1339,7 +1340,7 @@ export default function InventoryPage() {
                         Committed
                       </span>
                     </th>
-                    <th className="py-3 px-3 text-right min-w-[100px]">
+                    <th className="py-3 px-3 text-right min-w-25">
                       <span
                         className="border-b border-dotted border-slate-400 cursor-help"
                         title="Available to sell"
@@ -1347,7 +1348,7 @@ export default function InventoryPage() {
                         Available
                       </span>
                     </th>
-                    <th className="py-3 px-3 text-right min-w-[110px]">
+                    <th className="py-3 px-3 text-right min-w-27.5">
                       <span
                         className="border-b border-dotted border-slate-400 cursor-help"
                         title="Total on hand: Available + Committed + Unavailable"
@@ -1355,7 +1356,7 @@ export default function InventoryPage() {
                         On hand
                       </span>
                     </th>
-                    <th className="py-3 pl-3 pr-6 text-right min-w-[90px]">
+                    <th className="py-3 pl-3 pr-6 text-right min-w-22.5">
                       <span
                         className="border-b border-dotted border-slate-400 cursor-help"
                         title="Inventory on the way to your location"
@@ -1371,10 +1372,10 @@ export default function InventoryPage() {
                     <tr>
                       <td colSpan={8} className="py-16 text-center text-sm text-[#4C4F7A]">
                         <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
-                          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F0F2F5] text-[#0B1020]">
+                          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F0F2F5] text-charcoal-navy">
                             <PageIcon name="inventory" />
                           </span>
-                          <p className="font-semibold text-base text-[#0B1020]">
+                          <p className="font-semibold text-base text-charcoal-navy">
                             {searchQuery ? "No matching products found" : "No inventory items yet"}
                           </p>
                           <p className="mt-1 text-xs text-[#4C4F7A]">
@@ -1386,7 +1387,7 @@ export default function InventoryPage() {
                             <button
                               type="button"
                               onClick={() => setIsImportModalOpen(true)}
-                              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition shadow-xs cursor-pointer"
+                              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition shadow-xs cursor-pointer"
                             >
                               Import products
                             </button>
@@ -1416,7 +1417,7 @@ export default function InventoryPage() {
                               checked={isSelected}
                               onChange={() => toggleSelectOne(item.id)}
                               aria-label={`Select ${item.title}`}
-                              className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
+                              className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy cursor-pointer"
                             />
                           </td>
 
@@ -1426,7 +1427,7 @@ export default function InventoryPage() {
                               <ProductThumbnail item={item} />
                               <Link
                                 to={`/admin/online-store/products/${item.product}`}
-                                className="font-medium text-[#0B1020] hover:text-[#005BD3] hover:underline line-clamp-1 leading-snug"
+                                className="font-medium text-charcoal-navy hover:text-[#005BD3] hover:underline line-clamp-1 leading-snug"
                                 title={item.title}
                               >
                                 {item.title}
@@ -1454,7 +1455,7 @@ export default function InventoryPage() {
                                     : { id: item.id, kind: "unavailable" }
                                 );
                               }}
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-[#0B1020] transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-charcoal-navy transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
                               title="See why stock is unavailable"
                             >
                               {item.unavailable ?? 0}
@@ -1486,7 +1487,7 @@ export default function InventoryPage() {
                                   open === "committed" ? null : { id: item.id, kind: "committed" }
                                 );
                               }}
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-[#0B1020] transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-charcoal-navy transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
                               title="See which orders hold this stock"
                             >
                               {item.committed ?? 0}
@@ -1518,7 +1519,7 @@ export default function InventoryPage() {
                                   open === "available" ? null : { id: item.id, kind: "available" }
                                 );
                               }}
-                              className="inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium text-[#0B1020] transition cursor-pointer select-none hover:bg-[#E4E5E7]"
+                              className="inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium text-charcoal-navy transition cursor-pointer select-none hover:bg-[#E4E5E7]"
                               title="Click to adjust quantity"
                             >
                               <span>{item.available ?? 0}</span>
@@ -1552,10 +1553,10 @@ export default function InventoryPage() {
                               }}
                               className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium transition cursor-pointer select-none ${
                                 open === "onhand"
-                                  ? "bg-[#E4E5E7] text-[#0B1020] ring-1 ring-[#8C9196]"
+                                  ? "bg-[#E4E5E7] text-charcoal-navy ring-1 ring-[#8C9196]"
                                   : onHand < 0
                                     ? "text-[#D82C0D] hover:bg-[#E4E5E7]"
-                                    : "text-[#0B1020] hover:bg-[#E4E5E7]"
+                                    : "text-charcoal-navy hover:bg-[#E4E5E7]"
                               }`}
                               title="Click to edit on hand quantity"
                             >
@@ -1580,7 +1581,7 @@ export default function InventoryPage() {
 
                           {/* Incoming */}
                           <td className="py-2.5 pl-3 pr-6 text-right">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-[#0B1020]">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-charcoal-navy">
                               {item.incoming ?? 0}
                               <span className="text-[10px] text-[#6D7175]">▾</span>
                             </span>
@@ -1614,7 +1615,7 @@ export default function InventoryPage() {
                 >
                   ›
                 </button>
-                <span className="ml-1 font-medium text-[#0B1020]">
+                <span className="ml-1 font-medium text-charcoal-navy">
                   {totalItems > 0
                     ? `${startIndex + 1}-${Math.min(startIndex + pageSize, totalItems)}`
                     : "0-0"}
@@ -1631,7 +1632,7 @@ export default function InventoryPage() {
               href="https://help.shopify.com/en/manual/products/inventory"
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-[#5C5F62] hover:text-[#0B1020] hover:underline"
+              className="text-xs text-[#5C5F62] hover:text-charcoal-navy hover:underline"
             >
               Learn more about managing inventory
             </a>
