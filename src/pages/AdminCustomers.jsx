@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -8,13 +8,24 @@ import DeleteAddressModal from "@/components/DeleteAddressModal";
 
 export default function AdminCustomers() {
   const canManage = useCan("customers.manage");
+  const canDelete = useCan("customers.delete") || canManage;
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isSelectDropdownOpen, setIsSelectDropdownOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [toastMsg, setToastMsg] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const moreMenuRef = useRef(null);
+  const selectDropdownRef = useRef(null);
 
   // Customer Address Management State
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -176,13 +187,36 @@ export default function AdminCustomers() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const allSelected = customers.length > 0 && selectedIds.size === customers.length;
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
+        setIsMoreMenuOpen(false);
+      }
+      if (selectDropdownRef.current && !selectDropdownRef.current.contains(event.target)) {
+        setIsSelectDropdownOpen(false);
+      }
+    };
 
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      setSelectedIds(new Set(customers.map((c) => c.id)));
-    } else {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const allSelected = customers.length > 0 && selectedIds.size === customers.length;
+  const isIndeterminate = selectedIds.size > 0 && !allSelected;
+
+  const displayedCustomers =
+    showOnlySelected && selectedIds.size > 0
+      ? customers.filter((c) => selectedIds.has(c.id))
+      : customers;
+
+  const handleMasterCheckboxClick = () => {
+    if (selectedIds.size > 0) {
       setSelectedIds(new Set());
+      setShowOnlySelected(false);
+    } else {
+      setSelectedIds(new Set(customers.map((c) => c.id)));
     }
   };
 
@@ -196,6 +230,123 @@ export default function AdminCustomers() {
       }
       return next;
     });
+  };
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(""), 3500);
+  };
+
+  const handleBulkAction = (actionName) => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    const s = count > 1 ? "customers" : "customer";
+    if (actionName === "Bulk edit") {
+      showToast(`Bulk edit for ${count} ${s} triggered.`);
+    } else if (actionName === "Merge customer") {
+      showToast(`Merge action for ${count} ${s} triggered.`);
+    } else if (actionName === "Add tags") {
+      showToast(`Add tags for ${count} ${s} triggered.`);
+    } else if (actionName === "Remove tags") {
+      showToast(`Remove tags for ${count} ${s} triggered.`);
+    } else if (actionName === "Add to company") {
+      showToast(`Add ${count} ${s} to company triggered.`);
+    }
+  };
+
+  const handleExport = () => {
+    if (!customers.length) {
+      showToast("No customers to export.");
+      return;
+    }
+    const headers = [
+      "First Name",
+      "Last Name",
+      "Email",
+      "Subscription Status",
+      "Location",
+      "Orders",
+      "Amount Spent",
+    ];
+    const rows = customers.map((c) => [
+      c.first_name || "",
+      c.last_name || "",
+      c.email || "",
+      c.email_subscription_status || "",
+      c.location || [c.city, c.state, c.country].filter(Boolean).join(", ") || "",
+      c.orders_count || 0,
+      c.amount_spent || "0.00",
+    ]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `customers_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Customers exported successfully.");
+  };
+
+  const handleImport = () => {
+    showToast("Customer import feature ready.");
+  };
+
+  const handleConfirmDeleteCustomers = async () => {
+    if (selectedIds.size === 0) return;
+    setIsDeleting(true);
+    setDeleteError("");
+
+    const idsToDelete = Array.from(selectedIds);
+    let failedCount = 0;
+    let lastErrorMessage = "";
+    const deletedIds = new Set();
+
+    for (const id of idsToDelete) {
+      const res = await apiDelete(`/api/v1/customers/${id}/`);
+      if (res.ok) {
+        deletedIds.add(id);
+      } else {
+        failedCount++;
+        lastErrorMessage = res.error || "Failed to delete customer.";
+      }
+    }
+
+    setIsDeleting(false);
+
+    if (deletedIds.size > 0) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        deletedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      fetchCustomers(searchQuery);
+    }
+
+    if (failedCount === 0) {
+      setIsDeleteDialogOpen(false);
+      setShowOnlySelected(false);
+      showToast(
+        deletedIds.size > 1
+          ? `Successfully deleted ${deletedIds.size} customers.`
+          : "Customer deleted successfully."
+      );
+    } else {
+      setDeleteError(
+        idsToDelete.length > 1
+          ? `Failed to delete ${failedCount} of ${idsToDelete.length} customers: ${lastErrorMessage}`
+          : lastErrorMessage
+      );
+    }
   };
 
   const handleCreateCustomer = async (e) => {
@@ -255,17 +406,31 @@ export default function AdminCustomers() {
         {/* MAIN CONTENT AREA */}
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & TOP ACTION BAR */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="customers" />
               Customers
             </h1>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExport}
+                className="rounded-lg bg-white border border-slate-300 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+              >
+                Export
+              </button>
+              <button
+                type="button"
+                onClick={handleImport}
+                className="rounded-lg bg-white border border-slate-300 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+              >
+                Import
+              </button>
               {canManage && (
                 <Link
                   to="/admin/online-store/customers/new"
-                  className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
+                  className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#1C2347] transition shadow-2xs"
                 >
                   Add customer
                 </Link>
@@ -273,12 +438,31 @@ export default function AdminCustomers() {
             </div>
           </div>
 
+          {/* DESCRIBE YOUR SEGMENT ROW */}
+          <div className="flex items-center justify-between rounded-xl border border-slate-200/90 bg-white px-3.5 py-2.5 shadow-2xs mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#7C3AED] text-white">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.38-1 1.72V7h2a5 5 0 0 1 5 5v1.28c.6.34 1 .98 1 1.72a2 2 0 1 1-4 0v-.28A5 5 0 0 1 15 10H9a5 5 0 0 1-2 4.72V15a2 2 0 1 1-4 0c0-.74.4-1.38 1-1.72V12a5 5 0 0 1 5-5h2V5.72A2 2 0 0 1 12 2zm-3 9a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+                </svg>
+              </div>
+              <span className="text-xs sm:text-sm text-slate-600 font-medium">Describe your segment</span>
+            </div>
+            <button type="button" className="text-slate-400 hover:text-slate-600 p-0.5" aria-label="Segment options">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+          </div>
+
           {/* CUSTOMERS TABLE CARD */}
-          <section className="rounded-2xl border border-[#E4DEFB] bg-white shadow-sm overflow-hidden">
+          <section className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-visible">
             {/* SEARCH & CONTROLS HEADER */}
-            <div className="flex items-center justify-between gap-3 border-b border-[#E4DEFB] px-4 py-3">
-              <div className="flex items-center gap-2 w-full sm:w-80 h-9 rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm">
-                <span className="text-slate-400">⌕</span>
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-2.5">
+              <div className="flex items-center gap-2.5 w-full sm:w-96 text-sm">
+                <svg className="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
                 <input
                   type="text"
                   value={searchQuery}
@@ -300,36 +484,248 @@ export default function AdminCustomers() {
               <button
                 type="button"
                 title="Table columns"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-slate-600 hover:bg-[#F3F0FF] transition shrink-0"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition shrink-0"
               >
-                ▥
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5v15m6-15v15m-10.5-15h15a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-12a1.5 1.5 0 0 1 1.5-1.5Z" />
+                </svg>
               </button>
             </div>
 
             {/* RESPONSIVE TABLE */}
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-visible min-h-[360px]">
               <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
                 <thead>
-                  <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
-                    <th className="py-3.5 pl-5 pr-3 w-10">
-                      <input
-                        type="checkbox"
-                        checked={allSelected}
-                        onChange={handleSelectAll}
-                        className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
-                      />
-                    </th>
-                    <th className="py-3.5 px-3">Customer name</th>
-                    <th className="py-3.5 px-3">Email subscription</th>
-                    <th className="py-3.5 px-3">Location</th>
-                    <th className="py-3.5 px-3">
-                      <span className="inline-flex items-center gap-1 cursor-pointer">
-                        Orders <span className="text-[10px]">↑</span>
-                      </span>
-                    </th>
-                    <th className="py-3.5 px-3">Amount spent</th>
-                    <th className="py-3.5 pl-3 pr-6 text-right">Addresses</th>
-                  </tr>
+                  {selectedIds.size > 0 ? (
+                    /* BULK ACTIONS TOOLBAR ROW */
+                    <tr className="border-b border-slate-200 bg-white">
+                      {/* Master Checkbox */}
+                      <th className="py-2.5 pl-5 pr-3 w-10 align-middle">
+                        <button
+                          type="button"
+                          onClick={handleMasterCheckboxClick}
+                          className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus:outline-none"
+                          aria-label="Toggle selection"
+                        >
+                          {isIndeterminate ? (
+                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
+                              <span className="h-0.5 w-2 rounded-full bg-white" />
+                            </span>
+                          ) : allSelected ? (
+                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
+                              <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          ) : (
+                            <span className="h-4 w-4 rounded border border-slate-300 bg-white transition-colors group-hover:border-slate-500" />
+                          )}
+                        </button>
+                      </th>
+
+                      {/* Bulk actions and toggle spanning remaining columns */}
+                      <th colSpan={6} className="py-2 pr-6 font-normal">
+                        <div className="flex items-center justify-between gap-3">
+                          {/* Left Action Buttons */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {/* Selected Count with Dropdown */}
+                            <div className="relative inline-block" ref={selectDropdownRef}>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsSelectDropdownOpen((prev) => !prev);
+                                }}
+                                className="flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-xs sm:text-[13px] font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
+                                aria-expanded={isSelectDropdownOpen}
+                              >
+                                <span>{selectedIds.size} selected</span>
+                                <svg
+                                  className={`h-3 w-3 text-slate-500 transition-transform duration-150 ${
+                                    isSelectDropdownOpen ? "rotate-180" : ""
+                                  }`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m6 9 6 6 6-6" />
+                                </svg>
+                              </button>
+
+                              {isSelectDropdownOpen && (
+                                <div
+                                  className="absolute left-0 top-full mt-1.5 z-50 min-w-[200px] rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg animate-in fade-in"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedIds(new Set(customers.map((c) => c.id)));
+                                      setIsSelectDropdownOpen(false);
+                                    }}
+                                    className="flex w-full items-center rounded-lg px-3 py-2 text-xs sm:text-[13px] text-slate-700 transition-colors hover:bg-slate-100"
+                                  >
+                                    Select all ({customers.length})
+                                  </button>
+                                  <div className="my-1 border-t border-slate-100" />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedIds(new Set());
+                                      setShowOnlySelected(false);
+                                      setIsSelectDropdownOpen(false);
+                                    }}
+                                    className="flex w-full items-center rounded-lg px-3 py-2 text-xs sm:text-[13px] font-medium text-red-600 transition-colors hover:bg-red-50"
+                                  >
+                                    Deselect all
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Bulk edit button */}
+                            <button
+                              type="button"
+                              onClick={() => handleBulkAction("Bulk edit")}
+                              className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs sm:text-[13px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 active:bg-slate-100 transition-colors"
+                            >
+                              Bulk edit
+                            </button>
+
+                            {/* Merge customer button */}
+                            <button
+                              type="button"
+                              onClick={() => handleBulkAction("Merge customer")}
+                              className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs sm:text-[13px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 active:bg-slate-100 transition-colors"
+                            >
+                              Merge customer
+                            </button>
+
+                            {/* Add tags button */}
+                            <button
+                              type="button"
+                              onClick={() => handleBulkAction("Add tags")}
+                              className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs sm:text-[13px] font-medium text-slate-700 shadow-2xs hover:bg-slate-50 active:bg-slate-100 transition-colors"
+                            >
+                              Add tags
+                            </button>
+
+                            {/* Three-dot menu button & popover */}
+                            <div className="relative inline-block" ref={moreMenuRef}>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsMoreMenuOpen((prev) => !prev);
+                                }}
+                                className={`inline-flex h-[28px] w-[32px] items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 shadow-2xs hover:bg-slate-50 active:bg-slate-100 transition-colors ${
+                                  isMoreMenuOpen ? "bg-slate-100 border-slate-400" : ""
+                                }`}
+                                aria-label="More bulk actions"
+                                aria-expanded={isMoreMenuOpen}
+                              >
+                                <span className="tracking-tight text-base leading-none">⋯</span>
+                              </button>
+
+                              {/* Popover Dropdown */}
+                              {isMoreMenuOpen && (
+                                <div
+                                  className="absolute left-0 top-full mt-1.5 z-50 min-w-[185px] rounded-xl border border-slate-200 bg-white p-1 text-left shadow-[0_4px_20px_rgba(0,0,0,0.12)] animate-in fade-in zoom-in-95 duration-100"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsMoreMenuOpen(false);
+                                      handleBulkAction("Remove tags");
+                                    }}
+                                    className="flex w-full items-center rounded-lg px-3.5 py-2 text-left text-xs sm:text-[13px] text-slate-700 transition-colors hover:bg-slate-100"
+                                  >
+                                    Remove tags
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsMoreMenuOpen(false);
+                                      handleBulkAction("Add to company");
+                                    }}
+                                    className="flex w-full items-center rounded-lg px-3.5 py-2 text-left text-xs sm:text-[13px] text-slate-700 transition-colors hover:bg-slate-100"
+                                  >
+                                    Add to company
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsMoreMenuOpen(false);
+                                      setDeleteError("");
+                                      setIsDeleteDialogOpen(true);
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-lg px-3.5 py-2 text-left text-xs sm:text-[13px] font-medium text-red-600 transition-colors hover:bg-red-50"
+                                  >
+                                    <svg className="h-4 w-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                    <span>Delete customer</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Right: Show all selected switch */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              role="switch"
+                              aria-checked={showOnlySelected}
+                              onClick={() => setShowOnlySelected((prev) => !prev)}
+                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                showOnlySelected ? "bg-[#0B1020]" : "bg-slate-300"
+                              }`}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+                                  showOnlySelected ? "translate-x-4" : "translate-x-0"
+                                }`}
+                              />
+                            </button>
+                            <span
+                              onClick={() => setShowOnlySelected((prev) => !prev)}
+                              className="cursor-pointer select-none text-xs sm:text-[13px] font-medium text-slate-700"
+                            >
+                              Show all selected
+                            </span>
+                          </div>
+                        </div>
+                      </th>
+                    </tr>
+                  ) : (
+                    /* REGULAR COLUMN HEADERS */
+                    <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
+                      <th className="py-3.5 pl-5 pr-3 w-10">
+                        <button
+                          type="button"
+                          onClick={handleMasterCheckboxClick}
+                          className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus:outline-none"
+                          aria-label="Select all"
+                        >
+                          <span className="h-4 w-4 rounded border border-slate-300 bg-white transition-colors group-hover:border-slate-500" />
+                        </button>
+                      </th>
+                      <th className="py-3.5 px-3">Customer name</th>
+                      <th className="py-3.5 px-3">Email subscription</th>
+                      <th className="py-3.5 px-3">Location</th>
+                      <th className="py-3.5 px-3">
+                        <span className="inline-flex items-center gap-1 cursor-pointer">
+                          Orders <span className="text-[10px]">↑</span>
+                        </span>
+                      </th>
+                      <th className="py-3.5 px-3">Amount spent</th>
+                      <th className="py-3.5 pl-3 pr-6 text-right">Addresses</th>
+                    </tr>
+                  )}
                 </thead>
 
                 <tbody className="divide-y divide-[#E4DEFB]">
@@ -357,14 +753,15 @@ export default function AdminCustomers() {
                         </td>
                       </tr>
                     ))
-                  ) : customers.length > 0 ? (
+                  ) : displayedCustomers.length > 0 ? (
                     // DYNAMIC DATA
-                    customers.map((c) => {
+                    displayedCustomers.map((c) => {
                       const isSelected = selectedIds.has(c.id);
                       const fullName =
                         [c.first_name, c.last_name].filter(Boolean).join(" ") || c.name || c.email;
 
                       const isSubscribed = c.email_subscription_status === "subscribed";
+                      const isUnsubscribed = c.email_subscription_status === "unsubscribed";
 
                       return (
                         <tr
@@ -375,12 +772,25 @@ export default function AdminCustomers() {
                         >
                           {/* Checkbox */}
                           <td className="py-3.5 pl-5 pr-3">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToggleSelect(c.id)}
-                              className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
-                            />
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleSelect(c.id);
+                              }}
+                              className="group flex h-4 w-4 items-center justify-center rounded transition-colors focus:outline-none"
+                              aria-label={isSelected ? "Deselect customer" : "Select customer"}
+                            >
+                              {isSelected ? (
+                                <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
+                                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </span>
+                              ) : (
+                                <span className="h-4 w-4 rounded border border-slate-300 bg-white transition-colors group-hover:border-slate-500" />
+                              )}
+                            </button>
                           </td>
 
                           {/* Customer Name */}
@@ -392,17 +802,23 @@ export default function AdminCustomers() {
                             >
                               {fullName}
                             </button>
-                            <div className="text-[11px] text-slate-400">{c.email}</div>
+                            {c.email && c.email !== fullName && (
+                              <div className="text-[11px] text-slate-400">{c.email}</div>
+                            )}
                           </td>
 
                           {/* Email subscription */}
                           <td className="py-3.5 px-3">
                             {isSubscribed ? (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#D1FADF] text-[#027A48]">
+                              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-[#D1FADF] text-[#027A48]">
                                 Subscribed
                               </span>
+                            ) : isUnsubscribed ? (
+                              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-[#FEF0C7] text-[#B54708]">
+                                Unsubscribed
+                              </span>
                             ) : (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F2F4F7] text-[#475467]">
+                              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-[#F2F4F7] text-[#475467]">
                                 Not subscribed
                               </span>
                             )}
@@ -450,7 +866,9 @@ export default function AdminCustomers() {
                           <NavIcon name="customers" className="h-8 w-8 text-slate-300" />
                           <p className="text-sm font-medium text-slate-700">No customers found</p>
                           <p className="text-xs text-slate-400 max-w-sm">
-                            {searchQuery
+                            {showOnlySelected && selectedIds.size > 0
+                              ? "No selected customers to display."
+                              : searchQuery
                               ? `No customers matching "${searchQuery}".`
                               : "Customers who place orders or are added will appear here."}
                           </p>
@@ -884,6 +1302,111 @@ export default function AdminCustomers() {
         address={deletingAddress}
         deleting={deletingAddressLoading}
       />
+
+      {/* TOAST FEEDBACK NOTIFICATION */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-[#0B1020] px-4 py-3 text-sm text-white shadow-xl animate-in slide-in-from-bottom duration-200">
+          <span>✓</span>
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
+      {/* DELETE CUSTOMER CONFIRMATION MODAL */}
+      {isDeleteDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div
+            className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    {selectedIds.size > 1 ? `Delete ${selectedIds.size} customers?` : "Delete customer?"}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setIsDeleteDialogOpen(false);
+                  setDeleteError("");
+                }}
+                className="text-slate-400 hover:text-slate-700 font-bold p-1 rounded-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              {selectedIds.size === 1 ? (
+                <>
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold text-slate-900">
+                    {(() => {
+                      const target = customers.find((c) => selectedIds.has(c.id));
+                      return target
+                        ? [target.first_name, target.last_name].filter(Boolean).join(" ") || target.name || target.email
+                        : "this customer";
+                    })()}
+                  </span>
+                  ? This customer and their data will be removed.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold text-slate-900">{selectedIds.size} selected customers</span>?
+                  Their data will be removed.
+                </>
+              )}
+            </div>
+
+            {deleteError && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 leading-relaxed">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setIsDeleteDialogOpen(false);
+                  setDeleteError("");
+                }}
+                className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDeleteCustomers}
+                className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <span>{selectedIds.size > 1 ? "Delete customers" : "Delete customer"}</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
