@@ -279,18 +279,13 @@ export default function AdminCustomers() {
     ]);
     const csvContent = [
       headers.join(","),
-      ...rows.map((row) =>
-        row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")
-      ),
+      ...rows.map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")),
     ].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `customers_${new Date().toISOString().slice(0, 10)}.csv`
-    );
+    link.setAttribute("download", `customers_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -446,11 +441,22 @@ export default function AdminCustomers() {
                   <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.38-1 1.72V7h2a5 5 0 0 1 5 5v1.28c.6.34 1 .98 1 1.72a2 2 0 1 1-4 0v-.28A5 5 0 0 1 15 10H9a5 5 0 0 1-2 4.72V15a2 2 0 1 1-4 0c0-.74.4-1.38 1-1.72V12a5 5 0 0 1 5-5h2V5.72A2 2 0 0 1 12 2zm-3 9a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
                 </svg>
               </div>
-              <span className="text-xs sm:text-sm text-slate-600 font-medium">Describe your segment</span>
+              <span className="text-xs sm:text-sm text-slate-600 font-medium">
+                Describe your segment
+              </span>
             </div>
-            <button type="button" className="text-slate-400 hover:text-slate-600 p-0.5" aria-label="Segment options">
+            <button
+              type="button"
+              className="text-slate-400 hover:text-slate-600 p-0.5"
+              aria-label="Segment options"
+            >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                />
               </svg>
             </button>
           </div>
@@ -460,8 +466,18 @@ export default function AdminCustomers() {
             {/* SEARCH & CONTROLS HEADER */}
             <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-2.5">
               <div className="flex items-center gap-2.5 w-full sm:w-96 text-sm">
-                <svg className="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                <svg
+                  className="h-4 w-4 text-slate-400 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                  />
                 </svg>
                 <input
                   type="text"
@@ -486,8 +502,18 @@ export default function AdminCustomers() {
                 title="Table columns"
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition shrink-0"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5v15m6-15v15m-10.5-15h15a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-12a1.5 1.5 0 0 1 1.5-1.5Z" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.75}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 4.5v15m6-15v15m-10.5-15h15a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5v-12a1.5 1.5 0 0 1 1.5-1.5Z"
+                  />
                 </svg>
               </button>
             </div>
@@ -513,8 +539,18 @@ export default function AdminCustomers() {
                             </span>
                           ) : allSelected ? (
                             <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
-                              <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              <svg
+                                className="h-3 w-3"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M5 13l4 4L19 7"
+                                />
                               </svg>
                             </span>
                           ) : (
@@ -548,7 +584,12 @@ export default function AdminCustomers() {
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
                                 >
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m6 9 6 6 6-6" />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="m6 9 6 6 6-6"
+                                  />
                                 </svg>
                               </button>
 
@@ -657,15 +698,26 @@ export default function AdminCustomers() {
 
                                   <button
                                     type="button"
+                                    disabled={!canDelete}
                                     onClick={() => {
                                       setIsMoreMenuOpen(false);
                                       setDeleteError("");
                                       setIsDeleteDialogOpen(true);
                                     }}
-                                    className="flex w-full items-center gap-2 rounded-lg px-3.5 py-2 text-left text-xs sm:text-[13px] font-medium text-red-600 transition-colors hover:bg-red-50"
+                                    className="flex w-full items-center gap-2 rounded-lg px-3.5 py-2 text-left text-xs sm:text-[13px] font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
                                   >
-                                    <svg className="h-4 w-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    <svg
+                                      className="h-4 w-4 shrink-0 text-red-500"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                      strokeWidth={1.75}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                      />
                                     </svg>
                                     <span>Delete customer</span>
                                   </button>
@@ -783,8 +835,18 @@ export default function AdminCustomers() {
                             >
                               {isSelected ? (
                                 <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
-                                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  <svg
+                                    className="h-3 w-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M5 13l4 4L19 7"
+                                    />
                                   </svg>
                                 </span>
                               ) : (
@@ -869,8 +931,8 @@ export default function AdminCustomers() {
                             {showOnlySelected && selectedIds.size > 0
                               ? "No selected customers to display."
                               : searchQuery
-                              ? `No customers matching "${searchQuery}".`
-                              : "Customers who place orders or are added will appear here."}
+                                ? `No customers matching "${searchQuery}".`
+                                : "Customers who place orders or are added will appear here."}
                           </p>
                           {canManage && (
                             <Link
@@ -1321,17 +1383,27 @@ export default function AdminCustomers() {
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                    />
                   </svg>
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">
-                    {selectedIds.size > 1 ? `Delete ${selectedIds.size} customers?` : "Delete customer?"}
+                    {selectedIds.size > 1
+                      ? `Delete ${selectedIds.size} customers?`
+                      : "Delete customer?"}
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    This action cannot be undone.
-                  </p>
+                  <p className="text-xs text-slate-500">This action cannot be undone.</p>
                 </div>
               </div>
               <button
@@ -1355,7 +1427,9 @@ export default function AdminCustomers() {
                     {(() => {
                       const target = customers.find((c) => selectedIds.has(c.id));
                       return target
-                        ? [target.first_name, target.last_name].filter(Boolean).join(" ") || target.name || target.email
+                        ? [target.first_name, target.last_name].filter(Boolean).join(" ") ||
+                            target.name ||
+                            target.email
                         : "this customer";
                     })()}
                   </span>
@@ -1364,8 +1438,10 @@ export default function AdminCustomers() {
               ) : (
                 <>
                   Are you sure you want to delete{" "}
-                  <span className="font-semibold text-slate-900">{selectedIds.size} selected customers</span>?
-                  Their data will be removed.
+                  <span className="font-semibold text-slate-900">
+                    {selectedIds.size} selected customers
+                  </span>
+                  ? Their data will be removed.
                 </>
               )}
             </div>
@@ -1390,7 +1466,7 @@ export default function AdminCustomers() {
               </button>
               <button
                 type="button"
-                disabled={isDeleting}
+                disabled={isDeleting || !canDelete}
                 onClick={handleConfirmDeleteCustomers}
                 className="px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
               >
