@@ -66,8 +66,6 @@ const SOURCE_LABELS = {
   starter: "Original",
 };
 
-
-
 const baseName = (path) => path.split("/").pop();
 const parentOf = (path) => {
   const i = path.lastIndexOf("/");
@@ -484,7 +482,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     const input = window.prompt("New file name (e.g. product-card.liquid, theme.css, app.js)");
     if (!input) return;
     const name = toValidFileName(input);
-    if (!name) return window.alert("Only Liquid (.liquid), CSS (.css), JavaScript (.js) and JSON (.json) files are allowed.");
+    if (!name)
+      return window.alert(
+        "Only Liquid (.liquid), CSS (.css), JavaScript (.js) and JSON (.json) files are allowed."
+      );
     const dir = targetFolder();
     const path = dir ? `${dir}/${name}` : name;
     if (path in project.files) return window.alert("A file with that name already exists.");
@@ -520,7 +521,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     const input = window.prompt("Rename to", current);
     if (!input || input === current) return;
     const name = toValidFileName(input);
-    if (!name) return window.alert("Only Liquid (.liquid), CSS (.css), JavaScript (.js) and JSON (.json) files are allowed.");
+    if (!name)
+      return window.alert(
+        "Only Liquid (.liquid), CSS (.css), JavaScript (.js) and JSON (.json) files are allowed."
+      );
     if (name === current) return;
     const dir = parentOf(item.path);
     const newPath = dir ? `${dir}/${name}` : name;
@@ -792,7 +796,14 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               className="flex items-center gap-1.5 border-r border-[#e5e5e5] px-3 py-2 text-[13px] font-medium text-[#4C4F7A] hover:bg-[#e8e8e8] hover:text-[#0B1020]"
               title="Return to theme customizer"
             >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <path d="M10 13L5 8l5-5" />
               </svg>
               Back to customizer
