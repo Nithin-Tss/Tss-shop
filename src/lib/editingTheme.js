@@ -15,6 +15,13 @@ function storeId() {
 
 export function getEditingThemeId() {
   try {
+    if (typeof window !== "undefined" && window.location?.search) {
+      const urlTheme = new URLSearchParams(window.location.search).get("theme");
+      if (urlTheme) {
+        setEditingThemeId(urlTheme);
+        return urlTheme;
+      }
+    }
     const saved = JSON.parse(sessionStorage.getItem(KEY) || "null");
     return saved && saved.storeId === storeId() ? saved.themeId : "";
   } catch {

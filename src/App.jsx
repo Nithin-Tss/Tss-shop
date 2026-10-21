@@ -108,6 +108,15 @@ export default function App() {
                 </>
               }
             />
+            <Route
+              path="/admin/online-store/code"
+              element={
+                <>
+                  <EditorDemo />
+                  <EditingThemeBar />
+                </>
+              }
+            />
           </Route>
           <Route element={<RequirePermission permission="products.view" />}>
             <Route path="/admin/online-store/products" element={<AdminProducts />} />

@@ -16,10 +16,20 @@ import {
 } from "@/lib/themeApi";
 import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
 
+import { getEditingThemeId, setEditingThemeId } from "@/lib/editingTheme";
+
 const KEEP = ".keep";
 
-// You can create Liquid files only: the server rejects any other new file.
-const EXT = ".liquid";
+// Allowed extensions for theme editing
+const ALLOWED_EXTS = [".liquid", ".css", ".js", ".json"];
+
+function toValidFileName(name) {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  const lower = trimmed.toLowerCase();
+  if (ALLOWED_EXTS.some((ext) => lower.endsWith(ext))) return trimmed;
+  return trimmed.includes(".") ? null : trimmed + ".liquid";
+}
 
 // The customizer's settings, shown as JSON (config/settings_data.json, templates/<page>.json).
 // They are generated from what the customizer saved, and saving one updates the customizer.
@@ -36,7 +46,14 @@ const PAGE_TEMPLATE_STARTER = [
 ].join("\n");
 // Pictures uploaded in the customizer (kept in the database), listed read-only
 const IMAGES_FILE = "assets/images.json";
-const languageOf = (path) => (path.toLowerCase().endsWith(".json") ? "json" : "liquid");
+const languageOf = (path) => {
+  const p = (path || "").toLowerCase();
+  if (p.endsWith(".json")) return "json";
+  if (p.endsWith(".css")) return "css";
+  if (p.endsWith(".js") || p.endsWith(".mjs")) return "javascript";
+  if (p.endsWith(".html") || p.endsWith(".htm")) return "html";
+  return "liquid";
+};
 
 // Synced sections (sections/header.liquid, sections/footer.liquid): a file's schema is what the
 // customizer's panel for it shows, and changes made there are written into the file (see
@@ -49,13 +66,7 @@ const SOURCE_LABELS = {
   starter: "Original",
 };
 
-// "product-card" -> "product-card.liquid"; "theme.css" -> null (not allowed)
-function toLiquidName(name) {
-  const trimmed = name.trim();
-  if (!trimmed) return null;
-  if (trimmed.toLowerCase().endsWith(EXT)) return trimmed;
-  return trimmed.includes(".") ? null : trimmed + EXT;
-}
+
 
 const baseName = (path) => path.split("/").pop();
 const parentOf = (path) => {
@@ -134,14 +145,25 @@ const CloseIcon = () => (
 );
 
 export default function CodeWorkbench({ height = "640px", fullscreen = false }) {
-  // ?file=sections/hero.liquid opens that file (the customizer's "Edit code")
+  // ?file=sections/hero.liquid opens that file; ?theme=<id> keeps selected theme context
   const [searchParams] = useSearchParams();
   const requestedFile = searchParams.get("file");
+  const requestedTheme = searchParams.get("theme");
+
+  useEffect(() => {
+    if (requestedTheme) {
+      setEditingThemeId(requestedTheme);
+    }
+  }, [requestedTheme]);
+
+  const currentThemeId = requestedTheme || getEditingThemeId();
+
   const [project, setProject] = useState({
     files: {},
     folders: [],
     storeId: null,
     storefrontUrl: "",
+    theme: null,
   });
   const [drafts, setDrafts] = useState({});
   const [openTabs, setOpenTabs] = useState([]);
@@ -179,7 +201,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       if (baseName(f.path) === KEEP) folders.push(parentOf(f.path));
       else files[f.path] = f.content;
     });
-    return { files, folders, storeId: data.store, storefrontUrl: data.storefrontUrl };
+    return {
+      files,
+      folders,
+      storeId: data.store,
+      storefrontUrl: data.storefrontUrl,
+      theme: data.theme || null,
+    };
   }
 
   async function load() {
@@ -197,6 +225,22 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       }
       setSyncedFiles(files);
       setProject(loaded);
+
+      // Auto-expand common root folders (layout, sections, snippets, templates)
+      const rootFolders = new Set(
+        Object.keys(loaded.files)
+          .map((p) => p.split("/")[0])
+          .filter((p) => Boolean(p) && !p.includes("."))
+      );
+      setExpanded(rootFolders);
+
+      // If no file was requested via URL, default to opening the Home page template
+      if (!requestedFile && "templates/index.liquid" in loaded.files) {
+        setOpenTabs(["templates/index.liquid"]);
+        setActivePath("templates/index.liquid");
+        setSelected({ type: "file", path: "templates/index.liquid" });
+      }
+
       setStatus("ready");
     } catch (e) {
       setError(e.message);
@@ -437,10 +481,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         : "";
 
   async function newFile() {
-    const input = window.prompt("New Liquid file name (e.g. product-card.liquid)");
+    const input = window.prompt("New file name (e.g. product-card.liquid, theme.css, app.js)");
     if (!input) return;
-    const name = toLiquidName(input);
-    if (!name) return window.alert("Only Liquid files (.liquid) are allowed.");
+    const name = toValidFileName(input);
+    if (!name) return window.alert("Only Liquid (.liquid), CSS (.css), JavaScript (.js) and JSON (.json) files are allowed.");
     const dir = targetFolder();
     const path = dir ? `${dir}/${name}` : name;
     if (path in project.files) return window.alert("A file with that name already exists.");
@@ -475,8 +519,8 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     const current = baseName(item.path);
     const input = window.prompt("Rename to", current);
     if (!input || input === current) return;
-    const name = item.type === "file" ? toLiquidName(input) : input.trim();
-    if (!name) return window.alert("Liquid files must keep the .liquid extension.");
+    const name = toValidFileName(input);
+    if (!name) return window.alert("Only Liquid (.liquid), CSS (.css), JavaScript (.js) and JSON (.json) files are allowed.");
     if (name === current) return;
     const dir = parentOf(item.path);
     const newPath = dir ? `${dir}/${name}` : name;
@@ -588,17 +632,28 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         style={{ height }}
       >
         {status === "loading" ? (
-          "Loading theme files..."
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#6D28D9] border-t-transparent" />
+            <p>Loading theme files...</p>
+          </div>
         ) : (
-          <>
-            <p className="text-red-600">{error}</p>
-            <button
-              onClick={load}
-              className="rounded border border-[#0B1020] px-4 py-1.5 hover:bg-[#0B1020] hover:text-white"
-            >
-              Retry
-            </button>
-          </>
+          <div className="flex flex-col items-center gap-3 max-w-md text-center p-4">
+            <p className="text-red-600 font-medium">Failed to load theme files: {error}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={load}
+                className="rounded border border-[#0B1020] px-4 py-1.5 hover:bg-[#0B1020] hover:text-white"
+              >
+                Retry
+              </button>
+              <Link
+                to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
+                className="rounded border border-[#DDD6FE] px-4 py-1.5 hover:border-[#0B1020]"
+              >
+                Back to customizer
+              </Link>
+            </div>
+          </div>
         )}
       </div>
     );
@@ -651,7 +706,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                   }}
                 >
                   <Chevron open={rootOpen} />
-                  Tss-gg
+                  {project.theme?.name || "Theme Files"}
                 </button>
                 <div className="flex gap-1 text-[#424242]">
                   <IconButton title="New File" onClick={newFile}>
@@ -731,6 +786,18 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         {/* Editor area */}
         <section className="flex min-w-0 flex-1 flex-col">
           <div className="flex items-stretch bg-[#f8f8f8]">
+            <Link
+              id="back-to-customizer-btn"
+              to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
+              className="flex items-center gap-1.5 border-r border-[#e5e5e5] px-3 py-2 text-[13px] font-medium text-[#4C4F7A] hover:bg-[#e8e8e8] hover:text-[#0B1020]"
+              title="Return to theme customizer"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M10 13L5 8l5-5" />
+              </svg>
+              Back to customizer
+            </Link>
+
             <div className="flex min-w-0 flex-1 overflow-x-auto">
               {openTabs.map((path) => {
                 const active = path === activePath;
@@ -792,12 +859,11 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 </button>
               )}
               <Link
-                to="/admin/online-store/customize"
-                target="_blank"
+                to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
                 className="rounded border border-[#cecece] px-2.5 py-1 hover:bg-[#e8e8e8]"
-                title="Open the Customize editor in a new tab; both stay in step"
+                title="Return to theme customizer"
               >
-                Customize
+                Customizer
               </Link>
               <button
                 onClick={() => setPreviewOpen((o) => !o)}

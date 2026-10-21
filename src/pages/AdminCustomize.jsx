@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import { getEditingThemeId, setEditingThemeId } from "@/lib/editingTheme";
 
 import { API_URL, apiRequest, openStorefront } from "@/lib/api";
 
@@ -161,6 +163,7 @@ const SECTION_ICONS = {
 
 export default function AdminCustomizePage() {
   const session = useSession();
+  const navigate = useNavigate();
 
   const store = session?.stores?.find((s) => s.storeId === session.storeId);
 
@@ -185,6 +188,13 @@ export default function AdminCustomizePage() {
 
   // ?page=product&product=<id>&article=<handle>&section=<id>: what was open, so a refresh shows it again
   const [startParams] = useState(() => new URLSearchParams(window.location.search));
+
+  useEffect(() => {
+    const themeFromUrl = startParams.get("theme");
+    if (themeFromUrl) {
+      setEditingThemeId(themeFromUrl);
+    }
+  }, [startParams]);
 
   const [sampleProductId, setSampleProductId] = useState(() => startParams.get("product"));
 
@@ -2243,15 +2253,19 @@ export default function AdminCustomizePage() {
                     </select>
                   )}
 
-                  <a
-                    href="/editor-demo"
-                    target="_blank"
-                    rel="noopener"
-                    title="Open the theme code in a new tab; the two stay in step"
-                    className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 hover:border-[#0B1020]"
+                  <Link
+                    id="edit-code-btn"
+                    to={`/editor-demo${(() => {
+                      const themeId = startParams.get("theme") || getEditingThemeId();
+                      const query = new URLSearchParams();
+                      if (themeId) query.set("theme", themeId);
+                      return query.toString() ? `?${query.toString()}` : "";
+                    })()}`}
+                    title="Open the theme code in the editor"
+                    className="inline-flex h-9 items-center justify-center rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 text-[#0B1020] hover:border-[#0B1020]"
                   >
                     Edit code
-                  </a>
+                  </Link>
 
                   {previewUrl && (
                     <a
@@ -3130,11 +3144,10 @@ export default function AdminCustomizePage() {
                     type="button"
                     role="menuitem"
                     onClick={() => {
-                      window.open(
-                        `/editor-demo?file=${encodeURIComponent(contextMenu.file)}`,
-                        "_blank",
-                        "noopener"
-                      );
+                      const themeId = startParams.get("theme") || getEditingThemeId();
+                      const query = new URLSearchParams({ file: contextMenu.file });
+                      if (themeId) query.set("theme", themeId);
+                      navigate(`/editor-demo?${query.toString()}`);
                       setContextMenu(null);
                     }}
                     className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F5F3FF]"
