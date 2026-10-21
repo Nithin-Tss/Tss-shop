@@ -49,7 +49,13 @@ export default function StoreBuilder() {
               className="w-[230px] min-w-[230px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm"
             >
               <div className="h-[140px] overflow-hidden bg-neutral-200">
-                <img src={store.image} alt={store.name} className="h-full w-full object-cover" />
+                <img
+                  src={store.image}
+                  alt={store.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div className="p-4">

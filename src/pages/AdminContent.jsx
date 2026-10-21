@@ -410,6 +410,7 @@ export function BlogPostsPage() {
                     <img
                       src={form.cover_image}
                       alt=""
+                      loading="lazy"
                       className="aspect-[3/2] w-full rounded-lg object-cover"
                     />
                   )}

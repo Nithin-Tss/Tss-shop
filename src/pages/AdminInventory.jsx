@@ -114,6 +114,8 @@ function ProductThumbnail({ item }) {
       <img
         src={item.image_url}
         alt={item.title}
+        loading="lazy"
+        decoding="async"
         className="h-9 w-9 rounded-md border border-[#E1E3E5] object-cover bg-white shrink-0"
       />
     );

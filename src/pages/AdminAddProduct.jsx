@@ -1465,6 +1465,7 @@ export function ProductForm({ productId }) {
                               <img
                                 src={photo.url}
                                 alt={photo.name || "Product image"}
+                                loading="lazy"
                                 onError={() => handleImageError(photo.id)}
                                 className="h-full w-full object-cover transition duration-200 group-hover:scale-102"
                               />

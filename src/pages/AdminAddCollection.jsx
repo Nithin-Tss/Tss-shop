@@ -734,6 +734,7 @@ export default function AdminAddCollection() {
                             <img
                               src={form.image_url}
                               alt="Collection"
+                              loading="lazy"
                               className="h-full w-full object-cover"
                             />
                           </div>
