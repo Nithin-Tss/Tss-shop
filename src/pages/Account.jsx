@@ -11,6 +11,7 @@ function profileFromUser(user) {
     lastName: user?.lastName || "",
     email: user?.email || "",
     mobileNumber: user?.mobileNumber || "",
+    currentPassword: "", // only needed (and sent) when the email changes
   };
 }
 
@@ -109,6 +110,9 @@ export default function AccountPage() {
     setMessage("");
   };
 
+  const emailChanging =
+    profileData.email.trim().toLowerCase() !== (user?.email || "").toLowerCase();
+
   const validateProfile = () => {
     const newErrors = {};
     if (!profileData.firstName.trim()) {
@@ -119,6 +123,9 @@ export default function AccountPage() {
     }
     if (emailError(profileData.email)) {
       newErrors.email = emailError(profileData.email);
+    }
+    if (emailChanging && !profileData.currentPassword) {
+      newErrors.currentPassword = "Enter your current password to change your email.";
     }
     if (!profileData.mobileNumber.trim()) {
       newErrors.mobileNumber = "Mobile number is required.";
@@ -484,6 +491,26 @@ export default function AccountPage() {
                     />
                     {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
                   </div>
+
+                  {emailChanging && (
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Current Password *
+                      </label>
+                      <input
+                        type="password"
+                        name="currentPassword"
+                        value={profileData.currentPassword}
+                        onChange={handleProfileChange}
+                        autoComplete="current-password"
+                        placeholder="Needed to change your email"
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+                      />
+                      {errors.currentPassword && (
+                        <p className="mt-1 text-xs text-red-500">{errors.currentPassword}</p>
+                      )}
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
