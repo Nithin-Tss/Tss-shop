@@ -4,9 +4,12 @@ import { getEditingThemeId } from "@/lib/editingTheme";
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 function getHeaders(extraHeaders = {}) {
+  const flat =
+    extraHeaders && typeof extraHeaders === "object" && extraHeaders.headers
+      ? extraHeaders.headers
+      : extraHeaders;
   const headers = {
     "Content-Type": "application/json",
-    ...extraHeaders,
   };
 
   try {
@@ -21,6 +24,10 @@ function getHeaders(extraHeaders = {}) {
       headers["X-Store-Id"] = storeId;
     }
   } catch {}
+
+  if (flat && typeof flat === "object") {
+    Object.assign(headers, flat);
+  }
 
   return headers;
 }

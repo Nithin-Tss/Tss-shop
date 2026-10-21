@@ -1,8 +1,5 @@
-import { useState } from "react";
-
-import { useNavigate } from "react-router-dom";
-
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
 import { MOBILE_PATTERN, NAME_PATTERN, emailError, passwordError } from "@/lib/validation";
@@ -10,6 +7,16 @@ import { PasswordChecklist } from "@/components/PasswordFields";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const sId = searchParams.get("storeId") || searchParams.get("store");
+    if (sId && typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem("tss-store-id", sId);
+      } catch {}
+    }
+  }, [searchParams]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -133,7 +140,19 @@ export default function SignUpPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await apiPost("/api/v1/auth/signup/", formData);
+      const activeStoreId =
+        searchParams.get("storeId") ||
+        searchParams.get("store") ||
+        (typeof localStorage !== "undefined" ? localStorage.getItem("tss-store-id") : null) ||
+        null;
+
+      const payload = {
+        ...formData,
+        ...(activeStoreId ? { storeId: activeStoreId } : {}),
+      };
+
+      const customHeaders = activeStoreId ? { "X-Store-Id": activeStoreId } : {};
+      const result = await apiPost("/api/v1/auth/signup/", payload, customHeaders);
 
       if (!result.ok) {
         setErrors({ ...result.fieldErrors, form: result.formError });
@@ -142,8 +161,12 @@ export default function SignUpPage() {
 
       signIn(result.data);
       setMessage("Account created. Let's set up your store...");
-      // A new account has no store yet: ask to create one or open a default "My Store"
-      navigate("/auth/stores");
+      const redirectTo = searchParams.get("redirect") || searchParams.get("from");
+      if (redirectTo) {
+        navigate(redirectTo);
+      } else {
+        navigate("/auth/stores");
+      }
     } catch (error) {
       console.error("Signup failed:", error);
 

@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
 import { emailError } from "@/lib/validation";
 
 export default function SignInPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -208,7 +208,7 @@ export default function SignInPage() {
             <p className="text-sm text-slate-500">Don't have an account?</p>
 
             <Link
-              to="/auth/signup"
+              to={{ pathname: "/auth/signup", search: location.search }}
               className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-violet-600 px-5 py-3 font-semibold text-violet-600 transition hover:bg-blue-50"
             >
               Sign Up
