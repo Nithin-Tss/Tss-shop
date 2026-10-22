@@ -73,6 +73,9 @@ const MAIN_SECTION = {
 };
 
 const NEW_TEMPLATE = "__new_template__";
+// The login page has no sections: it is the code file templates/login.liquid, shared by every theme
+const LOGIN_PAGE = "__login_page__";
+const REGISTER_PAGE = "__register_page__";
 
 const newSectionId = (type) => `${type}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -212,6 +215,8 @@ export default function AdminCustomizePage() {
   const [storePages, setStorePages] = useState([]);
 
   const [samplePage, setSamplePage] = useState(() => startParams.get("handle") || "");
+  // "login" / "register": the preview shows that customer page (templates/login.liquid) instead of the page being edited
+  const [customerPage, setCustomerPage] = useState("");
 
   const [products, setProducts] = useState([]);
 
@@ -346,6 +351,8 @@ export default function AdminCustomizePage() {
 
   const samplePageRef = useRef("");
 
+  const customerPageRef = useRef("");
+
   // Keep the "latest value" refs in step after each commit (event handlers and timers read them)
   useLayoutEffect(() => {
     saveStateRef.current = saveState;
@@ -359,6 +366,7 @@ export default function AdminCustomizePage() {
     sampleArticleRef.current = sampleArticle;
     sampleCollectionRef.current = sampleCollection;
     samplePageRef.current = samplePage;
+    customerPageRef.current = customerPage;
   });
 
   // Pages written in Pages; the preview keeps its page while that page is still visible
@@ -581,6 +589,7 @@ export default function AdminCustomizePage() {
       article: pageRef.current === "article" ? sampleArticleRef.current : "",
       collection: pageRef.current === "collection" ? sampleCollectionRef.current : "",
       handle: basePage(pageRef.current) === "page" ? samplePageRef.current : "",
+      customer: customerPageRef.current,
     };
   }
 
@@ -724,7 +733,7 @@ export default function AdminCustomizePage() {
     sync.frame = 0;
     const d = dataRef.current;
     const before = sync.rendered;
-    if (!d || !before || sync.page !== pageRef.current) return;
+    if (!d || !before || sync.page !== pageRef.current || customerPageRef.current) return;
 
     // Edit mode off, a link opened another store page in the preview: show Home with the change
     if (sync.away) {
@@ -1361,7 +1370,16 @@ export default function AdminCustomizePage() {
   // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed
   useEffect(() => {
     if (status === "ready") engineRef.current.renderFull();
-  }, [status, page, previewKey, sampleArticle, sampleProductId, sampleCollection, samplePage]);
+  }, [
+    status,
+    page,
+    previewKey,
+    sampleArticle,
+    sampleProductId,
+    sampleCollection,
+    samplePage,
+    customerPage,
+  ]);
 
   // The address remembers the page, its product or post, and the open section (a refresh shows them again)
   useEffect(() => {
@@ -1386,6 +1404,14 @@ export default function AdminCustomizePage() {
   // selected; with Edit mode Off nothing is selected. The page it came from is kept for "Back".
   function openStorePage(path) {
     const [first, second, third] = path.split("/").filter(Boolean);
+    if (first === "account" && (second === "login" || second === "register")) {
+      // Sign in / create account: shown in the preview; "Edit code" there opens templates/<page>.liquid
+      setCustomerPage(second);
+      setSelected(null);
+      return;
+    }
+    if (first === "account") return;
+    setCustomerPage("");
     let next = "index";
     if (first === "products" && second) next = "product";
     else if (first === "collections") next = "collection";
@@ -1424,6 +1450,7 @@ export default function AdminCustomizePage() {
     const previous = backStack[backStack.length - 1];
     if (!previous) return;
     setBackStack((stack) => stack.slice(0, -1));
+    setCustomerPage("");
     if (previous.product) setSampleProductId(previous.product);
     if (previous.article) setSampleArticle(previous.article);
     if (previous.page === "collection") setSampleCollection(previous.collection || "");
@@ -2177,13 +2204,28 @@ export default function AdminCustomizePage() {
                   )}
 
                   <select
-                    value={page}
+                    value={
+                      customerPage === "login"
+                        ? LOGIN_PAGE
+                        : customerPage === "register"
+                          ? REGISTER_PAGE
+                          : page
+                    }
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value === NEW_TEMPLATE) {
                         addPageTemplate();
                         return;
                       }
+                      if (value === LOGIN_PAGE || value === REGISTER_PAGE) {
+                        // Login / register page: shown in the preview; its code is templates/<page>.liquid
+                        setCustomerPage(value === LOGIN_PAGE ? "login" : "register");
+                        setSelected(null);
+                        setAdding(false);
+                        setBackStack([]);
+                        return;
+                      }
+                      setCustomerPage("");
                       // A page template previews a page that uses it, when there is one
                       const own = storePages.find((p) => (p.template || "page") === value);
                       if (own) setSamplePage(own.handle);
@@ -2200,6 +2242,10 @@ export default function AdminCustomizePage() {
                         {pageLabel(p)}
                       </option>
                     ))}
+                    <optgroup label="Account pages">
+                      <option value={LOGIN_PAGE}>Login page</option>
+                      <option value={REGISTER_PAGE}>Register page</option>
+                    </optgroup>
                     <optgroup label="Page templates">
                       {pageTemplateKeys.map((key) => (
                         <option key={key} value={key}>
@@ -2258,6 +2304,7 @@ export default function AdminCustomizePage() {
                     to={`/editor-demo${(() => {
                       const themeId = startParams.get("theme") || getEditingThemeId();
                       const query = new URLSearchParams();
+                      if (customerPage) query.set("file", `templates/${customerPage}.liquid`);
                       if (themeId) query.set("theme", themeId);
                       return query.toString() ? `?${query.toString()}` : "";
                     })()}`}

@@ -61,6 +61,7 @@ export function previewTheme(
     article = "",
     handle = "",
     collection = "",
+    customer = "",
   } = {}
 ) {
   const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected, page });
@@ -69,6 +70,7 @@ export function previewTheme(
   if (article) query.set("article", article);
   if (handle) query.set("handle", handle);
   if (collection) query.set("collection", collection);
+  if (customer) query.set("customer", customer);
   return apiRequest(`${BASE}/preview/?${query}`, { method: "POST", body: data });
 }
 
