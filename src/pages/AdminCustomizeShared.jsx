@@ -32,7 +32,7 @@ export function DropLine({ after }) {
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute left-1 right-1 z-10 h-[3px] rounded-full bg-[#0B1020] shadow-[0_0_0_3px_rgba(20,27,45,0.12)]"
+      className="pointer-events-none absolute left-1 right-1 z-10 h-0.75 rounded-full bg-charcoal-navy shadow-[0_0_0_3px_rgba(20,27,45,0.12)]"
       style={{ top: after ? "calc(100% - 1px)" : "-2px" }}
     />
   );
@@ -44,7 +44,7 @@ export function DragHandle({ label, onPointerDown, onKeyDown }) {
       type="button"
       onPointerDown={onPointerDown}
       onKeyDown={onKeyDown}
-      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-[#A3ADBF] hover:text-[#0B1020] active:cursor-grabbing"
+      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-[#A3ADBF] hover:text-charcoal-navy active:cursor-grabbing"
       aria-label={label}
       title="Drag to reorder (or use the arrow keys)"
     >

@@ -138,7 +138,7 @@ export function FontSizeInput({ spec, value, onChange }) {
         <button
           type="button"
           onClick={() => onChange(0)}
-          className={`rounded-md border px-2 py-1 text-[11px] ${!value ? "border-[#0B1020] bg-[#0B1020] text-white" : "border-[#DDD6FE] text-[#3B3F8F] hover:border-[#0B1020]"}`}
+          className={`rounded-md border px-2 py-1 text-[11px] ${!value ? "border-charcoal-navy bg-charcoal-navy text-white" : "border-[#DDD6FE] text-[#3B3F8F] hover:border-charcoal-navy"}`}
         >
           Theme
         </button>
@@ -147,14 +147,14 @@ export function FontSizeInput({ spec, value, onChange }) {
             key={name}
             type="button"
             onClick={() => onChange(size)}
-            className={`rounded-md border px-2 py-1 text-[11px] ${value === size ? "border-[#0B1020] bg-[#0B1020] text-white" : "border-[#DDD6FE] text-[#3B3F8F] hover:border-[#0B1020]"}`}
+            className={`rounded-md border px-2 py-1 text-[11px] ${value === size ? "border-charcoal-navy bg-charcoal-navy text-white" : "border-[#DDD6FE] text-[#3B3F8F] hover:border-charcoal-navy"}`}
           >
             {name}
           </button>
         ))}
       </div>
 
-      <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#DDD6FE] bg-white focus-within:border-[#0B1020]">
+      <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#DDD6FE] bg-white focus-within:border-charcoal-navy">
         <input
           type="number"
           min={spec.min}
@@ -267,7 +267,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
               type="button"
               onClick={() => move(i, -1)}
               disabled={i === 0}
-              className="rounded p-1 text-[#4C4F7A] hover:text-[#0B1020] disabled:opacity-30"
+              className="rounded p-1 text-[#4C4F7A] hover:text-charcoal-navy disabled:opacity-30"
               aria-label="Move link up"
             >
               ▲
@@ -276,7 +276,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
               type="button"
               onClick={() => move(i, 1)}
               disabled={i === rows.length - 1}
-              className="rounded p-1 text-[#4C4F7A] hover:text-[#0B1020] disabled:opacity-30"
+              className="rounded p-1 text-[#4C4F7A] hover:text-charcoal-navy disabled:opacity-30"
               aria-label="Move link down"
             >
               ▼
@@ -390,7 +390,7 @@ export function GroupedFields({
             <button
               type="button"
               onClick={() => setOpen((current) => ({ ...current, [group.id]: !current[group.id] }))}
-              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-[#0B1020] hover:bg-[#F5F3FF]"
+              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-charcoal-navy hover:bg-[#F5F3FF]"
               aria-expanded={isOpen}
             >
               {group.label}
@@ -459,7 +459,7 @@ export const Field = memo(function Field({
                 checked={Boolean(value)}
                 onChange={(e) => onChange(e.target.checked)}
               />
-              <span className="h-5 w-9 rounded-full bg-[#CBD3DF] transition-colors peer-checked:bg-[#0B1020] peer-focus-visible:ring-2 peer-focus-visible:ring-[#0B1020]/30" />
+              <span className="h-5 w-9 rounded-full bg-[#CBD3DF] transition-colors peer-checked:bg-charcoal-navy peer-focus-visible:ring-2 peer-focus-visible:ring-[#0B1020]/30" />
               <span className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
             </span>
           </label>
@@ -486,7 +486,7 @@ export const Field = memo(function Field({
             step={spec.step || 1}
             value={value}
             onChange={(e) => onChange(Number(e.target.value))}
-            className="w-full accent-[#0B1020]"
+            className="w-full accent-charcoal-navy"
           />
 
           <Help spec={spec} />
@@ -498,7 +498,7 @@ export const Field = memo(function Field({
         <label className="block">
           {label}
 
-          <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#DDD6FE] bg-white focus-within:border-[#0B1020]">
+          <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#DDD6FE] bg-white focus-within:border-charcoal-navy">
             <input
               type="number"
               min={spec.min}
@@ -549,8 +549,8 @@ export const Field = memo(function Field({
                   onClick={() => onChange(o)}
                   className={`min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
                     value === o
-                      ? "bg-white text-[#0B1020] shadow-sm"
-                      : "text-[#4C4F7A] hover:text-[#0B1020]"
+                      ? "bg-white text-charcoal-navy shadow-sm"
+                      : "text-[#4C4F7A] hover:text-charcoal-navy"
                   }`}
                 >
                   {optionLabel(spec, o)}
@@ -621,7 +621,7 @@ export const Field = memo(function Field({
               type="button"
               disabled={!value}
               onClick={() => onChange("")}
-              className="rounded-md border border-[#DDD6FE] px-2 py-1 text-xs text-[#3B3F8F] hover:border-[#0B1020] disabled:opacity-40"
+              className="rounded-md border border-[#DDD6FE] px-2 py-1 text-xs text-[#3B3F8F] hover:border-charcoal-navy disabled:opacity-40"
             >
               None
             </button>
@@ -770,7 +770,7 @@ export const Field = memo(function Field({
             spellCheck={false}
             placeholder='<iframe src="https://www.google.com/maps/embed?..."></iframe>'
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-[#DDD6FE] px-3 py-2 font-mono text-xs outline-none focus:border-[#0B1020]"
+            className="w-full rounded-lg border border-[#DDD6FE] px-3 py-2 font-mono text-xs outline-none focus:border-charcoal-navy"
           />
 
           <span className="mt-1 block text-[11px] leading-snug text-[#4C4F7A]">
@@ -807,7 +807,7 @@ export const Field = memo(function Field({
             value={value}
             spellCheck
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-[#DDD6FE] px-3 py-2 text-sm outline-none focus:border-[#0B1020]"
+            className="w-full rounded-lg border border-[#DDD6FE] px-3 py-2 text-sm outline-none focus:border-charcoal-navy"
           />
 
           <Help spec={spec} />
@@ -947,7 +947,7 @@ export function SectionBlocks({
                   : undefined
               }
               onClick={() => add(type, blockSpec)}
-              className="truncate rounded-md border border-[#DDD6FE] bg-white px-2 py-1.5 text-left text-xs text-[#0B1020] hover:border-[#0B1020] disabled:opacity-40 disabled:hover:border-[#DDD6FE]"
+              className="truncate rounded-md border border-[#DDD6FE] bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-charcoal-navy disabled:opacity-40 disabled:hover:border-[#DDD6FE]"
             >
               {blockSpec.name}
             </button>
@@ -1201,13 +1201,13 @@ export function ImageUpload({ value, onChange }) {
           {progress !== null && (
             <div className="absolute inset-x-0 top-0 h-1 bg-black/10" aria-label="Uploading">
               <div
-                className="h-full bg-[#0B1020] transition-[width] duration-150"
+                className="h-full bg-charcoal-navy transition-[width] duration-150"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1 bg-gradient-to-t from-black/50 to-transparent p-1.5">
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1 bg-linear-to-t from-black/50 to-transparent p-1.5">
             {progress !== null && (
               <span className="mr-auto rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white">
                 Uploading {Math.round(progress * 100)}%
@@ -1217,7 +1217,7 @@ export function ImageUpload({ value, onChange }) {
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={progress !== null}
-              className="rounded-md bg-white px-2 py-0.5 text-xs font-medium text-[#0B1020] disabled:opacity-60"
+              className="rounded-md bg-white px-2 py-0.5 text-xs font-medium text-charcoal-navy disabled:opacity-60"
             >
               Replace
             </button>
@@ -1241,9 +1241,9 @@ export function ImageUpload({ value, onChange }) {
             e.preventDefault();
             choose(e.dataTransfer.files?.[0]);
           }}
-          className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#DDD6FE] text-xs text-[#4C4F7A] hover:border-[#0B1020]"
+          className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#DDD6FE] text-xs text-[#4C4F7A] hover:border-charcoal-navy"
         >
-          <span className="font-medium text-[#0B1020]">Upload image</span>
+          <span className="font-medium text-charcoal-navy">Upload image</span>
           JPG, PNG or WEBP, up to 1MB
         </button>
       )}
@@ -1311,7 +1311,7 @@ export function ProductPicker({ value, products, max, noun = "products", error, 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${noun} to add`}
-            className="h-9 w-full rounded-md border border-[#DDD6FE] px-2.5 text-sm outline-none focus:border-[#0B1020]"
+            className="h-9 w-full rounded-md border border-[#DDD6FE] px-2.5 text-sm outline-none focus:border-charcoal-navy"
           />
 
           <ul className="mt-1 max-h-40 overflow-y-auto">
@@ -1386,7 +1386,7 @@ export function RichTextEditor({ value, onChange }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#DDD6FE] focus-within:border-[#0B1020]">
+    <div className="overflow-hidden rounded-lg border border-[#DDD6FE] focus-within:border-charcoal-navy">
       <div className="flex flex-wrap gap-1 border-b border-[#DDD6FE] bg-[#F5F3FF] p-1">
         {RICH_TEXT_TOOLS.map((tool) => (
           <button
@@ -1396,7 +1396,7 @@ export function RichTextEditor({ value, onChange }) {
             aria-label={tool.title}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => apply(tool)}
-            className={`h-7 min-w-7 rounded px-2 text-xs text-[#0B1020] hover:bg-white ${tool.className || ""}`}
+            className={`h-7 min-w-7 rounded px-2 text-xs text-charcoal-navy hover:bg-white ${tool.className || ""}`}
           >
             {tool.label}
           </button>
@@ -1411,7 +1411,7 @@ export function RichTextEditor({ value, onChange }) {
         aria-multiline="true"
         onFocus={preferParagraphs}
         onInput={(e) => onChange(e.currentTarget.innerHTML)}
-        className="min-h-[120px] px-3 py-2 text-sm leading-relaxed outline-none [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-[#C9D1DD] [&_blockquote]:pl-3 [&_blockquote]:italic [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+        className="min-h-30 px-3 py-2 text-sm leading-relaxed outline-none [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-[#C9D1DD] [&_blockquote]:pl-3 [&_blockquote]:italic [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
       />
     </div>
   );
@@ -1445,7 +1445,7 @@ export const LAYOUT_ROWS = [
 // A labelled group in the sections list (Header / Template / Footer), divided from the one above
 export function GroupHeading({ children }) {
   return (
-    <h3 className="mt-2 border-t border-[#E4DEFB] px-4 pb-1.5 pt-4 text-sm font-semibold text-[#0B1020]">
+    <h3 className="mt-2 border-t border-[#E4DEFB] px-4 pb-1.5 pt-4 text-sm font-semibold text-charcoal-navy">
       {children}
     </h3>
   );

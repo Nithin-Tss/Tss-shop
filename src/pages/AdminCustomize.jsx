@@ -2160,7 +2160,7 @@ export default function AdminCustomizePage() {
         <BlogPostsContext.Provider value={blogPosts}>
           <UploadsContext.Provider value={uploads}>
             <div
-              className={`flex h-screen flex-col bg-[#F5F3FF] text-[#0B1020] ${drag ? "cursor-grabbing select-none" : ""}`}
+              className={`flex h-screen flex-col bg-[#F5F3FF] text-charcoal-navy ${drag ? "cursor-grabbing select-none" : ""}`}
             >
               {/* Top bar */}
               <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#DDD6FE] bg-white px-4">
@@ -2174,7 +2174,7 @@ export default function AdminCustomizePage() {
                       )
                         e.preventDefault();
                     }}
-                    className="text-sm text-[#4C4F7A] hover:text-[#0B1020]"
+                    className="text-sm text-[#4C4F7A] hover:text-charcoal-navy"
                   >
                     ← Online store
                   </Link>
@@ -2186,7 +2186,7 @@ export default function AdminCustomizePage() {
                   <button
                     type="button"
                     onClick={() => setPanelOpen((v) => !v)}
-                    className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-[#0B1020] lg:hidden"
+                    className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-charcoal-navy lg:hidden"
                     aria-expanded={panelOpen}
                   >
                     {panelOpen ? "Hide panel" : "Sections"}
@@ -2196,7 +2196,7 @@ export default function AdminCustomizePage() {
                     <button
                       type="button"
                       onClick={goBack}
-                      className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-[#0B1020]"
+                      className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-charcoal-navy"
                       title="Back to the page you came from"
                     >
                       &larr; {pageLabel(backStack[backStack.length - 1].page) || "Back"}
@@ -2260,7 +2260,7 @@ export default function AdminCustomizePage() {
                     <button
                       type="button"
                       onClick={() => deletePageTemplate(page)}
-                      className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm text-[#4C4F7A] hover:border-[#0B1020] hover:text-[#0B1020]"
+                      className="h-9 rounded-lg border border-[#D8DFE8] px-3 text-sm text-[#4C4F7A] hover:border-charcoal-navy hover:text-charcoal-navy"
                       title="Delete this template; its pages go back to Page"
                     >
                       Delete template
@@ -2272,7 +2272,7 @@ export default function AdminCustomizePage() {
                     <select
                       value={sampleArticle}
                       onChange={(e) => setSampleArticle(e.target.value)}
-                      className="h-9 max-w-[200px] rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
+                      className="h-9 max-w-50 rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
                       aria-label="Post to preview"
                     >
                       {blogPosts.map((p) => (
@@ -2288,7 +2288,7 @@ export default function AdminCustomizePage() {
                     <select
                       value={samplePage}
                       onChange={(e) => setSamplePage(e.target.value)}
-                      className="h-9 max-w-[200px] rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
+                      className="h-9 max-w-50 rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
                       aria-label="Page to preview"
                     >
                       {storePages.map((p) => (
@@ -2309,7 +2309,7 @@ export default function AdminCustomizePage() {
                       return query.toString() ? `?${query.toString()}` : "";
                     })()}`}
                     title="Open the theme code in the editor"
-                    className="inline-flex h-9 items-center justify-center rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 text-[#0B1020] hover:border-[#0B1020]"
+                    className="inline-flex h-9 items-center justify-center rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 text-charcoal-navy hover:border-charcoal-navy"
                   >
                     Edit code
                   </Link>
@@ -2324,7 +2324,7 @@ export default function AdminCustomizePage() {
                           new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/"
                         );
                       }}
-                      className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 hover:border-[#0B1020]"
+                      className="h-9 rounded-lg border border-[#DDD6FE] px-3 text-sm leading-9 hover:border-charcoal-navy"
                     >
                       View store
                     </a>
@@ -2335,7 +2335,7 @@ export default function AdminCustomizePage() {
                       type="button"
                       onClick={undo}
                       disabled={!historyRef.current.past.length}
-                      className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-[#0B1020] disabled:opacity-30"
+                      className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-charcoal-navy disabled:opacity-30"
                       aria-label="Undo"
                       title="Undo (Ctrl+Z)"
                     >
@@ -2349,7 +2349,7 @@ export default function AdminCustomizePage() {
                       type="button"
                       onClick={redo}
                       disabled={!historyRef.current.future.length}
-                      className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-[#0B1020] disabled:opacity-30"
+                      className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-charcoal-navy disabled:opacity-30"
                       aria-label="Redo"
                       title="Redo (Ctrl+Shift+Z)"
                     >
@@ -2397,7 +2397,7 @@ export default function AdminCustomizePage() {
                     )}
                     {saveState === "invalid" && (
                       <span
-                        className="flex max-w-[260px] items-center gap-1.5 text-red-600"
+                        className="flex max-w-65 items-center gap-1.5 text-red-600"
                         title={saveError}
                       >
                         <span className="truncate">Couldn't save: {saveError}</span>
@@ -2416,7 +2416,7 @@ export default function AdminCustomizePage() {
                     type="button"
                     onClick={() => engineRef.current.flushSave()}
                     disabled={!dirty || saveState === "saving"}
-                    className="h-9 rounded-lg bg-[#0B1020] px-4 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-40"
+                    className="h-9 rounded-lg bg-charcoal-navy px-4 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-40"
                     title="Changes save automatically; this saves right away"
                   >
                     Save
@@ -2448,7 +2448,7 @@ export default function AdminCustomizePage() {
               <div className="relative flex min-h-0 flex-1">
                 {/* Side panel: list view and edit view slide inside the same panel */}
                 <aside
-                  className={`absolute inset-y-0 left-0 z-30 w-[340px] max-w-[90vw] shrink-0 overflow-hidden border-r border-[#DDD6FE] bg-white shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${
+                  className={`absolute inset-y-0 left-0 z-30 w-85 max-w-[90vw] shrink-0 overflow-hidden border-r border-[#DDD6FE] bg-white shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${
                     panelOpen ? "translate-x-0" : "-translate-x-full"
                   }`}
                 >
@@ -2467,7 +2467,7 @@ export default function AdminCustomizePage() {
                       inert={panelView !== 0}
                       aria-hidden={panelView !== 0}
                     >
-                      <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-[#0B1020]">
+                      <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-charcoal-navy">
                         {pageLabel(page)}
                       </h2>
 
@@ -2581,7 +2581,7 @@ export default function AdminCustomizePage() {
                                         setRenaming(null);
                                       }
                                     }}
-                                    className="h-7 min-w-0 flex-1 rounded border border-[#0B1020] bg-white px-2 text-sm outline-none"
+                                    className="h-7 min-w-0 flex-1 rounded border border-charcoal-navy bg-white px-2 text-sm outline-none"
                                   />
                                 ) : (
                                   <button
@@ -2592,7 +2592,7 @@ export default function AdminCustomizePage() {
                                     title={showType ? `${name} (${spec.name})` : name}
                                   >
                                     <span
-                                      className={`truncate ${s.hidden ? "text-[#A3ADBF]" : "text-[#0B1020]"} ${isSelected ? "font-medium" : ""}`}
+                                      className={`truncate ${s.hidden ? "text-[#A3ADBF]" : "text-charcoal-navy"} ${isSelected ? "font-medium" : ""}`}
                                     >
                                       {name}
                                     </span>
@@ -2728,14 +2728,14 @@ export default function AdminCustomizePage() {
                                     setNewName("");
                                   }
                                 }}
-                                className="h-9 min-w-0 flex-1 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-sm outline-none focus:border-[#0B1020]"
+                                className="h-9 min-w-0 flex-1 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-sm outline-none focus:border-charcoal-navy"
                               />
 
                               <button
                                 type="button"
                                 onClick={addCustomSection}
                                 disabled={!newName.trim()}
-                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0B1020] text-white hover:bg-[#1C2347] disabled:opacity-30"
+                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-charcoal-navy text-white hover:bg-[#1C2347] disabled:opacity-30"
                                 aria-label="Add section"
                                 title="Add section"
                               >
@@ -2750,7 +2750,7 @@ export default function AdminCustomizePage() {
                                   setAdding(false);
                                   setNewName("");
                                 }}
-                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-[#0B1020] hover:text-[#0B1020]"
+                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-charcoal-navy hover:text-charcoal-navy"
                                 aria-label="Cancel"
                                 title="Cancel"
                               >
@@ -2772,7 +2772,7 @@ export default function AdminCustomizePage() {
                                       key={type}
                                       type="button"
                                       onClick={() => addTemplateSection(type)}
-                                      className="rounded-full border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-[#3B3F8F] hover:border-[#0B1020] hover:text-[#0B1020]"
+                                      className="rounded-full border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-[#3B3F8F] hover:border-charcoal-navy hover:text-charcoal-navy"
                                     >
                                       {spec.name}
                                     </button>
@@ -2785,7 +2785,7 @@ export default function AdminCustomizePage() {
                           <button
                             type="button"
                             onClick={() => setAdding(true)}
-                            className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-sm font-medium text-[#3B3F8F] hover:bg-[#F5F6F8] hover:text-[#0B1020]"
+                            className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-sm font-medium text-[#3B3F8F] hover:bg-[#F5F6F8] hover:text-charcoal-navy"
                           >
                             <span
                               className="flex h-5 w-5 items-center justify-center"
@@ -2844,7 +2844,7 @@ export default function AdminCustomizePage() {
                         <button
                           type="button"
                           onClick={() => setSelected(null)}
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
                           aria-label="Back to sections"
                           title="Back (Esc)"
                         >
@@ -2925,7 +2925,7 @@ export default function AdminCustomizePage() {
                                           data-drop-section={id}
                                           className={`truncate rounded-md border bg-white px-2.5 py-2 text-sm ${
                                             dropTarget?.kind === "into" && dropTarget.id === id
-                                              ? "border-[#0B1020] ring-2 ring-[#0B1020]/20"
+                                              ? "border-charcoal-navy ring-2 ring-[#0B1020]/20"
                                               : "border-[#DDD6FE]"
                                           }`}
                                         >
@@ -2947,7 +2947,7 @@ export default function AdminCustomizePage() {
                           <button
                             type="button"
                             onClick={() => resetSection(shown)}
-                            className="rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
+                            className="rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
                           >
                             Reset to default
                           </button>
@@ -2959,7 +2959,7 @@ export default function AdminCustomizePage() {
                               <button
                                 type="button"
                                 onClick={() => duplicateSection(shown)}
-                                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
+                                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
                               >
                                 <svg {...iconProps} className="h-3.5 w-3.5">
                                   <rect x="8" y="8" width="13" height="13" rx="2" />
@@ -2994,7 +2994,7 @@ export default function AdminCustomizePage() {
                         <button
                           type="button"
                           onClick={() => setSelectedBlock(null)}
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
                           aria-label="Back to section"
                           title="Back (Esc)"
                         >
@@ -3042,7 +3042,7 @@ export default function AdminCustomizePage() {
                           <button
                             type="button"
                             onClick={() => toggleBlockHidden(shown, shownBlockIndex)}
-                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
+                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
                           >
                             <EyeIcon hidden={!shownBlock.hidden} />
                             {shownBlock.hidden ? "Show" : "Hide"}
@@ -3053,7 +3053,7 @@ export default function AdminCustomizePage() {
                           <button
                             type="button"
                             onClick={() => duplicateBlock(shown, shownBlockIndex)}
-                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020]"
+                            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
                           >
                             <svg {...iconProps} className="h-3.5 w-3.5">
                               <rect x="8" y="8" width="13" height="13" rx="2" />
@@ -3107,8 +3107,8 @@ export default function AdminCustomizePage() {
                         title="Click sections in the preview to edit them"
                         className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#0B1020]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
                           editMode
-                            ? "border-[#0B1020] bg-[#0B1020] text-white"
-                            : "border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-[#0B1020] hover:text-[#0B1020]"
+                            ? "border-charcoal-navy bg-charcoal-navy text-white"
+                            : "border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-charcoal-navy hover:text-charcoal-navy"
                         }`}
                       >
                         <svg {...iconProps} className="h-3.5 w-3.5">
@@ -3135,8 +3135,8 @@ export default function AdminCustomizePage() {
                             onClick={() => setDevice(id)}
                             className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${
                               device === id
-                                ? "bg-[#0B1020] text-white"
-                                : "text-[#4C4F7A] hover:text-[#0B1020]"
+                                ? "bg-charcoal-navy text-white"
+                                : "text-[#4C4F7A] hover:text-charcoal-navy"
                             }`}
                           >
                             <svg {...iconProps} className="h-3.5 w-3.5">
@@ -3149,7 +3149,7 @@ export default function AdminCustomizePage() {
 
                       <button
                         type="button"
-                        className="hover:text-[#0B1020]"
+                        className="hover:text-charcoal-navy"
                         onClick={() => setPreviewKey((k) => k + 1)}
                       >
                         Refresh
@@ -3167,7 +3167,7 @@ export default function AdminCustomizePage() {
                       // Theme code is written by store owners: keep it off this origin
                       sandbox="allow-scripts allow-forms allow-popups"
                       className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#DDD6FE] bg-white transition-[width] duration-200 ${
-                        device === "mobile" ? "w-[390px] max-w-full" : "w-full"
+                        device === "mobile" ? "w-97.5 max-w-full" : "w-full"
                       } ${drag ? "pointer-events-none" : ""}`}
                     />
                   ) : (
