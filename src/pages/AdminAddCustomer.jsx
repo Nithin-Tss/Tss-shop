@@ -32,8 +32,6 @@ export default function AdminAddCustomer() {
   const [selectedCountry] = useState(COUNTRIES[0]);
   const [phone, setPhone] = useState("");
   const [marketingEmail, setMarketingEmail] = useState(false);
-  const [marketingSms, setMarketingSms] = useState(false);
-  const [marketingWhatsApp, setMarketingWhatsApp] = useState(false);
 
   // Address fields
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -301,37 +299,13 @@ export default function AdminAddCustomer() {
                       Customer agreed to receive marketing emails.
                     </span>
                   </label>
-
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={marketingSms}
-                      onChange={(e) => setMarketingSms(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
-                    />
-                    <span className="text-xs text-slate-600">
-                      Customer agreed to receive SMS marketing text messages.
-                    </span>
-                  </label>
-
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={marketingWhatsApp}
-                      onChange={(e) => setMarketingWhatsApp(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
-                    />
-                    <span className="text-xs text-slate-600">
-                      Customer agreed to receive WhatsApp marketing messages.
-                    </span>
-                  </label>
                 </div>
 
                 {/* Footer Note */}
                 <div className="pt-3 border-t border-slate-100">
                   <p className="text-xs text-slate-500 leading-5">
                     You should ask your customers for permission before you subscribe them to your
-                    marketing emails, SMS, or WhatsApp messages.
+                    marketing emails.
                   </p>
                 </div>
               </div>
