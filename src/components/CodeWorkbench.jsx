@@ -114,10 +114,7 @@ export function findMatchingThemeFile(requested, files) {
     const fileKeys = Object.keys(files);
     const matched = fileKeys.find(
       (k) =>
-        stripped === k ||
-        k === withExt ||
-        k.endsWith("/" + stripped) ||
-        k.endsWith("/" + withExt)
+        stripped === k || k === withExt || k.endsWith("/" + stripped) || k.endsWith("/" + withExt)
     );
     if (matched) return matched;
     return null;
@@ -135,10 +132,7 @@ export function findMatchingThemeFile(requested, files) {
   const fileKeys = Object.keys(files);
   const matched = fileKeys.find(
     (k) =>
-      stripped === k ||
-      k === withExt ||
-      k.endsWith("/" + stripped) ||
-      k.endsWith("/" + withExt)
+      stripped === k || k === withExt || k.endsWith("/" + stripped) || k.endsWith("/" + withExt)
   );
   if (matched) return matched;
 

@@ -1438,7 +1438,10 @@ export default function AdminCustomizePage() {
     }
     if (next === "checkout" && !dataRef.current?.templates?.checkout) {
       if (dataRef.current?.templates) {
-        dataRef.current.templates.checkout = { order: ["main"], sections: { main: { type: "main-checkout", settings: {} } } };
+        dataRef.current.templates.checkout = {
+          order: ["main"],
+          sections: { main: { type: "main-checkout", settings: {} } },
+        };
       }
     }
     if (!dataRef.current?.templates[next]) return;
