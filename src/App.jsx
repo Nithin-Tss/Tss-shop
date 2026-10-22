@@ -33,6 +33,7 @@ const AdminDrafts = lazy(() => import("@/pages/AdminDrafts"));
 const AdminAbandonedCheckouts = lazy(() => import("@/pages/AdminAbandonedCheckouts"));
 const AdminCreateOrder = lazy(() => import("@/pages/AdminCreateOrder"));
 const AdminCustomers = lazy(() => import("@/pages/AdminCustomers"));
+const AdminCustomerDetails = lazy(() => import("@/pages/AdminCustomerDetails"));
 const AdminAddCustomer = lazy(() => import("@/pages/AdminAddCustomer"));
 const AdminOverview = lazy(() => import("@/pages/AdminOverview"));
 const AdminReports = lazy(() => import("@/pages/AdminReports"));
@@ -162,6 +163,7 @@ export default function App() {
           </Route>
           <Route element={<RequirePermission permission="customers.view" />}>
             <Route path="/admin/online-store/customers" element={<AdminCustomers />} />
+            <Route path="/admin/online-store/customers/:id" element={<AdminCustomerDetails />} />
           </Route>
           <Route element={<RequirePermission permission="customers.manage" />}>
             <Route path="/admin/online-store/customers/new" element={<AdminAddCustomer />} />

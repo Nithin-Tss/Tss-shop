@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
@@ -7,6 +7,7 @@ import AddressModal from "@/components/AddressModal";
 import DeleteAddressModal from "@/components/DeleteAddressModal";
 
 export default function AdminCustomers() {
+  const navigate = useNavigate();
   const canManage = useCan("customers.manage");
   const canDelete = useCan("customers.delete") || canManage;
   const [customers, setCustomers] = useState([]);
@@ -859,7 +860,7 @@ export default function AdminCustomers() {
                           <td className="py-3.5 px-3">
                             <button
                               type="button"
-                              onClick={() => handleSelectCustomer(c)}
+                              onClick={() => navigate(`/admin/online-store/customers/${c.id}`)}
                               className="font-semibold text-slate-900 hover:text-violet-600 hover:underline cursor-pointer text-left"
                             >
                               {fullName}
