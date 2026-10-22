@@ -46,9 +46,9 @@ export default function StoreBuilder() {
           {stores.map((store) => (
             <div
               key={store.name}
-              className="w-[230px] min-w-[230px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm"
+              className="w-57.5 min-w-57.5 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm"
             >
-              <div className="h-[140px] overflow-hidden bg-neutral-200">
+              <div className="h-35 overflow-hidden bg-neutral-200">
                 <img
                   src={store.image}
                   alt={store.name}

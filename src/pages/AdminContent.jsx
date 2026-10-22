@@ -16,7 +16,7 @@ const lineIcon = {
 
 export default function ContentPage() {
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-white text-charcoal-navy">
       <AdminHeader />
 
       {/* BODY */}
@@ -28,7 +28,7 @@ export default function ContentPage() {
         <main className="flex-1 bg-[#F5F3FF] px-6 lg:px-8 py-6 overflow-hidden">
           {/* TITLE + ACTIONS */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
               <PageIcon name="content" />
               Metaobjects
             </h1>
@@ -36,14 +36,14 @@ export default function ContentPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#DDE3EA] transition"
+                className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#DDE3EA] transition"
               >
                 Manage
               </button>
 
               <button
                 type="button"
-                className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
+                className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
               >
                 Add definition
               </button>
@@ -56,7 +56,7 @@ export default function ContentPage() {
             <div className="flex items-center gap-3 border-b border-[#E4DEFB] px-4 py-3">
               <button
                 type="button"
-                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition"
               >
                 Custom
                 <svg {...lineIcon} className="h-4 w-4 text-[#4C4F7A]">
@@ -73,7 +73,7 @@ export default function ContentPage() {
                 <input
                   type="text"
                   placeholder="Searching in metaobject definitions..."
-                  className="w-full bg-transparent text-sm text-[#0B1020] outline-none placeholder:text-slate-500"
+                  className="w-full bg-transparent text-sm text-charcoal-navy outline-none placeholder:text-slate-500"
                 />
               </div>
 
@@ -81,9 +81,9 @@ export default function ContentPage() {
                 <button
                   type="button"
                   aria-label="Columns"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020] transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy transition"
                 >
-                  <svg {...lineIcon} className="h-[18px] w-[18px]">
+                  <svg {...lineIcon} className="h-4.5 w-4.5">
                     <rect x="3" y="4" width="18" height="16" rx="2" />
                     <path d="M9 4v16M15 4v16" />
                   </svg>
@@ -92,9 +92,9 @@ export default function ContentPage() {
                 <button
                   type="button"
                   aria-label="View"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-[#0B1020] transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy transition"
                 >
-                  <svg {...lineIcon} className="h-[18px] w-[18px]">
+                  <svg {...lineIcon} className="h-4.5 w-4.5">
                     <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
@@ -104,14 +104,14 @@ export default function ContentPage() {
 
             {/* Empty state */}
             <div className="px-6 py-12 text-center">
-              <h2 className="text-xl font-semibold text-[#0B1020]">No definitions found</h2>
+              <h2 className="text-xl font-semibold text-charcoal-navy">No definitions found</h2>
 
               <p className="mt-3 text-sm text-[#4C4F7A]">Try changing the filters or search term</p>
             </div>
           </section>
 
           {/* LEARN MORE */}
-          <p className="mt-8 text-center text-sm font-medium text-[#0B1020]">
+          <p className="mt-8 text-center text-sm font-medium text-charcoal-navy">
             <a href="#" className="hover:underline">
               Learn more about metaobjects
             </a>
@@ -224,13 +224,13 @@ export function BlogPostsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-white text-charcoal-navy">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
         <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
               <PageIcon name="blog" />
               {editing ? (editing.id ? "Edit blog post" : "Add blog post") : "Blog posts"}
             </h1>
@@ -247,7 +247,7 @@ export function BlogPostsPage() {
                 <button
                   type="button"
                   onClick={() => open({})}
-                  className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
+                  className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
                 >
                   Add blog post
                 </button>
@@ -378,7 +378,7 @@ export function BlogPostsPage() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                    className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
                   >
                     {busy ? "Saving..." : "Save"}
                   </button>
@@ -411,7 +411,7 @@ export function BlogPostsPage() {
                       src={form.cover_image}
                       alt=""
                       loading="lazy"
-                      className="aspect-[3/2] w-full rounded-lg object-cover"
+                      className="aspect-3/2 w-full rounded-lg object-cover"
                     />
                   )}
                   <input

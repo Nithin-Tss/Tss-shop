@@ -291,7 +291,7 @@ export default function AccountPage() {
           <div className="mt-6 flex items-center gap-2">
             <Link
               to="/account"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#0B1020] text-white shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-charcoal-navy text-white shadow-xs"
             >
               <span>👤</span>
               <span>Account & Addresses</span>
@@ -546,7 +546,7 @@ export default function AccountPage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="px-5 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
                   >
                     {isSaving ? "Saving..." : "Save Details"}
                   </button>
@@ -623,7 +623,7 @@ export default function AccountPage() {
                   <button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="px-5 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
                   >
                     {isChangingPassword ? "Updating..." : "Update Password"}
                   </button>
