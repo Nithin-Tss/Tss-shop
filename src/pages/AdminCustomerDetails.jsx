@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import AddressModal from "@/components/AddressModal";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -47,16 +47,22 @@ function formatElapsedDays(dateString) {
 export default function AdminCustomerDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const session = useSession();
   const canManage = useCan("customers.manage");
   const canDelete = useCan("customers.delete") || canManage;
 
-  const [customer, setCustomer] = useState(null);
-  const [allCustomers, setAllCustomers] = useState([]);
+  const passedCustomer = location.state?.customer?.id === id ? location.state.customer : null;
+  const passedAllCustomers = Array.isArray(location.state?.allCustomers)
+    ? location.state.allCustomers
+    : [];
+
+  const [customer, setCustomer] = useState(passedCustomer);
+  const [allCustomers, setAllCustomers] = useState(passedAllCustomers);
   const [orders, setOrders] = useState([]);
-  const [addresses, setAddresses] = useState([]);
+  const [addresses, setAddresses] = useState(passedCustomer?.addresses || []);
   const [timelineEvents, setTimelineEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!passedCustomer);
   const [error, setError] = useState("");
   const [toastMsg, setToastMsg] = useState("");
 
@@ -119,140 +125,152 @@ export default function AdminCustomerDetails() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch customer details, orders, addresses, and customer list
-  const fetchCustomerData = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      // 1. Fetch customer
-      const custRes = await apiGet(`/api/v1/customers/${id}/`);
-      if (!custRes.ok || !custRes.data) {
-        setError(custRes.formError || "Customer not found or access denied.");
-        setLoading(false);
-        return;
+  // Fetch customer details, orders, addresses, and timeline in parallel
+  const fetchCustomerData = useCallback(
+    async (hasInitialData = false) => {
+      if (!hasInitialData) {
+        setLoading(true);
       }
-      const custData = custRes.data;
-      setCustomer(custData);
+      setError("");
 
-      // 2. Fetch customer orders
-      const ordersRes = await apiGet(`/api/v1/orders/?customer=${id}`);
-      let custOrders = [];
-      if (ordersRes.ok) {
-        if (Array.isArray(ordersRes.data)) custOrders = ordersRes.data;
-        else if (Array.isArray(ordersRes.data?.results)) custOrders = ordersRes.data.results;
-      }
-      setOrders(custOrders);
+      try {
+        // 1. Fetch customer details, orders, and timeline concurrently in parallel
+        const [custRes, ordersRes, timelineRes] = await Promise.all([
+          apiGet(`/api/v1/customers/${id}/`),
+          apiGet(`/api/v1/orders/?customer=${id}`),
+          apiGet(`/api/v1/customers/${id}/timeline/`),
+        ]);
 
-      // 3. Fetch addresses
-      const addrRes = await apiGet(`/api/v1/customers/addresses/?customer=${id}`);
-      let custAddresses = [];
-      if (addrRes.ok) {
-        if (Array.isArray(addrRes.data)) custAddresses = addrRes.data;
-        else if (Array.isArray(addrRes.data?.results)) custAddresses = addrRes.data.results;
-      }
-      setAddresses(custAddresses);
+        if (!custRes.ok || !custRes.data) {
+          setError(custRes.formError || "Customer not found or access denied.");
+          setLoading(false);
+          return;
+        }
+        const custData = custRes.data;
+        setCustomer(custData);
+        setAddresses(Array.isArray(custData.addresses) ? custData.addresses : []);
 
-      // 4. Fetch timeline events
-      const timelineRes = await apiGet(`/api/v1/customers/${id}/timeline/`);
-      let events = [];
-      if (timelineRes.ok && Array.isArray(timelineRes.data)) {
-        events = timelineRes.data;
-      } else {
-        // Fallback live event construction from actual database records
-        events.push({
-          id: `cust_created_${custData.id}`,
-          type: "customer_created",
-          title: "Customer was created.",
-          description: "Customer was created.",
-          timestamp: custData.created_at,
-        });
+        let custOrders = [];
+        if (ordersRes.ok) {
+          if (Array.isArray(ordersRes.data)) custOrders = ordersRes.data;
+          else if (Array.isArray(ordersRes.data?.results)) custOrders = ordersRes.data.results;
+        }
+        setOrders(custOrders);
 
-        if (custData.updated_at && custData.updated_at > custData.created_at) {
+        let events = [];
+        if (timelineRes.ok && Array.isArray(timelineRes.data)) {
+          events = timelineRes.data;
+        } else {
+          // Fallback live event construction from actual database records
           events.push({
-            id: `cust_updated_${custData.id}`,
-            type: "customer_updated",
-            title: "Customer details updated.",
-            description: "Customer details updated.",
-            timestamp: custData.updated_at,
+            id: `cust_created_${custData.id}`,
+            type: "customer_created",
+            title: "Customer was created.",
+            description: "Customer was created.",
+            timestamp: custData.created_at,
+          });
+
+          if (custData.updated_at && custData.updated_at > custData.created_at) {
+            events.push({
+              id: `cust_updated_${custData.id}`,
+              type: "customer_updated",
+              title: "Customer details updated.",
+              description: "Customer details updated.",
+              timestamp: custData.updated_at,
+            });
+          }
+
+          custOrders.forEach((o) => {
+            events.push({
+              id: `order_placed_${o.id}`,
+              type: "order_placed",
+              order_number: o.order_number,
+              order_id: o.id,
+              channel: o.channel || "Online Store",
+              title: `This customer placed test order #${o.order_number} on ${o.channel || "Online Store"}.`,
+              description: `This customer placed test order #${o.order_number} on ${o.channel || "Online Store"}.`,
+              timestamp: o.created_at,
+            });
+            events.push({
+              id: `order_email_${o.id}`,
+              type: "order_email",
+              order_number: o.order_number,
+              order_id: o.id,
+              email: custData.email || "",
+              title: `Order Confirmation email for test order #${o.order_number} sent to this customer (${custData.email || ""}).`,
+              description: `Order Confirmation email for test order #${o.order_number} sent to this customer (${custData.email || ""}).`,
+              timestamp: o.created_at,
+            });
           });
         }
 
-        custOrders.forEach((o) => {
-          events.push({
-            id: `order_placed_${o.id}`,
-            type: "order_placed",
-            order_number: o.order_number,
-            order_id: o.id,
-            channel: o.channel || "Online Store",
-            title: `This customer placed test order #${o.order_number} on ${o.channel || "Online Store"}.`,
-            description: `This customer placed test order #${o.order_number} on ${o.channel || "Online Store"}.`,
-            timestamp: o.created_at,
-          });
-          events.push({
-            id: `order_email_${o.id}`,
-            type: "order_email",
-            order_number: o.order_number,
-            order_id: o.id,
-            email: custData.email || "",
-            title: `Order Confirmation email for test order #${o.order_number} sent to this customer (${custData.email || ""}).`,
-            description: `Order Confirmation email for test order #${o.order_number} sent to this customer (${custData.email || ""}).`,
-            timestamp: o.created_at,
-          });
+        // Add local persistent staff comments
+        try {
+          const savedComments = JSON.parse(
+            localStorage.getItem(`vendra_comments_${custData.id}`) || "[]"
+          );
+          events = [...events, ...savedComments];
+        } catch {
+          // ignore
+        }
+
+        // Sort chronological descending
+        events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setTimelineEvents(events);
+
+        // Load persistent notes & tags
+        try {
+          const savedNotes = localStorage.getItem(`vendra_notes_${custData.id}`) || "";
+          setNotes(savedNotes);
+          setNotesInput(savedNotes);
+
+          const savedTags = JSON.parse(localStorage.getItem(`vendra_tags_${custData.id}`) || "[]");
+          setTags(savedTags);
+        } catch {
+          // ignore
+        }
+
+        // 4. Asynchronously fetch full customers list for Prev/Next navigation if needed
+        setAllCustomers((prev) => {
+          if (prev.length === 0) {
+            apiGet("/api/v1/customers/").then((listRes) => {
+              if (listRes.ok) {
+                const list = Array.isArray(listRes.data)
+                  ? listRes.data
+                  : listRes.data?.results || [];
+                setAllCustomers(list);
+              }
+            });
+          }
+          return prev;
         });
-      }
-
-      // Add local persistent staff comments
-      try {
-        const savedComments = JSON.parse(
-          localStorage.getItem(`vendra_comments_${custData.id}`) || "[]"
-        );
-        events = [...events, ...savedComments];
       } catch {
-        // ignore
+        setError("An unexpected error occurred while loading customer details.");
+      } finally {
+        setLoading(false);
       }
-
-      // Sort chronological descending
-      events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-      setTimelineEvents(events);
-
-      // Load persistent notes & tags
-      try {
-        const savedNotes = localStorage.getItem(`vendra_notes_${custData.id}`) || "";
-        setNotes(savedNotes);
-        setNotesInput(savedNotes);
-
-        const savedTags = JSON.parse(localStorage.getItem(`vendra_tags_${custData.id}`) || "[]");
-        setTags(savedTags);
-      } catch {
-        // ignore
-      }
-
-      // 5. Fetch all customers list for Prev/Next navigation
-      const listRes = await apiGet("/api/v1/customers/");
-      if (listRes.ok) {
-        const list = Array.isArray(listRes.data) ? listRes.data : listRes.data?.results || [];
-        setAllCustomers(list);
-      }
-    } catch {
-      setError("An unexpected error occurred while loading customer details.");
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
+    },
+    [id]
+  );
 
   useEffect(() => {
     let active = true;
+    const hasInitial = location.state?.customer?.id === id;
+    if (hasInitial) {
+      setCustomer(location.state.customer);
+      setAddresses(location.state.customer.addresses || []);
+      setLoading(false);
+    }
     const load = async () => {
       if (active) {
-        await fetchCustomerData();
+        await fetchCustomerData(hasInitial);
       }
     };
     load();
     return () => {
       active = false;
     };
-  }, [fetchCustomerData]);
+  }, [id, fetchCustomerData, location.state]);
 
   // Prev / Next customer navigation
   const currentIndex = allCustomers.findIndex((c) => c.id === id);
@@ -633,7 +651,10 @@ export default function AdminCustomerDetails() {
                     type="button"
                     disabled={!prevCustomer}
                     onClick={() =>
-                      prevCustomer && navigate(`/admin/online-store/customers/${prevCustomer.id}`)
+                      prevCustomer &&
+                      navigate(`/admin/online-store/customers/${prevCustomer.id}`, {
+                        state: { customer: prevCustomer, allCustomers },
+                      })
                     }
                     className="p-1.5 text-xs text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition"
                     title={
@@ -657,7 +678,10 @@ export default function AdminCustomerDetails() {
                     type="button"
                     disabled={!nextCustomer}
                     onClick={() =>
-                      nextCustomer && navigate(`/admin/online-store/customers/${nextCustomer.id}`)
+                      nextCustomer &&
+                      navigate(`/admin/online-store/customers/${nextCustomer.id}`, {
+                        state: { customer: nextCustomer, allCustomers },
+                      })
                     }
                     className="p-1.5 text-xs text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition"
                     title={

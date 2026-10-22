@@ -860,7 +860,11 @@ export default function AdminCustomers() {
                           <td className="py-3.5 px-3">
                             <button
                               type="button"
-                              onClick={() => navigate(`/admin/online-store/customers/${c.id}`)}
+                              onClick={() =>
+                                navigate(`/admin/online-store/customers/${c.id}`, {
+                                  state: { customer: c, allCustomers: displayedCustomers },
+                                })
+                              }
                               className="font-semibold text-slate-900 hover:text-violet-600 hover:underline cursor-pointer text-left"
                             >
                               {fullName}
