@@ -187,7 +187,7 @@ export default function OnlineStorePage() {
 
   const open = (theme, to) => {
     setEditingThemeId(theme.published ? "" : theme.id);
-    navigate(to);
+    navigate(theme.published ? to : `${to}?theme=${theme.id}`);
   };
 
   const publish = (theme) => {
@@ -341,9 +341,10 @@ export default function OnlineStorePage() {
                             <button
                               type="button"
                               className={smallButton}
+                              title="Edit code"
                               onClick={() => open(theme, "/editor-demo")}
                             >
-                              Code editor
+                              Edit code
                             </button>
                             {!theme.published && (
                               <button

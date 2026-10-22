@@ -95,6 +95,56 @@ function buildTree(files, folders) {
   };
 }
 
+export function findMatchingThemeFile(requested, files) {
+  if (!requested || !files) return null;
+  const trimmed = requested.trim();
+  if (trimmed in files) return trimmed;
+
+  // Strip prefix like "apps/themes/starter/" or "apps/themes/<name>/" or leading slashes
+  const stripped = trimmed.replace(/^(?:apps\/themes\/[^/]+\/|\/)+/, "");
+  if (stripped in files) return stripped;
+
+  // If path specifies a directory (e.g. "templates/checkout.liquid" or "sections/main-checkout.liquid")
+  if (stripped.includes("/")) {
+    const withExt =
+      stripped.endsWith(".liquid") || stripped.endsWith(".json") ? stripped : `${stripped}.liquid`;
+    if (withExt in files) return withExt;
+
+    // Suffix matching (e.g. "templates/checkout.liquid" in "starter/templates/checkout.liquid")
+    const fileKeys = Object.keys(files);
+    const matched = fileKeys.find(
+      (k) =>
+        stripped === k ||
+        k === withExt ||
+        k.endsWith("/" + stripped) ||
+        k.endsWith("/" + withExt)
+    );
+    if (matched) return matched;
+    return null;
+  }
+
+  // Bare name without directory (e.g. "checkout" or "checkout.liquid")
+  const withExt =
+    stripped.endsWith(".liquid") || stripped.endsWith(".json") ? stripped : `${stripped}.liquid`;
+  if (`templates/${withExt}` in files) return `templates/${withExt}`;
+  if (`sections/${withExt}` in files) return `sections/${withExt}`;
+  if (`snippets/${withExt}` in files) return `snippets/${withExt}`;
+  if (`layout/${withExt}` in files) return `layout/${withExt}`;
+
+  // Suffix matching
+  const fileKeys = Object.keys(files);
+  const matched = fileKeys.find(
+    (k) =>
+      stripped === k ||
+      k === withExt ||
+      k.endsWith("/" + stripped) ||
+      k.endsWith("/" + withExt)
+  );
+  if (matched) return matched;
+
+  return null;
+}
+
 /* ---------- small inline icons (VS Code codicon look) ---------- */
 const svgProps = {
   width: 16,
@@ -147,6 +197,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   const [searchParams] = useSearchParams();
   const requestedFile = searchParams.get("file");
   const requestedTheme = searchParams.get("theme");
+
+  if (requestedTheme && getEditingThemeId() !== requestedTheme) {
+    setEditingThemeId(requestedTheme);
+  }
 
   useEffect(() => {
     if (requestedTheme) {
@@ -232,11 +286,24 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       );
       setExpanded(rootFolders);
 
-      // If no file was requested via URL, default to opening the Home page template
-      if (!requestedFile && "templates/index.liquid" in loaded.files) {
-        setOpenTabs(["templates/index.liquid"]);
-        setActivePath("templates/index.liquid");
-        setSelected({ type: "file", path: "templates/index.liquid" });
+      // Open requested file if given, otherwise default to Home page template
+      const matched = findMatchingThemeFile(requestedFile, loaded.files);
+      if (requestedFile && !matched) {
+        setNotice(`Requested template "${requestedFile}" was not found in theme files.`);
+      }
+      const initialFile =
+        matched ||
+        ("templates/index.liquid" in loaded.files
+          ? "templates/index.liquid"
+          : Object.keys(loaded.files)[0] || null);
+
+      if (initialFile) {
+        setOpenTabs([initialFile]);
+        setActivePath(initialFile);
+        setSelected({ type: "file", path: initialFile });
+        for (let dir = parentOf(initialFile); dir; dir = parentOf(dir)) {
+          rootFolders.add(dir);
+        }
       }
 
       setStatus("ready");
@@ -363,13 +430,14 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
   // Once the files are loaded, open the requested one and expand its folders in the explorer
   const [openedFor, setOpenedFor] = useState(null);
+  const targetFile = findMatchingThemeFile(requestedFile, project.files);
   if (openedFor?.status !== status || openedFor?.file !== requestedFile) {
     setOpenedFor({ status, file: requestedFile });
-    if (status === "ready" && requestedFile && requestedFile in project.files) {
-      openFile(requestedFile);
+    if (status === "ready" && targetFile && targetFile in project.files) {
+      openFile(targetFile);
       setExpanded((prev) => {
         const next = new Set(prev);
-        for (let dir = parentOf(requestedFile); dir; dir = parentOf(dir)) next.add(dir);
+        for (let dir = parentOf(targetFile); dir; dir = parentOf(dir)) next.add(dir);
         return next;
       });
     }

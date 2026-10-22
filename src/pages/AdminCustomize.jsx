@@ -48,7 +48,17 @@ const PAGE_LABELS = {
   blog: "Blog page",
   article: "Article page",
   page: "Page",
+  checkout: "Checkout",
+  cart: "Cart page",
 };
+
+export function getTemplateFileForPage(page, customerPage) {
+  if (customerPage) return `templates/${customerPage}.liquid`;
+  if (!page || page === "index") return "templates/index.liquid";
+  if (page === "checkout") return "templates/checkout.liquid";
+  if (page === "cart") return "templates/cart.liquid";
+  return `templates/${page}.liquid`;
+}
 
 // Alternate page templates are "page.<name>" (templates/page.<name>.liquid), edited like Page
 const PAGE_TEMPLATE_KEY = /^page\.[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -70,6 +80,8 @@ const MAIN_SECTION = {
   blog: "main-blog",
   article: "main-article",
   page: "main-page",
+  checkout: "main-checkout",
+  cart: "main-cart",
 };
 
 const NEW_TEMPLATE = "__new_template__";
@@ -1417,6 +1429,18 @@ export default function AdminCustomizePage() {
     else if (first === "collections") next = "collection";
     else if (first === "blog") next = second && !third ? "article" : "blog";
     else if (first === "pages" && second) next = "page";
+    else if (first === "checkout") next = "checkout";
+    else if (first === "cart") next = "cart";
+    if (next === "cart" && !dataRef.current?.templates?.cart) {
+      if (dataRef.current?.templates) {
+        dataRef.current.templates.cart = { order: [], sections: {} };
+      }
+    }
+    if (next === "checkout" && !dataRef.current?.templates?.checkout) {
+      if (dataRef.current?.templates) {
+        dataRef.current.templates.checkout = { order: ["main"], sections: { main: { type: "main-checkout", settings: {} } } };
+      }
+    }
     if (!dataRef.current?.templates[next]) return;
 
     setBackStack((stack) => [
@@ -2304,7 +2328,8 @@ export default function AdminCustomizePage() {
                     to={`/editor-demo${(() => {
                       const themeId = startParams.get("theme") || getEditingThemeId();
                       const query = new URLSearchParams();
-                      if (customerPage) query.set("file", `templates/${customerPage}.liquid`);
+                      const targetFile = getTemplateFileForPage(page, customerPage);
+                      if (targetFile) query.set("file", targetFile);
                       if (themeId) query.set("theme", themeId);
                       return query.toString() ? `?${query.toString()}` : "";
                     })()}`}
