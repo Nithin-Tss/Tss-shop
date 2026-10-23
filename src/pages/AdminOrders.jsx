@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
-import { apiGet } from "@/lib/api";
-import { useCan } from "@/lib/auth";
+import { apiGet, apiPost } from "@/lib/api";
+import { useCan, useSession } from "@/lib/auth";
 
 function formatOrderDate(dateString) {
   if (!dateString) return "—";
@@ -31,6 +31,19 @@ function formatOrderDate(dateString) {
     const monthName = date.toLocaleDateString("en-US", { month: "short" });
     const dayNum = date.getDate();
     return `${monthName} ${dayNum} at ${timeStr}`;
+  }
+}
+
+function formatOrderCurrency(amount, currencyCode = "INR") {
+  const num = typeof amount === "number" ? amount : parseFloat(amount || 0);
+  if (isNaN(num)) return `${amount || "0.00"} ${currencyCode || ""}`;
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode || "INR",
+    }).format(num);
+  } catch {
+    return `${currencyCode || ""} ${num.toFixed(2)}`;
   }
 }
 
@@ -111,45 +124,206 @@ function renderFulfillmentStatusBadge(status) {
 }
 
 export default function AdminOrders() {
+  const { id: routeOrderId } = useParams();
+  const navigate = useNavigate();
   const canCreate = useCan("orders.manage");
+  const session = useSession();
+  const storeId = session?.storeId;
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [cancellingOrder, setCancellingOrder] = useState(false);
+  const [actionMsg, setActionMsg] = useState("");
+  const [actionError, setActionError] = useState("");
+
+  const moreMenuRef = useRef(null);
 
   useEffect(() => {
-    async function fetchOrders() {
-      setLoading(true);
-      const res = await apiGet("/api/v1/orders/");
-      if (res.ok && Array.isArray(res.data)) {
-        setOrders(res.data);
-      } else if (res.ok && Array.isArray(res.data?.results)) {
-        setOrders(res.data.results);
-      } else {
-        setOrders([]);
+    function handleClickOutside(e) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) {
+        setIsMoreMenuOpen(false);
       }
-      setLoading(false);
     }
-    fetchOrders();
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredOrders = orders.filter((order) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    const orderNum = (order.order_number || "").toLowerCase();
-    const customer = (order.customer_name || "").toLowerCase();
-    const channel = (order.channel || "Online Store").toLowerCase();
-    const method = (order.delivery_method || "").toLowerCase();
-    const tags = Array.isArray(order.tags) ? order.tags.join(" ").toLowerCase() : "";
+  const fetchOrders = useCallback(async (opts = {}) => {
+    const isSilent = opts.silent || false;
+    if (!isSilent) {
+      setLoading(true);
+      setError(null);
+    }
+    try {
+      const res = await apiGet("/api/v1/orders/");
+      if (res.ok) {
+        const list = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.results)
+            ? res.data.results
+            : [];
+        setOrders(list);
+        if (!isSilent) setError(null);
+      } else {
+        if (!isSilent) {
+          setError(res.error || "Failed to load orders. Please try again.");
+          setOrders([]);
+        }
+      }
+    } catch {
+      if (!isSilent) {
+        setError("Failed to load orders. Please try again.");
+        setOrders([]);
+      }
+    } finally {
+      if (!isSilent) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
-    return (
-      orderNum.includes(query) ||
-      customer.includes(query) ||
-      channel.includes(query) ||
-      method.includes(query) ||
-      tags.includes(query)
-    );
-  });
+  useEffect(() => {
+    setOrders([]);
+    setSelectedIds(new Set());
+    setSelectedOrder(null);
+    fetchOrders({ silent: false });
+
+    // Lightweight automatic polling to fetch newly placed storefront orders in real time
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchOrders({ silent: true });
+      }
+    }, 4000);
+
+    const handleRefresh = () => {
+      fetchOrders({ silent: true });
+    };
+
+    window.addEventListener("focus", handleRefresh);
+    document.addEventListener("visibilitychange", handleRefresh);
+    window.addEventListener("vendra_order_placed", handleRefresh);
+    window.addEventListener("storage", handleRefresh);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleRefresh);
+      document.removeEventListener("visibilitychange", handleRefresh);
+      window.removeEventListener("vendra_order_placed", handleRefresh);
+      window.removeEventListener("storage", handleRefresh);
+    };
+  }, [storeId, fetchOrders]);
+
+  useEffect(() => {
+    if (routeOrderId && orders.length > 0) {
+      const match = orders.find((o) => o.id === routeOrderId);
+      if (match) {
+        setSelectedOrder(match);
+      }
+    }
+  }, [routeOrderId, orders]);
+
+  const handleCancelOrder = async (orderId) => {
+    if (!orderId) return;
+    setCancellingOrder(true);
+    setActionMsg("");
+    setActionError("");
+    const res = await apiPost(`/api/v1/orders/${orderId}/cancel/`, {});
+    setCancellingOrder(false);
+    if (res.ok) {
+      setActionMsg("Order cancelled successfully.");
+      if (res.data) {
+        setSelectedOrder(res.data);
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? res.data : o)));
+      } else {
+        fetchOrders();
+      }
+    } else {
+      setActionError(res.error || res.formError || "Failed to cancel order.");
+    }
+  };
+
+  const handleExport = () => {
+    const listToExport =
+      selectedIds.size > 0 ? orders.filter((o) => selectedIds.has(o.id)) : filteredOrders;
+
+    if (listToExport.length === 0) return;
+
+    const headers = [
+      "Order Number",
+      "Date",
+      "Customer",
+      "Fulfill By",
+      "Channel",
+      "Total",
+      "Currency",
+      "Payment Status",
+      "Fulfillment Status",
+      "Items Count",
+      "Delivery Status",
+      "Delivery Method",
+      "Tags",
+    ];
+
+    const rows = listToExport.map((o) => [
+      o.order_number || o.id,
+      o.created_at || "",
+      o.customer_name || "",
+      o.fulfill_by || "",
+      o.channel || "Online Store",
+      o.total || "0.00",
+      o.currency_code || "INR",
+      o.payment_status || "pending",
+      o.fulfillment_status || "unfulfilled",
+      o.items_count || (Array.isArray(o.items) ? o.items.length : 0),
+      o.delivery_status || "",
+      o.delivery_method || "",
+      Array.isArray(o.tags) ? o.tags.join("; ") : o.tags || "",
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `orders_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const filteredOrders = orders
+    .filter((order) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      const orderNum = (order.order_number || "").toLowerCase();
+      const customer = (order.customer_name || "").toLowerCase();
+      const channel = (order.channel || "Online Store").toLowerCase();
+      const method = (order.delivery_method || "").toLowerCase();
+      const tags = Array.isArray(order.tags) ? order.tags.join(" ").toLowerCase() : "";
+
+      return (
+        orderNum.includes(query) ||
+        customer.includes(query) ||
+        channel.includes(query) ||
+        method.includes(query) ||
+        tags.includes(query)
+      );
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return sortDirection === "desc" ? dateB - dateA : dateA - dateB;
+    });
 
   const allSelected = filteredOrders.length > 0 && selectedIds.size === filteredOrders.length;
 
@@ -194,18 +368,50 @@ export default function AdminOrders() {
             <div className="flex items-center gap-2.5">
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition"
+                onClick={handleExport}
+                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition cursor-pointer"
               >
                 Export
               </button>
 
-              <button
-                type="button"
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition"
-              >
-                More actions
-                <span className="text-xs">⌄</span>
-              </button>
+              <div className="relative" ref={moreMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsMoreMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition cursor-pointer"
+                >
+                  More actions
+                  <span className="text-xs">⌄</span>
+                </button>
+                {isMoreMenuOpen && (
+                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#DDD6FE] bg-white py-1.5 shadow-lg z-20">
+                    <Link
+                      to="/admin/online-store/orders/drafts"
+                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F0FF] transition"
+                      onClick={() => setIsMoreMenuOpen(false)}
+                    >
+                      Draft orders
+                    </Link>
+                    <Link
+                      to="/admin/online-store/orders/abandoned-checkouts"
+                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F0FF] transition"
+                      onClick={() => setIsMoreMenuOpen(false)}
+                    >
+                      Abandoned checkouts
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        handleExport();
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F0FF] transition cursor-pointer"
+                    >
+                      Export CSV
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {canCreate && (
                 <Link
@@ -289,9 +495,16 @@ export default function AdminOrders() {
                     </th>
                     <th className="py-3.5 px-3 font-semibold text-slate-700">Order</th>
                     <th className="py-3.5 px-3 font-semibold text-slate-700">
-                      <span className="inline-flex items-center gap-1 cursor-pointer hover:text-slate-900">
-                        Date <span>↓</span>
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))
+                        }
+                        className="inline-flex items-center gap-1 cursor-pointer hover:text-slate-900 font-semibold"
+                        title={`Sort by date (${sortDirection === "desc" ? "oldest first" : "newest first"})`}
+                      >
+                        Date <span>{sortDirection === "desc" ? "↓" : "↑"}</span>
+                      </button>
                     </th>
                     <th className="py-3.5 px-3 font-semibold text-slate-700">Customer</th>
                     <th className="py-3.5 px-3 font-semibold text-slate-700">Fulfill by</th>
@@ -356,6 +569,25 @@ export default function AdminOrders() {
                         </td>
                       </tr>
                     ))
+                  ) : error ? (
+                    // ERROR STATE (CLEAR MESSAGE + RETRY)
+                    <tr>
+                      <td colSpan={13} className="py-16 text-center text-slate-500">
+                        <div className="flex flex-col items-center justify-center space-y-3">
+                          <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-lg">
+                            !
+                          </div>
+                          <p className="text-sm font-semibold text-slate-800">{error}</p>
+                          <button
+                            type="button"
+                            onClick={() => fetchOrders()}
+                            className="px-4 py-1.5 rounded-lg bg-[#0B1020] text-white text-xs font-medium hover:bg-[#1C2347] transition shadow-xs cursor-pointer"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ) : filteredOrders.length > 0 ? (
                     // DYNAMIC ORDERS DATA
                     filteredOrders.map((order) => {
@@ -391,12 +623,17 @@ export default function AdminOrders() {
 
                           {/* Order Number */}
                           <td className="py-3.5 px-3 font-semibold text-[#0B1020]">
-                            <Link
-                              to={`/admin/online-store/orders/${order.id}`}
-                              className="hover:underline text-[#0B1020]"
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setActionMsg("");
+                                setActionError("");
+                              }}
+                              className="hover:underline text-[#0B1020] font-semibold text-left cursor-pointer"
                             >
                               {order.order_number || `#${order.id?.slice(0, 6)}`}
-                            </Link>
+                            </button>
                           </td>
 
                           {/* Date */}
@@ -423,7 +660,7 @@ export default function AdminOrders() {
 
                           {/* Total */}
                           <td className="py-3.5 px-3 text-right font-medium text-[#0B1020]">
-                            ${parseFloat(order.total || 0).toFixed(2)}
+                            {formatOrderCurrency(order.total, order.currency_code)}
                           </td>
 
                           {/* Payment status */}
@@ -505,6 +742,205 @@ export default function AdminOrders() {
           </p>
         </main>
       </div>
+
+      {/* ORDER DETAILS SLIDE-OVER DRAWER */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            onClick={() => {
+              setSelectedOrder(null);
+              if (routeOrderId) navigate("/admin/online-store/orders");
+            }}
+          />
+          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div className="w-screen max-w-xl bg-white shadow-2xl flex flex-col">
+              {/* Drawer Header */}
+              <div className="px-6 py-5 border-b border-[#E4DEFB] flex items-center justify-between bg-[#FAF8FF]">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-bold text-[#0B1020]">
+                      Order {selectedOrder.order_number || selectedOrder.id?.slice(0, 8)}
+                    </h2>
+                    {renderPaymentStatusBadge(selectedOrder.payment_status)}
+                    {renderFulfillmentStatusBadge(selectedOrder.fulfillment_status)}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Placed {formatOrderDate(selectedOrder.created_at)} • via{" "}
+                    {selectedOrder.channel || "Online Store"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedOrder(null);
+                    if (routeOrderId) navigate("/admin/online-store/orders");
+                  }}
+                  className="rounded-lg p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Action Messages */}
+              {actionMsg && (
+                <div className="mx-6 mt-4 p-3 rounded-lg bg-emerald-50 text-emerald-800 text-xs border border-emerald-200">
+                  {actionMsg}
+                </div>
+              )}
+              {actionError && (
+                <div className="mx-6 mt-4 p-3 rounded-lg bg-red-50 text-red-800 text-xs border border-red-200">
+                  {actionError}
+                </div>
+              )}
+
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+                {/* Customer Section */}
+                <div className="rounded-xl border border-[#E4DEFB] p-4 bg-white">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                    Customer Details
+                  </h3>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-slate-800">
+                      {selectedOrder.customer_name || "Guest Customer"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Delivery method: {selectedOrder.delivery_method || "Standard Delivery"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Delivery status: {selectedOrder.delivery_status || "Pending"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Items Ordered Section */}
+                <div className="rounded-xl border border-[#E4DEFB] p-4 bg-white">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                    Items ({Array.isArray(selectedOrder.items) ? selectedOrder.items.length : 0})
+                  </h3>
+                  {Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 ? (
+                    <div className="divide-y divide-slate-100">
+                      {selectedOrder.items.map((item, idx) => (
+                        <div
+                          key={item.id || idx}
+                          className="py-3 flex items-center justify-between gap-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-[#FAF8FF] border border-[#E4DEFB] flex items-center justify-center text-slate-500 shrink-0 text-sm">
+                              📦
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-800">
+                                {item.product_name || "Item"}
+                              </p>
+                              {item.sku && (
+                                <p className="text-xs text-slate-400 font-mono">SKU: {item.sku}</p>
+                              )}
+                              <p className="text-xs text-slate-500">
+                                Qty: {item.quantity} ×{" "}
+                                {formatOrderCurrency(item.unit_price, selectedOrder.currency_code)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-slate-900">
+                              {formatOrderCurrency(
+                                item.total || item.quantity * (item.unit_price || 0),
+                                selectedOrder.currency_code
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400">No line items recorded for this order.</p>
+                  )}
+                </div>
+
+                {/* Payment & Totals Breakdown */}
+                <div className="rounded-xl border border-[#E4DEFB] p-4 bg-[#FAF8FF] space-y-2 text-sm">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                    Payment Summary
+                  </h3>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Subtotal</span>
+                    <span>
+                      {formatOrderCurrency(selectedOrder.subtotal, selectedOrder.currency_code)}
+                    </span>
+                  </div>
+                  {Number(selectedOrder.discount_amount) > 0 && (
+                    <div className="flex justify-between text-emerald-700">
+                      <span>Discount</span>
+                      <span>
+                        -
+                        {formatOrderCurrency(
+                          selectedOrder.discount_amount,
+                          selectedOrder.currency_code
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {Number(selectedOrder.shipping_amount) > 0 && (
+                    <div className="flex justify-between text-slate-600">
+                      <span>Shipping</span>
+                      <span>
+                        {formatOrderCurrency(
+                          selectedOrder.shipping_amount,
+                          selectedOrder.currency_code
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {Number(selectedOrder.tax_amount) > 0 && (
+                    <div className="flex justify-between text-slate-600">
+                      <span>Tax</span>
+                      <span>
+                        {formatOrderCurrency(selectedOrder.tax_amount, selectedOrder.currency_code)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-base text-slate-900 pt-2 border-t border-[#DDD6FE]">
+                    <span>Total</span>
+                    <span>
+                      {formatOrderCurrency(selectedOrder.total, selectedOrder.currency_code)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer Actions */}
+              <div className="p-4 border-t border-[#E4DEFB] bg-[#FAF8FF] flex items-center justify-between">
+                {selectedOrder.status === "open" ? (
+                  <button
+                    type="button"
+                    disabled={cancellingOrder}
+                    onClick={() => handleCancelOrder(selectedOrder.id)}
+                    className="px-4 py-2 rounded-lg border border-red-300 text-red-600 text-xs font-semibold hover:bg-red-50 transition cursor-pointer disabled:opacity-50"
+                  >
+                    {cancellingOrder ? "Cancelling..." : "Cancel Order"}
+                  </button>
+                ) : (
+                  <span className="text-xs font-medium text-slate-500">
+                    Status: {selectedOrder.status}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedOrder(null);
+                    if (routeOrderId) navigate("/admin/online-store/orders");
+                  }}
+                  className="px-4 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-[#1C2347] transition cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -143,6 +143,7 @@ export default function App() {
           </Route>
           <Route element={<RequirePermission permission="orders.view" />}>
             <Route path="/admin/online-store/orders" element={<AdminOrders />} />
+            <Route path="/admin/online-store/orders/:id" element={<AdminOrders />} />
             <Route
               path="/admin/online-store/orders/abandoned-checkouts"
               element={<AdminAbandonedCheckouts />}
