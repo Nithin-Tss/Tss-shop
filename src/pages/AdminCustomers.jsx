@@ -184,9 +184,9 @@ export default function AdminCustomers() {
   };
 
   useEffect(() => {
-    setSelectedIds(new Set());
-    setSelectedCustomer(null);
     const timer = setTimeout(() => {
+      setSelectedIds(new Set());
+      setSelectedCustomer(null);
       fetchCustomers(searchQuery);
     }, 250);
     return () => clearTimeout(timer);
