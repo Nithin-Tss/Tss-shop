@@ -256,12 +256,15 @@ export default function AdminCustomerDetails() {
   useEffect(() => {
     let active = true;
     const hasInitial = location.state?.customer?.id === id;
-    if (hasInitial) {
-      setCustomer(location.state.customer);
-      setAddresses(location.state.customer.addresses || []);
-      setLoading(false);
-    }
     const load = async () => {
+      if (hasInitial) {
+        // Seed from the list page's row so the page paints before the fetch returns
+        await Promise.resolve();
+        if (!active) return;
+        setCustomer(location.state.customer);
+        setAddresses(location.state.customer.addresses || []);
+        setLoading(false);
+      }
       if (active) {
         await fetchCustomerData(hasInitial);
       }

@@ -55,7 +55,8 @@ const PAGE_LABELS = {
 export function getTemplateFileForPage(page, customerPage) {
   if (customerPage) return `templates/${customerPage}.liquid`;
   if (!page || page === "index") return "templates/index.liquid";
-  if (page === "checkout") return "templates/checkout.liquid";
+  // The checkout is the same in every theme; its markup lives in the main-checkout section
+  if (page === "checkout") return "sections/main-checkout.liquid";
   if (page === "cart") return "templates/cart.liquid";
   return `templates/${page}.liquid`;
 }
