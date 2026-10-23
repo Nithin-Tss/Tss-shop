@@ -57,8 +57,21 @@ export function getTemplateFileForPage(page, customerPage) {
   if (!page || page === "index") return "templates/index.liquid";
   // The checkout is the same in every theme; its markup lives in the main-checkout section
   if (page === "checkout") return "sections/main-checkout.liquid";
-  if (page === "cart") return "templates/cart.liquid";
+  // The cart is not a template: it is drawn by the cart snippet
+  if (page === "cart") return "snippets/cart.liquid";
   return `templates/${page}.liquid`;
+}
+
+// Blocks that are drawn by a snippet of their own: right-click Edit code opens that snippet
+const BLOCK_SNIPPETS = { cart: "snippets/cart.liquid", wishlist: "snippets/wishlist.liquid" };
+
+// The code file behind a section, or one of its blocks, in the preview
+export function getCodeFileFor(section, blockIndex, page) {
+  const blockType = Number.isInteger(blockIndex) ? section?.blocks?.[blockIndex]?.type : null;
+  if (blockType && BLOCK_SNIPPETS[blockType]) return BLOCK_SNIPPETS[blockType];
+  // A custom section has no file of its own: it lives in the page template
+  if (section?.type === "custom") return getTemplateFileForPage(page);
+  return `sections/${section.type}.liquid`;
 }
 
 // Alternate page templates are "page.<name>" (templates/page.<name>.liquid), edited like Page
@@ -1640,11 +1653,7 @@ export default function AdminCustomizePage() {
         setContextMenu({
           x: frame.left + (Number(message.x) || 0),
           y: frame.top + (Number(message.y) || 0),
-          // A custom section has no file of its own: it lives in the page template
-          file:
-            section.type === "custom"
-              ? "templates/index.liquid"
-              : `sections/${section.type}.liquid`,
+          file: getCodeFileFor(section, block, pageRef.current),
         });
         return;
       } else if (

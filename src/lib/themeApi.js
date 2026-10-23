@@ -39,10 +39,18 @@ export function getThemeCustomizer() {
   return apiRequest(`${BASE}/customizer/`);
 }
 
+// The cart is a shared snippet, not a saved template; the customizer only holds a temporary
+// templates.cart entry while it is the preview page, so it is never sent to the API.
+function withoutCartTemplate(data) {
+  if (!data?.templates || !("cart" in data.templates)) return data;
+  const { cart: _cart, ...templates } = data.templates;
+  return { ...data, templates };
+}
+
 export function saveThemeCustomizer(data) {
   return apiRequest(`${BASE}/customizer/`, {
     method: "POST",
-    body: data,
+    body: withoutCartTemplate(data),
   });
 }
 
@@ -71,7 +79,10 @@ export function previewTheme(
   if (handle) query.set("handle", handle);
   if (collection) query.set("collection", collection);
   if (customer) query.set("customer", customer);
-  return apiRequest(`${BASE}/preview/?${query}`, { method: "POST", body: data });
+  return apiRequest(`${BASE}/preview/?${query}`, {
+    method: "POST",
+    body: withoutCartTemplate(data),
+  });
 }
 
 // Blog posts -> [{ id, title, handle, excerpt, body, cover_image, author, category, tags, status, published_at, url }]
