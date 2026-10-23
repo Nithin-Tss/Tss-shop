@@ -55,7 +55,7 @@ function CatalogsIllustration() {
         <div className="absolute inset-0 rounded-full bg-[#E5E6E8]" />
 
         {/* Floating white card */}
-        <div className="relative z-10 w-[122px] rounded-xl border border-[#E1E3E5] bg-white px-3.5 py-4 shadow-[0_4px_18px_rgba(0,0,0,0.06)]">
+        <div className="relative z-10 w-30.5 rounded-xl border border-[#E1E3E5] bg-white px-3.5 py-4 shadow-[0_4px_18px_rgba(0,0,0,0.06)]">
           <div className="flex flex-col gap-3">
             {/* Row 1 - Personalized green customer & pricing */}
             <div className="flex items-center justify-between gap-2">
@@ -237,7 +237,7 @@ export default function CataloguesPage() {
             <div className="mt-4 flex flex-1 flex-col">
               <section
                 aria-labelledby="catalogs-empty-heading"
-                className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-[#E1E3E5] bg-white px-6 py-16 text-center shadow-xs min-h-[480px]"
+                className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-[#E1E3E5] bg-white px-6 py-16 text-center shadow-xs min-h-120"
               >
                 {/* Centered Graphic Illustration */}
                 <CatalogsIllustration />

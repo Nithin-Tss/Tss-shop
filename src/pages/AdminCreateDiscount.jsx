@@ -509,7 +509,7 @@ export default function AdminCreateDiscount({ initialType }) {
                 </svg>
               </Link>
               <div>
-                <h1 className="text-xl font-semibold text-[#0B1020]">{typeConfig.title}</h1>
+                <h1 className="text-xl font-semibold text-charcoal-navy">{typeConfig.title}</h1>
                 <p className="text-xs text-slate-500">Create discount</p>
               </div>
             </div>
@@ -526,7 +526,7 @@ export default function AdminCreateDiscount({ initialType }) {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="rounded-lg bg-[#0B1020] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50"
+                className="rounded-lg bg-charcoal-navy px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save discount"}
               </button>
@@ -567,7 +567,7 @@ export default function AdminCreateDiscount({ initialType }) {
                       onClick={() => setMethod("code")}
                       className={`flex flex-col items-start rounded-xl border p-3.5 text-left transition ${
                         method === "code"
-                          ? "border-[#0B1020] bg-slate-50/70 ring-2 ring-[#0B1020]/10"
+                          ? "border-charcoal-navy bg-slate-50/70 ring-2 ring-[#0B1020]/10"
                           : "border-slate-200 bg-white hover:border-slate-300"
                       }`}
                     >
@@ -577,7 +577,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           name="method"
                           checked={method === "code"}
                           onChange={() => setMethod("code")}
-                          className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         Discount code
                       </div>
@@ -591,7 +591,7 @@ export default function AdminCreateDiscount({ initialType }) {
                       onClick={() => setMethod("automatic")}
                       className={`flex flex-col items-start rounded-xl border p-3.5 text-left transition ${
                         method === "automatic"
-                          ? "border-[#0B1020] bg-slate-50/70 ring-2 ring-[#0B1020]/10"
+                          ? "border-charcoal-navy bg-slate-50/70 ring-2 ring-[#0B1020]/10"
                           : "border-slate-200 bg-white hover:border-slate-300"
                       }`}
                     >
@@ -601,7 +601,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           name="method"
                           checked={method === "automatic"}
                           onChange={() => setMethod("automatic")}
-                          className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         Automatic discount
                       </div>
@@ -620,7 +620,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         <button
                           type="button"
                           onClick={() => setCode(generateDiscountCode("PROMO"))}
-                          className="text-xs font-medium text-[#0B1020] hover:underline"
+                          className="text-xs font-medium text-charcoal-navy hover:underline"
                         >
                           Generate random code
                         </button>
@@ -726,7 +726,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             name="appliesTo"
                             checked={appliesToType === "collections"}
                             onChange={() => setAppliesToType("collections")}
-                            className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           Specific collections
                         </label>
@@ -736,7 +736,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             name="appliesTo"
                             checked={appliesToType === "products"}
                             onChange={() => setAppliesToType("products")}
-                            className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           Specific products
                         </label>
@@ -827,7 +827,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             type="checkbox"
                             checked={oncePerOrder}
                             onChange={(e) => setOncePerOrder(e.target.checked)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           <div>
                             <span className="font-medium">Only apply discount once per order</span>
@@ -859,7 +859,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             name="buyReq"
                             checked={buyRequirementType === "quantity"}
                             onChange={() => setBuyRequirementType("quantity")}
-                            className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           Minimum quantity of items
                         </label>
@@ -869,7 +869,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             name="buyReq"
                             checked={buyRequirementType === "amount"}
                             onChange={() => setBuyRequirementType("amount")}
-                            className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           Minimum purchase amount
                         </label>
@@ -904,7 +904,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               name="buySource"
                               checked={buySourceType === "products"}
                               onChange={() => setBuySourceType("products")}
-                              className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Specific products
                           </label>
@@ -914,7 +914,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               name="buySource"
                               checked={buySourceType === "collections"}
                               onChange={() => setBuySourceType("collections")}
-                              className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Specific collections
                           </label>
@@ -967,7 +967,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               name="getYSource"
                               checked={getYSourceType === "products"}
                               onChange={() => setGetYSourceType("products")}
-                              className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Specific products
                           </label>
@@ -977,7 +977,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               name="getYSource"
                               checked={getYSourceType === "collections"}
                               onChange={() => setGetYSourceType("collections")}
-                              className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Specific collections
                           </label>
@@ -1010,7 +1010,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               name="getYDiscount"
                               checked={getYDiscountType === "free"}
                               onChange={() => setGetYDiscountType("free")}
-                              className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Free
                           </label>
@@ -1020,7 +1020,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               name="getYDiscount"
                               checked={getYDiscountType === "percentage"}
                               onChange={() => setGetYDiscountType("percentage")}
-                              className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Percentage (%)
                           </label>
@@ -1030,7 +1030,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               name="getYDiscount"
                               checked={getYDiscountType === "amount"}
                               onChange={() => setGetYDiscountType("amount")}
-                              className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Amount off each ($)
                           </label>
@@ -1057,7 +1057,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               type="checkbox"
                               checked={hasMaxUsesPerOrder}
                               onChange={(e) => setHasMaxUsesPerOrder(e.target.checked)}
-                              className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                              className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                             />
                             Set a maximum number of uses per order
                           </label>
@@ -1147,7 +1147,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             name="countryScope"
                             checked={countryScope === "all"}
                             onChange={() => setCountryScope("all")}
-                            className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           All countries
                         </label>
@@ -1157,7 +1157,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             name="countryScope"
                             checked={countryScope === "selected"}
                             onChange={() => setCountryScope("selected")}
-                            className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           Selected countries
                         </label>
@@ -1241,7 +1241,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             type="checkbox"
                             checked={excludeShippingOver}
                             onChange={(e) => setExcludeShippingOver(e.target.checked)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                           />
                           <div>
                             <span className="font-medium">
@@ -1289,7 +1289,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           name="minRequirement"
                           checked={minRequirement === "none"}
                           onChange={() => setMinRequirement("none")}
-                          className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         No minimum requirements
                       </label>
@@ -1300,7 +1300,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           name="minRequirement"
                           checked={minRequirement === "amount"}
                           onChange={() => setMinRequirement("amount")}
-                          className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         Minimum purchase amount ($)
                       </label>
@@ -1330,7 +1330,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           name="minRequirement"
                           checked={minRequirement === "quantity"}
                           onChange={() => setMinRequirement("quantity")}
-                          className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         Minimum quantity of items
                       </label>
@@ -1364,7 +1364,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         name="eligibility"
                         checked={eligibility === "all"}
                         onChange={() => setEligibility("all")}
-                        className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       All customers
                     </label>
@@ -1375,7 +1375,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         name="eligibility"
                         checked={eligibility === "segments"}
                         onChange={() => setEligibility("segments")}
-                        className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       Specific customer segments
                     </label>
@@ -1400,7 +1400,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         name="eligibility"
                         checked={eligibility === "customers"}
                         onChange={() => setEligibility("customers")}
-                        className="h-4 w-4 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       Specific customers
                     </label>
@@ -1429,7 +1429,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           type="checkbox"
                           checked={limitTotalUses}
                           onChange={(e) => setLimitTotalUses(e.target.checked)}
-                          className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         Limit number of times this discount can be used in total
                       </label>
@@ -1453,7 +1453,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           type="checkbox"
                           checked={limitOnePerCustomer}
                           onChange={(e) => setLimitOnePerCustomer(e.target.checked)}
-                          className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         Limit to one use per customer
                       </label>
@@ -1477,7 +1477,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         type="checkbox"
                         checked={combinesWithProducts}
                         onChange={(e) => setCombinesWithProducts(e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       Product discounts
                     </label>
@@ -1487,7 +1487,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         type="checkbox"
                         checked={combinesWithOrders}
                         onChange={(e) => setCombinesWithOrders(e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       Order discounts
                     </label>
@@ -1498,7 +1498,7 @@ export default function AdminCreateDiscount({ initialType }) {
                           type="checkbox"
                           checked={combinesWithShipping}
                           onChange={(e) => setCombinesWithShipping(e.target.checked)}
-                          className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                          className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                         />
                         Shipping discounts
                       </label>
@@ -1545,7 +1545,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         type="checkbox"
                         checked={hasEndDate}
                         onChange={(e) => setHasEndDate(e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       Set end date
                     </label>
@@ -1592,7 +1592,7 @@ export default function AdminCreateDiscount({ initialType }) {
                   <h2 className="text-base font-semibold text-slate-900">Summary</h2>
 
                   <div className="mt-4 rounded-xl bg-slate-50 p-4 border border-slate-200/80">
-                    <div className="text-lg font-bold text-[#0B1020] break-words">
+                    <div className="text-lg font-bold text-charcoal-navy wrap-break-word">
                       {summaryTitle}
                     </div>
                     <div className="mt-1 inline-flex items-center rounded-md bg-slate-200/80 px-2 py-0.5 text-xs font-semibold text-slate-700">
@@ -1638,7 +1638,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         type="checkbox"
                         checked={channelOnlineStore}
                         onChange={(e) => setChannelOnlineStore(e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       Online Store
                     </label>
@@ -1648,7 +1648,7 @@ export default function AdminCreateDiscount({ initialType }) {
                         type="checkbox"
                         checked={channelPOS}
                         onChange={(e) => setChannelPOS(e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                        className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                       />
                       Point of Sale
                     </label>
@@ -1801,7 +1801,7 @@ function ItemPickerModal({
       onClick={onClose}
     >
       <div
-        className="flex flex-col w-full max-w-[620px] max-h-[85vh] rounded-2xl bg-white shadow-2xl overflow-hidden"
+        className="flex flex-col w-full max-w-155 max-h-[85vh] rounded-2xl bg-white shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -1827,7 +1827,7 @@ function ItemPickerModal({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={`Search ${mode}...`}
-              className="w-full h-10 rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-[#0B1020]"
+              className="w-full h-10 rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-charcoal-navy"
             />
           </div>
         </div>
@@ -1862,7 +1862,7 @@ function ItemPickerModal({
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => {}} // handled by parent onClick
-                      className="h-4 w-4 rounded border-slate-300 text-[#0B1020] focus:ring-[#0B1020]"
+                      className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-[#0B1020]"
                     />
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-slate-100 text-sm text-slate-600">
                       {mode === "products" ? "📦" : mode === "collections" ? "📁" : "👤"}
@@ -1894,7 +1894,7 @@ function ItemPickerModal({
             <button
               type="button"
               onClick={() => onConfirm(Object.values(selectedMap))}
-              className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+              className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-black"
             >
               Add {mode}
             </button>

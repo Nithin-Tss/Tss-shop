@@ -69,7 +69,7 @@ export default function AdminAbandonedCheckouts() {
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
@@ -194,7 +194,7 @@ export default function AdminAbandonedCheckouts() {
                   >
                     ›
                   </button>
-                  <span className="min-w-[48px] text-center tabular-nums text-slate-700">
+                  <span className="min-w-12 text-center tabular-nums text-slate-700">
                     {`${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, filtered.length)}`}
                   </span>
                 </div>

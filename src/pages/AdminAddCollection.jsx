@@ -165,7 +165,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#D5D8DD] focus-within:border-[#0B1020] focus-within:ring-2 focus-within:ring-[#0B1020]/10">
+    <div className="overflow-hidden rounded-lg border border-[#D5D8DD] focus-within:border-charcoal-navy focus-within:ring-2 focus-within:ring-[#0B1020]/10">
       <div
         className="flex flex-wrap gap-0.5 border-b border-[#E3E5E8] bg-[#FAFAFB] px-1.5 py-1"
         role="toolbar"
@@ -179,7 +179,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
             aria-label={tool.label}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => apply(tool)}
-            className="rounded-md px-2 py-1 text-[12px] text-[#4A5160] hover:bg-[#EDEEF0] hover:text-[#0B1020]"
+            className="rounded-md px-2 py-1 text-[12px] text-[#4A5160] hover:bg-[#EDEEF0] hover:text-charcoal-navy"
           >
             {tool.text}
           </button>
@@ -194,7 +194,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
         suppressContentEditableWarning
         data-placeholder={placeholder}
         onInput={emit}
-        className="min-h-[120px] px-3 py-2.5 text-[14px] leading-relaxed text-[#0B1020] outline-none empty:before:pointer-events-none empty:before:text-[#9AA0A9] empty:before:content-[attr(data-placeholder)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+        className="min-h-30 px-3 py-2.5 text-[14px] leading-relaxed text-charcoal-navy outline-none empty:before:pointer-events-none empty:before:text-[#9AA0A9] empty:before:content-[attr(data-placeholder)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
       />
     </div>
   );
@@ -233,7 +233,7 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[#0B1020]/30 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-charcoal-navy/30 p-0 sm:items-center sm:p-4"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -281,11 +281,11 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
                   type="checkbox"
                   checked={picked.has(p.id)}
                   onChange={() => toggle(p.id)}
-                  className="h-4 w-4 accent-[#0B1020]"
+                  className="h-4 w-4 accent-charcoal-navy"
                 />
                 <Thumb product={p} size="h-10 w-10" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] text-[#0B1020]">{p.title}</span>
+                  <span className="block truncate text-[14px] text-charcoal-navy">{p.title}</span>
                   <span className="block text-[12px] text-[#6B7280]">
                     {capitalize(p.status)}
                     {p.price ? ` · ${formatPrice(p.price)}` : ""}
@@ -305,7 +305,7 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
             <button
               type="button"
               onClick={() => onDone([...picked])}
-              className="rounded-lg bg-[#0B1020] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#262E42]"
+              className="rounded-lg bg-charcoal-navy px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#262E42]"
             >
               Done
             </button>
@@ -631,12 +631,12 @@ export default function AdminAddCollection() {
   // ---------------------------------------------------------------- render
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] font-sans text-[#0B1020]">
+    <div className="min-h-screen bg-[#F1F2F4] font-sans text-charcoal-navy">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
 
-        <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6 sm:px-8 sm:py-8">
+        <main className="mx-auto w-full max-w-275 flex-1 px-4 py-6 sm:px-8 sm:py-8">
           {/* Top bar */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
@@ -668,7 +668,7 @@ export default function AdminAddCollection() {
                 type="button"
                 onClick={save}
                 disabled={!dirty || saving || loading}
-                className="rounded-lg bg-[#0B1020] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#262E42] disabled:cursor-not-allowed disabled:bg-[#D5D8DD] disabled:text-[#8A909A]"
+                className="rounded-lg bg-charcoal-navy px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#262E42] disabled:cursor-not-allowed disabled:bg-[#D5D8DD] disabled:text-[#8A909A]"
               >
                 {saving ? "Saving…" : "Save"}
               </button>
@@ -844,7 +844,7 @@ export default function AdminAddCollection() {
                             aria-checked={viewMode === mode}
                             aria-label={`${capitalize(mode)} view`}
                             onClick={() => setViewMode(mode)}
-                            className={`flex h-7 w-7 items-center justify-center rounded-md ${viewMode === mode ? "bg-[#F1F2F4] text-[#0B1020]" : "text-[#9AA0A9] hover:text-[#4A5160]"}`}
+                            className={`flex h-7 w-7 items-center justify-center rounded-md ${viewMode === mode ? "bg-[#F1F2F4] text-charcoal-navy" : "text-[#9AA0A9] hover:text-[#4A5160]"}`}
                           >
                             <Icon d={ICONS[mode]} />
                           </button>
@@ -931,7 +931,7 @@ export default function AdminAddCollection() {
                           <div className="mb-2.5 aspect-square">
                             <Thumb product={p} />
                           </div>
-                          <p className="truncate text-[13px] font-medium text-[#0B1020]">
+                          <p className="truncate text-[13px] font-medium text-charcoal-navy">
                             {p.title}
                           </p>
                           <p className="text-[12px] text-[#6B7280]">
@@ -1052,7 +1052,7 @@ export default function AdminAddCollection() {
                           URL handle
                         </label>
                         <div
-                          className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-[#0B1020] ${errors.handle ? "border-red-400" : "border-[#D5D8DD]"}`}
+                          className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-charcoal-navy ${errors.handle ? "border-red-400" : "border-[#D5D8DD]"}`}
                         >
                           <span className="hidden max-w-[45%] truncate border-r border-[#E3E5E8] bg-[#FAFAFB] px-3 py-2.5 text-[13px] text-[#6B7280] sm:block">
                             {storeUrl}/collections/
@@ -1101,7 +1101,7 @@ export default function AdminAddCollection() {
                         role="radio"
                         aria-checked={form.type === value}
                         onClick={() => switchType(value)}
-                        className={`rounded-md py-1.5 text-[13px] font-medium transition ${form.type === value ? "bg-white text-[#0B1020] shadow-sm" : "text-[#6B7280] hover:text-[#0B1020]"}`}
+                        className={`rounded-md py-1.5 text-[13px] font-medium transition ${form.type === value ? "bg-white text-charcoal-navy shadow-sm" : "text-[#6B7280] hover:text-charcoal-navy"}`}
                       >
                         {label}
                       </button>
@@ -1145,7 +1145,7 @@ export default function AdminAddCollection() {
                                 name="match"
                                 checked={form.match === value}
                                 onChange={() => set("match", value)}
-                                className="accent-[#0B1020]"
+                                className="accent-charcoal-navy"
                               />
                               {label}
                             </label>
@@ -1259,7 +1259,7 @@ export default function AdminAddCollection() {
                                       form.excluded_products.filter((id) => id !== p.id)
                                     )
                                   }
-                                  className="shrink-0 text-[12px] text-[#4A5160] underline hover:text-[#0B1020]"
+                                  className="shrink-0 text-[12px] text-[#4A5160] underline hover:text-charcoal-navy"
                                 >
                                   Include
                                 </button>
@@ -1301,10 +1301,10 @@ export default function AdminAddCollection() {
                       aria-label="Show on the Online Store"
                       disabled={!onlineIds.length}
                       onClick={() => setOnlineStore(!onOnlineStore)}
-                      className={`relative h-5 w-9 rounded-full transition ${onOnlineStore ? "bg-[#0B1020]" : "bg-[#D5D8DD]"} disabled:opacity-40`}
+                      className={`relative h-5 w-9 rounded-full transition ${onOnlineStore ? "bg-charcoal-navy" : "bg-[#D5D8DD]"} disabled:opacity-40`}
                     >
                       <span
-                        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${onOnlineStore ? "left-[18px]" : "left-0.5"}`}
+                        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${onOnlineStore ? "left-4.5" : "left-0.5"}`}
                       />
                     </button>
                   </div>
@@ -1360,7 +1360,7 @@ function ItemAction({ product, type, form, set, inline = false }) {
       className={
         inline
           ? iconButton
-          : "absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#4A5160] opacity-100 shadow-sm transition hover:text-[#0B1020] sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+          : "absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#4A5160] opacity-100 shadow-sm transition hover:text-charcoal-navy sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
       }
     >
       <Icon d={manual ? ICONS.x : ICONS.minus} />

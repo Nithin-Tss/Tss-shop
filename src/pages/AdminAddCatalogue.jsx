@@ -263,7 +263,7 @@ export default function AdminAddCatalogue() {
                     id="set-prices-currency"
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full sm:w-auto min-w-[240px] appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-2 pr-8 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
+                    className="w-full sm:w-auto min-w-60 appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-2 pr-8 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
                   >
                     <option value="Store currency (AUD $)">Store currency (AUD $)</option>
                     <option value="Store currency (USD $)">Store currency (USD $)</option>

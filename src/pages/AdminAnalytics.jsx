@@ -41,7 +41,7 @@ function EmptyIcon() {
 
 export default function AnalyticsPage() {
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-72px)]">
@@ -49,9 +49,9 @@ export default function AnalyticsPage() {
 
         <main className="min-w-0 flex-1 overflow-x-hidden">
           <header className="border-b border-[#e5e7eb] bg-white">
-            <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
+            <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div className="min-w-0">
-                <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#0B1020]">
+                <h1 className="flex items-center gap-2.5 text-xl font-semibold text-charcoal-navy">
                   <PageIcon name="analytics" />
                   Analytics
                 </h1>
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
 
                 <Link
                   to="/admin/online-store/reports/new"
-                  className="inline-flex h-9 items-center rounded-lg bg-[#0B1020] px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1C2347]"
+                  className="inline-flex h-9 items-center rounded-lg bg-charcoal-navy px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1C2347]"
                 >
                   New exploration
                 </Link>
@@ -82,10 +82,13 @@ export default function AnalyticsPage() {
             </div>
           </header>
 
-          <div className="mx-auto max-w-[1280px] px-4 py-5 sm:px-6">
-            <div className="rounded-xl bg-[#f1f3f7] px-4 py-3 text-[13px] text-[#0B1020]">
+          <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
+            <div className="rounded-xl bg-[#f1f3f7] px-4 py-3 text-[13px] text-charcoal-navy">
               Analytics provides insights into your store performance.
-              <button type="button" className="ml-1.5 font-semibold text-[#0B1020] hover:underline">
+              <button
+                type="button"
+                className="ml-1.5 font-semibold text-charcoal-navy hover:underline"
+              >
                 Learn more
               </button>
             </div>
@@ -115,7 +118,7 @@ export default function AnalyticsPage() {
               <section className={card}>
                 <h2 className={cardHeading}>Total sales</h2>
 
-                <div className="mt-4 flex h-[340px] items-center justify-center rounded-lg bg-[#F5F3FF]">
+                <div className="mt-4 flex h-85 items-center justify-center rounded-lg bg-[#F5F3FF]">
                   <div className="flex flex-col items-center text-center">
                     <EmptyIcon />
 
@@ -157,7 +160,7 @@ function MetricCard({ title }) {
     <div className={card}>
       <h2 className={cardHeading}>{title}</h2>
 
-      <p className="mt-2 text-2xl font-bold text-[#0B1020]">—</p>
+      <p className="mt-2 text-2xl font-bold text-charcoal-navy">—</p>
 
       <div className="mt-4 h-px bg-[#e5e7eb]" />
     </div>
@@ -167,9 +170,9 @@ function MetricCard({ title }) {
 function BreakdownRow({ label }) {
   return (
     <div className="flex h-11 items-center justify-between px-1">
-      <span className="text-sm text-[#0B1020]">{label}</span>
+      <span className="text-sm text-charcoal-navy">{label}</span>
 
-      <span className="text-sm font-semibold text-[#0B1020]">—</span>
+      <span className="text-sm font-semibold text-charcoal-navy">—</span>
     </div>
   );
 }

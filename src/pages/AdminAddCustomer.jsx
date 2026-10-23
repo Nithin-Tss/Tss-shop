@@ -132,7 +132,7 @@ export default function AdminAddCustomer() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F1F2F4] text-charcoal-navy">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -168,7 +168,7 @@ export default function AdminAddCustomer() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-2 rounded-lg bg-[#0B1020] hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
+                className="px-5 py-2 rounded-lg bg-charcoal-navy hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -270,7 +270,7 @@ export default function AdminAddCustomer() {
                     <div className="relative">
                       <button
                         type="button"
-                        className="flex items-center gap-1.5 h-[38px] px-3 border border-slate-300 rounded-lg bg-white text-sm"
+                        className="flex items-center gap-1.5 h-9.5 px-3 border border-slate-300 rounded-lg bg-white text-sm"
                       >
                         <span className="text-base">{selectedCountry.flag}</span>
                         <span className="text-xs text-slate-400">↕</span>
@@ -293,7 +293,7 @@ export default function AdminAddCustomer() {
                       type="checkbox"
                       checked={marketingEmail}
                       onChange={(e) => setMarketingEmail(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
+                      className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy"
                     />
                     <span className="text-xs text-slate-600">
                       Customer agreed to receive marketing emails.
@@ -472,7 +472,7 @@ export default function AdminAddCustomer() {
               <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-3">
                 <span className="text-sm font-bold text-slate-900">Tags</span>
 
-                <div className="min-h-[42px] p-2 rounded-lg border border-slate-300 bg-white flex flex-wrap items-center gap-1.5 focus-within:border-slate-500">
+                <div className="min-h-10.5 p-2 rounded-lg border border-slate-300 bg-white flex flex-wrap items-center gap-1.5 focus-within:border-slate-500">
                   {tags.map((tag) => (
                     <span
                       key={tag}
@@ -496,7 +496,7 @@ export default function AdminAddCustomer() {
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleAddTag}
                       placeholder="Add tag and hit enter..."
-                      className="flex-1 min-w-[120px] bg-transparent outline-none text-xs text-slate-800 p-1"
+                      className="flex-1 min-w-30 bg-transparent outline-none text-xs text-slate-800 p-1"
                       autoFocus
                     />
                   ) : (
