@@ -137,10 +137,24 @@ export default function AdminOrders() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [sortDirection, setSortDirection] = useState("desc");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [pickedOrder, setSelectedOrder] = useState(null);
+  const [prevStoreId, setPrevStoreId] = useState(storeId);
   const [cancellingOrder, setCancellingOrder] = useState(false);
   const [actionMsg, setActionMsg] = useState("");
   const [actionError, setActionError] = useState("");
+
+  // The order opened by URL wins; otherwise the one picked from the list
+  const selectedOrder = (routeOrderId && orders.find((o) => o.id === routeOrderId)) || pickedOrder;
+
+  // Switching store clears the previous store's data (adjusted during render, not in an effect)
+  if (prevStoreId !== storeId) {
+    setPrevStoreId(storeId);
+    setOrders([]);
+    setSelectedIds(new Set());
+    setSelectedOrder(null);
+    setLoading(true);
+    setError(null);
+  }
 
   const moreMenuRef = useRef(null);
 
@@ -156,10 +170,7 @@ export default function AdminOrders() {
 
   const fetchOrders = useCallback(async (opts = {}) => {
     const isSilent = opts.silent || false;
-    if (!isSilent) {
-      setLoading(true);
-      setError(null);
-    }
+    // `loading` starts true and is set again when the store changes, so nothing is set before the request
     try {
       const res = await apiGet("/api/v1/orders/");
       if (res.ok) {
@@ -189,9 +200,8 @@ export default function AdminOrders() {
   }, []);
 
   useEffect(() => {
-    setOrders([]);
-    setSelectedIds(new Set());
-    setSelectedOrder(null);
+    // Initial load: state is only set after the request resolves
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchOrders({ silent: false });
 
     // Lightweight automatic polling to fetch newly placed storefront orders in real time
@@ -218,15 +228,6 @@ export default function AdminOrders() {
       window.removeEventListener("storage", handleRefresh);
     };
   }, [storeId, fetchOrders]);
-
-  useEffect(() => {
-    if (routeOrderId && orders.length > 0) {
-      const match = orders.find((o) => o.id === routeOrderId);
-      if (match) {
-        setSelectedOrder(match);
-      }
-    }
-  }, [routeOrderId, orders]);
 
   const handleCancelOrder = async (orderId) => {
     if (!orderId) return;
