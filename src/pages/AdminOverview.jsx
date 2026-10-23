@@ -10,7 +10,7 @@ export default function OverviewPage() {
 
         <main className="min-w-0 flex-1">
           {/* Header */}
-          <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-5">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-5 sm:px-6">
             <div>
               <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#0B1020]">
                 <PageIcon name="overview" />

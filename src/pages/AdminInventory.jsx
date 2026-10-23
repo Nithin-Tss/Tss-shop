@@ -645,39 +645,41 @@ function HistoryModal({ item, onClose }) {
             <p className="px-5 py-6 text-center text-sm text-[#4C4F7A]">No changes recorded yet.</p>
           )}
           {rows && rows.length > 0 && (
-            <table className="w-full text-left text-sm">
-              <thead className="sticky top-0 bg-[#FAF8FF] text-xs text-[#4C4F7A]">
-                <tr>
-                  <th className="px-5 py-2 font-medium">Date</th>
-                  <th className="px-3 py-2 text-right font-medium">Change</th>
-                  <th className="px-3 py-2 font-medium">Reason</th>
-                  <th className="px-3 py-2 font-medium">Who</th>
-                  <th className="px-5 py-2 text-right font-medium">New quantity</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E4DEFB]">
-                {rows.map((row) => (
-                  <tr key={row.id} title={row.note || undefined}>
-                    <td className="px-5 py-2 text-xs text-[#4C4F7A]">
-                      {new Date(row.created_at).toLocaleString()}
-                    </td>
-                    <td
-                      className={`px-3 py-2 text-right font-medium ${
-                        row.change < 0 ? "text-[#D82C0D]" : "text-charcoal-navy"
-                      }`}
-                    >
-                      {row.change > 0 ? `+${row.change}` : row.change}
-                    </td>
-                    <td className="px-3 py-2">
-                      {row.reason_label}
-                      {row.note ? <span className="text-[#4C4F7A]"> · {row.note}</span> : null}
-                    </td>
-                    <td className="px-3 py-2">{row.who}</td>
-                    <td className="px-5 py-2 text-right font-medium">{row.after}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead className="sticky top-0 bg-[#FAF8FF] text-xs text-[#4C4F7A]">
+                  <tr>
+                    <th className="px-5 py-2 font-medium">Date</th>
+                    <th className="px-3 py-2 text-right font-medium">Change</th>
+                    <th className="px-3 py-2 font-medium">Reason</th>
+                    <th className="px-3 py-2 font-medium">Who</th>
+                    <th className="px-5 py-2 text-right font-medium">New quantity</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#E4DEFB]">
+                  {rows.map((row) => (
+                    <tr key={row.id} title={row.note || undefined}>
+                      <td className="px-5 py-2 text-xs text-[#4C4F7A]">
+                        {new Date(row.created_at).toLocaleString()}
+                      </td>
+                      <td
+                        className={`px-3 py-2 text-right font-medium ${
+                          row.change < 0 ? "text-[#D82C0D]" : "text-charcoal-navy"
+                        }`}
+                      >
+                        {row.change > 0 ? `+${row.change}` : row.change}
+                      </td>
+                      <td className="px-3 py-2">
+                        {row.reason_label}
+                        {row.note ? <span className="text-[#4C4F7A]"> · {row.note}</span> : null}
+                      </td>
+                      <td className="px-3 py-2">{row.who}</td>
+                      <td className="px-5 py-2 text-right font-medium">{row.after}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
@@ -1167,7 +1169,7 @@ export default function InventoryPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 bg-[#F5F3FF] px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
+        <main className="min-w-0 flex-1 bg-[#F5F3FF] px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & ACTIONS */}
           <div className="mb-4 flex items-center justify-between">
             <h1 className="flex items-center gap-2.5 text-[20px] sm:text-[22px] font-bold text-charcoal-navy">

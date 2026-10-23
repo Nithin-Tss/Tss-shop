@@ -924,78 +924,82 @@ export default function ProductsPage() {
                     {notice}
                   </p>
                 )}
-                <table className="w-full text-left text-sm">
-                  <thead className="border-y border-[#E4DEFB] bg-[#F5F3FF] text-[#4C4F7A]">
-                    <tr>
-                      {/* Selecting is only for bulk delete */}
-                      {canDelete && (
-                        <th className="w-10 py-3 pl-6">
-                          <input
-                            type="checkbox"
-                            aria-label="Select all products"
-                            checked={allSelected}
-                            onChange={toggleAll}
-                          />
-                        </th>
-                      )}
-                      <th className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium`}>
-                        Product
-                      </th>
-                      <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 font-medium">Category</th>
-                      <th className="px-4 py-3 font-medium">SKU</th>
-                      <th className="px-6 py-3 text-right font-medium">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pageProducts.length === 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="border-y border-[#E4DEFB] bg-[#F5F3FF] text-[#4C4F7A]">
                       <tr>
-                        <td
-                          colSpan={canDelete ? 6 : 5}
-                          className="px-6 py-10 text-center text-sm text-[#4C4F7A]"
-                        >
-                          No products found matching the selected filter.
-                        </td>
+                        {/* Selecting is only for bulk delete */}
+                        {canDelete && (
+                          <th className="w-10 py-3 pl-6">
+                            <input
+                              type="checkbox"
+                              aria-label="Select all products"
+                              checked={allSelected}
+                              onChange={toggleAll}
+                            />
+                          </th>
+                        )}
+                        <th className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium`}>
+                          Product
+                        </th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="px-4 py-3 font-medium">Category</th>
+                        <th className="px-4 py-3 font-medium">SKU</th>
+                        <th className="px-6 py-3 text-right font-medium">Price</th>
                       </tr>
-                    ) : (
-                      pageProducts.map((product) => (
-                        <tr
-                          key={product.id}
-                          className={`border-b border-[#E4DEFB] last:border-0 hover:bg-[#F5F3FF] ${
-                            selected.has(product.id) ? "bg-[#F3F0FF]" : ""
-                          }`}
-                        >
-                          {canDelete && (
-                            <td className="w-10 py-3 pl-6">
-                              <input
-                                type="checkbox"
-                                aria-label={`Select ${product.title}`}
-                                checked={selected.has(product.id)}
-                                onChange={() => toggleOne(product.id)}
-                              />
-                            </td>
-                          )}
+                    </thead>
+                    <tbody>
+                      {pageProducts.length === 0 ? (
+                        <tr>
                           <td
-                            className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium text-charcoal-navy`}
+                            colSpan={canDelete ? 6 : 5}
+                            className="px-6 py-10 text-center text-sm text-[#4C4F7A]"
                           >
-                            <Link
-                              to={`/admin/online-store/products/${product.id}`}
-                              className="hover:underline"
-                            >
-                              {product.title}
-                            </Link>
-                          </td>
-                          <td className="px-4 py-3 capitalize text-[#4C4F7A]">{product.status}</td>
-                          <td className="px-4 py-3 text-[#4C4F7A]">{product.category || "-"}</td>
-                          <td className="px-4 py-3 text-[#4C4F7A]">{product.sku || "-"}</td>
-                          <td className="px-6 py-3 text-right text-charcoal-navy">
-                            {product.price ?? "-"}
+                            No products found matching the selected filter.
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        pageProducts.map((product) => (
+                          <tr
+                            key={product.id}
+                            className={`border-b border-[#E4DEFB] last:border-0 hover:bg-[#F5F3FF] ${
+                              selected.has(product.id) ? "bg-[#F3F0FF]" : ""
+                            }`}
+                          >
+                            {canDelete && (
+                              <td className="w-10 py-3 pl-6">
+                                <input
+                                  type="checkbox"
+                                  aria-label={`Select ${product.title}`}
+                                  checked={selected.has(product.id)}
+                                  onChange={() => toggleOne(product.id)}
+                                />
+                              </td>
+                            )}
+                            <td
+                              className={`${canDelete ? "px-4" : "pl-6 pr-4"} py-3 font-medium text-charcoal-navy`}
+                            >
+                              <Link
+                                to={`/admin/online-store/products/${product.id}`}
+                                className="hover:underline"
+                              >
+                                {product.title}
+                              </Link>
+                            </td>
+                            <td className="px-4 py-3 capitalize text-[#4C4F7A]">
+                              {product.status}
+                            </td>
+                            <td className="px-4 py-3 text-[#4C4F7A]">{product.category || "-"}</td>
+                            <td className="px-4 py-3 text-[#4C4F7A]">{product.sku || "-"}</td>
+                            <td className="px-6 py-3 text-right text-charcoal-navy">
+                              {product.price ?? "-"}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
                 <nav
                   aria-label="Pagination"

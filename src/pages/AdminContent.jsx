@@ -25,7 +25,7 @@ export default function ContentPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 bg-[#F5F3FF] px-6 lg:px-8 py-6 overflow-hidden">
+        <main className="min-w-0 flex-1 bg-[#F5F3FF] px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
           {/* TITLE + ACTIONS */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
@@ -228,7 +228,7 @@ export function BlogPostsPage() {
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
-        <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-6 py-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 sm:px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
               <PageIcon name="blog" />
@@ -276,40 +276,42 @@ export function BlogPostsPage() {
                   </p>
                 </div>
               ) : (
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
-                    <tr>
-                      <th className="px-4 py-3 font-medium">Title</th>
-                      <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="hidden px-4 py-3 font-medium sm:table-cell">Author</th>
-                      <th className="hidden px-4 py-3 font-medium sm:table-cell">Published</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {posts.map((post) => (
-                      <tr
-                        key={post.id}
-                        onClick={() => open(post)}
-                        className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
-                      >
-                        <td className="px-4 py-3 font-medium">{post.title}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.status === "published" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}
-                          >
-                            {post.status === "published" ? "Published" : "Draft"}
-                          </span>
-                        </td>
-                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
-                          {post.author}
-                        </td>
-                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
-                          {postDate(post.published_at)}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Title</th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="hidden px-4 py-3 font-medium sm:table-cell">Author</th>
+                        <th className="hidden px-4 py-3 font-medium sm:table-cell">Published</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {posts.map((post) => (
+                        <tr
+                          key={post.id}
+                          onClick={() => open(post)}
+                          className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
+                        >
+                          <td className="px-4 py-3 font-medium">{post.title}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.status === "published" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}
+                            >
+                              {post.status === "published" ? "Published" : "Draft"}
+                            </span>
+                          </td>
+                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                            {post.author}
+                          </td>
+                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                            {postDate(post.published_at)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </section>
           )}

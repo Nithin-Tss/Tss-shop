@@ -511,7 +511,7 @@ export default function AdminSettings() {
                 type="text"
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
-                className="w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
+                className="w-full max-w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
               />
             </div>
 
@@ -533,7 +533,7 @@ export default function AdminSettings() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter email"
-                className="w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
+                className="w-full max-w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
               />
             </div>
 
@@ -555,7 +555,7 @@ export default function AdminSettings() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Enter phone number"
-                className="w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
+                className="w-full max-w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
               />
             </div>
 
@@ -577,7 +577,7 @@ export default function AdminSettings() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Enter store address"
-                className="w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
+                className="w-full max-w-[280px] rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300"
               />
             </div>
           </div>
@@ -1070,12 +1070,12 @@ export default function AdminSettings() {
         <AdminSidebar />
 
         <div className="min-w-0 flex-1">
-          <div className="mx-auto flex max-w-[1500px] gap-7 px-6 py-7">
+          <div className="mx-auto flex max-w-[1500px] flex-col gap-5 px-4 py-5 sm:px-6 sm:py-7 lg:flex-row lg:gap-7">
             {/* =================================================
             LEFT SETTINGS SIDEBAR
             ================================================= */}
 
-            <aside className="w-[300px] shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <aside className="w-full shrink-0 self-start overflow-hidden lg:w-[300px] rounded-xl border border-slate-200 bg-white">
               {/* STORE HEADER */}
 
               <div className="border-b border-slate-200 p-5">

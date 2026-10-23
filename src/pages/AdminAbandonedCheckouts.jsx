@@ -74,7 +74,7 @@ export default function AdminAbandonedCheckouts() {
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
 
-        <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
+        <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           <h1 className="mb-5 flex items-center gap-2.5 text-[22px] font-bold">
             <PageIcon name="orders" />
             Abandoned checkouts

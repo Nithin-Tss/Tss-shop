@@ -503,7 +503,7 @@ export default function AdminCustomerDetails() {
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
 
-        <main className="flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">
+        <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">
           {/* TOAST MESSAGE */}
           {toastMsg && (
             <div className="fixed bottom-6 right-6 z-50 bg-charcoal-navy text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">

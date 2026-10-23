@@ -358,7 +358,7 @@ export default function AdminOrders() {
         <AdminSidebar />
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
+        <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & ACTION BAR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">

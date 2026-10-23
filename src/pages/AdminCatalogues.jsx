@@ -196,7 +196,7 @@ export default function CataloguesPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex flex-1 flex-col bg-[#F1F2F4] px-6 lg:px-8 py-5 overflow-hidden">
+        <main className="min-w-0 flex flex-1 flex-col bg-[#F1F2F4] px-4 sm:px-6 lg:px-8 py-5 overflow-hidden">
           {/* HEADER ROW: Match reference design */}
           <div className="flex items-center justify-between">
             <h1 className="flex items-center gap-2 text-[20px] font-bold text-[#1A1A1A] tracking-tight">

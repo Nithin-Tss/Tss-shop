@@ -217,7 +217,7 @@ export default function AdminHomePage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-4 py-6 sm:px-6 lg:px-9">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 py-6 sm:px-6 lg:px-9">
           <div className="mx-auto max-w-[1180px] space-y-6">
             {/* WELCOME BANNER */}
             <section className="relative overflow-hidden rounded-2xl bg-[#0B1020] px-6 py-7 text-white shadow-[0_10px_30px_-12px_rgba(20,27,45,0.45)] sm:px-8">

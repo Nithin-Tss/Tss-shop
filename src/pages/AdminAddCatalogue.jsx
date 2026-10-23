@@ -98,7 +98,7 @@ export default function AdminAddCatalogue() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex flex-1 flex-col bg-[#F1F2F4] px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
+        <main className="min-w-0 flex flex-1 flex-col bg-[#F1F2F4] px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
           <div className="mx-auto w-full max-w-5xl">
             {/* TOP BAR / BREADCRUMB & SAVE ACTIONS */}
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">

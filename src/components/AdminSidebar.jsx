@@ -439,6 +439,8 @@ function useSidebarScroll(navRef, path) {
   }, [navRef, path]);
 }
 
+const ADMIN_NAV_EVENT = "admin:toggle-nav";
+
 export default function AdminSidebar() {
   const { pathname } = useLocation();
   const path = pathname.replace(/\/+$/, "") || "/";
@@ -453,112 +455,152 @@ export default function AdminSidebar() {
 
   useSidebarScroll(navRef, path);
 
-  return (
-    <aside className="hidden md:block w-[256px] shrink-0 bg-[#0B1020] text-white select-none">
-      {/* Stays in view below the 72px header while long pages scroll */}
-      <div className="sticky top-[72px] flex h-[calc(100vh-72px)] flex-col">
-        <nav
-          ref={navRef}
-          onScroll={(e) => saveSidebarScroll(e.currentTarget.scrollTop)}
-          aria-label="Admin"
-          className="flex-1 overflow-y-auto scroll-smooth px-3 py-4 [scrollbar-color:rgba(255,255,255,0.14)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
-        >
-          {menuGroups.map((group) => {
-            const items = group.items.filter(allowed).map((item) => {
-              const children = item.children?.filter(allowed);
-              // No visible children: no expand chevron either
-              return item.children
-                ? { ...item, children: children.length ? children : undefined }
-                : item;
-            });
-            if (!items.length) return null;
+  // Remember the path the drawer was opened on: navigating elsewhere closes it
+  const [openOn, setOpenOn] = useState(null);
+  const mobileOpen = openOn === path;
+  const setMobileOpen = (v) => setOpenOn(v ? path : null);
 
-            return (
-              <div key={group.label} className="border-b border-white/[0.07] pb-3 pt-3 first:pt-0">
-                <SectionLabel>{group.label}</SectionLabel>
-                <div className="space-y-0.5">
-                  {items.map((item) => (
-                    <MenuItem key={item.label} item={item} path={path} />
-                  ))}
-                </div>
+  // The header's menu button (below md) opens the sidebar as a drawer
+  useEffect(() => {
+    const toggle = () => setOpenOn((cur) => (cur === path ? null : path));
+    window.addEventListener(ADMIN_NAV_EVENT, toggle);
+    return () => window.removeEventListener(ADMIN_NAV_EVENT, toggle);
+  }, [path]);
+
+  // Escape closes the drawer
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const onKey = (e) => e.key === "Escape" && setOpenOn(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
+  const panel = (
+    <div className="flex h-full flex-col">
+      <nav
+        ref={navRef}
+        onScroll={(e) => saveSidebarScroll(e.currentTarget.scrollTop)}
+        aria-label="Admin"
+        className="flex-1 overflow-y-auto scroll-smooth px-3 py-4 [scrollbar-color:rgba(255,255,255,0.14)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
+      >
+        {menuGroups.map((group) => {
+          const items = group.items.filter(allowed).map((item) => {
+            const children = item.children?.filter(allowed);
+            // No visible children: no expand chevron either
+            return item.children
+              ? { ...item, children: children.length ? children : undefined }
+              : item;
+          });
+          if (!items.length) return null;
+
+          return (
+            <div key={group.label} className="border-b border-white/[0.07] pb-3 pt-3 first:pt-0">
+              <SectionLabel>{group.label}</SectionLabel>
+              <div className="space-y-0.5">
+                {items.map((item) => (
+                  <MenuItem key={item.label} item={item} path={path} />
+                ))}
               </div>
-            );
-          })}
-
-          {/* SALES CHANNELS */}
-          <div className="pt-3">
-            <SectionLabel>Sales channels</SectionLabel>
-
-            <div className="space-y-0.5">
-              <button
-                type="button"
-                aria-expanded={onlineStoreOpen}
-                onClick={() => setOnlineStoreOpen((v) => !v)}
-                className={`${rowClass(false)} ${onlineStoreActive ? "text-white" : ""}`}
-              >
-                <NavIcon name="store" />
-                <span className="flex-1 truncate">Online Store</span>
-                <ChevronIcon open={onlineStoreOpen} />
-              </button>
-
-              <Collapse open={onlineStoreOpen}>
-                <div className="space-y-0.5 pl-4">
-                  {onlineStoreItems.filter(allowed).map((item) =>
-                    item.href ? (
-                      <Link
-                        key={item.label}
-                        to={item.href}
-                        aria-current={matches(path, item) ? "page" : undefined}
-                        className={rowClass(matches(path, item))}
-                      >
-                        <NavIcon name={item.icon} />
-                        <span className="truncate">{item.label}</span>
-                      </Link>
-                    ) : (
-                      <div
-                        key={item.label}
-                        title="Coming soon"
-                        className={`${rowClass(false)} cursor-default hover:bg-transparent hover:text-slate-300`}
-                      >
-                        <NavIcon name={item.icon} />
-                        <span className="truncate">{item.label}</span>
-                      </div>
-                    )
-                  )}
-                </div>
-              </Collapse>
-
-              <button
-                type="button"
-                aria-expanded={appsOpen}
-                onClick={() => setAppsOpen((v) => !v)}
-                className={rowClass(false)}
-              >
-                <NavIcon name="apps" />
-                <span className="flex-1 truncate">Apps</span>
-                <ChevronIcon open={appsOpen} />
-              </button>
-
-              <Collapse open={appsOpen}>
-                <p className="py-2 pl-[42px] pr-3 text-xs text-slate-500">No apps installed yet.</p>
-              </Collapse>
             </div>
-          </div>
-        </nav>
+          );
+        })}
 
-        {/* SETTINGS */}
-        <div className="border-t border-white/[0.08] px-3 py-3">
-          <Link
-            to={`${BASE}/settings`}
-            aria-current={settingsActive ? "page" : undefined}
-            className={rowClass(settingsActive)}
-          >
-            <NavIcon name="settings" />
-            <span>Settings</span>
-          </Link>
+        {/* SALES CHANNELS */}
+        <div className="pt-3">
+          <SectionLabel>Sales channels</SectionLabel>
+
+          <div className="space-y-0.5">
+            <button
+              type="button"
+              aria-expanded={onlineStoreOpen}
+              onClick={() => setOnlineStoreOpen((v) => !v)}
+              className={`${rowClass(false)} ${onlineStoreActive ? "text-white" : ""}`}
+            >
+              <NavIcon name="store" />
+              <span className="flex-1 truncate">Online Store</span>
+              <ChevronIcon open={onlineStoreOpen} />
+            </button>
+
+            <Collapse open={onlineStoreOpen}>
+              <div className="space-y-0.5 pl-4">
+                {onlineStoreItems.filter(allowed).map((item) =>
+                  item.href ? (
+                    <Link
+                      key={item.label}
+                      to={item.href}
+                      aria-current={matches(path, item) ? "page" : undefined}
+                      className={rowClass(matches(path, item))}
+                    >
+                      <NavIcon name={item.icon} />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  ) : (
+                    <div
+                      key={item.label}
+                      title="Coming soon"
+                      className={`${rowClass(false)} cursor-default hover:bg-transparent hover:text-slate-300`}
+                    >
+                      <NavIcon name={item.icon} />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                  )
+                )}
+              </div>
+            </Collapse>
+
+            <button
+              type="button"
+              aria-expanded={appsOpen}
+              onClick={() => setAppsOpen((v) => !v)}
+              className={rowClass(false)}
+            >
+              <NavIcon name="apps" />
+              <span className="flex-1 truncate">Apps</span>
+              <ChevronIcon open={appsOpen} />
+            </button>
+
+            <Collapse open={appsOpen}>
+              <p className="py-2 pl-[42px] pr-3 text-xs text-slate-500">No apps installed yet.</p>
+            </Collapse>
+          </div>
         </div>
+      </nav>
+
+      {/* SETTINGS */}
+      <div className="border-t border-white/[0.08] px-3 py-3">
+        <Link
+          to={`${BASE}/settings`}
+          aria-current={settingsActive ? "page" : undefined}
+          className={rowClass(settingsActive)}
+        >
+          <NavIcon name="settings" />
+          <span>Settings</span>
+        </Link>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      <aside className="hidden w-[256px] shrink-0 bg-[#0B1020] text-white select-none md:block">
+        {/* Stays in view below the 72px header while long pages scroll */}
+        <div className="sticky top-[72px] h-[calc(100vh-72px)]">{panel}</div>
+      </aside>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMobileOpen(false)}
+            className="absolute inset-0 bg-black/50"
+          />
+          <aside className="absolute inset-y-0 left-0 w-[280px] max-w-[85vw] bg-[#0B1020] text-white shadow-2xl select-none">
+            {panel}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1036,6 +1078,16 @@ export function AdminHeader() {
 
   return (
     <header className="sticky top-0 z-40 flex h-[72px] items-center gap-3 border-b border-[#EEF0F4] bg-white px-4 text-[#0B1020] shadow-[0_1px_8px_rgba(20,27,45,0.05)] sm:gap-6 sm:px-7">
+      <button
+        type="button"
+        aria-label="Open menu"
+        onClick={() => window.dispatchEvent(new Event(ADMIN_NAV_EVENT))}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#0B1020] transition hover:bg-[#F3F0FF] md:hidden"
+      >
+        <svg {...headerIcon} className="h-5 w-5">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
       <Link to={`${BASE}/home`} className="flex shrink-0 items-center gap-2.5">
         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0B1020] text-xl font-extrabold text-white">
           S

@@ -168,7 +168,7 @@ export default function AdminPages() {
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
-        <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-6 py-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 sm:px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
               <PageIcon name="pages" />
@@ -233,40 +233,42 @@ export default function AdminPages() {
                   </button>
                 </div>
               ) : (
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
-                    <tr>
-                      <th className="px-4 py-3 font-medium">Title</th>
-                      <th className="px-4 py-3 font-medium">Visibility</th>
-                      <th className="hidden px-4 py-3 font-medium sm:table-cell">Address</th>
-                      <th className="hidden px-4 py-3 font-medium sm:table-cell">Last updated</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pages.map((page) => (
-                      <tr
-                        key={page.id}
-                        onClick={() => open(page)}
-                        className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
-                      >
-                        <td className="px-4 py-3 font-medium">{page.title}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${page.status === "visible" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}
-                          >
-                            {page.status === "visible" ? "Visible" : "Hidden"}
-                          </span>
-                        </td>
-                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
-                          /pages/{page.handle}
-                        </td>
-                        <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
-                          {pageDate(page.updatedAt)}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Title</th>
+                        <th className="px-4 py-3 font-medium">Visibility</th>
+                        <th className="hidden px-4 py-3 font-medium sm:table-cell">Address</th>
+                        <th className="hidden px-4 py-3 font-medium sm:table-cell">Last updated</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {pages.map((page) => (
+                        <tr
+                          key={page.id}
+                          onClick={() => open(page)}
+                          className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
+                        >
+                          <td className="px-4 py-3 font-medium">{page.title}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${page.status === "visible" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}
+                            >
+                              {page.status === "visible" ? "Visible" : "Hidden"}
+                            </span>
+                          </td>
+                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                            /pages/{page.handle}
+                          </td>
+                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                            {pageDate(page.updatedAt)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </section>
           )}

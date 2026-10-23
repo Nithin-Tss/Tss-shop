@@ -49,7 +49,7 @@ export default function DiscountsPage() {
 
         <main className="min-w-0 flex-1">
           {/* HEADER */}
-          <header className="flex items-center justify-between border-b border-slate-200 bg-[#F5F3FF] px-6 py-5">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#F5F3FF] px-4 py-5 sm:px-6">
             <div className="flex items-center gap-2.5 text-[#0B1020]">
               <PageIcon name="discounts" />
 
@@ -110,77 +110,81 @@ export default function DiscountsPage() {
                 </button>
               </div>
 
-              {/* TABLE HEADER */}
-              <div className="grid grid-cols-[34px_minmax(220px,2fr)_150px_150px_170px_190px_190px_70px] items-center border-b border-slate-200 bg-[#FAFAFA] px-4 py-3 text-sm font-medium text-slate-700">
-                <div>
-                  <input type="checkbox" className="h-4 w-4" />
-                </div>
+              <div className="overflow-x-auto">
+                <div className="min-w-[1180px]">
+                  {/* TABLE HEADER */}
+                  <div className="grid grid-cols-[34px_minmax(220px,2fr)_150px_150px_170px_190px_190px_70px] items-center border-b border-slate-200 bg-[#FAFAFA] px-4 py-3 text-sm font-medium text-slate-700">
+                    <div>
+                      <input type="checkbox" className="h-4 w-4" />
+                    </div>
 
-                <div>Title</div>
+                    <div>Title</div>
 
-                <div>Status</div>
+                    <div>Status</div>
 
-                <div>Method</div>
+                    <div>Method</div>
 
-                <div>Eligibility</div>
+                    <div>Eligibility</div>
 
-                <div>Type</div>
+                    <div>Type</div>
 
-                <div>Combinations</div>
+                    <div>Combinations</div>
 
-                <div>Used</div>
-              </div>
+                    <div>Used</div>
+                  </div>
 
-              {/* TABLE BODY */}
-              {filteredDiscounts.length > 0 ? (
-                <div className="divide-y divide-slate-100">
-                  {filteredDiscounts.map((discount) => {
-                    const codeDisplay =
-                      Array.isArray(discount.codes) && discount.codes.length > 0
-                        ? discount.codes.join(", ")
-                        : discount.name || "Untitled discount";
-                    const isCode = Array.isArray(discount.codes) && discount.codes.length > 0;
-                    const isActive = discount.is_active !== false;
+                  {/* TABLE BODY */}
+                  {filteredDiscounts.length > 0 ? (
+                    <div className="divide-y divide-slate-100">
+                      {filteredDiscounts.map((discount) => {
+                        const codeDisplay =
+                          Array.isArray(discount.codes) && discount.codes.length > 0
+                            ? discount.codes.join(", ")
+                            : discount.name || "Untitled discount";
+                        const isCode = Array.isArray(discount.codes) && discount.codes.length > 0;
+                        const isActive = discount.is_active !== false;
 
-                    return (
-                      <div
-                        key={discount.id}
-                        className="grid grid-cols-[34px_minmax(220px,2fr)_150px_150px_170px_190px_190px_70px] items-center px-4 py-3 text-sm text-slate-800 hover:bg-slate-50 transition"
-                      >
-                        <div>
-                          <input type="checkbox" className="h-4 w-4 rounded border-slate-300" />
-                        </div>
-                        <div className="font-medium text-[#0B1020] truncate pr-2">
-                          {codeDisplay}
-                        </div>
-                        <div>
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                              isActive
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : "bg-slate-100 text-slate-600 border border-slate-200"
-                            }`}
+                        return (
+                          <div
+                            key={discount.id}
+                            className="grid grid-cols-[34px_minmax(220px,2fr)_150px_150px_170px_190px_190px_70px] items-center px-4 py-3 text-sm text-slate-800 hover:bg-slate-50 transition"
                           >
-                            {isActive ? "Active" : "Expired"}
-                          </span>
-                        </div>
-                        <div className="text-slate-600">{isCode ? "Code" : "Automatic"}</div>
-                        <div className="text-slate-600">All customers</div>
-                        <div className="text-slate-600 capitalize">
-                          {discount.discount_type?.replace(/_/g, " ") || "Amount off products"}
-                        </div>
-                        <div className="text-slate-500 text-xs">Product discounts</div>
-                        <div className="text-slate-600">{discount.times_used ?? 0}</div>
-                      </div>
-                    );
-                  })}
+                            <div>
+                              <input type="checkbox" className="h-4 w-4 rounded border-slate-300" />
+                            </div>
+                            <div className="font-medium text-[#0B1020] truncate pr-2">
+                              {codeDisplay}
+                            </div>
+                            <div>
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                                  isActive
+                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                    : "bg-slate-100 text-slate-600 border border-slate-200"
+                                }`}
+                              >
+                                {isActive ? "Active" : "Expired"}
+                              </span>
+                            </div>
+                            <div className="text-slate-600">{isCode ? "Code" : "Automatic"}</div>
+                            <div className="text-slate-600">All customers</div>
+                            <div className="text-slate-600 capitalize">
+                              {discount.discount_type?.replace(/_/g, " ") || "Amount off products"}
+                            </div>
+                            <div className="text-slate-500 text-xs">Product discounts</div>
+                            <div className="text-slate-600">{discount.times_used ?? 0}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    /* EMPTY STRUCTURE */
+                    <div className="min-h-[120px] flex items-center justify-center text-sm text-slate-400">
+                      {loading ? "Loading discounts..." : "No discounts yet"}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                /* EMPTY STRUCTURE */
-                <div className="min-h-[120px] flex items-center justify-center text-sm text-slate-400">
-                  {loading ? "Loading discounts..." : "No discounts yet"}
-                </div>
-              )}
+              </div>
             </section>
 
             {/* LEARN MORE */}

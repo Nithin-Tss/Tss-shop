@@ -363,7 +363,7 @@ export default function AdminCreateOrder() {
         <AdminSidebar />
 
         {/* MAIN CREATE ORDER CONTENT */}
-        <main className="flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">
+        <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">
           {/* Breadcrumb / Title Bar */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2 text-slate-700">

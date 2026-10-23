@@ -1157,7 +1157,7 @@ export function ProductForm({ productId }) {
         <AdminHeader />
         <div className="flex min-h-[calc(100vh-72px)]">
           <AdminSidebar />
-          <main className="flex-1 min-w-0 bg-white px-6 py-10">
+          <main className="flex-1 min-w-0 bg-white px-4 sm:px-6 py-10">
             {loading ? (
               <p className="text-sm text-slate-500">Loading product...</p>
             ) : (

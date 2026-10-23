@@ -296,7 +296,7 @@ export default function AdminMenus() {
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
 
-        <main className="flex-1 overflow-hidden bg-[#F5F3FF] px-6 py-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 sm:px-6 py-6 lg:px-8">
           {/* TOP BAR / HEADING */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">

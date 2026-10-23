@@ -636,7 +636,7 @@ export default function AdminAddCollection() {
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
 
-        <main className="mx-auto w-full max-w-275 flex-1 px-4 py-6 sm:px-8 sm:py-8">
+        <main className="min-w-0 mx-auto w-full max-w-275 flex-1 px-4 py-6 sm:px-8 sm:py-8">
           {/* Top bar */}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
