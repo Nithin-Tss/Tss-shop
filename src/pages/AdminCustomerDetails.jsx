@@ -497,7 +497,7 @@ export default function AdminCustomerDetails() {
     "RC";
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F1F2F4] text-charcoal-navy">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-72px)]">
@@ -506,7 +506,7 @@ export default function AdminCustomerDetails() {
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">
           {/* TOAST MESSAGE */}
           {toastMsg && (
-            <div className="fixed bottom-6 right-6 z-50 bg-[#0B1020] text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
+            <div className="fixed bottom-6 right-6 z-50 bg-charcoal-navy text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
               <svg
                 className="w-4 h-4 text-emerald-400"
                 fill="none"
@@ -559,7 +559,7 @@ export default function AdminCustomerDetails() {
               <p className="text-xs text-slate-500 mb-6">{error}</p>
               <Link
                 to="/admin/online-store/customers"
-                className="px-4 py-2 text-xs font-semibold bg-[#0B1020] text-white rounded-xl hover:bg-slate-800 transition"
+                className="px-4 py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-xl hover:bg-slate-800 transition"
               >
                 Back to Customers
               </Link>
@@ -789,7 +789,7 @@ export default function AdminCustomerDetails() {
                         </div>
 
                         {/* Order Graphic Illustration */}
-                        <div className="flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28">
+                        <div className="shrink-0 w-24 h-24 sm:w-28 sm:h-28">
                           <svg
                             viewBox="0 0 120 120"
                             fill="none"
@@ -842,7 +842,7 @@ export default function AdminCustomerDetails() {
                         {/* Test Order Warning Banner */}
                         <div className="bg-[#FFF5EA] border border-[#FFE2B8] text-[#9A4B00] rounded-xl px-4 py-2.5 text-xs font-medium flex items-center gap-2 mb-4">
                           <svg
-                            className="w-4 h-4 text-[#D97706] flex-shrink-0"
+                            className="w-4 h-4 text-[#D97706] shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -868,14 +868,14 @@ export default function AdminCustomerDetails() {
                                 #{latestOrder.order_number}
                               </Link>
                               {/* Payment badge */}
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#0B1020]">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#0B1020]" />
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+                                <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                                 {latestOrder.payment_status === "paid" ? "Paid" : "Paid"}
                               </span>
                               {/* Fulfillment badge */}
                               {latestOrder.fulfillment_status === "fulfilled" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#0B1020]">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#0B1020]" />
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                                   Fulfilled
                                 </span>
                               ) : (
@@ -908,10 +908,10 @@ export default function AdminCustomerDetails() {
                                       <img
                                         src={item.image_url}
                                         alt={item.product_name}
-                                        className="w-12 h-12 rounded-lg border border-slate-200 object-cover bg-slate-50 flex-shrink-0"
+                                        className="w-12 h-12 rounded-lg border border-slate-200 object-cover bg-slate-50 shrink-0"
                                       />
                                     ) : (
-                                      <div className="w-12 h-12 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+                                      <div className="w-12 h-12 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
                                         <svg
                                           className="w-6 h-6"
                                           fill="none"
@@ -937,7 +937,7 @@ export default function AdminCustomerDetails() {
                                     </div>
                                   </div>
 
-                                  <div className="flex items-center gap-6 text-xs text-slate-700 flex-shrink-0">
+                                  <div className="flex items-center gap-6 text-xs text-slate-700 shrink-0">
                                     <span className="text-slate-500">x {item.quantity}</span>
                                     <span className="font-semibold text-slate-900 w-16 text-right">
                                       ${parseFloat(item.unit_price || 0).toFixed(2)}
@@ -990,7 +990,7 @@ export default function AdminCustomerDetails() {
                     {/* Staff Comment Card */}
                     <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
                       <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#0080FF] text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-2xs">
+                        <div className="w-8 h-8 rounded-lg bg-[#0080FF] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                           {userInitials}
                         </div>
                         <div className="flex-1">
@@ -1063,7 +1063,7 @@ export default function AdminCustomerDetails() {
                               {dateEvents.map((ev) => (
                                 <div key={ev.id} className="relative flex items-start gap-4 pl-6">
                                   {/* Node bullet */}
-                                  <div className="absolute left-[5px] top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-[#F1F2F4]" />
+                                  <div className="absolute left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-[#F1F2F4]" />
 
                                   {/* Event Content */}
                                   <div className="flex-1 min-w-0">
@@ -1117,7 +1117,7 @@ export default function AdminCustomerDetails() {
                                         )}
                                       </div>
 
-                                      <span className="text-[11px] text-slate-400 whitespace-nowrap flex-shrink-0">
+                                      <span className="text-[11px] text-slate-400 whitespace-nowrap shrink-0">
                                         {formatTimeOnly(ev.timestamp)}
                                       </span>
                                     </div>
@@ -1413,7 +1413,7 @@ export default function AdminCustomerDetails() {
                           <button
                             type="button"
                             onClick={handleSaveNotes}
-                            className="px-3 py-1 text-xs font-semibold bg-[#0B1020] text-white rounded-md hover:bg-slate-800"
+                            className="px-3 py-1 text-xs font-semibold bg-charcoal-navy text-white rounded-md hover:bg-slate-800"
                           >
                             Save
                           </button>
@@ -1506,7 +1506,7 @@ export default function AdminCustomerDetails() {
                   <button
                     type="button"
                     onClick={() => setActiveEmailOrder(null)}
-                    className="px-4 py-2 text-xs font-semibold bg-[#0B1020] text-white rounded-lg hover:bg-slate-800 transition"
+                    className="px-4 py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-lg hover:bg-slate-800 transition"
                   >
                     Done
                   </button>
@@ -1537,7 +1537,7 @@ export default function AdminCustomerDetails() {
                 <button
                   type="button"
                   onClick={() => setShowBlocksModal(false)}
-                  className="w-full py-2 text-xs font-semibold bg-[#0B1020] text-white rounded-xl hover:bg-slate-800 transition"
+                  className="w-full py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-xl hover:bg-slate-800 transition"
                 >
                   Close
                 </button>
@@ -1614,7 +1614,7 @@ export default function AdminCustomerDetails() {
                               : "not_subscribed",
                           })
                         }
-                        className="h-4 w-4 rounded border-slate-300 accent-[#0B1020]"
+                        className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy"
                       />
                       <span className="text-slate-700 font-medium">
                         Customer agreed to receive marketing emails
@@ -1633,7 +1633,7 @@ export default function AdminCustomerDetails() {
                     <button
                       type="submit"
                       disabled={savingCustomer}
-                      className="px-4 py-2 text-xs font-semibold bg-[#0B1020] text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 transition"
+                      className="px-4 py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 transition"
                     >
                       {savingCustomer ? "Saving..." : "Save changes"}
                     </button>

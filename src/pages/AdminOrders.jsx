@@ -78,8 +78,8 @@ function renderPaymentStatusBadge(status) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#0B1020]">
-      <span className="w-1.5 h-1.5 rounded-full bg-[#0B1020]" />
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+      <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
       Paid
     </span>
   );
@@ -108,8 +108,8 @@ function renderFulfillmentStatusBadge(status) {
 
   if (s.includes("fulfilled") || s === "closed") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-[#0B1020]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#0B1020]" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+        <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
         Fulfilled
       </span>
     );
@@ -349,7 +349,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -361,7 +361,7 @@ export default function AdminOrders() {
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & ACTION BAR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
               <PageIcon name="orders" />
               Orders
             </h1>
@@ -370,7 +370,7 @@ export default function AdminOrders() {
               <button
                 type="button"
                 onClick={handleExport}
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition cursor-pointer"
+                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition cursor-pointer"
               >
                 Export
               </button>
@@ -379,7 +379,7 @@ export default function AdminOrders() {
                 <button
                   type="button"
                   onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition cursor-pointer"
+                  className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition cursor-pointer"
                 >
                   More actions
                   <span className="text-xs">⌄</span>
@@ -417,7 +417,7 @@ export default function AdminOrders() {
               {canCreate && (
                 <Link
                   to="/admin/online-store/orders/create"
-                  className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
+                  className="flex items-center gap-2 rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
                 >
                   Create order
                 </Link>
@@ -432,7 +432,7 @@ export default function AdminOrders() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-lg bg-[#EDE9FE] px-3.5 py-1.5 text-sm font-medium text-[#0B1020]"
+                  className="rounded-lg bg-[#EDE9FE] px-3.5 py-1.5 text-sm font-medium text-charcoal-navy"
                 >
                   All
                 </button>
@@ -447,7 +447,7 @@ export default function AdminOrders() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search and filter"
-                    className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#0B1020] placeholder:text-slate-400"
+                    className="w-full bg-transparent outline-none text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400"
                   />
                   {searchQuery && (
                     <button
@@ -473,7 +473,7 @@ export default function AdminOrders() {
 
             {/* SECONDARY HEADER */}
             <div className="px-5 py-3 border-b border-[#E4DEFB] bg-white flex items-center justify-between">
-              <span className="text-sm font-semibold text-[#0B1020]">Orders</span>
+              <span className="text-sm font-semibold text-charcoal-navy">Orders</span>
               {selectedIds.size > 0 && (
                 <span className="text-xs font-medium text-slate-500">
                   {selectedIds.size} selected
@@ -483,7 +483,7 @@ export default function AdminOrders() {
 
             {/* RESPONSIVE TABLE WITH HORIZONTAL SCROLL */}
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
+              <table className="w-full border-collapse text-left text-sm text-charcoal-navy">
                 <thead>
                   <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-medium text-slate-600 whitespace-nowrap select-none">
                     <th className="py-3.5 pl-5 pr-3 w-10">
@@ -491,7 +491,7 @@ export default function AdminOrders() {
                         type="checkbox"
                         checked={allSelected}
                         onChange={handleSelectAll}
-                        className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy cursor-pointer"
                       />
                     </th>
                     <th className="py-3.5 px-3 font-semibold text-slate-700">Order</th>
@@ -582,7 +582,7 @@ export default function AdminOrders() {
                           <button
                             type="button"
                             onClick={() => fetchOrders()}
-                            className="px-4 py-1.5 rounded-lg bg-[#0B1020] text-white text-xs font-medium hover:bg-[#1C2347] transition shadow-xs cursor-pointer"
+                            className="px-4 py-1.5 rounded-lg bg-charcoal-navy text-white text-xs font-medium hover:bg-[#1C2347] transition shadow-xs cursor-pointer"
                           >
                             Retry
                           </button>
@@ -618,12 +618,12 @@ export default function AdminOrders() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelect(order.id)}
-                              className="h-4 w-4 rounded border-slate-300 accent-[#0B1020] cursor-pointer"
+                              className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy cursor-pointer"
                             />
                           </td>
 
                           {/* Order Number */}
-                          <td className="py-3.5 px-3 font-semibold text-[#0B1020]">
+                          <td className="py-3.5 px-3 font-semibold text-charcoal-navy">
                             <button
                               type="button"
                               onClick={() => {
@@ -631,7 +631,7 @@ export default function AdminOrders() {
                                 setActionMsg("");
                                 setActionError("");
                               }}
-                              className="hover:underline text-[#0B1020] font-semibold text-left cursor-pointer"
+                              className="hover:underline text-charcoal-navy font-semibold text-left cursor-pointer"
                             >
                               {order.order_number || `#${order.id?.slice(0, 6)}`}
                             </button>
@@ -660,7 +660,7 @@ export default function AdminOrders() {
                           </td>
 
                           {/* Total */}
-                          <td className="py-3.5 px-3 text-right font-medium text-[#0B1020]">
+                          <td className="py-3.5 px-3 text-right font-medium text-charcoal-navy">
                             {formatOrderCurrency(order.total, order.currency_code)}
                           </td>
 
@@ -688,7 +688,7 @@ export default function AdminOrders() {
 
                           {/* Delivery method */}
                           <td
-                            className="py-3.5 px-3 text-slate-700 max-w-[200px] truncate"
+                            className="py-3.5 px-3 text-slate-700 max-w-50 truncate"
                             title={order.delivery_method || "—"}
                           >
                             {order.delivery_method || "—"}
@@ -698,7 +698,7 @@ export default function AdminOrders() {
                           <td className="py-3.5 pl-3 pr-6">
                             {tagsList.length > 0 ? (
                               <div className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-[#EEF2F6] text-[11px] font-mono text-slate-700 max-w-[170px] truncate border border-slate-200">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-[#EEF2F6] text-[11px] font-mono text-slate-700 max-w-42.5 truncate border border-slate-200">
                                   {tagsList[0]}
                                 </span>
                                 {tagsList.length > 1 && (
@@ -736,7 +736,7 @@ export default function AdminOrders() {
           </section>
 
           {/* LEARN MORE */}
-          <p className="mt-8 text-center text-sm font-medium text-[#0B1020]">
+          <p className="mt-8 text-center text-sm font-medium text-charcoal-navy">
             <a href="#" className="hover:underline text-slate-700 hover:text-slate-900">
               Learn more about orders
             </a>
@@ -760,7 +760,7 @@ export default function AdminOrders() {
               <div className="px-6 py-5 border-b border-[#E4DEFB] flex items-center justify-between bg-[#FAF8FF]">
                 <div>
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-bold text-[#0B1020]">
+                    <h2 className="text-lg font-bold text-charcoal-navy">
                       Order {selectedOrder.order_number || selectedOrder.id?.slice(0, 8)}
                     </h2>
                     {renderPaymentStatusBadge(selectedOrder.payment_status)}
@@ -933,7 +933,7 @@ export default function AdminOrders() {
                     setSelectedOrder(null);
                     if (routeOrderId) navigate("/admin/online-store/orders");
                   }}
-                  className="px-4 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-[#1C2347] transition cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1C2347] transition cursor-pointer"
                 >
                   Close
                 </button>
