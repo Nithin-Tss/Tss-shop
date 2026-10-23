@@ -626,11 +626,7 @@ export default function AdminOrders() {
                           <td className="py-3.5 px-3 font-semibold text-charcoal-navy">
                             <button
                               type="button"
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setActionMsg("");
-                                setActionError("");
-                              }}
+                              onClick={() => navigate(`/admin/online-store/orders/${order.id}`)}
                               className="hover:underline text-charcoal-navy font-semibold text-left cursor-pointer"
                             >
                               {order.order_number || `#${order.id?.slice(0, 6)}`}
