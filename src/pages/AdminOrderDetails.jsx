@@ -683,7 +683,9 @@ export default function AdminOrderDetails() {
                 <button
                   type="button"
                   disabled={!prevOrder}
-                  onClick={() => prevOrder && navigate(`/admin/online-store/orders/${prevOrder.id}`)}
+                  onClick={() =>
+                    prevOrder && navigate(`/admin/online-store/orders/${prevOrder.id}`)
+                  }
                   title={prevOrder ? `Previous: ${prevOrder.order_number}` : "No previous order"}
                   className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-[#F3F0FF] disabled:opacity-30 disabled:cursor-not-allowed transition"
                 >
@@ -693,7 +695,9 @@ export default function AdminOrderDetails() {
                 <button
                   type="button"
                   disabled={!nextOrder}
-                  onClick={() => nextOrder && navigate(`/admin/online-store/orders/${nextOrder.id}`)}
+                  onClick={() =>
+                    nextOrder && navigate(`/admin/online-store/orders/${nextOrder.id}`)
+                  }
                   title={nextOrder ? `Next: ${nextOrder.order_number}` : "No next order"}
                   className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-[#F3F0FF] disabled:opacity-30 disabled:cursor-not-allowed transition"
                 >
@@ -729,7 +733,10 @@ export default function AdminOrderDetails() {
                   <h2 className="text-sm font-semibold text-slate-900 mb-4">Removed</h2>
                   <div className="divide-y divide-slate-100">
                     {(order.items || []).map((item, idx) => (
-                      <div key={item.id || idx} className="py-3 flex items-center justify-between gap-3">
+                      <div
+                        key={item.id || idx}
+                        className="py-3 flex items-center justify-between gap-3"
+                      >
                         <div className="flex items-center gap-3">
                           {item.image_url ? (
                             <img
@@ -747,9 +754,7 @@ export default function AdminOrderDetails() {
                               {item.product_name}
                             </p>
                             {item.sku && (
-                              <p className="text-xs text-slate-400 font-mono">
-                                {item.sku}
-                              </p>
+                              <p className="text-xs text-slate-400 font-mono">{item.sku}</p>
                             )}
                             {item.variant_title && (
                               <p className="text-xs text-slate-500">{item.variant_title}</p>
@@ -790,14 +795,19 @@ export default function AdminOrderDetails() {
                       </div>
 
                       <p className="text-xs text-slate-500 mb-3">
-                        {ful.delivery_method ? `Method: ${ful.delivery_method}` : "Shipping not required"}
+                        {ful.delivery_method
+                          ? `Method: ${ful.delivery_method}`
+                          : "Shipping not required"}
                       </p>
 
                       {/* Items in fulfillment */}
                       <div className="divide-y divide-slate-100">
                         {Array.isArray(ful.items) && ful.items.length > 0 ? (
                           ful.items.map((fi, iIdx) => (
-                            <div key={fi.id || iIdx} className="py-2.5 flex items-center justify-between">
+                            <div
+                              key={fi.id || iIdx}
+                              className="py-2.5 flex items-center justify-between"
+                            >
                               <span className="text-sm font-medium text-slate-800">
                                 {fi.product_name}
                               </span>
@@ -805,7 +815,9 @@ export default function AdminOrderDetails() {
                             </div>
                           ))
                         ) : (
-                          <div className="py-2.5 text-xs text-slate-500">All order items fulfilled.</div>
+                          <div className="py-2.5 text-xs text-slate-500">
+                            All order items fulfilled.
+                          </div>
                         )}
                       </div>
                     </div>
@@ -880,14 +892,10 @@ export default function AdminOrderDetails() {
                                   {item.product_name}
                                 </p>
                                 {item.sku && (
-                                  <p className="text-xs text-slate-400 font-mono">
-                                    {item.sku}
-                                  </p>
+                                  <p className="text-xs text-slate-400 font-mono">{item.sku}</p>
                                 )}
                                 {item.variant_title && (
-                                  <p className="text-xs text-slate-500">
-                                    {item.variant_title}
-                                  </p>
+                                  <p className="text-xs text-slate-500">{item.variant_title}</p>
                                 )}
                               </div>
                             </div>
@@ -1050,16 +1058,32 @@ export default function AdminOrderDetails() {
                       />
                       <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
                         <div className="flex items-center gap-3 text-slate-400 text-sm">
-                          <button type="button" className="hover:text-slate-600 transition" title="Add emoji">
+                          <button
+                            type="button"
+                            className="hover:text-slate-600 transition"
+                            title="Add emoji"
+                          >
                             😊
                           </button>
-                          <button type="button" className="hover:text-slate-600 font-bold text-xs transition" title="Mention staff">
+                          <button
+                            type="button"
+                            className="hover:text-slate-600 font-bold text-xs transition"
+                            title="Mention staff"
+                          >
                             @
                           </button>
-                          <button type="button" className="hover:text-slate-600 font-bold text-xs transition" title="Reference order">
+                          <button
+                            type="button"
+                            className="hover:text-slate-600 font-bold text-xs transition"
+                            title="Reference order"
+                          >
                             #
                           </button>
-                          <button type="button" className="hover:text-slate-600 transition" title="Attach file">
+                          <button
+                            type="button"
+                            className="hover:text-slate-600 transition"
+                            title="Attach file"
+                          >
                             📎
                           </button>
                         </div>
@@ -1133,7 +1157,9 @@ export default function AdminOrderDetails() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-xs text-slate-400 pl-6">No timeline events recorded yet.</div>
+                    <div className="text-xs text-slate-400 pl-6">
+                      No timeline events recorded yet.
+                    </div>
                   )}
                 </div>
               </div>
@@ -1285,7 +1311,11 @@ export default function AdminOrderDetails() {
                       {shippingAddr.address1 && <p>{shippingAddr.address1}</p>}
                       {shippingAddr.address2 && <p>{shippingAddr.address2}</p>}
                       <p>
-                        {[shippingAddr.city, shippingAddr.province || shippingAddr.state, shippingAddr.postal_code]
+                        {[
+                          shippingAddr.city,
+                          shippingAddr.province || shippingAddr.state,
+                          shippingAddr.postal_code,
+                        ]
                           .filter(Boolean)
                           .join(" ")}
                       </p>
@@ -1295,7 +1325,12 @@ export default function AdminOrderDetails() {
 
                     <a
                       href={`https://maps.google.com/?q=${encodeURIComponent(
-                        [shippingAddr.address1, shippingAddr.city, shippingAddr.state, shippingAddr.country]
+                        [
+                          shippingAddr.address1,
+                          shippingAddr.city,
+                          shippingAddr.state,
+                          shippingAddr.country,
+                        ]
                           .filter(Boolean)
                           .join(", ")
                       )}`}
@@ -1323,7 +1358,11 @@ export default function AdminOrderDetails() {
                     )}
                     {billingAddr.address1 && <p>{billingAddr.address1}</p>}
                     <p>
-                      {[billingAddr.city, billingAddr.province || billingAddr.state, billingAddr.postal_code]
+                      {[
+                        billingAddr.city,
+                        billingAddr.province || billingAddr.state,
+                        billingAddr.postal_code,
+                      ]
                         .filter(Boolean)
                         .join(" ")}
                     </p>
@@ -1515,9 +1554,7 @@ export default function AdminOrderDetails() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Payment Method
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
                 <select
                   value={paymentProvider}
                   onChange={(e) => setPaymentProvider(e.target.value)}
@@ -1570,9 +1607,7 @@ export default function AdminOrderDetails() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="bg-white rounded-2xl border border-[#E4DEFB] p-6 max-w-md w-full shadow-xl">
             <h3 className="text-base font-bold text-slate-900 mb-2">Process refund</h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Refund an amount back to the customer.
-            </p>
+            <p className="text-xs text-slate-500 mb-4">Refund an amount back to the customer.</p>
 
             <div className="space-y-3 mb-6 text-xs sm:text-sm">
               <div>
