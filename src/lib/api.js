@@ -155,7 +155,8 @@ async function send(path, { method, headers, body }) {
     // The library calls manage all of the store's themes, so they don't pick one.
     if (path.startsWith("/api/v1/themes/") && !path.startsWith("/api/v1/themes/library")) {
       const themeId = getEditingThemeId();
-      if (themeId) allHeaders["X-Theme-Id"] = themeId;
+      // A call may name its theme itself (the Online store page previews several at once)
+      if (themeId && !allHeaders["X-Theme-Id"]) allHeaders["X-Theme-Id"] = themeId;
     }
     // Files go as multipart: the browser sets that Content-Type (with its boundary) itself
     if (typeof FormData !== "undefined" && body instanceof FormData)

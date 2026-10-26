@@ -14,10 +14,12 @@ export function formatMoney(amount, currency) {
 
 // The store overview: totals, a daily sales series and recent activity.
 // Returns { data, loading, error }.
-export function useOverview(days = 30) {
+// Pass `enabled: false` to skip the request (e.g. for roles that can't view reports).
+export function useOverview(days = 30, enabled = true) {
   const [state, setState] = useState({ days: null, data: null, error: "" });
 
   useEffect(() => {
+    if (!enabled) return undefined;
     let cancelled = false;
     apiGet(`/api/v1/reports/overview/?days=${days}`).then((res) => {
       if (cancelled) return;
@@ -28,8 +30,8 @@ export function useOverview(days = 30) {
     return () => {
       cancelled = true;
     };
-  }, [days]);
+  }, [days, enabled]);
 
   // Still loading until the answer for this range has arrived
-  return { data: state.data, error: state.error, loading: state.days !== days };
+  return { data: state.data, error: state.error, loading: enabled && state.days !== days };
 }

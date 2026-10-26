@@ -1,10 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { useCan } from "@/lib/auth";
 import { setEditingThemeId, getEditingThemeId } from "@/lib/editingTheme";
-import { addTheme, deleteTheme, getThemeLibrary, publishTheme, renameTheme } from "@/lib/themeApi";
+import {
+  addTheme,
+  deleteTheme,
+  getThemeLibrary,
+  publishTheme,
+  renameTheme,
+  renderThemeHome,
+} from "@/lib/themeApi";
 
 const categories = [
   "All",
@@ -56,10 +63,129 @@ function Preview({ swatches }) {
   );
 }
 
+const SITE_WIDTH = 1280;
+const homeCache = new Map();
+
+// The theme's real home page, scaled down to fit. Falls back to the colour mock-up while it loads or if it fails.
+function LivePreview({ theme, swatches, ratio = 0.62, className = "" }) {
+  const box = useRef(null);
+  const key = `${theme.id}:${theme.updated_at}`;
+  const [html, setHtml] = useState(homeCache.get(key) || "");
+  const [scale, setScale] = useState(0.2);
+
+  useEffect(() => {
+    if (homeCache.has(key)) return undefined;
+    let cancelled = false;
+    renderThemeHome(theme.id)
+      .then((res) => {
+        homeCache.set(key, res.html);
+        if (!cancelled) setHtml(res.html);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [key, theme.id]);
+
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === "undefined") return undefined;
+    const observer = new ResizeObserver(() => setScale(el.clientWidth / SITE_WIDTH));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={box}
+      className={`relative w-full overflow-hidden bg-white ${className}`}
+      style={{ aspectRatio: `1 / ${ratio}` }}
+    >
+      {html ? (
+        <iframe
+          title={`${theme.name} preview`}
+          srcDoc={html}
+          // Theme code is written by store owners: keep it off this origin
+          sandbox="allow-scripts"
+          tabIndex={-1}
+          className="pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-white"
+          style={{
+            width: SITE_WIDTH,
+            height: SITE_WIDTH * ratio,
+            transform: `scale(${scale})`,
+          }}
+        />
+      ) : (
+        <div className="absolute inset-0 animate-pulse">
+          <Preview swatches={swatches} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 const smallButton =
   "inline-flex h-8 items-center rounded-lg border border-[#DDD6FE] bg-white px-3 text-[13px] font-medium text-[#0B1020] transition hover:border-[#0B1020] disabled:opacity-50";
 const primaryButton =
   "inline-flex h-8 items-center rounded-lg bg-[#0B1020] px-3 text-[13px] font-semibold text-white transition hover:bg-[#1C2347] disabled:opacity-50";
+
+function timeAgo(value) {
+  const ms = Date.now() - new Date(value).getTime();
+  if (!value || Number.isNaN(ms)) return "recently";
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} minute${min === 1 ? "" : "s"} ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hour${hr === 1 ? "" : "s"} ago`;
+  const day = Math.floor(hr / 24);
+  return `${day} day${day === 1 ? "" : "s"} ago`;
+}
+
+function formatAdded(value) {
+  const d = new Date(value);
+  if (!value || Number.isNaN(d.getTime())) return "—";
+  const date = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return `${date} at ${time}`;
+}
+
+// The "..." menu on a theme row
+function ThemeMenu({ theme, full, dark, onCode, onRename, onCopy, onDelete }) {
+  const item =
+    "block w-full px-3 py-1.5 text-left text-[13px] hover:bg-[#F3F5F8] disabled:opacity-50";
+  const pick = (fn) => (e) => {
+    e.currentTarget.closest("details")?.removeAttribute("open");
+    fn();
+  };
+  return (
+    <details className="relative">
+      <summary
+        aria-label={`More actions for ${theme.name}`}
+        className={`flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-lg leading-none [&::-webkit-details-marker]:hidden ${
+          dark ? "text-white hover:bg-white/15" : "text-[#0B1020] hover:bg-[#F3F5F8]"
+        }`}
+      >
+        ⋯
+      </summary>
+      <div className="absolute bottom-full right-0 z-20 mb-1 w-36 rounded-lg border border-[#E5E7EB] bg-white py-1 text-[#0B1020] shadow-lg sm:bottom-auto sm:top-full sm:mb-0 sm:mt-1">
+        <button type="button" className={item} onClick={pick(onCode)}>
+          Edit code
+        </button>
+        <button type="button" className={item} onClick={pick(onRename)}>
+          Rename
+        </button>
+        <button type="button" className={item} disabled={full} onClick={pick(onCopy)}>
+          Duplicate
+        </button>
+        {!theme.published && onDelete && (
+          <button type="button" className={`${item} text-[#B42318]`} onClick={pick(onDelete)}>
+            Delete
+          </button>
+        )}
+      </div>
+    </details>
+  );
+}
 
 // Asks for a theme's name (creating your own, copying, renaming)
 function NameDialog({ title, confirmLabel, initial, onCancel, onConfirm, busy, error }) {
@@ -156,6 +282,7 @@ export default function OnlineStorePage() {
   const shown = presets.filter(
     (p) => selectedCategory === "All" || p.categories.includes(selectedCategory)
   );
+  const drafts = themes.filter((t) => !t.published);
   const full = themes.length >= (library?.max || 20);
 
   const run = async (key, task) => {
@@ -252,30 +379,31 @@ export default function OnlineStorePage() {
       <div className="flex min-h-[calc(100vh-72px)]">
         <AdminSidebar />
 
-        <main className="flex min-w-0 flex-1 flex-col">
-          <div className="mx-auto flex w-full max-w-[1160px] flex-1 flex-col px-4 pb-10 pt-5 sm:px-8">
-            <button
-              type="button"
-              onClick={goBack}
-              className="-ml-2 inline-flex self-start items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[#4C4F7A] transition hover:bg-[#F3F5F8] hover:text-[#0B1020]"
-            >
-              <svg {...lineIcon} className="h-4 w-4">
-                <path d="M19 12H5M11 6l-6 6 6 6" />
-              </svg>
-              Back
-            </button>
-
-            <div className="mt-3">
-              <h1 className="flex items-center gap-2.5 text-[26px] font-semibold leading-tight tracking-tight text-[#0B1020] sm:text-[28px]">
-                <PageIcon name="themes" />
-                {themes.length === 0 && library ? "Choose a theme for your store" : "Themes"}
-              </h1>
-              <p className="mt-1.5 text-sm text-[#4C4F7A] sm:text-[15px]">
-                {themes.length === 0 && library
-                  ? "Pick a ready-made design, or start your own. You can change everything later."
-                  : "One theme is live on your store. Add more and keep them as drafts until you’re ready to publish."}
-              </p>
+        <main className="flex min-w-0 flex-1 flex-col bg-[#F7F7F8]">
+          <div className="mx-auto flex w-full max-w-[1040px] flex-1 flex-col px-4 pb-16 pt-5">
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={goBack}
+                className="-ml-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[#4C4F7A] transition hover:bg-white hover:text-[#0B1020]"
+              >
+                <svg {...lineIcon} className="h-4 w-4">
+                  <path d="M19 12H5M11 6l-6 6 6 6" />
+                </svg>
+                Back
+              </button>
+              {live && (
+                <span className="inline-flex items-center gap-1.5 text-[13px] text-[#4C4F7A]">
+                  <span className="h-2 w-2 rounded-full bg-[#12B76A]" />
+                  Public
+                </span>
+              )}
             </div>
+
+            <h1 className="mt-3 flex items-center gap-2.5 text-[22px] font-semibold tracking-tight">
+              <PageIcon name="store" />
+              Online Store
+            </h1>
 
             {error && (
               <p
@@ -298,55 +426,101 @@ export default function OnlineStorePage() {
               <p className="py-16 text-center text-sm text-[#4C4F7A]">Loading themes…</p>
             )}
 
-            {/* YOUR THEMES */}
-            {themes.length > 0 && (
-              <section className="mt-6" aria-labelledby="your-themes">
-                <h2 id="your-themes" className="text-lg font-semibold">
-                  Your themes
-                </h2>
-                <ul className="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {themes.map((theme) => {
-                    const preset = presetOf(theme.preset);
-                    return (
-                      <li
-                        key={theme.id}
-                        className={`rounded-2xl border bg-white p-3 ${theme.published ? "border-[#0B1020]" : "border-[#E4DEFB]"}`}
-                      >
-                        <Preview swatches={preset?.swatches || OWN_SWATCHES} />
-                        <div className="mt-3 flex items-center justify-between gap-2">
-                          <h3 className="truncate text-[15px] font-semibold">{theme.name}</h3>
-                          <span
-                            className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              theme.published
-                                ? "bg-[#0B1020] text-white"
-                                : "bg-[#EDE9FE] text-[#4C4F7A]"
-                            }`}
-                          >
-                            {theme.published ? "Published" : "Draft"}
-                          </span>
-                        </div>
-                        <p className="mt-0.5 text-[13px] text-[#4C4F7A]">
-                          {preset ? `${preset.name} design` : "Your own design"}
-                        </p>
+            {/* LIVE THEME */}
+            {live && (
+              <section className="mt-4" aria-label="Live theme">
+                <div className="relative overflow-hidden rounded-2xl bg-[#161C2C] shadow-sm">
+                  <LivePreview
+                    theme={live}
+                    swatches={presetOf(live.preset)?.swatches || OWN_SWATCHES}
+                    ratio={0.5}
+                  />
+                  <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/85 via-black/60 to-transparent px-5 pb-4 pt-12 text-white">
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-semibold">{live.name}</p>
+                      <p className="text-[13px] text-white/70">
+                        {presetOf(live.preset)?.name || "Your own design"} · Last saved:{" "}
+                        {timeAgo(live.updated_at)}
+                      </p>
+                    </div>
+                    {canEditTheme && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="inline-flex h-8 items-center rounded-lg bg-white px-3 text-[13px] font-semibold text-[#0B1020] transition hover:bg-[#EDE9FE]"
+                          onClick={() => open(live, "/admin/online-store/customize")}
+                        >
+                          Edit theme
+                        </button>
+                        <ThemeMenu
+                          theme={live}
+                          full={full}
+                          dark
+                          onCode={() => open(live, "/editor-demo")}
+                          onRename={() => {
+                            setDialogError("");
+                            setDialog({ kind: "rename", theme: live });
+                          }}
+                          onCopy={() => {
+                            setDialogError("");
+                            setDialog({ kind: "copy", theme: live });
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
 
-                        {canEditTheme && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              className={primaryButton}
-                              onClick={() => open(theme, "/admin/online-store/customize")}
-                            >
-                              Customize
-                            </button>
-                            <button
-                              type="button"
-                              className={smallButton}
-                              title="Edit code"
-                              onClick={() => open(theme, "/editor-demo")}
-                            >
-                              Edit code
-                            </button>
-                            {!theme.published && (
+            {/* DRAFT THEMES */}
+            {library && (
+              <section className="mt-7" aria-labelledby="draft-themes">
+                <div className="flex items-center justify-between">
+                  <h2 id="draft-themes" className="text-sm font-semibold">
+                    {live ? "Draft themes" : "Your themes"}
+                  </h2>
+                  {canEditTheme && (
+                    <button
+                      type="button"
+                      className={smallButton}
+                      disabled={Boolean(busy) || full}
+                      title={full ? "You've reached the theme limit" : undefined}
+                      onClick={() => {
+                        setDialogError("");
+                        setDialog({ kind: "own" });
+                      }}
+                    >
+                      + New
+                    </button>
+                  )}
+                </div>
+                <div className="mt-2 rounded-2xl border border-[#E5E7EB] bg-white">
+                  {drafts.length === 0 ? (
+                    <p className="px-4 py-6 text-center text-sm text-[#4C4F7A]">
+                      {live
+                        ? "No draft themes yet. Add one below to work on it without touching your live store."
+                        : "You don’t have a theme yet. Pick one below to go live."}
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-[#EEF0F3]">
+                      {drafts.map((theme) => (
+                        <li key={theme.id} className="flex items-center gap-3 p-3">
+                          <div className="w-[96px] shrink-0 overflow-hidden rounded-lg border border-[#E5E7EB]">
+                            <LivePreview
+                              theme={theme}
+                              swatches={presetOf(theme.preset)?.swatches || OWN_SWATCHES}
+                              ratio={0.75}
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[13px] font-semibold">{theme.name}</p>
+                            <p className="text-xs text-[#6B6F8F]">
+                              Added: {formatAdded(theme.updated_at)}
+                            </p>
+                          </div>
+                          {canEditTheme && (
+                            <div className="flex shrink-0 items-center gap-1.5">
                               <button
                                 type="button"
                                 className={smallButton}
@@ -355,61 +529,50 @@ export default function OnlineStorePage() {
                               >
                                 Publish
                               </button>
-                            )}
-                            <button
-                              type="button"
-                              className={smallButton}
-                              onClick={() => {
-                                setDialogError("");
-                                setDialog({ kind: "rename", theme });
-                              }}
-                            >
-                              Rename
-                            </button>
-                            <button
-                              type="button"
-                              className={smallButton}
-                              disabled={full}
-                              title={full ? "You've reached the theme limit" : undefined}
-                              onClick={() => {
-                                setDialogError("");
-                                setDialog({ kind: "copy", theme });
-                              }}
-                            >
-                              Duplicate
-                            </button>
-                            {!theme.published && (
                               <button
                                 type="button"
-                                className={`${smallButton} text-[#B42318]`}
-                                disabled={Boolean(busy)}
-                                onClick={() => remove(theme)}
+                                className={smallButton}
+                                onClick={() => open(theme, "/admin/online-store/customize")}
                               >
-                                Delete
+                                Edit theme
                               </button>
-                            )}
-                          </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                              <ThemeMenu
+                                theme={theme}
+                                full={full}
+                                onCode={() => open(theme, "/editor-demo")}
+                                onRename={() => {
+                                  setDialogError("");
+                                  setDialog({ kind: "rename", theme });
+                                }}
+                                onCopy={() => {
+                                  setDialogError("");
+                                  setDialog({ kind: "copy", theme });
+                                }}
+                                onDelete={() => remove(theme)}
+                              />
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </section>
             )}
 
-            {/* THEME LIBRARY */}
+            {/* DISCOVER THEMES */}
             {library && (
               <section className="mt-8" aria-labelledby="theme-library">
-                <h2 id="theme-library" className="text-lg font-semibold">
-                  Theme library
+                <h2 id="theme-library" className="text-sm font-semibold">
+                  Discover themes
                 </h2>
-                <p className="mt-1 text-sm text-[#4C4F7A]">
+                <p className="mt-1 text-[13px] text-[#4C4F7A]">
                   {themes.length === 0
                     ? "Your pick goes live right away."
                     : "Adding a theme saves it as a draft. Your live theme isn’t touched until you publish."}
                 </p>
 
-                <div className="-mx-4 mt-4 overflow-x-auto px-4 [scrollbar-width:none] sm:-mx-8 sm:px-8 [&::-webkit-scrollbar]:hidden">
+                <div className="mt-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <div className="flex w-max gap-2">
                     {categories.map((category) => {
                       const active = selectedCategory === category;
@@ -422,7 +585,7 @@ export default function OnlineStorePage() {
                           className={`h-8 whitespace-nowrap rounded-full px-3.5 text-[13px] font-medium transition ${
                             active
                               ? "bg-[#0B1020] text-white"
-                              : "border border-[#E4DEFB] bg-white text-[#4C4F7A] hover:border-[#C9D1DD] hover:bg-[#F5F3FF] hover:text-[#0B1020]"
+                              : "border border-[#E5E7EB] bg-white text-[#4C4F7A] hover:border-[#C9D1DD] hover:text-[#0B1020]"
                           }`}
                         >
                           {category}
@@ -432,58 +595,29 @@ export default function OnlineStorePage() {
                   </div>
                 </div>
 
-                <ul className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {/* Your own */}
-                  {canEditTheme && (
-                    <li className="flex flex-col rounded-2xl border border-dashed border-[#C9D1DD] bg-[#fafbfc] p-3">
-                      <div className="flex h-[132px] items-center justify-center rounded-xl bg-white text-[#8B8FB8]">
-                        <svg {...lineIcon} className="h-8 w-8">
-                          <path d="M12 5v14M5 12h14" />
-                        </svg>
-                      </div>
-                      <h3 className="mt-3 text-[15px] font-semibold">Create your own theme</h3>
-                      <p className="mt-1 flex-1 text-[13px] leading-relaxed text-[#4C4F7A]">
-                        Start from a clean base and build your design with the customizer and the
-                        code editor.
-                      </p>
-                      <button
-                        type="button"
-                        className={`${primaryButton} mt-3 self-start`}
-                        disabled={Boolean(busy) || full}
-                        onClick={() => {
-                          setDialogError("");
-                          setDialog({ kind: "own" });
-                        }}
-                      >
-                        Create theme
-                      </button>
-                    </li>
-                  )}
-
+                <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                   {shown.map((preset) => (
                     <li
                       key={preset.slug}
-                      className="flex flex-col rounded-2xl border border-[#E4DEFB] bg-white p-3"
+                      className="flex flex-col rounded-xl border border-[#E5E7EB] bg-white p-2"
                     >
                       <Preview swatches={preset.swatches} />
-                      <h3 className="mt-3 text-[15px] font-semibold">{preset.name}</h3>
-                      <p className="mt-1 flex-1 text-[13px] leading-relaxed text-[#4C4F7A]">
+                      <div className="mt-2 flex items-center justify-between gap-2 px-1 pb-1">
+                        <h3 className="truncate text-[13px] font-semibold">{preset.name}</h3>
+                        {canEditTheme && (
+                          <button
+                            type="button"
+                            className={smallButton}
+                            disabled={Boolean(busy) || full}
+                            onClick={() => add(preset.slug)}
+                          >
+                            {busy === `add-${preset.slug}` ? "Adding…" : "Add"}
+                          </button>
+                        )}
+                      </div>
+                      <p className="line-clamp-2 px-1 pb-1 text-xs text-[#6B6F8F]">
                         {preset.description}
                       </p>
-                      {canEditTheme && (
-                        <button
-                          type="button"
-                          className={`${primaryButton} mt-3 self-start`}
-                          disabled={Boolean(busy) || full}
-                          onClick={() => add(preset.slug)}
-                        >
-                          {busy === `add-${preset.slug}`
-                            ? "Adding…"
-                            : themes.length === 0
-                              ? "Use this theme"
-                              : "Add to my themes"}
-                        </button>
-                      )}
                     </li>
                   ))}
                 </ul>

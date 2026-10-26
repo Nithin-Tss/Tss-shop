@@ -85,6 +85,18 @@ export function previewTheme(
   });
 }
 
+// The home page of one theme (live or draft) as HTML, for a thumbnail -> { html }
+// Names the theme in the request, so it doesn't change the theme the editor is working on.
+export async function renderThemeHome(themeId) {
+  const headers = { "X-Theme-Id": themeId };
+  const data = await apiRequest(`${BASE}/settings/`, { headers });
+  return apiRequest(`${BASE}/preview/?scroll=0&selected=&page=index`, {
+    method: "POST",
+    body: withoutCartTemplate(data),
+    headers,
+  });
+}
+
 // Blog posts -> [{ id, title, handle, excerpt, body, cover_image, author, category, tags, status, published_at, url }]
 export function listBlogPosts() {
   return apiRequest(`${BASE}/posts/`);

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, navIcons } from "@/components/AdminSidebar";
 import { apiGet, openStorefront } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
+import { formatMoney, useOverview } from "@/lib/reportsApi";
 
 const BASE = "/admin/online-store";
 
@@ -94,13 +95,33 @@ const listOf = (res) =>
 const countOf = (res) =>
   typeof res?.data?.count === "number" ? res.data.count : listOf(res).length;
 
-const isToday = (value) => value && new Date(value).toDateString() === new Date().toDateString();
-
 function greeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
+}
+
+// Tiny line chart for the metrics strip. `values` is a plain number array.
+function Sparkline({ values }) {
+  if (!values || values.length < 2) return null;
+  const max = Math.max(...values, 1);
+  const step = 56 / (values.length - 1);
+  const points = values.map(
+    (v, i) => `${(i * step).toFixed(1)},${(16 - (v / max) * 14).toFixed(1)}`
+  );
+  return (
+    <svg viewBox="0 0 56 16" className="h-4 w-14 text-emerald-500" aria-hidden="true">
+      <polyline
+        points={points.join(" ")}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 export default function AdminHomePage() {
@@ -110,81 +131,77 @@ export default function AdminHomePage() {
   const firstName = session?.user?.firstName || "there";
   const allowed = (item) => !item.permission || can(session, item.permission);
 
-  const canSeeOrders = can(session, "orders.view");
   const canSeeProducts = can(session, "products.view");
+  const canSeeReports = can(session, "reports.view");
   // Staff whose roles grant nothing in this store (owners always have permissions)
   const hasNoAccess = Array.isArray(store?.permissions) && store.permissions.length === 0;
 
-  const [stats, setStats] = useState({ sales: 0, orders: 0, visitors: 0, products: 0 });
+  const [productCount, setProductCount] = useState(0);
   const [tip] = useState(() => tips[Math.floor(Math.random() * tips.length)]);
+  const { data: overview, loading: overviewLoading } = useOverview(30, canSeeReports);
 
   useEffect(() => {
+    if (!canSeeProducts) return undefined;
     let cancelled = false;
-
-    // Only ask for what the role may see; a refused request would otherwise show as "0"
-    Promise.all([
-      canSeeProducts ? apiGet("/api/v1/catalog/products/").catch(() => null) : null,
-      canSeeOrders ? apiGet("/api/v1/orders/").catch(() => null) : null,
-    ]).then(([productsRes, ordersRes]) => {
-      if (cancelled) return;
-      const orders = ordersRes?.ok ? listOf(ordersRes) : [];
-      setStats({
-        sales: orders
-          .filter((o) => isToday(o.created_at))
-          .reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0),
-        orders: ordersRes?.ok ? countOf(ordersRes) : 0,
-        visitors: 0, // no visitor tracking yet
-        products: productsRes?.ok ? countOf(productsRes) : 0,
+    // Only "first product" can be checked from data today; a refused request just leaves it at 0
+    apiGet("/api/v1/catalog/products/")
+      .catch(() => null)
+      .then((res) => {
+        if (!cancelled && res?.ok) setProductCount(countOf(res));
       });
-    });
-
     return () => {
       cancelled = true;
     };
-  }, [canSeeOrders, canSeeProducts]);
+  }, [canSeeProducts]);
 
-  // Only "first product" can be checked from data today; the rest tick once there's data behind them.
+  // The rest tick once there's data behind them.
   // Each step shows only to roles that can do it; payments and the plan are the owner's.
   const steps = [
     {
       title: "Add your first product",
-      help: "Title, price and photo",
+      help: "Title, price and photo. Shoppers can't buy what isn't listed.",
       to: `${BASE}/products/new`,
-      done: stats.products > 0,
+      icon: "products",
+      done: productCount > 0,
       permission: "products.manage",
     },
     {
       title: "Choose a theme",
-      help: "Start with a free design",
+      help: "Start with a free design and make it yours.",
       to: BASE,
+      icon: "store",
       done: false,
       permission: "themes.manage",
     },
     {
       title: "Add a banner",
-      help: "Welcome shoppers on arrival",
+      help: "Welcome shoppers the moment they arrive.",
       to: `${BASE}/customize`,
+      icon: "image",
       done: false,
       permission: "themes.manage",
     },
     {
       title: "Set up payments",
-      help: "Choose how customers pay",
+      help: "Choose how customers pay you.",
       to: `${BASE}/settings`,
+      icon: "cash",
       done: false,
       permission: "store.manage",
     },
     {
       title: "Set up shipping",
-      help: "Delivery areas and rates",
+      help: "Delivery areas and rates.",
       to: `${BASE}/shipping`,
+      icon: "orders",
       done: false,
       permission: "shipping.manage",
     },
     {
       title: "Pick a plan",
-      help: "Open your store publicly",
+      help: "Open your store to the public.",
       to: `${BASE}/settings`,
+      icon: "check",
       done: false,
       permission: "store.manage",
     },
@@ -194,125 +211,72 @@ export default function AdminHomePage() {
   const nextIndex = steps.findIndex((s) => !s.done);
   const progress = steps.length ? Math.round((doneCount / steps.length) * 100) : 100;
 
-  const statCards = [
+  const totals = overview?.totals;
+  const currency = overview?.currency_code;
+  const series = overview?.series || [];
+  const metric = (value) => (overviewLoading || !totals ? "—" : value);
+  const metrics = [
     {
-      label: "Today's sales",
-      value: `$${stats.sales.toFixed(2)}`,
-      icon: "cash",
-      permission: "orders.view",
+      label: "Total sales",
+      value: metric(formatMoney(totals?.sales, currency)),
+      trend: series.map((d) => Number(d.sales) || 0),
     },
-    { label: "Orders", value: stats.orders, icon: "orders", permission: "orders.view" },
-    { label: "Visitors", value: stats.visitors, icon: "customers", permission: "reports.view" },
-    { label: "Products", value: stats.products, icon: "products", permission: "products.view" },
-  ].filter(allowed);
+    {
+      label: "Orders",
+      value: metric(totals?.orders),
+      trend: series.map((d) => Number(d.orders) || 0),
+    },
+    { label: "Customers", value: metric(totals?.customers) },
+    { label: "Products", value: metric(totals?.products) },
+  ];
+
   const actions = quickActions.filter(allowed);
 
   return (
     <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
 
-      {/* BODY */}
       <div className="flex min-h-[calc(100vh-72px)]">
-        {/* SIDEBAR */}
         <AdminSidebar />
 
-        {/* MAIN CONTENT */}
-        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 py-6 sm:px-6 lg:px-9">
-          <div className="mx-auto max-w-[1180px] space-y-6">
-            {/* WELCOME BANNER */}
-            <section className="relative overflow-hidden rounded-2xl bg-[#0B1020] px-6 py-7 text-white shadow-[0_10px_30px_-12px_rgba(20,27,45,0.45)] sm:px-8">
-              <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/[0.04]" />
-              <div className="pointer-events-none absolute -bottom-24 right-24 h-48 w-48 rounded-full bg-white/[0.04]" />
-
-              <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <p className="text-sm text-slate-300">
-                    {greeting()}, {firstName}
-                  </p>
-                  <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-[28px]">
-                    {steps.length ? (
-                      <>Let&apos;s get {storeName} ready to sell</>
-                    ) : (
-                      <>Welcome to {storeName}</>
-                    )}
-                  </h1>
-                  <p className="mt-2 max-w-lg text-sm text-slate-300">
-                    {hasNoAccess
-                      ? "You don't have any roles in this store yet."
-                      : steps.length
-                        ? "Work through the steps below. Most stores are ready to launch in under an hour."
-                        : "Use the menu on the left to get to the parts of the store you work on."}
-                  </p>
-                </div>
-
-                {steps.length > 0 && (
-                  <div className="w-full md:w-72">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">
-                        {doneCount} of {steps.length} setup steps done
-                      </span>
-                      <span className="text-slate-300">{progress}%</span>
-                    </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/15">
-                      <div
-                        className="h-full rounded-full bg-emerald-400 transition-all duration-500"
-                        style={{ width: `${Math.max(progress, 3)}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* NO ROLES: nothing below would work for them */}
-            {hasNoAccess && (
-              <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <h2 className="text-base font-semibold text-[#0B1020]">
-                  You don&apos;t have access to anything here yet
-                </h2>
-                <p className="mt-1 text-sm text-[#4C4F7A]">
-                  Your account is part of {storeName}, but none of your roles give you access to its
-                  products, orders or settings. Ask the store owner to give you a role under
-                  Settings → Users.
-                </p>
-              </section>
-            )}
-
-            {/* QUICK STATS */}
-            {statCards.length > 0 && (
-              <section
-                className={`grid grid-cols-2 gap-4 ${
-                  statCards.length >= 4
-                    ? "lg:grid-cols-4"
-                    : statCards.length === 3
-                      ? "lg:grid-cols-3"
-                      : ""
-                }`}
-              >
-                {statCards.map((card) => (
-                  <div
-                    key={card.label}
-                    className="rounded-2xl border border-[#E4DEFB] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#4C4F7A]">{card.label}</span>
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F5F8] text-[#3B3F8F]">
-                        <Icon name={card.icon} className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="mt-3 text-2xl font-semibold tracking-tight text-[#0B1020]">
-                      {card.value}
-                    </p>
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF]">
+          {/* METRICS STRIP */}
+          {canSeeReports && (
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-[#E4DEFB] bg-white/70 px-4 py-3 sm:px-6 lg:px-9">
+              <span className="text-sm text-[#4C4F7A]">Last 30 days</span>
+              <dl className="flex flex-wrap gap-x-8 gap-y-3">
+                {metrics.map((m) => (
+                  <div key={m.label}>
+                    <dt className="text-xs text-[#4C4F7A]">{m.label}</dt>
+                    <dd className="mt-0.5 flex items-center gap-2 text-sm font-semibold">
+                      {m.value}
+                      <Sparkline values={m.trend} />
+                    </dd>
                   </div>
                 ))}
-              </section>
-            )}
+              </dl>
+            </div>
+          )}
 
-            {/* QUICK ACTIONS */}
-            {actions.length > 0 && (
-              <section className="rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
-                <h2 className="text-base font-semibold text-[#0B1020]">Quick actions</h2>
-                <div className="mt-4 grid grid-cols-3 gap-y-5 sm:grid-cols-5">
+          <div className="mx-auto max-w-[1100px] space-y-8 px-4 py-10 sm:px-6 lg:px-9">
+            {/* GREETING + QUICK ACTIONS */}
+            <section className="text-center">
+              <p className="text-sm text-[#4C4F7A]">{storeName}</p>
+              <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
+                {greeting()}, {firstName}
+                <span className="block text-[#3B3F8F]">
+                  {steps.length ? "Let's get ready to sell." : "Let's keep growing."}
+                </span>
+              </h1>
+              {hasNoAccess && (
+                <p className="mx-auto mt-3 max-w-md text-sm text-[#4C4F7A]">
+                  You don&apos;t have any roles in this store yet. Ask the store owner to give you
+                  one under Settings → Users.
+                </p>
+              )}
+
+              {actions.length > 0 && (
+                <div className="mt-6 flex flex-wrap justify-center gap-2.5">
                   {actions.map((action) => (
                     <Link
                       key={action.label}
@@ -327,86 +291,96 @@ export default function AdminHomePage() {
                             }
                           : undefined
                       }
-                      className="group flex flex-col items-center gap-2 text-center"
+                      className="group inline-flex items-center gap-2 rounded-full border border-[#E4DEFB] bg-white px-4 py-2 text-sm font-medium text-[#0B1020] shadow-sm transition hover:-translate-y-0.5 hover:border-[#0B1020] hover:bg-[#0B1020] hover:text-white"
                     >
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#E4DEFB] bg-[#F5F3FF] text-[#0B1020] transition group-hover:-translate-y-0.5 group-hover:border-[#0B1020] group-hover:bg-[#0B1020] group-hover:text-white">
-                        <Icon name={action.icon} />
-                      </span>
-                      <span className="text-xs font-medium text-[#4C4F7A] group-hover:text-[#0B1020] sm:text-sm">
-                        {action.label}
-                      </span>
+                      <Icon name={action.icon} className="h-4 w-4" />
+                      {action.label}
                     </Link>
                   ))}
                 </div>
+              )}
+            </section>
+
+            {/* SETUP CARDS */}
+            {steps.length > 0 && (
+              <section>
+                <div className="mb-3 flex items-end justify-between gap-4">
+                  <h2 className="text-base font-semibold">Get your store ready</h2>
+                  <div className="flex items-center gap-3 text-xs text-[#4C4F7A]">
+                    <span>
+                      {doneCount} of {steps.length} done
+                    </span>
+                    <div className="h-1.5 w-28 overflow-hidden rounded-full bg-[#E4DEFB]">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                        style={{ width: `${Math.max(progress, 3)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {steps.map((step, i) => {
+                    const isNext = i === nextIndex;
+                    return (
+                      <li key={step.title} className="min-w-0">
+                        <Link
+                          to={step.to}
+                          className={`group flex h-full flex-col rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                            isNext ? "border-[#0B1020]" : "border-[#E4DEFB]"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F3FF] text-[#3B3F8F]">
+                              <Icon name={step.icon} />
+                            </span>
+                            {step.done ? (
+                              <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                <Icon name="check" className="h-3 w-3" /> Done
+                              </span>
+                            ) : (
+                              isNext && (
+                                <span className="rounded-full bg-[#0B1020] px-2 py-0.5 text-xs font-medium text-white">
+                                  Next
+                                </span>
+                              )
+                            )}
+                          </div>
+                          <h3
+                            className={`mt-4 text-sm font-semibold ${step.done ? "opacity-60" : ""}`}
+                          >
+                            {step.title}
+                          </h3>
+                          <p
+                            className={`mt-1 flex-1 text-sm text-[#4C4F7A] ${step.done ? "opacity-60" : ""}`}
+                          >
+                            {step.help}
+                          </p>
+                          <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#0B1020]">
+                            {step.done ? "Review" : "Get started"}
+                            <Icon
+                              name="arrow"
+                              className="h-4 w-4 transition group-hover:translate-x-0.5"
+                            />
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ol>
               </section>
             )}
 
-            {/* CHECKLIST + TIP */}
-            <div
-              className={`grid grid-cols-1 items-start gap-6 ${steps.length ? "lg:grid-cols-3" : ""}`}
-            >
-              {/* SETUP CHECKLIST */}
-              {steps.length > 0 && (
-                <section className="overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm lg:col-span-2">
-                  <div className="flex items-center justify-between border-b border-[#E4DEFB] px-4 py-2.5">
-                    <h2 className="text-sm font-semibold text-[#0B1020]">Setup checklist</h2>
-                    <span className="text-xs text-[#4C4F7A]">
-                      {doneCount}/{steps.length} complete
-                    </span>
-                  </div>
-
-                  <ol className="grid grid-cols-2 gap-2.5 p-3 md:grid-cols-3 2xl:grid-cols-6">
-                    {steps.map((step, i) => {
-                      const isNext = i === nextIndex;
-                      return (
-                        <li key={step.title} className="min-w-0">
-                          <Link
-                            to={step.to}
-                            className={`flex h-full min-w-0 items-start gap-2.5 rounded-xl border px-3 py-2.5 transition hover:-translate-y-0.5 hover:shadow-md ${
-                              isNext
-                                ? "border-[#0B1020] bg-[#F4F6FA]"
-                                : "border-[#E4DEFB] bg-white hover:border-[#C9D1DD]"
-                            }`}
-                          >
-                            <span
-                              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
-                                step.done
-                                  ? "border-emerald-500 bg-emerald-500 text-white"
-                                  : isNext
-                                    ? "border-[#0B1020]"
-                                    : "border-[#CBD3DF]"
-                              }`}
-                            >
-                              {step.done && <Icon name="check" className="h-3 w-3" />}
-                            </span>
-
-                            <span className={`min-w-0 ${step.done ? "opacity-60" : ""}`}>
-                              <span className="block truncate text-sm font-semibold text-[#0B1020]">
-                                {step.title}
-                              </span>
-                              <span className="mt-0.5 block truncate text-xs text-[#4C4F7A]">
-                                {step.help}
-                              </span>
-                            </span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </section>
-              )}
-
-              {/* TIP */}
-              <aside className="rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm transition hover:shadow-md">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                    <Icon name="bulb" />
-                  </span>
-                  <h2 className="text-base font-semibold text-[#0B1020]">Did you know?</h2>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-[#4C4F7A]">{tip}</p>
-              </aside>
-            </div>
+            {/* TIP */}
+            <aside className="mx-auto max-w-xl rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                  <Icon name="bulb" />
+                </span>
+                <h2 className="text-base font-semibold">Did you know?</h2>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-[#4C4F7A]">{tip}</p>
+            </aside>
           </div>
         </main>
       </div>

@@ -276,7 +276,6 @@ const menuGroups = [
 ];
 
 const onlineStoreItems = [
-  { icon: "themes", label: "Themes", href: BASE, exact: true, permission: "themes.view" },
   { icon: "pages", label: "Pages", href: `${BASE}/pages`, permission: "themes.manage" },
   { icon: "blog", label: "Blog Posts", href: `${BASE}/blog-posts`, permission: "themes.manage" },
 ];
@@ -445,7 +444,8 @@ export default function AdminSidebar() {
   const { pathname } = useLocation();
   const path = pathname.replace(/\/+$/, "") || "/";
 
-  const onlineStoreActive = onlineStoreItems.some((item) => matches(path, item));
+  const storeHomeActive = path === BASE;
+  const onlineStoreActive = storeHomeActive || onlineStoreItems.some((item) => matches(path, item));
   const [onlineStoreOpen, setOnlineStoreOpen] = useState(true);
   const [appsOpen, setAppsOpen] = useState(false);
   const settingsActive = isUnder(path, `${BASE}/settings`);
@@ -510,16 +510,25 @@ export default function AdminSidebar() {
           <SectionLabel>Sales channels</SectionLabel>
 
           <div className="space-y-0.5">
-            <button
-              type="button"
-              aria-expanded={onlineStoreOpen}
-              onClick={() => setOnlineStoreOpen((v) => !v)}
-              className={`${rowClass(false)} ${onlineStoreActive ? "text-white" : ""}`}
-            >
-              <NavIcon name="store" />
-              <span className="flex-1 truncate">Online Store</span>
-              <ChevronIcon open={onlineStoreOpen} />
-            </button>
+            <div className="relative">
+              <Link
+                to={BASE}
+                aria-current={storeHomeActive ? "page" : undefined}
+                className={`${rowClass(storeHomeActive)} pr-11 ${onlineStoreActive ? "text-white" : ""}`}
+              >
+                <NavIcon name="store" />
+                <span className="flex-1 truncate">Online Store</span>
+              </Link>
+              <button
+                type="button"
+                aria-label="Toggle Online Store menu"
+                aria-expanded={onlineStoreOpen}
+                onClick={() => setOnlineStoreOpen((v) => !v)}
+                className="group absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md hover:bg-white/10"
+              >
+                <ChevronIcon open={onlineStoreOpen} />
+              </button>
+            </div>
 
             <Collapse open={onlineStoreOpen}>
               <div className="space-y-0.5 pl-4">
