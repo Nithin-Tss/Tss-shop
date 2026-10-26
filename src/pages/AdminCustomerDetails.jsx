@@ -500,7 +500,7 @@ export default function AdminCustomerDetails() {
     <div className="min-h-screen bg-[#F1F2F4] text-charcoal-navy">
       <AdminHeader />
 
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">

@@ -1602,7 +1602,7 @@ export const LAYOUT_ROWS = [
 // A labelled group in the sections list (Header / Template / Footer), divided from the one above
 export function GroupHeading({ children }) {
   return (
-    <h3 className="mt-2 border-t border-[#E4DEFB] px-4 pb-1.5 pt-4 text-sm font-semibold text-charcoal-navy">
+    <h3 className="mt-2 border-t border-[#e3e3e3] px-4 pb-1.5 pt-4 text-[13px] font-bold text-[#303030]">
       {children}
     </h3>
   );
@@ -1623,11 +1623,11 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
             <button
               type="button"
               onClick={() => onOpen(row.group)}
-              className={`flex h-9 w-full items-center gap-2 rounded-md pl-1.5 pr-1 text-left text-sm ${
-                active ? "bg-[#EDE9FE]" : "hover:bg-[#F5F6F8]"
+              className={`flex h-8 w-full items-center gap-2 rounded-lg pl-1.5 pr-1 text-left text-[13px] ${
+                active ? "bg-[#f1f1f1] font-medium" : "hover:bg-[#f7f7f7]"
               }`}
             >
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[#8B8FB8]">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[#616161]">
                 <svg {...iconProps} className="h-4 w-4">
                   <path d={row.icon} />
                 </svg>

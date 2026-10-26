@@ -633,7 +633,7 @@ export default function AdminAddCollection() {
   return (
     <div className="min-h-screen bg-[#F1F2F4] font-sans text-charcoal-navy">
       <AdminHeader />
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 mx-auto w-full max-w-275 flex-1 px-4 py-6 sm:px-8 sm:py-8">

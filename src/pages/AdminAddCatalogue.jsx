@@ -232,7 +232,7 @@ export default function AdminAddCatalogue() {
       )}
 
       {/* BODY */}
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         {/* SIDEBAR */}
         <AdminSidebar />
 

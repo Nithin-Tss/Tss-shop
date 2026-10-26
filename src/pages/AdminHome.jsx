@@ -236,7 +236,7 @@ export default function AdminHomePage() {
     <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
 
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF]">

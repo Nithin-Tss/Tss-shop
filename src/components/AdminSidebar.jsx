@@ -288,25 +288,28 @@ function matches(path, item) {
   return (item.match || [item.href]).some((prefix) => isUnder(path, prefix));
 }
 
-// One row style for every item: 42px tall, icon + label on the same vertical line
+// Dark rail, like the Shopify admin: a near-black surface, soft grey text, and an inset "pill" on the active row.
+// Rows carry `group-data-[collapsed=true]/nav:` variants so the same markup works as a full sidebar or an icon rail.
+
+// One row style for every item: 40px tall, icon + label on the same vertical line
 const rowClass = (active) =>
-  `group relative flex h-[42px] w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium transition-colors duration-150 ${
+  `group relative flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[15px] font-medium transition-[background-color,color,box-shadow] duration-150 group-data-[collapsed=true]/nav:justify-center group-data-[collapsed=true]/nav:px-0 ${
     active
-      ? "bg-[#26324D] text-white before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-r-full before:bg-[#8FB0FF]"
-      : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
+      ? "bg-[#1f1f1f] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09),0_1px_2px_rgba(0,0,0,0.6)]"
+      : "text-[#b0b0b0] hover:bg-white/[0.06] hover:text-white"
   }`;
 
 // Text-only sub links (Drafts, Collections), lined up under the parent's label
 const subRowClass = (active) =>
-  `flex h-9 items-center rounded-md px-3 text-[13px] font-medium transition-colors duration-150 ${
-    active ? "bg-white/[0.08] text-white" : "text-slate-400 hover:bg-white/[0.06] hover:text-white"
+  `flex h-9 items-center rounded-lg px-3 text-sm font-medium transition-colors duration-150 ${
+    active ? "bg-white/[0.08] text-white" : "text-[#8f8f8f] hover:bg-white/[0.06] hover:text-white"
   }`;
 
 // Smooth open/close for nested items; closed content can't be tabbed into
 function Collapse({ open, children }) {
   return (
     <div
-      className={`grid transition-[grid-template-rows] duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+      className={`grid transition-[grid-template-rows] duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} group-data-[collapsed=true]/nav:hidden`}
       inert={!open}
     >
       <div className="overflow-hidden">{children}</div>
@@ -318,14 +321,21 @@ function ChevronIcon({ open }) {
   return (
     <NavIcon
       name="chevron"
-      className={`h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:text-white ${open ? "rotate-0" : "-rotate-90"}`}
+      className={`h-4 w-4 text-[#8f8f8f] transition-transform duration-200 group-hover:text-white ${open ? "rotate-0" : "-rotate-90"}`}
     />
   );
 }
 
+// Hidden in the icon rail: the label is the row's only text
+function Label({ children }) {
+  return <span className={`truncate group-data-[collapsed=true]/nav:hidden`}>{children}</span>;
+}
+
 function SectionLabel({ children }) {
   return (
-    <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+    <p
+      className={`px-3 pb-1.5 text-[13px] font-medium text-[#7d7d7d] group-data-[collapsed=true]/nav:sr-only`}
+    >
       {children}
     </p>
   );
@@ -348,15 +358,18 @@ function MenuItem({ item, path }) {
       <div className={rowClass(active)}>
         <Link
           to={item.href}
+          title={item.label}
           aria-current={active ? "page" : undefined}
-          className="flex h-full flex-1 items-center gap-3"
+          className={`flex h-full flex-1 items-center gap-3 group-data-[collapsed=true]/nav:justify-center`}
         >
           <NavIcon name={item.icon} />
-          <span className="truncate">{item.label}</span>
+          <Label>{item.label}</Label>
         </Link>
 
         {item.badge && (
-          <span className="rounded-full bg-white/10 px-2 py-px text-[11px] font-semibold leading-4 text-slate-200">
+          <span
+            className={`rounded-md bg-white/10 px-2 py-px text-xs font-semibold leading-5 text-white group-data-[collapsed=true]/nav:hidden`}
+          >
             {item.badge}
           </span>
         )}
@@ -366,7 +379,7 @@ function MenuItem({ item, path }) {
             aria-label={open ? `Collapse ${item.label}` : `Expand ${item.label}`}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="-mr-1.5 flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/10"
+            className={`-mr-1.5 flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/10 group-data-[collapsed=true]/nav:hidden`}
           >
             <ChevronIcon open={open} />
           </button>
@@ -395,6 +408,7 @@ function MenuItem({ item, path }) {
 // Every admin page renders its own sidebar, so it remounts on each route change;
 // its scroll position is kept here and put back before the browser paints.
 const SIDEBAR_SCROLL_KEY = "admin-sidebar-scroll";
+const SIDEBAR_COLLAPSED_KEY = "admin-sidebar-collapsed";
 
 function readSidebarScroll() {
   try {
@@ -407,6 +421,20 @@ function readSidebarScroll() {
 function saveSidebarScroll(top) {
   try {
     window.sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(Math.round(top)));
+  } catch {}
+}
+
+function readCollapsed() {
+  try {
+    return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function saveCollapsed(value) {
+  try {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
   } catch {}
 }
 
@@ -440,8 +468,75 @@ function useSidebarScroll(navRef, path) {
 
 const ADMIN_NAV_EVENT = "admin:toggle-nav";
 
+const railIcon = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.75,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  viewBox: "0 0 24 24",
+  "aria-hidden": true,
+};
+
+// The brand mark: a white tile on the dark rail
+function BrandMark({ to }) {
+  return (
+    <Link to={to} aria-label="Home" className="flex shrink-0 items-center">
+      <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-white text-lg font-extrabold text-[#0a0a0a]">
+        S
+      </span>
+    </Link>
+  );
+}
+
+function NavSearch({ inputRef, query, setQuery, onSubmit, collapsed, onExpand }) {
+  if (collapsed) {
+    return (
+      <button
+        type="button"
+        aria-label="Search"
+        title="Search"
+        onClick={onExpand}
+        className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#1a1a1a] text-[#b0b0b0] transition hover:text-white"
+      >
+        <svg {...railIcon} className="h-[18px] w-[18px]">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+      </button>
+    );
+  }
+
+  return (
+    <label className="group flex h-10 items-center gap-2.5 rounded-xl border border-white/10 bg-[#1a1a1a] px-3 text-[#8f8f8f] shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition focus-within:border-white/30 focus-within:text-white">
+      <svg {...railIcon} className="h-[18px] w-[18px] shrink-0">
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+      <input
+        ref={inputRef}
+        type="text"
+        value={query}
+        placeholder="Search"
+        aria-label="Search the admin"
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onSubmit();
+          if (e.key === "Escape") {
+            setQuery("");
+            e.currentTarget.blur();
+          }
+        }}
+        className="w-full min-w-0 bg-transparent text-[15px] text-white outline-none placeholder:text-[#8f8f8f]"
+      />
+      <kbd className="shrink-0 font-sans text-[13px] text-[#6f6f6f]">⌘K</kbd>
+    </label>
+  );
+}
+
 export default function AdminSidebar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const path = pathname.replace(/\/+$/, "") || "/";
 
   const storeHomeActive = path === BASE;
@@ -450,8 +545,17 @@ export default function AdminSidebar() {
   const [appsOpen, setAppsOpen] = useState(false);
   const settingsActive = isUnder(path, `${BASE}/settings`);
   const navRef = useRef(null);
+  const searchRef = useRef(null);
   const session = useSession();
   const allowed = (item) => !item.permission || can(session, item.permission);
+
+  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const [query, setQuery] = useState("");
+
+  const setRail = (value) => {
+    setCollapsed(value);
+    saveCollapsed(value);
+  };
 
   useSidebarScroll(navRef, path);
 
@@ -475,125 +579,255 @@ export default function AdminSidebar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  const panel = (
-    <div className="flex h-full flex-col">
-      <nav
-        ref={navRef}
-        onScroll={(e) => saveSidebarScroll(e.currentTarget.scrollTop)}
-        aria-label="Admin"
-        className="flex-1 overflow-y-auto scroll-smooth px-3 py-4 [scrollbar-color:rgba(255,255,255,0.14)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
+  // Cmd/Ctrl+K jumps to the search box (opening the rail first if it is collapsed)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (!((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) return;
+      if (!window.matchMedia("(min-width: 768px)").matches) return;
+      e.preventDefault();
+      if (collapsed) {
+        setCollapsed(false);
+        saveCollapsed(false);
+        requestAnimationFrame(() => searchRef.current?.focus());
+      } else {
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [collapsed]);
+
+  // Every page the user may open, flattened for the search box
+  const searchable = [
+    ...menuGroups.flatMap((group) =>
+      group.items
+        .filter(allowed)
+        .flatMap((item) => [
+          { label: item.label, icon: item.icon, href: item.href },
+          ...(item.children || [])
+            .filter(allowed)
+            .map((child) => ({ label: child.label, icon: item.icon, href: child.href })),
+        ])
+    ),
+    { label: "Online Store", icon: "store", href: BASE },
+    ...onlineStoreItems
+      .filter((item) => item.href && allowed(item))
+      .map((item) => ({ label: item.label, icon: item.icon, href: item.href })),
+    { label: "Settings", icon: "settings", href: `${BASE}/settings` },
+  ];
+  const needle = query.trim().toLowerCase();
+  const results = needle ? searchable.filter((r) => r.label.toLowerCase().includes(needle)) : null;
+
+  const go = (href) => {
+    setQuery("");
+    navigate(href);
+  };
+
+  const renderPanel = (drawer) => (
+    <div data-collapsed={!drawer && collapsed} className="group/nav flex h-full flex-col">
+      {/* BRAND + COLLAPSE */}
+      <div
+        className={`flex items-center justify-between px-4 pb-3 pt-4 group-data-[collapsed=true]/nav:flex-col group-data-[collapsed=true]/nav:gap-3 group-data-[collapsed=true]/nav:px-0`}
       >
-        {menuGroups.map((group) => {
-          const items = group.items.filter(allowed).map((item) => {
-            const children = item.children?.filter(allowed);
-            // No visible children: no expand chevron either
-            return item.children
-              ? { ...item, children: children.length ? children : undefined }
-              : item;
-          });
-          if (!items.length) return null;
+        <BrandMark to={`${BASE}/home`} />
+        <button
+          type="button"
+          aria-label={drawer ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={drawer ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          onClick={() => (drawer ? setMobileOpen(false) : setRail(!collapsed))}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#b0b0b0] transition hover:bg-white/10 hover:text-white"
+        >
+          {drawer ? (
+            <svg {...railIcon} className="h-[18px] w-[18px]">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          ) : (
+            <svg {...railIcon} className="h-[18px] w-[18px]">
+              <rect width="18" height="18" x="3" y="3" rx="3" />
+              <path d="M9 3v18" />
+            </svg>
+          )}
+        </button>
+      </div>
 
-          return (
-            <div key={group.label} className="border-b border-white/[0.07] pb-3 pt-3 first:pt-0">
-              <SectionLabel>{group.label}</SectionLabel>
-              <div className="space-y-0.5">
-                {items.map((item) => (
-                  <MenuItem key={item.label} item={item} path={path} />
-                ))}
-              </div>
-            </div>
-          );
-        })}
+      <div className="px-3 pb-3">
+        <NavSearch
+          inputRef={drawer ? undefined : searchRef}
+          query={query}
+          setQuery={setQuery}
+          onSubmit={() => results?.[0] && go(results[0].href)}
+          collapsed={!drawer && collapsed}
+          onExpand={() => {
+            setRail(false);
+            requestAnimationFrame(() => searchRef.current?.focus());
+          }}
+        />
+      </div>
 
-        {/* SALES CHANNELS */}
-        <div className="pt-3">
-          <SectionLabel>Sales channels</SectionLabel>
-
+      <nav
+        ref={drawer ? undefined : navRef}
+        onScroll={drawer ? undefined : (e) => saveSidebarScroll(e.currentTarget.scrollTop)}
+        aria-label="Admin"
+        className="flex-1 overflow-y-auto scroll-smooth px-3 pb-4 [scrollbar-color:rgba(255,255,255,0.14)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
+      >
+        {results ? (
           <div className="space-y-0.5">
-            <div className="relative">
+            <SectionLabel>Results</SectionLabel>
+            {results.length === 0 && (
+              <p className="px-3 py-2 text-sm text-[#7d7d7d]">Nothing matches "{query.trim()}".</p>
+            )}
+            {results.map((r) => (
               <Link
-                to={BASE}
-                aria-current={storeHomeActive ? "page" : undefined}
-                className={`${rowClass(storeHomeActive)} pr-11 ${onlineStoreActive ? "text-white" : ""}`}
+                key={`${r.href}-${r.label}`}
+                to={r.href}
+                onClick={() => setQuery("")}
+                className={rowClass(false)}
               >
-                <NavIcon name="store" />
-                <span className="flex-1 truncate">Online Store</span>
+                <NavIcon name={r.icon} />
+                <Label>{r.label}</Label>
               </Link>
-              <button
-                type="button"
-                aria-label="Toggle Online Store menu"
-                aria-expanded={onlineStoreOpen}
-                onClick={() => setOnlineStoreOpen((v) => !v)}
-                className="group absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md hover:bg-white/10"
-              >
-                <ChevronIcon open={onlineStoreOpen} />
-              </button>
-            </div>
-
-            <Collapse open={onlineStoreOpen}>
-              <div className="space-y-0.5 pl-4">
-                {onlineStoreItems.filter(allowed).map((item) =>
-                  item.href ? (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      aria-current={matches(path, item) ? "page" : undefined}
-                      className={rowClass(matches(path, item))}
-                    >
-                      <NavIcon name={item.icon} />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  ) : (
-                    <div
-                      key={item.label}
-                      title="Coming soon"
-                      className={`${rowClass(false)} cursor-default hover:bg-transparent hover:text-slate-300`}
-                    >
-                      <NavIcon name={item.icon} />
-                      <span className="truncate">{item.label}</span>
-                    </div>
-                  )
-                )}
-              </div>
-            </Collapse>
-
-            <button
-              type="button"
-              aria-expanded={appsOpen}
-              onClick={() => setAppsOpen((v) => !v)}
-              className={rowClass(false)}
-            >
-              <NavIcon name="apps" />
-              <span className="flex-1 truncate">Apps</span>
-              <ChevronIcon open={appsOpen} />
-            </button>
-
-            <Collapse open={appsOpen}>
-              <p className="py-2 pl-[42px] pr-3 text-xs text-slate-500">No apps installed yet.</p>
-            </Collapse>
+            ))}
           </div>
-        </div>
+        ) : (
+          <>
+            {menuGroups.map((group, index) => {
+              const items = group.items.filter(allowed).map((item) => {
+                const children = item.children?.filter(allowed);
+                // No visible children: no expand chevron either
+                return item.children
+                  ? { ...item, children: children.length ? children : undefined }
+                  : item;
+              });
+              if (!items.length) return null;
+
+              return (
+                <div
+                  key={group.label}
+                  className={`${index === 0 ? "" : "pt-5"} group-data-[collapsed=true]/nav:pt-3 group-data-[collapsed=true]/nav:first:pt-0`}
+                >
+                  {/* The first group is the app's core, so it needs no heading */}
+                  {index > 0 && <SectionLabel>{group.label}</SectionLabel>}
+                  <div className="space-y-0.5">
+                    {items.map((item) => (
+                      <MenuItem key={item.label} item={item} path={path} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* SALES CHANNELS */}
+            <div className={`pt-5 group-data-[collapsed=true]/nav:pt-3`}>
+              <SectionLabel>Sales channels</SectionLabel>
+
+              <div className="space-y-0.5">
+                <div className="relative">
+                  <Link
+                    to={BASE}
+                    title="Online Store"
+                    aria-current={storeHomeActive ? "page" : undefined}
+                    className={`${rowClass(storeHomeActive)} pr-11 group-data-[collapsed=true]/nav:pr-0 ${onlineStoreActive ? "text-white" : ""}`}
+                  >
+                    <NavIcon name="store" />
+                    <span className={`flex-1 truncate group-data-[collapsed=true]/nav:hidden`}>
+                      Online Store
+                    </span>
+                  </Link>
+                  <button
+                    type="button"
+                    aria-label="Toggle Online Store menu"
+                    aria-expanded={onlineStoreOpen}
+                    onClick={() => setOnlineStoreOpen((v) => !v)}
+                    className={`group absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg hover:bg-white/10 group-data-[collapsed=true]/nav:hidden`}
+                  >
+                    <ChevronIcon open={onlineStoreOpen} />
+                  </button>
+                </div>
+
+                <Collapse open={onlineStoreOpen}>
+                  <div className="space-y-0.5 pl-4">
+                    {onlineStoreItems.filter(allowed).map((item) => (
+                      <Link
+                        key={item.label}
+                        to={item.href}
+                        aria-current={matches(path, item) ? "page" : undefined}
+                        className={rowClass(matches(path, item))}
+                      >
+                        <NavIcon name={item.icon} />
+                        <Label>{item.label}</Label>
+                      </Link>
+                    ))}
+                  </div>
+                </Collapse>
+
+                <button
+                  type="button"
+                  title="Apps"
+                  aria-expanded={appsOpen}
+                  onClick={() => setAppsOpen((v) => !v)}
+                  className={rowClass(false)}
+                >
+                  <NavIcon name="apps" />
+                  <span className={`flex-1 truncate group-data-[collapsed=true]/nav:hidden`}>
+                    Apps
+                  </span>
+                  <span className={"group-data-[collapsed=true]/nav:hidden"}>
+                    <ChevronIcon open={appsOpen} />
+                  </span>
+                </button>
+
+                <Collapse open={appsOpen}>
+                  <p className="py-2 pl-[42px] pr-3 text-xs text-[#7d7d7d]">
+                    No apps installed yet.
+                  </p>
+                </Collapse>
+              </div>
+            </div>
+          </>
+        )}
       </nav>
 
-      {/* SETTINGS */}
-      <div className="border-t border-white/[0.08] px-3 py-3">
+      {/* SETTINGS + ACCOUNT */}
+      <div className="space-y-2 px-3 pb-3 pt-2">
         <Link
           to={`${BASE}/settings`}
+          title="Settings"
           aria-current={settingsActive ? "page" : undefined}
           className={rowClass(settingsActive)}
         >
           <NavIcon name="settings" />
-          <span>Settings</span>
+          <Label>Settings</Label>
         </Link>
+
+        <div
+          className={`flex items-center gap-1 border-t border-white/[0.08] pt-3 group-data-[collapsed=true]/nav:flex-col group-data-[collapsed=true]/nav:gap-2`}
+        >
+          <div className={`min-w-0 flex-1 group-data-[collapsed=true]/nav:flex-none`}>
+            <StoreSwitcher variant="rail" collapsed={!drawer && collapsed} />
+          </div>
+          <NotificationsButton />
+          <ProfileMenu variant="rail" />
+        </div>
       </div>
     </div>
   );
 
   return (
     <>
-      <aside className="hidden w-[256px] shrink-0 bg-[#0B1020] text-white select-none md:block">
-        {/* Stays in view below the 72px header while long pages scroll */}
-        <div className="sticky top-[72px] h-[calc(100vh-72px)]">{panel}</div>
+      <aside
+        className={`relative z-30 hidden shrink-0 bg-[#0a0a0a] text-white select-none transition-[width] duration-200 ease-out md:block ${
+          collapsed ? "w-[76px]" : "w-[264px]"
+        }`}
+      >
+        {/* Full height of the screen and pinned while long pages scroll */}
+        <div className="sticky top-0 h-screen">
+          {renderPanel(false)}
+          {/* Rounds the content's top-left corner, so the page looks like a sheet laid on the rail */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-4 top-0 h-4 w-4 [background:radial-gradient(circle_at_100%_100%,transparent_16px,#0a0a0a_16.5px)]"
+          />
+        </div>
       </aside>
 
       {mobileOpen && (
@@ -602,10 +836,10 @@ export default function AdminSidebar() {
             type="button"
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/60"
           />
-          <aside className="absolute inset-y-0 left-0 w-[280px] max-w-[85vw] bg-[#0B1020] text-white shadow-2xl select-none">
-            {panel}
+          <aside className="absolute inset-y-0 left-0 w-[290px] max-w-[85vw] bg-[#0a0a0a] text-white shadow-2xl select-none">
+            {renderPanel(true)}
           </aside>
         </div>
       )}
@@ -641,7 +875,7 @@ function useDismiss(ref, open, close) {
 function StoreAvatar({ name, size = "h-7 w-7 text-xs" }) {
   return (
     <span
-      className={`flex shrink-0 items-center justify-center rounded-lg bg-[#3B3F8F] font-bold uppercase text-white ${size}`}
+      className={`flex shrink-0 items-center justify-center rounded-lg bg-[#a23bd1] font-bold uppercase text-white ${size}`}
     >
       {(name || "S").trim().charAt(0)}
     </span>
@@ -853,7 +1087,8 @@ function StoresDialog({ stores, activeId, onClose }) {
 }
 
 // Current store name next to the logo; lists every store, switches between them, and creates new ones
-function StoreSwitcher() {
+function StoreSwitcher({ variant = "bar", collapsed = false }) {
+  const rail = variant === "rail";
   const navigate = useNavigate();
   const session = useSession();
   const stores = session?.stores || [];
@@ -888,24 +1123,41 @@ function StoreSwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 min-w-0 items-center gap-2 rounded-lg border border-[#E4DEFB] bg-white px-2 hover:border-[#C9D1DD] hover:bg-[#F5F3FF] transition"
+        title={rail ? active?.storeName || "No store yet" : undefined}
+        className={
+          rail
+            ? `flex h-11 w-full min-w-0 items-center gap-2.5 rounded-xl px-1.5 text-white transition hover:bg-white/[0.06] ${collapsed ? "justify-center" : ""}`
+            : "flex h-10 min-w-0 items-center gap-2 rounded-lg border border-[#E4DEFB] bg-white px-2 hover:border-[#C9D1DD] hover:bg-[#F5F3FF] transition"
+        }
       >
-        <StoreAvatar name={active?.storeName} />
-        <span className="hidden max-w-[160px] truncate text-sm font-semibold text-[#0B1020] sm:inline">
-          {active?.storeName || "No store yet"}
-        </span>
-        <svg
-          {...headerIcon}
-          className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+        <StoreAvatar name={active?.storeName} size={rail ? "h-8 w-8 text-xs" : "h-7 w-7 text-xs"} />
+        {!collapsed && (
+          <span
+            className={
+              rail
+                ? "min-w-0 flex-1 truncate text-left text-[15px] font-semibold"
+                : "hidden max-w-[160px] truncate text-sm font-semibold text-[#0B1020] sm:inline"
+            }
+          >
+            {active?.storeName || "No store yet"}
+          </span>
+        )}
+        {!rail && (
+          <svg
+            {...headerIcon}
+            className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        )}
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-[calc(100%+8px)] z-50 w-64 rounded-xl border border-[#E4DEFB] bg-white p-1.5 shadow-lg shadow-[#0B1020]/10"
+          className={`absolute left-0 z-50 w-64 rounded-xl border border-[#E4DEFB] bg-white p-1.5 text-[#0B1020] shadow-lg shadow-[#0B1020]/10 ${
+            rail ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
+          }`}
         >
           <p className="px-2.5 pb-1 pt-1.5 text-xs font-medium uppercase tracking-wide text-[#8B8FB8]">
             Your stores
@@ -988,7 +1240,8 @@ function StoreSwitcher() {
 }
 
 // Avatar + name; opens a small menu with Profile, Settings and Logout
-function ProfileMenu() {
+function ProfileMenu({ variant = "bar" }) {
+  const rail = variant === "rail";
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
@@ -1014,24 +1267,40 @@ function ProfileMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-11 items-center gap-2.5 rounded-full py-1 pl-1 pr-2 hover:bg-[#F3F0FF] transition sm:pr-3"
+        aria-label={rail ? "Account" : undefined}
+        title={rail ? "Account" : undefined}
+        className={
+          rail
+            ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-white/[0.08]"
+            : "flex h-11 items-center gap-2.5 rounded-full py-1 pl-1 pr-2 hover:bg-[#F3F0FF] transition sm:pr-3"
+        }
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0B1020] text-sm font-semibold text-white">
+        <span
+          className={`flex items-center justify-center rounded-full text-sm font-semibold ${
+            rail ? "h-7 w-7 bg-white text-xs text-[#0a0a0a]" : "h-9 w-9 bg-[#0B1020] text-white"
+          }`}
+        >
           A
         </span>
-        <span className="hidden sm:inline text-sm font-medium text-[#0B1020]">Admin</span>
-        <svg
-          {...headerIcon}
-          className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+        {!rail && (
+          <>
+            <span className="hidden sm:inline text-sm font-medium text-[#0B1020]">Admin</span>
+            <svg
+              {...headerIcon}
+              className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </>
+        )}
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+8px)] w-48 rounded-xl border border-[#E4DEFB] bg-white p-1.5 shadow-lg shadow-[#0B1020]/10"
+          className={`absolute z-50 w-48 rounded-xl border border-[#E4DEFB] bg-white p-1.5 text-[#0B1020] shadow-lg shadow-[#0B1020]/10 ${
+            rail ? "bottom-[calc(100%+8px)] left-0" : "right-0 top-[calc(100%+8px)]"
+          }`}
         >
           <Link
             role="menuitem"
@@ -1075,7 +1344,28 @@ function ProfileMenu() {
   );
 }
 
-// Top bar shown on every admin page, above the sidebar (72px tall; the sidebar is pinned below it)
+function NotificationsButton({ tone = "rail" }) {
+  return (
+    <button
+      type="button"
+      aria-label="Notifications"
+      title="Notifications"
+      className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
+        tone === "rail"
+          ? "text-[#b0b0b0] hover:bg-white/[0.08] hover:text-white"
+          : "text-white hover:bg-white/10"
+      }`}
+    >
+      <svg {...headerIcon} className="h-5 w-5">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+      </svg>
+      <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-[#0a0a0a]" />
+    </button>
+  );
+}
+
+// Top bar on phones and tablets only (the sidebar carries brand, search and account from md up)
 export function AdminHeader() {
   // Back from "View store": return to where the user was on this page
   useEffect(() => {
@@ -1086,59 +1376,20 @@ export function AdminHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 flex h-[72px] items-center gap-3 border-b border-[#EEF0F4] bg-white px-4 text-[#0B1020] shadow-[0_1px_8px_rgba(20,27,45,0.05)] sm:gap-6 sm:px-7">
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-3 bg-[#0a0a0a] px-3 text-white md:hidden">
       <button
         type="button"
         aria-label="Open menu"
         onClick={() => window.dispatchEvent(new Event(ADMIN_NAV_EVENT))}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#0B1020] transition hover:bg-[#F3F0FF] md:hidden"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white transition hover:bg-white/10"
       >
         <svg {...headerIcon} className="h-5 w-5">
           <path d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      <Link to={`${BASE}/home`} className="flex shrink-0 items-center gap-2.5">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0B1020] text-xl font-extrabold text-white">
-          S
-        </span>
-        <span className="hidden text-[22px] font-extrabold tracking-tight lg:inline">Store</span>
-      </Link>
-
-      <StoreSwitcher />
-
-      {/* Search: grows to fill the middle, narrower on small screens */}
-      <div className="flex flex-1 justify-center">
-        <label className="group flex h-11 w-full max-w-[560px] items-center gap-2.5 rounded-full border border-transparent bg-[#F3F5F8] px-4 transition focus-within:border-[#0B1020]/40 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(20,27,45,0.08)]">
-          <svg
-            {...headerIcon}
-            className="h-[18px] w-[18px] shrink-0 text-slate-500 group-focus-within:text-[#0B1020]"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search anything..."
-            className="w-full min-w-0 bg-transparent text-sm text-[#0B1020] outline-none placeholder:text-slate-500"
-          />
-        </label>
-      </div>
-
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-full text-[#0B1020] hover:bg-[#F3F0FF] transition"
-        >
-          <svg {...headerIcon} className="h-5 w-5">
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-          </svg>
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-        </button>
-
-        <ProfileMenu />
-      </div>
+      <BrandMark to={`${BASE}/home`} />
+      <div className="flex-1" />
+      <NotificationsButton tone="header" />
     </header>
   );
 }

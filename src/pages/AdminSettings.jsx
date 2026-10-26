@@ -1066,7 +1066,7 @@ export default function AdminSettings() {
           SETTINGS BODY
           ===================================================== */}
 
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <div className="min-w-0 flex-1">

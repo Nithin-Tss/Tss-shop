@@ -126,6 +126,20 @@ function LivePreview({ theme, swatches, ratio = 0.62, className = "" }) {
 
 const smallButton =
   "inline-flex h-8 items-center rounded-lg border border-[#DDD6FE] bg-white px-3 text-[13px] font-medium text-[#0B1020] transition hover:border-[#0B1020] disabled:opacity-50";
+// View-only copy of a theme, opened as a website in a new tab
+function OpenThemeLink({ theme, className }) {
+  return (
+    <a
+      href={`/admin/online-store/view/${theme.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+    >
+      Open theme
+    </a>
+  );
+}
+
 const primaryButton =
   "inline-flex h-8 items-center rounded-lg bg-[#0B1020] px-3 text-[13px] font-semibold text-white transition hover:bg-[#1C2347] disabled:opacity-50";
 
@@ -317,6 +331,11 @@ export default function OnlineStorePage() {
     navigate(theme.published ? to : `${to}?theme=${theme.id}`);
   };
 
+  // The code editor opens in its own tab; a draft is named in the URL, so this tab's choice is untouched
+  const openInTab = (theme, to) => {
+    window.open(theme.published ? to : `${to}?theme=${theme.id}`, "_blank", "noopener,noreferrer");
+  };
+
   const publish = (theme) => {
     if (
       !window.confirm(
@@ -376,7 +395,7 @@ export default function OnlineStorePage() {
     <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
 
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="flex min-w-0 flex-1 flex-col bg-[#F7F7F8]">
@@ -443,31 +462,37 @@ export default function OnlineStorePage() {
                         {timeAgo(live.updated_at)}
                       </p>
                     </div>
-                    {canEditTheme && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          className="inline-flex h-8 items-center rounded-lg bg-white px-3 text-[13px] font-semibold text-[#0B1020] transition hover:bg-[#EDE9FE]"
-                          onClick={() => open(live, "/admin/online-store/customize")}
-                        >
-                          Edit theme
-                        </button>
-                        <ThemeMenu
-                          theme={live}
-                          full={full}
-                          dark
-                          onCode={() => open(live, "/editor-demo")}
-                          onRename={() => {
-                            setDialogError("");
-                            setDialog({ kind: "rename", theme: live });
-                          }}
-                          onCopy={() => {
-                            setDialogError("");
-                            setDialog({ kind: "copy", theme: live });
-                          }}
-                        />
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <OpenThemeLink
+                        theme={live}
+                        className="inline-flex h-8 items-center rounded-lg border border-white/40 px-3 text-[13px] font-semibold text-white transition hover:bg-white/10"
+                      />
+                      {canEditTheme && (
+                        <>
+                          <button
+                            type="button"
+                            className="inline-flex h-8 items-center rounded-lg bg-white px-3 text-[13px] font-semibold text-[#0B1020] transition hover:bg-[#EDE9FE]"
+                            onClick={() => open(live, "/admin/online-store/customize")}
+                          >
+                            Edit theme
+                          </button>
+                          <ThemeMenu
+                            theme={live}
+                            full={full}
+                            dark
+                            onCode={() => openInTab(live, "/editor-demo")}
+                            onRename={() => {
+                              setDialogError("");
+                              setDialog({ kind: "rename", theme: live });
+                            }}
+                            onCopy={() => {
+                              setDialogError("");
+                              setDialog({ kind: "copy", theme: live });
+                            }}
+                          />
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </section>
@@ -519,39 +544,42 @@ export default function OnlineStorePage() {
                               Added: {formatAdded(theme.updated_at)}
                             </p>
                           </div>
-                          {canEditTheme && (
-                            <div className="flex shrink-0 items-center gap-1.5">
-                              <button
-                                type="button"
-                                className={smallButton}
-                                disabled={Boolean(busy)}
-                                onClick={() => publish(theme)}
-                              >
-                                Publish
-                              </button>
-                              <button
-                                type="button"
-                                className={smallButton}
-                                onClick={() => open(theme, "/admin/online-store/customize")}
-                              >
-                                Edit theme
-                              </button>
-                              <ThemeMenu
-                                theme={theme}
-                                full={full}
-                                onCode={() => open(theme, "/editor-demo")}
-                                onRename={() => {
-                                  setDialogError("");
-                                  setDialog({ kind: "rename", theme });
-                                }}
-                                onCopy={() => {
-                                  setDialogError("");
-                                  setDialog({ kind: "copy", theme });
-                                }}
-                                onDelete={() => remove(theme)}
-                              />
-                            </div>
-                          )}
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <OpenThemeLink theme={theme} className={smallButton} />
+                            {canEditTheme && (
+                              <>
+                                <button
+                                  type="button"
+                                  className={smallButton}
+                                  disabled={Boolean(busy)}
+                                  onClick={() => publish(theme)}
+                                >
+                                  Publish
+                                </button>
+                                <button
+                                  type="button"
+                                  className={smallButton}
+                                  onClick={() => open(theme, "/admin/online-store/customize")}
+                                >
+                                  Edit theme
+                                </button>
+                                <ThemeMenu
+                                  theme={theme}
+                                  full={full}
+                                  onCode={() => openInTab(theme, "/editor-demo")}
+                                  onRename={() => {
+                                    setDialogError("");
+                                    setDialog({ kind: "rename", theme });
+                                  }}
+                                  onCopy={() => {
+                                    setDialogError("");
+                                    setDialog({ kind: "copy", theme });
+                                  }}
+                                  onDelete={() => remove(theme)}
+                                />
+                              </>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>

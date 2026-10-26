@@ -71,7 +71,7 @@ export default function AdminAbandonedCheckouts() {
   return (
     <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
       <AdminHeader />
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">

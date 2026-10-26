@@ -404,7 +404,7 @@ export default function AdminOrderDetails() {
     return (
       <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
         <AdminHeader />
-        <div className="flex min-h-[calc(100vh-72px)]">
+        <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
           <AdminSidebar />
           <main className="flex-1 px-4 sm:px-8 py-6 max-w-full">
             <div className="animate-pulse space-y-6">
@@ -431,7 +431,7 @@ export default function AdminOrderDetails() {
     return (
       <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
         <AdminHeader />
-        <div className="flex min-h-[calc(100vh-72px)]">
+        <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
           <AdminSidebar />
           <main className="flex-1 px-4 sm:px-8 py-16 flex flex-col items-center justify-center">
             <div className="bg-white p-8 rounded-2xl border border-[#E4DEFB] text-center max-w-md shadow-sm">
@@ -457,7 +457,7 @@ export default function AdminOrderDetails() {
     <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
       <AdminHeader />
 
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">

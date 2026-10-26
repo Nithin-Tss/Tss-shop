@@ -399,7 +399,7 @@ export default function AdminCustomers() {
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         {/* SIDEBAR */}
         <AdminSidebar />
 

@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
       <AdminHeader />
 
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 overflow-x-hidden">

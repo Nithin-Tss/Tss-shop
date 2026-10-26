@@ -2519,7 +2519,7 @@ export default function AdminCustomizePage() {
                         inert={panelView !== 0}
                         aria-hidden={panelView !== 0}
                       >
-                        <h2 className="px-4 pb-3 pt-4 text-sm font-semibold text-charcoal-navy">
+                        <h2 className="px-4 pb-3 pt-4 text-[15px] font-bold text-[#303030]">
                           {pageLabel(page)}
                         </h2>
 
@@ -2579,12 +2579,12 @@ export default function AdminCustomizePage() {
                                 {lineHere && <DropLine after={dropTarget.after} />}
 
                                 <div
-                                  className={`group flex h-9 items-center gap-2 rounded-md pl-1.5 pr-1 text-sm ${
+                                  className={`group flex h-8 items-center gap-2 rounded-lg pl-1.5 pr-1 text-[13px] ${
                                     blockInto
-                                      ? "bg-[#EDE9FE] ring-1 ring-[#0B1020]/30"
+                                      ? "bg-[#f1f1f1] ring-1 ring-[#005bd3]/50"
                                       : isSelected
-                                        ? "bg-[#EDE9FE]"
-                                        : "hover:bg-[#F5F6F8]"
+                                        ? "bg-[#f1f1f1]"
+                                        : "hover:bg-[#f7f7f7]"
                                   }`}
                                 >
                                   {/* The type icon turns into the drag handle on hover */}
@@ -2837,7 +2837,7 @@ export default function AdminCustomizePage() {
                             <button
                               type="button"
                               onClick={() => setAdding(true)}
-                              className="flex h-9 w-full items-center gap-2 rounded-md px-1.5 text-sm font-medium text-[#3B3F8F] hover:bg-[#F5F6F8] hover:text-charcoal-navy"
+                              className="flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-[13px] font-medium text-[#005bd3] hover:bg-[#f7f7f7] hover:text-[#003d99]"
                             >
                               <span
                                 className="flex h-5 w-5 items-center justify-center"

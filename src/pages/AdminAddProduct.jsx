@@ -1155,7 +1155,7 @@ export function ProductForm({ productId }) {
     return (
       <div className="min-h-screen bg-white text-slate-900">
         <AdminHeader />
-        <div className="flex min-h-[calc(100vh-72px)]">
+        <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
           <AdminSidebar />
           <main className="flex-1 min-w-0 bg-white px-4 sm:px-6 py-10">
             {loading ? (
@@ -1178,7 +1178,7 @@ export function ProductForm({ productId }) {
     <div className="min-h-screen bg-white text-slate-900">
       <AdminHeader />
 
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="flex-1 min-w-0 bg-white">

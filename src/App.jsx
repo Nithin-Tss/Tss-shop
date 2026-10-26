@@ -11,6 +11,7 @@ const Account = lazy(() => import("@/pages/Account"));
 const OrderHistory = lazy(() => import("@/pages/OrderHistory"));
 const EditorDemo = lazy(() => import("@/pages/EditorDemo"));
 const AdminOnlineStore = lazy(() => import("@/pages/AdminOnlineStore"));
+const ThemeView = lazy(() => import("@/pages/ThemeView"));
 const AdminCustomize = lazy(() => import("@/pages/AdminCustomize"));
 const AdminSettings = lazy(() => import("@/pages/AdminSettings"));
 const AdminHome = lazy(() => import("@/pages/AdminHome"));
@@ -87,6 +88,7 @@ export default function App() {
           {/* Pages a role may not have (see can() in lib/auth.js); the API refuses them anyway */}
           <Route element={<RequirePermission permission="themes.view" />}>
             <Route path="/admin/online-store" element={<AdminOnlineStore />} />
+            <Route path="/admin/online-store/view/:themeId" element={<ThemeView />} />
           </Route>
           <Route element={<RequirePermission permission="themes.manage" />}>
             <Route

@@ -166,7 +166,7 @@ export default function AdminPages() {
   return (
     <div className="min-h-screen bg-white text-[#0B1020]">
       <AdminHeader />
-      <div className="flex min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
         <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 sm:px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
