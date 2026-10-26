@@ -138,6 +138,10 @@ export default function App() {
             />
             <Route path="/admin/online-store/catalogues/new" element={<AdminAddCatalogue />} />
             <Route path="/admin/online-store/catalogs/new" element={<AdminAddCatalogue />} />
+            <Route
+              path="/admin/online-store/catalogues/:catalogueId"
+              element={<AdminAddCatalogue />}
+            />
           </Route>
           <Route element={<RequirePermission permission="inventory.view" />}>
             <Route path="/admin/online-store/inventory" element={<AdminInventory />} />

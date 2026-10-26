@@ -1,21 +1,29 @@
-import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import AssignMarketsModal from "@/components/AssignMarketsModal";
+import { apiGet, apiPatch, apiPost } from "@/lib/api";
+import { useCan } from "@/lib/auth";
+
+const CATALOGUES = "/api/v1/catalog/catalogues/";
+const CURRENCIES = ["USD", "EUR", "GBP", "AUD", "CAD", "INR"];
 
 export default function AdminAddCatalogue() {
   const navigate = useNavigate();
+  const { catalogueId } = useParams();
+  const canManage = useCan("products.manage");
 
   // General Information State
   const [title, setTitle] = useState("");
-  const [status, setStatus] = useState("Active");
+  const [status, setStatus] = useState("active");
   const [markets, setMarkets] = useState([]);
   const [isMarketModalOpen, setIsMarketModalOpen] = useState(false);
 
   // Pricing State
-  const [currency, setCurrency] = useState("Store currency (AUD $)");
+  // Blank means the store's own currency
+  const [currency, setCurrency] = useState("");
   const [priceAdjustment, setPriceAdjustment] = useState("0");
-  const [adjustmentDirection, setAdjustmentDirection] = useState("Decrease");
+  const [adjustmentDirection, setAdjustmentDirection] = useState("decrease");
   const [includeCompareAtPrice, setIncludeCompareAtPrice] = useState(false);
 
   // Products Section State
@@ -29,6 +37,134 @@ export default function AdminAddCatalogue() {
   const [sortBy, setSortBy] = useState("title"); // "title" | "created"
   const [sortDirection, setSortDirection] = useState("asc"); // "asc" | "desc"
   const sortMenuRef = useRef(null);
+
+  // Feedback Toast
+  const [toastMessage, setToastMessage] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Products of the store, and which ones this catalog holds.
+  // Included = not excluded, and (picked, or "automatically include" is on).
+  const [products, setProducts] = useState([]);
+  const [picked, setPicked] = useState(() => new Set());
+  const [excluded, setExcluded] = useState(() => new Set());
+  const [loading, setLoading] = useState(true);
+  const importRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [prods, existing] = await Promise.all([
+        apiGet("/api/v1/catalog/products/"),
+        catalogueId ? apiGet(`${CATALOGUES}${catalogueId}/`) : Promise.resolve(null),
+      ]);
+      if (cancelled) return;
+      if (prods.ok) setProducts(prods.data?.results ?? prods.data ?? []);
+      if (existing?.ok) {
+        const c = existing.data;
+        setTitle(c.name);
+        setStatus(c.status);
+        setMarkets(c.markets);
+        setCurrency(c.currency_code);
+        setPriceAdjustment(String(Number(c.price_adjustment)));
+        setAdjustmentDirection(c.adjustment_direction);
+        setIncludeCompareAtPrice(c.include_compare_at_price);
+        setAutoIncludeNewProducts(c.auto_include_new_products);
+        setPicked(new Set(c.products));
+        setExcluded(new Set(c.excluded_products));
+      } else if (existing) {
+        showToast(existing.error);
+      }
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [catalogueId]);
+
+  const isIncluded = (id) => !excluded.has(id) && (autoIncludeNewProducts || picked.has(id));
+
+  const toggleProduct = (id) => {
+    const nextPicked = new Set(picked);
+    const nextExcluded = new Set(excluded);
+    if (isIncluded(id)) {
+      nextPicked.delete(id);
+      nextExcluded.add(id);
+    } else {
+      nextExcluded.delete(id);
+      nextPicked.add(id);
+    }
+    setPicked(nextPicked);
+    setExcluded(nextExcluded);
+  };
+
+  const visibleProducts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const direction = sortDirection === "asc" ? 1 : -1;
+    const key = (p) => (sortBy === "created" ? (p.createdAt ?? "") : (p.title ?? "").toLowerCase());
+    return products
+      .filter((p) => (p.title ?? "").toLowerCase().includes(q))
+      .filter((p) => activeTab === "all" || (activeTab === "included") === isIncluded(p.id))
+      .sort((a, b) => (key(a) < key(b) ? -direction : key(a) > key(b) ? direction : 0));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    products,
+    searchQuery,
+    activeTab,
+    sortBy,
+    sortDirection,
+    picked,
+    excluded,
+    autoIncludeNewProducts,
+  ]);
+
+  // The product's base price with this catalog's percentage applied
+  const adjustedPrice = (price) => {
+    const base = Number(price);
+    if (!Number.isFinite(base)) return "—";
+    const pct = (Number(priceAdjustment) || 0) / 100;
+    return (base * (adjustmentDirection === "increase" ? 1 + pct : 1 - pct)).toFixed(2);
+  };
+
+  // Included products as CSV: Title,Price
+  const handleExportProducts = () => {
+    const rows = products
+      .filter((p) => isIncluded(p.id))
+      .map((p) => `"${String(p.title).replace(/"/g, '""')}",${adjustedPrice(p.price)}`);
+    if (!rows.length) return showToast("No included products to export.");
+    const blob = new Blob(["Title,Price\n" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "catalog-products.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // A CSV whose first column is the product title: matching products become included
+  const handleImportProducts = async (file) => {
+    const titles = new Set(
+      (await file.text())
+        .split(/\r?\n/)
+        .slice(1)
+        .map((line) => line.split(",")[0].replace(/^"|"$/g, "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+    const matched = products.filter((p) => titles.has((p.title ?? "").toLowerCase()));
+    const nextPicked = new Set(picked);
+    const nextExcluded = new Set(excluded);
+    matched.forEach((p) => {
+      nextPicked.add(p.id);
+      nextExcluded.delete(p.id);
+    });
+    setPicked(nextPicked);
+    setExcluded(nextExcluded);
+    showToast(`${matched.length} of ${titles.size} products matched.`);
+  };
 
   // Close sort menu on click outside
   useEffect(() => {
@@ -45,38 +181,41 @@ export default function AdminAddCatalogue() {
     };
   }, [isSortOpen]);
 
-  // Feedback Toast
-  const [toastMessage, setToastMessage] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
   const handleRemoveMarket = (index) => {
     setMarkets((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       showToast("Please enter a catalog title.");
       return;
     }
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      showToast("Catalog saved successfully.");
-      setTimeout(() => {
-        navigate("/admin/online-store/catalogues");
-      }, 500);
-    }, 400);
+    const body = {
+      name: title.trim(),
+      status,
+      markets,
+      currency_code: currency,
+      price_adjustment: String(Number(priceAdjustment) || 0),
+      adjustment_direction: adjustmentDirection,
+      include_compare_at_price: includeCompareAtPrice,
+      auto_include_new_products: autoIncludeNewProducts,
+      products: [...picked].filter((id) => !excluded.has(id)),
+      excluded_products: [...excluded],
+    };
+    const res = catalogueId
+      ? await apiPatch(`${CATALOGUES}${catalogueId}/`, body)
+      : await apiPost(CATALOGUES, body);
+    setIsSaving(false);
+    if (!res.ok) {
+      showToast(res.formError || Object.values(res.fieldErrors)[0] || "Couldn't save the catalog.");
+      return;
+    }
+    showToast("Catalog saved successfully.");
+    setTimeout(() => navigate("/admin/online-store/catalogues"), 500);
   };
 
-  // Currency code extractor (e.g. "AUD", "USD")
-  const currencyCode = currency.includes("(")
-    ? currency.substring(currency.indexOf("(") + 1, currency.indexOf("(") + 4)
-    : "AUD";
+  const currencyCode = currency || "store currency";
 
   return (
     <div className="min-h-screen bg-white text-[#1A1A1A]">
@@ -118,7 +257,9 @@ export default function AdminAddCatalogue() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                 </Link>
-                <h1 className="text-[20px] font-bold text-[#1A1A1A] tracking-tight">New catalog</h1>
+                <h1 className="text-[20px] font-bold text-[#1A1A1A] tracking-tight">
+                  {catalogueId ? title || "Catalog" : "New catalog"}
+                </h1>
               </div>
 
               <div className="flex items-center gap-2">
@@ -132,7 +273,7 @@ export default function AdminAddCatalogue() {
                 <button
                   type="button"
                   onClick={handleSave}
-                  disabled={isSaving}
+                  disabled={isSaving || loading || !canManage}
                   className="rounded-lg bg-[#1A1A1A] px-4 py-1.5 text-sm font-medium text-white shadow-xs hover:bg-[#303030] transition disabled:opacity-50"
                 >
                   {isSaving ? "Saving..." : "Save"}
@@ -182,8 +323,8 @@ export default function AdminAddCatalogue() {
                       onChange={(e) => setStatus(e.target.value)}
                       className="appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-2 pr-8 text-sm font-medium text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
                     >
-                      <option value="Active">Active</option>
-                      <option value="Draft">Draft</option>
+                      <option value="active">Active</option>
+                      <option value="draft">Draft</option>
                     </select>
                     <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5C5F62]">
                       ↕
@@ -265,11 +406,12 @@ export default function AdminAddCatalogue() {
                     onChange={(e) => setCurrency(e.target.value)}
                     className="w-full sm:w-auto min-w-60 appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-2 pr-8 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
                   >
-                    <option value="Store currency (AUD $)">Store currency (AUD $)</option>
-                    <option value="Store currency (USD $)">Store currency (USD $)</option>
-                    <option value="Store currency (CAD $)">Store currency (CAD $)</option>
-                    <option value="Store currency (EUR €)">Store currency (EUR €)</option>
-                    <option value="Store currency (GBP £)">Store currency (GBP £)</option>
+                    <option value="">Store currency</option>
+                    {CURRENCIES.map((code) => (
+                      <option key={code} value={code}>
+                        {code}
+                      </option>
+                    ))}
                   </select>
                   <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#5C5F62]">
                     ⌄
@@ -306,8 +448,8 @@ export default function AdminAddCatalogue() {
                       onChange={(e) => setAdjustmentDirection(e.target.value)}
                       className="appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-1.5 pr-8 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
                     >
-                      <option value="Decrease">Decrease</option>
-                      <option value="Increase">Increase</option>
+                      <option value="decrease">Decrease</option>
+                      <option value="increase">Increase</option>
                     </select>
                     <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5C5F62]">
                       ↕
@@ -377,18 +519,28 @@ export default function AdminAddCatalogue() {
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => showToast("Export will be available when products are added.")}
+                      onClick={handleExportProducts}
                       className="rounded-lg bg-[#EFEFEF] px-3 py-1 text-xs font-medium text-[#8C9196] hover:bg-[#E4E5E7] hover:text-[#1A1A1A] transition"
                     >
                       Export
                     </button>
                     <button
                       type="button"
-                      onClick={() => showToast("Import will be available when products are added.")}
+                      onClick={() => importRef.current?.click()}
                       className="rounded-lg bg-[#EFEFEF] px-3 py-1 text-xs font-medium text-[#8C9196] hover:bg-[#E4E5E7] hover:text-[#1A1A1A] transition"
                     >
                       Import
                     </button>
+                    <input
+                      ref={importRef}
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleImportProducts(e.target.files[0]);
+                        e.target.value = "";
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -640,35 +792,40 @@ export default function AdminAddCatalogue() {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Empty table state ready for dynamic integration */}
-                    <tr>
-                      <td colSpan={5} className="py-16 text-center">
-                        <div className="flex flex-col items-center justify-center">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F1F2F4] text-[#8C9196] mb-3">
-                            <svg
-                              className="h-6 w-6"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.6"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                              />
-                            </svg>
-                          </div>
+                    {visibleProducts.map((p) => (
+                      <tr key={p.id} className="border-b border-[#F1F2F4] hover:bg-[#F6F6F7]">
+                        <td className="w-10 px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={isIncluded(p.id)}
+                            onChange={() => toggleProduct(p.id)}
+                            aria-label={`Include ${p.title}`}
+                            className="h-4 w-4 rounded border-[#D2D5D8] text-[#1A1A1A]"
+                          />
+                        </td>
+                        <td className="px-4 py-3 font-medium text-[#1A1A1A]">{p.title}</td>
+                        <td className="px-4 py-3">{adjustedPrice(p.price)}</td>
+                        <td className="px-4 py-3 text-[#5C5F62]">—</td>
+                        <td className="px-4 py-3 text-right text-xs text-[#5C5F62]">
+                          {Number(priceAdjustment) > 0
+                            ? `${priceAdjustment}% ${adjustmentDirection}`
+                            : "None"}
+                        </td>
+                      </tr>
+                    ))}
+                    {!visibleProducts.length && (
+                      <tr>
+                        <td colSpan={5} className="py-16 text-center">
                           <p className="text-sm font-medium text-[#1A1A1A]">
-                            No products in this catalog yet
+                            {loading
+                              ? "Loading products…"
+                              : products.length
+                                ? "No products match"
+                                : "No products in this store yet"}
                           </p>
-                          <p className="mt-1 text-xs text-[#5C5F62] max-w-sm">
-                            When products are added to this catalog, they will appear here with
-                            custom pricing and comparison rates.
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>

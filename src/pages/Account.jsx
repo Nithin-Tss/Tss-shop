@@ -174,12 +174,12 @@ export default function AccountPage() {
     setIsResending(true);
     setMessage("");
     try {
-      const result = await apiPost("/api/v1/auth/verify-email/send/", {});
+      const result = await apiPost("/api/v1/auth/verify-email/resend/", {});
       if (result.ok) {
-        setMessage("Verification link sent. Please check your inbox.");
+        setMessage(result.data?.message || "Verification link sent. Please check your inbox.");
       } else {
         setErrors({
-          form: result.error || "Unable to send verification link.",
+          form: result.formError || "Unable to send verification link.",
         });
       }
     } finally {

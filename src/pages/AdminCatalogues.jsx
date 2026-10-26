@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import { apiDelete, apiGet, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
 
 // Shopify Polaris CatalogIcon (20x20 viewBox)
@@ -93,21 +94,51 @@ function CatalogsIllustration() {
   );
 }
 
+const CATALOGUES = "/api/v1/catalog/catalogues/";
+
+const titleCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+const formatDate = (iso) =>
+  new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+// Minimal CSV reader (quoted fields, "" escapes, newlines inside quotes)
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else if (c === '"') quoted = false;
+      else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") {
+      row.push(field);
+      field = "";
+    } else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field);
+      field = "";
+      if (row.some((f) => f.trim())) rows.push(row);
+      row = [];
+    } else field += c;
+  }
+  row.push(field);
+  if (row.some((f) => f.trim())) rows.push(row);
+  return rows;
+}
+
 export default function CataloguesPage() {
   const canManage = useCan("products.manage");
 
-  // Dynamic catalogues list state
   const [catalogues, setCatalogues] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-
-  // Form fields for new catalog
-  const [newTitle, setNewTitle] = useState("");
-  const [newStatus, setNewStatus] = useState("Active");
-  const [newDescription, setNewDescription] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -116,35 +147,23 @@ export default function CataloguesPage() {
     }, 3000);
   };
 
-  const handleSaveCatalogue = (e) => {
-    e.preventDefault();
-    if (!newTitle.trim()) return;
+  const load = useCallback(async () => {
+    const res = await apiGet(CATALOGUES);
+    if (res.ok) setCatalogues(res.data?.results ?? res.data ?? []);
+    else showToast(res.error);
+    setLoading(false);
+  }, []);
 
-    setIsSubmitting(true);
-    const newRecord = {
-      id: Date.now().toString(),
-      name: newTitle.trim(),
-      status: newStatus,
-      description: newDescription.trim(),
-      productsCount: 0,
-      createdAt: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-    };
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
 
-    setCatalogues((prev) => [newRecord, ...prev]);
-    setNewTitle("");
-    setNewDescription("");
-    setNewStatus("Active");
-    setIsSubmitting(false);
-    setIsCreateModalOpen(false);
-    showToast("Catalog created successfully.");
-  };
-
-  const handleDeleteCatalogue = (id) => {
-    setCatalogues((prev) => prev.filter((item) => item.id !== id));
+  const handleDeleteCatalogue = async (cat) => {
+    if (!window.confirm(`Delete "${cat.name}"?`)) return;
+    const res = await apiDelete(`${CATALOGUES}${cat.id}/`);
+    if (!res.ok) return showToast(res.error);
+    setCatalogues((prev) => prev.filter((item) => item.id !== cat.id));
     showToast("Catalog deleted.");
   };
 
@@ -153,11 +172,13 @@ export default function CataloguesPage() {
       showToast("No catalogs available to export.");
       return;
     }
+    const cell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
     const headers = "ID,Name,Status,Description,Created At\n";
     const rows = catalogues
-      .map(
-        (c) =>
-          `"${c.id}","${c.name.replace(/"/g, '""')}","${c.status}","${(c.description || "").replace(/"/g, '""')}","${c.createdAt}"`
+      .map((c) =>
+        [c.id, c.name, titleCase(c.status), c.description, formatDate(c.created_at)]
+          .map(cell)
+          .join(",")
       )
       .join("\n");
     const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
@@ -170,6 +191,31 @@ export default function CataloguesPage() {
     a.remove();
     URL.revokeObjectURL(url);
     showToast("Catalogs exported successfully.");
+  };
+
+  // Creates one catalog per row; needs a Name column, Status and Description are optional
+  const handleImport = async (file) => {
+    const [header = [], ...rows] = parseCsv(await file.text());
+    const column = (name) => header.findIndex((h) => h.trim().toLowerCase() === name);
+    const [nameAt, statusAt, descriptionAt] = ["name", "status", "description"].map(column);
+    if (nameAt < 0) return showToast("The CSV needs a Name column.");
+
+    let created = 0;
+    for (const row of rows) {
+      const name = row[nameAt]?.trim();
+      if (!name) continue;
+      const status =
+        statusAt >= 0 && row[statusAt]?.trim().toLowerCase() === "draft" ? "draft" : "active";
+      const res = await apiPost(CATALOGUES, {
+        name,
+        status,
+        description: descriptionAt >= 0 ? (row[descriptionAt] ?? "").trim() : "",
+      });
+      if (res.ok) created++;
+    }
+    setIsImportModalOpen(false);
+    showToast(`Imported ${created} of ${rows.length} catalogs.`);
+    load();
   };
 
   const filteredCatalogues = catalogues.filter((cat) =>
@@ -233,7 +279,7 @@ export default function CataloguesPage() {
           </div>
 
           {/* EMPTY STATE: Shown when no catalogues exist */}
-          {catalogues.length === 0 && (
+          {!loading && catalogues.length === 0 && (
             <div className="mt-4 flex flex-1 flex-col">
               <section
                 aria-labelledby="catalogs-empty-heading"
@@ -317,25 +363,32 @@ export default function CataloguesPage() {
                     <tbody className="divide-y divide-[#E1E3E5]">
                       {filteredCatalogues.map((cat) => (
                         <tr key={cat.id} className="hover:bg-[#F6F6F7] transition-colors">
-                          <td className="px-4 py-3 font-medium text-[#1A1A1A]">{cat.name}</td>
+                          <td className="px-4 py-3 font-medium text-[#1A1A1A]">
+                            <Link
+                              to={`/admin/online-store/catalogues/${cat.id}`}
+                              className="hover:underline"
+                            >
+                              {cat.name}
+                            </Link>
+                          </td>
                           <td className="px-4 py-3">
                             <span
                               className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                cat.status === "Active"
+                                cat.status === "active"
                                   ? "bg-[#E3F1DF] text-[#0D5B22]"
                                   : "bg-[#E4E5E7] text-[#616161]"
                               }`}
                             >
-                              {cat.status}
+                              {titleCase(cat.status)}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-[#616161]">{cat.description || "—"}</td>
-                          <td className="px-4 py-3 text-[#616161]">{cat.createdAt}</td>
+                          <td className="px-4 py-3 text-[#616161]">{formatDate(cat.created_at)}</td>
                           <td className="px-4 py-3 text-right">
                             {canManage && (
                               <button
                                 type="button"
-                                onClick={() => handleDeleteCatalogue(cat.id)}
+                                onClick={() => handleDeleteCatalogue(cat)}
                                 className="text-xs text-red-600 hover:text-red-800 font-medium"
                               >
                                 Delete
@@ -365,107 +418,6 @@ export default function CataloguesPage() {
           )}
         </main>
       </div>
-
-      {/* CREATE CATALOG MODAL */}
-      {isCreateModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="create-catalog-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-        >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#E1E3E5]">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E1E3E5]">
-              <h3
-                id="create-catalog-modal-title"
-                className="text-base font-semibold text-[#1A1A1A]"
-              >
-                Create catalog
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-[#616161] hover:text-[#1A1A1A] text-lg font-bold"
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveCatalogue} className="mt-4 flex flex-col gap-4">
-              <div>
-                <label
-                  htmlFor="catalog-title"
-                  className="block text-xs font-semibold text-[#1A1A1A] mb-1"
-                >
-                  Catalog title *
-                </label>
-                <input
-                  id="catalog-title"
-                  type="text"
-                  required
-                  placeholder="e.g. B2B Wholesale, Summer 2026"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full rounded-lg border border-[#D2D5D8] px-3 py-2 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="catalog-status"
-                  className="block text-xs font-semibold text-[#1A1A1A] mb-1"
-                >
-                  Status
-                </label>
-                <select
-                  id="catalog-status"
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full rounded-lg border border-[#D2D5D8] px-3 py-2 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none"
-                >
-                  <option value="Active">Active</option>
-                  <option value="Draft">Draft</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="catalog-description"
-                  className="block text-xs font-semibold text-[#1A1A1A] mb-1"
-                >
-                  Description
-                </label>
-                <textarea
-                  id="catalog-description"
-                  rows={3}
-                  placeholder="Optional details or pricing notes..."
-                  value={newDescription}
-                  onChange={(e) => setNewDescription(e.target.value)}
-                  className="w-full rounded-lg border border-[#D2D5D8] px-3 py-2 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none"
-                />
-              </div>
-
-              <div className="mt-2 flex items-center justify-end gap-2 pt-3 border-t border-[#E1E3E5]">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-1.5 text-xs font-medium text-[#1A1A1A] hover:bg-[#F6F6F7] transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !newTitle.trim()}
-                  className="rounded-lg bg-[#1A1A1A] px-3.5 py-1.5 text-xs font-medium text-white shadow-xs hover:bg-[#303030] transition disabled:opacity-50"
-                >
-                  Create catalog
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* IMPORT MODAL */}
       {isImportModalOpen && (
@@ -498,16 +450,15 @@ export default function CataloguesPage() {
                 <path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.56l2.22 2.22a.75.75 0 1 0 1.06-1.06l-3.5-3.5a.75.75 0 0 0-1.06 0l-3.5 3.5a.75.75 0 0 0 1.06 1.06l2.22-2.22v8.69Z" />
                 <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
               </svg>
-              <p className="text-xs text-[#616161]">Select a CSV file to import catalogs.</p>
+              <p className="text-xs text-[#616161]">
+                Select a CSV file with a Name column (Status and Description are optional).
+              </p>
               <input
                 type="file"
                 accept=".csv"
                 className="mt-3 text-xs text-[#616161]"
                 onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    setIsImportModalOpen(false);
-                    showToast(`Imported ${e.target.files[0].name}`);
-                  }
+                  if (e.target.files?.[0]) handleImport(e.target.files[0]);
                 }}
               />
             </div>

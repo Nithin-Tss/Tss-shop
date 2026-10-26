@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import SalesChart from "@/components/SalesChart";
+import { formatMoney, useOverview } from "@/lib/reportsApi";
 
 const lineIcon = {
   fill: "none",
@@ -40,6 +42,11 @@ function EmptyIcon() {
 }
 
 export default function AnalyticsPage() {
+  const { data, loading, error } = useOverview(30);
+  const totals = data?.totals;
+  const currency = data?.currency_code;
+  const show = (value) => (loading || !totals ? "—" : value);
+
   return (
     <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
       <AdminHeader />
@@ -56,7 +63,9 @@ export default function AnalyticsPage() {
                   Analytics
                 </h1>
 
-                <p className="mt-0.5 text-[13px] text-[#4C4F7A]">Last refreshed: —</p>
+                <p className="mt-0.5 text-[13px] text-[#4C4F7A]">
+                  Last refreshed: {data ? new Date().toLocaleTimeString() : "—"}
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -94,24 +103,18 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <button type="button" className={chip}>
-                Today <Chevron />
-              </button>
-
-              <button type="button" className={chip}>
-                Date <Chevron />
-              </button>
-
-              <button type="button" className={chip}>
-                ₹ INR
-              </button>
+              <span className={chip}>Last 30 days</span>
+              {currency && <span className={chip}>{currency}</span>}
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <MetricCard title="Gross sales" />
-              <MetricCard title="Returning customer rate" />
-              <MetricCard title="Orders fulfilled" />
-              <MetricCard title="Orders" />
+              <MetricCard title="Total sales" value={show(formatMoney(totals?.sales, currency))} />
+              <MetricCard title="Orders" value={show(totals?.orders)} />
+              <MetricCard
+                title="Average order value"
+                value={show(formatMoney(totals?.average_order_value, currency))}
+              />
+              <MetricCard title="Customers" value={show(totals?.customers)} />
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -119,11 +122,17 @@ export default function AnalyticsPage() {
                 <h2 className={cardHeading}>Total sales</h2>
 
                 <div className="mt-4 flex h-85 items-center justify-center rounded-lg bg-[#F5F3FF]">
-                  <div className="flex flex-col items-center text-center">
-                    <EmptyIcon />
+                  {data?.series?.length ? (
+                    <SalesChart series={data.series} currency={currency} />
+                  ) : (
+                    <div className="flex flex-col items-center text-center">
+                      <EmptyIcon />
 
-                    <p className="mt-2 text-[13px] text-[#4C4F7A]">No sales data available</p>
-                  </div>
+                      <p className="mt-2 text-[13px] text-[#4C4F7A]">
+                        {loading ? "Loading…" : error || "No sales data available"}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </section>
 
@@ -131,23 +140,20 @@ export default function AnalyticsPage() {
                 <h2 className={cardHeading}>Total sales breakdown</h2>
 
                 <div className="mt-3 divide-y divide-[#eef0f4]">
-                  <BreakdownRow label="Gross sales" />
-                  <BreakdownRow label="Discounts" />
-                  <BreakdownRow label="Sales reversals" />
-                  <BreakdownRow label="Net sales" />
-                  <BreakdownRow label="Shipping charges" />
-                  <BreakdownRow label="Return fees" />
-                  <BreakdownRow label="Taxes" />
-                  <BreakdownRow label="Total sales" />
+                  <BreakdownRow label="Orders" value={show(totals?.orders)} />
+                  <BreakdownRow
+                    label="Average order value"
+                    value={show(formatMoney(totals?.average_order_value, currency))}
+                  />
+                  <BreakdownRow
+                    label="Total sales"
+                    value={show(formatMoney(totals?.sales, currency))}
+                  />
                 </div>
               </section>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              <EmptyCard title="Total sales by sales channel" />
-              <EmptyCard title="Total sales by product" />
-              <EmptyCard title="Customer activity" />
-            </div>
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"></div>
           </div>
         </main>
       </div>
@@ -155,38 +161,24 @@ export default function AnalyticsPage() {
   );
 }
 
-function MetricCard({ title }) {
+function MetricCard({ title, value = "—" }) {
   return (
     <div className={card}>
       <h2 className={cardHeading}>{title}</h2>
 
-      <p className="mt-2 text-2xl font-bold text-charcoal-navy">—</p>
+      <p className="mt-2 text-2xl font-bold text-charcoal-navy">{value}</p>
 
       <div className="mt-4 h-px bg-[#e5e7eb]" />
     </div>
   );
 }
 
-function BreakdownRow({ label }) {
+function BreakdownRow({ label, value = "—" }) {
   return (
     <div className="flex h-11 items-center justify-between px-1">
       <span className="text-sm text-charcoal-navy">{label}</span>
 
-      <span className="text-sm font-semibold text-charcoal-navy">—</span>
-    </div>
-  );
-}
-
-function EmptyCard({ title }) {
-  return (
-    <div className={card}>
-      <h2 className={cardHeading}>{title}</h2>
-
-      <div className="mt-4 flex h-36 flex-col items-center justify-center rounded-lg bg-[#F5F3FF]">
-        <EmptyIcon />
-
-        <span className="mt-2 text-[13px] text-[#4C4F7A]">No data available</span>
-      </div>
+      <span className="text-sm font-semibold text-charcoal-navy">{value}</span>
     </div>
   );
 }

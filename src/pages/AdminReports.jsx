@@ -99,7 +99,7 @@ export default function AdminReports() {
 
   const availableCreators = useMemo(() => {
     const fromData = Array.from(new Set(reports.map((r) => r.created_by).filter(Boolean)));
-    return Array.from(new Set(["Shopify", ...fromData]));
+    return Array.from(new Set(["System", ...fromData]));
   }, [reports]);
 
   // Filter and sort reports
@@ -594,7 +594,7 @@ export default function AdminReports() {
                         <td className="px-4 py-3 text-[13px] text-[#202223]">
                           <div className="flex items-center gap-1.5">
                             <ShopifyBagIcon />
-                            <span>{report.created_by || "Shopify"}</span>
+                            <span>{report.created_by || "System"}</span>
                           </div>
                         </td>
                       </tr>
