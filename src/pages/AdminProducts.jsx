@@ -128,6 +128,11 @@ const IMPORT_FIELDS = [
   { key: "tags", label: "Tags", aliases: ["tags"] },
   { key: "collections", label: "Collections", aliases: ["collections", "collection"] },
   {
+    key: "images",
+    label: "Images",
+    aliases: ["images", "image", "image url", "image urls", "image src", "photos", "photo"],
+  },
+  {
     key: "quantity",
     label: "Quantity",
     aliases: ["quantity", "qty", "stock", "inventory", "variant inventory qty"],
@@ -192,6 +197,8 @@ function buildProductRows(rows, mapping) {
       status: status === "active" ? "active" : "draft",
       tags: splitList(pick("tags")),
       collections: splitList(pick("collections")),
+      // Image links separated by commas, spaces or new lines (the export writes them comma-separated)
+      images: pick("images").split(/[\s,]+/).filter((u) => /^(https?:\/\/|\/media\/)/i.test(u)),
       price: price === "" ? null : price,
       sku: pick("sku"),
       // Stocked at the store's first location (0 when the file has no quantity)
@@ -632,6 +639,7 @@ export default function ProductsPage() {
   );
   const [selected, setSelected] = useState(() => new Set());
   const [deleting, setDeleting] = useState(false);
+  const [activating, setActivating] = useState(false);
   const [notice, setNotice] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
@@ -729,6 +737,46 @@ export default function ProductsPage() {
     );
   };
 
+  const activateSelected = async () => {
+    // With nothing ticked this activates every draft product, not just this page
+    const drafts = products.filter(
+      (p) => (selected.size ? selected.has(p.id) : true) && p.status === "draft"
+    );
+    if (!drafts.length || activating) return;
+    if (
+      !selected.size &&
+      !window.confirm(`Set all ${drafts.length} draft products to active?`)
+    )
+      return;
+
+    setActivating(true);
+    setNotice("");
+    const ids = drafts.map((p) => p.id);
+    let updated = 0;
+
+    for (let start = 0; start < ids.length; start += 500) {
+      const res = await apiPost("/api/v1/catalog/products/bulk-status/", {
+        ids: ids.slice(start, start + 500),
+        status: "active",
+      });
+      if (!res.ok) {
+        setNotice(
+          `${updated} activated. ${
+            res.status === 401
+              ? "Your session expired. Sign in again."
+              : res.formError || "Something went wrong."
+          }`
+        );
+        break;
+      }
+      updated += res.data.updated;
+    }
+
+    setSelected(new Set());
+    setActivating(false);
+    await loadProducts();
+  };
+
   const deleteSelected = async () => {
     const count = selected.size;
     if (!count || deleting) return;
@@ -767,6 +815,38 @@ export default function ProductsPage() {
       );
     }
 
+    setSelected(new Set());
+    setDeleting(false);
+    await loadProducts();
+  };
+
+  const deleteAll = async () => {
+    if (deleting) return;
+    if (
+      !window.confirm(
+        "Delete ALL products in your store, including active ones?\n\nTheir variants, images, stock and stock history will be deleted too. Products on placed orders are kept. This can't be undone."
+      )
+    )
+      return;
+
+    setDeleting(true);
+    setNotice("");
+    const res = await apiPost("/api/v1/catalog/products/delete-all/", { confirm: true });
+    if (!res.ok) {
+      setNotice(
+        res.status === 401
+          ? "Your session expired. Sign in again."
+          : res.formError || "Something went wrong."
+      );
+    } else {
+      setNotice(
+        `${res.data.deleted} product${res.data.deleted === 1 ? "" : "s"} deleted.${
+          res.data.blocked.length ? ` ${res.data.blocked.length} kept because placed orders use them: ${res.data.blocked
+                .slice(0, 3)
+                .join(", ")}${res.data.blocked.length > 3 ? ", ..." : ""}.` : ""
+        }`
+      );
+    }
     setSelected(new Set());
     setDeleting(false);
     await loadProducts();
@@ -887,6 +967,20 @@ export default function ProductsPage() {
                     >
                       {selected.size ? `Export ${selected.size}` : "Export"}
                     </button>
+                    {canManage && products.some((p) => p.status === "draft") && (
+                      <button
+                        type="button"
+                        onClick={activateSelected}
+                        disabled={activating}
+                        className="rounded-lg border border-[#DDD6FE] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-charcoal-navy transition disabled:opacity-50"
+                      >
+                        {activating
+                          ? "Activating..."
+                          : selected.size
+                            ? `Set ${selected.size} active`
+                            : "Set all drafts active"}
+                      </button>
+                    )}
                     {canDelete && selected.size > 0 && (
                       <button
                         type="button"
@@ -895,6 +989,16 @@ export default function ProductsPage() {
                         className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition disabled:opacity-50"
                       >
                         {deleting ? "Deleting..." : `Delete ${selected.size}`}
+                      </button>
+                    )}
+                    {canDelete && products.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={deleteAll}
+                        disabled={deleting}
+                        className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition disabled:opacity-50"
+                      >
+                        Delete all
                       </button>
                     )}
                     {canManage && (
