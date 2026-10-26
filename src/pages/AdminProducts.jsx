@@ -198,7 +198,9 @@ function buildProductRows(rows, mapping) {
       tags: splitList(pick("tags")),
       collections: splitList(pick("collections")),
       // Image links separated by commas, spaces or new lines (the export writes them comma-separated)
-      images: pick("images").split(/[\s,]+/).filter((u) => /^(https?:\/\/|\/media\/)/i.test(u)),
+      images: pick("images")
+        .split(/[\s,]+/)
+        .filter((u) => /^(https?:\/\/|\/media\/)/i.test(u)),
       price: price === "" ? null : price,
       sku: pick("sku"),
       // Stocked at the store's first location (0 when the file has no quantity)
@@ -743,10 +745,7 @@ export default function ProductsPage() {
       (p) => (selected.size ? selected.has(p.id) : true) && p.status === "draft"
     );
     if (!drafts.length || activating) return;
-    if (
-      !selected.size &&
-      !window.confirm(`Set all ${drafts.length} draft products to active?`)
-    )
+    if (!selected.size && !window.confirm(`Set all ${drafts.length} draft products to active?`))
       return;
 
     setActivating(true);
@@ -841,9 +840,11 @@ export default function ProductsPage() {
     } else {
       setNotice(
         `${res.data.deleted} product${res.data.deleted === 1 ? "" : "s"} deleted.${
-          res.data.blocked.length ? ` ${res.data.blocked.length} kept because placed orders use them: ${res.data.blocked
+          res.data.blocked.length
+            ? ` ${res.data.blocked.length} kept because placed orders use them: ${res.data.blocked
                 .slice(0, 3)
-                .join(", ")}${res.data.blocked.length > 3 ? ", ..." : ""}.` : ""
+                .join(", ")}${res.data.blocked.length > 3 ? ", ..." : ""}.`
+            : ""
         }`
       );
     }
