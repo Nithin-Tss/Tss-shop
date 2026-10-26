@@ -135,7 +135,17 @@ const IMPORT_FIELDS = [
   {
     key: "quantity",
     label: "Quantity",
-    aliases: ["quantity", "qty", "stock", "inventory", "variant inventory qty"],
+    aliases: [
+      "quantity",
+      "qty",
+      "stock",
+      "inventory",
+      "variant inventory qty",
+      "available",
+      "on hand",
+      "stock quantity",
+      "inventory quantity",
+    ],
   },
   ...EXTRA_FIELDS.map((f) => ({
     key: f.key,
@@ -187,7 +197,12 @@ function buildProductRows(rows, mapping) {
 
     const status = pick("status").toLowerCase();
     const price = pick("price").replace(/[^0-9.]/g, "");
-    const quantity = pick("quantity").replace(/[^0-9]/g, "");
+    // "12", "12.0", "1,200" or "12 units": whole units, never "12.0" read as 120
+    const quantityText = pick("quantity").replace(/,/g, "");
+    const quantityNumber = parseFloat(quantityText.match(/-?\d+(\.\d+)?/)?.[0] ?? "");
+    const quantity = Number.isFinite(quantityNumber)
+      ? String(Math.max(0, Math.round(quantityNumber)))
+      : "";
     return {
       title: pick("title"),
       description: pick("description"),
