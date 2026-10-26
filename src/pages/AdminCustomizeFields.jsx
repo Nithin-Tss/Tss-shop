@@ -1064,6 +1064,163 @@ export function SectionBlocks({
   );
 }
 
+// A group block's child blocks: add, reorder, hide, delete and edit them right inside the group's panel
+export function GroupChildren({
+  spec,
+  items,
+  groups,
+  collections,
+  products,
+  catalogErrors,
+  onChange,
+}) {
+  const [open, setOpen] = useState(null);
+  const [menu, setMenu] = useState(false);
+
+  const types = Object.entries(spec.blocks).filter(([, s]) => s.generic && !s.nests);
+  const full = items.length >= 12;
+
+  function move(i, delta) {
+    const j = i + delta;
+    if (j < 0 || j >= items.length) return;
+    onChange((list) => {
+      [list[i], list[j]] = [list[j], list[i]];
+    });
+    setOpen(null);
+  }
+
+  return (
+    <div className="border-t border-[#EEF0F4] py-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-semibold">
+          Blocks in group <span className="font-normal text-[#8B8FB8]">({items.length}/12)</span>
+        </h3>
+        <button
+          type="button"
+          className={smallButton}
+          disabled={full}
+          onClick={() => setMenu((v) => !v)}
+        >
+          + Add block
+        </button>
+      </div>
+
+      {menu && (
+        <div
+          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-[#DDD6FE] bg-[#F5F3FF] p-2"
+          role="menu"
+        >
+          {types.map(([type, blockSpec]) => (
+            <button
+              key={type}
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onChange((list) =>
+                  list.push({ type, hidden: false, settings: defaultsOf(blockSpec.settings) })
+                );
+                setOpen(items.length);
+                setMenu(false);
+              }}
+              className="truncate rounded-md border border-[#DDD6FE] bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-charcoal-navy"
+            >
+              {blockSpec.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {items.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-[#DDD6FE] px-3 py-4 text-center text-xs text-[#4C4F7A]">
+          This group is empty. Use "+ Add block" to put blocks inside it.
+        </p>
+      ) : (
+        <ul className="grid gap-1.5">
+          {items.map((child, i) => {
+            const childSpec = spec.blocks[child.type];
+            if (!childSpec) return null;
+            const isOpen = open === i;
+            return (
+              <li key={i} className="rounded-lg border border-[#DDD6FE] bg-white">
+                <div className="flex items-center gap-1 px-1.5 py-1.5 text-sm">
+                  <button
+                    type="button"
+                    className={`min-w-0 flex-1 truncate text-left ${child.hidden ? "text-[#A3ADBF]" : ""}`}
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                  >
+                    {blockTitle(child, childSpec, i)}
+                  </button>
+                  <button
+                    type="button"
+                    className={iconButton}
+                    onClick={() => move(i, -1)}
+                    aria-label="Move up"
+                    disabled={i === 0}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    className={iconButton}
+                    onClick={() => move(i, 1)}
+                    aria-label="Move down"
+                    disabled={i === items.length - 1}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    className={iconButton}
+                    onClick={() =>
+                      onChange((list) => {
+                        list[i].hidden = !list[i].hidden;
+                      })
+                    }
+                    aria-label={child.hidden ? "Show" : "Hide"}
+                  >
+                    <EyeIcon hidden={child.hidden} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`${iconButton} hover:bg-red-50 hover:text-red-600`}
+                    onClick={() => {
+                      onChange((list) => {
+                        list.splice(i, 1);
+                      });
+                      setOpen(null);
+                    }}
+                    aria-label={`Delete ${childSpec.name}`}
+                  >
+                    ×
+                  </button>
+                </div>
+                {isOpen && (
+                  <div className="border-t border-[#EEF0F4] px-4 py-2">
+                    <GroupedFields
+                      fields={childSpec.settings}
+                      values={child.settings}
+                      groups={groups}
+                      collections={collections}
+                      products={products}
+                      catalogErrors={catalogErrors}
+                      onChange={(key, value) =>
+                        onChange((list) => {
+                          list[i].settings[key] = value;
+                        })
+                      }
+                    />
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export function EyeIcon({ hidden }) {
   return (
     <svg {...iconProps} className="h-3.5 w-3.5">

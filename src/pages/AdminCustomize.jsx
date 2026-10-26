@@ -35,6 +35,7 @@ import {
   UploadsContext,
   GroupedFields,
   SectionBlocks,
+  GroupChildren,
   EyeIcon,
   GroupHeading,
   LayoutRows,
@@ -3083,6 +3084,28 @@ export default function AdminCustomizePage() {
                                     list[shownBlockIndex].settings[key] = value;
                                   },
                                   `b:${shown}:${shownBlockIndex}:${key}`
+                                )
+                              }
+                            />
+                          )}
+                          {shownBlock && shownBlockSpec?.nests && (
+                            <GroupChildren
+                              key={`children-${shown}-${shownBlockIndex}`}
+                              spec={shownSpec}
+                              items={shownBlock.children || []}
+                              groups={schema.groups || [{ id: "content", label: "Content" }]}
+                              collections={collections}
+                              products={products}
+                              catalogErrors={catalogErrors}
+                              onChange={(mutate) =>
+                                updateBlocks(
+                                  shown,
+                                  (list) => {
+                                    list[shownBlockIndex].children =
+                                      list[shownBlockIndex].children || [];
+                                    mutate(list[shownBlockIndex].children);
+                                  },
+                                  `bc:${shown}:${shownBlockIndex}`
                                 )
                               }
                             />
