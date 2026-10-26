@@ -374,6 +374,7 @@ function ImportProductsModal({ onClose, onImported }) {
     const failures = [];
     let created = 0;
     let skipped = 0;
+    let stockUpdated = 0;
     let processed = 0;
 
     for (let start = 0; start < rows.length; start += IMPORT_BATCH_SIZE) {
@@ -399,6 +400,7 @@ function ImportProductsModal({ onClose, onImported }) {
 
       created += res.data.created;
       skipped += res.data.skipped;
+      stockUpdated += res.data.stockUpdated || 0;
       res.data.errors.forEach((e) =>
         failures.push(
           `Row ${start + e.index + 2} (${batch[e.index].title || "no title"}): ${e.message}`
@@ -409,12 +411,12 @@ function ImportProductsModal({ onClose, onImported }) {
 
     setProgress("");
     setImporting(false);
-    if (created) onImported();
+    if (created || stockUpdated) onImported();
 
     if (failures.length) {
       setFile(null);
       setError(
-        `${created} of ${rows.length} products imported${skipped ? `, ${skipped} already existed` : ""}. ${failures.slice(0, 3).join("; ")}${
+        `${created} of ${rows.length} products imported${skipped ? `, ${skipped} already existed` : ""}${stockUpdated ? `, ${stockUpdated} quantities updated` : ""}. ${failures.slice(0, 3).join("; ")}${
           failures.length > 3 ? `; and ${failures.length - 3} more` : ""
         }.`
       );
