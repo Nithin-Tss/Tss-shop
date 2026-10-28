@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import { openStorefront } from "@/lib/api";
 import { useCan } from "@/lib/auth";
 import { setEditingThemeId, getEditingThemeId } from "@/lib/editingTheme";
 import {
@@ -126,17 +127,16 @@ function LivePreview({ theme, swatches, ratio = 0.62, className = "" }) {
 
 const smallButton =
   "inline-flex h-8 items-center rounded-lg border border-[#DDD6FE] bg-white px-3 text-[13px] font-medium text-[#0B1020] transition hover:border-[#0B1020] disabled:opacity-50";
-// View-only copy of a theme, opened as a website in a new tab
+// The theme as a working store in a new tab: real pages, cart and links (a draft is shown to you only)
 function OpenThemeLink({ theme, className }) {
   return (
-    <a
-      href={`/admin/online-store/view/${theme.id}`}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={() => openStorefront("/", theme.published ? "" : theme.id)}
       className={className}
     >
       Open theme
-    </a>
+    </button>
   );
 }
 

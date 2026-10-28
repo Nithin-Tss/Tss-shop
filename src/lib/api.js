@@ -373,17 +373,19 @@ const RETURN_KEY = "tss-admin-return";
 const here = () => window.location.pathname + window.location.search;
 
 // `path` is a storefront path: "/", "/collections/all", "/products/<id>"
-export async function openStorefront(path = "/") {
+// `themeId`: show that draft theme instead of the published one (a real, working store either way)
+export async function openStorefront(path = "/", themeId = "") {
   // Open the tab right away (inside the click) so popup blockers allow it; it is pointed at the store below
   const tab = window.open("", "_blank");
 
   const res = await apiPost("/api/v1/themes/storefront-link/", {
     path,
     return_url: window.location.href,
+    ...(themeId ? { theme_id: themeId } : {}),
   });
 
   let url = res.ok ? res.data.url : null;
-  if (!url) {
+  if (!url && !themeId) {
     // The link couldn't be made: still open the store (just without the bar)
     const store = getActiveStore(getSession());
     if (store?.storeSlug) url = `${API_URL}/s/${store.storeSlug}${path}`;
