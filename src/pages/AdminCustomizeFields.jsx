@@ -1579,26 +1579,10 @@ export function RichTextEditor({ value, onChange }) {
 export const LAYOUT_ROWS = [
   {
     part: "top",
-    group: "utility",
-    name: "Utility bar",
-    hint: "Contact details and quick links",
-    file: "snippets/utility-bar.liquid",
-    icon: "M3 6h18v4H3zM7 15h4M15 15h2",
-  },
-  {
-    part: "top",
-    group: "announcement",
-    file: "layout/theme.liquid",
-    name: "Announcement bar",
-    hint: "Banner above the header",
-    icon: "M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6",
-  },
-  {
-    part: "top",
     group: "header",
     file: "sections/header.liquid",
     name: "Header",
-    hint: "Logo and navigation",
+    hint: "Announcement, logo and navigation",
     icon: "M3 5h18v5H3zM7 15h10M9 19h6",
   },
   {
