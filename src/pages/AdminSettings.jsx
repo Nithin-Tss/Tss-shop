@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { apiDelete, apiGet, apiPatch, syncAccess } from "@/lib/api";
 import { STORES_PATH, getActiveStore, getSession } from "@/lib/auth";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import PaymentsSettings from "@/components/PaymentsSettings";
 import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
 
 // [IANA name, label]; the backend validates the name
@@ -1166,6 +1167,8 @@ export default function AdminSettings() {
 
               {selectedSection === "General" ? (
                 renderGeneral()
+              ) : selectedSection === "Payments" && isOwner ? (
+                <PaymentsSettings />
               ) : selectedSection === "Users" ? (
                 <UsersSettings />
               ) : selectedSection === "Roles" ? (

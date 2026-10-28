@@ -44,5 +44,8 @@
     "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "vite": "^7.0.0"
+  },
+  "overrides": {
+    "dompurify": "^3.4.17"
   }
 }

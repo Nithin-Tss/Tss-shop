@@ -56,6 +56,11 @@ export const storefront = {
       method: "POST",
       body: { payment_method: paymentMethod },
     }),
+  // Card payment (Stripe Payment Element): returns { client_secret, publishable_key, stripe_account }
+  // to mount the element with. After Stripe redirects back, confirmStripe places the order.
+  startStripePayment: (slug, id) => call(slug, `checkout/${id}/stripe/`, { method: "POST" }),
+  confirmStripePayment: (slug, id) =>
+    call(slug, `checkout/${id}/stripe/confirm/`, { method: "POST" }),
   orders: (slug) => call(slug, "orders/"),
   cancelOrder: (slug, id) => call(slug, `orders/${id}/cancel/`, { method: "POST" }),
 };
