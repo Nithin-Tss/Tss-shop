@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { getEditingThemeId, setEditingThemeId } from "@/lib/editingTheme";
 
@@ -193,7 +193,6 @@ const SECTION_ICONS = {
 
 export default function AdminCustomizePage() {
   const session = useSession();
-  const navigate = useNavigate();
 
   const store = session?.stores?.find((s) => s.storeId === session.storeId);
 
@@ -2340,9 +2339,11 @@ export default function AdminCustomizePage() {
                     </select>
                   )}
 
-                  <Link
+                  <a
                     id="edit-code-btn"
-                    to={`/editor-demo${(() => {
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`/editor-demo${(() => {
                       const themeId = startParams.get("theme") || getEditingThemeId();
                       const query = new URLSearchParams();
                       const targetFile = getTemplateFileForPage(page, customerPage);
@@ -2354,7 +2355,7 @@ export default function AdminCustomizePage() {
                     className="inline-flex h-9 items-center justify-center rounded-lg border border-[#DDD6FE] px-3 text-sm inline-flex items-center text-charcoal-navy hover:border-charcoal-navy"
                   >
                     Edit code
-                  </Link>
+                  </a>
 
                   {previewUrl && (
                     <a
@@ -2489,23 +2490,38 @@ export default function AdminCustomizePage() {
 
               <div className="relative flex min-h-0 flex-1">
                 {/* Side panel: list view and edit view slide inside the same panel */}
-                {/* On desktop the panel collapses to a thin rail and expands over the preview on hover/focus */}
-                <div className="group/side lg:relative lg:z-30 lg:w-14 lg:shrink-0">
+                {/* On desktop the panel is a thin rail while nothing is selected (it peeks open over the preview on hover/focus) */}
+                {/* and stays open, beside the preview, for as long as a section or the theme is selected */}
+                <div
+                  className={`group/side transition-[width] duration-200 ease-out motion-reduce:transition-none lg:relative lg:z-30 lg:shrink-0 ${
+                    editing ? "lg:w-85" : "lg:w-14"
+                  }`}
+                >
                   <aside
-                    className={`absolute inset-y-0 left-0 z-30 w-85 max-w-[90vw] shrink-0 overflow-hidden border-r border-[#DDD6FE] bg-white shadow-xl transition-[transform,width] duration-200 ease-out motion-reduce:transition-none lg:max-w-none lg:translate-x-0 lg:shadow-none lg:group-focus-within/side:w-85 lg:group-focus-within/side:shadow-xl lg:group-hover/side:w-85 lg:group-hover/side:shadow-xl lg:w-14 ${
-                      panelOpen ? "translate-x-0" : "-translate-x-full"
-                    }`}
+                    className={`absolute inset-y-0 left-0 z-30 w-85 max-w-[90vw] shrink-0 overflow-hidden border-r border-[#DDD6FE] bg-white shadow-xl transition-[transform,width] duration-200 ease-out motion-reduce:transition-none lg:max-w-none lg:translate-x-0 ${
+                      editing
+                        ? "lg:w-85 lg:shadow-none"
+                        : "lg:w-14 lg:shadow-none lg:group-focus-within/side:w-85 lg:group-focus-within/side:shadow-xl lg:group-hover/side:w-85 lg:group-hover/side:shadow-xl"
+                    } ${panelOpen ? "translate-x-0" : "-translate-x-full"}`}
                   >
                     <div
                       aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-0 top-0 hidden justify-center pt-4 text-[#4C4F7A] transition-opacity duration-150 lg:flex lg:group-focus-within/side:opacity-0 lg:group-hover/side:opacity-0"
+                      className={`pointer-events-none absolute inset-x-0 top-0 hidden justify-center pt-4 text-[#4C4F7A] transition-opacity duration-150 ${
+                        editing
+                          ? "lg:hidden"
+                          : "lg:flex lg:group-focus-within/side:opacity-0 lg:group-hover/side:opacity-0"
+                      }`}
                     >
                       <svg {...iconProps} className="h-5 w-5">
                         <path d="M3 5h18M3 12h18M3 19h18" />
                       </svg>
                     </div>
                     <div
-                      className={`flex h-full w-255 transition-[transform,opacity] lg:opacity-0 lg:group-focus-within/side:opacity-100 lg:group-hover/side:opacity-100 duration-200 ease-out motion-reduce:transition-none ${
+                      className={`flex h-full w-255 transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
+                        editing
+                          ? "lg:opacity-100"
+                          : "lg:opacity-0 lg:group-focus-within/side:opacity-100 lg:group-hover/side:opacity-100"
+                      } ${
                         panelView === 2
                           ? "-translate-x-2/3"
                           : panelView === 1
@@ -3270,7 +3286,11 @@ export default function AdminCustomizePage() {
                       const themeId = startParams.get("theme") || getEditingThemeId();
                       const query = new URLSearchParams({ file: contextMenu.file });
                       if (themeId) query.set("theme", themeId);
-                      navigate(`/editor-demo?${query.toString()}`);
+                      window.open(
+                        `/editor-demo?${query.toString()}`,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
                       setContextMenu(null);
                     }}
                     className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F5F3FF]"
