@@ -1,6 +1,7 @@
 import { createContext, memo, useContext, useEffect, useRef, useState } from "react";
 
 import LinkField from "@/components/LinkField";
+import { getEditingThemeId } from "@/lib/editingTheme";
 
 import { uploadThemeImage } from "@/lib/themeApi";
 
@@ -1578,7 +1579,16 @@ export function RichTextEditor({ value, onChange }) {
 export const LAYOUT_ROWS = [
   {
     part: "top",
+    group: "utility",
+    name: "Utility bar",
+    hint: "Contact details and quick links",
+    file: "snippets/utility-bar.liquid",
+    icon: "M3 6h18v4H3zM7 15h4M15 15h2",
+  },
+  {
+    part: "top",
     group: "announcement",
+    file: "layout/theme.liquid",
     name: "Announcement bar",
     hint: "Banner above the header",
     icon: "M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6",
@@ -1586,6 +1596,7 @@ export const LAYOUT_ROWS = [
   {
     part: "top",
     group: "header",
+    file: "sections/header.liquid",
     name: "Header",
     hint: "Logo and navigation",
     icon: "M3 5h18v5H3zM7 15h10M9 19h6",
@@ -1593,6 +1604,7 @@ export const LAYOUT_ROWS = [
   {
     part: "bottom",
     group: "footer",
+    file: "sections/footer.liquid",
     name: "Footer",
     hint: "Links, social and copyright",
     icon: "M3 14h18v5H3zM7 9h10M9 5h6",
@@ -1619,11 +1631,11 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
           : selected === "theme" && themeGroup === row.group;
 
         return (
-          <li key={row.group}>
+          <li key={row.group} className="flex items-center">
             <button
               type="button"
               onClick={() => onOpen(row.group)}
-              className={`flex h-8 w-full items-center gap-2 rounded-lg pl-1.5 pr-1 text-left text-[13px] ${
+              className={`flex h-8 min-w-0 flex-1 items-center gap-2 rounded-lg pl-1.5 pr-1 text-left text-[13px] ${
                 active ? "bg-[#f1f1f1] font-medium" : "hover:bg-[#f7f7f7]"
               }`}
             >
@@ -1636,6 +1648,20 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
                 {row.name} <span className="text-xs text-[#A3ADBF]">{row.hint}</span>
               </span>
             </button>
+            {row.file && (
+              <a
+                href={`/editor-demo?${new URLSearchParams({
+                  file: row.file,
+                  ...(getEditingThemeId() ? { theme: getEditingThemeId() } : {}),
+                }).toString()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`Edit code: ${row.file}`}
+                className="shrink-0 rounded px-1.5 text-xs text-[#616161] hover:bg-[#f1f1f1]"
+              >
+                Edit code
+              </a>
+            )}
           </li>
         );
       })}
