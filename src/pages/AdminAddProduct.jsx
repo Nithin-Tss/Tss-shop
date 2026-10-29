@@ -643,6 +643,7 @@ export function ProductForm({ productId }) {
 
   // 4 Stock
   const [sku, setSku] = useState("");
+  const [weight, setWeight] = useState("");
   const [locationId, setLocationId] = useState("");
   const [quantity, setQuantity] = useState("");
 
@@ -725,6 +726,7 @@ export function ProductForm({ productId }) {
     );
     setPrice(first?.price ?? "");
     setSku(first?.sku || "");
+    setWeight(first?.weight && Number(first.weight) > 0 ? first.weight : "");
     setCategoryId(p.category_id || "");
     setProductType(p.product_type || "");
     setVendor(p.vendor || "");
@@ -826,6 +828,7 @@ export function ProductForm({ productId }) {
     photos.map((p) => p.id),
     price,
     sku,
+    weight,
     locationId,
     quantity,
     categoryId,
@@ -1087,12 +1090,18 @@ export function ProductForm({ productId }) {
       // Price and SKU belong to the first variant; any other variants go back unchanged so none is lost
       const [first, ...others] = variants;
       payload.variants = [
-        { ...(first && { id: first.id }), sku: sku.trim(), price: price === "" ? null : price },
+        {
+          ...(first && { id: first.id }),
+          sku: sku.trim(),
+          price: price === "" ? null : price,
+          weight: weight === "" ? "0" : weight,
+        },
         ...others.map((v) => ({ id: v.id, sku: v.sku, price: v.price })),
       ];
     } else {
       payload.price = price === "" ? null : price;
       payload.sku = sku.trim();
+      payload.weight = weight === "" ? "0" : weight;
     }
 
     // Edit mode updates this product (PATCH, scoped to the active store), never creates another
@@ -1665,6 +1674,21 @@ export function ProductForm({ productId }) {
                         onChange={(e) => setSku(e.target.value)}
                         placeholder="e.g. WINE-ZC-750"
                         className={`${inputClass} ${withError(fieldErrors.sku)}`}
+                      />
+                    </Field>
+                    <Field
+                      label="Weight"
+                      help="Per item, in your store's weight unit. Used for shipping rates."
+                      error={fieldErrors.weight}
+                    >
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        placeholder="0"
+                        className={`${inputClass} ${withError(fieldErrors.weight)}`}
                       />
                     </Field>
                     {!canSeeStock ? (
