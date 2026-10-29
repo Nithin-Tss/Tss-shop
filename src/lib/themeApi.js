@@ -85,17 +85,52 @@ export function previewTheme(
   });
 }
 
-// The home page of one theme (live or draft) as HTML, for a thumbnail -> { html }
+// One page of a theme (live or draft) as HTML, for its thumbnail and the plain "View" tab -> { html }
+// `path` is a store path ("/", "/products/<id>", "/collections/<handle>", "/blog/<handle>", ...).
 // Names the theme in the request, so it doesn't change the theme the editor is working on.
-export async function renderThemeHome(themeId) {
+export async function renderThemePage(themeId, path = "/") {
   const headers = { "X-Theme-Id": themeId };
   const data = await apiRequest(`${BASE}/settings/`, { headers });
-  return apiRequest(`${BASE}/preview/?scroll=0&selected=&page=index`, {
+  const [first, second, third] = path.split("/").filter(Boolean);
+  const query = new URLSearchParams({ scroll: "0", selected: "", page: "index" });
+  if (first === "account" && (second === "login" || second === "register")) {
+    query.set("customer", second);
+  } else if (first === "products" && second) {
+    query.set("page", "product");
+    query.set("product", second);
+  } else if (first === "collections") {
+    query.set("page", "collection");
+    if (second && second !== "all") query.set("collection", second);
+  } else if (first === "blog") {
+    if (second && !third) {
+      query.set("page", "article");
+      query.set("article", second);
+    } else {
+      query.set("page", "blog");
+    }
+  } else if (first === "pages" && second) {
+    query.set("page", "page");
+    query.set("handle", second);
+  } else if (first === "checkout") {
+    query.set("page", "checkout");
+  } else if (first === "cart") {
+    query.set("page", "cart");
+  }
+  const page = query.get("page");
+  if (page === "checkout" && !data.templates?.checkout) {
+    data.templates = {
+      ...data.templates,
+      checkout: { order: ["main"], sections: { main: { type: "main-checkout", settings: {} } } },
+    };
+  }
+  return apiRequest(`${BASE}/preview/?${query}`, {
     method: "POST",
     body: withoutCartTemplate(data),
     headers,
   });
 }
+
+export const renderThemeHome = (themeId) => renderThemePage(themeId, "/");
 
 // Blog posts -> [{ id, title, handle, excerpt, body, cover_image, author, category, tags, status, published_at, url }]
 export function listBlogPosts() {

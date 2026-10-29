@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, "src") },
   },
+  test: { environment: "jsdom", include: ["src/**/*.test.{js,jsx}"] },
   build: {
     // monacoSetup (~4 MB) is already lazy-loaded and slimmed (see src/lib/monacoMain.js);
     // limit sits just above it so any other oversized chunk still warns.
