@@ -370,3 +370,27 @@ export function subscribeThemeEvents(onEvent) {
     controller?.abort();
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Media library: the pictures a store uploaded (banners, slides, image blocks) */
+
+// ?q= searches name and alt text -> [{ id, name, url, mime_type, file_size, alt_text, uploaded_by_name, created_at }]
+export function listMediaAssets(query = "") {
+  const q = query.trim();
+  return apiRequest(`/api/v1/media/${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+}
+
+// -> { ok, data: asset } or { ok: false, error }
+export function uploadMediaAsset(file) {
+  return apiUpload("/api/v1/media/", "image", file);
+}
+
+// changes: { name?, alt_text? }
+export function updateMediaAsset(id, changes) {
+  return apiRequest(`/api/v1/media/${id}/`, { method: "PATCH", body: changes });
+}
+
+// Refused (400) while a picture is still used in the online store
+export function deleteMediaAsset(id) {
+  return apiRequest(`/api/v1/media/${id}/`, { method: "DELETE" });
+}

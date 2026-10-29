@@ -27,6 +27,7 @@ const BlogPostsPage = lazy(() =>
   import("@/pages/AdminContent").then((m) => ({ default: m.BlogPostsPage }))
 );
 const StorePagesPage = lazy(() => import("@/pages/AdminPages"));
+const AdminMedia = lazy(() => import("@/pages/AdminMedia"));
 const AdminMenus = lazy(() => import("@/pages/AdminMenus"));
 const AdminInventory = lazy(() => import("@/pages/AdminInventory"));
 const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
@@ -101,6 +102,7 @@ export default function App() {
               }
             />
             <Route path="/admin/online-store/pages" element={<StorePagesPage />} />
+            <Route path="/admin/online-store/media" element={<AdminMedia />} />
             <Route path="/admin/online-store/blog-posts" element={<BlogPostsPage />} />
             {/* Theme code editor: it saves theme files */}
             <Route
