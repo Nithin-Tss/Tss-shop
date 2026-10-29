@@ -1,5 +1,6 @@
 import { getActiveStore, getSession, setStores, setTokens, signOut } from "@/lib/auth";
 import { getEditingThemeId } from "@/lib/editingTheme";
+import { checkImageFile } from "@/lib/imageUpload";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -326,6 +327,9 @@ async function sendForm(method, path, body, customHeaders) {
 
 // Upload one file as multipart form data: { ok, data } or { ok: false, error }
 export async function apiUpload(path, field, file) {
+  const problem = await checkImageFile(file);
+  if (problem) return { ok: false, error: problem };
+
   const form = new FormData();
   form.append(field, file);
 

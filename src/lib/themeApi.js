@@ -1,4 +1,5 @@
 import { API_URL, apiRequest, apiUpload } from "@/lib/api";
+import { checkImageFile } from "@/lib/imageUpload";
 import { getSession } from "@/lib/auth";
 
 // Every call is for the signed-in user's current store (Authorization + X-Store-Id).
@@ -238,7 +239,10 @@ export function patchThemeSettings(changes) {
 
 // Banner / slide / image block picture -> { ok, data: { url } } or { ok: false, error }
 // Reports progress (0..1) while uploading; falls back to the normal upload if the session needs a refresh.
-export function uploadThemeImage(file, onProgress) {
+export async function uploadThemeImage(file, onProgress) {
+  const problem = await checkImageFile(file);
+  if (problem) return { ok: false, error: problem };
+
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
     const session = getSession();
