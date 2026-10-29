@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiDelete, apiGet, apiPatch, syncAccess } from "@/lib/api";
-import { STORES_PATH, getActiveStore, getSession } from "@/lib/auth";
+import { STORES_PATH, getActiveStore, getSession, storeCan } from "@/lib/auth";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import PaymentsSettings from "@/components/PaymentsSettings";
 import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
+import ApiKeysSettings from "@/components/ApiKeysSettings";
+import { useFlags } from "@/lib/featureFlags";
 
 // [IANA name, label]; the backend validates the name
 const TIME_ZONES = [
@@ -38,6 +40,7 @@ const settingsMenu = [
   { label: "Locations" },
   { label: "Markets" },
   { label: "Apps" },
+  { label: "API keys", permission: "api_keys.view", flag: "api_keys" },
   { label: "Sales channels" },
   { label: "Domains" },
   { label: "Customer events" },
@@ -131,6 +134,13 @@ const SETTINGS_ICONS = {
       <circle cx="12" cy="12" r="10" />
       <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
       <path d="M2 12h20" />
+    </>
+  ),
+  "API keys": (
+    <>
+      <circle cx="7.5" cy="15.5" r="5.5" />
+      <path d="m21 2-9.6 9.6" />
+      <path d="m15.5 7.5 3 3L22 7l-3-3" />
     </>
   ),
   Apps: (
@@ -260,6 +270,7 @@ export default function AdminSettings() {
   /* Loading and saving against the backend */
 
   const activeStore = getActiveStore(getSession());
+  const flagsOn = useFlags();
   const storeId = activeStore?.storeId;
   // Only the store owner may change store details (the backend enforces this too)
   const isOwner = activeStore?.role === "owner";
@@ -306,8 +317,11 @@ export default function AdminSettings() {
      SEARCH SETTINGS
      ========================================================= */
 
-  const filteredSettings = settingsMenu.filter((item) =>
-    item.label.toLowerCase().includes(settingsSearch.toLowerCase())
+  const filteredSettings = settingsMenu.filter(
+    (item) =>
+      (!item.permission || storeCan(activeStore, item.permission)) &&
+      (!item.flag || flagsOn(item.flag)) &&
+      item.label.toLowerCase().includes(settingsSearch.toLowerCase())
   );
 
   /* =========================================================
@@ -1173,6 +1187,8 @@ export default function AdminSettings() {
                 <UsersSettings />
               ) : selectedSection === "Roles" ? (
                 <RolesSettings />
+              ) : selectedSection === "API keys" ? (
+                <ApiKeysSettings />
               ) : (
                 renderOtherSection()
               )}

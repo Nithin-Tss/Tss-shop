@@ -267,6 +267,10 @@ export function apiPost(path, body, customHeaders = {}) {
   return sendForm("POST", path, body, customHeaders);
 }
 
+export function apiPut(path, body, customHeaders = {}) {
+  return sendForm("PUT", path, body, customHeaders);
+}
+
 export function apiPatch(path, body, customHeaders = {}) {
   return sendForm("PATCH", path, body, customHeaders);
 }

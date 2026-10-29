@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Link, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
 import EditingThemeBar from "@/components/EditingThemeBar";
@@ -44,6 +44,7 @@ const AdminReportExploration = lazy(() => import("@/pages/AdminReportExploration
 const AdminAnalytics = lazy(() => import("@/pages/AdminAnalytics"));
 const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
 const AdminCreateDiscount = lazy(() => import("@/pages/AdminCreateDiscount"));
+const AdminPlatform = lazy(() => import("@/pages/AdminPlatform"));
 const AdminShipping = lazy(() => import("@/pages/AdminShipping"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -53,10 +54,20 @@ const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
 import { can, useSession } from "@/lib/auth";
+import { clearFlags, loadFlags, useFlags } from "@/lib/featureFlags";
 
 export default function App() {
   // Switching store remounts every page, so each one re-fetches the new store's data
-  const storeId = useSession()?.storeId || "none";
+  const session = useSession();
+  const storeId = session?.storeId || "none";
+  const signedIn = Boolean(session?.token);
+  const flagsOn = useFlags();
+
+  // Flags are per store: fetch them again when the store changes, drop them on sign-out
+  useEffect(() => {
+    if (signedIn && storeId !== "none") loadFlags();
+    else clearFlags();
+  }, [signedIn, storeId]);
 
   return (
     <Suspense fallback={<div className="p-8 text-sm text-neutral-500">Loading...</div>}>
@@ -202,6 +213,8 @@ export default function App() {
               element={<AdminCreateDiscount initialType="free-shipping" />}
             />
           </Route>
+          {/* Platform administration: the API refuses anyone who isn't a platform administrator */}
+          <Route path="/admin/platform" element={<AdminPlatform />} />
           <Route element={<RequirePermission permission="shipping.view" />}>
             <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
           </Route>
@@ -209,7 +222,7 @@ export default function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/blog" element={<Blog />} />
+        {flagsOn("blog") && <Route path="/blog" element={<Blog />} />}
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         {/* Links sent by email (see the backend's apps/identity/email_links.py) */}
         <Route path="/auth/reset-password" element={<ResetPassword />} />
