@@ -688,12 +688,19 @@ export default function ProductsPage() {
 
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
-      list = list.filter(
-        (p) =>
-          (p.title || "").toLowerCase().includes(q) ||
+      list = list.filter((p) => {
+        const titleMatch = (p.title || p.name || "").toLowerCase().includes(q);
+        const skuMatch =
           (p.sku || "").toLowerCase().includes(q) ||
-          (p.category || "").toLowerCase().includes(q)
-      );
+          (Array.isArray(p.variants) &&
+            p.variants.some((v) => (v.sku || "").toLowerCase().includes(q)));
+        const idMatch =
+          (p.id != null && String(p.id).toLowerCase().includes(q)) ||
+          (Array.isArray(p.variants) &&
+            p.variants.some((v) => v.id != null && String(v.id).toLowerCase().includes(q)));
+        const categoryMatch = (p.category || "").toLowerCase().includes(q);
+        return titleMatch || skuMatch || idMatch || categoryMatch;
+      });
     }
 
     if (sortBy === "title_asc") {
@@ -891,32 +898,32 @@ export default function ProductsPage() {
           <section className="mt-5 flex flex-1 flex-col overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
             {/* Tabs & Controls */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4DEFB] px-4 py-2.5">
-              {/* Status Filter Dropdown: "All ▼" */}
-              <div className="relative inline-flex items-center">
-                <select
-                  id="products-status-filter"
-                  aria-label="Filter by status"
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                    setPage(1);
-                  }}
-                  className="h-8 appearance-none rounded-lg bg-[#EDE9FE] pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#E4DEFB] transition cursor-pointer"
-                >
-                  {STATUS_TABS.map((tab) => (
-                    <option key={tab.id} value={tab.id} className="bg-white text-charcoal-navy">
-                      {tab.label}
-                    </option>
-                  ))}
-                </select>
-                <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[8px] text-charcoal-navy">
-                  ▼
-                </span>
-              </div>
+              <div className="flex flex-1 items-center gap-3">
+                {/* Status Filter Dropdown: "All ▼" */}
+                <div className="relative inline-flex items-center shrink-0">
+                  <select
+                    id="products-status-filter"
+                    aria-label="Filter by status"
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setPage(1);
+                    }}
+                    className="h-8 appearance-none rounded-lg bg-[#EDE9FE] pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#E4DEFB] transition cursor-pointer"
+                  >
+                    {STATUS_TABS.map((tab) => (
+                      <option key={tab.id} value={tab.id} className="bg-white text-charcoal-navy">
+                        {tab.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[8px] text-charcoal-navy">
+                    ▼
+                  </span>
+                </div>
 
-              <div className="flex items-center gap-2.5">
                 {/* Search */}
-                <div className="flex items-center gap-2 h-8 w-full sm:w-56 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-xs sm:text-sm">
+                <div className="flex items-center gap-2 h-8 w-full max-w-xs sm:max-w-sm md:max-w-md rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-xs sm:text-sm">
                   <span className="text-slate-400">⌕</span>
                   <input
                     type="text"
@@ -925,7 +932,7 @@ export default function ProductsPage() {
                       setSearchQuery(e.target.value);
                       setPage(1);
                     }}
-                    placeholder="Search and filter"
+                    placeholder="Search products"
                     aria-label="Search products"
                     className="w-full bg-transparent outline-none text-xs text-[#0B1020] placeholder:text-slate-400"
                   />
@@ -943,29 +950,29 @@ export default function ProductsPage() {
                     </button>
                   )}
                 </div>
+              </div>
 
-                {/* Sort By Dropdown (compact) */}
-                <div className="relative shrink-0">
-                  <select
-                    id="products-sort-by"
-                    aria-label="Sort products"
-                    value={sortBy}
-                    onChange={(e) => {
-                      setSortBy(e.target.value);
-                      setPage(1);
-                    }}
-                    className="h-8 appearance-none rounded-lg border border-[#DDD6FE] bg-white pl-2.5 pr-6 text-xs font-medium text-charcoal-navy outline-none hover:border-charcoal-navy transition cursor-pointer"
-                  >
-                    {SORT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-[#4C4F7A]">
-                    ▼
-                  </span>
-                </div>
+              {/* Sort By Dropdown (compact) */}
+              <div className="relative shrink-0">
+                <select
+                  id="products-sort-by"
+                  aria-label="Sort products"
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setPage(1);
+                  }}
+                  className="h-8 appearance-none rounded-lg border border-[#DDD6FE] bg-white pl-2.5 pr-6 text-xs font-medium text-charcoal-navy outline-none hover:border-charcoal-navy transition cursor-pointer"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-[#4C4F7A]">
+                  ▼
+                </span>
               </div>
             </div>
 
@@ -1077,7 +1084,7 @@ export default function ProductsPage() {
                             colSpan={canDelete ? 6 : 5}
                             className="px-6 py-10 text-center text-sm text-[#4C4F7A]"
                           >
-                            No products found matching the selected filter.
+                            No products found
                           </td>
                         </tr>
                       ) : (
