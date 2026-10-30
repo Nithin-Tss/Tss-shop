@@ -113,7 +113,7 @@ export default function Footer() {
           <a href="/privacy" className="hover:text-[#7C3AED]">
             Privacy Policy
           </a>
-          <a href="#" className="hover:text-[#7C3AED]">
+          <a href="/sitemap.xml" className="hover:text-[#7C3AED]">
             Sitemap
           </a>
           <a href="#" className="hover:text-[#7C3AED]">
