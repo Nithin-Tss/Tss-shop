@@ -74,7 +74,10 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                 {recents.map((chat) => {
                   const title = chatTitle(chat);
                   return (
-                    <li key={chat.id} className="group flex items-center gap-1 pr-1.5 hover:bg-[#F7F8FA]">
+                    <li
+                      key={chat.id}
+                      className="group flex items-center gap-1 pr-1.5 hover:bg-[#F7F8FA]"
+                    >
                       <button
                         type="button"
                         disabled={pending}
@@ -87,7 +90,9 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                         className={`min-w-0 flex-1 px-3 py-2 text-left disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
                       >
                         <span className="block truncate text-[13px] text-[#111827]">{title}</span>
-                        <span className="block text-[11px] text-[#9CA3AF]">{formatWhen(chat.savedAt)}</span>
+                        <span className="block text-[11px] text-[#9CA3AF]">
+                          {formatWhen(chat.savedAt)}
+                        </span>
                       </button>
                       <button
                         type="button"

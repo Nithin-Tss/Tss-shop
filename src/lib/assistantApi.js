@@ -18,7 +18,12 @@ export async function askAssistant(message, signal, history = []) {
   // it is one of this store's own themes, and falls back to the published one)
   const themeId = getEditingThemeId();
   const body = Array.isArray(history) && history.length ? { message, history } : { message };
-  const res = await apiPost("/api/v1/assistant/chat/", body, themeId ? { "X-Theme-Id": themeId } : {}, signal);
+  const res = await apiPost(
+    "/api/v1/assistant/chat/",
+    body,
+    themeId ? { "X-Theme-Id": themeId } : {},
+    signal
+  );
 
   // Stopped by the person: not an error, and nothing to show (the chat store has already moved on)
   if (res.aborted) return { ok: false, aborted: true };

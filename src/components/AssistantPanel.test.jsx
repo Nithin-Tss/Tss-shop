@@ -99,7 +99,11 @@ describe("AssistantPanel", () => {
       await assistantStore.send("How were sales?");
     });
     expect(document.body.textContent).toContain("Net sales were ₹26,600.");
-    expect(apiPost).toHaveBeenCalledWith("/api/v1/assistant/chat/", { message: "How were sales?" }, {});
+    expect(apiPost).toHaveBeenCalledWith(
+      "/api/v1/assistant/chat/",
+      { message: "How were sales?" },
+      {}
+    );
 
     fireEvent.keyDown(document, { key: "Escape" });
     fireEvent.click(screen.getByRole("button", { name: "Assistant" }));
@@ -121,7 +125,10 @@ describe("AssistantPanel", () => {
     expect(document.body.textContent).toContain("Store one answer");
     first.unmount();
 
-    signIn(["reports.view"], { storeId: "s2", stores: [{ storeId: "s2", permissions: ["reports.view"] }] });
+    signIn(["reports.view"], {
+      storeId: "s2",
+      stores: [{ storeId: "s2", permissions: ["reports.view"] }],
+    });
     mount();
     expect(document.body.textContent).not.toContain("Store one answer");
   });
@@ -141,7 +148,11 @@ describe("AssistantPanel", () => {
 
   it("shows the server's message when the assistant is refused", async () => {
     signIn(["orders.view"]);
-    apiPost.mockResolvedValue({ ok: false, status: 403, formError: "Your role doesn't allow this." });
+    apiPost.mockResolvedValue({
+      ok: false,
+      status: 403,
+      formError: "Your role doesn't allow this.",
+    });
     mount();
     await act(async () => {
       await assistantStore.send("Q");
@@ -179,7 +190,11 @@ describe("AssistantPanel", () => {
     signIn(["themes.manage", "reports.view"]);
     apiPost.mockResolvedValue({
       ok: true,
-      data: { answer: "Steps", tools: [], actions: [{ label: "Open Code editor", path: "/admin/online-store/code" }] },
+      data: {
+        answer: "Steps",
+        tools: [],
+        actions: [{ label: "Open Code editor", path: "/admin/online-store/code" }],
+      },
     });
     mount();
     fireEvent.click(screen.getByRole("button", { name: "Assistant" }));

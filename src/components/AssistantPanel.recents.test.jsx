@@ -49,7 +49,10 @@ beforeEach(() => {
   assistantStore.setOpen(false);
   window.innerWidth = 1024;
   apiPost.mockReset();
-  apiPost.mockResolvedValue({ ok: true, data: { answer: "an answer", tools: [{ name: "low_stock", arguments: { x: 1 } }] } });
+  apiPost.mockResolvedValue({
+    ok: true,
+    data: { answer: "an answer", tools: [{ name: "low_stock", arguments: { x: 1 } }] },
+  });
   signIn();
   syncAssistantOwner();
 });
@@ -103,7 +106,9 @@ describe("the look of the panel", () => {
     expect(picture.getAttribute("aria-hidden")).toBe("true");
     expect(picture.getAttribute("class")).toContain("h-14"); // about 56px
     expect(wrapper.querySelectorAll("img")).toHaveLength(0); // no image files
-    expect(heading.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+    expect(
+      heading.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING
+    ).toBeTruthy();
   });
 
   it("stacks the example chips under the greeting as compact lavender pills", () => {

@@ -55,7 +55,9 @@ describe("parseBlocks", () => {
 describe("AssistantMarkdown", () => {
   it("renders paragraphs, lists, bold and inline code", () => {
     const { container } = render(
-      <AssistantMarkdown text={"Do this:\n\n1. Open **Footer**\n2. Set `Phone number`\n\n- one\n- two"} />
+      <AssistantMarkdown
+        text={"Do this:\n\n1. Open **Footer**\n2. Set `Phone number`\n\n- one\n- two"}
+      />
     );
     expect(container.querySelectorAll("p")).toHaveLength(1);
     expect(container.querySelectorAll("ol > li")).toHaveLength(2);
@@ -70,14 +72,17 @@ describe("AssistantMarkdown", () => {
   });
 
   it("shows HTML, scripts and images as text, never as elements", () => {
-    const html = '<script>alert(1)</script><img src=x onerror="alert(2)"><b>bold?</b> <a href="javascript:alert(3)">x</a>';
+    const html =
+      '<script>alert(1)</script><img src=x onerror="alert(2)"><b>bold?</b> <a href="javascript:alert(3)">x</a>';
     const { container } = render(<AssistantMarkdown text={html} />);
     expect(container.textContent).toBe(html);
     for (const tag of ["script", "img", "b", "a"]) expect(container.querySelector(tag)).toBeNull();
   });
 
   it("does not turn links or images in markdown into elements", () => {
-    const { container } = render(<AssistantMarkdown text={"[click](http://evil.example) ![x](http://evil.example/a.png)"} />);
+    const { container } = render(
+      <AssistantMarkdown text={"[click](http://evil.example) ![x](http://evil.example/a.png)"} />
+    );
     expect(container.querySelector("a")).toBeNull();
     expect(container.querySelector("img")).toBeNull();
     expect(container.textContent).toContain("[click](http://evil.example)");
@@ -91,13 +96,17 @@ describe("AssistantMarkdown", () => {
   });
 
   it("puts HTML inside a code block in the code, as text", () => {
-    const { container } = render(<AssistantMarkdown text={'```html\n<img src=x onerror="alert(1)">\n```'} />);
+    const { container } = render(
+      <AssistantMarkdown text={'```html\n<img src=x onerror="alert(1)">\n```'} />
+    );
     expect(container.querySelector("pre code").textContent).toBe('<img src=x onerror="alert(1)">');
     expect(container.querySelector("img")).toBeNull();
   });
 
   it("renders a code block with a caption, a monospace scrolling area and a Copy button", () => {
-    const { container } = render(<AssistantMarkdown text={"```liquid\n{{ s.utility_phone }}\n```"} />);
+    const { container } = render(
+      <AssistantMarkdown text={"```liquid\n{{ s.utility_phone }}\n```"} />
+    );
     expect(screen.getByText("Suggested code - review before using")).toBeTruthy();
     const pre = container.querySelector("pre");
     expect(pre.className).toContain("overflow-x-auto");

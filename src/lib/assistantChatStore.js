@@ -23,7 +23,9 @@ const ROLES = new Set(["user", "assistant", "error", "note"]);
 export function slimMessage(message) {
   if (!message || !ROLES.has(message.role) || typeof message.text !== "string") return null;
   const text =
-    message.text.length > MAX_SAVED_TEXT ? `${message.text.slice(0, MAX_SAVED_TEXT)}…` : message.text;
+    message.text.length > MAX_SAVED_TEXT
+      ? `${message.text.slice(0, MAX_SAVED_TEXT)}…`
+      : message.text;
   const saved = { role: message.role, text };
 
   const names = (Array.isArray(message.tools) ? message.tools : [])
@@ -67,7 +69,12 @@ export const MAX_HISTORY_TOTAL_CHARS = 3000;
 
 export function buildHistory(messages) {
   const turns = (Array.isArray(messages) ? messages : [])
-    .filter((m) => (m?.role === "user" || m?.role === "assistant") && typeof m.text === "string" && m.text.trim())
+    .filter(
+      (m) =>
+        (m?.role === "user" || m?.role === "assistant") &&
+        typeof m.text === "string" &&
+        m.text.trim()
+    )
     .map((m) => ({ role: m.role, content: m.text.trim().slice(0, MAX_HISTORY_ITEM_CHARS) }))
     .slice(-HISTORY_EXCHANGES * 2);
   // Over the total: drop the oldest turns first, so the latest answer is kept

@@ -163,7 +163,12 @@ async function send(path, { method, headers, body, signal }) {
     if (typeof FormData !== "undefined" && body instanceof FormData)
       delete allHeaders["Content-Type"];
     // `signal` (optional) lets the caller cancel the request; other callers pass none and are unchanged
-    return fetch(`${API_URL}${path}`, { method, headers: allHeaders, body, ...(signal ? { signal } : {}) });
+    return fetch(`${API_URL}${path}`, {
+      method,
+      headers: allHeaders,
+      body,
+      ...(signal ? { signal } : {}),
+    });
   };
 
   let usedToken = getSession()?.token;

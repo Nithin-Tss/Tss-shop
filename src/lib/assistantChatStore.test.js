@@ -192,7 +192,6 @@ describe("createChatStore", () => {
   });
 });
 
-
 describe("conversation history", () => {
   const msg = (role, text, extra = {}) => ({ role, text, ...extra });
 
@@ -225,7 +224,10 @@ describe("conversation history", () => {
       msg("user", "q"),
       msg("error", "Something went wrong."),
       msg("note", "Stopped."),
-      msg("assistant", "a", { tools: [{ name: "theme_files" }], actions: [{ label: "Open", path: "/admin/x" }] }),
+      msg("assistant", "a", {
+        tools: [{ name: "theme_files" }],
+        actions: [{ label: "Open", path: "/admin/x" }],
+      }),
     ]);
     expect(history).toEqual([
       { role: "user", content: "q" },
@@ -237,7 +239,9 @@ describe("conversation history", () => {
     const long = "x".repeat(MAX_HISTORY_ITEM_CHARS + 500);
     expect(buildHistory([msg("user", long)])[0].content).toHaveLength(MAX_HISTORY_ITEM_CHARS);
 
-    const turns = Array.from({ length: 6 }, (_, i) => msg(i % 2 ? "assistant" : "user", `${i}`.repeat(MAX_HISTORY_ITEM_CHARS)));
+    const turns = Array.from({ length: 6 }, (_, i) =>
+      msg(i % 2 ? "assistant" : "user", `${i}`.repeat(MAX_HISTORY_ITEM_CHARS))
+    );
     const history = buildHistory(turns);
     const total = history.reduce((sum, h) => sum + h.content.length, 0);
     expect(total).toBeLessThanOrEqual(MAX_HISTORY_TOTAL_CHARS);

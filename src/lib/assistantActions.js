@@ -14,7 +14,8 @@ function safePath(path) {
   } catch {
     return null;
   }
-  if (url.origin !== "http://admin.invalid" || url.hash || !ADMIN_PAGE.test(url.pathname)) return null;
+  if (url.origin !== "http://admin.invalid" || url.hash || !ADMIN_PAGE.test(url.pathname))
+    return null;
 
   const params = [...url.searchParams.entries()];
   if (params.length === 0) return url.search ? null : url.pathname;

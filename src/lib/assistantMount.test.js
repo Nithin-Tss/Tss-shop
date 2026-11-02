@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 
 // The customizer and the code editor don't render AdminSidebar, so each mounts the assistant itself. These
 // pages are too big to render in a test, so check by reading the source that every page mounts it exactly once.
-const source = (relative) => readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8");
+const source = (relative) =>
+  readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8");
 const count = (text, needle) => text.split(needle).length - 1;
 
 describe("where the assistant is mounted", () => {

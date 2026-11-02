@@ -728,405 +728,405 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
   return (
     <>
-    <div
-      onKeyDown={onKeyDown}
-      className={`flex flex-col overflow-hidden bg-white text-[#3b3b3b] ${
-        fullscreen ? "" : "rounded-lg border border-[#d4d4d4]"
-      }`}
-      style={{ height }}
-    >
-      <div className="flex min-h-0 flex-1">
-        {/* Activity bar */}
-        <nav className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-[#e5e5e5] bg-[#f8f8f8] pt-2">
-          {[
-            { id: "explorer", icon: <ExplorerIcon />, title: "Explorer" },
-            { id: "search", icon: <SearchIcon />, title: "Search" },
-          ].map((b) => (
-            <button
-              key={b.id}
-              title={b.title}
-              onClick={() => setPanel(b.id)}
-              className={`flex h-12 w-12 items-center justify-center border-l-2 ${
-                panel === b.id
-                  ? "border-[#6D28D9] text-[#3b3b3b]"
-                  : "border-transparent text-[#616161]"
-              }`}
-            >
-              {b.icon}
-            </button>
-          ))}
-        </nav>
-
-        {/* Side panel */}
-        <aside className="flex w-64 shrink-0 flex-col border-r border-[#e5e5e5] bg-[#f8f8f8]">
-          {panel === "explorer" ? (
-            <>
-              <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-[#3b3b3b]">
-                Explorer
-              </div>
-
-              <div className="flex items-center justify-between px-2 py-1">
-                <button
-                  className="flex items-center gap-1 text-[11px] font-bold uppercase text-[#3b3b3b]"
-                  onClick={() => {
-                    setRootOpen((o) => !o);
-                    setSelected({ type: "root", path: "" });
-                  }}
-                >
-                  <Chevron open={rootOpen} />
-                  {project.theme?.name || "Theme Files"}
-                </button>
-                <div className="flex gap-1 text-[#424242]">
-                  <IconButton title="New File" onClick={newFile}>
-                    <NewFileIcon />
-                  </IconButton>
-                  <IconButton title="New Folder" onClick={newFolder}>
-                    <NewFolderIcon />
-                  </IconButton>
-                  <IconButton title="Collapse Folders" onClick={() => setExpanded(new Set())}>
-                    <CollapseIcon />
-                  </IconButton>
-                </div>
-              </div>
-
-              <div className="min-h-0 flex-1 overflow-y-auto pb-2">
-                {rootOpen && children("").map((c) => renderNode(c, 0))}
-              </div>
-
-              {[
-                ["outline", "Outline"],
-                ["timeline", "Timeline"],
-                ["references", "References"],
-                ["dependencies", "Dependencies"],
-              ].map(([key, label]) => (
-                <div key={key} className="border-t border-[#e5e5e5]">
-                  <button
-                    className="flex w-full items-center gap-1 px-1 py-1 text-[11px] font-bold uppercase text-[#3b3b3b]"
-                    onClick={() => toggleSection(key)}
-                  >
-                    <Chevron open={sections[key]} />
-                    {label}
-                  </button>
-                  {sections[key] && (
-                    <p className="px-6 pb-3 text-[13px] text-[#6b6b6b]">
-                      {key === "outline" || key === "timeline"
-                        ? `The active editor cannot provide ${key} information.`
-                        : "Nothing to show."}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </>
-          ) : (
-            <>
-              <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-[#3b3b3b]">
-                Search
-              </div>
-              <div className="px-3 pb-2">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search"
-                  className="w-full rounded border border-[#cecece] bg-white px-2 py-1 text-[13px] outline-none focus:border-[#6D28D9]"
-                />
-              </div>
-              <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 text-[13px]">
-                {query && results.length === 0 && (
-                  <p className="text-[#6b6b6b]">No results found.</p>
-                )}
-                {results.map((r, i) => (
-                  <button
-                    key={i}
-                    onClick={() => openFile(r.path)}
-                    className="block w-full truncate py-0.5 text-left hover:bg-[#e8e8e8]"
-                    title={`${r.path}:${r.line}`}
-                  >
-                    <span className="font-medium">{baseName(r.path)}</span>
-                    <span className="text-[#6b6b6b]"> :{r.line} </span>
-                    <span className="text-[#6b6b6b]">{r.text}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </aside>
-
-        {/* Editor area */}
-        <section className="flex min-w-0 flex-1 flex-col">
-          <div className="flex items-stretch bg-[#f8f8f8]">
-            <Link
-              id="back-to-customizer-btn"
-              to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
-              className="flex items-center gap-1.5 border-r border-[#e5e5e5] px-3 py-2 text-[13px] font-medium text-[#4C4F7A] hover:bg-[#e8e8e8] hover:text-[#0B1020]"
-              title="Return to theme customizer"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
+      <div
+        onKeyDown={onKeyDown}
+        className={`flex flex-col overflow-hidden bg-white text-[#3b3b3b] ${
+          fullscreen ? "" : "rounded-lg border border-[#d4d4d4]"
+        }`}
+        style={{ height }}
+      >
+        <div className="flex min-h-0 flex-1">
+          {/* Activity bar */}
+          <nav className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-[#e5e5e5] bg-[#f8f8f8] pt-2">
+            {[
+              { id: "explorer", icon: <ExplorerIcon />, title: "Explorer" },
+              { id: "search", icon: <SearchIcon />, title: "Search" },
+            ].map((b) => (
+              <button
+                key={b.id}
+                title={b.title}
+                onClick={() => setPanel(b.id)}
+                className={`flex h-12 w-12 items-center justify-center border-l-2 ${
+                  panel === b.id
+                    ? "border-[#6D28D9] text-[#3b3b3b]"
+                    : "border-transparent text-[#616161]"
+                }`}
               >
-                <path d="M10 13L5 8l5-5" />
-              </svg>
-              Back to customizer
-            </Link>
+                {b.icon}
+              </button>
+            ))}
+          </nav>
 
-            <div className="flex min-w-0 flex-1 overflow-x-auto">
-              {openTabs.map((path) => {
-                const active = path === activePath;
-                return (
-                  <div
-                    key={path}
+          {/* Side panel */}
+          <aside className="flex w-64 shrink-0 flex-col border-r border-[#e5e5e5] bg-[#f8f8f8]">
+            {panel === "explorer" ? (
+              <>
+                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-[#3b3b3b]">
+                  Explorer
+                </div>
+
+                <div className="flex items-center justify-between px-2 py-1">
+                  <button
+                    className="flex items-center gap-1 text-[11px] font-bold uppercase text-[#3b3b3b]"
                     onClick={() => {
-                      setActivePath(path);
-                      setSelected({ type: "file", path });
+                      setRootOpen((o) => !o);
+                      setSelected({ type: "root", path: "" });
                     }}
-                    className={`flex cursor-pointer items-center gap-2 border-r border-[#e5e5e5] px-3 py-2 text-[13px] ${
-                      active
-                        ? "border-t-2 border-t-[#6D28D9] bg-white text-[#3b3b3b]"
-                        : "border-t-2 border-t-transparent text-[#6b6b6b]"
-                    }`}
                   >
-                    <span className="whitespace-nowrap">{baseName(path)}</span>
-                    {path in drafts ? (
-                      <span className="text-[#6D28D9]">●</span>
-                    ) : (
-                      <button
-                        className="rounded text-[#6b6b6b] hover:bg-[#e8e8e8]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          closeTab(path);
-                        }}
-                      >
-                        <CloseIcon />
-                      </button>
+                    <Chevron open={rootOpen} />
+                    {project.theme?.name || "Theme Files"}
+                  </button>
+                  <div className="flex gap-1 text-[#424242]">
+                    <IconButton title="New File" onClick={newFile}>
+                      <NewFileIcon />
+                    </IconButton>
+                    <IconButton title="New Folder" onClick={newFolder}>
+                      <NewFolderIcon />
+                    </IconButton>
+                    <IconButton title="Collapse Folders" onClick={() => setExpanded(new Set())}>
+                      <CollapseIcon />
+                    </IconButton>
+                  </div>
+                </div>
+
+                <div className="min-h-0 flex-1 overflow-y-auto pb-2">
+                  {rootOpen && children("").map((c) => renderNode(c, 0))}
+                </div>
+
+                {[
+                  ["outline", "Outline"],
+                  ["timeline", "Timeline"],
+                  ["references", "References"],
+                  ["dependencies", "Dependencies"],
+                ].map(([key, label]) => (
+                  <div key={key} className="border-t border-[#e5e5e5]">
+                    <button
+                      className="flex w-full items-center gap-1 px-1 py-1 text-[11px] font-bold uppercase text-[#3b3b3b]"
+                      onClick={() => toggleSection(key)}
+                    >
+                      <Chevron open={sections[key]} />
+                      {label}
+                    </button>
+                    {sections[key] && (
+                      <p className="px-6 pb-3 text-[13px] text-[#6b6b6b]">
+                        {key === "outline" || key === "timeline"
+                          ? `The active editor cannot provide ${key} information.`
+                          : "Nothing to show."}
+                      </p>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-[#3b3b3b]">
+                  Search
+                </div>
+                <div className="px-3 pb-2">
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search"
+                    className="w-full rounded border border-[#cecece] bg-white px-2 py-1 text-[13px] outline-none focus:border-[#6D28D9]"
+                  />
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 text-[13px]">
+                  {query && results.length === 0 && (
+                    <p className="text-[#6b6b6b]">No results found.</p>
+                  )}
+                  {results.map((r, i) => (
+                    <button
+                      key={i}
+                      onClick={() => openFile(r.path)}
+                      className="block w-full truncate py-0.5 text-left hover:bg-[#e8e8e8]"
+                      title={`${r.path}:${r.line}`}
+                    >
+                      <span className="font-medium">{baseName(r.path)}</span>
+                      <span className="text-[#6b6b6b]"> :{r.line} </span>
+                      <span className="text-[#6b6b6b]">{r.text}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </aside>
 
-            <div className="flex shrink-0 items-center gap-2 px-3 text-[12px]">
-              <button
-                onClick={saveActive}
-                disabled={busy || !activePath || !(activePath in drafts)}
-                className="rounded border border-[#cecece] px-2.5 py-1 hover:bg-[#e8e8e8] disabled:opacity-40"
+          {/* Editor area */}
+          <section className="flex min-w-0 flex-1 flex-col">
+            <div className="flex items-stretch bg-[#f8f8f8]">
+              <Link
+                id="back-to-customizer-btn"
+                to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
+                className="flex items-center gap-1.5 border-r border-[#e5e5e5] px-3 py-2 text-[13px] font-medium text-[#4C4F7A] hover:bg-[#e8e8e8] hover:text-[#0B1020]"
+                title="Return to theme customizer"
               >
-                Save
-              </button>
-              {activeSynced && (
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <path d="M10 13L5 8l5-5" />
+                </svg>
+                Back to customizer
+              </Link>
+
+              <div className="flex min-w-0 flex-1 overflow-x-auto">
+                {openTabs.map((path) => {
+                  const active = path === activePath;
+                  return (
+                    <div
+                      key={path}
+                      onClick={() => {
+                        setActivePath(path);
+                        setSelected({ type: "file", path });
+                      }}
+                      className={`flex cursor-pointer items-center gap-2 border-r border-[#e5e5e5] px-3 py-2 text-[13px] ${
+                        active
+                          ? "border-t-2 border-t-[#6D28D9] bg-white text-[#3b3b3b]"
+                          : "border-t-2 border-t-transparent text-[#6b6b6b]"
+                      }`}
+                    >
+                      <span className="whitespace-nowrap">{baseName(path)}</span>
+                      {path in drafts ? (
+                        <span className="text-[#6D28D9]">●</span>
+                      ) : (
+                        <button
+                          className="rounded text-[#6b6b6b] hover:bg-[#e8e8e8]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            closeTab(path);
+                          }}
+                        >
+                          <CloseIcon />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2 px-3 text-[12px]">
                 <button
-                  onClick={() =>
-                    history?.name === activeSynced.name
-                      ? setHistory(null)
-                      : loadHistory(activeSynced.name)
-                  }
+                  onClick={saveActive}
+                  disabled={busy || !activePath || !(activePath in drafts)}
+                  className="rounded border border-[#cecece] px-2.5 py-1 hover:bg-[#e8e8e8] disabled:opacity-40"
+                >
+                  Save
+                </button>
+                {activeSynced && (
+                  <button
+                    onClick={() =>
+                      history?.name === activeSynced.name
+                        ? setHistory(null)
+                        : loadHistory(activeSynced.name)
+                    }
+                    className={`rounded border px-2.5 py-1 ${
+                      history?.name === activeSynced.name
+                        ? "border-[#0B1020] bg-[#0B1020] text-white"
+                        : "border-[#cecece] hover:bg-[#e8e8e8]"
+                    }`}
+                    title="The last 20 versions of this file"
+                  >
+                    History
+                  </button>
+                )}
+                <Link
+                  to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
+                  className="rounded border border-[#cecece] px-2.5 py-1 hover:bg-[#e8e8e8]"
+                  title="Return to theme customizer"
+                >
+                  Customizer
+                </Link>
+                <button
+                  onClick={() => setPreviewOpen((o) => !o)}
                   className={`rounded border px-2.5 py-1 ${
-                    history?.name === activeSynced.name
+                    previewOpen
                       ? "border-[#0B1020] bg-[#0B1020] text-white"
                       : "border-[#cecece] hover:bg-[#e8e8e8]"
                   }`}
-                  title="The last 20 versions of this file"
                 >
-                  History
+                  Preview
                 </button>
-              )}
-              <Link
-                to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
-                className="rounded border border-[#cecece] px-2.5 py-1 hover:bg-[#e8e8e8]"
-                title="Return to theme customizer"
-              >
-                Customizer
-              </Link>
-              <button
-                onClick={() => setPreviewOpen((o) => !o)}
-                className={`rounded border px-2.5 py-1 ${
-                  previewOpen
-                    ? "border-[#0B1020] bg-[#0B1020] text-white"
-                    : "border-[#cecece] hover:bg-[#e8e8e8]"
-                }`}
-              >
-                Preview
-              </button>
-              {fullscreen && <AssistantButton tone="light" />}
+                {fullscreen && <AssistantButton tone="light" />}
+              </div>
             </div>
-          </div>
 
-          {activeSynced && (
-            <div className="border-b border-[#e5e5e5] bg-[#eef6ff] px-3 py-1.5 text-[12px] text-[#1d3f6e]">
-              {activeSynced.kind === "template" ? (
-                <>
-                  This file lists the {activeSynced.label}&apos;s sections in the Customize editor,
-                  one <code>{"{% section %}"}</code> line each, in order. Moving, adding or removing
-                  sections there changes these lines, and saving here updates the sections list
-                  there.
-                </>
-              ) : (
-                <>
-                  This file is linked to the {activeSynced.label} in the Customize editor: its
-                  schema is the {activeSynced.label}&apos;s options and blocks. Changes made there
-                  are written here, and saving here updates it there.
-                </>
-              )}
-            </div>
-          )}
-
-          {notice && (
-            <div
-              role="status"
-              className="border-b border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[12px] text-emerald-800"
-            >
-              {notice}
-            </div>
-          )}
-
-          {error && activeSynced && (
-            <div
-              role="alert"
-              className="border-b border-red-200 bg-red-50 px-3 py-1.5 text-[12px] text-red-700"
-            >
-              Not saved: {error} The saved version keeps working until this is fixed.
-            </div>
-          )}
-
-          {history && history.name === activeSynced?.name && (
-            <div className="max-h-56 overflow-y-auto border-b border-[#e5e5e5] bg-[#fbfbfb] px-3 py-2 text-[12px]">
-              <p className="mb-1 font-bold uppercase text-[#3b3b3b]">History (latest first)</p>
-              {history.history.length === 0 && (
-                <p className="text-[#6b6b6b]">No earlier versions yet.</p>
-              )}
-              {history.history.map((entry) => (
-                <div
-                  key={entry.index}
-                  className="flex items-center gap-3 border-t border-[#efefef] py-1 first:border-t-0"
-                >
-                  <span className="w-40 shrink-0">
-                    {new Date(entry.saved_at * 1000).toLocaleString()}
-                  </span>
-                  <span className="w-24 shrink-0 text-[#6b6b6b]">
-                    {SOURCE_LABELS[entry.source] || entry.source}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-[#6b6b6b]">
-                    {entry.preview.split("\n")[0]}
-                  </span>
-                  <button
-                    onClick={() => restoreVersion(history.name, entry)}
-                    disabled={busy}
-                    className="shrink-0 rounded border border-[#cecece] px-2 py-0.5 hover:bg-[#e8e8e8] disabled:opacity-40"
-                  >
-                    Restore
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activePath === IMAGES_FILE && (
-            <div className="border-b border-[#e5e5e5] bg-[#eef5ff] px-3 py-1.5 text-[12px] text-[#1f4b8f]">
-              Pictures uploaded in the Customize editor are stored in the database and listed here.
-              Use a picture&apos;s url in a Liquid file, or pick it in the customizer. This list
-              can&apos;t be edited.
-            </div>
-          )}
-
-          {activePath && isSettingsFile(activePath) && (
-            <div className="border-b border-[#e5e5e5] bg-[#fff8e5] px-3 py-1.5 text-[12px] text-[#6b4e00]">
-              These are the settings from the Customize editor. Changes made there appear here, and
-              when you save changes here they appear there. Settings that aren&apos;t valid are
-              refused.
-            </div>
-          )}
-
-          {activePath && (
-            <div className="flex items-center gap-1 border-b border-[#e5e5e5] bg-white px-3 py-1 text-[13px] text-[#6b6b6b]">
-              {activePath.split("/").map((seg, i, arr) => (
-                <span key={i} className="flex items-center gap-1">
-                  {i > 0 && <span>›</span>}
-                  <span className={i === arr.length - 1 ? "text-[#3b3b3b]" : ""}>{seg}</span>
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="min-h-0 flex-1">
-            {activePath ? (
-              <CodeEditor
-                path={activePath}
-                language={languageOf(activePath)}
-                theme="vs"
-                value={contentOf(activePath)}
-                onChange={(v) =>
-                  setDrafts((d) => {
-                    if (v === project.files[activePath]) {
-                      const next = { ...d };
-                      delete next[activePath];
-                      return next;
-                    }
-                    return { ...d, [activePath]: v };
-                  })
-                }
-                height="100%"
-                readOnly={activePath === IMAGES_FILE}
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-[#6b6b6b]">
-                Open a file from the Explorer to start editing.
+            {activeSynced && (
+              <div className="border-b border-[#e5e5e5] bg-[#eef6ff] px-3 py-1.5 text-[12px] text-[#1d3f6e]">
+                {activeSynced.kind === "template" ? (
+                  <>
+                    This file lists the {activeSynced.label}&apos;s sections in the Customize
+                    editor, one <code>{"{% section %}"}</code> line each, in order. Moving, adding
+                    or removing sections there changes these lines, and saving here updates the
+                    sections list there.
+                  </>
+                ) : (
+                  <>
+                    This file is linked to the {activeSynced.label} in the Customize editor: its
+                    schema is the {activeSynced.label}&apos;s options and blocks. Changes made there
+                    are written here, and saving here updates it there.
+                  </>
+                )}
               </div>
             )}
-          </div>
-        </section>
 
-        {previewOpen && (
-          <aside className="flex w-[40%] shrink-0 flex-col border-l border-[#e5e5e5]">
-            <div className="flex items-center justify-between bg-[#f8f8f8] px-3 py-2 text-[12px]">
-              <span className="font-bold uppercase text-[#3b3b3b]">Theme preview</span>
-              <span className="flex gap-3">
-                <button
-                  className="hover:text-[#6D28D9]"
-                  onClick={() => setPreviewKey((k) => k + 1)}
-                >
-                  Refresh
-                </button>
-                <a
-                  className="hover:text-[#6D28D9]"
-                  href={project.storefrontUrl}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    openStorefront("/");
-                  }}
-                >
-                  Open
-                </a>
-              </span>
+            {notice && (
+              <div
+                role="status"
+                className="border-b border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[12px] text-emerald-800"
+              >
+                {notice}
+              </div>
+            )}
+
+            {error && activeSynced && (
+              <div
+                role="alert"
+                className="border-b border-red-200 bg-red-50 px-3 py-1.5 text-[12px] text-red-700"
+              >
+                Not saved: {error} The saved version keeps working until this is fixed.
+              </div>
+            )}
+
+            {history && history.name === activeSynced?.name && (
+              <div className="max-h-56 overflow-y-auto border-b border-[#e5e5e5] bg-[#fbfbfb] px-3 py-2 text-[12px]">
+                <p className="mb-1 font-bold uppercase text-[#3b3b3b]">History (latest first)</p>
+                {history.history.length === 0 && (
+                  <p className="text-[#6b6b6b]">No earlier versions yet.</p>
+                )}
+                {history.history.map((entry) => (
+                  <div
+                    key={entry.index}
+                    className="flex items-center gap-3 border-t border-[#efefef] py-1 first:border-t-0"
+                  >
+                    <span className="w-40 shrink-0">
+                      {new Date(entry.saved_at * 1000).toLocaleString()}
+                    </span>
+                    <span className="w-24 shrink-0 text-[#6b6b6b]">
+                      {SOURCE_LABELS[entry.source] || entry.source}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-[#6b6b6b]">
+                      {entry.preview.split("\n")[0]}
+                    </span>
+                    <button
+                      onClick={() => restoreVersion(history.name, entry)}
+                      disabled={busy}
+                      className="shrink-0 rounded border border-[#cecece] px-2 py-0.5 hover:bg-[#e8e8e8] disabled:opacity-40"
+                    >
+                      Restore
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activePath === IMAGES_FILE && (
+              <div className="border-b border-[#e5e5e5] bg-[#eef5ff] px-3 py-1.5 text-[12px] text-[#1f4b8f]">
+                Pictures uploaded in the Customize editor are stored in the database and listed
+                here. Use a picture&apos;s url in a Liquid file, or pick it in the customizer. This
+                list can&apos;t be edited.
+              </div>
+            )}
+
+            {activePath && isSettingsFile(activePath) && (
+              <div className="border-b border-[#e5e5e5] bg-[#fff8e5] px-3 py-1.5 text-[12px] text-[#6b4e00]">
+                These are the settings from the Customize editor. Changes made there appear here,
+                and when you save changes here they appear there. Settings that aren&apos;t valid
+                are refused.
+              </div>
+            )}
+
+            {activePath && (
+              <div className="flex items-center gap-1 border-b border-[#e5e5e5] bg-white px-3 py-1 text-[13px] text-[#6b6b6b]">
+                {activePath.split("/").map((seg, i, arr) => (
+                  <span key={i} className="flex items-center gap-1">
+                    {i > 0 && <span>›</span>}
+                    <span className={i === arr.length - 1 ? "text-[#3b3b3b]" : ""}>{seg}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="min-h-0 flex-1">
+              {activePath ? (
+                <CodeEditor
+                  path={activePath}
+                  language={languageOf(activePath)}
+                  theme="vs"
+                  value={contentOf(activePath)}
+                  onChange={(v) =>
+                    setDrafts((d) => {
+                      if (v === project.files[activePath]) {
+                        const next = { ...d };
+                        delete next[activePath];
+                        return next;
+                      }
+                      return { ...d, [activePath]: v };
+                    })
+                  }
+                  height="100%"
+                  readOnly={activePath === IMAGES_FILE}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-[#6b6b6b]">
+                  Open a file from the Explorer to start editing.
+                </div>
+              )}
             </div>
-            {/* sandbox: theme code is user-written, so it must not get our origin's access */}
-            <iframe
-              key={previewKey}
-              title="Theme preview"
-              src={project.storefrontUrl}
-              sandbox="allow-scripts allow-forms allow-popups"
-              className="min-h-0 flex-1 bg-white"
-            />
-          </aside>
-        )}
-      </div>
+          </section>
 
-      {/* Status bar */}
-      <div className="flex items-center justify-between border-t border-[#e5e5e5] bg-[#f8f8f8] px-3 py-1 text-[12px] text-[#3b3b3b]">
-        <span className={error ? "text-red-600" : ""}>
-          {busy ? "Saving..." : error || savedNote || "Connected to server"}
-        </span>
-        <span>
-          {activePath && activePath in drafts ? "Unsaved (Cmd/Ctrl+S to save)  •  " : ""}
-          {activePath ? languageOf(activePath) : ""}
-        </span>
+          {previewOpen && (
+            <aside className="flex w-[40%] shrink-0 flex-col border-l border-[#e5e5e5]">
+              <div className="flex items-center justify-between bg-[#f8f8f8] px-3 py-2 text-[12px]">
+                <span className="font-bold uppercase text-[#3b3b3b]">Theme preview</span>
+                <span className="flex gap-3">
+                  <button
+                    className="hover:text-[#6D28D9]"
+                    onClick={() => setPreviewKey((k) => k + 1)}
+                  >
+                    Refresh
+                  </button>
+                  <a
+                    className="hover:text-[#6D28D9]"
+                    href={project.storefrontUrl}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openStorefront("/");
+                    }}
+                  >
+                    Open
+                  </a>
+                </span>
+              </div>
+              {/* sandbox: theme code is user-written, so it must not get our origin's access */}
+              <iframe
+                key={previewKey}
+                title="Theme preview"
+                src={project.storefrontUrl}
+                sandbox="allow-scripts allow-forms allow-popups"
+                className="min-h-0 flex-1 bg-white"
+              />
+            </aside>
+          )}
+        </div>
+
+        {/* Status bar */}
+        <div className="flex items-center justify-between border-t border-[#e5e5e5] bg-[#f8f8f8] px-3 py-1 text-[12px] text-[#3b3b3b]">
+          <span className={error ? "text-red-600" : ""}>
+            {busy ? "Saving..." : error || savedNote || "Connected to server"}
+          </span>
+          <span>
+            {activePath && activePath in drafts ? "Unsaved (Cmd/Ctrl+S to save)  •  " : ""}
+            {activePath ? languageOf(activePath) : ""}
+          </span>
+        </div>
       </div>
-    </div>
-    {/* Outside the editor's root, so keys typed in the chat never reach its Ctrl+S handler. Fullscreen is the
+      {/* Outside the editor's root, so keys typed in the chat never reach its Ctrl+S handler. Fullscreen is the
         code editor page, which has no AdminSidebar: it mounts the assistant panel itself (once). */}
-    {fullscreen && <AssistantPanel />}
+      {fullscreen && <AssistantPanel />}
     </>
   );
 }
