@@ -546,7 +546,7 @@ export default function AccountPage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] transition disabled:opacity-50 cursor-pointer"
                   >
                     {isSaving ? "Saving..." : "Save Details"}
                   </button>
@@ -623,7 +623,7 @@ export default function AccountPage() {
                   <button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1C2347] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] transition disabled:opacity-50 cursor-pointer"
                   >
                     {isChangingPassword ? "Updating..." : "Update Password"}
                   </button>

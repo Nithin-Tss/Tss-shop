@@ -132,7 +132,7 @@ export default function AdminAddCustomer() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] text-charcoal-navy">
+    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}

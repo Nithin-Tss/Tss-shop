@@ -149,15 +149,15 @@ export default function ExportDraftOrdersModal({
         aria-labelledby="export-modal-title"
       >
         {/* MODAL HEADER */}
-        <div className="flex items-center justify-between border-b border-[#E1E3E5] px-6 py-4">
-          <h2 id="export-modal-title" className="text-[17px] font-semibold text-[#202223]">
+        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
+          <h2 id="export-modal-title" className="text-[17px] font-semibold text-[#1A1916]">
             Export draft orders
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="rounded-lg p-1 text-[#5C5F62] hover:bg-[#F1F2F3] hover:text-[#202223] transition-colors focus:outline-none"
+            className="rounded-lg p-1 text-[#5A5750] hover:bg-[#F1F2F3] hover:text-[#1A1916] transition-colors focus:outline-none"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -174,7 +174,7 @@ export default function ExportDraftOrdersModal({
         <div className="px-6 py-5 space-y-6">
           {/* SECTION 1: EXPORT */}
           <div>
-            <h3 className="text-sm font-semibold text-[#202223] mb-3.5">Export</h3>
+            <h3 className="text-sm font-semibold text-[#1A1916] mb-3.5">Export</h3>
             <div className="space-y-3">
               {/* Option 1: Current page */}
               <label
@@ -182,13 +182,13 @@ export default function ExportDraftOrdersModal({
                 className="flex items-center gap-3 cursor-pointer group select-none"
               >
                 {exportScope === "current_page" ? (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#202223] bg-white">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#202223]" />
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1916] bg-white">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#1A1916]" />
                   </span>
                 ) : (
-                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
+                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#D4D0C5] bg-white transition-colors group-hover:border-[#A29E92]" />
                 )}
-                <span className="text-sm text-[#202223]">Current page</span>
+                <span className="text-sm text-[#1A1916]">Current page</span>
               </label>
 
               {/* Option 2: All draft orders */}
@@ -197,13 +197,13 @@ export default function ExportDraftOrdersModal({
                 className="flex items-center gap-3 cursor-pointer group select-none"
               >
                 {exportScope === "all" ? (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#202223] bg-white">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#202223]" />
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1916] bg-white">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#1A1916]" />
                   </span>
                 ) : (
-                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
+                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#D4D0C5] bg-white transition-colors group-hover:border-[#A29E92]" />
                 )}
-                <span className="text-sm text-[#202223]">All draft orders</span>
+                <span className="text-sm text-[#1A1916]">All draft orders</span>
               </label>
 
               {/* Option 3: Selected draft orders */}
@@ -213,20 +213,20 @@ export default function ExportDraftOrdersModal({
                   className="flex items-center gap-3 cursor-pointer group select-none"
                 >
                   {exportScope === "selected" ? (
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#202223] bg-white">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#202223]" />
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1916] bg-white">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#1A1916]" />
                     </span>
                   ) : (
-                    <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
+                    <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#D4D0C5] bg-white transition-colors group-hover:border-[#A29E92]" />
                   )}
-                  <span className="text-sm text-[#202223]">
+                  <span className="text-sm text-[#1A1916]">
                     Selected: {selectedCount} draft order{selectedCount > 1 ? "s" : ""}
                   </span>
                 </label>
               ) : (
                 <div className="flex items-center gap-3 cursor-not-allowed select-none">
-                  <span className="h-5 w-5 shrink-0 rounded-full bg-[#E5E7EB]" />
-                  <span className="text-sm text-[#8C9196]">Selected: 0 draft orders</span>
+                  <span className="h-5 w-5 shrink-0 rounded-full bg-[#E7E4DC]" />
+                  <span className="text-sm text-[#A29E92]">Selected: 0 draft orders</span>
                 </div>
               )}
 
@@ -237,21 +237,21 @@ export default function ExportDraftOrdersModal({
                   className="flex items-center gap-3 cursor-pointer group select-none"
                 >
                   {exportScope === "search" ? (
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#202223] bg-white">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#202223]" />
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1916] bg-white">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#1A1916]" />
                     </span>
                   ) : (
-                    <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
+                    <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#D4D0C5] bg-white transition-colors group-hover:border-[#A29E92]" />
                   )}
-                  <span className="text-sm text-[#202223]">
+                  <span className="text-sm text-[#1A1916]">
                     {searchMatchCount} draft order
                     {searchMatchCount === 1 ? "" : "s"} matching your search
                   </span>
                 </label>
               ) : (
                 <div className="flex items-center gap-3 cursor-not-allowed select-none">
-                  <span className="h-5 w-5 shrink-0 rounded-full bg-[#E5E7EB]" />
-                  <span className="text-sm text-[#8C9196]">1 draft order matching your search</span>
+                  <span className="h-5 w-5 shrink-0 rounded-full bg-[#E7E4DC]" />
+                  <span className="text-sm text-[#A29E92]">1 draft order matching your search</span>
                 </div>
               )}
 
@@ -262,34 +262,34 @@ export default function ExportDraftOrdersModal({
                   className="flex items-center gap-3 cursor-pointer group select-none"
                 >
                   {exportScope === "by_date" ? (
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#202223] bg-white">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#202223]" />
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1916] bg-white">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#1A1916]" />
                     </span>
                   ) : (
-                    <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
+                    <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#D4D0C5] bg-white transition-colors group-hover:border-[#A29E92]" />
                   )}
-                  <span className="text-sm text-[#202223]">Draft orders by date</span>
+                  <span className="text-sm text-[#1A1916]">Draft orders by date</span>
                 </label>
 
                 {/* Date range pickers */}
                 {exportScope === "by_date" && (
                   <div className="ml-8 mt-3 flex flex-col sm:flex-row items-center gap-3 animate-in fade-in duration-100">
                     <div className="w-full sm:w-1/2">
-                      <label className="block text-xs font-medium text-[#5C5F62] mb-1">From</label>
+                      <label className="block text-xs font-medium text-[#5A5750] mb-1">From</label>
                       <input
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-sm text-[#202223] shadow-xs focus:border-[#202223] focus:outline-none focus:ring-1 focus:ring-[#202223]"
+                        className="w-full rounded-lg border border-[#D4D0C5] bg-white px-3 py-1.5 text-sm text-[#1A1916] shadow-xs focus:border-[#1A1916] focus:outline-none focus:ring-1 focus:ring-[#1A1916]"
                       />
                     </div>
                     <div className="w-full sm:w-1/2">
-                      <label className="block text-xs font-medium text-[#5C5F62] mb-1">To</label>
+                      <label className="block text-xs font-medium text-[#5A5750] mb-1">To</label>
                       <input
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
-                        className="w-full rounded-lg border border-[#D1D5DB] bg-white px-3 py-1.5 text-sm text-[#202223] shadow-xs focus:border-[#202223] focus:outline-none focus:ring-1 focus:ring-[#202223]"
+                        className="w-full rounded-lg border border-[#D4D0C5] bg-white px-3 py-1.5 text-sm text-[#1A1916] shadow-xs focus:border-[#1A1916] focus:outline-none focus:ring-1 focus:ring-[#1A1916]"
                       />
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export default function ExportDraftOrdersModal({
 
           {/* SECTION 2: EXPORT AS */}
           <div>
-            <h3 className="text-sm font-semibold text-[#202223] mb-3.5">Export as</h3>
+            <h3 className="text-sm font-semibold text-[#1A1916] mb-3.5">Export as</h3>
             <div className="space-y-3">
               {/* Excel / Numbers CSV */}
               <label
@@ -308,13 +308,13 @@ export default function ExportDraftOrdersModal({
                 className="flex items-center gap-3 cursor-pointer group select-none"
               >
                 {exportFormat === "excel" ? (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#202223] bg-white">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#202223]" />
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1916] bg-white">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#1A1916]" />
                   </span>
                 ) : (
-                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
+                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#D4D0C5] bg-white transition-colors group-hover:border-[#A29E92]" />
                 )}
-                <span className="text-sm text-[#202223]">
+                <span className="text-sm text-[#1A1916]">
                   CSV for Excel, Numbers, or other spreadsheet programs
                 </span>
               </label>
@@ -325,31 +325,31 @@ export default function ExportDraftOrdersModal({
                 className="flex items-center gap-3 cursor-pointer group select-none"
               >
                 {exportFormat === "plain" ? (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#202223] bg-white">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#202223]" />
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#1A1916] bg-white">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#1A1916]" />
                   </span>
                 ) : (
-                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#C9CCCF] bg-white transition-colors group-hover:border-[#8C9196]" />
+                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-[#D4D0C5] bg-white transition-colors group-hover:border-[#A29E92]" />
                 )}
-                <span className="text-sm text-[#202223]">Plain CSV file</span>
+                <span className="text-sm text-[#1A1916]">Plain CSV file</span>
               </label>
             </div>
           </div>
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="flex items-center justify-end gap-3 border-t border-[#E1E3E5] px-6 py-4 bg-white rounded-b-2xl">
+        <div className="flex items-center justify-end gap-3 border-t border-[#E7E4DC] px-6 py-4 bg-white rounded-b-2xl">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[#D1D5DB] bg-white px-4 py-2 text-sm font-medium text-[#202223] shadow-xs hover:bg-[#F6F6F7] transition-colors focus:outline-none focus:ring-2 focus:ring-[#202223]/20"
+            className="rounded-lg border border-[#D4D0C5] bg-white px-4 py-2 text-sm font-medium text-[#1A1916] shadow-xs hover:bg-[#F3F1EC] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1A1916]/20"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleExecuteExport}
-            className="flex items-center gap-2 rounded-lg bg-[#202223] px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-[#303336] active:bg-[#0B1020] transition-colors focus:outline-none focus:ring-2 focus:ring-[#202223]/40"
+            className="flex items-center gap-2 rounded-lg bg-[#1A1916] px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-[#303336] active:bg-[#14130F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#1A1916]/40"
           >
             <svg
               className="h-4 w-4 text-white"

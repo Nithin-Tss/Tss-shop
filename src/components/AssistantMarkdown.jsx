@@ -124,14 +124,14 @@ function CodeBlock({ code }) {
   };
 
   return (
-    <figure className="overflow-hidden rounded-md border border-[#E5E7EB] bg-[#F3F4F6]">
-      <figcaption className="flex items-center justify-between gap-2 border-b border-[#E5E7EB] px-2.5 py-1">
-        <span className="text-[11px] text-[#6B7280]">Suggested code - review before using</span>
+    <figure className="overflow-hidden rounded-md border border-[#E7E4DC] bg-[#F3F1EC]">
+      <figcaption className="flex items-center justify-between gap-2 border-b border-[#E7E4DC] px-2.5 py-1">
+        <span className="text-[11px] text-[#78746A]">Suggested code - review before using</span>
         <button
           type="button"
           onClick={copy}
           aria-label="Copy code"
-          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[#374151] transition-colors hover:bg-[#E5E7EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111827]"
+          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[#403E39] transition-colors hover:bg-[#E7E4DC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916]"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -155,7 +155,7 @@ export default function AssistantMarkdown({ text }) {
             <List
               key={index}
               start={block.type === "ol" ? block.start : undefined}
-              className={`space-y-1 pl-5 marker:text-[#9CA3AF] ${block.type === "ol" ? "list-decimal" : "list-disc"}`}
+              className={`space-y-1 pl-5 marker:text-[#A29E92] ${block.type === "ol" ? "list-decimal" : "list-disc"}`}
             >
               {block.items.map((item, n) => (
                 <li key={n} className="pl-0.5">

@@ -116,14 +116,14 @@ function ProductThumbnail({ item }) {
         alt={item.title}
         loading="lazy"
         decoding="async"
-        className="h-9 w-9 rounded-md border border-[#E1E3E5] object-cover bg-white shrink-0"
+        className="h-9 w-9 rounded-md border border-[#E7E4DC] object-cover bg-white shrink-0"
       />
     );
   }
 
   return (
     <div
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#E4DEFB] bg-[#F5F3FF] text-[#6D7175]"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#E7E4DC] bg-[#F3F1EC] text-[#78746A]"
       title={item.title}
     >
       <svg
@@ -290,13 +290,13 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
   return (
     <div
       ref={popoverRef}
-      className="absolute right-0 top-full mt-1.5 z-50 flex items-center gap-2 rounded-xl border border-[#DDD6FE] bg-white p-2 shadow-[0_6px_22px_rgba(0,0,0,0.16)] whitespace-nowrap text-left"
+      className="absolute right-0 top-full mt-1.5 z-50 flex items-center gap-2 rounded-xl border border-[#E7E4DC] bg-white p-2 shadow-[0_6px_22px_rgba(0,0,0,0.16)] whitespace-nowrap text-left"
       onClick={(e) => e.stopPropagation()}
     >
       {/* 1. Action + Quantity Compound Control */}
-      <div className="flex h-9 items-center rounded-lg border border-[#8C9196] bg-white overflow-hidden shadow-2xs focus-within:border-charcoal-navy focus-within:ring-1 focus-within:ring-[#0B1020]">
+      <div className="flex h-9 items-center rounded-lg border border-[#A29E92] bg-white overflow-hidden shadow-2xs focus-within:border-charcoal-navy focus-within:ring-1 focus-within:ring-[#14130F]">
         {/* Action dropdown: Set to / Add */}
-        <div className="relative border-r border-[#DDD6FE] bg-white">
+        <div className="relative border-r border-[#E7E4DC] bg-white">
           <select
             value={actionType}
             onChange={(e) => {
@@ -309,7 +309,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
             <option value="set">Set to</option>
             <option value="add">Add</option>
           </select>
-          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#4C4F7A]">
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#5A5750]">
             ▼
           </span>
         </div>
@@ -325,12 +325,12 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         />
 
         {/* Micro Steppers (▲ / ▼) */}
-        <div className="flex h-full flex-col border-l border-[#DDD6FE]">
+        <div className="flex h-full flex-col border-l border-[#E7E4DC]">
           <button
             type="button"
             onClick={() => step(1)}
             aria-label="Increase quantity"
-            className="flex h-4.5 w-4.5 items-center justify-center text-[8px] text-[#4C4F7A] hover:bg-[#F3F0FF] border-b border-[#E4DEFB]"
+            className="flex h-4.5 w-4.5 items-center justify-center text-[8px] text-[#5A5750] hover:bg-[#F3F1EC] border-b border-[#E7E4DC]"
           >
             ▲
           </button>
@@ -338,7 +338,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
             type="button"
             onClick={() => step(-1)}
             aria-label="Decrease quantity"
-            className="flex h-4.5 w-4.5 items-center justify-center text-[8px] text-[#4C4F7A] hover:bg-[#F3F0FF]"
+            className="flex h-4.5 w-4.5 items-center justify-center text-[8px] text-[#5A5750] hover:bg-[#F3F1EC]"
           >
             ▼
           </button>
@@ -351,7 +351,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
           value={item.locationName}
           disabled
           onChange={() => {}}
-          className="h-9 appearance-none rounded-lg border border-[#8C9196] bg-white pl-3 pr-7 text-xs sm:text-sm font-normal text-charcoal-navy outline-none shadow-2xs min-w-32.5"
+          className="h-9 appearance-none rounded-lg border border-[#A29E92] bg-white pl-3 pr-7 text-xs sm:text-sm font-normal text-charcoal-navy outline-none shadow-2xs min-w-32.5"
         >
           <option value={item.locationName}>{item.locationName}</option>
         </select>
@@ -363,8 +363,8 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
           type="button"
           onClick={() => setShowReasonDropdown((prev) => !prev)}
           title={`Adjustment reason: ${reason}`}
-          className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy transition shadow-2xs ${
-            showReasonDropdown ? "ring-1 ring-[#0B1020] border-charcoal-navy" : ""
+          className={`flex h-9 w-9 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy transition shadow-2xs ${
+            showReasonDropdown ? "ring-1 ring-[#14130F] border-charcoal-navy" : ""
           }`}
         >
           <svg
@@ -383,8 +383,8 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         </button>
 
         {showReasonDropdown && (
-          <div className="absolute right-0 top-full mt-1.5 z-50 w-44 rounded-lg border border-[#E4DEFB] bg-white py-1 shadow-lg text-xs text-charcoal-navy">
-            <div className="px-3 py-1 font-semibold text-[11px] text-[#4C4F7A] border-b border-[#F0F2F5]">
+          <div className="absolute right-0 top-full mt-1.5 z-50 w-44 rounded-lg border border-[#E7E4DC] bg-white py-1 shadow-lg text-xs text-charcoal-navy">
+            <div className="px-3 py-1 font-semibold text-[11px] text-[#5A5750] border-b border-[#F3F1EC]">
               Reason for adjustment
             </div>
             {Object.keys(ADJUST_REASONS).map((r) => (
@@ -395,8 +395,8 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
                   setReason(r);
                   setShowReasonDropdown(false);
                 }}
-                className={`w-full text-left px-3 py-1.5 hover:bg-[#F3F0FF] transition ${
-                  reason === r ? "font-semibold text-[#005BD3] bg-[#F0F4FA]" : ""
+                className={`w-full text-left px-3 py-1.5 hover:bg-[#F3F1EC] transition ${
+                  reason === r ? "font-semibold text-[#265C48] bg-[#F0F4FA]" : ""
                 }`}
               >
                 {r}
@@ -415,7 +415,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         onKeyDown={handleKeyDown}
         placeholder="Note (optional)"
         aria-label="Note"
-        className="h-9 w-36 rounded-lg border border-[#8C9196] bg-white px-2.5 text-xs sm:text-sm text-charcoal-navy outline-none shadow-2xs focus:border-charcoal-navy focus:ring-1 focus:ring-[#0B1020]"
+        className="h-9 w-36 rounded-lg border border-[#A29E92] bg-white px-2.5 text-xs sm:text-sm text-charcoal-navy outline-none shadow-2xs focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F]"
       />
 
       {/* 5. Confirm / Save Button */}
@@ -424,7 +424,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         onClick={handleConfirm}
         disabled={busy}
         title="Confirm quantity change"
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-charcoal-navy hover:bg-charcoal-navy hover:text-white transition shadow-2xs disabled:opacity-50"
+        className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-charcoal-navy hover:bg-charcoal-navy hover:text-white transition shadow-2xs disabled:opacity-50"
       >
         <svg
           viewBox="0 0 24 24"
@@ -444,14 +444,14 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         <button
           type="button"
           onClick={onHistory}
-          className="text-xs font-medium text-[#005BD3] hover:underline"
+          className="text-xs font-medium text-[#265C48] hover:underline"
         >
           View history
         </button>
       )}
 
       {error && (
-        <p className="absolute left-2 top-full mt-1 rounded bg-white px-1 text-xs text-[#D82C0D]">
+        <p className="absolute left-2 top-full mt-1 rounded bg-white px-1 text-xs text-[#B42318]">
           {error}
         </p>
       )}
@@ -494,28 +494,28 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
   return (
     <div
       ref={popoverRef}
-      className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-xl border border-[#DDD6FE] bg-white p-3 shadow-[0_6px_22px_rgba(0,0,0,0.16)] text-left text-xs text-charcoal-navy"
+      className="absolute right-0 top-full mt-1.5 z-50 w-72 rounded-xl border border-[#E7E4DC] bg-white p-3 shadow-[0_6px_22px_rgba(0,0,0,0.16)] text-left text-xs text-charcoal-navy"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="mb-2 flex items-center justify-between">
-        <span className="font-semibold text-[11px] text-[#4C4F7A]">
+        <span className="font-semibold text-[11px] text-[#5A5750]">
           {kind === "unavailable" ? "Unavailable by reason" : "Committed by order"}
         </span>
         <button
           type="button"
           onClick={onHistory}
-          className="text-xs font-medium text-[#005BD3] hover:underline"
+          className="text-xs font-medium text-[#265C48] hover:underline"
         >
           View history
         </button>
       </div>
 
-      {!data && !error && <p className="py-2 text-[#4C4F7A]">Loading…</p>}
+      {!data && !error && <p className="py-2 text-[#5A5750]">Loading…</p>}
 
       {data && kind === "unavailable" && (
-        <ul className="divide-y divide-[#F0F2F5]">
+        <ul className="divide-y divide-[#F3F1EC]">
           {data.unavailable.length === 0 && (
-            <li className="py-2 text-[#4C4F7A]">Nothing set aside.</li>
+            <li className="py-2 text-[#5A5750]">Nothing set aside.</li>
           )}
           {data.unavailable.map((row) => (
             <li key={row.reason} className="flex items-center justify-between py-1.5">
@@ -527,7 +527,7 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
                   type="button"
                   disabled={busy}
                   onClick={() => move(row.quantity, row.reason, true)}
-                  className="text-[#005BD3] hover:underline disabled:opacity-50"
+                  className="text-[#265C48] hover:underline disabled:opacity-50"
                 >
                   Put back
                 </button>
@@ -538,9 +538,9 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
       )}
 
       {data && kind === "committed" && (
-        <ul className="divide-y divide-[#F0F2F5]">
+        <ul className="divide-y divide-[#F3F1EC]">
           {data.committed.length === 0 && (
-            <li className="py-2 text-[#4C4F7A]">
+            <li className="py-2 text-[#5A5750]">
               {item.committed > 0
                 ? "These orders were placed before history was kept."
                 : "No open orders."}
@@ -556,19 +556,19 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
       )}
 
       {kind === "unavailable" && canManage && (
-        <div className="mt-2 flex items-center gap-2 border-t border-[#F0F2F5] pt-2">
+        <div className="mt-2 flex items-center gap-2 border-t border-[#F3F1EC] pt-2">
           <input
             type="number"
             min={1}
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             aria-label="Quantity to set aside"
-            className="h-8 w-14 rounded-lg border border-[#8C9196] bg-white px-1.5 text-center text-sm outline-none focus:border-charcoal-navy"
+            className="h-8 w-14 rounded-lg border border-[#A29E92] bg-white px-1.5 text-center text-sm outline-none focus:border-charcoal-navy"
           />
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className="h-8 flex-1 rounded-lg border border-[#8C9196] bg-white px-2 text-xs outline-none cursor-pointer"
+            className="h-8 flex-1 rounded-lg border border-[#A29E92] bg-white px-2 text-xs outline-none cursor-pointer"
           >
             {Object.entries(UNAVAILABLE_REASONS).map(([key, label]) => (
               <option key={key} value={key}>
@@ -580,14 +580,14 @@ function BreakdownPopover({ item, kind, canManage, onChange, onHistory, onClose 
             type="button"
             disabled={busy}
             onClick={() => move(parseInt(quantity, 10) || 0, reason, false)}
-            className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-xs font-medium hover:bg-charcoal-navy hover:text-white transition disabled:opacity-50"
+            className="h-8 rounded-lg border border-[#E7E4DC] bg-white px-2.5 text-xs font-medium hover:bg-charcoal-navy hover:text-white transition disabled:opacity-50"
           >
             Set aside
           </button>
         </div>
       )}
 
-      {error && <p className="mt-2 text-xs text-[#D82C0D]">{error}</p>}
+      {error && <p className="mt-2 text-xs text-[#B42318]">{error}</p>}
     </div>
   );
 }
@@ -623,7 +623,7 @@ function HistoryModal({ item, onClose }) {
         className="w-full max-w-2xl rounded-xl bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#E4DEFB] px-5 py-3">
+        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-5 py-3">
           <h2 id="history-modal-title" className="text-base font-semibold text-charcoal-navy">
             History · {item.title}
             {item.sku ? ` (${item.sku})` : ""}
@@ -632,22 +632,22 @@ function HistoryModal({ item, onClose }) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="text-lg text-[#4C4F7A] hover:text-charcoal-navy"
+            className="text-lg text-[#5A5750] hover:text-charcoal-navy"
           >
             ×
           </button>
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto">
-          {error && <p className="px-5 py-4 text-sm text-[#D82C0D]">{error}</p>}
-          {!rows && !error && <p className="px-5 py-4 text-sm text-[#4C4F7A]">Loading…</p>}
+          {error && <p className="px-5 py-4 text-sm text-[#B42318]">{error}</p>}
+          {!rows && !error && <p className="px-5 py-4 text-sm text-[#5A5750]">Loading…</p>}
           {rows && rows.length === 0 && (
-            <p className="px-5 py-6 text-center text-sm text-[#4C4F7A]">No changes recorded yet.</p>
+            <p className="px-5 py-6 text-center text-sm text-[#5A5750]">No changes recorded yet.</p>
           )}
           {rows && rows.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="sticky top-0 bg-[#FAF8FF] text-xs text-[#4C4F7A]">
+                <thead className="sticky top-0 bg-[#FAF9F6] text-xs text-[#5A5750]">
                   <tr>
                     <th className="px-5 py-2 font-medium">Date</th>
                     <th className="px-3 py-2 text-right font-medium">Change</th>
@@ -656,22 +656,22 @@ function HistoryModal({ item, onClose }) {
                     <th className="px-5 py-2 text-right font-medium">New quantity</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E4DEFB]">
+                <tbody className="divide-y divide-[#E7E4DC]">
                   {rows.map((row) => (
                     <tr key={row.id} title={row.note || undefined}>
-                      <td className="px-5 py-2 text-xs text-[#4C4F7A]">
+                      <td className="px-5 py-2 text-xs text-[#5A5750]">
                         {new Date(row.created_at).toLocaleString()}
                       </td>
                       <td
                         className={`px-3 py-2 text-right font-medium ${
-                          row.change < 0 ? "text-[#D82C0D]" : "text-charcoal-navy"
+                          row.change < 0 ? "text-[#B42318]" : "text-charcoal-navy"
                         }`}
                       >
                         {row.change > 0 ? `+${row.change}` : row.change}
                       </td>
                       <td className="px-3 py-2">
                         {row.reason_label}
-                        {row.note ? <span className="text-[#4C4F7A]"> · {row.note}</span> : null}
+                        {row.note ? <span className="text-[#5A5750]"> · {row.note}</span> : null}
                       </td>
                       <td className="px-3 py-2">{row.who}</td>
                       <td className="px-5 py-2 text-right font-medium">{row.after}</td>
@@ -789,11 +789,11 @@ function ImportModal({ onClose, onImportSuccess }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="import-modal-title"
-        className="w-full max-w-lg rounded-2xl border border-[#E4DEFB] bg-white shadow-xl overflow-hidden"
+        className="w-full max-w-lg rounded-2xl border border-[#E7E4DC] bg-white shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#E4DEFB] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-5 py-4">
           <h2 id="import-modal-title" className="text-base font-semibold text-charcoal-navy">
             Import inventory
           </h2>
@@ -801,7 +801,7 @@ function ImportModal({ onClose, onImportSuccess }) {
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] transition"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#F3F1EC] transition"
           >
             ✕
           </button>
@@ -822,7 +822,7 @@ function ImportModal({ onClose, onImportSuccess }) {
 
           {sheet ? (
             <div>
-              <p className="text-sm text-[#4C4F7A] mb-3">
+              <p className="text-sm text-[#5A5750] mb-3">
                 Match columns in{" "}
                 <span className="font-medium text-charcoal-navy">{file?.name}</span> to inventory
                 fields. Found {sheet.rows.length} rows.
@@ -844,7 +844,7 @@ function ImportModal({ onClose, onImportSuccess }) {
                         const col = e.target.value === "" ? "" : Number(e.target.value);
                         setMapping((prev) => ({ ...prev, [field.key]: col }));
                       }}
-                      className="h-9 w-[55%] rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-charcoal-navy"
+                      className="h-9 w-[55%] rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-charcoal-navy"
                     >
                       <option value="">Don&apos;t import</option>
                       {sheet.headers.map((h, i) => (
@@ -858,18 +858,18 @@ function ImportModal({ onClose, onImportSuccess }) {
               </div>
             </div>
           ) : file ? (
-            <div className="flex items-center gap-3 rounded-xl border border-[#DDD6FE] bg-[#F5F3FF] px-4 py-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-700 border border-[#DDD6FE]">
+            <div className="flex items-center gap-3 rounded-xl border border-[#E7E4DC] bg-[#F3F1EC] px-4 py-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-700 border border-[#E7E4DC]">
                 📄
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-charcoal-navy">{file.name}</p>
-                <p className="text-xs text-[#4C4F7A]">{formatFileSize(file.size)}</p>
+                <p className="text-xs text-[#5A5750]">{formatFileSize(file.size)}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setFile(null)}
-                className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-white hover:text-charcoal-navy transition"
+                className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#5A5750] hover:bg-white hover:text-charcoal-navy transition"
               >
                 Remove
               </button>
@@ -890,20 +890,20 @@ function ImportModal({ onClose, onImportSuccess }) {
               }}
               className={`flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
                 isDragging
-                  ? "border-charcoal-navy bg-[#EDE9FE]"
+                  ? "border-charcoal-navy bg-[#DFEAE4]"
                   : error
                     ? "border-red-300 bg-red-50/20"
-                    : "border-[#DDD6FE] bg-[#FAF8FF] hover:border-charcoal-navy hover:bg-white"
+                    : "border-[#E7E4DC] bg-[#FAF9F6] hover:border-charcoal-navy hover:bg-white"
               }`}
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-[#DDD6FE] text-charcoal-navy shadow-2xs mb-2">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white border border-[#E7E4DC] text-charcoal-navy shadow-2xs mb-2">
                 ⬆
               </span>
               <p className="text-sm font-medium text-charcoal-navy">
                 <span className="underline underline-offset-2">Click to browse</span> or drag and
                 drop
               </p>
-              <p className="mt-1 text-xs text-[#4C4F7A]">
+              <p className="mt-1 text-xs text-[#5A5750]">
                 Excel (.xlsx, .xls) or CSV (.csv), up to 15MB
               </p>
             </button>
@@ -917,12 +917,12 @@ function ImportModal({ onClose, onImportSuccess }) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2.5 border-t border-[#E4DEFB] bg-[#FAF8FF] px-5 py-3.5">
+        <div className="flex justify-end gap-2.5 border-t border-[#E7E4DC] bg-[#FAF9F6] px-5 py-3.5">
           <button
             type="button"
             disabled={importing}
             onClick={sheet ? () => setSheet(null) : onClose}
-            className="rounded-lg border border-[#DDD6FE] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition"
+            className="rounded-lg border border-[#E7E4DC] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition"
           >
             {sheet ? "Back" : "Cancel"}
           </button>
@@ -930,7 +930,7 @@ function ImportModal({ onClose, onImportSuccess }) {
             type="button"
             disabled={sheet ? importing : !file}
             onClick={sheet ? handleImport : handleContinue}
-            className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition disabled:opacity-50"
+            className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition disabled:opacity-50"
           >
             {importing ? "Importing..." : sheet ? "Import" : "Continue"}
           </button>
@@ -1169,7 +1169,7 @@ export default function InventoryPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT AREA */}
-        <main className="min-w-0 flex-1 bg-[#F5F3FF] px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
+        <main className="min-w-0 flex-1 bg-[#F3F1EC] px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & ACTIONS */}
           <div className="mb-4 flex items-center justify-between">
             <h1 className="flex items-center gap-2.5 text-[20px] sm:text-[22px] font-bold text-charcoal-navy">
@@ -1182,7 +1182,7 @@ export default function InventoryPage() {
                 type="button"
                 onClick={handleExport}
                 disabled={items.length === 0}
-                className="flex items-center gap-1.5 rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F0FF] disabled:opacity-50 transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-50 transition cursor-pointer"
               >
                 Export
               </button>
@@ -1190,7 +1190,7 @@ export default function InventoryPage() {
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F0FF] transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] transition cursor-pointer"
               >
                 Import
               </button>
@@ -1212,9 +1212,9 @@ export default function InventoryPage() {
           )}
 
           {/* INVENTORY TABLE CARD */}
-          <section className="rounded-xl border border-[#E4DEFB] bg-white shadow-2xs overflow-visible">
+          <section className="rounded-xl border border-[#E7E4DC] bg-white shadow-2xs overflow-visible">
             {/* TOOLBAR */}
-            <div className="flex items-center justify-between border-b border-[#E4DEFB] px-3 sm:px-4 py-2.5 bg-white">
+            <div className="flex items-center justify-between border-b border-[#E7E4DC] px-3 sm:px-4 py-2.5 bg-white">
               {/* Left: View Filter (All ⇅) + Search input */}
               <div className="flex items-center gap-2 flex-1 max-w-xl">
                 {/* View dropdown: All ⇅ matching screenshot */}
@@ -1225,13 +1225,13 @@ export default function InventoryPage() {
                       setFilterTab(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="h-9 appearance-none rounded-lg border border-[#DDD6FE] bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#F3F0FF] cursor-pointer"
+                    className="h-9 appearance-none rounded-lg border border-[#E7E4DC] bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#F3F1EC] cursor-pointer"
                   >
                     <option value="all">All</option>
                     <option value="in_stock">In stock</option>
                     <option value="out_of_stock">Out of stock</option>
                   </select>
-                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#4C4F7A] leading-1.5">
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#5A5750] leading-1.5">
                     ▲▼
                   </span>
                 </div>
@@ -1260,7 +1260,7 @@ export default function InventoryPage() {
                       setCurrentPage(1);
                     }}
                     placeholder="Search and filter"
-                    className="h-9 w-full rounded-lg border border-[#DDD6FE] bg-white pl-9 pr-8 text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400 outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#0B1020]"
+                    className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white pl-9 pr-8 text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400 outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F]"
                   />
                   {searchQuery && (
                     <button
@@ -1278,7 +1278,7 @@ export default function InventoryPage() {
               <button
                 type="button"
                 title="Table columns & view"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:bg-[#F3F0FF] transition shrink-0 ml-2"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-[#5A5750] hover:bg-[#F3F1EC] transition shrink-0 ml-2"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -1298,7 +1298,7 @@ export default function InventoryPage() {
 
             {/* SELECTION BAR */}
             {selectedIds.size > 0 && (
-              <div className="flex items-center justify-between border-b border-[#E4DEFB] bg-[#F7F9FC] px-5 py-2 text-xs font-medium text-charcoal-navy">
+              <div className="flex items-center justify-between border-b border-[#E7E4DC] bg-[#F7F9FC] px-5 py-2 text-xs font-medium text-charcoal-navy">
                 <span>{selectedIds.size} selected</span>
                 <button
                   type="button"
@@ -1314,7 +1314,7 @@ export default function InventoryPage() {
             <div className="overflow-x-auto min-h-75 pb-16">
               <table className="w-full border-collapse text-left text-sm text-charcoal-navy">
                 <thead>
-                  <tr className="border-b border-[#E4DEFB] bg-white text-xs font-medium text-[#303030] whitespace-nowrap select-none">
+                  <tr className="border-b border-[#E7E4DC] bg-white text-xs font-medium text-[#2A2925] whitespace-nowrap select-none">
                     <th className="py-3 pl-4 pr-2 w-10">
                       <input
                         type="checkbox"
@@ -1369,18 +1369,18 @@ export default function InventoryPage() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-[#E4DEFB]">
+                <tbody className="divide-y divide-[#E7E4DC]">
                   {pageItems.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-16 text-center text-sm text-[#4C4F7A]">
+                      <td colSpan={8} className="py-16 text-center text-sm text-[#5A5750]">
                         <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
-                          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F0F2F5] text-charcoal-navy">
+                          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F3F1EC] text-charcoal-navy">
                             <PageIcon name="inventory" />
                           </span>
                           <p className="font-semibold text-base text-charcoal-navy">
                             {searchQuery ? "No matching products found" : "No inventory items yet"}
                           </p>
-                          <p className="mt-1 text-xs text-[#4C4F7A]">
+                          <p className="mt-1 text-xs text-[#5A5750]">
                             {searchQuery
                               ? `No products match "${searchQuery}".`
                               : "Click Import to upload your product inventory file (CSV or Excel)."}
@@ -1389,7 +1389,7 @@ export default function InventoryPage() {
                             <button
                               type="button"
                               onClick={() => setIsImportModalOpen(true)}
-                              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition shadow-xs cursor-pointer"
+                              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer"
                             >
                               Import products
                             </button>
@@ -1408,9 +1408,9 @@ export default function InventoryPage() {
                       return (
                         <tr
                           key={item.id}
-                          className={`hover:bg-[#F9FAFB] transition-colors ${
-                            isSelected ? "bg-[#F3F0FF]" : "bg-white"
-                          } ${isEditingThisOnHand ? "bg-[#FAF8FF]" : ""}`}
+                          className={`hover:bg-[#FAF9F6] transition-colors ${
+                            isSelected ? "bg-[#F3F1EC]" : "bg-white"
+                          } ${isEditingThisOnHand ? "bg-[#FAF9F6]" : ""}`}
                         >
                           {/* Checkbox */}
                           <td className="py-2.5 pl-4 pr-2">
@@ -1429,7 +1429,7 @@ export default function InventoryPage() {
                               <ProductThumbnail item={item} />
                               <Link
                                 to={`/admin/online-store/products/${item.product}`}
-                                className="font-medium text-charcoal-navy hover:text-[#005BD3] hover:underline line-clamp-1 leading-snug"
+                                className="font-medium text-charcoal-navy hover:text-[#265C48] hover:underline line-clamp-1 leading-snug"
                                 title={item.title}
                               >
                                 {item.title}
@@ -1439,7 +1439,7 @@ export default function InventoryPage() {
 
                           {/* SKU */}
                           <td className="py-2.5 px-3">
-                            <span className="text-sm text-[#303030] select-all">
+                            <span className="text-sm text-[#2A2925] select-all">
                               {item.sku || "—"}
                             </span>
                           </td>
@@ -1457,11 +1457,11 @@ export default function InventoryPage() {
                                     : { id: item.id, kind: "unavailable" }
                                 );
                               }}
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-charcoal-navy transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-charcoal-navy transition hover:bg-[#E7E4DC] disabled:hover:bg-transparent cursor-pointer"
                               title="See why stock is unavailable"
                             >
                               {item.unavailable ?? 0}
-                              <span className="text-[10px] text-[#6D7175]">▾</span>
+                              <span className="text-[10px] text-[#78746A]">▾</span>
                             </button>
                             {open === "unavailable" && (
                               <BreakdownPopover
@@ -1489,11 +1489,11 @@ export default function InventoryPage() {
                                   open === "committed" ? null : { id: item.id, kind: "committed" }
                                 );
                               }}
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-charcoal-navy transition hover:bg-[#E4E5E7] disabled:hover:bg-transparent cursor-pointer"
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-charcoal-navy transition hover:bg-[#E7E4DC] disabled:hover:bg-transparent cursor-pointer"
                               title="See which orders hold this stock"
                             >
                               {item.committed ?? 0}
-                              <span className="text-[10px] text-[#6D7175]">▾</span>
+                              <span className="text-[10px] text-[#78746A]">▾</span>
                             </button>
                             {open === "committed" && (
                               <BreakdownPopover
@@ -1521,11 +1521,11 @@ export default function InventoryPage() {
                                   open === "available" ? null : { id: item.id, kind: "available" }
                                 );
                               }}
-                              className="inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium text-charcoal-navy transition cursor-pointer select-none hover:bg-[#E4E5E7]"
+                              className="inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium text-charcoal-navy transition cursor-pointer select-none hover:bg-[#E7E4DC]"
                               title="Click to adjust quantity"
                             >
                               <span>{item.available ?? 0}</span>
-                              <span className="text-[11px] text-[#6D7175]">⇋</span>
+                              <span className="text-[11px] text-[#78746A]">⇋</span>
                             </button>
                             {open === "available" && (
                               <AdjustPopover
@@ -1555,15 +1555,15 @@ export default function InventoryPage() {
                               }}
                               className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium transition cursor-pointer select-none ${
                                 open === "onhand"
-                                  ? "bg-[#E4E5E7] text-charcoal-navy ring-1 ring-[#8C9196]"
+                                  ? "bg-[#E7E4DC] text-charcoal-navy ring-1 ring-[#A29E92]"
                                   : onHand < 0
-                                    ? "text-[#D82C0D] hover:bg-[#E4E5E7]"
-                                    : "text-charcoal-navy hover:bg-[#E4E5E7]"
+                                    ? "text-[#B42318] hover:bg-[#E7E4DC]"
+                                    : "text-charcoal-navy hover:bg-[#E7E4DC]"
                               }`}
                               title="Click to edit on hand quantity"
                             >
                               <span>{onHand}</span>
-                              <span className="text-[11px] text-[#6D7175]">⇋</span>
+                              <span className="text-[11px] text-[#78746A]">⇋</span>
                             </button>
 
                             {open === "onhand" && (
@@ -1585,7 +1585,7 @@ export default function InventoryPage() {
                           <td className="py-2.5 pl-3 pr-6 text-right">
                             <span className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-charcoal-navy">
                               {item.incoming ?? 0}
-                              <span className="text-[10px] text-[#6D7175]">▾</span>
+                              <span className="text-[10px] text-[#78746A]">▾</span>
                             </span>
                           </td>
                         </tr>
@@ -1597,14 +1597,14 @@ export default function InventoryPage() {
             </div>
 
             {/* PAGINATION BAR */}
-            <div className="flex items-center justify-between border-t border-[#E4DEFB] bg-[#FAF8FF] px-4 py-3 text-xs sm:text-sm text-[#5C5F62]">
+            <div className="flex items-center justify-between border-t border-[#E7E4DC] bg-[#FAF9F6] px-4 py-3 text-xs sm:text-sm text-[#5A5750]">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   disabled={currentPage <= 1}
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   aria-label="Previous page"
-                  className="flex h-7 w-7 items-center justify-center rounded border border-[#DDD6FE] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F0FF] disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="flex h-7 w-7 items-center justify-center rounded border border-[#E7E4DC] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   ‹
                 </button>
@@ -1613,7 +1613,7 @@ export default function InventoryPage() {
                   disabled={currentPage >= totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   aria-label="Next page"
-                  className="flex h-7 w-7 items-center justify-center rounded border border-[#DDD6FE] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F0FF] disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="flex h-7 w-7 items-center justify-center rounded border border-[#E7E4DC] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   ›
                 </button>
@@ -1634,7 +1634,7 @@ export default function InventoryPage() {
               href="https://help.shopify.com/en/manual/products/inventory"
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-[#5C5F62] hover:text-charcoal-navy hover:underline"
+              className="text-xs text-[#5A5750] hover:text-charcoal-navy hover:underline"
             >
               Learn more about managing inventory
             </a>

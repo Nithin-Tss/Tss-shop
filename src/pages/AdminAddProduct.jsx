@@ -5,11 +5,11 @@ import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/li
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
 
-const NAVY = "#0B1020";
+const NAVY = "#14130F";
 const PRODUCTS_URL = "/admin/online-store/products";
 
 const inputClass =
-  "w-full h-11 rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#0B1020] focus:bg-white focus:ring-4 focus:ring-[#0B1020]/[0.07]";
+  "w-full h-11 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#14130F] focus:bg-white focus:ring-4 focus:ring-[#14130F]/[0.07]";
 
 // Photos: JPG, PNG or WEBP, up to 1MB each
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -122,8 +122,8 @@ function categoryOptions(categories) {
 function Card({ title, hint, action, children }) {
   return (
     <section>
-      <div className="rounded-[22px] border border-[#E5E7EB] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
-        <header className="flex flex-wrap items-start justify-between gap-3 rounded-t-[21px] border-b border-[#E6E9F2] bg-[#EEF1F8] px-5 py-4 sm:px-6">
+      <div className="rounded-[22px] border border-[#E7E4DC] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
+        <header className="flex flex-wrap items-start justify-between gap-3 rounded-t-[21px] border-b border-[#E6E9F2] bg-[#F3F1EC] px-5 py-4 sm:px-6">
           <div className="min-w-0">
             <h2 className="text-base font-bold tracking-tight text-charcoal-navy">{title}</h2>
             {hint && <p className="mt-0.5 text-[13px] leading-snug text-[#55607A]">{hint}</p>}
@@ -189,7 +189,7 @@ function ChipInput({ values, onChange, placeholder }) {
   };
 
   return (
-    <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-2 py-1.5 focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0B1020]/[0.07]">
+    <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-2 py-1.5 focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#14130F]/[0.07]">
       {values.map((v) => (
         <span
           key={v}
@@ -385,7 +385,7 @@ function CollectionsPicker({
       {/* Selected Collections Box with Removable Tags (Screenshot 1) */}
       <div
         onClick={() => setIsOpen(true)}
-        className={`min-h-14.5 cursor-pointer rounded-lg border border-[#DDE1EA] bg-white p-2.5 transition focus-within:border-charcoal-navy ${
+        className={`min-h-14.5 cursor-pointer rounded-lg border border-[#E7E4DC] bg-white p-2.5 transition focus-within:border-charcoal-navy ${
           error ? "border-red-400" : "hover:border-slate-400"
         }`}
       >
@@ -398,7 +398,7 @@ function CollectionsPicker({
             {selectedCollections.map((col) => (
               <span
                 key={col}
-                className="group inline-flex items-center gap-1.5 rounded-xl bg-[#E5E7EB] px-3 py-1 text-sm font-normal text-slate-800 transition hover:bg-[#DCDFE4]"
+                className="group inline-flex items-center gap-1.5 rounded-xl bg-[#E7E4DC] px-3 py-1 text-sm font-normal text-slate-800 transition hover:bg-[#DCDFE4]"
               >
                 <span>{col}</span>
                 <button
@@ -1325,7 +1325,7 @@ export function ProductForm({ productId }) {
                       type="button"
                       onClick={() => mainFileInputRef.current?.click()}
                       disabled={saving}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#DDE1EA] bg-white px-3 py-1.5 text-xs font-semibold text-charcoal-navy shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3 py-1.5 text-xs font-semibold text-charcoal-navy shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <svg
                         className="h-3.5 w-3.5"
@@ -1383,8 +1383,8 @@ export function ProductForm({ productId }) {
                       }}
                       className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
                         dragging
-                          ? "border-charcoal-navy bg-[#EEF1F8]"
-                          : "border-[#DDE1EA] bg-[#FAF8FF] hover:bg-slate-50"
+                          ? "border-charcoal-navy bg-[#F3F1EC]"
+                          : "border-[#E7E4DC] bg-[#FAF9F6] hover:bg-slate-50"
                       }`}
                     >
                       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
@@ -1443,10 +1443,10 @@ export function ProductForm({ productId }) {
                         return (
                           <div
                             key={photo.id}
-                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF8FF] transition ${
+                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF9F6] transition ${
                               isCover
-                                ? "border-charcoal-navy ring-2 ring-[#0B1020]/15 col-span-2 row-span-2"
-                                : "border-[#DDE1EA] hover:border-slate-400"
+                                ? "border-charcoal-navy ring-2 ring-[#14130F]/15 col-span-2 row-span-2"
+                                : "border-[#E7E4DC] hover:border-slate-400"
                             }`}
                           >
                             {/* Image or Broken fallback */}
@@ -1594,8 +1594,8 @@ export function ProductForm({ productId }) {
                         }}
                         className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
                           dragging
-                            ? "border-charcoal-navy bg-[#EEF1F8]"
-                            : "border-[#DDE1EA] bg-[#FAF8FF] hover:border-slate-400 hover:bg-slate-50"
+                            ? "border-charcoal-navy bg-[#F3F1EC]"
+                            : "border-[#E7E4DC] bg-[#FAF9F6] hover:border-slate-400 hover:bg-slate-50"
                         } ${saving ? "pointer-events-none opacity-50" : ""}`}
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-charcoal-navy">
@@ -1865,8 +1865,8 @@ export function ProductForm({ productId }) {
                         key={opt.value}
                         className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${
                           status === opt.value
-                            ? "border-charcoal-navy bg-[#EEF1F8] ring-1 ring-[#0B1020]"
-                            : "border-[#DDE1EA] hover:bg-slate-50"
+                            ? "border-charcoal-navy bg-[#F3F1EC] ring-1 ring-[#14130F]"
+                            : "border-[#E7E4DC] hover:bg-slate-50"
                         }`}
                       >
                         <input
@@ -1896,7 +1896,7 @@ export function ProductForm({ productId }) {
                         return (
                           <label
                             key={ch.id}
-                            className="flex cursor-pointer items-center justify-between rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-4 py-3 text-sm font-medium transition hover:border-charcoal-navy hover:bg-white"
+                            className="flex cursor-pointer items-center justify-between rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-4 py-3 text-sm font-medium transition hover:border-charcoal-navy hover:bg-white"
                           >
                             <span className="text-charcoal-navy">{ch.name}</span>
                             <input
@@ -1951,7 +1951,7 @@ export function ProductForm({ productId }) {
                     </button>
                   }
                 >
-                  <div className="rounded-lg border border-[#DDE1EA] bg-white p-4 shadow-sm">
+                  <div className="rounded-lg border border-[#E7E4DC] bg-white p-4 shadow-sm">
                     <p className="text-sm font-semibold uppercase tracking-wide text-slate-800">
                       {storeBrand}
                     </p>
@@ -2002,7 +2002,7 @@ export function ProductForm({ productId }) {
                         error={fieldErrors.handle}
                       >
                         <div
-                          className={`flex h-11 items-center rounded-lg border border-[#DDE1EA] bg-[#FAF8FF] px-3.5 transition focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0B1020]/[0.07] ${withError(fieldErrors.handle)}`}
+                          className={`flex h-11 items-center rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3.5 transition focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#14130F]/[0.07] ${withError(fieldErrors.handle)}`}
                         >
                           <span className="select-none text-sm text-slate-500">products/</span>
                           <input

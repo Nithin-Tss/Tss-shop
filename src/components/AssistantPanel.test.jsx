@@ -217,11 +217,11 @@ describe("AssistantPanel", () => {
       </MemoryRouter>
     );
     const button = screen.getByRole("button", { name: "Assistant" });
-    expect(button.className).toContain("text-[#4C4F7A]"); // dark icon on a light bar
+    expect(button.className).toContain("text-[#5A5750]"); // dark icon on a light bar
     expect(button.className).not.toContain("text-white");
     fireEvent.click(button);
     expect(isOpen()).toBe(true);
-    expect(button.className).toContain("bg-[#EDE9FE]");
+    expect(button.className).toContain("bg-[#DFEAE4]");
     fireEvent.click(button);
     expect(isOpen()).toBe(false);
   });

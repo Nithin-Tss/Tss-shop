@@ -2204,10 +2204,10 @@ export default function AdminCustomizePage() {
         <BlogPostsContext.Provider value={blogPosts}>
           <UploadsContext.Provider value={uploads}>
             <div
-              className={`flex h-screen flex-col bg-[#F5F3FF] text-charcoal-navy ${drag ? "cursor-grabbing select-none" : ""}`}
+              className={`flex h-screen flex-col bg-[#EFECE4] text-charcoal-navy ${drag ? "cursor-grabbing select-none" : ""}`}
             >
               {/* Top bar */}
-              <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-[#DDD6FE] bg-white px-4 py-2">
+              <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-[#E7E4DC] bg-[#FAF9F6] px-5 py-2.5">
                 <div className="flex min-w-0 items-center gap-3">
                   <Link
                     to="/admin/online-store"
@@ -2218,19 +2218,26 @@ export default function AdminCustomizePage() {
                       )
                         e.preventDefault();
                     }}
-                    className="whitespace-nowrap text-sm text-[#4C4F7A] hover:text-charcoal-navy"
+                    className="whitespace-nowrap text-sm text-[#5A5750] hover:text-charcoal-navy"
                   >
                     ← Online store
                   </Link>
 
-                  <span className="truncate font-semibold">Customize · {store.storeName}</span>
+                  <span className="flex min-w-0 items-baseline gap-2.5">
+                    <span className="hidden text-xs uppercase tracking-[0.14em] text-[#78746A] sm:inline">
+                      Customize
+                    </span>
+                    <span className="display truncate text-2xl text-[#14130F]">
+                      {store.storeName}
+                    </span>
+                  </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setPanelOpen((v) => !v)}
-                    className="h-9 whitespace-nowrap rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-charcoal-navy lg:hidden"
+                    className="h-9 whitespace-nowrap rounded-md border border-[#D4D0C5] px-3 text-sm hover:border-charcoal-navy lg:hidden"
                     aria-expanded={panelOpen}
                   >
                     {panelOpen ? "Hide panel" : "Sections"}
@@ -2240,7 +2247,7 @@ export default function AdminCustomizePage() {
                     <button
                       type="button"
                       onClick={goBack}
-                      className="h-9 whitespace-nowrap rounded-lg border border-[#DDD6FE] px-3 text-sm hover:border-charcoal-navy"
+                      className="h-9 whitespace-nowrap rounded-md border border-[#D4D0C5] px-3 text-sm hover:border-charcoal-navy"
                       title="Back to the page you came from"
                     >
                       &larr; {pageLabel(backStack[backStack.length - 1].page) || "Back"}
@@ -2278,7 +2285,7 @@ export default function AdminCustomizePage() {
                       setAdding(false);
                       setBackStack([]);
                     }}
-                    className="h-9 whitespace-nowrap rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
+                    className="h-9 whitespace-nowrap rounded-md border border-[#D4D0C5] bg-white px-2 text-sm"
                     aria-label="Page to edit"
                   >
                     {schema.pages.map((p) => (
@@ -2304,7 +2311,7 @@ export default function AdminCustomizePage() {
                     <button
                       type="button"
                       onClick={() => deletePageTemplate(page)}
-                      className="h-9 whitespace-nowrap rounded-lg border border-[#D8DFE8] px-3 text-sm text-[#4C4F7A] hover:border-charcoal-navy hover:text-charcoal-navy"
+                      className="h-9 whitespace-nowrap rounded-md border border-[#D4D0C5] px-3 text-sm text-[#5A5750] hover:border-charcoal-navy hover:text-charcoal-navy"
                       title="Delete this template; its pages go back to Page"
                     >
                       Delete template
@@ -2316,7 +2323,7 @@ export default function AdminCustomizePage() {
                     <select
                       value={sampleArticle}
                       onChange={(e) => setSampleArticle(e.target.value)}
-                      className="h-9 whitespace-nowrap max-w-50 rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
+                      className="h-9 whitespace-nowrap max-w-50 rounded-md border border-[#D4D0C5] bg-white px-2 text-sm"
                       aria-label="Post to preview"
                     >
                       {blogPosts.map((p) => (
@@ -2332,7 +2339,7 @@ export default function AdminCustomizePage() {
                     <select
                       value={samplePage}
                       onChange={(e) => setSamplePage(e.target.value)}
-                      className="h-9 whitespace-nowrap max-w-50 rounded-lg border border-[#DDD6FE] bg-white px-2 text-sm"
+                      className="h-9 whitespace-nowrap max-w-50 rounded-md border border-[#D4D0C5] bg-white px-2 text-sm"
                       aria-label="Page to preview"
                     >
                       {storePages.map((p) => (
@@ -2358,7 +2365,7 @@ export default function AdminCustomizePage() {
                       return query.toString() ? `?${query.toString()}` : "";
                     })()}`}
                     title="Open the theme code in the editor"
-                    className="inline-flex h-9 items-center justify-center rounded-lg border border-[#DDD6FE] px-3 text-sm inline-flex items-center text-charcoal-navy hover:border-charcoal-navy"
+                    className="inline-flex h-9 items-center justify-center rounded-md border border-[#D4D0C5] px-3 text-sm inline-flex items-center text-charcoal-navy hover:border-charcoal-navy"
                   >
                     Edit code
                   </a>
@@ -2373,18 +2380,18 @@ export default function AdminCustomizePage() {
                           new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/"
                         );
                       }}
-                      className="h-9 whitespace-nowrap rounded-lg border border-[#DDD6FE] px-3 text-sm inline-flex items-center hover:border-charcoal-navy"
+                      className="h-9 whitespace-nowrap rounded-md border border-[#D4D0C5] px-3 text-sm inline-flex items-center hover:border-charcoal-navy"
                     >
                       View store
                     </a>
                   )}
 
-                  <div className="flex items-center rounded-lg border border-[#DDD6FE]">
+                  <div className="flex items-center rounded-md border border-[#D4D0C5]">
                     <button
                       type="button"
                       onClick={undo}
                       disabled={!historyRef.current.past.length}
-                      className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-charcoal-navy disabled:opacity-30"
+                      className="flex h-9 w-9 items-center justify-center text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
                       aria-label="Undo"
                       title="Undo (Ctrl+Z)"
                     >
@@ -2393,12 +2400,12 @@ export default function AdminCustomizePage() {
                         <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
                       </svg>
                     </button>
-                    <span className="h-5 w-px bg-[#DDD6FE]" />
+                    <span className="h-5 w-px bg-[#E7E4DC]" />
                     <button
                       type="button"
                       onClick={redo}
                       disabled={!historyRef.current.future.length}
-                      className="flex h-9 w-9 items-center justify-center text-[#4C4F7A] hover:text-charcoal-navy disabled:opacity-30"
+                      className="flex h-9 w-9 items-center justify-center text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
                       aria-label="Redo"
                       title="Redo (Ctrl+Shift+Z)"
                     >
@@ -2415,7 +2422,7 @@ export default function AdminCustomizePage() {
                     className="hidden min-w-0 items-center gap-1.5 text-xs sm:flex"
                   >
                     {saveState === "saved" && (
-                      <span className="flex items-center gap-1 text-[#4C4F7A]">
+                      <span className="flex items-center gap-1 text-[#5A5750]">
                         <svg
                           {...iconProps}
                           strokeWidth="2.2"
@@ -2427,14 +2434,14 @@ export default function AdminCustomizePage() {
                       </span>
                     )}
                     {saveState === "pending" && (
-                      <span className="flex items-center gap-1.5 text-[#4C4F7A]">
+                      <span className="flex items-center gap-1.5 text-[#5A5750]">
                         <span className="h-2 w-2 rounded-full bg-amber-500" />
                         Unsaved changes
                       </span>
                     )}
                     {saveState === "saving" && (
-                      <span className="flex items-center gap-1.5 text-[#4C4F7A]">
-                        <span className="h-2 w-2 animate-pulse rounded-full bg-[#8B8FB8]" />
+                      <span className="flex items-center gap-1.5 text-[#5A5750]">
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-[#A29E92]" />
                         Saving...
                       </span>
                     )}
@@ -2471,7 +2478,7 @@ export default function AdminCustomizePage() {
                     type="button"
                     onClick={() => engineRef.current.flushSave()}
                     disabled={!dirty || saveState === "saving"}
-                    className="h-9 whitespace-nowrap rounded-lg bg-charcoal-navy px-4 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-40"
+                    className="h-9 whitespace-nowrap rounded-md bg-charcoal-navy px-5 text-sm font-medium text-white hover:bg-[#2A2925] disabled:bg-[#D4D0C5] disabled:text-[#78746A] disabled:opacity-100"
                     title="Save your changes to the storefront"
                   >
                     Save
@@ -2510,7 +2517,7 @@ export default function AdminCustomizePage() {
                   }`}
                 >
                   <aside
-                    className={`absolute inset-y-0 left-0 z-30 w-85 max-w-[90vw] shrink-0 overflow-hidden border-r border-[#DDD6FE] bg-white shadow-xl transition-[transform,width] duration-200 ease-out motion-reduce:transition-none lg:max-w-none lg:translate-x-0 ${
+                    className={`absolute inset-y-0 left-0 z-30 w-85 max-w-[90vw] shrink-0 overflow-hidden border-r border-[#E7E4DC] bg-[#FAF9F6] shadow-xl transition-[transform,width] duration-200 ease-out motion-reduce:transition-none lg:max-w-none lg:translate-x-0 ${
                       editing
                         ? "lg:w-85 lg:shadow-none"
                         : "lg:w-14 lg:shadow-none lg:group-focus-within/side:w-85 lg:group-focus-within/side:shadow-xl lg:group-hover/side:w-85 lg:group-hover/side:shadow-xl"
@@ -2518,7 +2525,7 @@ export default function AdminCustomizePage() {
                   >
                     <div
                       aria-hidden="true"
-                      className={`pointer-events-none absolute inset-x-0 top-0 hidden justify-center pt-4 text-[#4C4F7A] transition-opacity duration-150 ${
+                      className={`pointer-events-none absolute inset-x-0 top-0 hidden justify-center pt-4 text-[#5A5750] transition-opacity duration-150 ${
                         editing
                           ? "lg:hidden"
                           : "lg:flex lg:group-focus-within/side:opacity-0 lg:group-hover/side:opacity-0"
@@ -2547,7 +2554,7 @@ export default function AdminCustomizePage() {
                         inert={panelView !== 0}
                         aria-hidden={panelView !== 0}
                       >
-                        <h2 className="px-4 pb-3 pt-4 text-[15px] font-bold text-[#303030]">
+                        <h2 className="display px-5 pb-4 pt-6 text-3xl text-[#14130F]">
                           {pageLabel(page)}
                         </h2>
 
@@ -2609,10 +2616,10 @@ export default function AdminCustomizePage() {
                                 <div
                                   className={`group flex h-8 items-center gap-2 rounded-lg pl-1.5 pr-1 text-[13px] ${
                                     blockInto
-                                      ? "bg-[#f1f1f1] ring-1 ring-[#005bd3]/50"
+                                      ? "bg-[#F3F1EC] ring-1 ring-[#265C48]/50"
                                       : isSelected
-                                        ? "bg-[#f1f1f1]"
-                                        : "hover:bg-[#f7f7f7]"
+                                        ? "bg-[#F3F1EC]"
+                                        : "hover:bg-[#FAF9F6]"
                                   }`}
                                 >
                                   {/* The type icon turns into the drag handle on hover */}
@@ -2620,7 +2627,7 @@ export default function AdminCustomizePage() {
                                     <svg
                                       {...iconProps}
                                       className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
-                                        s.hidden ? "text-[#C2C9D6]" : "text-[#8B8FB8]"
+                                        s.hidden ? "text-[#A29E92]" : "text-[#A29E92]"
                                       }`}
                                     >
                                       {SECTION_ICONS[s.type] || SECTION_ICONS.custom}
@@ -2672,12 +2679,12 @@ export default function AdminCustomizePage() {
                                       title={showType ? `${name} (${spec.name})` : name}
                                     >
                                       <span
-                                        className={`truncate ${s.hidden ? "text-[#A3ADBF]" : "text-charcoal-navy"} ${isSelected ? "font-medium" : ""}`}
+                                        className={`truncate ${s.hidden ? "text-[#A29E92]" : "text-charcoal-navy"} ${isSelected ? "font-medium" : ""}`}
                                       >
                                         {name}
                                       </span>
                                       {showType && (
-                                        <span className="shrink-0 truncate text-xs text-[#A3ADBF]">
+                                        <span className="shrink-0 truncate text-xs text-[#A29E92]">
                                           {spec.name}
                                         </span>
                                       )}
@@ -2723,7 +2730,7 @@ export default function AdminCustomizePage() {
                                           <div
                                             role="menu"
                                             data-row-menu
-                                            className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-[#E4DEFB] bg-white py-1 text-sm shadow-lg"
+                                            className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-[#E7E4DC] bg-white py-1 text-sm shadow-lg"
                                           >
                                             {canRename && (
                                               <button
@@ -2733,7 +2740,7 @@ export default function AdminCustomizePage() {
                                                   setRowMenu(null);
                                                   startRename(id);
                                                 }}
-                                                className="block w-full px-3 py-1.5 text-left hover:bg-[#F5F6F8]"
+                                                className="block w-full px-3 py-1.5 text-left hover:bg-[#F3F1EC]"
                                               >
                                                 Rename
                                               </button>
@@ -2745,11 +2752,11 @@ export default function AdminCustomizePage() {
                                                 setRowMenu(null);
                                                 duplicateSection(id);
                                               }}
-                                              className="block w-full px-3 py-1.5 text-left hover:bg-[#F5F6F8]"
+                                              className="block w-full px-3 py-1.5 text-left hover:bg-[#F3F1EC]"
                                             >
                                               Duplicate
                                             </button>
-                                            <div className="my-1 h-px bg-[#EEF0F4]" />
+                                            <div className="my-1 h-px bg-[#F3F1EC]" />
                                             <button
                                               type="button"
                                               role="menuitem"
@@ -2773,7 +2780,7 @@ export default function AdminCustomizePage() {
                         </ul>
 
                         {template.order.length === 0 && (
-                          <p className="px-4 py-2 text-xs text-[#4C4F7A]">
+                          <p className="px-4 py-2 text-xs text-[#5A5750]">
                             No sections yet. Your store shows a simple default layout until you add
                             one.
                           </p>
@@ -2782,9 +2789,9 @@ export default function AdminCustomizePage() {
                         {/* Add section */}
                         <div className="px-2 pb-3 pt-1">
                           {adding ? (
-                            <div className="rounded-xl border border-[#DDD6FE] bg-[#F5F3FF] p-3">
+                            <div className="rounded-xl border border-[#E7E4DC] bg-[#F3F1EC] p-3">
                               <label
-                                className="block text-xs font-medium text-[#3B3F8F]"
+                                className="block text-xs font-medium text-[#265C48]"
                                 htmlFor="new-section-name"
                               >
                                 Section name
@@ -2808,14 +2815,14 @@ export default function AdminCustomizePage() {
                                       setNewName("");
                                     }
                                   }}
-                                  className="h-9 min-w-0 flex-1 rounded-lg border border-[#DDD6FE] bg-white px-2.5 text-sm outline-none focus:border-charcoal-navy"
+                                  className="h-9 min-w-0 flex-1 rounded-md border border-[#D4D0C5] bg-white px-2.5 text-sm outline-none focus:border-charcoal-navy"
                                 />
 
                                 <button
                                   type="button"
                                   onClick={addCustomSection}
                                   disabled={!newName.trim()}
-                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-charcoal-navy text-white hover:bg-[#1C2347] disabled:opacity-30"
+                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-charcoal-navy text-white hover:bg-[#1A1916] disabled:opacity-30"
                                   aria-label="Add section"
                                   title="Add section"
                                 >
@@ -2830,7 +2837,7 @@ export default function AdminCustomizePage() {
                                     setAdding(false);
                                     setNewName("");
                                   }}
-                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-charcoal-navy hover:text-charcoal-navy"
+                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#D4D0C5] bg-white text-[#5A5750] hover:border-charcoal-navy hover:text-charcoal-navy"
                                   aria-label="Cancel"
                                   title="Cancel"
                                 >
@@ -2842,7 +2849,7 @@ export default function AdminCustomizePage() {
 
                               {templateTypes.length > 0 && (
                                 <>
-                                  <p className="mt-3 text-[11px] text-[#4C4F7A]">
+                                  <p className="mt-3 text-[11px] text-[#5A5750]">
                                     Or start from a template:
                                   </p>
 
@@ -2852,7 +2859,7 @@ export default function AdminCustomizePage() {
                                         key={type}
                                         type="button"
                                         onClick={() => addTemplateSection(type)}
-                                        className="rounded-full border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-[#3B3F8F] hover:border-charcoal-navy hover:text-charcoal-navy"
+                                        className="rounded-full border border-[#E7E4DC] bg-white px-2.5 py-1 text-xs text-[#265C48] hover:border-charcoal-navy hover:text-charcoal-navy"
                                       >
                                         {spec.name}
                                       </button>
@@ -2865,7 +2872,7 @@ export default function AdminCustomizePage() {
                             <button
                               type="button"
                               onClick={() => setAdding(true)}
-                              className="flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-[13px] font-medium text-[#005bd3] hover:bg-[#f7f7f7] hover:text-[#003d99]"
+                              className="flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-[13px] font-medium text-[#265C48] hover:bg-[#FAF9F6] hover:text-[#003d99]"
                             >
                               <span
                                 className="flex h-5 w-5 items-center justify-center"
@@ -2898,18 +2905,28 @@ export default function AdminCustomizePage() {
                           }}
                         />
 
-                        <div className="mt-auto border-t border-[#DDD6FE] p-2">
+                        <div className="mt-auto border-t border-[#E7E4DC] p-3">
                           <button
                             type="button"
                             onClick={() => {
                               setThemeGroup("colors");
                               setSelected("theme");
                             }}
-                            className={`w-full rounded-lg px-2 py-2 text-left text-sm ${
-                              selected === "theme" ? "bg-[#EDE9FE]" : "hover:bg-[#F5F3FF]"
+                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left ${
+                              selected === "theme" ? "bg-[#EFECE4]" : "hover:bg-[#F3F1EC]"
                             }`}
                           >
-                            Theme settings (colors, fonts, buttons)
+                            <span>
+                              <span className="block text-sm font-medium text-[#14130F]">
+                                Theme settings
+                              </span>
+                              <span className="block text-xs text-[#78746A]">
+                                Colors, fonts, buttons
+                              </span>
+                            </span>
+                            <span aria-hidden="true" className="text-[#78746A]">
+                              &rarr;
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -2920,11 +2937,11 @@ export default function AdminCustomizePage() {
                         inert={panelView !== 1}
                         aria-hidden={panelView !== 1}
                       >
-                        <div className="flex shrink-0 items-center gap-2 border-b border-[#DDD6FE] px-3 py-3">
+                        <div className="flex shrink-0 items-center gap-2 border-b border-[#E7E4DC] px-3 py-3">
                           <button
                             type="button"
                             onClick={() => setSelected(null)}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy"
                             aria-label="Back to sections"
                             title="Back (Esc)"
                           >
@@ -2935,7 +2952,7 @@ export default function AdminCustomizePage() {
 
                           <div className="min-w-0">
                             <h2 className="truncate font-semibold leading-tight">{editTitle}</h2>
-                            <p className="truncate text-xs text-[#8B8FB8]">{editSubtitle}</p>
+                            <p className="truncate text-xs text-[#A29E92]">{editSubtitle}</p>
                           </div>
                         </div>
 
@@ -2993,8 +3010,8 @@ export default function AdminCustomizePage() {
                                   )}
 
                                   {blockTargets.length > 0 && (
-                                    <div className="mt-4 rounded-lg border border-dashed border-[#C9D1DD] bg-[#F5F3FF] p-2">
-                                      <p className="px-1 pb-1.5 text-[11px] font-medium text-[#4C4F7A]">
+                                    <div className="mt-4 rounded-lg border border-dashed border-[#D4D0C5] bg-[#F3F1EC] p-2">
+                                      <p className="px-1 pb-1.5 text-[11px] font-medium text-[#5A5750]">
                                         Drop on a section to move the block there
                                       </p>
 
@@ -3005,8 +3022,8 @@ export default function AdminCustomizePage() {
                                             data-drop-section={id}
                                             className={`truncate rounded-md border bg-white px-2.5 py-2 text-sm ${
                                               dropTarget?.kind === "into" && dropTarget.id === id
-                                                ? "border-charcoal-navy ring-2 ring-[#0B1020]/20"
-                                                : "border-[#DDD6FE]"
+                                                ? "border-charcoal-navy ring-2 ring-[#14130F]/20"
+                                                : "border-[#E7E4DC]"
                                             }`}
                                           >
                                             {template.sections[id].settings.heading ||
@@ -3023,11 +3040,11 @@ export default function AdminCustomizePage() {
                         </div>
 
                         {shownSection && (
-                          <div className="flex shrink-0 items-center gap-1 border-t border-[#DDD6FE] bg-white px-3 py-2">
+                          <div className="flex shrink-0 items-center gap-1 border-t border-[#E7E4DC] bg-white px-3 py-2">
                             <button
                               type="button"
                               onClick={() => resetSection(shown)}
-                              className="rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
+                              className="rounded-md px-2 py-1.5 text-xs font-medium text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy"
                             >
                               Reset to default
                             </button>
@@ -3039,7 +3056,7 @@ export default function AdminCustomizePage() {
                                 <button
                                   type="button"
                                   onClick={() => duplicateSection(shown)}
-                                  className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
+                                  className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy"
                                 >
                                   <svg {...iconProps} className="h-3.5 w-3.5">
                                     <rect x="8" y="8" width="13" height="13" rx="2" />
@@ -3070,11 +3087,11 @@ export default function AdminCustomizePage() {
                         inert={panelView !== 2}
                         aria-hidden={panelView !== 2}
                       >
-                        <div className="flex shrink-0 items-center gap-2 border-b border-[#DDD6FE] px-3 py-3">
+                        <div className="flex shrink-0 items-center gap-2 border-b border-[#E7E4DC] px-3 py-3">
                           <button
                             type="button"
                             onClick={() => setSelectedBlock(null)}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy"
                             aria-label="Back to section"
                             title="Back (Esc)"
                           >
@@ -3087,7 +3104,7 @@ export default function AdminCustomizePage() {
                             <h2 className="truncate font-semibold leading-tight">
                               {shownBlockSpec?.name || "Block"}
                             </h2>
-                            <p className="truncate text-xs text-[#8B8FB8]">
+                            <p className="truncate text-xs text-[#A29E92]">
                               in{" "}
                               {shownSection ? shownSection.settings.heading || shownSpec.name : ""}
                               {shownBlock?.hidden ? " · Hidden" : ""}
@@ -3141,11 +3158,11 @@ export default function AdminCustomizePage() {
                         </div>
 
                         {shownBlock && (
-                          <div className="flex shrink-0 items-center gap-1 border-t border-[#DDD6FE] bg-white px-3 py-2">
+                          <div className="flex shrink-0 items-center gap-1 border-t border-[#E7E4DC] bg-white px-3 py-2">
                             <button
                               type="button"
                               onClick={() => toggleBlockHidden(shown, shownBlockIndex)}
-                              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
+                              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy"
                             >
                               <EyeIcon hidden={!shownBlock.hidden} />
                               {shownBlock.hidden ? "Show" : "Hide"}
@@ -3156,7 +3173,7 @@ export default function AdminCustomizePage() {
                             <button
                               type="button"
                               onClick={() => duplicateBlock(shown, shownBlockIndex)}
-                              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy"
+                              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy"
                             >
                               <svg {...iconProps} className="h-3.5 w-3.5">
                                 <rect x="8" y="8" width="13" height="13" rx="2" />
@@ -3187,7 +3204,7 @@ export default function AdminCustomizePage() {
 
                 {/* Preview */}
                 <main className="flex min-w-0 flex-1 flex-col p-4">
-                  <div className="mb-2 flex items-center justify-between text-xs text-[#4C4F7A]">
+                  <div className="mb-2 flex items-center justify-between text-xs text-[#5A5750]">
                     <span>
                       {previewError
                         ? `Preview not updated: ${previewError}`
@@ -3209,10 +3226,10 @@ export default function AdminCustomizePage() {
                         aria-pressed={editMode}
                         onClick={() => setEditMode((on) => !on)}
                         title="Click sections in the preview to edit them"
-                        className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#0B1020]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
+                        className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[#14130F]/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
                           editMode
                             ? "border-charcoal-navy bg-charcoal-navy text-white"
-                            : "border-[#DDD6FE] bg-white text-[#4C4F7A] hover:border-charcoal-navy hover:text-charcoal-navy"
+                            : "border-[#E7E4DC] bg-white text-[#5A5750] hover:border-charcoal-navy hover:text-charcoal-navy"
                         }`}
                       >
                         <svg {...iconProps} className="h-3.5 w-3.5">
@@ -3223,7 +3240,7 @@ export default function AdminCustomizePage() {
                       </button>
 
                       <div
-                        className="flex rounded-lg border border-[#DDD6FE] bg-white p-0.5"
+                        className="flex rounded-md border border-[#D4D0C5] bg-white p-0.5"
                         role="radiogroup"
                         aria-label="Preview size"
                       >
@@ -3240,7 +3257,7 @@ export default function AdminCustomizePage() {
                             className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${
                               device === id
                                 ? "bg-charcoal-navy text-white"
-                                : "text-[#4C4F7A] hover:text-charcoal-navy"
+                                : "text-[#5A5750] hover:text-charcoal-navy"
                             }`}
                           >
                             <svg {...iconProps} className="h-3.5 w-3.5">
@@ -3270,12 +3287,12 @@ export default function AdminCustomizePage() {
                       srcDoc={previewHtml}
                       // Theme code is written by store owners: keep it off this origin
                       sandbox="allow-scripts allow-forms allow-popups"
-                      className={`mx-auto min-h-0 flex-1 rounded-xl border border-[#DDD6FE] bg-white transition-[width] duration-200 ${
+                      className={`mx-auto min-h-0 flex-1 rounded-xl bg-white shadow-lg ring-1 ring-[#14130F]/5 transition-[width] duration-200 ${
                         device === "mobile" ? "w-97.5 max-w-full" : "w-full"
                       } ${drag ? "pointer-events-none" : ""}`}
                     />
                   ) : (
-                    <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#DDD6FE] text-sm text-[#4C4F7A]">
+                    <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[#E7E4DC] text-sm text-[#5A5750]">
                       Loading preview...
                     </div>
                   )}
@@ -3288,7 +3305,7 @@ export default function AdminCustomizePage() {
                     left: Math.min(contextMenu.x, window.innerWidth - 168),
                     top: Math.min(contextMenu.y, window.innerHeight - 56),
                   }}
-                  className="fixed z-50 w-40 rounded-lg border border-[#DDD6FE] bg-white p-1 shadow-lg"
+                  className="fixed z-50 w-40 rounded-md border border-[#D4D0C5] bg-white p-1 shadow-lg"
                   onContextMenu={(e) => e.preventDefault()}
                 >
                   <button
@@ -3305,7 +3322,7 @@ export default function AdminCustomizePage() {
                       );
                       setContextMenu(null);
                     }}
-                    className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F5F3FF]"
+                    className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-[#F3F1EC]"
                   >
                     Edit code
                   </button>

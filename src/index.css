@@ -1,12 +1,94 @@
 @import "tailwindcss";
 
-/* Brand colors */
+/* Design tokens. The default Tailwind slate/gray/neutral/violet scales are remapped here, so every
+   existing utility (text-slate-500, bg-violet-600, ...) picks up the palette without per-file edits. */
 @theme {
-  /* #0B1020 — a very deep, dark charcoal-navy */
-  --color-charcoal-navy: #0b1020;
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Instrument Serif", "Times New Roman", serif;
+
+  /* Ink: the deepest neutral, used for text and primary buttons */
+  --color-charcoal-navy: #14130f;
+  --color-ink: #14130f;
+  --color-paper: #f7f5f0;
+
+  /* Warm neutral ramp */
+  --color-slate-50: #faf9f6;
+  --color-slate-100: #f3f1ec;
+  --color-slate-200: #e7e4dc;
+  --color-slate-300: #d4d0c5;
+  --color-slate-400: #a29e92;
+  --color-slate-500: #78746a;
+  --color-slate-600: #5a5750;
+  --color-slate-700: #403e39;
+  --color-slate-800: #2a2925;
+  --color-slate-900: #1a1916;
+  --color-slate-950: #0f0e0c;
+  --color-gray-50: #faf9f6;
+  --color-gray-100: #f3f1ec;
+  --color-gray-200: #e7e4dc;
+  --color-gray-300: #d4d0c5;
+  --color-gray-400: #a29e92;
+  --color-gray-500: #78746a;
+  --color-gray-600: #5a5750;
+  --color-gray-700: #403e39;
+  --color-gray-800: #2a2925;
+  --color-gray-900: #1a1916;
+  --color-gray-950: #0f0e0c;
+  --color-neutral-50: #faf9f6;
+  --color-neutral-100: #f3f1ec;
+  --color-neutral-200: #e7e4dc;
+  --color-neutral-300: #d4d0c5;
+  --color-neutral-400: #a29e92;
+  --color-neutral-500: #78746a;
+  --color-neutral-600: #5a5750;
+  --color-neutral-700: #403e39;
+  --color-neutral-800: #2a2925;
+  --color-neutral-900: #1a1916;
+  --color-neutral-950: #0f0e0c;
+
+  /* The one accent: deep forest green (replaces violet / purple / indigo) */
+  --color-violet-50: #f1f6f3;
+  --color-violet-100: #dfeae4;
+  --color-violet-200: #bfd4c9;
+  --color-violet-300: #96b8a7;
+  --color-violet-400: #62977f;
+  --color-violet-500: #3b7862;
+  --color-violet-600: #265c48;
+  --color-violet-700: #1e4a3a;
+  --color-violet-800: #173b2f;
+  --color-violet-900: #112d24;
+  --color-violet-950: #0a1c16;
+  --color-purple-50: #f1f6f3;
+  --color-purple-100: #dfeae4;
+  --color-purple-200: #bfd4c9;
+  --color-purple-500: #3b7862;
+  --color-purple-600: #265c48;
+  --color-purple-700: #1e4a3a;
+  --color-indigo-50: #f1f6f3;
+  --color-indigo-100: #dfeae4;
+  --color-indigo-500: #3b7862;
+  --color-indigo-600: #265c48;
+  --color-indigo-700: #1e4a3a;
+
+  /* Tighter, more deliberate corners */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 7px;
+  --radius-xl: 10px;
+  --radius-2xl: 14px;
+
+  /* Soft, warm, layered shadows instead of the stock grey drop shadow */
+  --shadow-xs: 0 1px 0 rgb(20 19 15 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(20 19 15 / 0.05), 0 0 0 1px rgb(20 19 15 / 0.03);
+  --shadow-md: 0 4px 12px -2px rgb(20 19 15 / 0.07), 0 1px 2px rgb(20 19 15 / 0.04);
+  --shadow-lg: 0 12px 28px -8px rgb(20 19 15 / 0.12), 0 2px 4px rgb(20 19 15 / 0.04);
+  --shadow-xl: 0 24px 48px -12px rgb(20 19 15 / 0.16);
+  --shadow-2xl: 0 32px 64px -16px rgb(20 19 15 / 0.22);
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Global reset */
 * {
   box-sizing: border-box;
 }
@@ -14,13 +96,64 @@
 html {
   font-size: 80%;
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: #ffffff;
-  color: #0b1020;
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-slate-50);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
+}
+
+::selection {
+  background: var(--color-violet-200);
+  color: var(--color-ink);
+}
+
+/* Numbers that update or line up in columns */
+table,
+[data-numeric] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Editorial display face for marketing headlines */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+
+/* One consistent keyboard focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-violet-600);
+  outline-offset: 2px;
+}
+
+/* Press feedback and exact-property transitions for interactive elements */
+button,
+[role="button"],
+a {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: var(--ease-out-quart);
+}
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+button:disabled {
+  cursor: not-allowed;
 }
 
 /* The assistant panel (components/AssistantPanel.jsx) pushes the page instead of covering it: on wide windows,
@@ -37,9 +170,11 @@ html[data-assistant-push="true"] body {
   body {
     transition: none;
   }
+  button:not(:disabled):active {
+    transform: none;
+  }
 }
 
-/* Common form elements */
 button,
 input,
 textarea,
@@ -47,8 +182,13 @@ select {
   font: inherit;
 }
 
-/* Images */
 img {
   display: block;
   max-width: 100%;
+}
+
+/* Scrollbars that don't shout */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-slate-300) transparent;
 }

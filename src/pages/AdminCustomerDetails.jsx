@@ -497,7 +497,7 @@ export default function AdminCustomerDetails() {
     "RC";
 
   return (
-    <div className="min-h-screen bg-[#F1F2F4] text-charcoal-navy">
+    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
@@ -765,7 +765,7 @@ export default function AdminCustomerDetails() {
                           </Link>
                           <Link
                             to="/admin/online-store/orders/create"
-                            className="px-3.5 py-1.5 text-xs font-semibold bg-[#202223] text-white rounded-lg hover:bg-[#303134] transition"
+                            className="px-3.5 py-1.5 text-xs font-semibold bg-[#1A1916] text-white rounded-lg hover:bg-[#303134] transition"
                           >
                             Create order
                           </Link>
@@ -802,13 +802,13 @@ export default function AdminCustomerDetails() {
                               height="90"
                               rx="8"
                               fill="#F8FAFC"
-                              stroke="#CBD5E1"
+                              stroke="#D4D0C5"
                               strokeWidth="2"
                             />
                             <path
                               d="M75 15v16h16"
                               fill="#E2E8F0"
-                              stroke="#CBD5E1"
+                              stroke="#D4D0C5"
                               strokeWidth="2"
                             />
                             <rect x="36" y="28" width="28" height="6" rx="3" fill="#0EA5E9" />
@@ -823,8 +823,8 @@ export default function AdminCustomerDetails() {
                               fill="#F97316"
                               opacity="0.85"
                             />
-                            <rect x="58" y="72" width="26" height="4" rx="2" fill="#CBD5E1" />
-                            <rect x="58" y="80" width="18" height="4" rx="2" fill="#CBD5E1" />
+                            <rect x="58" y="72" width="26" height="4" rx="2" fill="#D4D0C5" />
+                            <rect x="58" y="80" width="18" height="4" rx="2" fill="#D4D0C5" />
                             <circle cx="60" cy="108" r="16" fill="#10B981" opacity="0.15" />
                             <path
                               d="M54 108l4 4 8-8"
@@ -868,13 +868,13 @@ export default function AdminCustomerDetails() {
                                 #{latestOrder.order_number}
                               </Link>
                               {/* Payment badge */}
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
                                 <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                                 {latestOrder.payment_status === "paid" ? "Paid" : "Paid"}
                               </span>
                               {/* Fulfillment badge */}
                               {latestOrder.fulfillment_status === "fulfilled" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
                                   <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                                   Fulfilled
                                 </span>
@@ -1063,7 +1063,7 @@ export default function AdminCustomerDetails() {
                               {dateEvents.map((ev) => (
                                 <div key={ev.id} className="relative flex items-start gap-4 pl-6">
                                   {/* Node bullet */}
-                                  <div className="absolute left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-[#F1F2F4]" />
+                                  <div className="absolute left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-[#F3F1EC]" />
 
                                   {/* Event Content */}
                                   <div className="flex-1 min-w-0">

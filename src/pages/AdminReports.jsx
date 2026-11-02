@@ -165,19 +165,19 @@ export default function AdminReports() {
     }
   };
 
-  const headCell = "px-4 py-2.5 text-[12px] font-semibold text-[#6B7280] whitespace-nowrap";
+  const headCell = "px-4 py-2.5 text-[12px] font-semibold text-[#78746A] whitespace-nowrap";
   const pageButton =
-    "inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E5E7EB] bg-white text-[#4B5563] transition-colors hover:bg-[#F9FAFB] disabled:pointer-events-none disabled:opacity-40";
+    "inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E7E4DC] bg-white text-[#5A5750] transition-colors hover:bg-[#FAF9F6] disabled:pointer-events-none disabled:opacity-40";
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020] font-sans">
+    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F] font-sans">
       <AdminHeader />
 
       {/* FEEDBACK TOAST */}
       {notice && (
         <div
           role="status"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#14130F] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all"
         >
           <span>{notice}</span>
           <button
@@ -202,7 +202,7 @@ export default function AdminReports() {
             <div className="flex items-center gap-2.5">
               {/* Document / report icon */}
               <svg
-                className="h-5 w-5 text-[#6B7280]"
+                className="h-5 w-5 text-[#78746A]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -214,26 +214,26 @@ export default function AdminReports() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <h1 className="text-[20px] font-bold tracking-tight text-[#0B1020]">Reports</h1>
+              <h1 className="text-[20px] font-bold tracking-tight text-[#14130F]">Reports</h1>
             </div>
 
             <Link
               to="/admin/online-store/reports/new"
-              className="inline-flex items-center justify-center rounded-lg bg-[#202223] px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-[#303336] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#202223]/20"
+              className="inline-flex items-center justify-center rounded-lg bg-[#1A1916] px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-[#303336] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916]/20"
             >
               New exploration
             </Link>
           </div>
 
           {/* MAIN CARD CONTAINER */}
-          <div className="rounded-xl border border-[#E5E7EB] bg-white shadow-xs">
+          <div className="rounded-xl border border-[#E7E4DC] bg-white shadow-xs">
             {/* SEARCH & FILTERS HEADER */}
-            <div className="border-b border-[#E5E7EB] p-3 sm:p-4">
+            <div className="border-b border-[#E7E4DC] p-3 sm:p-4">
               {/* Search input bar with sort button */}
               <div className="flex items-center gap-2 mb-3">
                 <div className="relative flex flex-1 items-center">
                   <svg
-                    className="pointer-events-none absolute left-3 h-4 w-4 text-[#9CA3AF]"
+                    className="pointer-events-none absolute left-3 h-4 w-4 text-[#A29E92]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -252,14 +252,14 @@ export default function AdminReports() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search reports"
                     aria-label="Search reports"
-                    className="h-9 w-full rounded-lg border border-[#E5E7EB] bg-white pl-9 pr-8 text-[14px] text-[#0B1020] outline-none transition placeholder:text-[#9CA3AF] hover:border-[#D1D5DB] focus:border-[#0B1020] focus:ring-1 focus:ring-[#0B1020]"
+                    className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white pl-9 pr-8 text-[14px] text-[#14130F] outline-none transition placeholder:text-[#A29E92] hover:border-[#D4D0C5] focus:border-[#14130F] focus:ring-1 focus:ring-[#14130F]"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
                       aria-label="Clear search"
-                      className="absolute right-2.5 flex h-5 w-5 items-center justify-center rounded text-[12px] text-[#9CA3AF] hover:text-[#4B5563]"
+                      className="absolute right-2.5 flex h-5 w-5 items-center justify-center rounded text-[12px] text-[#A29E92] hover:text-[#5A5750]"
                     >
                       ✕
                     </button>
@@ -272,7 +272,7 @@ export default function AdminReports() {
                   onClick={() => handleToggleSort("name")}
                   title={`Sort by name (${sortOrder === "asc" ? "ascending" : "descending"})`}
                   aria-label="Sort reports"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F9FAFB] hover:text-[#0B1020] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0B1020]"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-[#78746A] transition-colors hover:bg-[#FAF9F6] hover:text-[#14130F] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#14130F]"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -292,8 +292,8 @@ export default function AdminReports() {
                   <button
                     type="button"
                     onClick={() => setIsCreatedByOpen((prev) => !prev)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg border border-[#D1D5DB] bg-white px-3 py-1 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] ${
-                      selectedCreator !== "all" ? "border-[#0B1020] bg-[#F4F6F8]" : ""
+                    className={`inline-flex items-center gap-1.5 rounded-lg border border-[#D4D0C5] bg-white px-3 py-1 text-[13px] font-medium text-[#1A1916] shadow-xs transition-colors hover:bg-[#F3F1EC] ${
+                      selectedCreator !== "all" ? "border-[#14130F] bg-[#F4F6F8]" : ""
                     }`}
                     aria-expanded={isCreatedByOpen}
                   >
@@ -301,7 +301,7 @@ export default function AdminReports() {
                       {selectedCreator === "all" ? "Created by" : `Created by: ${selectedCreator}`}
                     </span>
                     <svg
-                      className="h-3.5 w-3.5 text-[#6B7280]"
+                      className="h-3.5 w-3.5 text-[#78746A]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -316,7 +316,7 @@ export default function AdminReports() {
                   </button>
 
                   {isCreatedByOpen && (
-                    <div className="absolute left-0 top-full z-40 mt-1 min-w-[160px] rounded-xl border border-[#E5E7EB] bg-white p-1 text-left shadow-lg">
+                    <div className="absolute left-0 top-full z-40 mt-1 min-w-[160px] rounded-xl border border-[#E7E4DC] bg-white p-1 text-left shadow-lg">
                       <button
                         type="button"
                         onClick={() => {
@@ -325,8 +325,8 @@ export default function AdminReports() {
                         }}
                         className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                           selectedCreator === "all"
-                            ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
-                            : "text-[#374151] hover:bg-[#F9FAFB]"
+                            ? "font-semibold text-[#14130F] bg-[#F3F1EC]"
+                            : "text-[#403E39] hover:bg-[#FAF9F6]"
                         }`}
                       >
                         <span>All creators</span>
@@ -342,8 +342,8 @@ export default function AdminReports() {
                           }}
                           className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                             selectedCreator === creator
-                              ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
-                              : "text-[#374151] hover:bg-[#F9FAFB]"
+                              ? "font-semibold text-[#14130F] bg-[#F3F1EC]"
+                              : "text-[#403E39] hover:bg-[#FAF9F6]"
                           }`}
                         >
                           <span>{creator}</span>
@@ -359,8 +359,8 @@ export default function AdminReports() {
                   <button
                     type="button"
                     onClick={() => setIsCategoryOpen((prev) => !prev)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg border border-[#D1D5DB] bg-white px-3 py-1 text-[13px] font-medium text-[#202223] shadow-xs transition-colors hover:bg-[#F6F6F7] ${
-                      selectedCategory !== "all" ? "border-[#0B1020] bg-[#F4F6F8]" : ""
+                    className={`inline-flex items-center gap-1.5 rounded-lg border border-[#D4D0C5] bg-white px-3 py-1 text-[13px] font-medium text-[#1A1916] shadow-xs transition-colors hover:bg-[#F3F1EC] ${
+                      selectedCategory !== "all" ? "border-[#14130F] bg-[#F4F6F8]" : ""
                     }`}
                     aria-expanded={isCategoryOpen}
                   >
@@ -368,7 +368,7 @@ export default function AdminReports() {
                       {selectedCategory === "all" ? "Category" : `Category: ${selectedCategory}`}
                     </span>
                     <svg
-                      className="h-3.5 w-3.5 text-[#6B7280]"
+                      className="h-3.5 w-3.5 text-[#78746A]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -383,7 +383,7 @@ export default function AdminReports() {
                   </button>
 
                   {isCategoryOpen && (
-                    <div className="absolute left-0 top-full z-40 mt-1 min-w-[170px] rounded-xl border border-[#E5E7EB] bg-white p-1 text-left shadow-lg">
+                    <div className="absolute left-0 top-full z-40 mt-1 min-w-[170px] rounded-xl border border-[#E7E4DC] bg-white p-1 text-left shadow-lg">
                       <button
                         type="button"
                         onClick={() => {
@@ -392,8 +392,8 @@ export default function AdminReports() {
                         }}
                         className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                           selectedCategory === "all"
-                            ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
-                            : "text-[#374151] hover:bg-[#F9FAFB]"
+                            ? "font-semibold text-[#14130F] bg-[#F3F1EC]"
+                            : "text-[#403E39] hover:bg-[#FAF9F6]"
                         }`}
                       >
                         <span>All categories</span>
@@ -409,8 +409,8 @@ export default function AdminReports() {
                           }}
                           className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                             selectedCategory === cat
-                              ? "font-semibold text-[#0B1020] bg-[#F3F4F6]"
-                              : "text-[#374151] hover:bg-[#F9FAFB]"
+                              ? "font-semibold text-[#14130F] bg-[#F3F1EC]"
+                              : "text-[#403E39] hover:bg-[#FAF9F6]"
                           }`}
                         >
                           <span>{cat}</span>
@@ -430,7 +430,7 @@ export default function AdminReports() {
                       setSelectedCreator("all");
                       setSearchQuery("");
                     }}
-                    className="text-[12px] text-[#6B7280] hover:text-[#0B1020] hover:underline"
+                    className="text-[12px] text-[#78746A] hover:text-[#14130F] hover:underline"
                   >
                     Clear filters
                   </button>
@@ -442,9 +442,9 @@ export default function AdminReports() {
             <div className="overflow-x-auto min-h-[300px]">
               <table className="w-full min-w-[640px] border-collapse text-left text-[14px]">
                 <thead>
-                  <tr className="border-b border-[#E5E7EB] bg-[#FAF8FF]">
+                  <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6]">
                     <th
-                      className={`${headCell} cursor-pointer hover:text-[#0B1020]`}
+                      className={`${headCell} cursor-pointer hover:text-[#14130F]`}
                       onClick={() => handleToggleSort("name")}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -456,13 +456,13 @@ export default function AdminReports() {
                     </th>
                     <th className={headCell}>Category</th>
                     <th
-                      className={`${headCell} cursor-pointer hover:text-[#0B1020]`}
+                      className={`${headCell} cursor-pointer hover:text-[#14130F]`}
                       onClick={() => handleToggleSort("last_viewed")}
                     >
                       <span className="inline-flex items-center gap-1">
                         Last viewed
                         <svg
-                          className="h-3 w-3 text-[#9CA3AF]"
+                          className="h-3 w-3 text-[#A29E92]"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -480,25 +480,25 @@ export default function AdminReports() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-[#F0F1F3]">
+                <tbody className="divide-y divide-[#F3F1EC]">
                   {/* LOADING SKELETON */}
                   {loading && (
                     <>
                       {[1, 2, 3, 4, 5, 6].map((i) => (
                         <tr key={i} className="h-12 animate-pulse">
                           <td className="px-4 py-3">
-                            <div className="h-4 w-48 rounded bg-[#EEF0F2]" />
+                            <div className="h-4 w-48 rounded bg-[#F3F1EC]" />
                           </td>
                           <td className="px-4 py-3">
-                            <div className="h-5 w-20 rounded-full bg-[#EEF0F2]" />
+                            <div className="h-5 w-20 rounded-full bg-[#F3F1EC]" />
                           </td>
                           <td className="px-4 py-3">
-                            <div className="h-4 w-24 rounded bg-[#EEF0F2]" />
+                            <div className="h-4 w-24 rounded bg-[#F3F1EC]" />
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="h-4 w-4 rounded bg-[#EEF0F2]" />
-                              <div className="h-4 w-16 rounded bg-[#EEF0F2]" />
+                              <div className="h-4 w-4 rounded bg-[#F3F1EC]" />
+                              <div className="h-4 w-16 rounded bg-[#F3F1EC]" />
                             </div>
                           </td>
                         </tr>
@@ -511,9 +511,9 @@ export default function AdminReports() {
                     <tr>
                       <td colSpan={4} className="px-4 py-16 text-center">
                         <div className="mx-auto flex max-w-md flex-col items-center">
-                          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] text-[22px] text-[#9CA3AF]">
+                          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] text-[22px] text-[#A29E92]">
                             <svg
-                              className="h-7 w-7 text-[#9CA3AF]"
+                              className="h-7 w-7 text-[#A29E92]"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -526,12 +526,12 @@ export default function AdminReports() {
                               />
                             </svg>
                           </div>
-                          <h3 className="mb-1 text-[16px] font-semibold text-[#0B1020]">
+                          <h3 className="mb-1 text-[16px] font-semibold text-[#14130F]">
                             {searchQuery || selectedCategory !== "all" || selectedCreator !== "all"
                               ? "No matching reports"
                               : "No reports found"}
                           </h3>
-                          <p className="mb-6 text-[14px] leading-relaxed text-[#6B7280]">
+                          <p className="mb-6 text-[14px] leading-relaxed text-[#78746A]">
                             {searchQuery || selectedCategory !== "all" || selectedCreator !== "all"
                               ? "No reports match your selected filters. Try clearing or modifying your search."
                               : "Reports will appear here when data is available."}
@@ -546,7 +546,7 @@ export default function AdminReports() {
                                 setSelectedCategory("all");
                                 setSelectedCreator("all");
                               }}
-                              className="inline-flex items-center justify-center rounded-lg bg-[#0B1020] px-4 py-2 text-[13px] font-medium text-white hover:bg-[#262E42]"
+                              className="inline-flex items-center justify-center rounded-lg bg-[#14130F] px-4 py-2 text-[13px] font-medium text-white hover:bg-[#2A2925]"
                             >
                               Clear filters
                             </button>
@@ -561,16 +561,16 @@ export default function AdminReports() {
                     paginatedReports.map((report, idx) => (
                       <tr
                         key={report.id || idx}
-                        className="h-12 transition-colors hover:bg-[#F9FAFB] cursor-pointer"
+                        className="h-12 transition-colors hover:bg-[#FAF9F6] cursor-pointer"
                       >
                         {/* Name */}
-                        <td className="px-4 py-3 font-medium text-[#0B1020] hover:underline">
+                        <td className="px-4 py-3 font-medium text-[#14130F] hover:underline">
                           <div className="flex items-center gap-1.5">
                             <span>{report.name}</span>
                             {report.description && (
                               <span
                                 title={report.description}
-                                className="text-[12px] text-[#9CA3AF] hover:text-[#4B5563]"
+                                className="text-[12px] text-[#A29E92] hover:text-[#5A5750]"
                               >
                                 ⓘ
                               </span>
@@ -580,18 +580,18 @@ export default function AdminReports() {
 
                         {/* Category */}
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center rounded-full bg-[#F1F2F4] px-2.5 py-0.5 text-[12px] font-medium text-[#4B5563]">
+                          <span className="inline-flex items-center rounded-full bg-[#F3F1EC] px-2.5 py-0.5 text-[12px] font-medium text-[#5A5750]">
                             {report.category || "General"}
                           </span>
                         </td>
 
                         {/* Last viewed */}
-                        <td className="px-4 py-3 text-[13px] text-[#6B7280]">
+                        <td className="px-4 py-3 text-[13px] text-[#78746A]">
                           {report.last_viewed || "—"}
                         </td>
 
                         {/* Created by */}
-                        <td className="px-4 py-3 text-[13px] text-[#202223]">
+                        <td className="px-4 py-3 text-[13px] text-[#1A1916]">
                           <div className="flex items-center gap-1.5">
                             <ShopifyBagIcon />
                             <span>{report.created_by || "System"}</span>
@@ -604,7 +604,7 @@ export default function AdminReports() {
             </div>
 
             {/* TABLE PAGINATION FOOTER */}
-            <div className="flex items-center justify-between gap-4 rounded-b-xl border-t border-[#E5E7EB] px-4 py-3 text-[12px] text-[#6B7280]">
+            <div className="flex items-center justify-between gap-4 rounded-b-xl border-t border-[#E7E4DC] px-4 py-3 text-[12px] text-[#78746A]">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -624,7 +624,7 @@ export default function AdminReports() {
                 >
                   ›
                 </button>
-                <span className="min-w-[48px] text-center tabular-nums text-[13px] text-[#374151]">
+                <span className="min-w-[48px] text-center tabular-nums text-[13px] text-[#403E39]">
                   {filteredReports.length === 0
                     ? "0-0"
                     : `${(currentPage - 1) * pageSize + 1}-${Math.min(
@@ -644,7 +644,7 @@ export default function AdminReports() {
           <div className="pb-6 pt-6 text-center">
             <a
               href="#learn-more"
-              className="text-[12px] text-[#6B7280] underline underline-offset-2 transition-colors hover:text-[#0B1020]"
+              className="text-[12px] text-[#78746A] underline underline-offset-2 transition-colors hover:text-[#14130F]"
             >
               Learn more about the new reporting experience
             </a>

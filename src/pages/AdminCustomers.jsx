@@ -395,7 +395,7 @@ export default function AdminCustomers() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F]">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -407,7 +407,7 @@ export default function AdminCustomers() {
         <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & TOP ACTION BAR */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#14130F]">
               <PageIcon name="customers" />
               Customers
             </h1>
@@ -430,7 +430,7 @@ export default function AdminCustomers() {
               {canManage && (
                 <Link
                   to="/admin/online-store/customers/new"
-                  className="flex items-center gap-2 rounded-lg bg-[#0B1020] px-4 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#1C2347] transition shadow-2xs"
+                  className="flex items-center gap-2 rounded-lg bg-[#14130F] px-4 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-2xs"
                 >
                   Add customer
                 </Link>
@@ -441,7 +441,7 @@ export default function AdminCustomers() {
           {/* DESCRIBE YOUR SEGMENT ROW */}
           <div className="flex items-center justify-between rounded-xl border border-slate-200/90 bg-white px-3.5 py-2.5 shadow-2xs mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#7C3AED] text-white">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#265C48] text-white">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.38-1 1.72V7h2a5 5 0 0 1 5 5v1.28c.6.34 1 .98 1 1.72a2 2 0 1 1-4 0v-.28A5 5 0 0 1 15 10H9a5 5 0 0 1-2 4.72V15a2 2 0 1 1-4 0c0-.74.4-1.38 1-1.72V12a5 5 0 0 1 5-5h2V5.72A2 2 0 0 1 12 2zm-3 9a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
                 </svg>
@@ -489,7 +489,7 @@ export default function AdminCustomers() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search customers"
-                  className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#0B1020] placeholder:text-slate-400"
+                  className="w-full bg-transparent outline-none text-xs sm:text-sm text-[#14130F] placeholder:text-slate-400"
                 />
                 {searchQuery && (
                   <button
@@ -525,7 +525,7 @@ export default function AdminCustomers() {
 
             {/* RESPONSIVE TABLE */}
             <div className="overflow-x-auto overflow-y-visible min-h-[360px]">
-              <table className="w-full border-collapse text-left text-sm text-[#0B1020]">
+              <table className="w-full border-collapse text-left text-sm text-[#14130F]">
                 <thead>
                   {selectedIds.size > 0 ? (
                     /* BULK ACTIONS TOOLBAR ROW */
@@ -539,11 +539,11 @@ export default function AdminCustomers() {
                           aria-label="Toggle selection"
                         >
                           {isIndeterminate ? (
-                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
+                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[#14130F] text-white shadow-2xs">
                               <span className="h-0.5 w-2 rounded-full bg-white" />
                             </span>
                           ) : allSelected ? (
-                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
+                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[#14130F] text-white shadow-2xs">
                               <svg
                                 className="h-3 w-3"
                                 fill="none"
@@ -739,7 +739,7 @@ export default function AdminCustomers() {
                               aria-checked={showOnlySelected}
                               onClick={() => setShowOnlySelected((prev) => !prev)}
                               className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                showOnlySelected ? "bg-[#0B1020]" : "bg-slate-300"
+                                showOnlySelected ? "bg-[#14130F]" : "bg-slate-300"
                               }`}
                             >
                               <span
@@ -760,7 +760,7 @@ export default function AdminCustomers() {
                     </tr>
                   ) : (
                     /* REGULAR COLUMN HEADERS */
-                    <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
+                    <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-semibold text-slate-700 whitespace-nowrap select-none">
                       <th className="py-3.5 pl-5 pr-3 w-10">
                         <button
                           type="button"
@@ -785,7 +785,7 @@ export default function AdminCustomers() {
                   )}
                 </thead>
 
-                <tbody className="divide-y divide-[#E4DEFB]">
+                <tbody className="divide-y divide-[#E7E4DC]">
                   {loading ? (
                     // SKELETON LOADING
                     [...Array(6)].map((_, i) => (
@@ -823,8 +823,8 @@ export default function AdminCustomers() {
                       return (
                         <tr
                           key={c.id}
-                          className={`transition-colors whitespace-nowrap hover:bg-[#F9FAFC] ${
-                            isSelected ? "bg-[#F3F0FF]" : ""
+                          className={`transition-colors whitespace-nowrap hover:bg-[#FAF9F6] ${
+                            isSelected ? "bg-[#F3F1EC]" : ""
                           }`}
                         >
                           {/* Checkbox */}
@@ -839,7 +839,7 @@ export default function AdminCustomers() {
                               aria-label={isSelected ? "Deselect customer" : "Select customer"}
                             >
                               {isSelected ? (
-                                <span className="flex h-4 w-4 items-center justify-center rounded bg-[#0B1020] text-white shadow-2xs">
+                                <span className="flex h-4 w-4 items-center justify-center rounded bg-[#14130F] text-white shadow-2xs">
                                   <svg
                                     className="h-3 w-3"
                                     fill="none"
@@ -946,7 +946,7 @@ export default function AdminCustomers() {
                           {canManage && (
                             <Link
                               to="/admin/online-store/customers/new"
-                              className="mt-3 px-4 py-2 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-slate-800 transition"
+                              className="mt-3 px-4 py-2 rounded-lg bg-[#14130F] text-white text-xs font-semibold hover:bg-slate-800 transition"
                             >
                               Add customer
                             </Link>
@@ -1082,7 +1082,7 @@ export default function AdminCustomers() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-[#0B1020] disabled:opacity-50 text-white font-semibold"
+                  className="px-4 py-2 rounded-lg bg-[#14130F] disabled:opacity-50 text-white font-semibold"
                 >
                   {saving ? "Saving..." : "Save customer"}
                 </button>
@@ -1099,7 +1099,7 @@ export default function AdminCustomers() {
             {/* Drawer Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0B1020] text-white font-bold text-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#14130F] text-white font-bold text-sm">
                   {[selectedCustomer.first_name?.[0], selectedCustomer.last_name?.[0]]
                     .filter(Boolean)
                     .join("") || "C"}
@@ -1197,7 +1197,7 @@ export default function AdminCustomers() {
                   <button
                     type="button"
                     onClick={handleOpenAddAddress}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B1020] hover:bg-[#1C2347] text-white text-xs font-semibold transition shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#14130F] hover:bg-[#1A1916] text-white text-xs font-semibold transition shadow-xs"
                   >
                     <span>⊕</span>
                     <span>Add address</span>
@@ -1331,7 +1331,7 @@ export default function AdminCustomers() {
                     <button
                       type="button"
                       onClick={handleOpenAddAddress}
-                      className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0B1020] text-white text-xs font-semibold hover:bg-slate-800 transition"
+                      className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#14130F] text-white text-xs font-semibold hover:bg-slate-800 transition"
                     >
                       <span>⊕</span>
                       <span>Add address</span>
@@ -1376,7 +1376,7 @@ export default function AdminCustomers() {
 
       {/* TOAST FEEDBACK NOTIFICATION */}
       {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-[#0B1020] px-4 py-3 text-sm text-white shadow-xl animate-in slide-in-from-bottom duration-200">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-[#14130F] px-4 py-3 text-sm text-white shadow-xl animate-in slide-in-from-bottom duration-200">
           <span>✓</span>
           <span>{toastMsg}</span>
         </div>

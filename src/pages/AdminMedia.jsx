@@ -96,13 +96,13 @@ export default function AdminMedia() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-white text-[#14130F]">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
-        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 py-6 sm:px-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F3F1EC] px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#14130F]">
               <PageIcon name="media" />
               Media
             </h1>
@@ -112,7 +112,7 @@ export default function AdminMedia() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search pictures"
-                className="rounded-lg border border-[#E4DEFB] bg-white px-3 py-2 text-sm"
+                className="rounded-lg border border-[#E7E4DC] bg-white px-3 py-2 text-sm"
               />
               <input
                 ref={fileInput}
@@ -126,7 +126,7 @@ export default function AdminMedia() {
                 type="button"
                 disabled={busy}
                 onClick={() => fileInput.current?.click()}
-                className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
               >
                 {busy ? "Working..." : "Upload"}
               </button>
@@ -153,13 +153,13 @@ export default function AdminMedia() {
               {assets.map((asset) => (
                 <li
                   key={asset.id}
-                  className="overflow-hidden rounded-xl border border-[#E4DEFB] bg-white"
+                  className="overflow-hidden rounded-xl border border-[#E7E4DC] bg-white"
                 >
                   <img
                     src={asset.url}
                     alt={asset.alt_text || asset.name}
                     loading="lazy"
-                    className="aspect-square w-full bg-[#F5F3FF] object-cover"
+                    className="aspect-square w-full bg-[#F3F1EC] object-cover"
                   />
                   <div className="p-3">
                     <p className="truncate text-sm font-medium" title={asset.name}>
@@ -204,7 +204,7 @@ export default function AdminMedia() {
                     value={editing.name}
                     maxLength={255}
                     onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-[#E4DEFB] px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#E7E4DC] px-3 py-2 text-sm"
                   />
                 </label>
                 <label className="block text-sm font-medium">
@@ -213,21 +213,21 @@ export default function AdminMedia() {
                     value={editing.alt_text || ""}
                     maxLength={255}
                     onChange={(e) => setEditing({ ...editing, alt_text: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-[#E4DEFB] px-3 py-2 text-sm"
+                    className="mt-1 w-full rounded-lg border border-[#E7E4DC] px-3 py-2 text-sm"
                   />
                 </label>
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setEditing(null)}
-                    className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium hover:bg-[#DDE3EA]"
+                    className="rounded-lg bg-[#F3F1EC] px-4 py-2 text-sm font-medium hover:bg-[#E7E4DC]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={busy || !editing.name.trim()}
-                    className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                    className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
                   >
                     Save
                   </button>

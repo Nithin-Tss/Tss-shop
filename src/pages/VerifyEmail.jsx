@@ -63,8 +63,8 @@ export default function VerifyEmail() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-12 flex items-center justify-center">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Verify email</h1>
+      <div className="w-full max-w-md rounded-xl bg-white ring-1 ring-ink/5 p-8 shadow-lg sm:p-10">
+        <h1 className="display text-5xl text-ink">Verify email</h1>
 
         {status === "checking" && (
           <p className="mt-3 text-sm leading-6 text-slate-600" role="status">

@@ -38,7 +38,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-12 flex items-center justify-center">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+      <div className="w-full max-w-md rounded-xl bg-white ring-1 ring-ink/5 p-8 shadow-lg sm:p-10">
         <Link
           to="/auth/signin"
           className="mb-8 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
@@ -46,11 +46,7 @@ export default function ForgotPassword() {
           <span aria-hidden="true">←</span> Back to Sign In
         </Link>
 
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-2xl">
-          ✉
-        </div>
-
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Forgot password?</h1>
+        <h1 className="display text-5xl text-ink">Forgot password?</h1>
 
         <p className="mt-3 text-sm leading-6 text-slate-600">
           No worries. Enter your registered email address and we'll help you reset your password.
@@ -100,7 +96,7 @@ export default function ForgotPassword() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-xl bg-[#0B1020] px-4 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-[#14130F] px-4 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Sending..." : "Send Reset Link"}
             </button>

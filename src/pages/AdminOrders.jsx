@@ -78,7 +78,7 @@ function renderPaymentStatusBadge(status) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
       <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
       Paid
     </span>
@@ -108,7 +108,7 @@ function renderFulfillmentStatusBadge(status) {
 
   if (s.includes("fulfilled") || s === "closed") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E9EEF5] text-charcoal-navy">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
         <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
         Fulfilled
       </span>
@@ -349,7 +349,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
+    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -370,7 +370,7 @@ export default function AdminOrders() {
               <button
                 type="button"
                 onClick={handleExport}
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition cursor-pointer"
+                className="flex items-center gap-2 rounded-lg bg-white border border-[#E7E4DC] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer"
               >
                 Export
               </button>
@@ -379,23 +379,23 @@ export default function AdminOrders() {
                 <button
                   type="button"
                   onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-lg bg-white border border-[#DDD6FE] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition cursor-pointer"
+                  className="flex items-center gap-2 rounded-lg bg-white border border-[#E7E4DC] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer"
                 >
                   More actions
                   <span className="text-xs">⌄</span>
                 </button>
                 {isMoreMenuOpen && (
-                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#DDD6FE] bg-white py-1.5 shadow-lg z-20">
+                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#E7E4DC] bg-white py-1.5 shadow-lg z-20">
                     <Link
                       to="/admin/online-store/orders/drafts"
-                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F0FF] transition"
+                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F1EC] transition"
                       onClick={() => setIsMoreMenuOpen(false)}
                     >
                       Draft orders
                     </Link>
                     <Link
                       to="/admin/online-store/orders/abandoned-checkouts"
-                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F0FF] transition"
+                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F1EC] transition"
                       onClick={() => setIsMoreMenuOpen(false)}
                     >
                       Abandoned checkouts
@@ -406,7 +406,7 @@ export default function AdminOrders() {
                         setIsMoreMenuOpen(false);
                         handleExport();
                       }}
-                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F0FF] transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
                     >
                       Export CSV
                     </button>
@@ -417,7 +417,7 @@ export default function AdminOrders() {
               {canCreate && (
                 <Link
                   to="/admin/online-store/orders/create"
-                  className="flex items-center gap-2 rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
+                  className="flex items-center gap-2 rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition"
                 >
                   Create order
                 </Link>
@@ -426,13 +426,13 @@ export default function AdminOrders() {
           </div>
 
           {/* ORDERS TABLE CARD */}
-          <section className="rounded-2xl border border-[#E4DEFB] bg-white shadow-sm overflow-hidden">
+          <section className="rounded-2xl border border-[#E7E4DC] bg-white shadow-sm overflow-hidden">
             {/* TABS & SEARCH / FILTER HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E4DEFB] px-4 py-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E4DC] px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-lg bg-[#EDE9FE] px-3.5 py-1.5 text-sm font-medium text-charcoal-navy"
+                  className="rounded-lg bg-[#DFEAE4] px-3.5 py-1.5 text-sm font-medium text-charcoal-navy"
                 >
                   All
                 </button>
@@ -440,7 +440,7 @@ export default function AdminOrders() {
 
               <div className="flex items-center gap-3">
                 {/* Search & Filter Input */}
-                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm">
+                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm">
                   <span className="text-slate-400">⌕</span>
                   <input
                     type="text"
@@ -464,7 +464,7 @@ export default function AdminOrders() {
                 <button
                   type="button"
                   title="Table columns"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#DDD6FE] bg-white text-slate-600 hover:bg-[#F3F0FF] transition"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-slate-600 hover:bg-[#F3F1EC] transition"
                 >
                   ▥
                 </button>
@@ -472,7 +472,7 @@ export default function AdminOrders() {
             </div>
 
             {/* SECONDARY HEADER */}
-            <div className="px-5 py-3 border-b border-[#E4DEFB] bg-white flex items-center justify-between">
+            <div className="px-5 py-3 border-b border-[#E7E4DC] bg-white flex items-center justify-between">
               <span className="text-sm font-semibold text-charcoal-navy">Orders</span>
               {selectedIds.size > 0 && (
                 <span className="text-xs font-medium text-slate-500">
@@ -485,7 +485,7 @@ export default function AdminOrders() {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm text-charcoal-navy">
                 <thead>
-                  <tr className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-medium text-slate-600 whitespace-nowrap select-none">
+                  <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-medium text-slate-600 whitespace-nowrap select-none">
                     <th className="py-3.5 pl-5 pr-3 w-10">
                       <input
                         type="checkbox"
@@ -524,7 +524,7 @@ export default function AdminOrders() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-[#E4DEFB]">
+                <tbody className="divide-y divide-[#E7E4DC]">
                   {loading ? (
                     // LOADING SKELETON ROWS
                     [...Array(6)].map((_, i) => (
@@ -582,7 +582,7 @@ export default function AdminOrders() {
                           <button
                             type="button"
                             onClick={() => fetchOrders()}
-                            className="px-4 py-1.5 rounded-lg bg-charcoal-navy text-white text-xs font-medium hover:bg-[#1C2347] transition shadow-xs cursor-pointer"
+                            className="px-4 py-1.5 rounded-lg bg-charcoal-navy text-white text-xs font-medium hover:bg-[#1A1916] transition shadow-xs cursor-pointer"
                           >
                             Retry
                           </button>
@@ -608,8 +608,8 @@ export default function AdminOrders() {
                       return (
                         <tr
                           key={order.id}
-                          className={`transition-colors whitespace-nowrap hover:bg-[#F9FAFC] ${
-                            isSelected ? "bg-[#F3F0FF]" : ""
+                          className={`transition-colors whitespace-nowrap hover:bg-[#FAF9F6] ${
+                            isSelected ? "bg-[#F3F1EC]" : ""
                           }`}
                         >
                           {/* Checkbox */}
@@ -753,7 +753,7 @@ export default function AdminOrders() {
           <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
             <div className="w-screen max-w-xl bg-white shadow-2xl flex flex-col">
               {/* Drawer Header */}
-              <div className="px-6 py-5 border-b border-[#E4DEFB] flex items-center justify-between bg-[#FAF8FF]">
+              <div className="px-6 py-5 border-b border-[#E7E4DC] flex items-center justify-between bg-[#FAF9F6]">
                 <div>
                   <div className="flex items-center gap-3">
                     <h2 className="text-lg font-bold text-charcoal-navy">
@@ -794,7 +794,7 @@ export default function AdminOrders() {
               {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
                 {/* Customer Section */}
-                <div className="rounded-xl border border-[#E4DEFB] p-4 bg-white">
+                <div className="rounded-xl border border-[#E7E4DC] p-4 bg-white">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
                     Customer Details
                   </h3>
@@ -812,7 +812,7 @@ export default function AdminOrders() {
                 </div>
 
                 {/* Items Ordered Section */}
-                <div className="rounded-xl border border-[#E4DEFB] p-4 bg-white">
+                <div className="rounded-xl border border-[#E7E4DC] p-4 bg-white">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
                     Items ({Array.isArray(selectedOrder.items) ? selectedOrder.items.length : 0})
                   </h3>
@@ -824,7 +824,7 @@ export default function AdminOrders() {
                           className="py-3 flex items-center justify-between gap-3"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-[#FAF8FF] border border-[#E4DEFB] flex items-center justify-center text-slate-500 shrink-0 text-sm">
+                            <div className="h-10 w-10 rounded-lg bg-[#FAF9F6] border border-[#E7E4DC] flex items-center justify-center text-slate-500 shrink-0 text-sm">
                               📦
                             </div>
                             <div>
@@ -857,7 +857,7 @@ export default function AdminOrders() {
                 </div>
 
                 {/* Payment & Totals Breakdown */}
-                <div className="rounded-xl border border-[#E4DEFB] p-4 bg-[#FAF8FF] space-y-2 text-sm">
+                <div className="rounded-xl border border-[#E7E4DC] p-4 bg-[#FAF9F6] space-y-2 text-sm">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
                     Payment Summary
                   </h3>
@@ -898,7 +898,7 @@ export default function AdminOrders() {
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold text-base text-slate-900 pt-2 border-t border-[#DDD6FE]">
+                  <div className="flex justify-between font-bold text-base text-slate-900 pt-2 border-t border-[#E7E4DC]">
                     <span>Total</span>
                     <span>
                       {formatOrderCurrency(selectedOrder.total, selectedOrder.currency_code)}
@@ -908,7 +908,7 @@ export default function AdminOrders() {
               </div>
 
               {/* Drawer Footer Actions */}
-              <div className="p-4 border-t border-[#E4DEFB] bg-[#FAF8FF] flex items-center justify-between">
+              <div className="p-4 border-t border-[#E7E4DC] bg-[#FAF9F6] flex items-center justify-between">
                 {selectedOrder.status === "open" ? (
                   <button
                     type="button"
@@ -929,7 +929,7 @@ export default function AdminOrders() {
                     setSelectedOrder(null);
                     if (routeOrderId) navigate("/admin/online-store/orders");
                   }}
-                  className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1C2347] transition cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] transition cursor-pointer"
                 >
                   Close
                 </button>

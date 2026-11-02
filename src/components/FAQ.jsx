@@ -32,52 +32,42 @@ export default function FAQ() {
   };
 
   return (
-    <section className="w-full bg-[#f8faff] px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        {/* Section Badge */}
-        <div className="mb-3 flex justify-center">
-          <span className="rounded-full bg-blue-100 px-4 py-1 text-sm font-semibold text-violet-600">
-            FAQ
-          </span>
-        </div>
-
-        {/* Heading */}
-        <h2 className="mb-10 text-center text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+    <section className="bg-white py-24 lg:py-32">
+      <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:px-10">
+        <h2 className="display text-5xl text-ink lg:col-span-4 lg:text-6xl">
           Questions, answered.
         </h2>
 
-        {/* FAQ List */}
-        <div className="mx-auto max-w-10xl border-t border-slate-200">
+        <div className="lg:col-span-7 lg:col-start-6">
           {faqItems.map((item, index) => {
             const isOpen = openIndex === index;
 
             return (
-              <div key={item.question} className="border-b border-slate-200">
+              <div key={item.question} className="border-t border-slate-200 last:border-b">
                 <button
                   type="button"
                   onClick={() => handleToggle(index)}
-                  className="flex w-full items-center justify-between gap-6 py-5 text-left transition hover:bg-white"
+                  className="flex w-full items-center justify-between gap-6 py-6 text-left"
                   aria-expanded={isOpen}
                   aria-controls={`faq-answer-${index}`}
                 >
-                  <span className="text-base font-medium text-slate-800 sm:text-lg">
-                    {item.question}
-                  </span>
-
-                  <span
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xl font-bold transition ${
-                      isOpen ? "bg-violet-600 text-white" : "text-violet-600"
-                    }`}
+                  <span className="text-lg text-ink">{item.question}</span>
+                  <svg
+                    viewBox="0 0 16 16"
+                    className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
                     aria-hidden="true"
                   >
-                    {isOpen ? "−" : "+"}
-                  </span>
+                    <path d="M8 2v12M2 8h12" strokeLinecap="round" />
+                  </svg>
                 </button>
 
                 {isOpen && (
                   <div
                     id={`faq-answer-${index}`}
-                    className="pb-5 pr-12 text-sm leading-7 text-slate-500 sm:text-base"
+                    className="max-w-xl pb-6 leading-relaxed text-slate-600"
                   >
                     {item.answer}
                   </div>

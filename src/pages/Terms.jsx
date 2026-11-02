@@ -18,9 +18,9 @@ export default function Terms() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
       {/* Hero */}
-      <section className="bg-[#111827] px-6 py-16 text-white">
+      <section className="bg-[#1A1916] px-6 py-16 text-white">
         <div className="mx-auto max-w-6xl">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7C3AED]">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#265C48]">
             Legal
           </p>
 
@@ -42,55 +42,55 @@ export default function Terms() {
             <h2 className="mb-4 text-lg font-bold text-gray-900">Contents</h2>
 
             <nav className="space-y-2 text-sm">
-              <a href="#acceptance" className="block hover:text-[#7C3AED]">
+              <a href="#acceptance" className="block hover:text-[#265C48]">
                 1. Acceptance of Terms
               </a>
 
-              <a href="#account" className="block hover:text-[#7C3AED]">
+              <a href="#account" className="block hover:text-[#265C48]">
                 2. Account Registration
               </a>
 
-              <a href="#products" className="block hover:text-[#7C3AED]">
+              <a href="#products" className="block hover:text-[#265C48]">
                 3. Products and Services
               </a>
 
-              <a href="#orders" className="block hover:text-[#7C3AED]">
+              <a href="#orders" className="block hover:text-[#265C48]">
                 4. Orders and Payments
               </a>
 
-              <a href="#shipping" className="block hover:text-[#7C3AED]">
+              <a href="#shipping" className="block hover:text-[#265C48]">
                 5. Shipping and Delivery
               </a>
 
-              <a href="#returns" className="block hover:text-[#7C3AED]">
+              <a href="#returns" className="block hover:text-[#265C48]">
                 6. Returns and Refunds
               </a>
 
-              <a href="#acceptable-use" className="block hover:text-[#7C3AED]">
+              <a href="#acceptable-use" className="block hover:text-[#265C48]">
                 7. Acceptable Use
               </a>
 
-              <a href="#intellectual-property" className="block hover:text-[#7C3AED]">
+              <a href="#intellectual-property" className="block hover:text-[#265C48]">
                 8. Intellectual Property
               </a>
 
-              <a href="#liability" className="block hover:text-[#7C3AED]">
+              <a href="#liability" className="block hover:text-[#265C48]">
                 9. Limitation of Liability
               </a>
 
-              <a href="#termination" className="block hover:text-[#7C3AED]">
+              <a href="#termination" className="block hover:text-[#265C48]">
                 10. Termination
               </a>
 
-              <a href="#changes" className="block hover:text-[#7C3AED]">
+              <a href="#changes" className="block hover:text-[#265C48]">
                 11. Changes to Terms
               </a>
 
-              <a href="#governing-law" className="block hover:text-[#7C3AED]">
+              <a href="#governing-law" className="block hover:text-[#265C48]">
                 12. Governing Law
               </a>
 
-              <a href="#contact" className="block hover:text-[#7C3AED]">
+              <a href="#contact" className="block hover:text-[#265C48]">
                 13. Contact
               </a>
             </nav>
@@ -243,12 +243,12 @@ export default function Terms() {
                       onChange={(event) => setEmail(event.target.value)}
                       placeholder="Enter your email"
                       required
-                      className="min-w-0 flex-1 rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20"
+                      className="min-w-0 flex-1 rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#265C48] focus:ring-2 focus:ring-[#265C48]/20"
                     />
 
                     <button
                       type="submit"
-                      className="rounded-lg bg-[#7C3AED] px-6 py-3 font-semibold text-white transition hover:bg-[#c8731e]"
+                      className="rounded-lg bg-[#265C48] px-6 py-3 font-semibold text-white transition hover:bg-[#c8731e]"
                     >
                       Send
                     </button>

@@ -463,7 +463,7 @@ export default function AdminSettings() {
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-5 py-5">
-            <h2 className="text-base font-semibold text-[#0B1020]">Business details</h2>
+            <h2 className="text-base font-semibold text-[#14130F]">Business details</h2>
 
             <p className="mt-1 text-sm text-slate-500">
               Business entity used for financial products, markets, apps, and taxes in this store.
@@ -501,7 +501,7 @@ export default function AdminSettings() {
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-5 py-5">
-            <h2 className="text-base font-semibold text-[#0B1020]">Store contact details</h2>
+            <h2 className="text-base font-semibold text-[#14130F]">Store contact details</h2>
 
             <p className="mt-1 text-sm text-slate-500">
               Contact information associated with your store.
@@ -604,7 +604,7 @@ export default function AdminSettings() {
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-5 py-5">
-            <h2 className="text-base font-semibold text-[#0B1020]">Store defaults</h2>
+            <h2 className="text-base font-semibold text-[#14130F]">Store defaults</h2>
 
             <p className="mt-1 text-sm text-slate-500">Default settings used by your store.</p>
           </div>
@@ -720,7 +720,7 @@ export default function AdminSettings() {
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="p-5">
-            <h2 className="text-base font-semibold text-[#0B1020]">Order ID format</h2>
+            <h2 className="text-base font-semibold text-[#14130F]">Order ID format</h2>
 
             <p className="mt-1 text-sm text-slate-500">
               Shown on the order page, customer pages, and customer order notifications to identify
@@ -771,7 +771,7 @@ export default function AdminSettings() {
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="p-5">
-            <h2 className="text-base font-semibold text-[#0B1020]">Order processing</h2>
+            <h2 className="text-base font-semibold text-[#14130F]">Order processing</h2>
 
             <p className="mt-1 text-sm text-slate-500">
               Choose how orders are processed after payment.
@@ -869,7 +869,7 @@ export default function AdminSettings() {
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="p-5">
-            <h2 className="text-base font-semibold text-[#0B1020]">Store assets</h2>
+            <h2 className="text-base font-semibold text-[#14130F]">Store assets</h2>
 
             <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
               {/* METAFIELDS */}
@@ -925,7 +925,7 @@ export default function AdminSettings() {
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="p-5">
-            <h2 className="text-base font-semibold text-[#0B1020]">Resources</h2>
+            <h2 className="text-base font-semibold text-[#14130F]">Resources</h2>
 
             <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
               {/* CHANGE LOG */}
@@ -1025,7 +1025,7 @@ export default function AdminSettings() {
             type="button"
             onClick={handleSave}
             disabled={saving || loading}
-            className="rounded-lg bg-[#0B1020] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1C2347] disabled:opacity-60"
+            className="rounded-lg bg-[#14130F] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1A1916] disabled:opacity-60"
           >
             {saveLabel}
           </button>
@@ -1049,7 +1049,7 @@ export default function AdminSettings() {
               </span>
             </div>
 
-            <h2 className="mt-5 text-xl font-semibold text-[#0B1020]">{selectedSection}</h2>
+            <h2 className="mt-5 text-xl font-semibold text-[#14130F]">{selectedSection}</h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
               The {selectedSection} settings page is not implemented yet. General settings are
@@ -1059,7 +1059,7 @@ export default function AdminSettings() {
             <button
               type="button"
               onClick={() => setSelectedSection("General")}
-              className="mt-5 rounded-lg bg-[#0B1020] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1C2347]"
+              className="mt-5 rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916]"
             >
               Back to General
             </button>
@@ -1074,7 +1074,7 @@ export default function AdminSettings() {
      ========================================================= */
 
   return (
-    <div className="min-h-screen bg-[#f1f1f1] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F]">
       <AdminHeader />
 
       {/* =====================================================
@@ -1133,7 +1133,7 @@ export default function AdminSettings() {
                     onClick={() => handleMenuClick(item.label)}
                     className={`mb-1 flex h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm transition ${
                       selectedSection === item.label
-                        ? "bg-[#f0f0f0] font-semibold text-[#0B1020]"
+                        ? "bg-[#f0f0f0] font-semibold text-[#14130F]"
                         : "text-slate-700 hover:bg-slate-50"
                     } ${item.nested ? "pl-10" : ""}`}
                   >
@@ -1168,7 +1168,7 @@ export default function AdminSettings() {
                     type="button"
                     onClick={handleSave}
                     disabled={saving || loading}
-                    className="rounded-lg bg-[#0B1020] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-60"
+                    className="rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60"
                   >
                     {saveLabel}
                   </button>

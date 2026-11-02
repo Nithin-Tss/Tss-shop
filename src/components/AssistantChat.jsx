@@ -32,7 +32,7 @@ const illustration = (
   <svg
     viewBox="3 2 19 19"
     fill="#C4B5FD"
-    stroke="#7C3AED"
+    stroke="#265C48"
     strokeWidth={1.4}
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -45,15 +45,15 @@ const illustration = (
 );
 
 const avatar =
-  "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F3F4F6] text-[#4B5563]";
+  "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F3F1EC] text-[#5A5750]";
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111827] focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916] focus-visible:ring-offset-2";
 
 // Example questions: fully rounded pills with a soft lavender border
-const chip = `inline-flex min-h-9 max-w-full items-center rounded-full border border-[#DDD6FE] bg-white px-4 py-2 text-center text-[13px] leading-5 text-[#1F2433] transition-colors hover:border-[#C4B5FD] hover:bg-[#FAF8FF] disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
+const chip = `inline-flex min-h-9 max-w-full items-center rounded-full border border-[#E7E4DC] bg-white px-4 py-2 text-center text-[13px] leading-5 text-[#1F2433] transition-colors hover:border-[#C4B5FD] hover:bg-[#FAF9F6] disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 
 // Action buttons ("Open ... in Code editor"): compact, solid and dark, so they read as the thing to click
-const actionButton = `inline-flex h-8 items-center gap-1.5 rounded-md bg-[#111827] px-3 text-[12px] font-medium text-white transition-colors hover:bg-[#2A3042] active:bg-black ${focusRing}`;
+const actionButton = `inline-flex h-8 items-center gap-1.5 rounded-md bg-[#1A1916] px-3 text-[12px] font-medium text-white transition-colors hover:bg-[#2A3042] active:bg-black ${focusRing}`;
 
 const arrow = (
   <svg
@@ -72,7 +72,7 @@ const arrow = (
 
 // The round button inside the input bar: Send (up arrow) and, while an answer is pending, Stop (filled square).
 // Light violet while the box is empty, a stronger violet when there is something to send.
-const roundButton = `flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6D28D9] text-white transition-colors hover:bg-[#5B21B6] disabled:cursor-not-allowed disabled:bg-[#DDD6FE] disabled:hover:bg-[#DDD6FE] ${focusRing}`;
+const roundButton = `flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1E4A3A] text-white transition-colors hover:bg-[#5B21B6] disabled:cursor-not-allowed disabled:bg-[#E7E4DC] disabled:hover:bg-[#E7E4DC] ${focusRing}`;
 
 const upArrow = (
   <svg
@@ -98,13 +98,13 @@ const stopSquare = (
 function Bubble({ message, onAction }) {
   if (message.role === "note") {
     // "Stopped.": a muted line, not a bubble
-    return <p className="text-center text-[12px] leading-4 text-[#9CA3AF]">{message.text}</p>;
+    return <p className="text-center text-[12px] leading-4 text-[#A29E92]">{message.text}</p>;
   }
 
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <p className="max-w-[85%] whitespace-pre-wrap rounded-xl rounded-br-sm bg-[#111827] px-3.5 py-2 text-[13px] leading-5 text-white">
+        <p className="max-w-[85%] whitespace-pre-wrap rounded-xl rounded-br-sm bg-[#1A1916] px-3.5 py-2 text-[13px] leading-5 text-white">
           {message.text}
         </p>
       </div>
@@ -148,7 +148,7 @@ function Bubble({ message, onAction }) {
             {tools.map((name) => (
               <span
                 key={name}
-                className="rounded bg-[#F1F3F5] px-1.5 py-0.5 text-[11px] leading-4 text-[#6B7280]"
+                className="rounded bg-[#F1F3F5] px-1.5 py-0.5 text-[11px] leading-4 text-[#78746A]"
               >
                 Used {name}
               </span>
@@ -164,19 +164,19 @@ function Thinking({ seconds }) {
   return (
     <div className="flex items-start gap-2" role="status">
       <span className={avatar}>{sparkle}</span>
-      <div className="pt-1 text-[12px] leading-5 text-[#6B7280]">
+      <div className="pt-1 text-[12px] leading-5 text-[#78746A]">
         <span className="mr-1.5 inline-flex items-center gap-[3px] align-middle" aria-hidden="true">
           {[0, 160, 320].map((delay) => (
             <span
               key={delay}
               style={{ animationDelay: `${delay}ms` }}
-              className="h-1 w-1 animate-pulse rounded-full bg-[#9CA3AF]"
+              className="h-1 w-1 animate-pulse rounded-full bg-[#A29E92]"
             />
           ))}
         </span>
         Thinking... {seconds}s
         {seconds >= 15 && (
-          <span className="mt-0.5 block text-xs text-[#9CA3AF]">
+          <span className="mt-0.5 block text-xs text-[#A29E92]">
             The model runs on this computer, so it can take a minute or two.
           </span>
         )}
@@ -246,7 +246,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
         {messages.length === 0 && !pending && (
           <div className="flex h-full flex-col items-center justify-center text-center">
             {illustration}
-            <h2 className="mt-4 text-[21px] font-semibold leading-7 text-[#111827]">
+            <h2 className="mt-4 text-[21px] font-semibold leading-7 text-[#1A1916]">
               Where should we begin?
             </h2>
             {/* Only here, in the empty chat: stacked under the greeting, never next to the input */}
@@ -276,7 +276,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
             event.preventDefault();
             send(input);
           }}
-          className="flex items-center gap-2 rounded-full border border-[#DDD6FE] bg-white py-1 pl-4 pr-1 transition-colors focus-within:border-[#A78BFA]"
+          className="flex items-center gap-2 rounded-full border border-[#E7E4DC] bg-white py-1 pl-4 pr-1 transition-colors focus-within:border-[#A78BFA]"
         >
           <input
             ref={inputRef}
@@ -287,7 +287,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask a question about your store"
             aria-label="Your question"
-            className="h-9 min-w-0 flex-1 bg-transparent text-[13px] text-[#111827] outline-none placeholder:text-[#9CA3AF] disabled:cursor-not-allowed disabled:text-[#9CA3AF]"
+            className="h-9 min-w-0 flex-1 bg-transparent text-[13px] text-[#1A1916] outline-none placeholder:text-[#A29E92] disabled:cursor-not-allowed disabled:text-[#A29E92]"
           />
           {pending ? (
             <button
@@ -311,7 +311,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
             </button>
           )}
         </form>
-        <p className="mt-1.5 px-4 text-[11px] leading-4 text-[#9CA3AF]">{INPUT_HINT}</p>
+        <p className="mt-1.5 px-4 text-[11px] leading-4 text-[#A29E92]">{INPUT_HINT}</p>
       </div>
     </section>
   );

@@ -179,7 +179,7 @@ export default function OrderHistory() {
 
             <Link
               to="/account/orders"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#0B1020] text-white shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#14130F] text-white shadow-xs"
             >
               <span>📦</span>
               <span>Order History</span>
@@ -211,7 +211,7 @@ export default function OrderHistory() {
             </p>
             <Link
               to="/"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#0B1020] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#1C2347] shadow-xs cursor-pointer"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#14130F] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#1A1916] shadow-xs cursor-pointer"
             >
               <span>Start shopping</span>
               <span>→</span>

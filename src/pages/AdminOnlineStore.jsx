@@ -126,7 +126,7 @@ function LivePreview({ theme, swatches, ratio = 0.62, className = "" }) {
 }
 
 const smallButton =
-  "inline-flex h-8 items-center rounded-lg border border-[#DDD6FE] bg-white px-3 text-[13px] font-medium text-[#0B1020] transition hover:border-[#0B1020] disabled:opacity-50";
+  "inline-flex h-8 items-center rounded-lg border border-[#E7E4DC] bg-white px-3 text-[13px] font-medium text-[#14130F] transition hover:border-[#14130F] disabled:opacity-50";
 // The theme as a working store in a new tab: real pages, cart and links (a draft is shown to you only)
 function OpenThemeLink({ theme, className }) {
   return (
@@ -141,7 +141,7 @@ function OpenThemeLink({ theme, className }) {
 }
 
 const primaryButton =
-  "inline-flex h-8 items-center rounded-lg bg-[#0B1020] px-3 text-[13px] font-semibold text-white transition hover:bg-[#1C2347] disabled:opacity-50";
+  "inline-flex h-8 items-center rounded-lg bg-[#14130F] px-3 text-[13px] font-semibold text-white transition hover:bg-[#1A1916] disabled:opacity-50";
 
 function timeAgo(value) {
   const ms = Date.now() - new Date(value).getTime();
@@ -176,12 +176,12 @@ function ThemeMenu({ theme, full, dark, onCode, onRename, onCopy, onDelete }) {
       <summary
         aria-label={`More actions for ${theme.name}`}
         className={`flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-lg leading-none [&::-webkit-details-marker]:hidden ${
-          dark ? "text-white hover:bg-white/15" : "text-[#0B1020] hover:bg-[#F3F5F8]"
+          dark ? "text-white hover:bg-white/15" : "text-[#14130F] hover:bg-[#F3F5F8]"
         }`}
       >
         ⋯
       </summary>
-      <div className="absolute bottom-full right-0 z-20 mb-1 w-36 rounded-lg border border-[#E5E7EB] bg-white py-1 text-[#0B1020] shadow-lg sm:bottom-auto sm:top-full sm:mb-0 sm:mt-1">
+      <div className="absolute bottom-full right-0 z-20 mb-1 w-36 rounded-lg border border-[#E7E4DC] bg-white py-1 text-[#14130F] shadow-lg sm:bottom-auto sm:top-full sm:mb-0 sm:mt-1">
         <button type="button" className={item} onClick={pick(onCode)}>
           Edit code
         </button>
@@ -218,8 +218,8 @@ function NameDialog({ title, confirmLabel, initial, onCancel, onConfirm, busy, e
           onConfirm(name);
         }}
       >
-        <h2 className="text-lg font-semibold text-[#0B1020]">{title}</h2>
-        <label className="mt-4 block text-sm font-medium text-[#4C4F7A]" htmlFor="theme-name">
+        <h2 className="text-lg font-semibold text-[#14130F]">{title}</h2>
+        <label className="mt-4 block text-sm font-medium text-[#5A5750]" htmlFor="theme-name">
           Theme name
         </label>
         <input
@@ -228,7 +228,7 @@ function NameDialog({ title, confirmLabel, initial, onCancel, onConfirm, busy, e
           maxLength={60}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1.5 h-10 w-full rounded-lg border border-[#DDD6FE] px-3 text-sm outline-none focus:border-[#0B1020]"
+          className="mt-1.5 h-10 w-full rounded-lg border border-[#E7E4DC] px-3 text-sm outline-none focus:border-[#14130F]"
         />
         {error && <p className="mt-2 text-sm text-[#B42318]">{error}</p>}
         <div className="mt-5 flex justify-end gap-2">
@@ -392,7 +392,7 @@ export default function OnlineStorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-white text-[#14130F]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
@@ -404,7 +404,7 @@ export default function OnlineStorePage() {
               <button
                 type="button"
                 onClick={goBack}
-                className="-ml-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[#4C4F7A] transition hover:bg-white hover:text-[#0B1020]"
+                className="-ml-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[#5A5750] transition hover:bg-white hover:text-[#14130F]"
               >
                 <svg {...lineIcon} className="h-4 w-4">
                   <path d="M19 12H5M11 6l-6 6 6 6" />
@@ -412,7 +412,7 @@ export default function OnlineStorePage() {
                 Back
               </button>
               {live && (
-                <span className="inline-flex items-center gap-1.5 text-[13px] text-[#4C4F7A]">
+                <span className="inline-flex items-center gap-1.5 text-[13px] text-[#5A5750]">
                   <span className="h-2 w-2 rounded-full bg-[#12B76A]" />
                   Public
                 </span>
@@ -442,7 +442,7 @@ export default function OnlineStorePage() {
             )}
 
             {library === null && (
-              <p className="py-16 text-center text-sm text-[#4C4F7A]">Loading themes…</p>
+              <p className="py-16 text-center text-sm text-[#5A5750]">Loading themes…</p>
             )}
 
             {/* LIVE THEME */}
@@ -471,7 +471,7 @@ export default function OnlineStorePage() {
                         <>
                           <button
                             type="button"
-                            className="inline-flex h-8 items-center rounded-lg bg-white px-3 text-[13px] font-semibold text-[#0B1020] transition hover:bg-[#EDE9FE]"
+                            className="inline-flex h-8 items-center rounded-lg bg-white px-3 text-[13px] font-semibold text-[#14130F] transition hover:bg-[#DFEAE4]"
                             onClick={() => open(live, "/admin/online-store/customize")}
                           >
                             Edit theme
@@ -520,9 +520,9 @@ export default function OnlineStorePage() {
                     </button>
                   )}
                 </div>
-                <div className="mt-2 rounded-2xl border border-[#E5E7EB] bg-white">
+                <div className="mt-2 rounded-2xl border border-[#E7E4DC] bg-white">
                   {drafts.length === 0 ? (
-                    <p className="px-4 py-6 text-center text-sm text-[#4C4F7A]">
+                    <p className="px-4 py-6 text-center text-sm text-[#5A5750]">
                       {live
                         ? "No draft themes yet. Add one below to work on it without touching your live store."
                         : "You don’t have a theme yet. Pick one below to go live."}
@@ -531,7 +531,7 @@ export default function OnlineStorePage() {
                     <ul className="divide-y divide-[#EEF0F3]">
                       {drafts.map((theme) => (
                         <li key={theme.id} className="flex items-center gap-3 p-3">
-                          <div className="w-[96px] shrink-0 overflow-hidden rounded-lg border border-[#E5E7EB]">
+                          <div className="w-[96px] shrink-0 overflow-hidden rounded-lg border border-[#E7E4DC]">
                             <LivePreview
                               theme={theme}
                               swatches={presetOf(theme.preset)?.swatches || OWN_SWATCHES}
@@ -594,7 +594,7 @@ export default function OnlineStorePage() {
                 <h2 id="theme-library" className="text-sm font-semibold">
                   Discover themes
                 </h2>
-                <p className="mt-1 text-[13px] text-[#4C4F7A]">
+                <p className="mt-1 text-[13px] text-[#5A5750]">
                   {themes.length === 0
                     ? "Your pick goes live right away."
                     : "Adding a theme saves it as a draft. Your live theme isn’t touched until you publish."}
@@ -612,8 +612,8 @@ export default function OnlineStorePage() {
                           onClick={() => setSelectedCategory(category)}
                           className={`h-8 whitespace-nowrap rounded-full px-3.5 text-[13px] font-medium transition ${
                             active
-                              ? "bg-[#0B1020] text-white"
-                              : "border border-[#E5E7EB] bg-white text-[#4C4F7A] hover:border-[#C9D1DD] hover:text-[#0B1020]"
+                              ? "bg-[#14130F] text-white"
+                              : "border border-[#E7E4DC] bg-white text-[#5A5750] hover:border-[#D4D0C5] hover:text-[#14130F]"
                           }`}
                         >
                           {category}
@@ -627,7 +627,7 @@ export default function OnlineStorePage() {
                   {shown.map((preset) => (
                     <li
                       key={preset.slug}
-                      className="flex flex-col rounded-xl border border-[#E5E7EB] bg-white p-2"
+                      className="flex flex-col rounded-xl border border-[#E7E4DC] bg-white p-2"
                     >
                       <Preview swatches={preset.swatches} />
                       <div className="mt-2 flex items-center justify-between gap-2 px-1 pb-1">
@@ -650,7 +650,7 @@ export default function OnlineStorePage() {
                   ))}
                 </ul>
                 {full && (
-                  <p className="mt-3 text-sm text-[#4C4F7A]">
+                  <p className="mt-3 text-sm text-[#5A5750]">
                     You have {library.max} themes. Delete a draft to add another.
                   </p>
                 )}

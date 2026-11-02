@@ -182,10 +182,10 @@ export default function SignUpPage() {
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
       {/* Reduced width from max-w-2xl to max-w-lg */}
       <div className="mx-auto w-full max-w-lg">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-xl bg-white ring-1 ring-ink/5 p-6 shadow-lg sm:p-8">
           {/* Heading */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Create Your Account</h1>
+            <h1 className="display text-5xl text-ink">Create your account</h1>
 
             <p className="mt-2 text-sm text-slate-500">
               Create an account to start building your online store.

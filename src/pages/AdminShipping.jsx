@@ -10,7 +10,7 @@ const GATEWAYS = "/api/v1/delivery/gateways/";
 const RATES = "/api/v1/delivery/rates/";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#0B1020]";
+  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]";
 
 const bandLabel = (rate, unit) => {
   const min = Number(rate.min_weight);
@@ -159,15 +159,15 @@ export default function ShippingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-[#0B1020]">
+    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1">
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#F5F3FF] px-4 py-5 sm:px-6">
-            <div className="flex items-center gap-2.5 text-[#0B1020]">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#F3F1EC] px-4 py-5 sm:px-6">
+            <div className="flex items-center gap-2.5 text-[#14130F]">
               <PageIcon name="shipping" />
               <h1 className="text-xl font-semibold">Shipping</h1>
             </div>
@@ -253,7 +253,7 @@ export default function ShippingPage() {
                     <button
                       type="submit"
                       disabled={savingPricing}
-                      className="rounded-lg bg-[#0B1020] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                      className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
                     >
                       {savingPricing ? "Saving…" : "Save"}
                     </button>
@@ -360,7 +360,7 @@ export default function ShippingPage() {
                   <button
                     type="submit"
                     disabled={savingRate || rateForm.price === ""}
-                    className="rounded-lg bg-[#0B1020] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                    className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
                   >
                     {savingRate ? "Adding…" : "Add rate"}
                   </button>
@@ -442,12 +442,12 @@ export default function ShippingPage() {
                     placeholder="Delivery partner name"
                     aria-label="Delivery partner name"
                     maxLength={100}
-                    className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#0B1020]"
+                    className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]"
                   />
                   <button
                     type="submit"
                     disabled={saving || !name.trim()}
-                    className="rounded-lg bg-[#0B1020] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                    className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
                   >
                     {saving ? "Adding…" : "Add partner"}
                   </button>

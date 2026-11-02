@@ -25,7 +25,7 @@ export default function ContentPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="min-w-0 flex-1 bg-[#F5F3FF] px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
+        <main className="min-w-0 flex-1 bg-[#F3F1EC] px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
           {/* TITLE + ACTIONS */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
@@ -36,14 +36,14 @@ export default function ContentPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#DDE3EA] transition"
+                className="rounded-lg bg-[#F3F1EC] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#E7E4DC] transition"
               >
                 Manage
               </button>
 
               <button
                 type="button"
-                className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
+                className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition"
               >
                 Add definition
               </button>
@@ -51,21 +51,21 @@ export default function ContentPage() {
           </div>
 
           {/* DEFINITIONS CARD */}
-          <section className="mt-5 overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
+          <section className="mt-5 overflow-hidden rounded-2xl border border-[#E7E4DC] bg-white shadow-sm">
             {/* Toolbar */}
-            <div className="flex items-center gap-3 border-b border-[#E4DEFB] px-4 py-3">
+            <div className="flex items-center gap-3 border-b border-[#E7E4DC] px-4 py-3">
               <button
                 type="button"
-                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-charcoal-navy hover:bg-[#F3F0FF] transition"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition"
               >
                 Custom
-                <svg {...lineIcon} className="h-4 w-4 text-[#4C4F7A]">
+                <svg {...lineIcon} className="h-4 w-4 text-[#5A5750]">
                   <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
                 </svg>
               </button>
 
               <div className="flex flex-1 items-center gap-2">
-                <svg {...lineIcon} className="h-4 w-4 shrink-0 text-[#4C4F7A]">
+                <svg {...lineIcon} className="h-4 w-4 shrink-0 text-[#5A5750]">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-4-4" />
                 </svg>
@@ -77,11 +77,11 @@ export default function ContentPage() {
                 />
               </div>
 
-              <div className="flex shrink-0 items-center gap-1 border-l border-[#E4DEFB] pl-3">
+              <div className="flex shrink-0 items-center gap-1 border-l border-[#E7E4DC] pl-3">
                 <button
                   type="button"
                   aria-label="Columns"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy transition"
                 >
                   <svg {...lineIcon} className="h-4.5 w-4.5">
                     <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -92,7 +92,7 @@ export default function ContentPage() {
                 <button
                   type="button"
                   aria-label="View"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] hover:text-charcoal-navy transition"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#F3F1EC] hover:text-charcoal-navy transition"
                 >
                   <svg {...lineIcon} className="h-4.5 w-4.5">
                     <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
@@ -106,7 +106,7 @@ export default function ContentPage() {
             <div className="px-6 py-12 text-center">
               <h2 className="text-xl font-semibold text-charcoal-navy">No definitions found</h2>
 
-              <p className="mt-3 text-sm text-[#4C4F7A]">Try changing the filters or search term</p>
+              <p className="mt-3 text-sm text-[#5A5750]">Try changing the filters or search term</p>
             </div>
           </section>
 
@@ -139,8 +139,8 @@ const EMPTY_POST = {
 };
 
 const fieldClass =
-  "w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-2 text-sm text-[#0B1020] outline-none focus:border-[#0B1020]";
-const fieldLabel = "mb-1 block text-[13px] font-medium text-[#4A5160]";
+  "w-full rounded-lg border border-[#E7E4DC] bg-white px-3 py-2 text-sm text-[#14130F] outline-none focus:border-[#14130F]";
+const fieldLabel = "mb-1 block text-[13px] font-medium text-[#5A5750]";
 
 const postDate = (value) => (value ? new Date(value).toLocaleDateString() : "");
 
@@ -228,7 +228,7 @@ export function BlogPostsPage() {
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
-        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 sm:px-6 py-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F3F1EC] px-4 sm:px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
               <PageIcon name="blog" />
@@ -239,7 +239,7 @@ export function BlogPostsPage() {
                 <button
                   type="button"
                   onClick={() => setEditing(null)}
-                  className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium hover:bg-[#DDE3EA]"
+                  className="rounded-lg bg-[#F3F1EC] px-4 py-2 text-sm font-medium hover:bg-[#E7E4DC]"
                 >
                   Back to posts
                 </button>
@@ -247,7 +247,7 @@ export function BlogPostsPage() {
                 <button
                   type="button"
                   onClick={() => open({})}
-                  className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
+                  className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916]"
                 >
                   Add blog post
                 </button>
@@ -263,22 +263,22 @@ export function BlogPostsPage() {
           )}
 
           {!editing && (
-            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E7E4DC] bg-white shadow-sm">
               {posts === null ? (
-                <p className="px-6 py-10 text-center text-sm text-[#4C4F7A]">
+                <p className="px-6 py-10 text-center text-sm text-[#5A5750]">
                   {error ? "" : "Loading..."}
                 </p>
               ) : posts.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <h2 className="text-xl font-semibold">No blog posts yet</h2>
-                  <p className="mt-3 text-sm text-[#4C4F7A]">
+                  <p className="mt-3 text-sm text-[#5A5750]">
                     Published posts appear on your store's blog.
                   </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
-                    <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
+                    <thead className="border-b border-[#E7E4DC] text-[13px] text-[#5A5750]">
                       <tr>
                         <th className="px-4 py-3 font-medium">Title</th>
                         <th className="px-4 py-3 font-medium">Status</th>
@@ -291,20 +291,20 @@ export function BlogPostsPage() {
                         <tr
                           key={post.id}
                           onClick={() => open(post)}
-                          className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
+                          className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F3F1EC]"
                         >
                           <td className="px-4 py-3 font-medium">{post.title}</td>
                           <td className="px-4 py-3">
                             <span
-                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.status === "published" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${post.status === "published" ? "bg-green-100 text-green-800" : "bg-[#F3F1EC] text-[#5A5750]"}`}
                             >
                               {post.status === "published" ? "Published" : "Draft"}
                             </span>
                           </td>
-                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                          <td className="hidden px-4 py-3 text-[#5A5750] sm:table-cell">
                             {post.author}
                           </td>
-                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                          <td className="hidden px-4 py-3 text-[#5A5750] sm:table-cell">
                             {postDate(post.published_at)}
                           </td>
                         </tr>
@@ -318,7 +318,7 @@ export function BlogPostsPage() {
 
           {editing && (
             <form onSubmit={save} className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-              <section className="grid gap-4 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+              <section className="grid gap-4 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                 <label>
                   <span className={fieldLabel}>Title</span>
                   <input
@@ -358,14 +358,14 @@ export function BlogPostsPage() {
                     placeholder="Made from the title when empty"
                     maxLength={255}
                   />
-                  <span className="mt-1 block text-xs text-[#4C4F7A]">
+                  <span className="mt-1 block text-xs text-[#5A5750]">
                     Address on your store: /blog/{form.handle || "…"}
                   </span>
                 </label>
               </section>
 
               <aside className="grid content-start gap-4">
-                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Visibility</span>
                     <select
@@ -380,7 +380,7 @@ export function BlogPostsPage() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                    className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
                   >
                     {busy ? "Saving..." : "Save"}
                   </button>
@@ -389,7 +389,7 @@ export function BlogPostsPage() {
                       href={editing.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-center text-sm font-medium text-[#3B3F8F] hover:underline"
+                      className="text-center text-sm font-medium text-[#265C48] hover:underline"
                     >
                       View on store
                     </a>
@@ -406,7 +406,7 @@ export function BlogPostsPage() {
                   )}
                 </section>
 
-                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                   <span className={fieldLabel}>Featured image</span>
                   {form.cover_image && (
                     <img
@@ -430,7 +430,7 @@ export function BlogPostsPage() {
                   />
                 </section>
 
-                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Author</span>
                     <input

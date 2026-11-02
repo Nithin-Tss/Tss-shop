@@ -10,7 +10,7 @@ export default function OverviewPage() {
   const show = (value) => (loading || !totals ? "—" : value);
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF]">
+    <div className="min-h-screen bg-[#F3F1EC]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
@@ -20,7 +20,7 @@ export default function OverviewPage() {
           {/* Header */}
           <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-5 sm:px-6">
             <div>
-              <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#0B1020]">
+              <h1 className="flex items-center gap-2.5 text-xl font-semibold text-[#14130F]">
                 <PageIcon name="overview" />
                 Overview
               </h1>
@@ -30,7 +30,7 @@ export default function OverviewPage() {
 
             <Link
               to="/admin/online-store/reports"
-              className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white"
             >
               View reports
             </Link>
@@ -59,7 +59,7 @@ export default function OverviewPage() {
             <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
               {/* Sales Overview */}
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 className="font-semibold text-[#0B1020]">Sales overview</h2>
+                <h2 className="font-semibold text-[#14130F]">Sales overview</h2>
 
                 <div className="mt-5 flex h-72 items-center justify-center rounded-xl bg-slate-50">
                   {data?.series?.length ? (
@@ -74,7 +74,7 @@ export default function OverviewPage() {
 
               {/* Recent Activity */}
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 className="font-semibold text-[#0B1020]">Recent activity</h2>
+                <h2 className="font-semibold text-[#14130F]">Recent activity</h2>
 
                 {data?.activity?.length ? (
                   <ul className="mt-5 h-72 divide-y divide-slate-100 overflow-y-auto">
@@ -83,7 +83,7 @@ export default function OverviewPage() {
                         key={i}
                         className="flex items-center justify-between gap-3 py-2.5 text-sm"
                       >
-                        <span className="min-w-0 truncate text-[#0B1020]">{item.title}</span>
+                        <span className="min-w-0 truncate text-[#14130F]">{item.title}</span>
                         <span className="shrink-0 text-slate-500">
                           {item.amount != null &&
                             `${formatMoney(item.amount, item.currency_code)} · `}
@@ -113,7 +113,7 @@ function OverviewCard({ title, value = "—" }) {
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <p className="text-sm font-medium text-slate-600">{title}</p>
 
-      <p className="mt-3 text-2xl font-bold text-[#0B1020]">{value}</p>
+      <p className="mt-3 text-2xl font-bold text-[#14130F]">{value}</p>
 
       <div className="mt-5 h-[2px] bg-sky-400" />
     </section>

@@ -25,38 +25,14 @@ export default function NavBar() {
   ];
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-white shadow-xs">
-      {/* 1. ANNOUNCEMENT BAR (hidden for signed-in users) */}
-      {!isLoggedIn && (
-        <div className="w-full bg-charcoal-navy text-white text-xs sm:text-sm py-2 px-4 flex items-center justify-between transition-all">
-          <div className="hidden sm:block sm:w-28"></div>
-
-          <div className="flex-1 flex items-center justify-center gap-2 text-center text-gray-200">
-            <span className="inline-flex items-center justify-center text-amber-400 text-sm">
-              🚀
-            </span>
-            <span className="font-normal tracking-wide text-xs sm:text-sm">
-              Start your online store for free &mdash; No credit card required.
-            </span>
-          </div>
-
-          <div className="hidden sm:flex items-center justify-end sm:w-28 text-right">
-            <span className="text-[11px] text-gray-400 font-light whitespace-nowrap">
-              Limited time offer
-            </span>
-          </div>
-        </div>
-      )}
-
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-slate-50/85 backdrop-blur-md">
       {/* 2. MAIN NAVBAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="flex items-center justify-between h-16">
           {/* Left: Brand Logo & Desktop Nav Links */}
           <div className="flex items-center gap-8 lg:gap-12">
             <a href="#" className="flex items-center gap-1 group">
-              <span className="text-xl sm:text-2xl font-black tracking-wider text-slate-900 uppercase">
-                STORE
-              </span>
+              <span className="display text-3xl text-ink">Store</span>
             </a>
 
             {/* Desktop Navigation Links */}
@@ -66,7 +42,7 @@ export default function NavBar() {
                   <Link
                     key={link.name}
                     to={link.href}
-                    className="text-sm font-medium text-slate-600 hover:text-violet-600 transition-colors duration-150"
+                    className="text-sm text-slate-600 hover:text-ink"
                   >
                     {link.name}
                   </Link>
@@ -74,7 +50,7 @@ export default function NavBar() {
                   <a
                     key={link.name}
                     href={link.href}
-                    className="text-sm font-medium text-slate-600 hover:text-violet-600 transition-colors duration-150"
+                    className="text-sm text-slate-600 hover:text-ink"
                   >
                     {link.name}
                   </a>
@@ -120,7 +96,7 @@ export default function NavBar() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 text-slate-600 hover:text-violet-600 hover:bg-slate-50 rounded-full transition-colors"
+                  className="p-2 text-slate-600 hover:text-ink hover:bg-slate-50 rounded-full transition-colors"
                   aria-label="Search"
                   title="Search"
                 >
@@ -163,17 +139,14 @@ export default function NavBar() {
             ) : (
               <>
                 {/* Login Link */}
-                <Link
-                  to="/auth/signin"
-                  className="text-sm font-medium text-slate-700 hover:text-violet-600 transition-colors px-2 py-1"
-                >
+                <Link to="/auth/signin" className="text-sm text-slate-700 hover:text-ink px-2 py-1">
                   Login
                 </Link>
 
                 {/* Create Store CTA Button */}
                 <Link
                   to={ONBOARDING_PATH}
-                  className="bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm hover:shadow transition-all duration-150 inline-flex items-center justify-center whitespace-nowrap"
+                  className="bg-ink hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-md inline-flex items-center justify-center whitespace-nowrap"
                 >
                   Create Store
                 </Link>
@@ -265,7 +238,7 @@ export default function NavBar() {
                     key={link.name}
                     {...(link.isRoute ? { to: link.href } : { href: link.href })}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-violet-600 hover:bg-slate-50 transition-colors"
+                    className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-ink hover:bg-slate-50 transition-colors"
                   >
                     {link.name}
                   </Tag>
@@ -304,14 +277,14 @@ export default function NavBar() {
                 <Link
                   to="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-violet-600 hover:bg-slate-50 transition-colors"
+                  className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-ink hover:bg-slate-50 transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to={ONBOARDING_PATH}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full mt-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2.5 px-4 rounded-lg text-center shadow-sm transition-colors"
+                  className="w-full mt-2 bg-ink hover:bg-slate-800 text-white font-medium py-3 px-4 rounded-md text-center"
                 >
                   Create Store
                 </Link>

@@ -86,10 +86,10 @@ export function AssistantButton({ tone = "rail" }) {
       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
         tone === "light"
           ? // For the white top bars of the customizer and the code editor
-            `text-[#4C4F7A] hover:bg-[#F5F3FF] hover:text-[#0B1020] ${open ? "bg-[#EDE9FE] text-[#0B1020]" : ""}`
+            `text-[#5A5750] hover:bg-[#F3F1EC] hover:text-[#14130F] ${open ? "bg-[#DFEAE4] text-[#14130F]" : ""}`
           : `${
               tone === "rail"
-                ? "text-[#b0b0b0] hover:bg-white/[0.08] hover:text-white"
+                ? "text-[#B8B4A8] hover:bg-white/[0.08] hover:text-white"
                 : "text-white hover:bg-white/10"
             } ${open ? "bg-white/10 text-white" : ""}`
       }`}
@@ -187,7 +187,7 @@ export function AssistantPanel() {
                 assistantStore.newChat();
                 focusInput();
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111827] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-[#78746A] transition-colors hover:bg-[#F3F1EC] hover:text-[#1A1916] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
             >
               <svg {...icon} className="h-4 w-4">
                 <path d="M12 5v14M5 12h14" />
@@ -197,7 +197,7 @@ export function AssistantPanel() {
               type="button"
               aria-label="Close assistant"
               onClick={() => assistantStore.setOpen(false)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#111827] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111827]"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-[#78746A] transition-colors hover:bg-[#F3F1EC] hover:text-[#1A1916] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916]"
             >
               <svg {...icon} className="h-4 w-4">
                 <path d="M6 6l12 12M18 6 6 18" />

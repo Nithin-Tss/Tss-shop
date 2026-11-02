@@ -1,11 +1,11 @@
 export const inputClass =
-  "h-10 w-full rounded-lg border border-[#DDD6FE] bg-white px-3 text-sm outline-none focus:border-[#0B1020]";
+  "h-10 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm outline-none focus:border-[#14130F]";
 
 export const smallButton =
-  "rounded-md border border-[#DDD6FE] bg-white px-2 py-1 text-xs text-[#3B3F8F] hover:border-[#0B1020] disabled:opacity-30";
+  "rounded-md border border-[#E7E4DC] bg-white px-2 py-1 text-xs text-[#265C48] hover:border-[#14130F] disabled:opacity-30";
 
 export const iconButton =
-  "flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#4C4F7A] hover:bg-white hover:text-[#0B1020]";
+  "flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#5A5750] hover:bg-white hover:text-[#14130F]";
 
 export const iconProps = {
   fill: "none",
@@ -44,7 +44,7 @@ export function DragHandle({ label, onPointerDown, onKeyDown }) {
       type="button"
       onPointerDown={onPointerDown}
       onKeyDown={onKeyDown}
-      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-[#A3ADBF] hover:text-charcoal-navy active:cursor-grabbing"
+      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-[#A29E92] hover:text-charcoal-navy active:cursor-grabbing"
       aria-label={label}
       title="Drag to reorder (or use the arrow keys)"
     >

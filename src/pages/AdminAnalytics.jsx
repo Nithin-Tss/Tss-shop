@@ -14,19 +14,19 @@ const lineIcon = {
 };
 
 const card =
-  "rounded-xl border border-[#e5e7eb] bg-white p-5 shadow-[0_1px_2px_rgba(20,27,45,0.04)] transition-shadow duration-200 hover:shadow-[0_4px_14px_-6px_rgba(20,27,45,0.12)]";
+  "rounded-xl border border-[#E7E4DC] bg-white p-5 shadow-[0_1px_2px_rgba(20,27,45,0.04)] transition-shadow duration-200 hover:shadow-[0_4px_14px_-6px_rgba(20,27,45,0.12)]";
 
-const cardHeading = "text-sm font-semibold text-[#0B1020]";
+const cardHeading = "text-sm font-semibold text-[#14130F]";
 
 const outlineButton =
-  "inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3.5 text-sm font-medium text-[#0B1020] transition-colors duration-200 hover:border-[#0B1020] hover:bg-[#f1f3f7]";
+  "inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 text-sm font-medium text-[#14130F] transition-colors duration-200 hover:border-[#14130F] hover:bg-[#f1f3f7]";
 
 const chip =
-  "inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 text-[13px] font-medium text-[#0B1020] transition-colors duration-200 hover:border-[#0B1020] hover:bg-[#f1f3f7]";
+  "inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3 text-[13px] font-medium text-[#14130F] transition-colors duration-200 hover:border-[#14130F] hover:bg-[#f1f3f7]";
 
 function Chevron() {
   return (
-    <svg {...lineIcon} className="h-3.5 w-3.5 text-[#4C4F7A]">
+    <svg {...lineIcon} className="h-3.5 w-3.5 text-[#5A5750]">
       <path d="m6 9 6 6 6-6" />
     </svg>
   );
@@ -34,7 +34,7 @@ function Chevron() {
 
 function EmptyIcon() {
   return (
-    <svg {...lineIcon} className="h-6 w-6 text-[#A3ADBF]">
+    <svg {...lineIcon} className="h-6 w-6 text-[#A29E92]">
       <path d="M3 3v16a2 2 0 0 0 2 2h16" />
       <path d="M18 17V9M13 17V5M8 17v-3" />
     </svg>
@@ -48,14 +48,14 @@ export default function AnalyticsPage() {
   const show = (value) => (loading || !totals ? "—" : value);
 
   return (
-    <div className="min-h-screen bg-[#F5F3FF] text-charcoal-navy">
+    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 overflow-x-hidden">
-          <header className="border-b border-[#e5e7eb] bg-white">
+          <header className="border-b border-[#E7E4DC] bg-white">
             <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div className="min-w-0">
                 <h1 className="flex items-center gap-2.5 text-xl font-semibold text-charcoal-navy">
@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
                   Analytics
                 </h1>
 
-                <p className="mt-0.5 text-[13px] text-[#4C4F7A]">
+                <p className="mt-0.5 text-[13px] text-[#5A5750]">
                   Last refreshed: {data ? new Date().toLocaleTimeString() : "—"}
                 </p>
               </div>
@@ -83,7 +83,7 @@ export default function AnalyticsPage() {
 
                 <Link
                   to="/admin/online-store/reports/new"
-                  className="inline-flex h-9 items-center rounded-lg bg-charcoal-navy px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1C2347]"
+                  className="inline-flex h-9 items-center rounded-lg bg-charcoal-navy px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1A1916]"
                 >
                   New exploration
                 </Link>
@@ -121,14 +121,14 @@ export default function AnalyticsPage() {
               <section className={card}>
                 <h2 className={cardHeading}>Total sales</h2>
 
-                <div className="mt-4 flex h-85 items-center justify-center rounded-lg bg-[#F5F3FF]">
+                <div className="mt-4 flex h-85 items-center justify-center rounded-lg bg-[#F3F1EC]">
                   {data?.series?.length ? (
                     <SalesChart series={data.series} currency={currency} />
                   ) : (
                     <div className="flex flex-col items-center text-center">
                       <EmptyIcon />
 
-                      <p className="mt-2 text-[13px] text-[#4C4F7A]">
+                      <p className="mt-2 text-[13px] text-[#5A5750]">
                         {loading ? "Loading…" : error || "No sales data available"}
                       </p>
                     </div>
@@ -139,7 +139,7 @@ export default function AnalyticsPage() {
               <section className={card}>
                 <h2 className={cardHeading}>Total sales breakdown</h2>
 
-                <div className="mt-3 divide-y divide-[#eef0f4]">
+                <div className="mt-3 divide-y divide-[#F3F1EC]">
                   <BreakdownRow label="Orders" value={show(totals?.orders)} />
                   <BreakdownRow
                     label="Average order value"
@@ -168,7 +168,7 @@ function MetricCard({ title, value = "—" }) {
 
       <p className="mt-2 text-2xl font-bold text-charcoal-navy">{value}</p>
 
-      <div className="mt-4 h-px bg-[#e5e7eb]" />
+      <div className="mt-4 h-px bg-[#E7E4DC]" />
     </div>
   );
 }

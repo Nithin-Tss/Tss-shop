@@ -218,14 +218,14 @@ export default function AdminAddCatalogue() {
   const currencyCode = currency || "store currency";
 
   return (
-    <div className="min-h-screen bg-white text-[#1A1A1A]">
+    <div className="min-h-screen bg-white text-[#1A1916]">
       <AdminHeader />
 
       {/* Toast Notification */}
       {toastMessage && (
         <div
           role="status"
-          className="fixed bottom-6 right-6 z-50 rounded-lg bg-[#1A1A1A] px-4 py-2.5 text-sm font-medium text-white shadow-xl transition-all"
+          className="fixed bottom-6 right-6 z-50 rounded-lg bg-[#1A1916] px-4 py-2.5 text-sm font-medium text-white shadow-xl transition-all"
         >
           {toastMessage}
         </div>
@@ -237,14 +237,14 @@ export default function AdminAddCatalogue() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="min-w-0 flex flex-1 flex-col bg-[#F1F2F4] px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
+        <main className="min-w-0 flex flex-1 flex-col bg-[#F3F1EC] px-4 sm:px-6 lg:px-8 py-6 overflow-x-hidden">
           <div className="mx-auto w-full max-w-5xl">
             {/* TOP BAR / BREADCRUMB & SAVE ACTIONS */}
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <Link
                   to="/admin/online-store/catalogues"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#D2D5D8] bg-white text-[#5C5F62] hover:bg-[#F6F6F7] hover:text-[#1A1A1A] transition shadow-2xs"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-[#5A5750] hover:bg-[#F3F1EC] hover:text-[#1A1916] transition shadow-2xs"
                   aria-label="Back to catalogs"
                 >
                   <svg
@@ -257,7 +257,7 @@ export default function AdminAddCatalogue() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                 </Link>
-                <h1 className="text-[20px] font-bold text-[#1A1A1A] tracking-tight">
+                <h1 className="text-[20px] font-bold text-[#1A1916] tracking-tight">
                   {catalogueId ? title || "Catalog" : "New catalog"}
                 </h1>
               </div>
@@ -266,7 +266,7 @@ export default function AdminAddCatalogue() {
                 <button
                   type="button"
                   onClick={() => navigate("/admin/online-store/catalogues")}
-                  className="rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-1.5 text-sm font-medium text-[#5C5F62] hover:bg-[#F6F6F7] hover:text-[#1A1A1A] transition"
+                  className="rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-1.5 text-sm font-medium text-[#5A5750] hover:bg-[#F3F1EC] hover:text-[#1A1916] transition"
                 >
                   Discard
                 </button>
@@ -274,7 +274,7 @@ export default function AdminAddCatalogue() {
                   type="button"
                   onClick={handleSave}
                   disabled={isSaving || loading || !canManage}
-                  className="rounded-lg bg-[#1A1A1A] px-4 py-1.5 text-sm font-medium text-white shadow-xs hover:bg-[#303030] transition disabled:opacity-50"
+                  className="rounded-lg bg-[#1A1916] px-4 py-1.5 text-sm font-medium text-white shadow-xs hover:bg-[#2A2925] transition disabled:opacity-50"
                 >
                   {isSaving ? "Saving..." : "Save"}
                 </button>
@@ -284,7 +284,7 @@ export default function AdminAddCatalogue() {
             {/* 1. GENERAL INFORMATION CARD */}
             <section
               aria-labelledby="general-info-heading"
-              className="mb-4 rounded-2xl border border-[#E1E3E5] bg-white p-5 shadow-xs"
+              className="mb-4 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs"
             >
               <h2 id="general-info-heading" className="sr-only">
                 General Information
@@ -294,7 +294,7 @@ export default function AdminAddCatalogue() {
               <div>
                 <label
                   htmlFor="catalog-title-input"
-                  className="block text-xs font-semibold text-[#1A1A1A] mb-1.5"
+                  className="block text-xs font-semibold text-[#1A1916] mb-1.5"
                 >
                   Title
                 </label>
@@ -307,9 +307,9 @@ export default function AdminAddCatalogue() {
                       placeholder=""
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full rounded-lg border border-[#D2D5D8] px-3.5 py-2 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none pr-14"
+                      className="w-full rounded-lg border border-[#D4D0C5] px-3.5 py-2 text-sm text-[#1A1916] focus:border-[#1A1916] focus:outline-none pr-14"
                     />
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8C9196]">
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#A29E92]">
                       {title.length}/255
                     </span>
                   </div>
@@ -321,12 +321,12 @@ export default function AdminAddCatalogue() {
                       aria-label="Catalog status"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-2 pr-8 text-sm font-medium text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
+                      className="appearance-none rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-2 pr-8 text-sm font-medium text-[#1A1916] focus:border-[#1A1916] focus:outline-none cursor-pointer"
                     >
                       <option value="active">Active</option>
                       <option value="draft">Draft</option>
                     </select>
-                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5C5F62]">
+                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5A5750]">
                       ↕
                     </span>
                   </div>
@@ -334,21 +334,21 @@ export default function AdminAddCatalogue() {
               </div>
 
               {/* Markets row */}
-              <div className="mt-4 pt-4 border-t border-[#F1F2F4] flex flex-wrap items-center justify-between gap-2">
+              <div className="mt-4 pt-4 border-t border-[#F3F1EC] flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[#1A1A1A]">Markets</span>
+                  <span className="text-sm font-medium text-[#1A1916]">Markets</span>
                   {markets.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {markets.map((m, idx) => (
                         <span
                           key={idx}
-                          className="inline-flex items-center gap-1 rounded-md bg-[#F1F2F4] px-2 py-0.5 text-xs font-medium text-[#1A1A1A]"
+                          className="inline-flex items-center gap-1 rounded-md bg-[#F3F1EC] px-2 py-0.5 text-xs font-medium text-[#1A1916]"
                         >
                           {m}
                           <button
                             type="button"
                             onClick={() => handleRemoveMarket(idx)}
-                            className="text-[#8C9196] hover:text-[#1A1A1A]"
+                            className="text-[#A29E92] hover:text-[#1A1916]"
                             aria-label={`Remove market ${m}`}
                           >
                             ×
@@ -362,7 +362,7 @@ export default function AdminAddCatalogue() {
                 <button
                   type="button"
                   onClick={() => setIsMarketModalOpen(true)}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-[#1A1A1A] hover:underline"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[#1A1916] hover:underline"
                 >
                   <span className="text-base leading-none">⊕</span>
                   Add a market
@@ -373,11 +373,11 @@ export default function AdminAddCatalogue() {
             {/* 2. PRICING CARD */}
             <section
               aria-labelledby="pricing-heading"
-              className="mb-4 rounded-2xl border border-[#E1E3E5] bg-white p-5 shadow-xs"
+              className="mb-4 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs"
             >
               <h2
                 id="pricing-heading"
-                className="text-sm font-semibold text-[#1A1A1A] mb-4 tracking-tight"
+                className="text-sm font-semibold text-[#1A1916] mb-4 tracking-tight"
               >
                 Pricing
               </h2>
@@ -387,12 +387,12 @@ export default function AdminAddCatalogue() {
                 <div className="flex items-center gap-1.5">
                   <label
                     htmlFor="set-prices-currency"
-                    className="text-sm text-[#1A1A1A] font-normal"
+                    className="text-sm text-[#1A1916] font-normal"
                   >
                     Set prices in
                   </label>
                   <span
-                    className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#8C9196] text-[10px] text-[#5C5F62] cursor-help"
+                    className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#A29E92] text-[10px] text-[#5A5750] cursor-help"
                     title="Choose which currency catalog prices will be denominated in."
                   >
                     ⓘ
@@ -404,7 +404,7 @@ export default function AdminAddCatalogue() {
                     id="set-prices-currency"
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full sm:w-auto min-w-60 appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-2 pr-8 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
+                    className="w-full sm:w-auto min-w-60 appearance-none rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-2 pr-8 text-sm text-[#1A1916] focus:border-[#1A1916] focus:outline-none cursor-pointer"
                   >
                     <option value="">Store currency</option>
                     {CURRENCIES.map((code) => (
@@ -413,15 +413,15 @@ export default function AdminAddCatalogue() {
                       </option>
                     ))}
                   </select>
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#5C5F62]">
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#5A5750]">
                     ⌄
                   </span>
                 </div>
               </div>
 
               {/* Price adjustment */}
-              <div className="mt-4 pt-4 border-t border-[#F1F2F4] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="text-sm text-[#1A1A1A] font-normal">Price adjustment</div>
+              <div className="mt-4 pt-4 border-t border-[#F3F1EC] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="text-sm text-[#1A1916] font-normal">Price adjustment</div>
 
                 <div className="flex flex-wrap items-center gap-3">
                   {/* Percentage Adjustment Input */}
@@ -433,9 +433,9 @@ export default function AdminAddCatalogue() {
                       aria-label="Price adjustment percentage"
                       value={priceAdjustment}
                       onChange={(e) => setPriceAdjustment(e.target.value)}
-                      className="w-20 rounded-lg border border-[#D2D5D8] px-3 py-1.5 text-sm text-right text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none pr-7"
+                      className="w-20 rounded-lg border border-[#D4D0C5] px-3 py-1.5 text-sm text-right text-[#1A1916] focus:border-[#1A1916] focus:outline-none pr-7"
                     />
-                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5C5F62]">
+                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5A5750]">
                       %
                     </span>
                   </div>
@@ -446,12 +446,12 @@ export default function AdminAddCatalogue() {
                       aria-label="Adjustment direction"
                       value={adjustmentDirection}
                       onChange={(e) => setAdjustmentDirection(e.target.value)}
-                      className="appearance-none rounded-lg border border-[#D2D5D8] bg-white px-3.5 py-1.5 pr-8 text-sm text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none cursor-pointer"
+                      className="appearance-none rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-1.5 pr-8 text-sm text-[#1A1916] focus:border-[#1A1916] focus:outline-none cursor-pointer"
                     >
                       <option value="decrease">Decrease</option>
                       <option value="increase">Increase</option>
                     </select>
-                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5C5F62]">
+                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#5A5750]">
                       ↕
                     </span>
                   </div>
@@ -464,7 +464,7 @@ export default function AdminAddCatalogue() {
                       aria-checked={includeCompareAtPrice}
                       onClick={() => setIncludeCompareAtPrice((prev) => !prev)}
                       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 ${
-                        includeCompareAtPrice ? "bg-[#1A1A1A]" : "bg-[#D2D5D8]"
+                        includeCompareAtPrice ? "bg-[#1A1916]" : "bg-[#D4D0C5]"
                       }`}
                     >
                       <span
@@ -473,7 +473,7 @@ export default function AdminAddCatalogue() {
                         }`}
                       />
                     </button>
-                    <span className="text-xs text-[#1A1A1A] font-medium">
+                    <span className="text-xs text-[#1A1916] font-medium">
                       Include compare-at price
                     </span>
                   </label>
@@ -484,11 +484,11 @@ export default function AdminAddCatalogue() {
             {/* 3. PRODUCTS SECTION */}
             <section
               aria-labelledby="products-heading"
-              className="rounded-2xl border border-[#E1E3E5] bg-white shadow-xs overflow-hidden"
+              className="rounded-2xl border border-[#E7E4DC] bg-white shadow-xs overflow-hidden"
             >
               {/* Header row */}
-              <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-[#E1E3E5]">
-                <h2 id="products-heading" className="text-sm font-semibold text-[#1A1A1A]">
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-[#E7E4DC]">
+                <h2 id="products-heading" className="text-sm font-semibold text-[#1A1916]">
                   Products
                 </h2>
 
@@ -501,7 +501,7 @@ export default function AdminAddCatalogue() {
                       aria-checked={autoIncludeNewProducts}
                       onClick={() => setAutoIncludeNewProducts((prev) => !prev)}
                       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 ${
-                        autoIncludeNewProducts ? "bg-[#1A1A1A]" : "bg-[#D2D5D8]"
+                        autoIncludeNewProducts ? "bg-[#1A1916]" : "bg-[#D4D0C5]"
                       }`}
                     >
                       <span
@@ -510,7 +510,7 @@ export default function AdminAddCatalogue() {
                         }`}
                       />
                     </button>
-                    <span className="text-xs text-[#5C5F62] font-normal">
+                    <span className="text-xs text-[#5A5750] font-normal">
                       Automatically include new products
                     </span>
                   </label>
@@ -520,14 +520,14 @@ export default function AdminAddCatalogue() {
                     <button
                       type="button"
                       onClick={handleExportProducts}
-                      className="rounded-lg bg-[#EFEFEF] px-3 py-1 text-xs font-medium text-[#8C9196] hover:bg-[#E4E5E7] hover:text-[#1A1A1A] transition"
+                      className="rounded-lg bg-[#F3F1EC] px-3 py-1 text-xs font-medium text-[#A29E92] hover:bg-[#E7E4DC] hover:text-[#1A1916] transition"
                     >
                       Export
                     </button>
                     <button
                       type="button"
                       onClick={() => importRef.current?.click()}
-                      className="rounded-lg bg-[#EFEFEF] px-3 py-1 text-xs font-medium text-[#8C9196] hover:bg-[#E4E5E7] hover:text-[#1A1A1A] transition"
+                      className="rounded-lg bg-[#F3F1EC] px-3 py-1 text-xs font-medium text-[#A29E92] hover:bg-[#E7E4DC] hover:text-[#1A1916] transition"
                     >
                       Import
                     </button>
@@ -546,7 +546,7 @@ export default function AdminAddCatalogue() {
               </div>
 
               {/* Tabs & Filter Toolbar */}
-              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-[#E1E3E5] bg-[#FAFBFB]">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-[#E7E4DC] bg-[#FAF9F6]">
                 {/* Left Tabs: Included, Excluded, All */}
                 <div className="flex items-center gap-1">
                   <button
@@ -554,8 +554,8 @@ export default function AdminAddCatalogue() {
                     onClick={() => setActiveTab("included")}
                     className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
                       activeTab === "included"
-                        ? "bg-[#E4E5E7] text-[#1A1A1A] font-semibold"
-                        : "text-[#5C5F62] hover:text-[#1A1A1A]"
+                        ? "bg-[#E7E4DC] text-[#1A1916] font-semibold"
+                        : "text-[#5A5750] hover:text-[#1A1916]"
                     }`}
                   >
                     Included
@@ -565,8 +565,8 @@ export default function AdminAddCatalogue() {
                     onClick={() => setActiveTab("excluded")}
                     className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
                       activeTab === "excluded"
-                        ? "bg-[#E4E5E7] text-[#1A1A1A] font-semibold"
-                        : "text-[#5C5F62] hover:text-[#1A1A1A]"
+                        ? "bg-[#E7E4DC] text-[#1A1916] font-semibold"
+                        : "text-[#5A5750] hover:text-[#1A1916]"
                     }`}
                   >
                     Excluded
@@ -576,8 +576,8 @@ export default function AdminAddCatalogue() {
                     onClick={() => setActiveTab("all")}
                     className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
                       activeTab === "all"
-                        ? "bg-[#E4E5E7] text-[#1A1A1A] font-semibold"
-                        : "text-[#5C5F62] hover:text-[#1A1A1A]"
+                        ? "bg-[#E7E4DC] text-[#1A1916] font-semibold"
+                        : "text-[#5A5750] hover:text-[#1A1916]"
                     }`}
                   >
                     All
@@ -585,14 +585,14 @@ export default function AdminAddCatalogue() {
                 </div>
 
                 {/* Right Action Toolbar matching reference */}
-                <div className="flex items-center gap-1.5 text-[#5C5F62]">
+                <div className="flex items-center gap-1.5 text-[#5A5750]">
                   {isSearchOpen && (
                     <input
                       type="text"
                       placeholder="Filter products..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="rounded-lg border border-[#D2D5D8] bg-white px-2.5 py-1 text-xs text-[#1A1A1A] focus:border-[#1A1A1A] focus:outline-none w-36 sm:w-48 shadow-2xs"
+                      className="rounded-lg border border-[#D4D0C5] bg-white px-2.5 py-1 text-xs text-[#1A1916] focus:border-[#1A1916] focus:outline-none w-36 sm:w-48 shadow-2xs"
                     />
                   )}
 
@@ -602,14 +602,14 @@ export default function AdminAddCatalogue() {
                     onClick={() => setIsSearchOpen((prev) => !prev)}
                     className={`inline-flex items-center gap-1.5 rounded-lg border bg-white px-2.5 py-1.5 text-xs transition shadow-2xs ${
                       isSearchOpen
-                        ? "border-[#1A1A1A] bg-[#F6F6F7]"
-                        : "border-[#D2D5D8] hover:bg-[#F6F6F7]"
+                        ? "border-[#1A1916] bg-[#F3F1EC]"
+                        : "border-[#D4D0C5] hover:bg-[#F3F1EC]"
                     }`}
                     title="Search and filter products"
                     aria-label="Search and filter products"
                   >
                     <svg
-                      className="h-3.5 w-3.5 text-[#303030]"
+                      className="h-3.5 w-3.5 text-[#2A2925]"
                       viewBox="0 0 16 16"
                       fill="none"
                       stroke="currentColor"
@@ -621,7 +621,7 @@ export default function AdminAddCatalogue() {
                       <path d="M10 10L13.5 13.5" />
                     </svg>
                     <svg
-                      className="h-3.5 w-3.5 text-[#303030]"
+                      className="h-3.5 w-3.5 text-[#2A2925]"
                       viewBox="0 0 16 16"
                       fill="none"
                       stroke="currentColor"
@@ -642,15 +642,15 @@ export default function AdminAddCatalogue() {
                       onClick={() => setIsSortOpen((prev) => !prev)}
                       className={`inline-flex items-center justify-center rounded-lg border bg-white px-2 py-1.5 text-xs transition shadow-2xs ${
                         isSortOpen
-                          ? "border-[#1A1A1A] bg-[#F6F6F7]"
-                          : "border-[#D2D5D8] hover:bg-[#F6F6F7]"
+                          ? "border-[#1A1916] bg-[#F3F1EC]"
+                          : "border-[#D4D0C5] hover:bg-[#F3F1EC]"
                       }`}
                       title="Sort products"
                       aria-label="Sort products"
                       aria-expanded={isSortOpen}
                     >
                       <svg
-                        className="h-3.5 w-3.5 text-[#303030]"
+                        className="h-3.5 w-3.5 text-[#2A2925]"
                         viewBox="0 0 16 16"
                         fill="none"
                         stroke="currentColor"
@@ -669,9 +669,9 @@ export default function AdminAddCatalogue() {
                         id="sort-by-popover"
                         role="menu"
                         aria-orientation="vertical"
-                        className="absolute right-0 top-full mt-1.5 z-40 w-44 rounded-2xl border border-[#E1E3E5] bg-white p-2 shadow-xl"
+                        className="absolute right-0 top-full mt-1.5 z-40 w-44 rounded-2xl border border-[#E7E4DC] bg-white p-2 shadow-xl"
                       >
-                        <div className="px-2 pt-1 pb-2 text-[13px] font-semibold text-[#1A1A1A]">
+                        <div className="px-2 pt-1 pb-2 text-[13px] font-semibold text-[#1A1916]">
                           Sort by
                         </div>
 
@@ -681,16 +681,16 @@ export default function AdminAddCatalogue() {
                           role="menuitemradio"
                           aria-checked={sortBy === "title"}
                           onClick={() => setSortBy("title")}
-                          className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] text-[#1A1A1A] hover:bg-[#F6F6F7] transition-colors"
+                          className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] text-[#1A1916] hover:bg-[#F3F1EC] transition-colors"
                         >
                           <span
                             className={`w-4 h-4 rounded-full transition-all shrink-0 ${
                               sortBy === "title"
                                 ? "border-[4.5px] border-[#2C2C2E] bg-white"
-                                : "border border-[#8C9196] bg-white hover:border-[#5C5F62]"
+                                : "border border-[#A29E92] bg-white hover:border-[#5A5750]"
                             }`}
                           />
-                          <span className="font-medium text-[#202223]">Product Title</span>
+                          <span className="font-medium text-[#1A1916]">Product Title</span>
                         </button>
 
                         {/* Radio: Created */}
@@ -699,20 +699,20 @@ export default function AdminAddCatalogue() {
                           role="menuitemradio"
                           aria-checked={sortBy === "created"}
                           onClick={() => setSortBy("created")}
-                          className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] text-[#1A1A1A] hover:bg-[#F6F6F7] transition-colors"
+                          className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] text-[#1A1916] hover:bg-[#F3F1EC] transition-colors"
                         >
                           <span
                             className={`w-4 h-4 rounded-full transition-all shrink-0 ${
                               sortBy === "created"
                                 ? "border-[4.5px] border-[#2C2C2E] bg-white"
-                                : "border border-[#8C9196] bg-white hover:border-[#5C5F62]"
+                                : "border border-[#A29E92] bg-white hover:border-[#5A5750]"
                             }`}
                           />
-                          <span className="font-normal text-[#202223]">Created</span>
+                          <span className="font-normal text-[#1A1916]">Created</span>
                         </button>
 
                         {/* Divider */}
-                        <div className="border-t border-[#E1E3E5] my-1.5" />
+                        <div className="border-t border-[#E7E4DC] my-1.5" />
 
                         {/* Direction: Ascending (A-Z) */}
                         <button
@@ -720,12 +720,12 @@ export default function AdminAddCatalogue() {
                           onClick={() => setSortDirection("asc")}
                           className={`flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] font-medium transition-colors ${
                             sortDirection === "asc"
-                              ? "bg-[#EAEBED] text-[#1A1A1A]"
-                              : "text-[#202223] hover:bg-[#F6F6F7]"
+                              ? "bg-[#EAEBED] text-[#1A1916]"
+                              : "text-[#1A1916] hover:bg-[#F3F1EC]"
                           }`}
                         >
                           <svg
-                            className="h-3.5 w-3.5 text-[#1A1A1A] shrink-0"
+                            className="h-3.5 w-3.5 text-[#1A1916] shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 16 16"
@@ -744,12 +744,12 @@ export default function AdminAddCatalogue() {
                           onClick={() => setSortDirection("desc")}
                           className={`flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg text-left text-[13px] font-medium transition-colors ${
                             sortDirection === "desc"
-                              ? "bg-[#EAEBED] text-[#1A1A1A]"
-                              : "text-[#202223] hover:bg-[#F6F6F7]"
+                              ? "bg-[#EAEBED] text-[#1A1916]"
+                              : "text-[#1A1916] hover:bg-[#F3F1EC]"
                           }`}
                         >
                           <svg
-                            className="h-3.5 w-3.5 text-[#1A1A1A] shrink-0"
+                            className="h-3.5 w-3.5 text-[#1A1916] shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 16 16"
@@ -770,20 +770,20 @@ export default function AdminAddCatalogue() {
               {/* PRODUCTS TABLE STRUCTURE */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b border-[#E1E3E5] bg-[#FAFBFB] text-xs font-semibold text-[#5C5F62]">
+                  <thead className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-semibold text-[#5A5750]">
                     <tr>
                       <th className="w-10 px-4 py-3">
                         <input
                           type="checkbox"
                           disabled
-                          className="h-4 w-4 rounded border-[#D2D5D8] text-[#1A1A1A] focus:ring-black cursor-not-allowed opacity-50"
+                          className="h-4 w-4 rounded border-[#D4D0C5] text-[#1A1916] focus:ring-black cursor-not-allowed opacity-50"
                           aria-label="Select all products"
                         />
                       </th>
                       <th className="px-4 py-3">
                         <span className="inline-flex items-center gap-1">
                           Product
-                          <span className="text-xs text-[#8C9196]">↕</span>
+                          <span className="text-xs text-[#A29E92]">↕</span>
                         </span>
                       </th>
                       <th className="px-4 py-3">Price in {currencyCode}</th>
@@ -793,20 +793,20 @@ export default function AdminAddCatalogue() {
                   </thead>
                   <tbody>
                     {visibleProducts.map((p) => (
-                      <tr key={p.id} className="border-b border-[#F1F2F4] hover:bg-[#F6F6F7]">
+                      <tr key={p.id} className="border-b border-[#F3F1EC] hover:bg-[#F3F1EC]">
                         <td className="w-10 px-4 py-3">
                           <input
                             type="checkbox"
                             checked={isIncluded(p.id)}
                             onChange={() => toggleProduct(p.id)}
                             aria-label={`Include ${p.title}`}
-                            className="h-4 w-4 rounded border-[#D2D5D8] text-[#1A1A1A]"
+                            className="h-4 w-4 rounded border-[#D4D0C5] text-[#1A1916]"
                           />
                         </td>
-                        <td className="px-4 py-3 font-medium text-[#1A1A1A]">{p.title}</td>
+                        <td className="px-4 py-3 font-medium text-[#1A1916]">{p.title}</td>
                         <td className="px-4 py-3">{adjustedPrice(p.price)}</td>
-                        <td className="px-4 py-3 text-[#5C5F62]">—</td>
-                        <td className="px-4 py-3 text-right text-xs text-[#5C5F62]">
+                        <td className="px-4 py-3 text-[#5A5750]">—</td>
+                        <td className="px-4 py-3 text-right text-xs text-[#5A5750]">
                           {Number(priceAdjustment) > 0
                             ? `${priceAdjustment}% ${adjustmentDirection}`
                             : "None"}
@@ -816,7 +816,7 @@ export default function AdminAddCatalogue() {
                     {!visibleProducts.length && (
                       <tr>
                         <td colSpan={5} className="py-16 text-center">
-                          <p className="text-sm font-medium text-[#1A1A1A]">
+                          <p className="text-sm font-medium text-[#1A1916]">
                             {loading
                               ? "Loading products…"
                               : products.length

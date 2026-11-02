@@ -40,7 +40,7 @@ export default function PaymentsSettings() {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-5">
-        <h2 className="text-lg font-semibold text-[#0B1020]">Stripe</h2>
+        <h2 className="text-lg font-semibold text-[#14130F]">Stripe</h2>
         <p className="mt-1 text-sm text-slate-500">
           Accept cards and wallets at checkout. Payments go straight to your own Stripe account.
         </p>
@@ -67,7 +67,7 @@ export default function PaymentsSettings() {
                 type="button"
                 onClick={connect}
                 disabled={working}
-                className="rounded-lg bg-[#0B1020] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-60"
+                className="rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60"
               >
                 {working ? "Opening Stripe…" : pending ? "Continue setup" : "Connect Stripe"}
               </button>

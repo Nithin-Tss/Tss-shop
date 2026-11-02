@@ -90,10 +90,10 @@ export default function SignInPage() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-md items-center justify-center">
-        <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="w-full rounded-xl bg-white ring-1 ring-ink/5 p-6 shadow-lg sm:p-8">
           {/* Heading */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
+            <h1 className="display text-5xl text-ink">Welcome back</h1>
 
             <p className="mt-2 text-sm text-slate-500">Sign in to continue to your account</p>
           </div>

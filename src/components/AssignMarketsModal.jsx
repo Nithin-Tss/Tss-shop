@@ -78,16 +78,16 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
       aria-labelledby="assign-markets-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
     >
-      <div className="w-full max-w-[560px] rounded-2xl bg-white shadow-2xl border border-[#E1E3E5] overflow-hidden flex flex-col">
+      <div className="w-full max-w-[560px] rounded-2xl bg-white shadow-2xl border border-[#E7E4DC] overflow-hidden flex flex-col">
         {/* HEADER */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E1E3E5] bg-[#F6F6F7]">
-          <h2 id="assign-markets-title" className="text-[15px] font-semibold text-[#1A1A1A]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E4DC] bg-[#F3F1EC]">
+          <h2 id="assign-markets-title" className="text-[15px] font-semibold text-[#1A1916]">
             Assign markets
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#5C5F62] hover:text-[#1A1A1A] text-lg font-bold p-1 rounded-md transition"
+            className="text-[#5A5750] hover:text-[#1A1916] text-lg font-bold p-1 rounded-md transition"
             aria-label="Close"
           >
             <svg
@@ -106,7 +106,7 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
         <div className="p-5 flex-1 flex flex-col">
           {/* SEARCH INPUT */}
           <div className="relative mb-4">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#5C5F62]">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#5A5750]">
               <svg
                 className="h-4 w-4"
                 fill="none"
@@ -126,7 +126,7 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-[#D2D5D8] pl-9 pr-3.5 py-2 text-sm text-[#1A1A1A] placeholder-[#5C5F62] focus:border-[#1A1A1A] focus:outline-none"
+              className="w-full rounded-xl border border-[#D4D0C5] pl-9 pr-3.5 py-2 text-sm text-[#1A1916] placeholder-[#5A5750] focus:border-[#1A1916] focus:outline-none"
             />
           </div>
 
@@ -137,8 +137,8 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
               onClick={() => setActiveTab("regions")}
               className={`px-3.5 py-1.5 rounded-lg text-[13px] transition ${
                 activeTab === "regions"
-                  ? "bg-[#E4E5E7] text-[#1A1A1A] font-semibold"
-                  : "text-[#5C5F62] hover:text-[#1A1A1A] font-medium"
+                  ? "bg-[#E7E4DC] text-[#1A1916] font-semibold"
+                  : "text-[#5A5750] hover:text-[#1A1916] font-medium"
               }`}
             >
               Regions
@@ -148,8 +148,8 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
               onClick={() => setActiveTab("b2b")}
               className={`px-3.5 py-1.5 rounded-lg text-[13px] transition ${
                 activeTab === "b2b"
-                  ? "bg-[#E4E5E7] text-[#1A1A1A] font-semibold"
-                  : "text-[#5C5F62] hover:text-[#1A1A1A] font-medium"
+                  ? "bg-[#E7E4DC] text-[#1A1916] font-semibold"
+                  : "text-[#5A5750] hover:text-[#1A1916] font-medium"
               }`}
             >
               B2B
@@ -159,8 +159,8 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
               onClick={() => setActiveTab("channels")}
               className={`px-3.5 py-1.5 rounded-lg text-[13px] transition ${
                 activeTab === "channels"
-                  ? "bg-[#E4E5E7] text-[#1A1A1A] font-semibold"
-                  : "text-[#5C5F62] hover:text-[#1A1A1A] font-medium"
+                  ? "bg-[#E7E4DC] text-[#1A1916] font-semibold"
+                  : "text-[#5A5750] hover:text-[#1A1916] font-medium"
               }`}
             >
               Channels
@@ -181,16 +181,16 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => handleToggle(opt.name)}
-                      className="h-4 w-4 rounded border-[#D2D5D8] text-[#1A1A1A] focus:ring-black cursor-pointer"
+                      className="h-4 w-4 rounded border-[#D4D0C5] text-[#1A1916] focus:ring-black cursor-pointer"
                     />
-                    <span className="text-sm font-normal text-[#1A1A1A] group-hover:text-black">
+                    <span className="text-sm font-normal text-[#1A1916] group-hover:text-black">
                       {opt.name}
                     </span>
                   </label>
                 );
               })
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center text-xs text-[#8C9196]">
+              <div className="flex flex-col items-center justify-center py-8 text-center text-xs text-[#A29E92]">
                 {activeTab === "b2b" ? "No B2B markets available." : "No options found."}
               </div>
             )}
@@ -198,18 +198,18 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
         </div>
 
         {/* FOOTER */}
-        <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-[#E1E3E5] bg-white">
+        <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-[#E7E4DC] bg-white">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[#D2D5D8] bg-white px-4 py-1.5 text-sm font-medium text-[#1A1A1A] hover:bg-[#F6F6F7] transition"
+            className="rounded-lg border border-[#D4D0C5] bg-white px-4 py-1.5 text-sm font-medium text-[#1A1916] hover:bg-[#F3F1EC] transition"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleDone}
-            className="rounded-lg bg-[#1A1A1A] px-4 py-1.5 text-sm font-medium text-white shadow-xs hover:bg-[#303030] transition"
+            className="rounded-lg bg-[#1A1916] px-4 py-1.5 text-sm font-medium text-white shadow-xs hover:bg-[#2A2925] transition"
           >
             Done
           </button>

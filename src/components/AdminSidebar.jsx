@@ -312,14 +312,14 @@ function matches(path, item) {
 const rowClass = (active) =>
   `group relative flex h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[15px] font-medium transition-[background-color,color,box-shadow] duration-150 group-data-[collapsed=true]/nav:justify-center group-data-[collapsed=true]/nav:px-0 ${
     active
-      ? "bg-[#1f1f1f] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09),0_1px_2px_rgba(0,0,0,0.6)]"
-      : "text-[#b0b0b0] hover:bg-white/[0.06] hover:text-white"
+      ? "bg-[#26251F] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.09),0_1px_2px_rgba(0,0,0,0.6)]"
+      : "text-[#B8B4A8] hover:bg-white/[0.06] hover:text-white"
   }`;
 
 // Text-only sub links (Drafts, Collections), lined up under the parent's label
 const subRowClass = (active) =>
   `flex h-9 items-center rounded-lg px-3 text-sm font-medium transition-colors duration-150 ${
-    active ? "bg-white/[0.08] text-white" : "text-[#8f8f8f] hover:bg-white/[0.06] hover:text-white"
+    active ? "bg-white/[0.08] text-white" : "text-[#8F8B80] hover:bg-white/[0.06] hover:text-white"
   }`;
 
 // Smooth open/close for nested items; closed content can't be tabbed into
@@ -338,7 +338,7 @@ function ChevronIcon({ open }) {
   return (
     <NavIcon
       name="chevron"
-      className={`h-4 w-4 text-[#8f8f8f] transition-transform duration-200 group-hover:text-white ${open ? "rotate-0" : "-rotate-90"}`}
+      className={`h-4 w-4 text-[#8F8B80] transition-transform duration-200 group-hover:text-white ${open ? "rotate-0" : "-rotate-90"}`}
     />
   );
 }
@@ -351,7 +351,7 @@ function Label({ children }) {
 function SectionLabel({ children }) {
   return (
     <p
-      className={`px-3 pb-1.5 text-[13px] font-medium text-[#7d7d7d] group-data-[collapsed=true]/nav:sr-only`}
+      className={`px-3 pb-1.5 text-[13px] font-medium text-[#7D796E] group-data-[collapsed=true]/nav:sr-only`}
     >
       {children}
     </p>
@@ -499,7 +499,7 @@ const railIcon = {
 function BrandMark({ to }) {
   return (
     <Link to={to} aria-label="Home" className="flex shrink-0 items-center">
-      <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-white text-lg font-extrabold text-[#0a0a0a]">
+      <span className="display flex h-9 w-9 items-center justify-center rounded-md bg-[#F3F1EC] text-2xl text-[#14130F]">
         S
       </span>
     </Link>
@@ -514,7 +514,7 @@ function NavSearch({ inputRef, query, setQuery, onSubmit, collapsed, onExpand })
         aria-label="Search"
         title="Search"
         onClick={onExpand}
-        className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#1a1a1a] text-[#b0b0b0] transition hover:text-white"
+        className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#1A1916] text-[#B8B4A8] transition hover:text-white"
       >
         <svg {...railIcon} className="h-[18px] w-[18px]">
           <circle cx="11" cy="11" r="7" />
@@ -525,7 +525,7 @@ function NavSearch({ inputRef, query, setQuery, onSubmit, collapsed, onExpand })
   }
 
   return (
-    <label className="group flex h-10 items-center gap-2.5 rounded-xl border border-white/10 bg-[#1a1a1a] px-3 text-[#8f8f8f] shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition focus-within:border-white/30 focus-within:text-white">
+    <label className="group flex h-10 items-center gap-2.5 rounded-xl border border-white/10 bg-[#1A1916] px-3 text-[#8F8B80] shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition focus-within:border-white/30 focus-within:text-white">
       <svg {...railIcon} className="h-[18px] w-[18px] shrink-0">
         <circle cx="11" cy="11" r="7" />
         <path d="m20 20-3.5-3.5" />
@@ -544,9 +544,9 @@ function NavSearch({ inputRef, query, setQuery, onSubmit, collapsed, onExpand })
             e.currentTarget.blur();
           }
         }}
-        className="w-full min-w-0 bg-transparent text-[15px] text-white outline-none placeholder:text-[#8f8f8f]"
+        className="w-full min-w-0 bg-transparent text-[15px] text-white outline-none placeholder:text-[#8F8B80]"
       />
-      <kbd className="shrink-0 font-sans text-[13px] text-[#6f6f6f]">⌘K</kbd>
+      <kbd className="shrink-0 font-sans text-[13px] text-[#6E6A60]">⌘K</kbd>
     </label>
   );
 }
@@ -652,7 +652,7 @@ export default function AdminSidebar() {
           aria-label={drawer ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={drawer ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
           onClick={() => (drawer ? setMobileOpen(false) : setRail(!collapsed))}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#b0b0b0] transition hover:bg-white/10 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#B8B4A8] transition hover:bg-white/10 hover:text-white"
         >
           {drawer ? (
             <svg {...railIcon} className="h-[18px] w-[18px]">
@@ -691,7 +691,7 @@ export default function AdminSidebar() {
           <div className="space-y-0.5">
             <SectionLabel>Results</SectionLabel>
             {results.length === 0 && (
-              <p className="px-3 py-2 text-sm text-[#7d7d7d]">Nothing matches "{query.trim()}".</p>
+              <p className="px-3 py-2 text-sm text-[#7D796E]">Nothing matches "{query.trim()}".</p>
             )}
             {results.map((r) => (
               <Link
@@ -794,7 +794,7 @@ export default function AdminSidebar() {
                 </button>
 
                 <Collapse open={appsOpen}>
-                  <p className="py-2 pl-[42px] pr-3 text-xs text-[#7d7d7d]">
+                  <p className="py-2 pl-[42px] pr-3 text-xs text-[#7D796E]">
                     No apps installed yet.
                   </p>
                 </Collapse>
@@ -845,7 +845,7 @@ export default function AdminSidebar() {
   return (
     <>
       <aside
-        className={`relative z-30 hidden shrink-0 bg-[#0a0a0a] text-white select-none transition-[width] duration-200 ease-out md:block ${
+        className={`relative z-30 hidden shrink-0 bg-[#14130F] text-white select-none transition-[width] duration-200 ease-out md:block ${
           collapsed ? "w-[76px]" : "w-[264px]"
         }`}
       >
@@ -868,7 +868,7 @@ export default function AdminSidebar() {
             onClick={() => setMobileOpen(false)}
             className="absolute inset-0 bg-black/60"
           />
-          <aside className="absolute inset-y-0 left-0 w-[290px] max-w-[85vw] bg-[#0a0a0a] text-white shadow-2xl select-none">
+          <aside className="absolute inset-y-0 left-0 w-[290px] max-w-[85vw] bg-[#14130F] text-white shadow-2xl select-none">
             {renderPanel(true)}
           </aside>
         </div>
@@ -907,7 +907,7 @@ function useDismiss(ref, open, close) {
 function StoreAvatar({ name, size = "h-7 w-7 text-xs" }) {
   return (
     <span
-      className={`flex shrink-0 items-center justify-center rounded-lg bg-[#a23bd1] font-bold uppercase text-white ${size}`}
+      className={`flex shrink-0 items-center justify-center rounded-lg bg-[#265C48] font-bold uppercase text-white ${size}`}
     >
       {(name || "S").trim().charAt(0)}
     </span>
@@ -981,22 +981,22 @@ function StoresDialog({ stores, activeId, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1020]/50 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#14130F]/50 px-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="all-stores-title"
-        className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-xl"
+        className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-[#E7E4DC] bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#E4DEFB] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-5 py-4">
           <div>
-            <h2 id="all-stores-title" className="text-base font-semibold text-[#0B1020]">
+            <h2 id="all-stores-title" className="text-base font-semibold text-[#14130F]">
               All stores
             </h2>
-            <p className="text-sm text-[#4C4F7A]">
+            <p className="text-sm text-[#5A5750]">
               {stores.length} {stores.length === 1 ? "store" : "stores"} on your account
             </p>
           </div>
@@ -1004,7 +1004,7 @@ function StoresDialog({ stores, activeId, onClose }) {
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#4C4F7A] hover:bg-[#F3F0FF] transition"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#F3F1EC] transition"
           >
             <svg {...headerIcon} className="h-4 w-4">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -1012,7 +1012,7 @@ function StoresDialog({ stores, activeId, onClose }) {
           </button>
         </div>
 
-        <ul className="max-h-[60vh] divide-y divide-[#EEF0F4] overflow-y-auto">
+        <ul className="max-h-[60vh] divide-y divide-[#F3F1EC] overflow-y-auto">
           {stores.map((store) => {
             const isOwner = storeCan(store, "store.manage");
             const busy = busyId === store.storeId;
@@ -1038,23 +1038,23 @@ function StoresDialog({ stores, activeId, onClose }) {
                           setEditingId(null);
                         }
                       }}
-                      className="h-9 w-full rounded-lg border border-[#0B1020] px-3 text-sm outline-none focus:ring-4 focus:ring-[#0B1020]/[0.08]"
+                      className="h-9 w-full rounded-lg border border-[#14130F] px-3 text-sm outline-none focus:ring-4 focus:ring-[#14130F]/[0.08]"
                     />
                   ) : (
                     <>
-                      <p className="truncate text-sm font-semibold text-[#0B1020]">
+                      <p className="truncate text-sm font-semibold text-[#14130F]">
                         {store.storeName}
                       </p>
                       <div className="mt-0.5 flex items-center gap-2 text-xs">
                         <span
                           className={`rounded-full px-2 py-0.5 font-medium ${
-                            live ? "bg-emerald-50 text-emerald-700" : "bg-[#EDE9FE] text-[#4C4F7A]"
+                            live ? "bg-emerald-50 text-emerald-700" : "bg-[#DFEAE4] text-[#5A5750]"
                           }`}
                         >
                           {storeStatus(store)}
                         </span>
                         {store.storeId === activeId && (
-                          <span className="text-[#4C4F7A]">Current store</span>
+                          <span className="text-[#5A5750]">Current store</span>
                         )}
                       </div>
                     </>
@@ -1069,14 +1069,14 @@ function StoresDialog({ stores, activeId, onClose }) {
                           type="button"
                           disabled={busy}
                           onClick={() => saveRename(store)}
-                          className="rounded-lg bg-[#0B1020] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#1C2347] transition disabled:opacity-60"
+                          className="rounded-lg bg-[#14130F] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#1A1916] transition disabled:opacity-60"
                         >
                           Save
                         </button>
                         <button
                           type="button"
                           onClick={() => setEditingId(null)}
-                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#4C4F7A] hover:bg-[#F3F0FF] transition"
+                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#5A5750] hover:bg-[#F3F1EC] transition"
                         >
                           Cancel
                         </button>
@@ -1087,7 +1087,7 @@ function StoresDialog({ stores, activeId, onClose }) {
                           type="button"
                           disabled={busy}
                           onClick={() => startRename(store)}
-                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#0B1020] hover:bg-[#F3F0FF] transition disabled:opacity-60"
+                          className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#14130F] hover:bg-[#F3F1EC] transition disabled:opacity-60"
                         >
                           Rename
                         </button>
@@ -1146,7 +1146,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
   };
 
   const itemClass =
-    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-[#0B1020] hover:bg-[#F3F0FF] transition";
+    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-[#14130F] hover:bg-[#F3F1EC] transition";
 
   return (
     <div ref={menuRef} className="relative min-w-0">
@@ -1159,7 +1159,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
         className={
           rail
             ? `flex h-11 w-full min-w-0 items-center gap-2.5 rounded-xl px-1.5 text-white transition hover:bg-white/[0.06] ${collapsed ? "justify-center" : ""}`
-            : "flex h-10 min-w-0 items-center gap-2 rounded-lg border border-[#E4DEFB] bg-white px-2 hover:border-[#C9D1DD] hover:bg-[#F5F3FF] transition"
+            : "flex h-10 min-w-0 items-center gap-2 rounded-lg border border-[#E7E4DC] bg-white px-2 hover:border-[#D4D0C5] hover:bg-[#F3F1EC] transition"
         }
       >
         <StoreAvatar name={active?.storeName} size={rail ? "h-8 w-8 text-xs" : "h-7 w-7 text-xs"} />
@@ -1168,7 +1168,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
             className={
               rail
                 ? "min-w-0 flex-1 truncate text-left text-[15px] font-semibold"
-                : "hidden max-w-[160px] truncate text-sm font-semibold text-[#0B1020] sm:inline"
+                : "hidden max-w-[160px] truncate text-sm font-semibold text-[#14130F] sm:inline"
             }
           >
             {active?.storeName || "No store yet"}
@@ -1187,11 +1187,11 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
       {open && (
         <div
           role="menu"
-          className={`absolute left-0 z-50 w-64 rounded-xl border border-[#E4DEFB] bg-white p-1.5 text-[#0B1020] shadow-lg shadow-[#0B1020]/10 ${
+          className={`absolute left-0 z-50 w-64 rounded-xl border border-[#E7E4DC] bg-white p-1.5 text-[#14130F] shadow-lg shadow-[#14130F]/10 ${
             rail ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
           }`}
         >
-          <p className="px-2.5 pb-1 pt-1.5 text-xs font-medium uppercase tracking-wide text-[#8B8FB8]">
+          <p className="px-2.5 pb-1 pt-1.5 text-xs font-medium uppercase tracking-wide text-[#A29E92]">
             Your stores
           </p>
 
@@ -1211,7 +1211,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
                   <svg
                     {...headerIcon}
                     strokeWidth="2.2"
-                    className="h-4 w-4 shrink-0 text-[#0B1020]"
+                    className="h-4 w-4 shrink-0 text-[#14130F]"
                   >
                     <path d="m5 12.5 4.5 4.5L19 7.5" />
                   </svg>
@@ -1220,7 +1220,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
             ))}
           </div>
 
-          <div className="my-1 h-px bg-[#E4DEFB]" />
+          <div className="my-1 h-px bg-[#E7E4DC]" />
 
           {stores.length > 0 && (
             <button
@@ -1250,7 +1250,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
             }}
             className={`${itemClass} font-semibold`}
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-dashed border-[#C9D1DD] text-[#0B1020]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-dashed border-[#D4D0C5] text-[#14130F]">
               <svg {...headerIcon} strokeWidth="2" className="h-4 w-4">
                 <path d="M12 5v14M5 12h14" />
               </svg>
@@ -1290,7 +1290,7 @@ function ProfileMenu({ variant = "bar" }) {
   };
 
   const itemClass =
-    "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-[#0B1020] hover:bg-[#F3F0FF] transition";
+    "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-[#14130F] hover:bg-[#F3F1EC] transition";
 
   return (
     <div ref={menuRef} className="relative">
@@ -1304,19 +1304,19 @@ function ProfileMenu({ variant = "bar" }) {
         className={
           rail
             ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition hover:bg-white/[0.08]"
-            : "flex h-11 items-center gap-2.5 rounded-full py-1 pl-1 pr-2 hover:bg-[#F3F0FF] transition sm:pr-3"
+            : "flex h-11 items-center gap-2.5 rounded-full py-1 pl-1 pr-2 hover:bg-[#F3F1EC] transition sm:pr-3"
         }
       >
         <span
           className={`flex items-center justify-center rounded-full text-sm font-semibold ${
-            rail ? "h-7 w-7 bg-white text-xs text-[#0a0a0a]" : "h-9 w-9 bg-[#0B1020] text-white"
+            rail ? "h-7 w-7 bg-white text-xs text-[#14130F]" : "h-9 w-9 bg-[#14130F] text-white"
           }`}
         >
           A
         </span>
         {!rail && (
           <>
-            <span className="hidden sm:inline text-sm font-medium text-[#0B1020]">Admin</span>
+            <span className="hidden sm:inline text-sm font-medium text-[#14130F]">Admin</span>
             <svg
               {...headerIcon}
               className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
@@ -1330,7 +1330,7 @@ function ProfileMenu({ variant = "bar" }) {
       {open && (
         <div
           role="menu"
-          className={`absolute z-50 w-48 rounded-xl border border-[#E4DEFB] bg-white p-1.5 text-[#0B1020] shadow-lg shadow-[#0B1020]/10 ${
+          className={`absolute z-50 w-48 rounded-xl border border-[#E7E4DC] bg-white p-1.5 text-[#14130F] shadow-lg shadow-[#14130F]/10 ${
             rail ? "bottom-[calc(100%+8px)] left-0" : "right-0 top-[calc(100%+8px)]"
           }`}
         >
@@ -1358,7 +1358,7 @@ function ProfileMenu({ variant = "bar" }) {
             </svg>
             Settings
           </Link>
-          <div className="my-1 h-px bg-[#E4DEFB]" />
+          <div className="my-1 h-px bg-[#E7E4DC]" />
           <button
             type="button"
             role="menuitem"
@@ -1384,7 +1384,7 @@ function NotificationsButton({ tone = "rail" }) {
       title="Notifications"
       className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
         tone === "rail"
-          ? "text-[#b0b0b0] hover:bg-white/[0.08] hover:text-white"
+          ? "text-[#B8B4A8] hover:bg-white/[0.08] hover:text-white"
           : "text-white hover:bg-white/10"
       }`}
     >
@@ -1392,7 +1392,7 @@ function NotificationsButton({ tone = "rail" }) {
         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
       </svg>
-      <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-[#0a0a0a]" />
+      <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-[#14130F]" />
     </button>
   );
 }
@@ -1408,7 +1408,7 @@ export function AdminHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-3 bg-[#0a0a0a] px-3 text-white md:hidden">
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-3 bg-[#14130F] px-3 text-white md:hidden">
       <button
         type="button"
         aria-label="Open menu"

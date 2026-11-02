@@ -19,8 +19,8 @@ const EMPTY_PAGE = {
 };
 
 const fieldClass =
-  "w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-2 text-sm text-[#0B1020] outline-none focus:border-[#0B1020]";
-const fieldLabel = "mb-1 block text-[13px] font-medium text-[#4A5160]";
+  "w-full rounded-lg border border-[#E7E4DC] bg-white px-3 py-2 text-sm text-[#14130F] outline-none focus:border-[#14130F]";
+const fieldLabel = "mb-1 block text-[13px] font-medium text-[#5A5750]";
 
 const pageDate = (value) => (value ? new Date(value).toLocaleDateString() : "");
 
@@ -56,14 +56,14 @@ function TemplatePicker({ templates, value, onChange }) {
         className={`${fieldClass} flex items-center justify-between text-left`}
       >
         <span className="truncate">{current.label}</span>
-        <span aria-hidden="true" className="text-xs text-[#4C4F7A]">
+        <span aria-hidden="true" className="text-xs text-[#5A5750]">
           &#9662;
         </span>
       </button>
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 right-0 z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-[#E4DEFB] bg-white p-1.5 shadow-lg"
+          className="absolute left-0 right-0 z-20 mt-1 max-h-72 overflow-y-auto rounded-xl border border-[#E7E4DC] bg-white p-1.5 shadow-lg"
         >
           {options.map((o) => {
             const chosen = o.value === current.value;
@@ -75,7 +75,7 @@ function TemplatePicker({ templates, value, onChange }) {
                     onChange(o.value);
                     setOpen(false);
                   }}
-                  className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[#F5F3FF] ${chosen ? "bg-[#F5F3FF] font-medium" : ""}`}
+                  className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[#F3F1EC] ${chosen ? "bg-[#F3F1EC] font-medium" : ""}`}
                 >
                   <span className="w-4 text-center">{chosen ? "\u2713" : ""}</span>
                   <span className="truncate">{o.label}</span>
@@ -164,13 +164,13 @@ export default function AdminPages() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-white text-[#14130F]">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
-        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 sm:px-6 py-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F3F1EC] px-4 sm:px-6 py-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#14130F]">
               <PageIcon name="pages" />
               {editing ? (editing.id ? "Edit page" : "Add page") : "Pages"}
             </h1>
@@ -180,7 +180,7 @@ export default function AdminPages() {
                   <button
                     type="button"
                     onClick={() => setEditing(null)}
-                    className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium hover:bg-[#DDE3EA]"
+                    className="rounded-lg bg-[#F3F1EC] px-4 py-2 text-sm font-medium hover:bg-[#E7E4DC]"
                   >
                     Back to pages
                   </button>
@@ -188,7 +188,7 @@ export default function AdminPages() {
                     type="submit"
                     form="page-form"
                     disabled={busy}
-                    className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                    className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
                   >
                     {busy ? "Saving..." : "Save"}
                   </button>
@@ -197,7 +197,7 @@ export default function AdminPages() {
                 <button
                   type="button"
                   onClick={() => open({})}
-                  className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
+                  className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916]"
                 >
                   Add page
                 </button>
@@ -213,21 +213,21 @@ export default function AdminPages() {
           )}
 
           {!editing && (
-            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E7E4DC] bg-white shadow-sm">
               {pages === null ? (
-                <p className="px-6 py-10 text-center text-sm text-[#4C4F7A]">
+                <p className="px-6 py-10 text-center text-sm text-[#5A5750]">
                   {error ? "" : "Loading..."}
                 </p>
               ) : pages.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <h2 className="text-xl font-semibold">Add your first page</h2>
-                  <p className="mt-3 text-sm text-[#4C4F7A]">
+                  <p className="mt-3 text-sm text-[#5A5750]">
                     Write pages like About us or Shipping policy and show them on your store.
                   </p>
                   <button
                     type="button"
                     onClick={() => open({})}
-                    className="mt-5 rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347]"
+                    className="mt-5 rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916]"
                   >
                     Add page
                   </button>
@@ -235,7 +235,7 @@ export default function AdminPages() {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
-                    <thead className="border-b border-[#E4DEFB] text-[13px] text-[#4C4F7A]">
+                    <thead className="border-b border-[#E7E4DC] text-[13px] text-[#5A5750]">
                       <tr>
                         <th className="px-4 py-3 font-medium">Title</th>
                         <th className="px-4 py-3 font-medium">Visibility</th>
@@ -248,20 +248,20 @@ export default function AdminPages() {
                         <tr
                           key={page.id}
                           onClick={() => open(page)}
-                          className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F5F3FF]"
+                          className="cursor-pointer border-b border-[#EEF1F5] last:border-0 hover:bg-[#F3F1EC]"
                         >
                           <td className="px-4 py-3 font-medium">{page.title}</td>
                           <td className="px-4 py-3">
                             <span
-                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${page.status === "visible" ? "bg-green-100 text-green-800" : "bg-[#E9EDF2] text-[#4A5160]"}`}
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${page.status === "visible" ? "bg-green-100 text-green-800" : "bg-[#F3F1EC] text-[#5A5750]"}`}
                             >
                               {page.status === "visible" ? "Visible" : "Hidden"}
                             </span>
                           </td>
-                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                          <td className="hidden px-4 py-3 text-[#5A5750] sm:table-cell">
                             /pages/{page.handle}
                           </td>
-                          <td className="hidden px-4 py-3 text-[#4C4F7A] sm:table-cell">
+                          <td className="hidden px-4 py-3 text-[#5A5750] sm:table-cell">
                             {pageDate(page.updatedAt)}
                           </td>
                         </tr>
@@ -279,7 +279,7 @@ export default function AdminPages() {
               onSubmit={save}
               className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]"
             >
-              <section className="grid gap-4 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+              <section className="grid gap-4 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                 <label>
                   <span className={fieldLabel}>Title</span>
                   <input
@@ -301,7 +301,7 @@ export default function AdminPages() {
                   />
                 </div>
 
-                <div className="grid gap-3 rounded-xl border border-[#E4DEFB] p-4">
+                <div className="grid gap-3 rounded-xl border border-[#E7E4DC] p-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold">Search engine listing</h2>
                     <button
@@ -309,17 +309,17 @@ export default function AdminPages() {
                       onClick={() => setSeoOpen((o) => !o)}
                       aria-label="Edit search engine listing"
                       aria-expanded={seoOpen}
-                      className="rounded-md px-2 py-1 text-sm text-[#4C4F7A] hover:bg-[#F5F3FF]"
+                      className="rounded-md px-2 py-1 text-sm text-[#5A5750] hover:bg-[#F3F1EC]"
                     >
                       &#9998;
                     </button>
                   </div>
                   {!seoOpen && (
-                    <p className="text-sm text-[#4C4F7A]">
+                    <p className="text-sm text-[#5A5750]">
                       {form.title || form.seo_title ? (
                         <>
                           {form.seo_title || form.title} -{" "}
-                          <span className="text-[#3B3F8F]">/pages/{form.handle || "..."}</span>
+                          <span className="text-[#265C48]">/pages/{form.handle || "..."}</span>
                         </>
                       ) : (
                         "Add a title and description to see how this page might appear in a search engine listing"
@@ -357,7 +357,7 @@ export default function AdminPages() {
                           placeholder="Made from the title when empty"
                           maxLength={255}
                         />
-                        <span className="mt-1 block text-xs text-[#4C4F7A]">
+                        <span className="mt-1 block text-xs text-[#5A5750]">
                           Address on your store: /pages/{form.handle || "..."}
                         </span>
                       </label>
@@ -367,7 +367,7 @@ export default function AdminPages() {
               </section>
 
               <aside className="grid content-start gap-4">
-                <section className="grid gap-3 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+                <section className="grid gap-3 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                   <h2 className="text-sm font-semibold">Visibility</h2>
                   {[
                     ["visible", "Visible"],
@@ -379,34 +379,34 @@ export default function AdminPages() {
                         name="page-status"
                         checked={form.status === value}
                         onChange={() => set("status")(value)}
-                        className="h-4 w-4 accent-[#0B1020]"
+                        className="h-4 w-4 accent-[#14130F]"
                       />
                       {label}
                     </label>
                   ))}
                 </section>
 
-                <section className="grid gap-2 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+                <section className="grid gap-2 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                   <h2 className="text-sm font-semibold">Template</h2>
                   <TemplatePicker
                     templates={templates}
                     value={form.template}
                     onChange={set("template")}
                   />
-                  <p className="text-xs text-[#4C4F7A]">
+                  <p className="text-xs text-[#5A5750]">
                     Each template is a file in the code editor (templates/page.&lt;name&gt;.liquid)
                     and a page in the theme editor.
                   </p>
                 </section>
 
                 {editing.id && (
-                  <section className="grid gap-2 rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
+                  <section className="grid gap-2 rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-sm">
                     {editing.status === "visible" && (
                       <a
                         href={editing.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-center text-sm font-medium text-[#3B3F8F] hover:underline"
+                        className="text-center text-sm font-medium text-[#265C48] hover:underline"
                       >
                         View on store
                       </a>

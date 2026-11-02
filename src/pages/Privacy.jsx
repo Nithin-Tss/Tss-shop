@@ -18,9 +18,9 @@ export default function Privacy() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
       {/* Hero */}
-      <section className="bg-[#111827] px-6 py-16 text-white">
+      <section className="bg-[#1A1916] px-6 py-16 text-white">
         <div className="mx-auto max-w-6xl">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7C3AED]">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#265C48]">
             Legal
           </p>
 
@@ -43,47 +43,47 @@ export default function Privacy() {
             <h2 className="mb-4 text-lg font-bold text-gray-900">Contents</h2>
 
             <nav className="space-y-2 text-sm">
-              <a href="#information" className="block hover:text-[#7C3AED]">
+              <a href="#information" className="block hover:text-[#265C48]">
                 1. Information We Collect
               </a>
 
-              <a href="#use" className="block hover:text-[#7C3AED]">
+              <a href="#use" className="block hover:text-[#265C48]">
                 2. How We Use Information
               </a>
 
-              <a href="#sharing" className="block hover:text-[#7C3AED]">
+              <a href="#sharing" className="block hover:text-[#265C48]">
                 3. Information Sharing
               </a>
 
-              <a href="#cookies" className="block hover:text-[#7C3AED]">
+              <a href="#cookies" className="block hover:text-[#265C48]">
                 4. Cookies
               </a>
 
-              <a href="#security" className="block hover:text-[#7C3AED]">
+              <a href="#security" className="block hover:text-[#265C48]">
                 5. Data Security
               </a>
 
-              <a href="#retention" className="block hover:text-[#7C3AED]">
+              <a href="#retention" className="block hover:text-[#265C48]">
                 6. Data Retention
               </a>
 
-              <a href="#rights" className="block hover:text-[#7C3AED]">
+              <a href="#rights" className="block hover:text-[#265C48]">
                 7. Your Rights
               </a>
 
-              <a href="#children" className="block hover:text-[#7C3AED]">
+              <a href="#children" className="block hover:text-[#265C48]">
                 8. Children's Privacy
               </a>
 
-              <a href="#third-party" className="block hover:text-[#7C3AED]">
+              <a href="#third-party" className="block hover:text-[#265C48]">
                 9. Third-Party Services
               </a>
 
-              <a href="#changes" className="block hover:text-[#7C3AED]">
+              <a href="#changes" className="block hover:text-[#265C48]">
                 10. Changes to This Policy
               </a>
 
-              <a href="#contact" className="block hover:text-[#7C3AED]">
+              <a href="#contact" className="block hover:text-[#265C48]">
                 11. Contact
               </a>
             </nav>
@@ -216,12 +216,12 @@ export default function Privacy() {
                       onChange={(event) => setEmail(event.target.value)}
                       placeholder="Enter your email"
                       required
-                      className="min-w-0 flex-1 rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/20"
+                      className="min-w-0 flex-1 rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#265C48] focus:ring-2 focus:ring-[#265C48]/20"
                     />
 
                     <button
                       type="submit"
-                      className="rounded-lg bg-[#7C3AED] px-6 py-3 font-semibold text-white transition hover:bg-[#c8731e]"
+                      className="rounded-lg bg-[#265C48] px-6 py-3 font-semibold text-white transition hover:bg-[#c8731e]"
                     >
                       Send
                     </button>

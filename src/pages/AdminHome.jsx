@@ -233,21 +233,21 @@ export default function AdminHomePage() {
   const actions = quickActions.filter(allowed);
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#14130F]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
-        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF]">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#FAF9F6]">
           {/* METRICS STRIP */}
           {canSeeReports && (
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-[#E4DEFB] bg-white/70 px-4 py-3 sm:px-6 lg:px-9">
-              <span className="text-sm text-[#4C4F7A]">Last 30 days</span>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-[#E7E4DC] bg-white/70 px-4 py-3 sm:px-6 lg:px-9">
+              <span className="text-sm text-[#5A5750]">Last 30 days</span>
               <dl className="flex flex-wrap gap-x-8 gap-y-3">
                 {metrics.map((m) => (
                   <div key={m.label}>
-                    <dt className="text-xs text-[#4C4F7A]">{m.label}</dt>
+                    <dt className="text-xs text-[#5A5750]">{m.label}</dt>
                     <dd className="mt-0.5 flex items-center gap-2 text-sm font-semibold">
                       {m.value}
                       <Sparkline values={m.trend} />
@@ -258,25 +258,25 @@ export default function AdminHomePage() {
             </div>
           )}
 
-          <div className="mx-auto max-w-[1100px] space-y-8 px-4 py-10 sm:px-6 lg:px-9">
+          <div className="mx-auto max-w-[980px] px-4 py-12 sm:px-6 lg:px-10 lg:py-16">
             {/* GREETING + QUICK ACTIONS */}
-            <section className="text-center">
-              <p className="text-sm text-[#4C4F7A]">{storeName}</p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
-                {greeting()}, {firstName}
-                <span className="block text-[#3B3F8F]">
+            <section>
+              <p className="text-sm text-[#78746A]">{storeName}</p>
+              <h1 className="display mt-3 text-5xl text-[#14130F] sm:text-6xl">
+                {greeting()}, {firstName}.
+                <span className="block italic text-[#265C48]">
                   {steps.length ? "Let's get ready to sell." : "Let's keep growing."}
                 </span>
               </h1>
               {hasNoAccess && (
-                <p className="mx-auto mt-3 max-w-md text-sm text-[#4C4F7A]">
+                <p className="mt-4 max-w-md text-sm text-[#5A5750]">
                   You don&apos;t have any roles in this store yet. Ask the store owner to give you
                   one under Settings → Users.
                 </p>
               )}
 
               {actions.length > 0 && (
-                <div className="mt-6 flex flex-wrap justify-center gap-2.5">
+                <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
                   {actions.map((action) => (
                     <Link
                       key={action.label}
@@ -291,9 +291,12 @@ export default function AdminHomePage() {
                             }
                           : undefined
                       }
-                      className="group inline-flex items-center gap-2 rounded-full border border-[#E4DEFB] bg-white px-4 py-2 text-sm font-medium text-[#0B1020] shadow-sm transition hover:-translate-y-0.5 hover:border-[#0B1020] hover:bg-[#0B1020] hover:text-white"
+                      className="group inline-flex items-center gap-2 text-sm font-medium text-[#14130F] underline decoration-[#D4D0C5] underline-offset-[6px] hover:decoration-[#14130F]"
                     >
-                      <Icon name={action.icon} className="h-4 w-4" />
+                      <Icon
+                        name={action.icon}
+                        className="h-4 w-4 text-[#78746A] group-hover:text-[#14130F]"
+                      />
                       {action.label}
                     </Link>
                   ))}
@@ -301,66 +304,53 @@ export default function AdminHomePage() {
               )}
             </section>
 
-            {/* SETUP CARDS */}
+            {/* SETUP LIST */}
             {steps.length > 0 && (
-              <section>
-                <div className="mb-3 flex items-end justify-between gap-4">
-                  <h2 className="text-base font-semibold">Get your store ready</h2>
-                  <div className="flex items-center gap-3 text-xs text-[#4C4F7A]">
+              <section className="mt-16">
+                <div className="flex items-end justify-between gap-4 border-b border-[#14130F] pb-3">
+                  <h2 className="text-lg font-medium">Get your store ready</h2>
+                  <div className="flex items-center gap-3 text-sm tabular-nums text-[#5A5750]">
                     <span>
-                      {doneCount} of {steps.length} done
+                      {doneCount} of {steps.length}
                     </span>
-                    <div className="h-1.5 w-28 overflow-hidden rounded-full bg-[#E4DEFB]">
+                    <div className="h-px w-24 bg-[#D4D0C5]">
                       <div
-                        className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                        className="h-[3px] -translate-y-px bg-[#265C48] transition-[width] duration-500"
                         style={{ width: `${Math.max(progress, 3)}%` }}
                       />
                     </div>
                   </div>
                 </div>
 
-                <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <ol>
                   {steps.map((step, i) => {
                     const isNext = i === nextIndex;
                     return (
-                      <li key={step.title} className="min-w-0">
+                      <li key={step.title} className="border-b border-[#E7E4DC]">
                         <Link
                           to={step.to}
-                          className={`group flex h-full flex-col rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-                            isNext ? "border-[#0B1020]" : "border-[#E4DEFB]"
-                          }`}
+                          className="group -mx-3 flex items-center gap-5 rounded-md px-3 py-5 hover:bg-white"
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F3FF] text-[#3B3F8F]">
-                              <Icon name={step.icon} />
-                            </span>
-                            {step.done ? (
-                              <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                                <Icon name="check" className="h-3 w-3" /> Done
-                              </span>
-                            ) : (
-                              isNext && (
-                                <span className="rounded-full bg-[#0B1020] px-2 py-0.5 text-xs font-medium text-white">
-                                  Next
-                                </span>
-                              )
-                            )}
-                          </div>
-                          <h3
-                            className={`mt-4 text-sm font-semibold ${step.done ? "opacity-60" : ""}`}
+                          <span
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs tabular-nums ${
+                              step.done
+                                ? "bg-[#265C48] text-white"
+                                : isNext
+                                  ? "bg-[#14130F] text-white"
+                                  : "border border-[#D4D0C5] text-[#78746A]"
+                            }`}
                           >
-                            {step.title}
-                          </h3>
-                          <p
-                            className={`mt-1 flex-1 text-sm text-[#4C4F7A] ${step.done ? "opacity-60" : ""}`}
-                          >
-                            {step.help}
-                          </p>
-                          <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#0B1020]">
-                            {step.done ? "Review" : "Get started"}
+                            {step.done ? <Icon name="check" className="h-3.5 w-3.5" /> : i + 1}
+                          </span>
+                          <span className={`min-w-0 flex-1 ${step.done ? "opacity-50" : ""}`}>
+                            <span className="block text-[15px] font-medium">{step.title}</span>
+                            <span className="mt-0.5 block text-sm text-[#5A5750]">{step.help}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-sm text-[#5A5750] group-hover:text-[#14130F]">
+                            {step.done ? "Review" : isNext ? "Start" : ""}
                             <Icon
                               name="arrow"
-                              className="h-4 w-4 transition group-hover:translate-x-0.5"
+                              className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
                             />
                           </span>
                         </Link>
@@ -372,15 +362,10 @@ export default function AdminHomePage() {
             )}
 
             {/* TIP */}
-            <aside className="mx-auto max-w-xl rounded-2xl border border-[#E4DEFB] bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                  <Icon name="bulb" />
-                </span>
-                <h2 className="text-base font-semibold">Did you know?</h2>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-[#4C4F7A]">{tip}</p>
-            </aside>
+            <p className="mt-12 max-w-lg text-sm leading-relaxed text-[#78746A]">
+              <span className="font-medium text-[#14130F]">Tip. </span>
+              {tip}
+            </p>
           </div>
         </main>
       </div>

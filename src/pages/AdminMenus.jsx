@@ -456,16 +456,16 @@ export default function AdminMenus() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#0B1020]">
+    <div className="min-h-screen bg-white text-[#14130F]">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
-        <main className="min-w-0 flex-1 overflow-hidden bg-[#F5F3FF] px-4 sm:px-6 py-6 lg:px-8">
+        <main className="min-w-0 flex-1 overflow-hidden bg-[#F3F1EC] px-4 sm:px-6 py-6 lg:px-8">
           {/* TOP BAR / HEADING */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#0B1020]">
+            <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-[#14130F]">
               <PageIcon name="menus" />
               {editingMenu
                 ? editingMenu.isNew
@@ -480,7 +480,7 @@ export default function AdminMenus() {
                   type="button"
                   id="btn-url-redirects"
                   onClick={handleOpenRedirects}
-                  className="rounded-lg bg-[#E9EDF2] px-4 py-2 text-sm font-medium text-[#0B1020] hover:bg-[#DDE3EA] transition"
+                  className="rounded-lg bg-[#F3F1EC] px-4 py-2 text-sm font-medium text-[#14130F] hover:bg-[#E7E4DC] transition"
                 >
                   URL redirects
                 </button>
@@ -489,7 +489,7 @@ export default function AdminMenus() {
                   type="button"
                   id="btn-create-menu"
                   onClick={handleOpenCreate}
-                  className="rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
+                  className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition"
                 >
                   Create menu
                 </button>
@@ -527,10 +527,10 @@ export default function AdminMenus() {
           {/* MAIN CONTENT: TABLE OR EDITOR */}
           {!editingMenu ? (
             /* --- MENUS TABLE CARD --- */
-            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E4DEFB] bg-white shadow-sm">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#E7E4DC] bg-white shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-[#0B1020]">
-                  <thead className="border-b border-[#E4DEFB] bg-[#FAF8FF] text-xs font-medium text-slate-500">
+                <table className="w-full text-left text-sm text-[#14130F]">
+                  <thead className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-medium text-slate-500">
                     <tr>
                       <th className="px-5 py-3.5 font-semibold text-slate-700 w-1/4">
                         <div className="inline-flex items-center gap-1 cursor-pointer select-none">
@@ -541,7 +541,7 @@ export default function AdminMenus() {
                       <th className="px-5 py-3.5 font-semibold text-slate-700">Menu items</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E4DEFB]">
+                  <tbody className="divide-y divide-[#E7E4DC]">
                     {loading ? (
                       <tr>
                         <td colSpan={2} className="px-5 py-10 text-center text-slate-400">
@@ -558,7 +558,7 @@ export default function AdminMenus() {
                           onClick={() => handleOpenEdit(menu)}
                           className="hover:bg-[#F8F9FA] transition-colors cursor-pointer group"
                         >
-                          <td className="px-5 py-4 font-semibold text-[#0B1020] group-hover:text-violet-600">
+                          <td className="px-5 py-4 font-semibold text-[#14130F] group-hover:text-violet-600">
                             <div className="flex items-center gap-2">
                               <span>{menu.name}</span>
                               {menu.items?.some((it) => it.is_mega) && (
@@ -586,7 +586,7 @@ export default function AdminMenus() {
                           <button
                             type="button"
                             onClick={handleOpenCreate}
-                            className="mt-4 inline-flex items-center rounded-lg bg-[#0B1020] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition"
+                            className="mt-4 inline-flex items-center rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition"
                           >
                             Create menu
                           </button>
@@ -601,7 +601,7 @@ export default function AdminMenus() {
             /* --- CREATE / EDIT MENU FORM --- */
             <form onSubmit={handleSaveMenu} className="mt-5 max-w-4xl space-y-6">
               {/* Menu Details Card */}
-              <div className="rounded-2xl border border-[#E4DEFB] bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-6 shadow-sm">
                 <h2 className="text-base font-semibold text-slate-900 mb-4">Menu details</h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
@@ -614,7 +614,7 @@ export default function AdminMenus() {
                       value={menuForm.name}
                       onChange={(e) => setMenuForm({ ...menuForm, name: e.target.value })}
                       placeholder="e.g. Main menu, Footer menu"
-                      className="w-full rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-2 text-sm text-slate-900 outline-none focus:border-[#0B1020] focus:ring-1 focus:ring-[#0B1020]"
+                      className="w-full rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-2 text-sm text-slate-900 outline-none focus:border-[#14130F] focus:ring-1 focus:ring-[#14130F]"
                     />
                   </div>
                   <div>
@@ -629,14 +629,14 @@ export default function AdminMenus() {
                       value={menuForm.handle}
                       onChange={(e) => setMenuForm({ ...menuForm, handle: e.target.value })}
                       placeholder="e.g. main-menu, footer"
-                      className="w-full rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-2 text-sm text-slate-900 outline-none focus:border-[#0B1020] focus:ring-1 focus:ring-[#0B1020]"
+                      className="w-full rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-2 text-sm text-slate-900 outline-none focus:border-[#14130F] focus:ring-1 focus:ring-[#14130F]"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Menu Items Card */}
-              <div className="rounded-2xl border border-[#E4DEFB] bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-base font-semibold text-slate-900">Menu items</h2>
@@ -671,8 +671,8 @@ export default function AdminMenus() {
                         key={idx}
                         className={`rounded-xl border p-4 space-y-3 transition-colors ${
                           item.is_mega
-                            ? "border-violet-300 bg-[#FAF8FF] shadow-xs"
-                            : "border-[#E4DEFB] bg-[#FCFBFF]"
+                            ? "border-violet-300 bg-[#FAF9F6] shadow-xs"
+                            : "border-[#E7E4DC] bg-[#FCFBFF]"
                         }`}
                       >
                         {/* Level 1 Item Row */}
@@ -706,7 +706,7 @@ export default function AdminMenus() {
                               value={item.title}
                               onChange={(e) => handleChangeItem(idx, "title", e.target.value)}
                               placeholder="Link name (e.g. Products, Shop)"
-                              className="w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-1.5 text-sm font-medium text-slate-900 outline-none focus:border-[#0B1020]"
+                              className="w-full rounded-lg border border-[#E7E4DC] bg-white px-3 py-1.5 text-sm font-medium text-slate-900 outline-none focus:border-[#14130F]"
                             />
                           </div>
 
@@ -730,7 +730,7 @@ export default function AdminMenus() {
                               onChange={(e) => handleChangeItem(idx, "badge", e.target.value)}
                               placeholder="Badge"
                               title="Optional badge (e.g. New, Sale)"
-                              className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                              className="w-full rounded-lg border border-[#E7E4DC] bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                             />
                           </div>
 
@@ -740,7 +740,7 @@ export default function AdminMenus() {
                             onClick={() => handleChangeItem(idx, "is_mega", !item.is_mega)}
                             className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
                               item.is_mega
-                                ? "bg-[#7C3AED] text-white shadow-xs"
+                                ? "bg-[#265C48] text-white shadow-xs"
                                 : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
                             }`}
                             title="Toggle multi-column Mega Menu layout for this navigation item"
@@ -869,7 +869,7 @@ export default function AdminMenus() {
                                       handleChangeItem(idx, "promo_title", e.target.value)
                                     }
                                     placeholder="e.g. Summer Collection"
-                                    className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                    className="w-full rounded-lg border border-[#E7E4DC] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                                   />
                                 </div>
                                 <div>
@@ -883,7 +883,7 @@ export default function AdminMenus() {
                                       handleChangeItem(idx, "promo_subtitle", e.target.value)
                                     }
                                     placeholder="e.g. Up to 40% Off"
-                                    className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                    className="w-full rounded-lg border border-[#E7E4DC] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                                   />
                                 </div>
                               </div>
@@ -952,7 +952,7 @@ export default function AdminMenus() {
                                         ? "Column heading (e.g. Clothing, Shoes)"
                                         : "Sub-link label"
                                     }
-                                    className="flex-1 min-w-[130px] rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs font-medium text-slate-900 outline-none focus:border-[#0B1020]"
+                                    className="flex-1 min-w-[130px] rounded-lg border border-[#E7E4DC] bg-white px-2.5 py-1 text-xs font-medium text-slate-900 outline-none focus:border-[#14130F]"
                                   />
 
                                   {/* Column Link */}
@@ -977,7 +977,7 @@ export default function AdminMenus() {
                                       }
                                       placeholder="Badge"
                                       title="Optional column badge"
-                                      className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                      className="w-full rounded-lg border border-[#E7E4DC] bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                                     />
                                   </div>
 
@@ -1058,7 +1058,7 @@ export default function AdminMenus() {
                                             )
                                           }
                                           placeholder="Column link (e.g. Dresses, T-Shirts)"
-                                          className="flex-1 min-w-[120px] rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                          className="flex-1 min-w-[120px] rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                                         />
 
                                         {/* Link URL */}
@@ -1091,7 +1091,7 @@ export default function AdminMenus() {
                                             }
                                             placeholder="Badge"
                                             title="Optional link badge"
-                                            className="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                            className="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                                           />
                                         </div>
 
@@ -1154,7 +1154,7 @@ export default function AdminMenus() {
                   <button
                     type="submit"
                     disabled={savingMenu}
-                    className="rounded-lg bg-[#0B1020] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1C2347] transition disabled:opacity-50"
+                    className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition disabled:opacity-50"
                   >
                     {savingMenu ? "Saving..." : "Save menu"}
                   </button>
@@ -1198,7 +1198,7 @@ export default function AdminMenus() {
                   {/* Add / Edit Redirect Form */}
                   <form
                     onSubmit={handleSaveRedirect}
-                    className="rounded-xl border border-slate-200 bg-[#FAF8FF] p-4 space-y-3"
+                    className="rounded-xl border border-slate-200 bg-[#FAF9F6] p-4 space-y-3"
                   >
                     <p className="text-xs font-semibold text-slate-700">
                       {editingRedirect ? "Edit URL redirect" : "Create new URL redirect"}
@@ -1216,7 +1216,7 @@ export default function AdminMenus() {
                             setRedirectForm({ ...redirectForm, path: e.target.value })
                           }
                           placeholder="/old-page-path"
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                         />
                       </div>
                       <div>
@@ -1231,7 +1231,7 @@ export default function AdminMenus() {
                             setRedirectForm({ ...redirectForm, target: e.target.value })
                           }
                           placeholder="/new-page-path or https://..."
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-[#14130F]"
                         />
                       </div>
                     </div>
@@ -1251,7 +1251,7 @@ export default function AdminMenus() {
                       <button
                         type="submit"
                         disabled={savingRedirect}
-                        className="rounded-lg bg-[#0B1020] px-3.5 py-1 text-xs font-semibold text-white hover:bg-[#1C2347] disabled:opacity-50"
+                        className="rounded-lg bg-[#14130F] px-3.5 py-1 text-xs font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
                       >
                         {savingRedirect
                           ? "Saving..."

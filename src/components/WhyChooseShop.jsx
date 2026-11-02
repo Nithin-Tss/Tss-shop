@@ -1,75 +1,41 @@
-const features = [
+const points = [
   {
-    title: "AI Assistant",
-    description: "Get smart recommendations and save time.",
-    icon: "🤖",
-    iconBackground: "bg-purple-100",
+    title: "Assistant that edits, not just chats",
+    body: "Ask it to restock a collection or rewrite a product page. It proposes the change; you approve it.",
   },
   {
-    title: "Automation",
-    description: "Automate repetitive tasks and focus on growth.",
-    icon: "⚡",
-    iconBackground: "bg-yellow-100",
+    title: "Inventory you can trust",
+    body: "Counts move with every order, return and transfer, with an audit trail behind each number.",
   },
   {
-    title: "Analytics",
-    description: "Make data-driven decisions with powerful insights.",
-    icon: "▥",
-    iconBackground: "bg-blue-100",
+    title: "Reports without exporting",
+    body: "Sales, customers and abandoned checkouts in one place, filterable down to a single product.",
   },
   {
-    title: "Smart Inventory",
-    description: "Track stock, get alerts, and never run out.",
-    icon: "◇",
-    iconBackground: "bg-green-100",
-  },
-  {
-    title: "Customer Insights",
-    description: "Understand your customers and boost sales.",
-    icon: "◎",
-    iconBackground: "bg-pink-100",
-  },
-  {
-    title: "Security",
-    description: "Your business and customer data are always protected.",
-    icon: "✓",
-    iconBackground: "bg-purple-100",
+    title: "Roles and keys",
+    body: "Give staff exactly the access they need. Issue API keys that can be revoked in one click.",
   },
 ];
 
-export default function WhyChooseVendra() {
+export default function WhyChooseShop() {
   return (
-    <section className="w-full bg-white px-4 py-14 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        {/* Heading */}
-        <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Why choose Store?
+    <section className="bg-slate-50 py-24 lg:py-32">
+      <div className="mx-auto grid max-w-7xl gap-16 px-6 lg:grid-cols-12 lg:px-10">
+        <h2 className="display text-5xl text-ink lg:col-span-5 lg:text-6xl">
+          The unglamorous parts, done properly.
         </h2>
 
-        {/* Features */}
-        <div className="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <div key={feature.title} className="flex items-start gap-5">
-              {/* Icon */}
-              <div
-                className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full ${feature.iconBackground}`}
-              >
-                <span className="text-3xl font-bold text-violet-600" aria-hidden="true">
-                  {feature.icon}
-                </span>
-              </div>
-
-              {/* Content */}
-              <div className="pt-1">
-                <h3 className="text-lg font-bold text-slate-900">{feature.title}</h3>
-
-                <p className="mt-1 text-sm leading-6 text-slate-500 sm:text-base">
-                  {feature.description}
-                </p>
-              </div>
+        <dl className="lg:col-span-6 lg:col-start-7">
+          {points.map((p) => (
+            <div
+              key={p.title}
+              className="border-t border-slate-200 py-8 first:border-t-0 first:pt-0"
+            >
+              <dt className="text-lg font-medium text-ink">{p.title}</dt>
+              <dd className="mt-2 max-w-md leading-relaxed text-slate-600">{p.body}</dd>
             </div>
           ))}
-        </div>
+        </dl>
       </div>
     </section>
   );
