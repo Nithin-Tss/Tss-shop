@@ -942,7 +942,7 @@ export default function AdminCustomizePage() {
       setSaveError("");
       if (dataRef.current !== snapshot || customizerRef.current !== customizerNow || state.again) {
         state.again = false;
-        state.timer = setTimeout(() => engineRef.current.flushSave(), 300);
+        setSaveState("pending");
       } else {
         setSaveState("saved");
       }
@@ -953,8 +953,6 @@ export default function AdminCustomizePage() {
         setSaveState("invalid");
       } else {
         setSaveState("error");
-        state.timer = setTimeout(() => engineRef.current.flushSave(), state.retryDelay);
-        state.retryDelay = Math.min(state.retryDelay * 2, 30000);
       }
     } finally {
       state.saving = false;
@@ -982,7 +980,7 @@ export default function AdminCustomizePage() {
       return;
     }
     setSaveState((current) => (current === "saving" ? current : "pending"));
-    state.timer = setTimeout(() => engineRef.current.flushSave(), delay);
+    // No timer: changes are saved only when Save is clicked
   }
 
   // The code editor (another tab) saved something: Liquid code re-renders the preview;
@@ -2424,7 +2422,13 @@ export default function AdminCustomizePage() {
                         All changes saved
                       </span>
                     )}
-                    {(saveState === "pending" || saveState === "saving") && (
+                    {saveState === "pending" && (
+                      <span className="flex items-center gap-1.5 text-[#4C4F7A]">
+                        <span className="h-2 w-2 rounded-full bg-amber-500" />
+                        Unsaved changes
+                      </span>
+                    )}
+                    {saveState === "saving" && (
                       <span className="flex items-center gap-1.5 text-[#4C4F7A]">
                         <span className="h-2 w-2 animate-pulse rounded-full bg-[#8B8FB8]" />
                         Saving...
@@ -2432,7 +2436,7 @@ export default function AdminCustomizePage() {
                     )}
                     {saveState === "error" && (
                       <span className="flex items-center gap-1.5 text-red-600" title={saveError}>
-                        Couldn't save, retrying
+                        Couldn't save
                         <button
                           type="button"
                           className="font-medium underline"
@@ -2464,7 +2468,7 @@ export default function AdminCustomizePage() {
                     onClick={() => engineRef.current.flushSave()}
                     disabled={!dirty || saveState === "saving"}
                     className="h-9 whitespace-nowrap rounded-lg bg-charcoal-navy px-4 text-sm font-semibold text-white hover:bg-[#1C2347] disabled:opacity-40"
-                    title="Changes save automatically; this saves right away"
+                    title="Save your changes to the storefront"
                   >
                     Save
                   </button>
