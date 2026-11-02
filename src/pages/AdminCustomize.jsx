@@ -2,6 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { Link } from "react-router-dom";
 
+import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
+
 import { getEditingThemeId, setEditingThemeId } from "@/lib/editingTheme";
 
 import { API_URL, apiRequest, openStorefront } from "@/lib/api";
@@ -2339,6 +2341,8 @@ export default function AdminCustomizePage() {
                     </select>
                   )}
 
+                  <AssistantButton tone="light" />
+
                   <a
                     id="edit-code-btn"
                     target="_blank"
@@ -3299,6 +3303,9 @@ export default function AdminCustomizePage() {
                   </button>
                 </div>
               )}
+
+              {/* This page has no AdminSidebar, so it mounts the assistant panel itself (once) */}
+              <AssistantPanel />
             </div>
           </UploadsContext.Provider>
         </BlogPostsContext.Provider>

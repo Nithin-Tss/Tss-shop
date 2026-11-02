@@ -149,7 +149,7 @@ if (typeof window !== "undefined") {
 
 // fetch() with the auth headers, refreshing an expired access token once.
 // Throws only when the server can't be reached.
-async function send(path, { method, headers, body }) {
+async function send(path, { method, headers, body, signal }) {
   const request = () => {
     const allHeaders = getHeaders(headers);
     // Theme calls work on the theme chosen on the Online store page (a draft), else the published one.
@@ -162,7 +162,8 @@ async function send(path, { method, headers, body }) {
     // Files go as multipart: the browser sets that Content-Type (with its boundary) itself
     if (typeof FormData !== "undefined" && body instanceof FormData)
       delete allHeaders["Content-Type"];
-    return fetch(`${API_URL}${path}`, { method, headers: allHeaders, body });
+    // `signal` (optional) lets the caller cancel the request; other callers pass none and are unchanged
+    return fetch(`${API_URL}${path}`, { method, headers: allHeaders, body, ...(signal ? { signal } : {}) });
   };
 
   let usedToken = getSession()?.token;
@@ -264,8 +265,9 @@ export async function apiGet(path, customHeaders = {}) {
   };
 }
 
-export function apiPost(path, body, customHeaders = {}) {
-  return sendForm("POST", path, body, customHeaders);
+// `signal` (an AbortSignal, optional) cancels the request: the result is then { ok: false, aborted: true }
+export function apiPost(path, body, customHeaders = {}, signal) {
+  return sendForm("POST", path, body, customHeaders, signal);
 }
 
 export function apiPut(path, body, customHeaders = {}) {
@@ -277,7 +279,9 @@ export function apiPatch(path, body, customHeaders = {}) {
 }
 
 // Send a form's data: { ok, data } or { ok: false, status, fieldErrors, formError }
-async function sendForm(method, path, body, customHeaders) {
+const ABORTED = { ok: false, aborted: true, status: 0, fieldErrors: {}, formError: "" };
+
+async function sendForm(method, path, body, customHeaders, signal) {
   let response;
 
   try {
@@ -285,8 +289,12 @@ async function sendForm(method, path, body, customHeaders) {
       method,
       headers: customHeaders,
       body: JSON.stringify(body),
+      signal,
     });
-  } catch {
+  } catch (error) {
+    // A request the caller cancelled is not an error: no message, and no sign-out or token refresh follows
+    // (those only happen after a 401 response, which a cancelled request never gets)
+    if (error?.name === "AbortError" || signal?.aborted) return { ...ABORTED };
     return {
       ok: false,
       status: 0,
@@ -296,6 +304,7 @@ async function sendForm(method, path, body, customHeaders) {
   }
 
   const data = await response.json().catch(() => ({}));
+  if (signal?.aborted) return { ...ABORTED }; // cancelled while the body was still arriving
 
   if (response.ok) {
     return { ok: true, data };

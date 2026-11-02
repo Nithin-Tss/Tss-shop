@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import CodeEditor from "./CodeEditor";
+import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
 import { openStorefront } from "@/lib/api";
 import {
   deleteThemePath,
@@ -726,6 +727,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   }
 
   return (
+    <>
     <div
       onKeyDown={onKeyDown}
       className={`flex flex-col overflow-hidden bg-white text-[#3b3b3b] ${
@@ -948,6 +950,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               >
                 Preview
               </button>
+              {fullscreen && <AssistantButton tone="light" />}
             </div>
           </div>
 
@@ -1121,6 +1124,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         </span>
       </div>
     </div>
+    {/* Outside the editor's root, so keys typed in the chat never reach its Ctrl+S handler. Fullscreen is the
+        code editor page, which has no AdminSidebar: it mounts the assistant panel itself (once). */}
+    {fullscreen && <AssistantPanel />}
+    </>
   );
 }
 

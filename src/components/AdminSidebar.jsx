@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
 import {
   apiDelete,
   apiGet,
@@ -833,6 +834,7 @@ export default function AdminSidebar() {
           <div className={`min-w-0 flex-1 group-data-[collapsed=true]/nav:flex-none`}>
             <StoreSwitcher variant="rail" collapsed={!drawer && collapsed} />
           </div>
+          <AssistantButton />
           <NotificationsButton />
           <ProfileMenu variant="rail" />
         </div>
@@ -871,6 +873,8 @@ export default function AdminSidebar() {
           </aside>
         </div>
       )}
+      {/* The assistant (dev only, and only for members who may read some data): one panel per page */}
+      <AssistantPanel />
     </>
   );
 }
@@ -1417,6 +1421,7 @@ export function AdminHeader() {
       </button>
       <BrandMark to={`${BASE}/home`} />
       <div className="flex-1" />
+      <AssistantButton tone="header" />
       <NotificationsButton tone="header" />
     </header>
   );
