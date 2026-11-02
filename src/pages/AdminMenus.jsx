@@ -11,11 +11,12 @@ import {
   listUrlRedirects,
   saveMenu,
   saveUrlRedirect,
+  uploadThemeImage,
 } from "@/lib/themeApi";
 
 // ---------------------------------------------------------------- AdminMenus
 // Displays the Menus table matching the VENDRA admin UI, with dynamic backend
-// integration for Menus, Menu Items, and URL Redirects.
+// integration for Menus, Menu Items, URL Redirects, and Mega Menus.
 
 export default function AdminMenus() {
   const [menus, setMenus] = useState(null);
@@ -47,6 +48,7 @@ export default function AdminMenus() {
   const [editingMenu, setEditingMenu] = useState(null);
   const [menuForm, setMenuForm] = useState({ name: "", handle: "", items: [] });
   const [savingMenu, setSavingMenu] = useState(false);
+  const [uploadingBannerIdx, setUploadingBannerIdx] = useState(null);
 
   // URL Redirects Modal mode: boolean
   const [showRedirectsModal, setShowRedirectsModal] = useState(false);
@@ -71,7 +73,7 @@ export default function AdminMenus() {
     }
   };
 
-  // Initial load: `loading` already starts true, so no synchronous setState here.
+  // Initial load
   useEffect(() => {
     let cancelled = false;
     listMenus()
@@ -96,8 +98,28 @@ export default function AdminMenus() {
       name: "",
       handle: "",
       items: [
-        { title: "Home", url: "/", children: [] },
-        { title: "Catalog", url: "/collections/all", children: [] },
+        {
+          title: "Home",
+          url: "/",
+          is_mega: false,
+          badge: "",
+          promo_image: "",
+          promo_title: "",
+          promo_subtitle: "",
+          promo_url: "",
+          children: [],
+        },
+        {
+          title: "Catalog",
+          url: "/collections/all",
+          is_mega: false,
+          badge: "",
+          promo_image: "",
+          promo_title: "",
+          promo_subtitle: "",
+          promo_url: "",
+          children: [],
+        },
       ],
     });
     setError("");
@@ -107,21 +129,49 @@ export default function AdminMenus() {
   // Open Edit Menu form
   const handleOpenEdit = (menu) => {
     setEditingMenu(menu);
-    // Flatten items or deep copy
+    // Deep copy items supporting 3 levels of hierarchy and Mega Menu attributes
     const itemsCopy = (menu.items || []).map((it) => ({
       id: it.id,
       title: it.title || "",
       url: it.url || "",
+      is_mega: Boolean(it.is_mega),
+      badge: it.badge || "",
+      promo_image: it.promo_image || "",
+      promo_title: it.promo_title || "",
+      promo_subtitle: it.promo_subtitle || "",
+      promo_url: it.promo_url || "",
       children: (it.children || []).map((ch) => ({
         id: ch.id,
         title: ch.title || "",
         url: ch.url || "",
+        badge: ch.badge || "",
+        children: (ch.children || []).map((sub) => ({
+          id: sub.id,
+          title: sub.title || "",
+          url: sub.url || "",
+          badge: sub.badge || "",
+        })),
       })),
     }));
+
     setMenuForm({
       name: menu.name || "",
       handle: menu.handle || "",
-      items: itemsCopy.length ? itemsCopy : [{ title: "", url: "", children: [] }],
+      items: itemsCopy.length
+        ? itemsCopy
+        : [
+            {
+              title: "",
+              url: "",
+              is_mega: false,
+              badge: "",
+              promo_image: "",
+              promo_title: "",
+              promo_subtitle: "",
+              promo_url: "",
+              children: [],
+            },
+          ],
     });
     setError("");
     setNotice("");
@@ -133,63 +183,155 @@ export default function AdminMenus() {
     setError("");
   };
 
-  // Menu Form: Add Item
-  const handleAddItem = (parentIdx = null) => {
+  // Menu Form: Add Item across Level 1, Level 2 (Column), or Level 3 (Link)
+  const handleAddItem = (parentIdx = null, childIdx = null) => {
     setMenuForm((prev) => {
       const newItems = [...prev.items];
       if (parentIdx === null) {
-        newItems.push({ title: "", url: "", children: [] });
-      } else {
+        // Level 1 item
+        newItems.push({
+          title: "",
+          url: "",
+          is_mega: false,
+          badge: "",
+          promo_image: "",
+          promo_title: "",
+          promo_subtitle: "",
+          promo_url: "",
+          children: [],
+        });
+      } else if (childIdx === null) {
+        // Level 2 item (Column / Submenu under parentIdx)
         const parent = { ...newItems[parentIdx] };
-        parent.children = [...(parent.children || []), { title: "", url: "" }];
+        parent.children = [
+          ...(parent.children || []),
+          { title: "", url: "", badge: "", children: [] },
+        ];
+        newItems[parentIdx] = parent;
+      } else {
+        // Level 3 item (Column link under childIdx)
+        const parent = { ...newItems[parentIdx] };
+        parent.children = [...parent.children];
+        const child = { ...parent.children[childIdx] };
+        child.children = [
+          ...(child.children || []),
+          { title: "", url: "", badge: "" },
+        ];
+        parent.children[childIdx] = child;
         newItems[parentIdx] = parent;
       }
       return { ...prev, items: newItems };
     });
   };
 
-  // Menu Form: Remove Item
-  const handleRemoveItem = (idx, childIdx = null) => {
+  // Menu Form: Remove Item across Level 1, 2, or 3
+  const handleRemoveItem = (idx, childIdx = null, subIdx = null) => {
     setMenuForm((prev) => {
       const newItems = [...prev.items];
-      if (childIdx === null) {
+      if (childIdx === null && subIdx === null) {
+        // Remove Level 1 item
         newItems.splice(idx, 1);
-      } else {
+      } else if (subIdx === null) {
+        // Remove Level 2 item
         const parent = { ...newItems[idx] };
         parent.children = [...parent.children];
         parent.children.splice(childIdx, 1);
         newItems[idx] = parent;
-      }
-      return { ...prev, items: newItems };
-    });
-  };
-
-  // Menu Form: Change Item Field
-  const handleChangeItem = (idx, field, value, childIdx = null) => {
-    setMenuForm((prev) => {
-      const newItems = [...prev.items];
-      if (childIdx === null) {
-        newItems[idx] = { ...newItems[idx], [field]: value };
       } else {
+        // Remove Level 3 item
         const parent = { ...newItems[idx] };
         parent.children = [...parent.children];
-        parent.children[childIdx] = { ...parent.children[childIdx], [field]: value };
+        const child = { ...parent.children[childIdx] };
+        child.children = [...child.children];
+        child.children.splice(subIdx, 1);
+        parent.children[childIdx] = child;
         newItems[idx] = parent;
       }
       return { ...prev, items: newItems };
     });
   };
 
-  // Menu Form: Move Item Up/Down
-  const handleMoveItem = (idx, direction) => {
+  // Menu Form: Change Item Field across Level 1, 2, or 3
+  const handleChangeItem = (idx, field, value, childIdx = null, subIdx = null) => {
     setMenuForm((prev) => {
       const newItems = [...prev.items];
-      const targetIdx = idx + direction;
-      if (targetIdx < 0 || targetIdx >= newItems.length) return prev;
-      const [moved] = newItems.splice(idx, 1);
-      newItems.splice(targetIdx, 0, moved);
+      if (childIdx === null && subIdx === null) {
+        // Change Level 1 item
+        newItems[idx] = { ...newItems[idx], [field]: value };
+      } else if (subIdx === null) {
+        // Change Level 2 item
+        const parent = { ...newItems[idx] };
+        parent.children = [...parent.children];
+        parent.children[childIdx] = { ...parent.children[childIdx], [field]: value };
+        newItems[idx] = parent;
+      } else {
+        // Change Level 3 item
+        const parent = { ...newItems[idx] };
+        parent.children = [...parent.children];
+        const child = { ...parent.children[childIdx] };
+        child.children = [...child.children];
+        child.children[subIdx] = { ...child.children[subIdx], [field]: value };
+        parent.children[childIdx] = child;
+        newItems[idx] = parent;
+      }
       return { ...prev, items: newItems };
     });
+  };
+
+  // Menu Form: Move Item Up/Down within its level
+  const handleMoveItem = (idx, direction, childIdx = null, subIdx = null) => {
+    setMenuForm((prev) => {
+      const newItems = [...prev.items];
+      if (childIdx === null && subIdx === null) {
+        // Move Level 1 item
+        const targetIdx = idx + direction;
+        if (targetIdx < 0 || targetIdx >= newItems.length) return prev;
+        const [moved] = newItems.splice(idx, 1);
+        newItems.splice(targetIdx, 0, moved);
+      } else if (subIdx === null) {
+        // Move Level 2 item
+        const parent = { ...newItems[idx] };
+        parent.children = [...parent.children];
+        const targetIdx = childIdx + direction;
+        if (targetIdx < 0 || targetIdx >= parent.children.length) return prev;
+        const [moved] = parent.children.splice(childIdx, 1);
+        parent.children.splice(targetIdx, 0, moved);
+        newItems[idx] = parent;
+      } else {
+        // Move Level 3 item
+        const parent = { ...newItems[idx] };
+        parent.children = [...parent.children];
+        const child = { ...parent.children[childIdx] };
+        child.children = [...child.children];
+        const targetIdx = subIdx + direction;
+        if (targetIdx < 0 || targetIdx >= child.children.length) return prev;
+        const [moved] = child.children.splice(subIdx, 1);
+        child.children.splice(targetIdx, 0, moved);
+        parent.children[childIdx] = child;
+        newItems[idx] = parent;
+      }
+      return { ...prev, items: newItems };
+    });
+  };
+
+  // Upload Promotional Banner Image
+  const handlePromoImageUpload = async (e, idx) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    setUploadingBannerIdx(idx);
+    try {
+      const res = await uploadThemeImage(file);
+      if (res.ok && res.data?.url) {
+        handleChangeItem(idx, "promo_image", res.data.url);
+      } else {
+        setError(res.error || "Failed to upload promotional banner image.");
+      }
+    } catch (err) {
+      setError(err.message || "Failed to upload promotional banner image.");
+    } finally {
+      setUploadingBannerIdx(null);
+    }
   };
 
   // Save Menu
@@ -203,11 +345,38 @@ export default function AdminMenus() {
     setError("");
     try {
       const isNew = editingMenu?.isNew || !editingMenu?.id;
+
+      const cleanSub = (s) => ({
+        title: s.title.trim(),
+        url: (s.url || "").trim(),
+        badge: (s.badge || "").trim(),
+      });
+
+      const cleanChild = (c) => ({
+        title: c.title.trim(),
+        url: (c.url || "").trim(),
+        badge: (c.badge || "").trim(),
+        children: (c.children || []).filter((s) => s.title && s.title.trim()).map(cleanSub),
+      });
+
+      const cleanItem = (it) => ({
+        title: it.title.trim(),
+        url: (it.url || "").trim(),
+        is_mega: Boolean(it.is_mega),
+        badge: (it.badge || "").trim(),
+        promo_image: (it.promo_image || "").trim(),
+        promo_title: (it.promo_title || "").trim(),
+        promo_subtitle: (it.promo_subtitle || "").trim(),
+        promo_url: (it.promo_url || "").trim(),
+        children: (it.children || []).filter((c) => c.title && c.title.trim()).map(cleanChild),
+      });
+
       const payload = {
         name: menuForm.name.trim(),
         handle: menuForm.handle.trim(),
-        items: menuForm.items.filter((it) => it.title.trim()),
+        items: menuForm.items.filter((it) => it.title && it.title.trim()).map(cleanItem),
       };
+
       await saveMenu(isNew ? null : editingMenu.id, payload);
       setNotice(isNew ? "Menu created successfully." : "Menu updated successfully.");
       setEditingMenu(null);
@@ -393,7 +562,14 @@ export default function AdminMenus() {
                           className="hover:bg-[#F8F9FA] transition-colors cursor-pointer group"
                         >
                           <td className="px-5 py-4 font-semibold text-[#0B1020] group-hover:text-violet-600">
-                            {menu.name}
+                            <div className="flex items-center gap-2">
+                              <span>{menu.name}</span>
+                              {menu.items?.some((it) => it.is_mega) && (
+                                <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-[11px] font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                                  Mega Menu
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-5 py-4 text-slate-600 leading-relaxed font-normal">
                             {menu.items_summary || (
@@ -455,7 +631,7 @@ export default function AdminMenus() {
                       type="text"
                       value={menuForm.handle}
                       onChange={(e) => setMenuForm({ ...menuForm, handle: e.target.value })}
-                      placeholder="e.g. footer-menu"
+                      placeholder="e.g. main-menu, footer"
                       className="w-full rounded-lg border border-[#DDD6FE] bg-white px-3.5 py-2 text-sm text-slate-900 outline-none focus:border-[#0B1020] focus:ring-1 focus:ring-[#0B1020]"
                     />
                   </div>
@@ -468,7 +644,7 @@ export default function AdminMenus() {
                   <div>
                     <h2 className="text-base font-semibold text-slate-900">Menu items</h2>
                     <p className="text-xs text-slate-500">
-                      Add links to products, collections, pages, or external URLs.
+                      Organize standard links, dropdowns, and multi-column Mega Menus.
                     </p>
                   </div>
                   <button
@@ -480,7 +656,7 @@ export default function AdminMenus() {
                   </button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {menuForm.items.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-slate-400">
                       <p className="text-sm">No items in this menu yet.</p>
@@ -496,9 +672,14 @@ export default function AdminMenus() {
                     menuForm.items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="rounded-xl border border-[#E4DEFB] bg-[#FAF8FF] p-3 space-y-2"
+                        className={`rounded-xl border p-4 space-y-3 transition-colors ${
+                          item.is_mega
+                            ? "border-violet-300 bg-[#FAF8FF] shadow-xs"
+                            : "border-[#E4DEFB] bg-[#FCFBFF]"
+                        }`}
                       >
-                        <div className="flex items-center gap-2">
+                        {/* Level 1 Item Row */}
+                        <div className="flex flex-wrap items-center gap-2">
                           {/* Reorder Buttons */}
                           <div className="flex flex-col gap-0.5">
                             <button
@@ -522,18 +703,18 @@ export default function AdminMenus() {
                           </div>
 
                           {/* Item Name */}
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-[140px]">
                             <input
                               type="text"
                               value={item.title}
                               onChange={(e) => handleChangeItem(idx, "title", e.target.value)}
-                              placeholder="Link name (e.g. Home, Shop All)"
-                              className="w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-[#0B1020]"
+                              placeholder="Link name (e.g. Products, Shop)"
+                              className="w-full rounded-lg border border-[#DDD6FE] bg-white px-3 py-1.5 text-sm font-medium text-slate-900 outline-none focus:border-[#0B1020]"
                             />
                           </div>
 
                           {/* Item Link */}
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-[160px]">
                             <LinkField
                               value={item.url}
                               onChange={(url) => handleChangeItem(idx, "url", url)}
@@ -543,20 +724,52 @@ export default function AdminMenus() {
                             />
                           </div>
 
-                          {/* Add nested button */}
+                          {/* Badge (Optional) */}
+                          <div className="w-24">
+                            <input
+                              type="text"
+                              maxLength={30}
+                              value={item.badge}
+                              onChange={(e) => handleChangeItem(idx, "badge", e.target.value)}
+                              placeholder="Badge"
+                              title="Optional badge (e.g. New, Sale)"
+                              className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                            />
+                          </div>
+
+                          {/* Mega Menu Toggle */}
                           <button
                             type="button"
-                            title="Add sub-link"
-                            onClick={() => handleAddItem(idx)}
-                            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 whitespace-nowrap"
+                            onClick={() => handleChangeItem(idx, "is_mega", !item.is_mega)}
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+                              item.is_mega
+                                ? "bg-[#7C3AED] text-white shadow-xs"
+                                : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                            }`}
+                            title="Toggle multi-column Mega Menu layout for this navigation item"
                           >
-                            + Sub
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                item.is_mega ? "bg-white" : "bg-slate-400"
+                              }`}
+                            />
+                            {item.is_mega ? "Mega Menu ON" : "Mega Menu"}
+                          </button>
+
+                          {/* Add Sub / Add Column Button */}
+                          <button
+                            type="button"
+                            title={item.is_mega ? "Add column grouping" : "Add sub-link"}
+                            onClick={() => handleAddItem(idx)}
+                            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 whitespace-nowrap"
+                          >
+                            {item.is_mega ? "+ Column" : "+ Sub"}
                           </button>
 
                           {/* Remove Item */}
                           <button
                             type="button"
-                            title="Remove item"
+                            title="Remove menu item"
                             onClick={() => handleRemoveItem(idx)}
                             className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
                           >
@@ -572,45 +785,345 @@ export default function AdminMenus() {
                           </button>
                         </div>
 
-                        {/* Nested items (sub-links) */}
-                        {item.children && item.children.length > 0 && (
-                          <div className="ml-8 pl-3 border-l-2 border-slate-200 space-y-2 pt-1">
-                            {item.children.map((child, cIdx) => (
-                              <div key={cIdx} className="flex items-center gap-2">
-                                <span className="text-slate-400 text-xs select-none">↳</span>
-                                <input
-                                  type="text"
-                                  value={child.title}
-                                  onChange={(e) =>
-                                    handleChangeItem(idx, "title", e.target.value, cIdx)
-                                  }
-                                  placeholder="Sub-link label"
-                                  className="flex-1 rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
-                                />
-                                <div className="min-w-0 flex-1">
-                                  <LinkField
-                                    value={child.url}
-                                    onChange={(url) => handleChangeItem(idx, "url", url, cIdx)}
-                                    {...linkData}
-                                    label="Sub-link"
-                                    compact
-                                  />
-                                </div>
+                        {/* Promotional Banner Box (Shown only when is_mega is enabled) */}
+                        {item.is_mega && (
+                          <div className="rounded-xl border border-purple-200 bg-white/80 p-3.5 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold uppercase tracking-wider text-purple-900">
+                                  Promotional Banner
+                                </span>
+                                <span className="text-[11px] text-slate-500">
+                                  (Optional card displayed on the side of the mega menu)
+                                </span>
+                              </div>
+                              {(item.promo_image || item.promo_title || item.promo_subtitle || item.promo_url) && (
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveItem(idx, cIdx)}
-                                  className="p-1 text-slate-400 hover:text-rose-600"
+                                  onClick={() => {
+                                    handleChangeItem(idx, "promo_image", "");
+                                    handleChangeItem(idx, "promo_title", "");
+                                    handleChangeItem(idx, "promo_subtitle", "");
+                                    handleChangeItem(idx, "promo_url", "");
+                                  }}
+                                  className="text-xs text-rose-600 hover:underline"
                                 >
-                                  <svg
-                                    className="w-3.5 h-3.5"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <path d="M18 6 6 18M6 6l12 12" />
-                                  </svg>
+                                  Clear banner
                                 </button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              {/* Image Upload / Preview */}
+                              <div>
+                                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                                  Banner Image
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  {item.promo_image ? (
+                                    <div className="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0">
+                                      <img
+                                        src={item.promo_image}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleChangeItem(idx, "promo_image", "")}
+                                        className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs transition"
+                                        title="Remove image"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  ) : null}
+                                  <label className="flex-1 cursor-pointer">
+                                    <span className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                                      {uploadingBannerIdx === idx
+                                        ? "Uploading..."
+                                        : item.promo_image
+                                          ? "Change image"
+                                          : "Upload image"}
+                                    </span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      disabled={uploadingBannerIdx === idx}
+                                      onChange={(e) => handlePromoImageUpload(e, idx)}
+                                      className="sr-only"
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Titles */}
+                              <div className="space-y-1.5">
+                                <div>
+                                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                                    Headline
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={item.promo_title}
+                                    onChange={(e) =>
+                                      handleChangeItem(idx, "promo_title", e.target.value)
+                                    }
+                                    placeholder="e.g. Summer Collection"
+                                    className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                                    Subtitle
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={item.promo_subtitle}
+                                    onChange={(e) =>
+                                      handleChangeItem(idx, "promo_subtitle", e.target.value)
+                                    }
+                                    placeholder="e.g. Up to 40% Off"
+                                    className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Banner Destination Link */}
+                              <div>
+                                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                                  Banner Link
+                                </label>
+                                <LinkField
+                                  value={item.promo_url}
+                                  onChange={(url) => handleChangeItem(idx, "promo_url", url)}
+                                  {...linkData}
+                                  label="Banner destination"
+                                  compact
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Level 2 items (Columns / Sub-links) */}
+                        {item.children && item.children.length > 0 && (
+                          <div className="ml-6 pl-3 border-l-2 border-violet-200 space-y-3 pt-1">
+                            {item.children.map((child, cIdx) => (
+                              <div
+                                key={cIdx}
+                                className="rounded-lg bg-white p-2.5 border border-slate-200 space-y-2 shadow-2xs"
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {/* Level 2 Reorder Buttons */}
+                                  <div className="flex flex-col gap-0.5">
+                                    <button
+                                      type="button"
+                                      title="Move column up"
+                                      disabled={cIdx === 0}
+                                      onClick={() => handleMoveItem(idx, -1, cIdx)}
+                                      className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2.5 p-0.5"
+                                    >
+                                      ▲
+                                    </button>
+                                    <button
+                                      type="button"
+                                      title="Move column down"
+                                      disabled={cIdx === item.children.length - 1}
+                                      onClick={() => handleMoveItem(idx, 1, cIdx)}
+                                      className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2.5 p-0.5"
+                                    >
+                                      ▼
+                                    </button>
+                                  </div>
+
+                                  <span className="text-violet-600 font-bold text-xs select-none">
+                                    {item.is_mega ? "↳ Column:" : "↳ Sub:"}
+                                  </span>
+
+                                  {/* Column Name */}
+                                  <input
+                                    type="text"
+                                    value={child.title}
+                                    onChange={(e) =>
+                                      handleChangeItem(idx, "title", e.target.value, cIdx)
+                                    }
+                                    placeholder={
+                                      item.is_mega
+                                        ? "Column heading (e.g. Clothing, Shoes)"
+                                        : "Sub-link label"
+                                    }
+                                    className="flex-1 min-w-[130px] rounded-lg border border-[#DDD6FE] bg-white px-2.5 py-1 text-xs font-medium text-slate-900 outline-none focus:border-[#0B1020]"
+                                  />
+
+                                  {/* Column Link */}
+                                  <div className="flex-1 min-w-[150px]">
+                                    <LinkField
+                                      value={child.url}
+                                      onChange={(url) =>
+                                        handleChangeItem(idx, "url", url, cIdx)
+                                      }
+                                      {...linkData}
+                                      label="Column link"
+                                      compact
+                                    />
+                                  </div>
+
+                                  {/* Column Badge */}
+                                  <div className="w-20">
+                                    <input
+                                      type="text"
+                                      maxLength={30}
+                                      value={child.badge}
+                                      onChange={(e) =>
+                                        handleChangeItem(idx, "badge", e.target.value, cIdx)
+                                      }
+                                      placeholder="Badge"
+                                      title="Optional column badge"
+                                      className="w-full rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                    />
+                                  </div>
+
+                                  {/* Add Level 3 Link under this Column */}
+                                  <button
+                                    type="button"
+                                    title="Add nested link under this column"
+                                    onClick={() => handleAddItem(idx, cIdx)}
+                                    className="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700 hover:bg-violet-100 whitespace-nowrap"
+                                  >
+                                    + Link
+                                  </button>
+
+                                  {/* Remove Level 2 Column */}
+                                  <button
+                                    type="button"
+                                    title="Remove column"
+                                    onClick={() => handleRemoveItem(idx, cIdx)}
+                                    className="p-1 text-slate-400 hover:text-rose-600 transition"
+                                  >
+                                    <svg
+                                      className="w-3.5 h-3.5"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    >
+                                      <path d="M18 6 6 18M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+
+                                {/* Level 3 items (Links under Column) */}
+                                {child.children && child.children.length > 0 && (
+                                  <div className="ml-6 pl-3 border-l-2 border-violet-300 space-y-2 pt-1">
+                                    {child.children.map((sub, sIdx) => (
+                                      <div
+                                        key={sIdx}
+                                        className="flex items-center gap-2 bg-slate-50/70 p-1.5 rounded-md border border-slate-200"
+                                      >
+                                        {/* Level 3 Reorder Buttons */}
+                                        <div className="flex flex-col gap-0.5">
+                                          <button
+                                            type="button"
+                                            title="Move link up"
+                                            disabled={sIdx === 0}
+                                            onClick={() => handleMoveItem(idx, -1, cIdx, sIdx)}
+                                            className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2 p-0.5"
+                                          >
+                                            ▲
+                                          </button>
+                                          <button
+                                            type="button"
+                                            title="Move link down"
+                                            disabled={sIdx === child.children.length - 1}
+                                            onClick={() => handleMoveItem(idx, 1, cIdx, sIdx)}
+                                            className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2 p-0.5"
+                                          >
+                                            ▼
+                                          </button>
+                                        </div>
+
+                                        <span className="text-slate-400 text-xs select-none">
+                                          ↳↳
+                                        </span>
+
+                                        {/* Link Title */}
+                                        <input
+                                          type="text"
+                                          value={sub.title}
+                                          onChange={(e) =>
+                                            handleChangeItem(
+                                              idx,
+                                              "title",
+                                              e.target.value,
+                                              cIdx,
+                                              sIdx
+                                            )
+                                          }
+                                          placeholder="Column link (e.g. Dresses, T-Shirts)"
+                                          className="flex-1 min-w-[120px] rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                        />
+
+                                        {/* Link URL */}
+                                        <div className="flex-1 min-w-[140px]">
+                                          <LinkField
+                                            value={sub.url}
+                                            onChange={(url) =>
+                                              handleChangeItem(
+                                                idx,
+                                                "url",
+                                                url,
+                                                cIdx,
+                                                sIdx
+                                              )
+                                            }
+                                            {...linkData}
+                                            label="Link destination"
+                                            compact
+                                          />
+                                        </div>
+
+                                        {/* Link Badge */}
+                                        <div className="w-18">
+                                          <input
+                                            type="text"
+                                            maxLength={30}
+                                            value={sub.badge}
+                                            onChange={(e) =>
+                                              handleChangeItem(
+                                                idx,
+                                                "badge",
+                                                e.target.value,
+                                                cIdx,
+                                                sIdx
+                                              )
+                                            }
+                                            placeholder="Badge"
+                                            title="Optional link badge"
+                                            className="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-900 outline-none focus:border-[#0B1020]"
+                                          />
+                                        </div>
+
+                                        {/* Remove Level 3 Link */}
+                                        <button
+                                          type="button"
+                                          title="Remove link"
+                                          onClick={() => handleRemoveItem(idx, cIdx, sIdx)}
+                                          className="p-1 text-slate-400 hover:text-rose-600 transition"
+                                        >
+                                          <svg
+                                            className="w-3.5 h-3.5"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                          >
+                                            <path d="M18 6 6 18M6 6l12 12" />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
