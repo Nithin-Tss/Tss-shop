@@ -111,14 +111,14 @@ export function AssistantPanel() {
   const open = access && state.open;
   const [recentsOpen, setRecentsOpen] = useState(false);
   const recentsOpenRef = useRef(false);
-  recentsOpenRef.current = recentsOpen;
+  useEffect(() => {
+    recentsOpenRef.current = recentsOpen;
+  }, [recentsOpen]);
   useFreshChatPerOwner();
   useReserveSpace(open);
 
   // The list of Recents never stays open behind a closed panel
-  useEffect(() => {
-    if (!open) setRecentsOpen(false);
-  }, [open]);
+  if (!open && recentsOpen) setRecentsOpen(false);
 
   const focusInput = () => setTimeout(() => panelRef.current?.querySelector("input")?.focus(), 0);
 

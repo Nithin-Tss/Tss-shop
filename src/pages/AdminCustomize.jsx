@@ -963,7 +963,7 @@ export default function AdminCustomizePage() {
     }
   }
 
-  function scheduleSave(delay = 900) {
+  function scheduleSave() {
     const state = saveRef.current;
     clearTimeout(state.timer);
     // Nothing differs from what is saved (e.g. the code editor's change was just loaded): nothing to
@@ -1516,9 +1516,8 @@ export default function AdminCustomizePage() {
   useEffect(() => {
     if (status !== "ready") return;
     engineRef.current.scheduleSync();
-    const quick = syncedRef.current.quickSave;
     syncedRef.current.quickSave = false;
-    scheduleSave(quick ? 200 : 900);
+    scheduleSave();
   }, [data, customizer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Selecting a section or block only moves the outline in the preview (shown in Edit mode);
