@@ -17,6 +17,7 @@ import {
   getThemeCustomizer,
   saveThemeCustomizer,
   previewTheme,
+  previewKeyOf,
   getSyncedSections,
   postSyncTiming,
   subscribeThemeEvents,
@@ -415,9 +416,10 @@ export default function AdminCustomizePage() {
     []
   );
 
+  // The lists below load once the editor is ready, so they don't compete with the four calls it opens on
   useEffect(() => {
-    loadStorePages();
-  }, [loadStorePages]);
+    if (status === "ready") loadStorePages();
+  }, [status, loadStorePages]);
 
   // Posts written in Blog posts; the article preview keeps its post while that post is still published
   const loadBlogPosts = useCallback(
@@ -435,8 +437,8 @@ export default function AdminCustomizePage() {
   );
 
   useEffect(() => {
-    loadBlogPosts();
-  }, [loadBlogPosts]);
+    if (status === "ready") loadBlogPosts();
+  }, [status, loadBlogPosts]);
 
   // What the server last saved, to send only the changes
   const lastSavedRef = useRef(null);
@@ -542,6 +544,7 @@ export default function AdminCustomizePage() {
   // Products and collections only fill the pickers, so they load after the editor opens
   // instead of holding it up (the product list is the largest response).
   useEffect(() => {
+    if (status !== "ready") return;
     // A failed load leaves the picker empty: keep why, so it says so instead of "Add products first"
     apiRequest("/api/v1/catalog/collections/")
       .then(setCollections)
@@ -563,7 +566,7 @@ export default function AdminCustomizePage() {
         setProducts([]);
         setCatalogErrors((errors) => ({ ...errors, products: catalogError(e, "products") }));
       });
-  }, []);
+  }, [status]);
 
   // Warn before leaving with unsaved changes
   useEffect(() => {
@@ -1396,19 +1399,21 @@ export default function AdminCustomizePage() {
     engineRef.current.replaceImage = replaceImage;
   });
 
+  // Only the sample the open page shows can change what is rendered: another page's sample loading late
+  // (the posts, pages or products lists arrive after the editor opens) must not render the preview again
+  const previewTargetKey = previewKeyOf({
+    page,
+    product: sampleProductId,
+    article: sampleArticle,
+    collection: sampleCollection,
+    handle: samplePage,
+    customer: customerPage,
+  });
+
   // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed
   useEffect(() => {
     if (status === "ready") engineRef.current.renderFull();
-  }, [
-    status,
-    page,
-    previewKey,
-    sampleArticle,
-    sampleProductId,
-    sampleCollection,
-    samplePage,
-    customerPage,
-  ]);
+  }, [status, previewKey, previewTargetKey]);
 
   // The address remembers the page, its product or post, and the open section (a refresh shows them again)
   useEffect(() => {
