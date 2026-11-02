@@ -83,7 +83,10 @@ function Inline({ text }) {
   text.split(/(`[^`\n]+`)/g).forEach((piece, i) => {
     if (piece.length > 2 && piece.startsWith("`") && piece.endsWith("`")) {
       parts.push(
-        <code key={`c${i}`} className="rounded bg-[#ECEEF1] px-1 py-px font-mono text-[12px] text-[#1F2433]">
+        <code
+          key={`c${i}`}
+          className="rounded bg-[#ECEEF1] px-1 py-px font-mono text-[12px] text-[#1F2433]"
+        >
           {piece.slice(1, -1)}
         </code>
       );

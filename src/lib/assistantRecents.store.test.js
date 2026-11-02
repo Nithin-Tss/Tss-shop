@@ -27,7 +27,10 @@ function fakeStorage({ limit = Infinity } = {}) {
   };
 }
 
-const answerWith = (text, extra = {}) => () => Promise.resolve({ ok: true, answer: text, tools: [], ...extra });
+const answerWith =
+  (text, extra = {}) =>
+  () =>
+    Promise.resolve({ ok: true, answer: text, tools: [], ...extra });
 
 async function chatWith(store, ...questions) {
   for (const q of questions) await store.send(q);
@@ -132,9 +135,16 @@ describe("what is saved", () => {
       id: 7,
       role: "assistant",
       text: "Open the footer.",
-      tools: [{ name: "theme_files", arguments: { path: "sections/footer.liquid", secret: "x" } }, { name: "theme_files" }],
+      tools: [
+        { name: "theme_files", arguments: { path: "sections/footer.liquid", secret: "x" } },
+        { name: "theme_files" },
+      ],
       actions: [
-        { label: "Open footer.liquid in Code editor", path: "/admin/online-store/code?file=sections%2Ffooter.liquid", extra: 1 },
+        {
+          label: "Open footer.liquid in Code editor",
+          path: "/admin/online-store/code?file=sections%2Ffooter.liquid",
+          extra: 1,
+        },
         { label: "Evil", path: "https://evil.example" },
       ],
       startedAt: 123,
@@ -144,7 +154,12 @@ describe("what is saved", () => {
       role: "assistant",
       text: "Open the footer.",
       tools: [{ name: "theme_files" }],
-      actions: [{ label: "Open footer.liquid in Code editor", path: "/admin/online-store/code?file=sections%2Ffooter.liquid" }],
+      actions: [
+        {
+          label: "Open footer.liquid in Code editor",
+          path: "/admin/online-store/code?file=sections%2Ffooter.liquid",
+        },
+      ],
     });
   });
 
@@ -160,7 +175,9 @@ describe("what is saved", () => {
     store.newChat();
     const [chat] = store.getState().recents;
     expect(chat.messages).toHaveLength(MAX_SAVED_MESSAGES);
-    expect(Math.max(...chat.messages.map((m) => m.text.length))).toBeLessThanOrEqual(MAX_SAVED_TEXT + 1);
+    expect(Math.max(...chat.messages.map((m) => m.text.length))).toBeLessThanOrEqual(
+      MAX_SAVED_TEXT + 1
+    );
   });
 
   it("does not save a chat that has no question in it", () => {
@@ -171,7 +188,11 @@ describe("what is saved", () => {
 });
 
 describe("sessionStorage", () => {
-  const options = (storage, owner = "a@b.c:s1") => ({ storage, storageKey: KEY, getOwner: () => owner });
+  const options = (storage, owner = "a@b.c:s1") => ({
+    storage,
+    storageKey: KEY,
+    getOwner: () => owner,
+  });
 
   it("writes Recents (and only Recents) for the owner, and a new store reads them back", async () => {
     const storage = fakeStorage();
@@ -195,13 +216,23 @@ describe("sessionStorage", () => {
     await chatWith(store, "Mine");
     store.newChat();
 
-    expect(createChatStore(answerWith("A"), options(storage, "other@x.y:s1")).getState().recents).toEqual([]);
-    expect(createChatStore(answerWith("A"), options(storage, "a@b.c:s2")).getState().recents).toEqual([]);
+    expect(
+      createChatStore(answerWith("A"), options(storage, "other@x.y:s1")).getState().recents
+    ).toEqual([]);
+    expect(
+      createChatStore(answerWith("A"), options(storage, "a@b.c:s2")).getState().recents
+    ).toEqual([]);
     expect(createChatStore(answerWith("A"), options(storage, null)).getState().recents).toEqual([]);
 
     storage.setItem(KEY, "{not json");
     expect(createChatStore(answerWith("A"), options(storage)).getState().recents).toEqual([]);
-    storage.setItem(KEY, JSON.stringify({ owner: "a@b.c:s1", chats: [{ id: 1 }, null, { id: "x", savedAt: 1, messages: [] }] }));
+    storage.setItem(
+      KEY,
+      JSON.stringify({
+        owner: "a@b.c:s1",
+        chats: [{ id: 1 }, null, { id: "x", savedAt: 1, messages: [] }],
+      })
+    );
     expect(createChatStore(answerWith("A"), options(storage)).getState().recents).toEqual([]);
   });
 
@@ -217,7 +248,12 @@ describe("sessionStorage", () => {
             savedAt: Date.now(),
             messages: [
               { role: "user", text: "q" },
-              { role: "assistant", text: "a", actions: [{ label: "x", path: "javascript:alert(1)" }], password: "p" },
+              {
+                role: "assistant",
+                text: "a",
+                actions: [{ label: "x", path: "javascript:alert(1)" }],
+                password: "p",
+              },
             ],
           },
         ],
@@ -310,7 +346,9 @@ describe("sessionStorage", () => {
 
 describe("A reopened chat continues with its history", () => {
   it("sends the reopened chat's earlier turns with the next question, and not the chat it replaced", async () => {
-    const ask = vi.fn((question) => Promise.resolve({ ok: true, answer: `answer to ${question}`, tools: [] }));
+    const ask = vi.fn((question) =>
+      Promise.resolve({ ok: true, answer: `answer to ${question}`, tools: [] })
+    );
     const store = createChatStore(ask);
     await chatWith(store, "View all button");
     store.newChat();

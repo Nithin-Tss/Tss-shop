@@ -8,7 +8,8 @@ export const EXAMPLE_QUESTIONS = [
   "Show me the latest orders",
 ];
 
-export const INPUT_HINT = "I read text only. Paste the lines you see; screenshots are not supported yet.";
+export const INPUT_HINT =
+  "I read text only. Paste the lines you see; screenshots are not supported yet.";
 
 const sparkle = (
   <svg
@@ -236,10 +237,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
   };
 
   return (
-    <section
-      aria-label="Assistant chat"
-      className="flex h-full min-h-[420px] flex-col"
-    >
+    <section aria-label="Assistant chat" className="flex h-full min-h-[420px] flex-col">
       <div
         ref={listRef}
         aria-live="polite"
@@ -248,11 +246,18 @@ export default function AssistantChat({ chat, ask, onAction }) {
         {messages.length === 0 && !pending && (
           <div className="flex h-full flex-col items-center justify-center text-center">
             {illustration}
-            <h2 className="mt-4 text-[21px] font-semibold leading-7 text-[#111827]">Where should we begin?</h2>
+            <h2 className="mt-4 text-[21px] font-semibold leading-7 text-[#111827]">
+              Where should we begin?
+            </h2>
             {/* Only here, in the empty chat: stacked under the greeting, never next to the input */}
             <div className="mt-5 flex w-full max-w-[300px] flex-col items-center gap-2.5">
               {EXAMPLE_QUESTIONS.map((question) => (
-                <button key={question} type="button" onClick={() => send(question)} className={chip}>
+                <button
+                  key={question}
+                  type="button"
+                  onClick={() => send(question)}
+                  className={chip}
+                >
                   {question}
                 </button>
               ))}
@@ -285,7 +290,13 @@ export default function AssistantChat({ chat, ask, onAction }) {
             className="h-9 min-w-0 flex-1 bg-transparent text-[13px] text-[#111827] outline-none placeholder:text-[#9CA3AF] disabled:cursor-not-allowed disabled:text-[#9CA3AF]"
           />
           {pending ? (
-            <button type="button" aria-label="Stop" title="Stop" onClick={stop} className={roundButton}>
+            <button
+              type="button"
+              aria-label="Stop"
+              title="Stop"
+              onClick={stop}
+              className={roundButton}
+            >
               {stopSquare}
             </button>
           ) : (

@@ -56,7 +56,9 @@ describe("AssistantRecents", () => {
   it("says No previous chats when there are none", () => {
     render(<Harness store={createChatStore(answer)} />);
     fireEvent.click(pill());
-    expect(screen.getByRole("region", { name: "Recent chats" }).textContent).toContain("No previous chats");
+    expect(screen.getByRole("region", { name: "Recent chats" }).textContent).toContain(
+      "No previous chats"
+    );
   });
 
   it("lists previous chats, newest first, by their first question with a time", async () => {
@@ -66,7 +68,9 @@ describe("AssistantRecents", () => {
     render(<Harness store={store} />);
     fireEvent.click(pill());
 
-    const items = within(screen.getByRole("region", { name: "Recent chats" })).getAllByRole("listitem");
+    const items = within(screen.getByRole("region", { name: "Recent chats" })).getAllByRole(
+      "listitem"
+    );
     expect(items).toHaveLength(2);
     expect(items[0].textContent).toContain("Newer question about sales");
     expect(items[1].textContent).toContain("Older question about stock");
@@ -83,7 +87,10 @@ describe("AssistantRecents", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^Question to reopen/ }));
 
-    expect(store.getState().messages.map((m) => m.text)).toEqual(["Question to reopen", "an answer"]);
+    expect(store.getState().messages.map((m) => m.text)).toEqual([
+      "Question to reopen",
+      "an answer",
+    ]);
     expect(screen.queryByRole("region", { name: "Recent chats" })).toBeNull();
     expect(opened).toBe(1);
   });
@@ -101,7 +108,9 @@ describe("AssistantRecents", () => {
     expect(list.textContent).not.toContain("Second");
 
     fireEvent.click(screen.getByRole("button", { name: "Clear all" }));
-    expect(screen.getByRole("region", { name: "Recent chats" }).textContent).toContain("No previous chats");
+    expect(screen.getByRole("region", { name: "Recent chats" }).textContent).toContain(
+      "No previous chats"
+    );
     expect(store.getState().recents).toEqual([]);
   });
 

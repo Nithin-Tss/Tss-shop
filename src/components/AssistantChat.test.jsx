@@ -32,13 +32,16 @@ describe("AssistantChat", () => {
 
   it("shows a small hint under the input", () => {
     render(<AssistantChat ask={vi.fn()} />);
-    expect(text()).toContain("I read text only. Paste the lines you see; screenshots are not supported yet.");
+    expect(text()).toContain(
+      "I read text only. Paste the lines you see; screenshots are not supported yet."
+    );
   });
 
   it("shows a guided answer as one list and offers no Next chip", async () => {
     const ask = vi.fn().mockResolvedValueOnce({
       ok: true,
-      answer: "1. Go to Online Store > Edit theme.\n2. Click the section.\n3. Save, then check the preview.",
+      answer:
+        "1. Go to Online Store > Edit theme.\n2. Click the section.\n3. Save, then check the preview.",
       tools: [],
     });
     render(<AssistantChat ask={ask} />);
@@ -154,7 +157,10 @@ describe("AssistantChat", () => {
         answer: "Open the footer file.",
         tools: [{ name: "theme_files" }, { name: "theme_files" }, { name: "admin_help" }],
         actions: [
-          { label: "Open footer.liquid in Code editor", path: "/admin/online-store/code?file=sections%2Ffooter.liquid" },
+          {
+            label: "Open footer.liquid in Code editor",
+            path: "/admin/online-store/code?file=sections%2Ffooter.liquid",
+          },
           { label: "Open Customize", path: "/admin/online-store/customize" },
         ],
       })

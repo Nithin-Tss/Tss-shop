@@ -46,7 +46,9 @@ describe("cleanActions", () => {
   });
 
   it("offers at most three", () => {
-    const many = Array.from({ length: 6 }, (_, i) => button(`/admin/online-store/pages${i ? "" : ""}`, `B${i}`));
+    const many = Array.from({ length: 6 }, (_, i) =>
+      button(`/admin/online-store/pages${i ? "" : ""}`, `B${i}`)
+    );
     expect(cleanActions(many)).toHaveLength(3);
   });
 });
@@ -72,7 +74,12 @@ describe("askAssistant", () => {
   it("sends no theme header when none is being edited", async () => {
     getEditingThemeId.mockReturnValue("");
     await askAssistant("hi");
-    expect(apiPost).toHaveBeenCalledWith("/api/v1/assistant/chat/", { message: "hi" }, {}, undefined);
+    expect(apiPost).toHaveBeenCalledWith(
+      "/api/v1/assistant/chat/",
+      { message: "hi" },
+      {},
+      undefined
+    );
   });
 
   it("sends the earlier turns as history, and leaves it out when there are none", async () => {
@@ -89,7 +96,12 @@ describe("askAssistant", () => {
       undefined
     );
     await askAssistant("hi", undefined, []);
-    expect(apiPost).toHaveBeenLastCalledWith("/api/v1/assistant/chat/", { message: "hi" }, {}, undefined);
+    expect(apiPost).toHaveBeenLastCalledWith(
+      "/api/v1/assistant/chat/",
+      { message: "hi" },
+      {},
+      undefined
+    );
   });
 
   it("returns only buttons that pass the checks", async () => {
@@ -99,11 +111,16 @@ describe("askAssistant", () => {
       data: {
         answer: "a",
         tools: [],
-        actions: [button("/admin/online-store/code?file=sections%2Ffooter.liquid"), button("https://evil.example")],
+        actions: [
+          button("/admin/online-store/code?file=sections%2Ffooter.liquid"),
+          button("https://evil.example"),
+        ],
       },
     });
     const result = await askAssistant("x");
-    expect(result.actions).toEqual([button("/admin/online-store/code?file=sections%2Ffooter.liquid")]);
+    expect(result.actions).toEqual([
+      button("/admin/online-store/code?file=sections%2Ffooter.liquid"),
+    ]);
   });
 
   it("passes the AbortSignal to the request", async () => {
@@ -116,6 +133,9 @@ describe("askAssistant", () => {
   it("answers { ok: false, aborted: true } for a cancelled request, with no error text", async () => {
     getEditingThemeId.mockReturnValue("");
     apiPost.mockResolvedValue({ ok: false, aborted: true, status: 0, formError: "" });
-    expect(await askAssistant("x", new AbortController().signal)).toEqual({ ok: false, aborted: true });
+    expect(await askAssistant("x", new AbortController().signal)).toEqual({
+      ok: false,
+      aborted: true,
+    });
   });
 });
