@@ -213,10 +213,7 @@ export default function AdminMenus() {
         const parent = { ...newItems[parentIdx] };
         parent.children = [...parent.children];
         const child = { ...parent.children[childIdx] };
-        child.children = [
-          ...(child.children || []),
-          { title: "", url: "", badge: "" },
-        ];
+        child.children = [...(child.children || []), { title: "", url: "", badge: "" }];
         parent.children[childIdx] = child;
         newItems[parentIdx] = parent;
       }
@@ -797,7 +794,10 @@ export default function AdminMenus() {
                                   (Optional card displayed on the side of the mega menu)
                                 </span>
                               </div>
-                              {(item.promo_image || item.promo_title || item.promo_subtitle || item.promo_url) && (
+                              {(item.promo_image ||
+                                item.promo_title ||
+                                item.promo_subtitle ||
+                                item.promo_url) && (
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -959,9 +959,7 @@ export default function AdminMenus() {
                                   <div className="flex-1 min-w-[150px]">
                                     <LinkField
                                       value={child.url}
-                                      onChange={(url) =>
-                                        handleChangeItem(idx, "url", url, cIdx)
-                                      }
+                                      onChange={(url) => handleChangeItem(idx, "url", url, cIdx)}
                                       {...linkData}
                                       label="Column link"
                                       compact
@@ -1068,13 +1066,7 @@ export default function AdminMenus() {
                                           <LinkField
                                             value={sub.url}
                                             onChange={(url) =>
-                                              handleChangeItem(
-                                                idx,
-                                                "url",
-                                                url,
-                                                cIdx,
-                                                sIdx
-                                              )
+                                              handleChangeItem(idx, "url", url, cIdx, sIdx)
                                             }
                                             {...linkData}
                                             label="Link destination"
