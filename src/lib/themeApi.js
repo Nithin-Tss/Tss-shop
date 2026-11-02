@@ -436,7 +436,14 @@ export function deleteMediaAsset(id) {
 
 // What a full render of the preview depends on: the page and only the sample that page shows.
 // A sample for another page (posts, pages or products arriving late) is not part of it.
-export function previewKeyOf({ page, product = "", article = "", collection = "", handle = "", customer = "" }) {
+export function previewKeyOf({
+  page,
+  product = "",
+  article = "",
+  collection = "",
+  handle = "",
+  customer = "",
+}) {
   const base = String(page || "").split(".")[0];
   return [
     page,
