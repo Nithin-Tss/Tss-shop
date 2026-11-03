@@ -240,6 +240,8 @@ export default function AdminCustomizePage() {
     () => startParams.get("collection") || ""
   );
 
+  const [sampleQuery, setSampleQuery] = useState(() => startParams.get("q") || "");
+
   // Visible store pages (About us, ...), and the one the Page preview shows (its handle)
   const [storePages, setStorePages] = useState([]);
 
@@ -381,6 +383,8 @@ export default function AdminCustomizePage() {
 
   const sampleCollectionRef = useRef("");
 
+  const sampleQueryRef = useRef("");
+
   const samplePageRef = useRef("");
 
   const customerPageRef = useRef("");
@@ -397,6 +401,7 @@ export default function AdminCustomizePage() {
     sampleProductRef.current = sampleProductId;
     sampleArticleRef.current = sampleArticle;
     sampleCollectionRef.current = sampleCollection;
+    sampleQueryRef.current = sampleQuery;
     samplePageRef.current = samplePage;
     customerPageRef.current = customerPage;
   });
@@ -599,7 +604,8 @@ export default function AdminCustomizePage() {
     }
 
     if (page === "collection") {
-      return `${base}/collections/${sampleCollection || "all"}`;
+      const collUrl = `${base}/collections/${sampleCollection || "all"}`;
+      return sampleQuery ? `${collUrl}?q=${encodeURIComponent(sampleQuery)}` : collUrl;
     }
 
     if (page === "blog") return `${base}/blog`;
@@ -622,6 +628,7 @@ export default function AdminCustomizePage() {
       product: pageRef.current === "product" ? sampleProductRef.current || "" : "",
       article: pageRef.current === "article" ? sampleArticleRef.current : "",
       collection: pageRef.current === "collection" ? sampleCollectionRef.current : "",
+      q: pageRef.current === "collection" ? sampleQueryRef.current || "" : "",
       handle: basePage(pageRef.current) === "page" ? samplePageRef.current : "",
       customer: customerPageRef.current,
     };
@@ -1437,7 +1444,10 @@ export default function AdminCustomizePage() {
   // open that page's own template here. In Edit mode its main section (e.g. Product information) is
   // selected; with Edit mode Off nothing is selected. The page it came from is kept for "Back".
   function openStorePage(path) {
-    const [first, second, third] = path.split("/").filter(Boolean);
+    const [pathname, queryString] = path.split("?");
+    const searchParams = new URLSearchParams(queryString || "");
+    const qParam = searchParams.get("q") || "";
+    const [first, second, third] = pathname.split("/").filter(Boolean);
     if (first === "account" && (second === "login" || second === "register")) {
       // Sign in / create account: shown in the preview; "Edit code" there opens templates/<page>.liquid
       setCustomerPage(second);
@@ -1448,7 +1458,7 @@ export default function AdminCustomizePage() {
     setCustomerPage("");
     let next = "index";
     if (first === "products" && second) next = "product";
-    else if (first === "collections") next = "collection";
+    else if (first === "collections" || first === "search") next = "collection";
     else if (first === "blog") next = second && !third ? "article" : "blog";
     else if (first === "pages" && second) next = "page";
     else if (first === "checkout") next = "checkout";
@@ -1476,10 +1486,15 @@ export default function AdminCustomizePage() {
         product: sampleProductRef.current,
         article: sampleArticleRef.current,
         collection: sampleCollectionRef.current,
+        q: sampleQueryRef.current,
         handle: samplePageRef.current,
       },
     ]);
-    if (next === "collection") setSampleCollection(second && second !== "all" ? second : "");
+    if (next === "collection") {
+      setSampleQuery(qParam);
+      sampleQueryRef.current = qParam;
+      setSampleCollection(second && second !== "all" && second !== "search" ? second : "");
+    }
     if (next === "product") setSampleProductId(second);
     if (next === "article") setSampleArticle(second);
     if (next === "page") setSamplePage(second);
@@ -1502,7 +1517,11 @@ export default function AdminCustomizePage() {
     setCustomerPage("");
     if (previous.product) setSampleProductId(previous.product);
     if (previous.article) setSampleArticle(previous.article);
-    if (previous.page === "collection") setSampleCollection(previous.collection || "");
+    if (previous.page === "collection") {
+      setSampleCollection(previous.collection || "");
+      setSampleQuery(previous.q || "");
+      sampleQueryRef.current = previous.q || "";
+    }
     if (previous.handle) setSamplePage(previous.handle);
     setPage(previous.page);
     setAdding(false);
