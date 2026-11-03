@@ -2,7 +2,8 @@ import { getActiveStore, getSession, setStores, setTokens, signOut } from "@/lib
 import { getEditingThemeId } from "@/lib/editingTheme";
 import { checkImageFile } from "@/lib/imageUpload";
 
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// The localhost fallback is for `npm run dev` only; production builds must set VITE_API_URL (see Dockerfile).
+export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "");
 
 function getHeaders(extraHeaders = {}) {
   const flat =

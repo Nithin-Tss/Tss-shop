@@ -7,8 +7,9 @@ RUN npm ci
 COPY . .
 
 # Vite inlines this at build time
-ARG VITE_API_URL=http://localhost:8000
+ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
+RUN test -n "$VITE_API_URL" || (echo "Set --build-arg VITE_API_URL=https://<your backend domain>" && exit 1)
 RUN npm run build
 
 FROM nginx:1.27-alpine
