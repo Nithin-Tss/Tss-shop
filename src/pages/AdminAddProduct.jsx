@@ -1045,7 +1045,8 @@ export function ProductForm({ productId }) {
     const errors = {};
     if (!name.trim()) errors.title = "Give your product a name.";
     if (price !== "" && !(parseFloat(price) >= 0)) errors.price = "Enter a price of 0 or more.";
-    if (compareAt !== "" && !(parseFloat(compareAt) >= 0)) errors.compareAt = "Enter a compare-at price of 0 or more.";
+    if (compareAt !== "" && !(parseFloat(compareAt) >= 0))
+      errors.compareAt = "Enter a compare-at price of 0 or more.";
     if (quantity !== "" && !(Number.isInteger(Number(quantity)) && Number(quantity) >= 0)) {
       errors.quantity = "Enter a whole number of 0 or more.";
     }
@@ -1701,7 +1702,11 @@ export function ProductForm({ productId }) {
                             ?
                           </span>
                         </span>
-                        <MoneyInput value={compareAt} onChange={setCompareAt} error={fieldErrors.compareAt} />
+                        <MoneyInput
+                          value={compareAt}
+                          onChange={setCompareAt}
+                          error={fieldErrors.compareAt}
+                        />
                         <FieldError message={fieldErrors.compareAt} />
                         {!fieldErrors.compareAt &&
                           compareAt !== "" &&
