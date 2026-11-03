@@ -323,7 +323,8 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       // Remember the latest version of every synced file, so Save always builds on it
       for (const [name, info] of Object.entries(synced || {})) {
         const path = info.path;
-        const changed = versionsRef.current[name] !== undefined && versionsRef.current[name] !== info.version;
+        const changed =
+          versionsRef.current[name] !== undefined && versionsRef.current[name] !== info.version;
         versionsRef.current[name] = info.version;
         if (changed && path in drafts && drafts[path] !== loaded.files[path]) {
           setNotice(

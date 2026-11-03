@@ -14,7 +14,11 @@ export function listThemeFiles(themeId) {
 const themeHeaders = (themeId) => (themeId ? { headers: { "X-Theme-Id": themeId } } : {});
 
 export function saveThemeFile(path, content, themeId) {
-  return apiRequest(`${BASE}/files/`, { method: "POST", body: { path, content }, ...themeHeaders(themeId) });
+  return apiRequest(`${BASE}/files/`, {
+    method: "POST",
+    body: { path, content },
+    ...themeHeaders(themeId),
+  });
 }
 
 export function deleteThemePath(path) {
