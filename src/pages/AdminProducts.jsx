@@ -1121,27 +1121,28 @@ export default function ProductsPage() {
                     )}
                   </div>
                 </div>
-                {canDelete && (allMatching || (allSelected && matchCount > pageProducts.length)) && (
-                  <p
-                    role="status"
-                    className="mx-6 mb-3 rounded-lg bg-[#F3F1EC] px-3 py-2 text-center text-sm text-[#5A5750]"
-                  >
-                    {allMatching ? (
-                      <>All {matchCount.toLocaleString()} products selected · </>
-                    ) : (
-                      <>{pageProducts.length.toLocaleString()} selected · </>
-                    )}
-                    <button
-                      type="button"
-                      onClick={allMatching ? clearSelection : selectAllMatching}
-                      className="font-medium text-charcoal-navy underline"
+                {canDelete &&
+                  (allMatching || (allSelected && matchCount > pageProducts.length)) && (
+                    <p
+                      role="status"
+                      className="mx-6 mb-3 rounded-lg bg-[#F3F1EC] px-3 py-2 text-center text-sm text-[#5A5750]"
                     >
-                      {allMatching
-                        ? "Clear selection"
-                        : `Select all ${matchCount.toLocaleString()} products`}
-                    </button>
-                  </p>
-                )}
+                      {allMatching ? (
+                        <>All {matchCount.toLocaleString()} products selected · </>
+                      ) : (
+                        <>{pageProducts.length.toLocaleString()} selected · </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={allMatching ? clearSelection : selectAllMatching}
+                        className="font-medium text-charcoal-navy underline"
+                      >
+                        {allMatching
+                          ? "Clear selection"
+                          : `Select all ${matchCount.toLocaleString()} products`}
+                      </button>
+                    </p>
+                  )}
                 {notice && (
                   <p
                     role="status"
