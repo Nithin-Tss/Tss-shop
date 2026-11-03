@@ -237,11 +237,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   // a message about them, and the open History ({ name, version, history })
   const [syncedFiles, setSyncedFiles] = useState({});
   const versionsRef = useRef({});
+  // The theme this editor loaded: every later read and save names it, so they cannot drift to another one
+  const loadedThemeRef = useRef(null);
   const [notice, setNotice] = useState("");
   const [history, setHistory] = useState(null);
 
   async function fetchProject() {
-    const data = await listThemeFiles();
+    const data = await listThemeFiles(loadedThemeRef.current);
     const files = {};
     const folders = [];
     data.files.forEach((f) => {
@@ -265,6 +267,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         fetchProject(),
         getSyncedSections().catch(() => ({})),
       ]);
+      loadedThemeRef.current = loaded.theme?.id || null;
       const files = {};
       for (const [name, info] of Object.entries(synced || {})) {
         files[info.path] = { name, label: info.label || name, kind: info.kind || "section" };
@@ -313,7 +316,23 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   const refreshRef = useRef(null);
   const refresh = async () => {
     try {
-      setProject(await fetchProject());
+      const [loaded, synced] = await Promise.all([
+        fetchProject(),
+        getSyncedSections(loadedThemeRef.current).catch(() => null),
+      ]);
+      // Remember the latest version of every synced file, so Save always builds on it
+      for (const [name, info] of Object.entries(synced || {})) {
+        const path = info.path;
+        const changed = versionsRef.current[name] !== undefined && versionsRef.current[name] !== info.version;
+        versionsRef.current[name] = info.version;
+        if (changed && path in drafts && drafts[path] !== loaded.files[path]) {
+          setNotice(
+            `${baseName(path)} changed elsewhere (version ${info.version}). Your unsaved edits are kept: ` +
+              "saving them puts your version on top (the other version stays in History)."
+          );
+        }
+      }
+      setProject(loaded);
       setPreviewKey((k) => k + 1);
     } catch {
       // keep showing what we have; the next save or refresh reports problems
@@ -322,6 +341,21 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   useEffect(() => {
     refreshRef.current = refresh;
   });
+
+  // Live events can be missed (a dropped connection, a sleeping tab): every few seconds, compare
+  // the synced files' versions with the ones this editor has and reload when any is newer.
+  useEffect(() => {
+    if (status !== "ready" || !Object.keys(syncedFiles).length) return undefined;
+    const timer = setInterval(async () => {
+      if (document.visibilityState !== "visible") return;
+      const synced = await getSyncedSections(loadedThemeRef.current).catch(() => null);
+      const newer = Object.entries(synced || {}).some(
+        ([name, info]) => versionsRef.current[name] !== info.version
+      );
+      if (newer) refreshRef.current();
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [status, syncedFiles]);
 
   useEffect(() => {
     // Initial fetch: status and error already start as "loading" and "", so nothing re-renders early
@@ -499,10 +533,15 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     // A synced section: its code is checked first (invalid Liquid or schema JSON is refused with
     // its line, and the saved version keeps working); then the customizer's panel is rebuilt from it
     const synced = syncedFiles[path];
+    if (synced) {
+      // Build on the latest version, whatever this editor saw last
+      const latest = await getSyncedSections(loadedThemeRef.current).catch(() => null);
+      if (latest?.[synced.name]) versionsRef.current[synced.name] = latest[synced.name].version;
+    }
     const saved = await run(() =>
       synced
-        ? saveSyncedFile(path, content, versionsRef.current[synced.name])
-        : saveThemeFile(path, content)
+        ? saveSyncedFile(path, content, versionsRef.current[synced.name], loadedThemeRef.current)
+        : saveThemeFile(path, content, loadedThemeRef.current)
     );
     if (!saved) return;
     setSavedNote(

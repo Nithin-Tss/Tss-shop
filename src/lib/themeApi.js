@@ -6,12 +6,15 @@ import { getSession } from "@/lib/auth";
 const BASE = "/api/v1/themes";
 
 // -> { store, storefrontUrl, files: [{ path, content }] }
-export function listThemeFiles() {
-  return apiRequest(`${BASE}/files/`);
+// themeId (optional) pins the call to the theme the editor loaded; the timestamp keeps any cache out of it
+export function listThemeFiles(themeId) {
+  return apiRequest(`${BASE}/files/?_=${Date.now()}`, themeHeaders(themeId));
 }
 
-export function saveThemeFile(path, content) {
-  return apiRequest(`${BASE}/files/`, { method: "POST", body: { path, content } });
+const themeHeaders = (themeId) => (themeId ? { headers: { "X-Theme-Id": themeId } } : {});
+
+export function saveThemeFile(path, content, themeId) {
+  return apiRequest(`${BASE}/files/`, { method: "POST", body: { path, content }, ...themeHeaders(themeId) });
 }
 
 export function deleteThemePath(path) {
@@ -288,13 +291,14 @@ export async function uploadThemeImage(file, onProgress) {
 export const SYNC_CLIENT = Math.random().toString(36).slice(2, 12);
 
 // -> { footer: { path, label, spec, values, version } }
-export function getSyncedSections() {
-  return apiRequest(`${BASE}/sections/`);
+export function getSyncedSections(themeId) {
+  return apiRequest(`${BASE}/sections/?_=${Date.now()}`, themeHeaders(themeId));
 }
 
 // Save a synced section's file from the code editor: -> { path, size, sync? }
-export function saveSyncedFile(path, content, baseVersion) {
+export function saveSyncedFile(path, content, baseVersion, themeId) {
   return apiRequest(`${BASE}/files/`, {
+    ...themeHeaders(themeId),
     method: "POST",
     body: {
       path,
