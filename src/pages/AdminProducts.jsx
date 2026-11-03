@@ -657,6 +657,9 @@ export default function ProductsPage() {
     Boolean(productsCache.items) && productsCache.storeId === activeStoreId()
   );
   const [selected, setSelected] = useState(() => new Set());
+  // "Select all N products": every product the current filter and search match, on every page
+  // (kept as the filter it was made for, so changing the filter or search drops it)
+  const [allMatchingKey, setAllMatchingKey] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [activating, setActivating] = useState(false);
   const [notice, setNotice] = useState("");
@@ -738,21 +741,74 @@ export default function ProductsPage() {
   const pageProducts = filteredAndSortedProducts.slice(pageStart, pageStart + pageSize);
   const allSelected = pageProducts.length > 0 && pageProducts.every((p) => selected.has(p.id));
 
-  const toggleOne = (id) =>
+  const filterKey = JSON.stringify([statusFilter, searchQuery.trim()]);
+  const allMatching = allMatchingKey === filterKey;
+  const matchCount = filteredAndSortedProducts.length;
+  const selectedCount = allMatching ? matchCount : selected.size;
+  const filterSpec = { status: statusFilter, q: searchQuery.trim() };
+
+  const toggleOne = (id) => {
+    // Unticking one row of "all selected" leaves a plain selection of the other matches
+    if (allMatching) setAllMatchingKey(null);
     setSelected((prev) => {
-      const next = new Set(prev);
+      const next = new Set(allMatching ? filteredAndSortedProducts.map((p) => p.id) : prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+  };
 
-  // "Select all" covers the products on this page only, so a bulk delete never reaches unseen rows
-  const toggleAll = () =>
+  // The header box covers the products on this page; "Select all N products" (below it) reaches the rest
+  const toggleAll = () => {
+    setAllMatchingKey(null);
     setSelected((prev) => {
       const next = new Set(prev);
       pageProducts.forEach((p) => (allSelected ? next.delete(p.id) : next.add(p.id)));
       return next;
     });
+  };
+
+  const selectAllMatching = () => {
+    setAllMatchingKey(filterKey);
+    setSelected(new Set(filteredAndSortedProducts.map((p) => p.id)));
+  };
+
+  const clearSelection = () => {
+    setAllMatchingKey(null);
+    setSelected(new Set());
+  };
+
+  // Sets a status on the selection; "all N selected" is sent as the filter, not as N ids
+  const setStatusOfSelected = async (status) => {
+    if (!status || !selectedCount || activating) return;
+    setActivating(true);
+    setNotice("");
+    let updated = 0;
+    const ids = [...selected];
+    const bodies = allMatching
+      ? [{ filter: filterSpec, status }]
+      : Array.from({ length: Math.ceil(ids.length / 500) }, (_, i) => ({
+          ids: ids.slice(i * 500, i * 500 + 500),
+          status,
+        }));
+    for (const body of bodies) {
+      const res = await apiPost("/api/v1/catalog/products/bulk-status/", body);
+      if (!res.ok) {
+        setNotice(
+          `${updated} updated. ${
+            res.status === 401
+              ? "Your session expired. Sign in again."
+              : res.formError || "Something went wrong."
+          }`
+        );
+        break;
+      }
+      updated += res.data.updated;
+    }
+    clearSelection();
+    setActivating(false);
+    await loadProducts();
+  };
 
   const exportCsv = async () => {
     // The store's own names for the extra fields; the defaults if they can't be fetched
@@ -764,6 +820,7 @@ export default function ProductsPage() {
   };
 
   const activateSelected = async () => {
+    if (allMatching) return setStatusOfSelected("active");
     // With nothing ticked this activates every draft product, not just this page
     const drafts = products.filter(
       (p) => (selected.size ? selected.has(p.id) : true) && p.status === "draft"
@@ -795,13 +852,13 @@ export default function ProductsPage() {
       updated += res.data.updated;
     }
 
-    setSelected(new Set());
+    clearSelection();
     setActivating(false);
     await loadProducts();
   };
 
   const deleteSelected = async () => {
-    const count = selected.size;
+    const count = selectedCount;
     if (!count || deleting) return;
     if (!window.confirm(`Delete ${count} product${count === 1 ? "" : "s"}? This can't be undone.`))
       return;
@@ -812,10 +869,15 @@ export default function ProductsPage() {
     let deleted = 0;
     const blocked = [];
 
-    for (let start = 0; start < ids.length; start += 500) {
-      const res = await apiPost("/api/v1/catalog/products/bulk-delete/", {
-        ids: ids.slice(start, start + 500),
-      });
+    // "All N selected" is one request by filter; a plain selection goes in batches of ids
+    const batches = allMatching
+      ? [{ filter: filterSpec }]
+      : Array.from({ length: Math.ceil(ids.length / 500) }, (_, i) => ({
+          ids: ids.slice(i * 500, i * 500 + 500),
+        }));
+
+    for (const batch of batches) {
+      const res = await apiPost("/api/v1/catalog/products/bulk-delete/", batch);
       if (!res.ok) {
         setNotice(
           `${deleted} deleted. ${
@@ -838,7 +900,7 @@ export default function ProductsPage() {
       );
     }
 
-    setSelected(new Set());
+    clearSelection();
     setDeleting(false);
     await loadProducts();
   };
@@ -980,8 +1042,8 @@ export default function ProductsPage() {
               <div>
                 <div className="flex items-center justify-between px-6 py-4">
                   <p className="text-sm text-[#5A5750]">
-                    {selected.size
-                      ? `${selected.size} selected`
+                    {selectedCount
+                      ? `${selectedCount.toLocaleString()} selected`
                       : `${filteredAndSortedProducts.length} product${filteredAndSortedProducts.length === 1 ? "" : "s"}`}
                   </p>
                   <div className="flex items-center gap-3">
@@ -990,7 +1052,7 @@ export default function ProductsPage() {
                       onClick={exportCsv}
                       className="rounded-lg border border-[#E7E4DC] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-charcoal-navy transition"
                     >
-                      {selected.size ? `Export ${selected.size}` : "Export"}
+                      {selectedCount ? `Export ${selectedCount.toLocaleString()}` : "Export"}
                     </button>
                     {canManage && products.some((p) => p.status === "draft") && (
                       <button
@@ -1001,19 +1063,33 @@ export default function ProductsPage() {
                       >
                         {activating
                           ? "Activating..."
-                          : selected.size
-                            ? `Set ${selected.size} active`
+                          : selectedCount
+                            ? `Set ${selectedCount.toLocaleString()} active`
                             : "Set all drafts active"}
                       </button>
                     )}
-                    {canDelete && selected.size > 0 && (
+                    {canManage && selectedCount > 0 && (
+                      <select
+                        aria-label="Set status of selected products"
+                        value=""
+                        disabled={activating}
+                        onChange={(e) => setStatusOfSelected(e.target.value)}
+                        className="rounded-lg border border-[#E7E4DC] bg-white px-3 py-2 text-sm font-medium text-charcoal-navy disabled:opacity-50"
+                      >
+                        <option value="">Set status...</option>
+                        <option value="active">Active</option>
+                        <option value="draft">Draft</option>
+                        <option value="archived">Archived</option>
+                      </select>
+                    )}
+                    {canDelete && selectedCount > 0 && (
                       <button
                         type="button"
                         onClick={deleteSelected}
                         disabled={deleting}
                         className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 transition disabled:opacity-50"
                       >
-                        {deleting ? "Deleting..." : `Delete ${selected.size}`}
+                        {deleting ? "Deleting..." : `Delete ${selectedCount.toLocaleString()}`}
                       </button>
                     )}
                     {canDelete && products.length > 0 && (
@@ -1045,6 +1121,27 @@ export default function ProductsPage() {
                     )}
                   </div>
                 </div>
+                {canDelete && (allMatching || (allSelected && matchCount > pageProducts.length)) && (
+                  <p
+                    role="status"
+                    className="mx-6 mb-3 rounded-lg bg-[#F3F1EC] px-3 py-2 text-center text-sm text-[#5A5750]"
+                  >
+                    {allMatching ? (
+                      <>All {matchCount.toLocaleString()} products selected · </>
+                    ) : (
+                      <>{pageProducts.length.toLocaleString()} selected · </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={allMatching ? clearSelection : selectAllMatching}
+                      className="font-medium text-charcoal-navy underline"
+                    >
+                      {allMatching
+                        ? "Clear selection"
+                        : `Select all ${matchCount.toLocaleString()} products`}
+                    </button>
+                  </p>
+                )}
                 {notice && (
                   <p
                     role="status"
