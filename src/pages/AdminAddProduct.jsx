@@ -640,6 +640,9 @@ export function ProductForm({ productId }) {
 
   // 3 Pricing
   const [price, setPrice] = useState("");
+  const [compareAt, setCompareAt] = useState("");
+  const [showDisplayPrices, setShowDisplayPrices] = useState(false);
+  const [isTaxable, setIsTaxable] = useState(true);
 
   // 4 Stock
   const [sku, setSku] = useState("");
@@ -725,6 +728,9 @@ export function ProductForm({ productId }) {
         }))
     );
     setPrice(first?.price ?? "");
+    setCompareAt(first?.compare_at_price ?? "");
+    setShowDisplayPrices(first?.compare_at_price != null && first.compare_at_price !== "");
+    setIsTaxable(p.is_taxable ?? true);
     setSku(first?.sku || "");
     setWeight(first?.weight && Number(first.weight) > 0 ? first.weight : "");
     setCategoryId(p.category_id || "");
@@ -827,6 +833,8 @@ export function ProductForm({ productId }) {
     about,
     photos.map((p) => p.id),
     price,
+    compareAt,
+    isTaxable,
     sku,
     weight,
     locationId,
@@ -1037,6 +1045,7 @@ export function ProductForm({ productId }) {
     const errors = {};
     if (!name.trim()) errors.title = "Give your product a name.";
     if (price !== "" && !(parseFloat(price) >= 0)) errors.price = "Enter a price of 0 or more.";
+    if (compareAt !== "" && !(parseFloat(compareAt) >= 0)) errors.compareAt = "Enter a compare-at price of 0 or more.";
     if (quantity !== "" && !(Number.isInteger(Number(quantity)) && Number(quantity) >= 0)) {
       errors.quantity = "Enter a whole number of 0 or more.";
     }
@@ -1083,6 +1092,7 @@ export function ProductForm({ productId }) {
       handle: (handle || slugify(name)).trim(),
       ...Object.fromEntries(EXTRA_FIELDS.map((f) => [f.key, extra[f.key].trim()])),
     };
+    payload.is_taxable = isTaxable;
     if (!failedLists.includes("categories")) payload.category_id = categoryId || null;
     if (!failedLists.includes("channels")) payload.sales_channels = channelIds;
 
@@ -1094,12 +1104,14 @@ export function ProductForm({ productId }) {
           ...(first && { id: first.id }),
           sku: sku.trim(),
           price: price === "" ? null : price,
+          compare_at_price: compareAt === "" ? null : compareAt,
           weight: weight === "" ? "0" : weight,
         },
         ...others.map((v) => ({ id: v.id, sku: v.sku, price: v.price })),
       ];
     } else {
       payload.price = price === "" ? null : price;
+      payload.compare_at_price = compareAt === "" ? null : compareAt;
       payload.sku = sku.trim();
       payload.weight = weight === "" ? "0" : weight;
     }
@@ -1654,12 +1666,62 @@ export function ProductForm({ productId }) {
                 </Card>
 
                 {/* 3 PRICING */}
-                <Card title="Pricing" hint="Set what shoppers pay for this product.">
+                <Card title="Price">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Field label="Selling price" error={fieldErrors.price}>
+                    <Field label="Price" error={fieldErrors.price}>
                       <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
                     </Field>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowDisplayPrices((v) => !v)}
+                    aria-expanded={showDisplayPrices}
+                    className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-charcoal-navy hover:underline"
+                  >
+                    Additional display prices
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className={`h-4 w-4 transition-transform ${showDisplayPrices ? "rotate-180" : ""}`}
+                      aria-hidden="true"
+                    >
+                      <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
+                    </svg>
+                  </button>
+                  {showDisplayPrices && (
+                    <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div>
+                        <span className="mb-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-charcoal-navy">
+                          Compare-at price
+                          <span
+                            title="To show a reduced price, move the product's original price into Compare-at price. Enter a lower value into Price."
+                            aria-label="To show a reduced price, move the product's original price into Compare-at price. Enter a lower value into Price."
+                            className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-slate-400 text-[10px] font-bold text-slate-500"
+                          >
+                            ?
+                          </span>
+                        </span>
+                        <MoneyInput value={compareAt} onChange={setCompareAt} error={fieldErrors.compareAt} />
+                        <FieldError message={fieldErrors.compareAt} />
+                        {!fieldErrors.compareAt &&
+                          compareAt !== "" &&
+                          parseFloat(compareAt) >= 0 &&
+                          !(parseFloat(compareAt) > (parseFloat(price) || 0)) && (
+                            <span className="mt-1 block text-xs text-amber-600">
+                              Compare-at price should be higher than Price to show a discount
+                            </span>
+                          )}
+                      </div>
+                    </div>
+                  )}
+                  <label className="mt-4 flex items-center gap-2 text-[13px] text-charcoal-navy">
+                    <input
+                      type="checkbox"
+                      checked={isTaxable}
+                      onChange={(e) => setIsTaxable(e.target.checked)}
+                    />
+                    Charge tax on this product
+                  </label>
                 </Card>
 
                 {/* 4 STOCK */}
