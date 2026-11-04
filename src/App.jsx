@@ -31,6 +31,7 @@ const AdminMedia = lazy(() => import("@/pages/AdminMedia"));
 const AdminMenus = lazy(() => import("@/pages/AdminMenus"));
 const AdminInventory = lazy(() => import("@/pages/AdminInventory"));
 const AdminPurchaseOrders = lazy(() => import("@/pages/AdminPurchaseOrders"));
+const AdminTransfers = lazy(() => import("@/pages/AdminTransfers"));
 const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
 const AdminOrderDetails = lazy(() => import("@/pages/AdminOrderDetails"));
 const AdminDrafts = lazy(() => import("@/pages/AdminDrafts"));
@@ -145,6 +146,14 @@ export default function App() {
             <Route
               path="/admin/online-store/products/purchase-orders"
               element={<AdminPurchaseOrders />}
+            />
+            <Route
+              path="/admin/online-store/transfers"
+              element={<AdminTransfers />}
+            />
+            <Route
+              path="/admin/online-store/products/transfers"
+              element={<AdminTransfers />}
             />
             <Route
               path="/admin/online-store/products/:productId"
