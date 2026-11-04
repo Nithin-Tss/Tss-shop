@@ -30,6 +30,9 @@ const StorePagesPage = lazy(() => import("@/pages/AdminPages"));
 const AdminMedia = lazy(() => import("@/pages/AdminMedia"));
 const AdminMenus = lazy(() => import("@/pages/AdminMenus"));
 const AdminInventory = lazy(() => import("@/pages/AdminInventory"));
+const AdminPurchaseOrders = lazy(() => import("@/pages/AdminPurchaseOrders"));
+const AdminTransfers = lazy(() => import("@/pages/AdminTransfers"));
+const AdminGiftCards = lazy(() => import("@/pages/AdminGiftCards"));
 const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
 const AdminOrderDetails = lazy(() => import("@/pages/AdminOrderDetails"));
 const AdminDrafts = lazy(() => import("@/pages/AdminDrafts"));
@@ -139,6 +142,15 @@ export default function App() {
           </Route>
           <Route element={<RequirePermission permission="products.view" />}>
             <Route path="/admin/online-store/products" element={<AdminProducts />} />
+            <Route path="/admin/online-store/purchase-orders" element={<AdminPurchaseOrders />} />
+            <Route
+              path="/admin/online-store/products/purchase-orders"
+              element={<AdminPurchaseOrders />}
+            />
+            <Route path="/admin/online-store/transfers" element={<AdminTransfers />} />
+            <Route path="/admin/online-store/products/transfers" element={<AdminTransfers />} />
+            <Route path="/admin/online-store/gift-cards" element={<AdminGiftCards />} />
+            <Route path="/admin/online-store/products/gift-cards" element={<AdminGiftCards />} />
             <Route
               path="/admin/online-store/products/:productId"
               element={<AdminProductDetails />}
@@ -162,6 +174,7 @@ export default function App() {
           </Route>
           <Route element={<RequirePermission permission="inventory.view" />}>
             <Route path="/admin/online-store/inventory" element={<AdminInventory />} />
+            <Route path="/admin/online-store/products/inventory" element={<AdminInventory />} />
           </Route>
           <Route element={<RequirePermission permission="orders.view" />}>
             <Route path="/admin/online-store/orders" element={<AdminOrders />} />

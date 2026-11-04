@@ -135,9 +135,20 @@ export function openAccountActionsInStore(win, storeBase) {
     win.open(url, "_blank", "noopener");
   }
   win.addEventListener("click", function (event) {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
     var link = event.target.closest && event.target.closest("a[href]");
-    var url = link && (!link.target || link.target === "_self") ? storeUrl(link.getAttribute("href")) : null;
+    var url =
+      link && (!link.target || link.target === "_self")
+        ? storeUrl(link.getAttribute("href"))
+        : null;
     if (url) open(event, url);
   });
   win.addEventListener(
@@ -336,7 +347,8 @@ export default function AdminCustomizePage() {
   const saveStateRef = useRef("saved");
 
   // Which group of the Theme settings panel opens first (Header, Footer, ...)
-  const [themeGroup, setThemeGroup] = useState("colors");
+  // The Theme settings group to open (null: all closed); header/footer rows open their own group
+  const [themeGroup, setThemeGroup] = useState(null);
 
   const [previewKey, setPreviewKey] = useState(0);
 
@@ -2352,10 +2364,18 @@ export default function AdminCustomizePage() {
                         addPageTemplate();
                         return;
                       }
-                      if (value === LOGIN_PAGE || value === REGISTER_PAGE || value === ACCOUNT_PAGE) {
+                      if (
+                        value === LOGIN_PAGE ||
+                        value === REGISTER_PAGE ||
+                        value === ACCOUNT_PAGE
+                      ) {
                         // Login / register / account page: shown in the preview; its code is templates/<page>.liquid
                         setCustomerPage(
-                          value === LOGIN_PAGE ? "login" : value === REGISTER_PAGE ? "register" : "account"
+                          value === LOGIN_PAGE
+                            ? "login"
+                            : value === REGISTER_PAGE
+                              ? "register"
+                              : "account"
                         );
                         setSelected(null);
                         setAdding(false);
@@ -2996,7 +3016,7 @@ export default function AdminCustomizePage() {
                           <button
                             type="button"
                             onClick={() => {
-                              setThemeGroup("colors");
+                              setThemeGroup(null);
                               setSelected("theme");
                             }}
                             className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left ${
@@ -3056,6 +3076,8 @@ export default function AdminCustomizePage() {
                                 (group) => !isSynced(data, group.id)
                               )}
                               initialOpen={themeGroup}
+                              exclusive
+                              resetAny
                               collections={collections}
                               onChange={(key, value) =>
                                 update((d) => {

@@ -35,17 +35,24 @@ const click = (win, el) =>
 
 describe("account actions in the customizer preview", () => {
   it("opens the real store's sign-in page in a new tab instead of signing in inside the preview", () => {
-    const win = preview('<form method="post" action="/s/my-store/account/login"><button>Sign in</button></form>');
+    const win = preview(
+      '<form method="post" action="/s/my-store/account/login"><button>Sign in</button></form>'
+    );
     const event = submit(win, win.document.querySelector("form"));
     expect(event).toBe(false); // the preview did not post the form
     expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login`, "_blank", "noopener");
   });
 
   it("opens the store before the theme's form script, so the preview's button isn't left on 'Please wait...'", () => {
-    const win = preview('<form method="post" action="/s/my-store/account/login"><button>Sign in</button></form>');
+    const win = preview(
+      '<form method="post" action="/s/my-store/account/login"><button>Sign in</button></form>'
+    );
     const form = win.document.querySelector("form");
     // The theme's own script (snippets/auth-script.liquid): checks the fields, then marks the form as sending
-    const theme = vi.fn((e) => { form.dataset.sending = "1"; e.preventDefault(); });
+    const theme = vi.fn((e) => {
+      form.dataset.sending = "1";
+      e.preventDefault();
+    });
     form.addEventListener("submit", theme);
     submit(win, form);
     expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login`, "_blank", "noopener");
@@ -72,13 +79,17 @@ describe("account actions in the customizer preview", () => {
   });
 
   it("always uses the store being edited", () => {
-    const win = preview('<a href="https://elsewhere.example/s/other-store/account/login">Sign in</a>');
+    const win = preview(
+      '<a href="https://elsewhere.example/s/other-store/account/login">Sign in</a>'
+    );
     click(win, win.document.querySelector("a"));
     expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login`, "_blank", "noopener");
   });
 
   it("leaves other store links to the editor", () => {
-    const win = preview('<a href="/s/my-store/products/1">Mug</a><form action="/s/my-store/search"></form>');
+    const win = preview(
+      '<a href="/s/my-store/products/1">Mug</a><form action="/s/my-store/search"></form>'
+    );
     click(win, win.document.querySelector("a"));
     submit(win, win.document.querySelector("form"));
     expect(win.open).not.toHaveBeenCalled();
@@ -108,11 +119,15 @@ describe("account actions in the customizer preview", () => {
   });
 
   it("can't be broken out of by the store address, and needs a store", () => {
-    expect(withAccountActionsInStore("<body></body>", "https://x/</script><b>")).not.toContain("</script><b>");
+    expect(withAccountActionsInStore("<body></body>", "https://x/</script><b>")).not.toContain(
+      "</script><b>"
+    );
     expect(withAccountActionsInStore("<body></body>", "")).toBe("<body></body>");
   });
 
   it("lets the preview open the store as a normal tab", () => {
-    expect(source).toContain('sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"');
+    expect(source).toContain(
+      'sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"'
+    );
   });
 });
