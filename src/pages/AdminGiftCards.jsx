@@ -15,7 +15,14 @@ function GiftCardsIllustration({ className = "h-36 w-44" }) {
         <filter id="gc-shadow" x="25" y="30" width="150" height="95" filterUnits="userSpaceOnUse">
           <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#14130F" floodOpacity="0.1" />
         </filter>
-        <linearGradient id="card-grad" x1="35" y1="40" x2="165" y2="115" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="card-grad"
+          x1="35"
+          y1="40"
+          x2="165"
+          y2="115"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#1E1D19" />
           <stop offset="1" stopColor="#3A3832" />
         </linearGradient>
@@ -30,7 +37,16 @@ function GiftCardsIllustration({ className = "h-36 w-44" }) {
 
       {/* Main Gift Card */}
       <g filter="url(#gc-shadow)">
-        <rect x="35" y="42" width="130" height="76" rx="8" fill="url(#card-grad)" stroke="#4A4740" strokeWidth="1" />
+        <rect
+          x="35"
+          y="42"
+          width="130"
+          height="76"
+          rx="8"
+          fill="url(#card-grad)"
+          stroke="#4A4740"
+          strokeWidth="1"
+        />
         {/* Ribbon Horizontal */}
         <rect x="35" y="68" width="130" height="12" fill="url(#ribbon-grad)" opacity="0.9" />
         {/* Ribbon Vertical */}
@@ -58,7 +74,9 @@ function GiftCardsIllustration({ className = "h-36 w-44" }) {
         <circle cx="118" cy="98" r="1.5" fill="#A8A49C" />
         <circle cx="124" cy="98" r="1.5" fill="#A8A49C" />
 
-        <text x="135" y="101" fill="#FFFFFF" fontSize="8" fontFamily="monospace" fontWeight="600">8492</text>
+        <text x="135" y="101" fill="#FFFFFF" fontSize="8" fontFamily="monospace" fontWeight="600">
+          8492
+        </text>
       </g>
     </svg>
   );
@@ -102,7 +120,13 @@ export default function AdminGiftCards() {
                 type="button"
                 className="flex items-center gap-1.5 rounded-lg border border-[#D4D0C5] bg-white px-3 py-1.5 text-xs sm:text-sm font-semibold text-charcoal-navy hover:bg-[#FAF9F6] transition shadow-2xs cursor-pointer"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="h-4 w-4"
+                >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
@@ -113,7 +137,13 @@ export default function AdminGiftCards() {
                 type="button"
                 className="flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-[#1A1916] transition cursor-pointer"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="h-4 w-4"
+                >
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
@@ -150,7 +180,10 @@ export default function AdminGiftCards() {
               <div className="flex flex-wrap items-center gap-2">
                 {/* Status Filter */}
                 <div className="flex items-center gap-1.5">
-                  <label htmlFor="status-filter" className="text-xs text-[#78746A] font-medium hidden sm:inline">
+                  <label
+                    htmlFor="status-filter"
+                    className="text-xs text-[#78746A] font-medium hidden sm:inline"
+                  >
                     Status:
                   </label>
                   <select
@@ -167,7 +200,10 @@ export default function AdminGiftCards() {
 
                 {/* Sort By */}
                 <div className="flex items-center gap-1.5">
-                  <label htmlFor="sort-by" className="text-xs text-[#78746A] font-medium hidden sm:inline">
+                  <label
+                    htmlFor="sort-by"
+                    className="text-xs text-[#78746A] font-medium hidden sm:inline"
+                  >
                     Sort:
                   </label>
                   <select
@@ -188,7 +224,13 @@ export default function AdminGiftCards() {
                   title="Table columns & view"
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-[#5A5750] hover:bg-[#FAF9F6] transition shrink-0 cursor-pointer"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    className="h-4 w-4"
+                  >
                     <rect width="18" height="18" x="3" y="3" rx="2" />
                     <line x1="9" y1="3" x2="9" y2="21" />
                     <line x1="15" y1="3" x2="15" y2="21" />
@@ -234,7 +276,9 @@ export default function AdminGiftCards() {
                     <th className="px-4 py-3 font-semibold">Customer</th>
                     <th className="px-4 py-3 font-semibold">Recipient</th>
                     <th className="px-4 py-3 font-semibold">Created</th>
-                    <th className="px-4 py-3 font-semibold text-right">Current / Initial Balance</th>
+                    <th className="px-4 py-3 font-semibold text-right">
+                      Current / Initial Balance
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -246,7 +290,8 @@ export default function AdminGiftCards() {
                           No gift cards issued yet
                         </h2>
                         <p className="text-xs sm:text-sm text-[#78746A] max-w-sm leading-relaxed mb-5">
-                          Issue a gift card directly to a customer or start selling digital gift card products in your store.
+                          Issue a gift card directly to a customer or start selling digital gift
+                          card products in your store.
                         </p>
                         <button
                           type="button"

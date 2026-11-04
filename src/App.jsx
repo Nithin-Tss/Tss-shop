@@ -147,14 +147,8 @@ export default function App() {
             />
             <Route path="/admin/online-store/transfers" element={<AdminTransfers />} />
             <Route path="/admin/online-store/products/transfers" element={<AdminTransfers />} />
-            <Route
-              path="/admin/online-store/gift-cards"
-              element={<AdminGiftCards />}
-            />
-            <Route
-              path="/admin/online-store/products/gift-cards"
-              element={<AdminGiftCards />}
-            />
+            <Route path="/admin/online-store/gift-cards" element={<AdminGiftCards />} />
+            <Route path="/admin/online-store/products/gift-cards" element={<AdminGiftCards />} />
             <Route
               path="/admin/online-store/products/:productId"
               element={<AdminProductDetails />}
