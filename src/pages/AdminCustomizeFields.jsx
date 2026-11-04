@@ -713,9 +713,16 @@ export const Field = memo(function Field({
               onClick={() => onChange("")}
               className="rounded-md border border-[#E7E4DC] px-2 py-1 text-xs text-[#265C48] hover:border-charcoal-navy disabled:opacity-40"
             >
-              None
+              {spec.palette ? "Use palette" : "None"}
             </button>
           </div>
+
+          {/* Whether this element follows the palette or has its own colour */}
+          {spec.palette && (
+            <p className="mt-1 text-xs text-[#5A5750]" data-testid="color-source">
+              {value ? "Own colour" : `Follows the palette (${spec.palette})`}
+            </p>
+          )}
 
           <Help spec={spec} />
         </div>
@@ -887,6 +894,30 @@ export const Field = memo(function Field({
 
           <Help spec={spec} />
         </div>
+      );
+
+    case "css":
+      // Custom CSS: checked by the server (no <, @import, scripts or http:// links) when it is saved
+      return (
+        <label className="block">
+          {label}
+
+          <textarea
+            rows={6}
+            value={value}
+            maxLength={spec.max}
+            spellCheck={false}
+            placeholder=".product-card__title { letter-spacing: .02em; }"
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full rounded-lg border border-[#E7E4DC] px-3 py-2 font-mono text-xs outline-none focus:border-charcoal-navy"
+          />
+
+          <p className="text-right text-xs text-[#A29E92]">
+            {(value || "").length} / {spec.max}
+          </p>
+
+          <Help spec={spec} />
+        </label>
       );
 
     case "textarea":

@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 
 import { GroupedFields, contrastRatio } from "@/pages/AdminCustomizeFields";
+import editorSource from "@/pages/AdminCustomize.jsx?raw";
 
 vi.mock("@/lib/themeApi", () => ({ uploadThemeImage: vi.fn() }));
 
@@ -34,6 +35,7 @@ const FIELDS = {
     default: "",
     group: "colors",
     contrast: [["heading_color", "text_color"], ["background_color"]],
+    palette: "Text",
   },
   heading_weight: {
     type: "select",
@@ -161,6 +163,21 @@ describe("contrast warning", () => {
   });
 });
 
+describe("palette or own colour", () => {
+  it("says the colour follows the palette until one is picked, and Use palette goes back", () => {
+    const onChange = vi.fn();
+    render(<Panel initialOpen="colors" onChange={onChange} />);
+    expect(screen.getByTestId("color-source").textContent).toBe("Follows the palette (Text)");
+    expect(screen.getByRole("button", { name: "Use palette" }).disabled).toBe(true);
+
+    fireEvent.change(screen.getByLabelText("Heading colour hex code"), { target: { value: "#AA0000" } });
+    expect(screen.getByTestId("color-source").textContent).toBe("Own colour");
+    fireEvent.click(screen.getByRole("button", { name: "Use palette" }));
+    expect(onChange).toHaveBeenLastCalledWith("heading_color", "");
+    expect(screen.getByTestId("color-source").textContent).toBe("Follows the palette (Text)");
+  });
+});
+
 describe("reset to default", () => {
   it("shows only for changed options and restores the default", () => {
     const onChange = vi.fn();
@@ -174,5 +191,40 @@ describe("reset to default", () => {
   it("is not offered in section panels for plain options", () => {
     render(<Panel initialOpen="buttons" resetAny={false} start={{ button_size: "large" }} />);
     expect(screen.queryByRole("button", { name: /Reset to/ })).toBeNull();
+  });
+});
+
+describe("custom CSS field", () => {
+  const CSS_FIELDS = {
+    custom_css: { type: "css", label: "Custom CSS", default: "", max: 1500, group: "custom_css" },
+  };
+
+  it("is a code box with a character count that never goes past the limit", () => {
+    const onChange = vi.fn();
+    render(
+      <GroupedFields
+        fields={CSS_FIELDS}
+        values={{ custom_css: ".a{color:red}" }}
+        groups={[{ id: "custom_css", label: "Custom CSS" }]}
+        initialOpen="custom_css"
+        onChange={onChange}
+      />
+    );
+    const box = screen.getByRole("textbox");
+    expect(box.getAttribute("maxlength")).toBe("1500");
+    expect(box.getAttribute("spellcheck")).toBe("false");
+    expect(screen.getByText("13 / 1500")).toBeTruthy();
+    fireEvent.change(box, { target: { value: ".b{color:blue}" } });
+    expect(onChange).toHaveBeenCalledWith("custom_css", ".b{color:blue}");
+  });
+});
+
+describe("Discard changes", () => {
+  it("goes back to the theme from before the session's first change, as one undoable step", () => {
+    expect(editorSource).toContain("if (!sessionStartRef.current) sessionStartRef.current = current;");
+    const discard = editorSource.slice(editorSource.indexOf("const discardSession"));
+    expect(discard.slice(0, 600)).toContain("window.confirm(");
+    expect(discard.slice(0, 600)).toContain("update((d) =>"); // through update(): an undo step, then autosave
+    expect(editorSource).toContain("onClick={discardSession}");
   });
 });

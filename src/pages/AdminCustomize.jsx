@@ -532,6 +532,7 @@ export default function AdminCustomizePage() {
 
   // Undo / redo: snapshots of the (immutable) theme data
   const historyRef = useRef({ past: [], future: [], lastKey: null, lastTime: 0 });
+  const sessionStartRef = useRef(null);
 
   const [, setHistoryTick] = useState(0);
 
@@ -1395,6 +1396,8 @@ export default function AdminCustomizePage() {
     (mutator, coalesceKey) => {
       const current = dataRef.current;
       if (!current) return;
+      // What the theme looked like before the first change made in this editor session (for Discard)
+      if (!sessionStartRef.current) sessionStartRef.current = current;
       const history = historyRef.current;
       const now = Date.now();
       if (!(coalesceKey && history.lastKey === coalesceKey && now - history.lastTime < 800)) {
@@ -1413,6 +1416,18 @@ export default function AdminCustomizePage() {
     },
     [markSyncedChanges]
   );
+
+  // Discard: back to the theme as it was before this session's first change. It is one more step,
+  // so Undo brings the changes back; autosave saves the result like any other change.
+  const discardSession = useCallback(() => {
+    const start = sessionStartRef.current;
+    if (!start || !dataRef.current || dataRef.current === start) return;
+    if (!window.confirm("Discard the changes made since you opened the editor? You can undo this.")) return;
+    update((d) => {
+      for (const key of Object.keys(d)) delete d[key];
+      Object.assign(d, structuredClone(start));
+    });
+  }, [update]);
 
   const undo = useCallback(() => {
     const history = historyRef.current;
@@ -2580,6 +2595,17 @@ export default function AdminCustomizePage() {
                       </span>
                     )}
                   </span>
+
+                  {historyRef.current.past.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={discardSession}
+                      className="h-9 whitespace-nowrap rounded-md border border-[#D4D0C5] px-3 text-sm hover:border-charcoal-navy"
+                      title="Go back to the theme as it was when you opened the editor"
+                    >
+                      Discard changes
+                    </button>
+                  )}
 
                   <button
                     type="button"
