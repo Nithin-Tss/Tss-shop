@@ -65,6 +65,14 @@ export const navIcons = {
       <path d="m7.5 4.27 9 5.15" />
     </>
   ),
+  purchase_orders: (
+    <>
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect width="8" height="4" x="8" y="2" rx="1" />
+      <path d="m9 14 3 3 3-3" />
+      <path d="M12 10v7" />
+    </>
+  ),
   content: (
     <>
       <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
@@ -223,11 +231,12 @@ const menuGroups = [
         icon: "products",
         label: "Products",
         href: `${BASE}/products`,
-        match: [`${BASE}/products`, `${BASE}/collections`, `${BASE}/inventory`],
+        match: [`${BASE}/products`, `${BASE}/collections`, `${BASE}/inventory`, `${BASE}/purchase-orders`],
         permission: "products.view",
         children: [
           { label: "Collections", href: `${BASE}/collections` },
           { label: "Inventory", href: `${BASE}/inventory`, permission: "inventory.view" },
+          { label: "Purchase orders", href: `${BASE}/purchase-orders`, permission: "products.view" },
         ],
       },
       {
