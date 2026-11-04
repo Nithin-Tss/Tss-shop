@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
-import { apiDelete, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
 
 const NAVY = "#14130F";
@@ -1165,7 +1165,7 @@ export function ProductForm({ productId }) {
   };
 
   const storeBrand = (activeStore?.storeName || "SIPNOW").toUpperCase();
-  const storeDomain = `https://${activeStore?.storeSlug || "zz35zk-e0"}.myshopify.com`;
+  const storeDomain = storeBaseUrl(activeStore);
   const currentHandle = handle || slugify(name) || "product-handle";
   const shownSeoTitle = seoTitle || name || "Your product name";
   const shownSeoDescription =

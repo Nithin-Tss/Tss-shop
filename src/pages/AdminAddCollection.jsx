@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
-import { API_URL, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
+import { storeBaseUrl, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
 import { getActiveStore, getSession } from "@/lib/auth";
 
 // Add collection (/admin/online-store/collections/new) and Edit collection (/collections/:collectionId).
@@ -617,7 +617,7 @@ export default function AdminAddCollection() {
   // ---- search engine listing
 
   const store = getActiveStore(getSession());
-  const storeUrl = `${API_URL.replace(/\/$/, "")}/s/${store?.storeSlug || "your-store"}`;
+  const storeUrl = storeBaseUrl(store);
   const collectionUrl = `${storeUrl}/collections/${slugify(form.handle) || "collection-handle"}`;
   const seoTitle = form.seo_title || form.name || "Collection title";
   const seoDescription =

@@ -6,6 +6,15 @@ import { checkImageFile } from "@/lib/imageUpload";
 export const API_URL =
   import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "");
 
+// Public address of a store's storefront: its own domain when it has one, else /s/<slug> on the API host.
+export function storeBaseUrl(store) {
+  if (store?.domain) {
+    const scheme = API_URL.startsWith("http://") ? "http" : "https";
+    return `${scheme}://${store.domain}`;
+  }
+  return `${API_URL.replace(/\/$/, "")}/s/${store?.storeSlug || "your-store"}`;
+}
+
 function getHeaders(extraHeaders = {}) {
   const flat =
     extraHeaders && typeof extraHeaders === "object" && extraHeaders.headers
@@ -427,7 +436,7 @@ export async function openStorefront(path = "/", themeId = "") {
   if (!url && !themeId) {
     // The link couldn't be made: still open the store (just without the bar)
     const store = getActiveStore(getSession());
-    if (store?.storeSlug) url = `${API_URL}/s/${store.storeSlug}${path}`;
+    if (store?.storeSlug) url = `${storeBaseUrl(store)}${path}`;
   }
 
   if (tab) {
