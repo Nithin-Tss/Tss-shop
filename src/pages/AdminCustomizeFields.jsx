@@ -55,6 +55,16 @@ export function useFontPreviews(fonts, active) {
   }, [fonts, active]);
 }
 
+// What the browser shows if the font can't load
+function FontFallback({ value }) {
+  const fonts = useContext(FontsContext);
+  const stack = fonts.find((f) => f.key === value)?.stack || "";
+  const fallback = stack.split(",").slice(1).join(", ").replace(/"/g, "");
+  return fallback ? (
+    <span className="mt-1 block text-[11px] leading-snug text-[#A29E92]">Fallback: {fallback}</span>
+  ) : null;
+}
+
 export function FontPicker({ value, allowTheme, onChange, label }) {
   const fonts = useContext(FontsContext);
 
@@ -322,14 +332,15 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
 }
 
 // An option that was changed from the theme default gets a small reset link
-export function isOverridden(spec, value) {
+export function isOverridden(spec, value, any = false) {
   return (
-    spec.theme_default && JSON.stringify(value ?? spec.default) !== JSON.stringify(spec.default)
+    (any || spec.theme_default) &&
+    JSON.stringify(value ?? spec.default) !== JSON.stringify(spec.default)
   );
 }
 
-export function ResetToTheme({ spec, value, onChange }) {
-  if (!isOverridden(spec, value)) return null;
+export function ResetToTheme({ spec, value, onChange, any = false }) {
+  if (!isOverridden(spec, value, any)) return null;
 
   return (
     <button
@@ -337,8 +348,70 @@ export function ResetToTheme({ spec, value, onChange }) {
       onClick={() => onChange(structuredClone(spec.default))}
       className="mt-1 text-[11px] font-medium text-[#265C48] underline-offset-2 hover:underline"
     >
-      Reset to theme default
+      {spec.theme_default ? "Reset to theme default" : "Reset to default"}
     </button>
+  );
+}
+
+// "contrast": [[keys...], [keys...]]: the first key with a value on each side is compared
+function luminance(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+export function contrastRatio(a, b) {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+const HEX = /^#[0-9a-f]{6}$/i;
+
+function ContrastWarning({ spec, values }) {
+  if (!spec.contrast) return null;
+  const [a, b] = spec.contrast.map((keys) =>
+    keys.map((k) => values[k]).find((v) => HEX.test(v || ""))
+  );
+  if (!a || !b) return null;
+  const ratio = contrastRatio(a, b);
+  if (ratio >= 4.5) return null;
+  return (
+    <p role="status" className="mt-1 text-[11px] font-medium leading-snug text-[#9A3412]">
+      Low contrast ({ratio.toFixed(1)}:1). Text may be hard to read; aim for at least 4.5:1.
+    </p>
+  );
+}
+
+// Hex text box beside a colour picker: changes only when a full #RRGGBB is typed
+function HexInput({ value, onChange, label }) {
+  const [text, setText] = useState(value || "");
+  const [shown, setShown] = useState(value);
+  if (shown !== value) {
+    setShown(value);
+    setText(value || "");
+  }
+  const invalid = text !== "" && !HEX.test(text);
+  return (
+    <input
+      type="text"
+      value={text}
+      maxLength={7}
+      spellCheck={false}
+      aria-label={`${label} hex code`}
+      aria-invalid={invalid}
+      placeholder="None"
+      onChange={(e) => {
+        const next = e.target.value.trim();
+        setText(next);
+        if (HEX.test(next)) onChange(next.toUpperCase());
+      }}
+      onBlur={() => setText(value || "")}
+      className={`h-10 w-24 rounded-lg border px-2 text-sm tabular-nums uppercase ${
+        invalid ? "border-[#B91C1C]" : "border-[#E7E4DC]"
+      }`}
+    />
   );
 }
 
@@ -368,8 +441,16 @@ export function GroupedFields({
   onChange,
   extra,
   initialOpen = "content",
+  resetAny = false,
+  exclusive = false,
 }) {
-  const [open, setOpen] = useState({ [initialOpen]: true });
+  // exclusive (Theme settings): at most one group open; initialOpen null starts them all closed
+  const [open, setOpen] = useState(initialOpen ? { [initialOpen]: true } : {});
+
+  const toggle = (id) =>
+    setOpen((current) =>
+      exclusive ? (current[id] ? {} : { [id]: true }) : { ...current, [id]: !current[id] }
+    );
 
   const handlerFor = useOptionHandlers(onChange);
 
@@ -390,9 +471,10 @@ export function GroupedFields({
           <section key={group.id} className="border-b border-[#F3F1EC] last:border-b-0">
             <button
               type="button"
-              onClick={() => setOpen((current) => ({ ...current, [group.id]: !current[group.id] }))}
+              onClick={() => toggle(group.id)}
               className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-charcoal-navy hover:bg-[#F3F1EC]"
               aria-expanded={isOpen}
+              aria-controls={`group-${group.id}`}
             >
               {group.label}
 
@@ -405,7 +487,7 @@ export function GroupedFields({
             </button>
 
             {isOpen && (
-              <div className="grid gap-4 px-4 pb-5 pt-1">
+              <div id={`group-${group.id}`} className="grid gap-4 px-4 pb-5 pt-1">
                 {entries.map(([key, spec]) => (
                   <div key={key}>
                     <Field
@@ -416,7 +498,13 @@ export function GroupedFields({
                       catalogErrors={catalogErrors}
                       onChange={handlerFor(key)}
                     />
-                    <ResetToTheme spec={spec} value={values[key]} onChange={handlerFor(key)} />
+                    <ContrastWarning spec={spec} values={values} />
+                    <ResetToTheme
+                      spec={spec}
+                      value={values[key]}
+                      onChange={handlerFor(key)}
+                      any={resetAny}
+                    />
                   </div>
                 ))}
 
@@ -591,9 +679,10 @@ export const Field = memo(function Field({
               value={value}
               onChange={(e) => onChange(e.target.value.toUpperCase())}
               className="h-10 w-12 rounded border border-[#E7E4DC]"
+              aria-label={spec.label}
             />
 
-            <span className="text-sm tabular-nums">{value}</span>
+            <HexInput value={value} onChange={onChange} label={spec.label} />
           </div>
 
           <Help spec={spec} />
@@ -614,9 +703,9 @@ export const Field = memo(function Field({
               aria-label={spec.label}
             />
 
-            <span className="min-w-0 flex-1 text-sm tabular-nums text-[#5A5750]">
-              {value || "None"}
-            </span>
+            <HexInput value={value} onChange={onChange} label={spec.label} />
+
+            <span className="flex-1" />
 
             <button
               type="button"
@@ -639,10 +728,12 @@ export const Field = memo(function Field({
 
           <FontPicker
             value={value || ""}
-            allowTheme={Boolean(spec.theme_default)}
+            allowTheme={Boolean(spec.theme_default || spec.allow_empty)}
             onChange={onChange}
             label={spec.label}
           />
+
+          <FontFallback value={value} />
 
           <Help spec={spec} />
         </div>
