@@ -259,7 +259,11 @@ const menuGroups = [
         children: [
           { label: "Collections", href: `${BASE}/collections` },
           { label: "Inventory", href: `${BASE}/inventory`, permission: "inventory.view" },
-          { label: "Purchase orders", href: `${BASE}/purchase-orders`, permission: "products.view" },
+          {
+            label: "Purchase orders",
+            href: `${BASE}/purchase-orders`,
+            permission: "products.view",
+          },
           { label: "Transfers", href: `${BASE}/transfers`, permission: "products.view" },
           { label: "Gift cards", href: `${BASE}/gift-cards`, permission: "products.view" },
         ],

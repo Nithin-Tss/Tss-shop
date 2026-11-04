@@ -140,22 +140,13 @@ export default function App() {
           </Route>
           <Route element={<RequirePermission permission="products.view" />}>
             <Route path="/admin/online-store/products" element={<AdminProducts />} />
-            <Route
-              path="/admin/online-store/purchase-orders"
-              element={<AdminPurchaseOrders />}
-            />
+            <Route path="/admin/online-store/purchase-orders" element={<AdminPurchaseOrders />} />
             <Route
               path="/admin/online-store/products/purchase-orders"
               element={<AdminPurchaseOrders />}
             />
-            <Route
-              path="/admin/online-store/transfers"
-              element={<AdminTransfers />}
-            />
-            <Route
-              path="/admin/online-store/products/transfers"
-              element={<AdminTransfers />}
-            />
+            <Route path="/admin/online-store/transfers" element={<AdminTransfers />} />
+            <Route path="/admin/online-store/products/transfers" element={<AdminTransfers />} />
             <Route
               path="/admin/online-store/gift-cards"
               element={<AdminGiftCards />}

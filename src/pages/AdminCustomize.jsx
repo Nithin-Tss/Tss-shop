@@ -135,9 +135,20 @@ export function openAccountActionsInStore(win, storeBase) {
     win.open(url, "_blank", "noopener");
   }
   win.addEventListener("click", function (event) {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
     var link = event.target.closest && event.target.closest("a[href]");
-    var url = link && (!link.target || link.target === "_self") ? storeUrl(link.getAttribute("href")) : null;
+    var url =
+      link && (!link.target || link.target === "_self")
+        ? storeUrl(link.getAttribute("href"))
+        : null;
     if (url) open(event, url);
   });
   win.addEventListener(
@@ -2352,10 +2363,18 @@ export default function AdminCustomizePage() {
                         addPageTemplate();
                         return;
                       }
-                      if (value === LOGIN_PAGE || value === REGISTER_PAGE || value === ACCOUNT_PAGE) {
+                      if (
+                        value === LOGIN_PAGE ||
+                        value === REGISTER_PAGE ||
+                        value === ACCOUNT_PAGE
+                      ) {
                         // Login / register / account page: shown in the preview; its code is templates/<page>.liquid
                         setCustomerPage(
-                          value === LOGIN_PAGE ? "login" : value === REGISTER_PAGE ? "register" : "account"
+                          value === LOGIN_PAGE
+                            ? "login"
+                            : value === REGISTER_PAGE
+                              ? "register"
+                              : "account"
                         );
                         setSelected(null);
                         setAdding(false);
