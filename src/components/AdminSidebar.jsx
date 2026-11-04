@@ -325,6 +325,14 @@ const menuGroups = [
         href: `${BASE}/shipping`,
         permission: "shipping.view",
       },
+      { icon: "discounts", label: "Taxes", href: `${BASE}/tax`, permission: "shipping.view" },
+    ],
+  },
+  {
+    label: "Developers & compliance",
+    items: [
+      { icon: "apps", label: "Webhooks", href: `${BASE}/webhooks`, permission: "webhooks.manage" },
+      { icon: "reports", label: "Audit log", href: `${BASE}/audit-log`, permission: "audit.view" },
     ],
   },
 ];

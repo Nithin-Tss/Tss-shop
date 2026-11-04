@@ -102,7 +102,8 @@ describe("AssistantPanel", () => {
     expect(apiPost).toHaveBeenCalledWith(
       "/api/v1/assistant/chat/",
       { message: "How were sales?" },
-      {}
+      {},
+      expect.anything() // the AbortSignal
     );
 
     fireEvent.keyDown(document, { key: "Escape" });
@@ -137,6 +138,7 @@ describe("AssistantPanel", () => {
     signIn(["reports.view"]);
     apiPost.mockResolvedValue({ ok: true, data: { answer: "Some answer", tools: [] } });
     mount();
+    fireEvent.click(screen.getByRole("button", { name: "Assistant" })); // the closed panel is inert
     await act(async () => {
       await assistantStore.send("Q");
     });
@@ -232,7 +234,9 @@ describe("AssistantPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Assistant" }));
 
     const escape = new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
-    document.dispatchEvent(escape);
+    act(() => {
+      document.dispatchEvent(escape);
+    });
     expect(isOpen()).toBe(false);
     expect(escape.defaultPrevented).toBe(true);
 
