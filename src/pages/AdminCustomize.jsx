@@ -347,7 +347,8 @@ export default function AdminCustomizePage() {
   const saveStateRef = useRef("saved");
 
   // Which group of the Theme settings panel opens first (Header, Footer, ...)
-  const [themeGroup, setThemeGroup] = useState("colors");
+  // The Theme settings group to open (null: all closed); header/footer rows open their own group
+  const [themeGroup, setThemeGroup] = useState(null);
 
   const [previewKey, setPreviewKey] = useState(0);
 
@@ -3015,7 +3016,7 @@ export default function AdminCustomizePage() {
                           <button
                             type="button"
                             onClick={() => {
-                              setThemeGroup("colors");
+                              setThemeGroup(null);
                               setSelected("theme");
                             }}
                             className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left ${
@@ -3075,6 +3076,8 @@ export default function AdminCustomizePage() {
                                 (group) => !isSynced(data, group.id)
                               )}
                               initialOpen={themeGroup}
+                              exclusive
+                              resetAny
                               collections={collections}
                               onChange={(key, value) =>
                                 update((d) => {
