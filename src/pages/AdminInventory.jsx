@@ -940,7 +940,6 @@ function ImportModal({ onClose, onImportSuccess }) {
   );
 }
 
-
 // Shopify-style Stock Counts Modal
 function StockCountsModal({ items, locations, onClose, onStartCount }) {
   const [downloading, setDownloading] = useState(false);
@@ -1010,7 +1009,15 @@ function StockCountsModal({ items, locations, onClose, onStartCount }) {
         <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F1EC] text-charcoal-navy">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
                 <path d="M9 11l3 3L22 4" />
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
               </svg>
@@ -1062,14 +1069,19 @@ function StockCountsModal({ items, locations, onClose, onStartCount }) {
               Locations ({locations.length || 1})
             </h3>
             <div className="divide-y divide-[#E7E4DC]">
-              {(locations.length > 0 ? locations : [{ id: "primary", name: "Primary Location" }]).map((loc, idx) => (
+              {(locations.length > 0
+                ? locations
+                : [{ id: "primary", name: "Primary Location" }]
+              ).map((loc, idx) => (
                 <div key={loc.id || idx} className="py-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="h-2 w-2 rounded-full bg-[#008060]"></span>
                     <div>
                       <p className="text-sm font-medium text-charcoal-navy">{loc.name}</p>
                       <p className="text-xs text-[#78746A]">
-                        {loc.address1 ? `${loc.address1}, ${loc.city || ""}` : "All inventory variants tracked"}
+                        {loc.address1
+                          ? `${loc.address1}, ${loc.city || ""}`
+                          : "All inventory variants tracked"}
                       </p>
                     </div>
                   </div>
@@ -1084,9 +1096,12 @@ function StockCountsModal({ items, locations, onClose, onStartCount }) {
           {/* Cycle Count Instructions & Count Sheet */}
           <div className="rounded-xl border border-[#E7E4DC] bg-[#F7F9FC] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-charcoal-navy">Physical inventory count sheet</p>
+              <p className="text-sm font-semibold text-charcoal-navy">
+                Physical inventory count sheet
+              </p>
               <p className="text-xs text-[#5A5750] mt-0.5">
-                Download a pre-formatted worksheet with all product variants and current levels to perform an in-person stock check.
+                Download a pre-formatted worksheet with all product variants and current levels to
+                perform an in-person stock check.
               </p>
             </div>
             <button
@@ -1095,7 +1110,15 @@ function StockCountsModal({ items, locations, onClose, onStartCount }) {
               disabled={downloading || totalItems === 0}
               className="shrink-0 flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-2 text-xs font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-50 transition cursor-pointer"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 text-[#5A5750]"
+              >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
@@ -1276,7 +1299,8 @@ export default function InventoryPage() {
     return items.filter((item) => {
       if (filterTab === "in_stock" && (item.available || 0) <= 0) return false;
       if (filterTab === "out_of_stock" && (item.available || 0) > 0) return false;
-      if (filterTab === "low_stock" && ((item.available || 0) <= 0 || (item.available || 0) > 5)) return false;
+      if (filterTab === "low_stock" && ((item.available || 0) <= 0 || (item.available || 0) > 5))
+        return false;
       if (filterTab === "committed" && (item.committed || 0) <= 0) return false;
       if (filterTab === "unavailable" && (item.unavailable || 0) <= 0) return false;
 
@@ -1284,7 +1308,9 @@ export default function InventoryPage() {
       return (
         item.title?.toLowerCase().includes(q) ||
         item.sku?.toLowerCase().includes(q) ||
-        String(item.product || "").toLowerCase().includes(q)
+        String(item.product || "")
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [items, searchQuery, filterTab]);
@@ -1386,7 +1412,15 @@ export default function InventoryPage() {
                 onClick={() => setIsStockCountsOpen(true)}
                 className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] transition cursor-pointer"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4 text-[#5A5750]"
+                >
                   <path d="M9 11l3 3L22 4" />
                   <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                 </svg>
@@ -1399,7 +1433,15 @@ export default function InventoryPage() {
                 disabled={items.length === 0}
                 className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-50 transition cursor-pointer"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4 text-[#5A5750]"
+                >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
@@ -1412,7 +1454,15 @@ export default function InventoryPage() {
                 onClick={() => setIsImportModalOpen(true)}
                 className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] transition cursor-pointer"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4 text-[#5A5750]"
+                >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
@@ -1905,7 +1955,9 @@ export default function InventoryPage() {
           locations={locationsList}
           onClose={() => setIsStockCountsOpen(false)}
           onStartCount={() =>
-            flash("Stock count session initiated. Use the count sheet to record physical inventory.")
+            flash(
+              "Stock count session initiated. Use the count sheet to record physical inventory."
+            )
           }
         />
       )}

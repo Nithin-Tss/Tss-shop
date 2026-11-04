@@ -16,7 +16,14 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
         <filter id="hub-shadow" x="15" y="40" width="70" height="70" filterUnits="userSpaceOnUse">
           <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#14130F" floodOpacity="0.08" />
         </filter>
-        <filter id="hub-shadow-2" x="135" y="40" width="70" height="70" filterUnits="userSpaceOnUse">
+        <filter
+          id="hub-shadow-2"
+          x="135"
+          y="40"
+          width="70"
+          height="70"
+          filterUnits="userSpaceOnUse"
+        >
           <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#14130F" floodOpacity="0.08" />
         </filter>
         <filter id="cargo-shadow" x="80" y="30" width="60" height="60" filterUnits="userSpaceOnUse">
@@ -38,16 +45,46 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
 
       {/* Origin Location Hub (Left) */}
       <g filter="url(#hub-shadow)">
-        <rect x="25" y="50" width="50" height="50" rx="10" fill="#FFFFFF" stroke="#E7E4DC" strokeWidth="1.5" />
-        <path d="M40 78 V64 L50 58 L60 64 V78 H40 Z" fill="#F3F1EC" stroke="#2B2925" strokeWidth="1.5" strokeLinejoin="round" />
+        <rect
+          x="25"
+          y="50"
+          width="50"
+          height="50"
+          rx="10"
+          fill="#FFFFFF"
+          stroke="#E7E4DC"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M40 78 V64 L50 58 L60 64 V78 H40 Z"
+          fill="#F3F1EC"
+          stroke="#2B2925"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
         <rect x="47" y="70" width="6" height="8" fill="#2B2925" />
         <circle cx="50" cy="46" r="4" fill="#008060" />
       </g>
 
       {/* Destination Location Hub (Right) */}
       <g filter="url(#hub-shadow-2)">
-        <rect x="145" y="50" width="50" height="50" rx="10" fill="#FFFFFF" stroke="#E7E4DC" strokeWidth="1.5" />
-        <path d="M160 78 V64 L170 58 L180 64 V78 H160 Z" fill="#F3F1EC" stroke="#2B2925" strokeWidth="1.5" strokeLinejoin="round" />
+        <rect
+          x="145"
+          y="50"
+          width="50"
+          height="50"
+          rx="10"
+          fill="#FFFFFF"
+          stroke="#E7E4DC"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M160 78 V64 L170 58 L180 64 V78 H160 Z"
+          fill="#F3F1EC"
+          stroke="#2B2925"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
         <rect x="167" y="70" width="6" height="8" fill="#2B2925" />
         <circle cx="170" cy="46" r="#004B87" fill="#004B87" />
       </g>
@@ -61,7 +98,13 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
         {/* Box tape */}
         <path d="M108 48 L112 50 L112 75 L108 73 Z" fill="#F4E6D2" opacity="0.9" />
         {/* Forward transit arrow */}
-        <path d="M102 85 H118 M114 81 L118 85 L114 89" stroke="#14130F" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M102 85 H118 M114 81 L118 85 L114 89"
+          stroke="#14130F"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </g>
     </svg>
   );
@@ -143,9 +186,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
 
   const handleUpdateItemQty = (index, value) => {
     const qty = Math.max(1, parseInt(value, 10) || 1);
-    setItems((prev) =>
-      prev.map((it, i) => (i === index ? { ...it, quantity: qty } : it))
-    );
+    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, quantity: qty } : it)));
   };
 
   // Form submission validation
@@ -199,7 +240,15 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
         <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F1EC] text-charcoal-navy">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
                 <path d="m16 3 4 4-4 4" />
                 <path d="M20 7H4" />
                 <path d="m8 21-4-4 4-4" />
@@ -244,14 +293,18 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
 
             {locations.length < 2 && (
               <p className="text-xs text-[#B42318] bg-[#FDECEC] p-2.5 rounded-lg border border-[#F8D7DA]">
-                Transferring inventory requires at least two registered locations. Please create an additional location in Settings → Locations first.
+                Transferring inventory requires at least two registered locations. Please create an
+                additional location in Settings → Locations first.
               </p>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Origin / Source */}
               <div>
-                <label htmlFor="transfer-source" className="block text-xs font-medium text-charcoal-navy mb-1.5">
+                <label
+                  htmlFor="transfer-source"
+                  className="block text-xs font-medium text-charcoal-navy mb-1.5"
+                >
                   Origin (Source location)
                 </label>
                 <select
@@ -260,7 +313,9 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                   onChange={(e) => setSourceId(e.target.value)}
                   className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F] cursor-pointer"
                 >
-                  <option value="" disabled>Select origin location</option>
+                  <option value="" disabled>
+                    Select origin location
+                  </option>
                   {locations.map((loc) => (
                     <option key={loc.id} value={loc.id}>
                       {loc.name} {loc.city ? `(${loc.city})` : ""}
@@ -271,7 +326,10 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
 
               {/* Destination */}
               <div>
-                <label htmlFor="transfer-dest" className="block text-xs font-medium text-charcoal-navy mb-1.5">
+                <label
+                  htmlFor="transfer-dest"
+                  className="block text-xs font-medium text-charcoal-navy mb-1.5"
+                >
                   Destination (Receiving location)
                 </label>
                 <select
@@ -280,7 +338,9 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                   onChange={(e) => setDestId(e.target.value)}
                   className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F] cursor-pointer"
                 >
-                  <option value="" disabled>Select destination location</option>
+                  <option value="" disabled>
+                    Select destination location
+                  </option>
                   {locations.map((loc) => (
                     <option key={loc.id} value={loc.id}>
                       {loc.name} {loc.city ? `(${loc.city})` : ""}
@@ -293,7 +353,13 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
             {/* Same location inline validation */}
             {isSameLocation && (
               <p className="text-xs text-[#B42318] flex items-center gap-1.5 font-medium">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 shrink-0">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="h-3.5 w-3.5 shrink-0"
+                >
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -652,9 +718,7 @@ export default function AdminTransfers() {
 
             {/* CONTENT AREA: EMPTY STATE OR DATA TABLE */}
             {loading ? (
-              <div className="py-20 text-center text-sm text-[#78746A]">
-                Loading transfers…
-              </div>
+              <div className="py-20 text-center text-sm text-[#78746A]">Loading transfers…</div>
             ) : filteredTransfers.length === 0 ? (
               searchQuery || filterStatus !== "all" ? (
                 /* Search / Filter yields no items */
@@ -742,9 +806,14 @@ export default function AdminTransfers() {
                   </thead>
                   <tbody className="divide-y divide-[#E7E4DC]">
                     {filteredTransfers.map((t) => {
-                      const originName = locationMap.get(String(t.source_location)) || "Origin location";
-                      const destName = locationMap.get(String(t.destination_location)) || "Destination location";
-                      const itemsCount = (t.items || []).reduce((sum, it) => sum + (it.quantity || 1), 0);
+                      const originName =
+                        locationMap.get(String(t.source_location)) || "Origin location";
+                      const destName =
+                        locationMap.get(String(t.destination_location)) || "Destination location";
+                      const itemsCount = (t.items || []).reduce(
+                        (sum, it) => sum + (it.quantity || 1),
+                        0
+                      );
                       const isPending = (t.status || "").toLowerCase() === "pending";
 
                       return (
@@ -764,7 +833,9 @@ export default function AdminTransfers() {
                                     : "bg-[#EBF5FB] text-[#004B87]"
                               }`}
                             >
-                              {t.status ? t.status.charAt(0).toUpperCase() + t.status.slice(1) : "Pending"}
+                              {t.status
+                                ? t.status.charAt(0).toUpperCase() + t.status.slice(1)
+                                : "Pending"}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-center text-[#5A5750] font-medium">
@@ -833,4 +904,3 @@ export default function AdminTransfers() {
     </div>
   );
 }
-
