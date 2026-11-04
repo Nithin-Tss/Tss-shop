@@ -272,6 +272,30 @@ export async function apiGet(path, customHeaders = {}) {
   };
 }
 
+// Downloads a file from the API (with the sign-in headers a plain link would lack) and saves it
+// as `filename`. Returns { ok: true } or { ok: false, error }.
+export async function apiDownload(path, filename) {
+  let response;
+  try {
+    response = await send(path, { method: "GET", headers: {} });
+  } catch {
+    return { ok: false, error: "Unable to reach the server. Please try again." };
+  }
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    return { ok: false, error: errorMessage(data, "The download failed.") };
+  }
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  return { ok: true };
+}
+
 // `signal` (an AbortSignal, optional) cancels the request: the result is then { ok: false, aborted: true }
 export function apiPost(path, body, customHeaders = {}, signal) {
   return sendForm("POST", path, body, customHeaders, signal);

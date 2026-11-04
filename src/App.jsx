@@ -41,7 +41,9 @@ const AdminAddCustomer = lazy(() => import("@/pages/AdminAddCustomer"));
 const AdminOverview = lazy(() => import("@/pages/AdminOverview"));
 const AdminReports = lazy(() => import("@/pages/AdminReports"));
 const AdminReportExploration = lazy(() => import("@/pages/AdminReportExploration"));
+const AdminReportDetail = lazy(() => import("@/pages/AdminReportDetail"));
 const AdminAnalytics = lazy(() => import("@/pages/AdminAnalytics"));
+const AdminLiveView = lazy(() => import("@/pages/AdminLiveView"));
 const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
 const AdminCreateDiscount = lazy(() => import("@/pages/AdminCreateDiscount"));
 const AdminPlatform = lazy(() => import("@/pages/AdminPlatform"));
@@ -176,8 +178,10 @@ export default function App() {
             <Route path="/admin/online-store/overview" element={<AdminOverview />} />
             <Route path="/admin/online-store/reports" element={<AdminReports />} />
             <Route path="/admin/online-store/reports/new" element={<AdminReportExploration />} />
+            <Route path="/admin/online-store/reports/:reportId" element={<AdminReportDetail />} />
             <Route path="/admin/online-store/analytics/new" element={<AdminReportExploration />} />
             <Route path="/admin/online-store/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/online-store/analytics/live" element={<AdminLiveView />} />
           </Route>
           <Route element={<RequirePermission permission="orders.manage" />}>
             <Route path="/admin/online-store/orders/create" element={<AdminCreateOrder />} />

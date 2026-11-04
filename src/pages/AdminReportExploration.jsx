@@ -224,16 +224,6 @@ export default function AdminReportExploration() {
                       >
                         Duplicate
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsMoreMenuOpen(false);
-                          showToast("CSV export initiated.");
-                        }}
-                        className="flex w-full items-center rounded-lg px-3 py-1.5 text-[13px] text-[#1A1916] hover:bg-[#F3F1EC]"
-                      >
-                        Export CSV
-                      </button>
                       <div className="my-1 border-t border-[#F3F1EC]" />
                       <button
                         type="button"

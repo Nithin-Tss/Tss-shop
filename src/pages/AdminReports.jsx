@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
 
@@ -31,6 +31,7 @@ function ShopifyBagIcon({ className = "h-4 w-4 shrink-0" }) {
 }
 
 export default function AdminReports() {
+  const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,7 +93,7 @@ export default function AdminReports() {
 
   // Distinct categories and creators from data
   const availableCategories = useMemo(() => {
-    const defaultCats = ["Acquisition", "Behavior", "Customers", "Finances", "Sales"];
+    const defaultCats = ["Customers", "Finances", "Inventory", "Orders", "Sales"];
     const fromData = Array.from(new Set(reports.map((r) => r.category).filter(Boolean)));
     return Array.from(new Set([...defaultCats, ...fromData]));
   }, [reports]);
@@ -561,12 +562,15 @@ export default function AdminReports() {
                     paginatedReports.map((report, idx) => (
                       <tr
                         key={report.id || idx}
+                        onClick={() => navigate(`/admin/online-store/reports/${report.id}`)}
                         className="h-12 transition-colors hover:bg-[#FAF9F6] cursor-pointer"
                       >
                         {/* Name */}
                         <td className="px-4 py-3 font-medium text-[#14130F] hover:underline">
                           <div className="flex items-center gap-1.5">
-                            <span>{report.name}</span>
+                            <Link to={`/admin/online-store/reports/${report.id}`} onClick={(e) => e.stopPropagation()}>
+                              {report.name}
+                            </Link>
                             {report.description && (
                               <span
                                 title={report.description}

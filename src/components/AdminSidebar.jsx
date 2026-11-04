@@ -269,6 +269,9 @@ const menuGroups = [
         label: "Analytics",
         href: `${BASE}/analytics`,
         permission: "reports.view",
+        children: [
+          { label: "Live View", href: `${BASE}/analytics/live`, permission: "reports.view" },
+        ],
       },
     ],
   },
