@@ -81,6 +81,14 @@ export const navIcons = {
       <path d="M4 17h16" />
     </>
   ),
+  gift_cards: (
+    <>
+      <rect x="3" y="8" width="18" height="4" rx="1" />
+      <path d="M12 8v13" />
+      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
+      <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
+    </>
+  ),
   content: (
     <>
       <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
@@ -245,6 +253,7 @@ const menuGroups = [
           `${BASE}/inventory`,
           `${BASE}/purchase-orders`,
           `${BASE}/transfers`,
+          `${BASE}/gift-cards`,
         ],
         permission: "products.view",
         children: [
@@ -252,6 +261,7 @@ const menuGroups = [
           { label: "Inventory", href: `${BASE}/inventory`, permission: "inventory.view" },
           { label: "Purchase orders", href: `${BASE}/purchase-orders`, permission: "products.view" },
           { label: "Transfers", href: `${BASE}/transfers`, permission: "products.view" },
+          { label: "Gift cards", href: `${BASE}/gift-cards`, permission: "products.view" },
         ],
       },
       {
