@@ -170,7 +170,9 @@ describe("palette or own colour", () => {
     expect(screen.getByTestId("color-source").textContent).toBe("Follows the palette (Text)");
     expect(screen.getByRole("button", { name: "Use palette" }).disabled).toBe(true);
 
-    fireEvent.change(screen.getByLabelText("Heading colour hex code"), { target: { value: "#AA0000" } });
+    fireEvent.change(screen.getByLabelText("Heading colour hex code"), {
+      target: { value: "#AA0000" },
+    });
     expect(screen.getByTestId("color-source").textContent).toBe("Own colour");
     fireEvent.click(screen.getByRole("button", { name: "Use palette" }));
     expect(onChange).toHaveBeenLastCalledWith("heading_color", "");
@@ -221,7 +223,9 @@ describe("custom CSS field", () => {
 
 describe("Discard changes", () => {
   it("goes back to the theme from before the session's first change, as one undoable step", () => {
-    expect(editorSource).toContain("if (!sessionStartRef.current) sessionStartRef.current = current;");
+    expect(editorSource).toContain(
+      "if (!sessionStartRef.current) sessionStartRef.current = current;"
+    );
     const discard = editorSource.slice(editorSource.indexOf("const discardSession"));
     expect(discard.slice(0, 600)).toContain("window.confirm(");
     expect(discard.slice(0, 600)).toContain("update((d) =>"); // through update(): an undo step, then autosave

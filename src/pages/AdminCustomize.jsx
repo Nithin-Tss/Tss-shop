@@ -1422,7 +1422,8 @@ export default function AdminCustomizePage() {
   const discardSession = useCallback(() => {
     const start = sessionStartRef.current;
     if (!start || !dataRef.current || dataRef.current === start) return;
-    if (!window.confirm("Discard the changes made since you opened the editor? You can undo this.")) return;
+    if (!window.confirm("Discard the changes made since you opened the editor? You can undo this."))
+      return;
     update((d) => {
       for (const key of Object.keys(d)) delete d[key];
       Object.assign(d, structuredClone(start));
