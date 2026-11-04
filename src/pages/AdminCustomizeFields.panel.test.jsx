@@ -15,27 +15,51 @@ const GROUPS = [
   { id: "buttons", label: "Buttons" },
 ];
 const FIELDS = {
-  background_color: { type: "color", label: "Background color", default: "#FAF9F6", group: "colors" },
+  background_color: {
+    type: "color",
+    label: "Background color",
+    default: "#FAF9F6",
+    group: "colors",
+  },
   text_color: {
-    type: "color", label: "Text color", default: "#1A1916", group: "colors",
+    type: "color",
+    label: "Text color",
+    default: "#1A1916",
+    group: "colors",
     contrast: [["text_color"], ["background_color"]],
   },
   heading_color: {
-    type: "color_optional", label: "Heading colour", default: "", group: "colors",
+    type: "color_optional",
+    label: "Heading colour",
+    default: "",
+    group: "colors",
     contrast: [["heading_color", "text_color"], ["background_color"]],
   },
   heading_weight: {
-    type: "select", label: "Heading font weight", default: "500", group: "typography",
+    type: "select",
+    label: "Heading font weight",
+    default: "500",
+    group: "typography",
     options: ["400", "500", "700"],
   },
   button_size: {
-    type: "select", label: "Button size", default: "medium", group: "buttons",
-    options: ["small", "medium", "large"], ui: "segmented",
+    type: "select",
+    label: "Button size",
+    default: "medium",
+    group: "buttons",
+    options: ["small", "medium", "large"],
+    ui: "segmented",
   },
 };
 const DEFAULTS = Object.fromEntries(Object.entries(FIELDS).map(([k, s]) => [k, s.default]));
 
-function Panel({ initialOpen = null, exclusive = true, resetAny = true, start = {}, onChange = () => {} }) {
+function Panel({
+  initialOpen = null,
+  exclusive = true,
+  resetAny = true,
+  start = {},
+  onChange = () => {},
+}) {
   const [values, setValues] = useState({ ...DEFAULTS, ...start });
   return (
     <GroupedFields
