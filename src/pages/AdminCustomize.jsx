@@ -615,7 +615,7 @@ export default function AdminCustomizePage() {
     if (basePage(page) === "page") return samplePage ? `${base}/pages/${samplePage}` : "";
 
     return `${base}/`;
-  }, [store, page, sampleProductId, sampleArticle, sampleCollection, samplePage]);
+  }, [store, page, sampleProductId, sampleArticle, sampleCollection, sampleQuery, samplePage]);
 
   // ---------------- Live preview (the page being edited) ----------------
   // The preview is rendered once; afterwards only the sections that changed are rendered
@@ -2384,7 +2384,7 @@ export default function AdminCustomizePage() {
                       return query.toString() ? `?${query.toString()}` : "";
                     })()}`}
                     title="Open the theme code in the editor"
-                    className="inline-flex h-9 items-center justify-center rounded-md border border-[#D4D0C5] px-3 text-sm inline-flex items-center text-charcoal-navy hover:border-charcoal-navy"
+                    className="h-9 justify-center rounded-md border border-[#D4D0C5] px-3 text-sm inline-flex items-center text-charcoal-navy hover:border-charcoal-navy"
                   >
                     Edit code
                   </a>
