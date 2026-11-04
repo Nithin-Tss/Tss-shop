@@ -1990,7 +1990,9 @@ export default function AdminCustomizePage() {
       type,
       hidden: false,
       settings,
-      ...(spec.blocks ? { blocks: spec.default_blocks ? JSON.parse(JSON.stringify(spec.default_blocks)) : [] } : {}),
+      ...(spec.blocks
+        ? { blocks: spec.default_blocks ? JSON.parse(JSON.stringify(spec.default_blocks)) : [] }
+        : {}),
     });
 
     setNewName("");
