@@ -57,10 +57,10 @@ export default function StoreBuilder() {
                     : "lg:col-span-2"
               }`}
             >
-              <span className="text-xs tabular-nums text-ink/50">0{i + 1}</span>
+              <span className="text-xs tabular-nums text-ink/75">0{i + 1}</span>
               <div>
                 <h3 className="display text-4xl text-ink">{s.name}</h3>
-                <p className="mt-2 text-sm text-ink/60">{s.note}</p>
+                <p className="mt-2 text-sm text-ink/80">{s.note}</p>
               </div>
             </div>
           ))}

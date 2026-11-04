@@ -6,6 +6,8 @@ import { describe, expect, it } from "vitest";
 // pages are too big to render in a test, so check by reading the source that every page mounts it exactly once.
 const source = (relative) =>
   readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8");
+// Comments may name AdminSidebar (to say the page has none); only code counts
+const code = (text) => text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 const count = (text, needle) => text.split(needle).length - 1;
 
 describe("where the assistant is mounted", () => {
@@ -19,7 +21,7 @@ describe("where the assistant is mounted", () => {
     ["the customizer", "../pages/AdminCustomize.jsx"],
     ["the code editor", "../components/CodeWorkbench.jsx"],
   ])("%s mounts one panel and one light button, and has no AdminSidebar", (_name, file) => {
-    const text = source(file);
+    const text = code(source(file));
     expect(count(text, "<AssistantPanel")).toBe(1);
     expect(count(text, '<AssistantButton tone="light"')).toBe(1);
     expect(count(text, "<AssistantButton")).toBe(1);

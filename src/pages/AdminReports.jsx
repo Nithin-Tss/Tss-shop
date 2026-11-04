@@ -568,7 +568,10 @@ export default function AdminReports() {
                         {/* Name */}
                         <td className="px-4 py-3 font-medium text-[#14130F] hover:underline">
                           <div className="flex items-center gap-1.5">
-                            <Link to={`/admin/online-store/reports/${report.id}`} onClick={(e) => e.stopPropagation()}>
+                            <Link
+                              to={`/admin/online-store/reports/${report.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               {report.name}
                             </Link>
                             {report.description && (

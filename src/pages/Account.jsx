@@ -4,6 +4,7 @@ import { apiGet, apiPatch, apiPost, logout } from "@/lib/api";
 import { getSession, setTokens, setUser, useSession } from "@/lib/auth";
 import { MOBILE_PATTERN, NAME_PATTERN, emailError } from "@/lib/validation";
 import { PasswordChecklist, PasswordInput } from "@/components/PasswordFields";
+import MfaSettings from "@/components/MfaSettings";
 
 function profileFromUser(user) {
   return {
@@ -631,6 +632,8 @@ export default function AccountPage() {
               </form>
             )}
           </div>
+
+          {!isEditing && !showChangePassword && <MfaSettings />}
         </div>
       </div>
     </main>

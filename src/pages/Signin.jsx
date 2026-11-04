@@ -18,6 +18,9 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  // Set once the password was right and the account needs its authenticator code too
+  const [mfaStep, setMfaStep] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
 
   const handleChange = (event) => {
     const { name, value, checked, type } = event.target;
@@ -64,10 +67,23 @@ export default function SignInPage() {
       return;
     }
 
+    if (mfaStep && !mfaCode.trim()) {
+      setErrors({ mfaCode: "Enter the code from your authenticator app, or a recovery code." });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const result = await apiPost("/api/v1/auth/login/", formData);
+      const result = await apiPost(
+        "/api/v1/auth/login/",
+        mfaStep ? { ...formData, mfaCode: mfaCode.trim() } : formData
+      );
+
+      if (!result.ok && result.fieldErrors?.mfaRequired) {
+        setMfaStep(true);
+        return;
+      }
 
       if (!result.ok) {
         setErrors({ ...result.fieldErrors, form: result.formError });
@@ -100,14 +116,20 @@ export default function SignInPage() {
 
           {/* Form Error */}
           {errors.form && (
-            <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div
+              role="alert"
+              className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+            >
               {errors.form}
             </div>
           )}
 
           {/* Frontend Message */}
           {message && (
-            <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-violet-700">
+            <div
+              role="status"
+              className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-violet-700"
+            >
               {message}
             </div>
           )}
@@ -170,6 +192,37 @@ export default function SignInPage() {
 
               {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
             </div>
+
+            {/* Second factor: shown after the password was accepted */}
+            {mfaStep && (
+              <div className="mt-5">
+                <label htmlFor="mfaCode" className="mb-2 block text-sm font-medium text-slate-700">
+                  Authentication code
+                </label>
+
+                <input
+                  id="mfaCode"
+                  name="mfaCode"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  value={mfaCode}
+                  onChange={(event) => {
+                    setMfaCode(event.target.value);
+                    setErrors((previousErrors) => ({ ...previousErrors, mfaCode: "", form: "" }));
+                  }}
+                  placeholder="6-digit code or recovery code"
+                  className={`w-full rounded-lg border px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+                    errors.mfaCode
+                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                      : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
+                  }`}
+                />
+
+                {errors.mfaCode && <p className="mt-1 text-xs text-red-500">{errors.mfaCode}</p>}
+              </div>
+            )}
 
             {/* Remember Me + Forgot Password */}
             <div className="mt-5 flex items-center justify-between gap-4">

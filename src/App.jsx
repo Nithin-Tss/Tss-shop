@@ -51,6 +51,9 @@ const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
 const AdminCreateDiscount = lazy(() => import("@/pages/AdminCreateDiscount"));
 const AdminPlatform = lazy(() => import("@/pages/AdminPlatform"));
 const AdminShipping = lazy(() => import("@/pages/AdminShipping"));
+const AdminTax = lazy(() => import("@/pages/AdminTax"));
+const AdminWebhooks = lazy(() => import("@/pages/AdminWebhooks"));
+const AdminAuditLog = lazy(() => import("@/pages/AdminAuditLog"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Contact = lazy(() => import("@/pages/Contact"));
@@ -234,6 +237,13 @@ export default function App() {
           <Route path="/admin/platform" element={<AdminPlatform />} />
           <Route element={<RequirePermission permission="shipping.view" />}>
             <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
+            <Route path="/admin/online-store/tax" element={<AdminTax />} />
+          </Route>
+          <Route element={<RequirePermission permission="webhooks.manage" />}>
+            <Route path="/admin/online-store/webhooks" element={<AdminWebhooks />} />
+          </Route>
+          <Route element={<RequirePermission permission="audit.view" />}>
+            <Route path="/admin/online-store/audit-log" element={<AdminAuditLog />} />
           </Route>
         </Route>
         <Route path="/terms" element={<Terms />} />

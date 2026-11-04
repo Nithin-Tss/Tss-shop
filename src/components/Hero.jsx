@@ -42,7 +42,7 @@ export default function Hero() {
             </a>
           </div>
 
-          <p className="mt-8 text-sm text-slate-500">
+          <p className="mt-8 text-sm text-slate-600">
             14 days free. No card. Cancel from the dashboard.
           </p>
         </div>
@@ -73,6 +73,15 @@ export default function Hero() {
             </div>
 
             <table className="mt-8 w-full text-left text-sm">
+              <caption className="sr-only">Recent orders</caption>
+              <thead className="sr-only">
+                <tr>
+                  <th scope="col">Order</th>
+                  <th scope="col">Customer</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Total</th>
+                </tr>
+              </thead>
               <tbody>
                 {orders.map((o) => (
                   <tr key={o.id} className="border-t border-slate-100">

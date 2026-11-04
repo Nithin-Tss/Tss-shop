@@ -104,7 +104,7 @@ describe("the look of the panel", () => {
     const picture = wrapper.querySelector("svg");
     expect(picture).not.toBeNull();
     expect(picture.getAttribute("aria-hidden")).toBe("true");
-    expect(picture.getAttribute("class")).toContain("h-14"); // about 56px
+    expect(picture.getAttribute("class")).toContain("h-10"); // about 40px
     expect(wrapper.querySelectorAll("img")).toHaveLength(0); // no image files
     expect(
       heading.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING

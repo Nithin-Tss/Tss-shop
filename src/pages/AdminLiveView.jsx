@@ -54,7 +54,10 @@ export default function AdminLiveView() {
 
           <div className="mx-auto max-w-7xl space-y-4 px-4 py-5 sm:px-6">
             {error && (
-              <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700">
+              <p
+                role="alert"
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-700"
+              >
                 {error}
               </p>
             )}
@@ -62,7 +65,9 @@ export default function AdminLiveView() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className={card}>
                 <h2 className={cardHeading}>Visitors right now</h2>
-                <p className="mt-2 text-4xl font-bold text-[#14130F]">{count(data?.visitors_now)}</p>
+                <p className="mt-2 text-4xl font-bold text-[#14130F]">
+                  {count(data?.visitors_now)}
+                </p>
                 <p className={`mt-1 ${smallLabel}`}>Active in the last 5 minutes</p>
               </div>
               <Stat title="Total sales" value={money(data?.total_sales)} />

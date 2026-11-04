@@ -500,8 +500,8 @@ export default function AdminTransfers() {
   };
 
   // Load transfers, locations, and products dynamically from existing APIs
+  // `loading` starts true, so refreshes after an action update in place without a spinner flash
   const loadData = async () => {
-    setLoading(true);
     try {
       const [transfersRes, locationsRes, productsRes] = await Promise.all([
         apiGet("/api/v1/inventory/transfers/"),
@@ -537,6 +537,8 @@ export default function AdminTransfers() {
   };
 
   useEffect(() => {
+    // Initial fetch on mount; state is only set after the awaited requests resolve
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, []);
 

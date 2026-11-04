@@ -12,7 +12,8 @@ export const lineIcon = {
   "aria-hidden": true,
 };
 
-export const card = "rounded-xl border border-[#E7E4DC] bg-white p-5 shadow-[0_1px_2px_rgba(20,27,45,0.04)]";
+export const card =
+  "rounded-xl border border-[#E7E4DC] bg-white p-5 shadow-[0_1px_2px_rgba(20,27,45,0.04)]";
 export const cardHeading = "text-sm font-semibold text-[#14130F]";
 export const smallLabel = "text-[12px] text-[#5A5750]";
 export const outlineButton =
@@ -60,9 +61,29 @@ export const PRESETS = [
   { key: "ytd", label: "Year to date", range: (t) => [`${t.slice(0, 4)}-01-01`, t] },
 ];
 
-export const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-export const shortDate = (s) => parse(s).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
-export const rangeLabel = (from, to) => (from === to ? shortDate(from) : `${shortDate(from)} – ${shortDate(to)}`);
+export const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+export const shortDate = (s) =>
+  parse(s).toLocaleDateString("en", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+export const rangeLabel = (from, to) =>
+  from === to ? shortDate(from) : `${shortDate(from)} – ${shortDate(to)}`;
 
 // ---- number formatting -----------------------------------------------------------------
 
@@ -124,7 +145,13 @@ export function Sparkline({ values }) {
   });
   return (
     <svg viewBox="0 0 100 32" preserveAspectRatio="none" className="h-8 w-full" aria-hidden="true">
-      <polyline points={points.join(" ")} fill="none" stroke="#5B9BD5" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+      <polyline
+        points={points.join(" ")}
+        fill="none"
+        stroke="#5B9BD5"
+        strokeWidth="1.5"
+        vectorEffect="non-scaling-stroke"
+      />
     </svg>
   );
 }
@@ -134,7 +161,11 @@ export function bucketLabel(bucket, hourly) {
     const h = Number(bucket.slice(11, 13));
     return `${h % 12 || 12} ${h < 12 ? "AM" : "PM"}`;
   }
-  return parse(bucket.slice(0, 10)).toLocaleDateString("en", { day: "numeric", month: "short", timeZone: "UTC" });
+  return parse(bucket.slice(0, 10)).toLocaleDateString("en", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
 }
 
 // Solid line for the current period, dashed for the comparison one.
@@ -149,9 +180,12 @@ export function LineChart({ series, comparison, field, format, hourly }) {
   const n = Math.max(cur.length, prev.length);
   const x = (i) => left + (n <= 1 ? (W - left) / 2 : (i / (n - 1)) * (W - left - 8));
   const y = (v) => 8 + (1 - v / max) * (H - bottom - 16);
-  const path = (vals) => vals.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const path = (vals) =>
+    vals.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const ticks = [0, 0.5, 1].map((f) => f * max);
-  const labelAt = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => v >= 0 && a.indexOf(v) === i);
+  const labelAt = [0, Math.floor((n - 1) / 2), n - 1].filter(
+    (v, i, a) => v >= 0 && a.indexOf(v) === i
+  );
   const [hover, setHover] = useState(null);
 
   return (
@@ -165,7 +199,9 @@ export function LineChart({ series, comparison, field, format, hourly }) {
         onMouseMove={(e) => {
           const box = e.currentTarget.getBoundingClientRect();
           const px = ((e.clientX - box.left) / box.width) * W;
-          setHover(Math.min(Math.max(Math.round(((px - left) / (W - left - 8)) * (n - 1)), 0), n - 1));
+          setHover(
+            Math.min(Math.max(Math.round(((px - left) / (W - left - 8)) * (n - 1)), 0), n - 1)
+          );
         }}
       >
         {ticks.map((t) => (
@@ -177,19 +213,47 @@ export function LineChart({ series, comparison, field, format, hourly }) {
           </g>
         ))}
         {labelAt.map((i) => (
-          <text key={i} x={x(i)} y={H - 6} textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"} fontSize="10" fill="#5A5750">
+          <text
+            key={i}
+            x={x(i)}
+            y={H - 6}
+            textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"}
+            fontSize="10"
+            fill="#5A5750"
+          >
             {series[i] ? bucketLabel(series[i].bucket, hourly) : ""}
           </text>
         ))}
-        {prev.length > 0 && <path d={path(prev)} fill="none" stroke="#A29E92" strokeWidth="1.5" strokeDasharray="4 3" />}
+        {prev.length > 0 && (
+          <path
+            d={path(prev)}
+            fill="none"
+            stroke="#A29E92"
+            strokeWidth="1.5"
+            strokeDasharray="4 3"
+          />
+        )}
         <path d={path(cur)} fill="none" stroke="#2F6DB5" strokeWidth="2" />
-        {hover !== null && <line x1={x(hover)} x2={x(hover)} y1="8" y2={H - bottom} stroke="#A29E92" strokeWidth="1" />}
+        {hover !== null && (
+          <line
+            x1={x(hover)}
+            x2={x(hover)}
+            y1="8"
+            y2={H - bottom}
+            stroke="#A29E92"
+            strokeWidth="1"
+          />
+        )}
       </svg>
       {hover !== null && series[hover] && (
         <div className="pointer-events-none absolute right-2 top-2 rounded-lg border border-[#E7E4DC] bg-white px-3 py-2 text-[12px] shadow-md">
-          <p className="font-medium text-[#14130F]">{bucketLabel(series[hover].bucket, hourly)}: {format(cur[hover])}</p>
+          <p className="font-medium text-[#14130F]">
+            {bucketLabel(series[hover].bucket, hourly)}: {format(cur[hover])}
+          </p>
           {comparison?.[hover] && (
-            <p className="text-[#5A5750]">{bucketLabel(comparison[hover].bucket, hourly)}: {format(prev[hover])}</p>
+            <p className="text-[#5A5750]">
+              {bucketLabel(comparison[hover].bucket, hourly)}: {format(prev[hover])}
+            </p>
           )}
         </div>
       )}
@@ -211,7 +275,9 @@ export function Month({ year, month, start, end, onPick }) {
       </p>
       <div className="grid grid-cols-7 text-center text-[11px] text-[#5A5750]">
         {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-          <span key={i} className="py-1">{d}</span>
+          <span key={i} className="py-1">
+            {d}
+          </span>
         ))}
         {cells.map((d, i) => {
           if (!d) return <span key={i} />;
@@ -261,17 +327,41 @@ export function CustomRange({ initial, today, onApply, onCancel }) {
   return (
     <div className="p-3">
       <div className="flex items-start gap-4">
-        <button type="button" aria-label="Previous month" onClick={() => shift(-1)} className="mt-0.5 h-7 w-7 rounded-lg hover:bg-[#f1f3f7]">‹</button>
+        <button
+          type="button"
+          aria-label="Previous month"
+          onClick={() => shift(-1)}
+          className="mt-0.5 h-7 w-7 rounded-lg hover:bg-[#f1f3f7]"
+        >
+          ‹
+        </button>
         <div className="flex flex-col gap-4 sm:flex-row">
           <Month year={view.y} month={view.m} start={start} end={end} onPick={pick} />
-          <Month year={next.getUTCFullYear()} month={next.getUTCMonth()} start={start} end={end} onPick={pick} />
+          <Month
+            year={next.getUTCFullYear()}
+            month={next.getUTCMonth()}
+            start={start}
+            end={end}
+            onPick={pick}
+          />
         </div>
-        <button type="button" aria-label="Next month" onClick={() => shift(1)} className="mt-0.5 h-7 w-7 rounded-lg hover:bg-[#f1f3f7]">›</button>
+        <button
+          type="button"
+          aria-label="Next month"
+          onClick={() => shift(1)}
+          className="mt-0.5 h-7 w-7 rounded-lg hover:bg-[#f1f3f7]"
+        >
+          ›
+        </button>
       </div>
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#F3F1EC] pt-3">
-        <span className={smallLabel}>{start ? rangeLabel(start, end || start) : "Pick a start date"}</span>
+        <span className={smallLabel}>
+          {start ? rangeLabel(start, end || start) : "Pick a start date"}
+        </span>
         <div className="flex gap-2">
-          <button type="button" onClick={onCancel} className={outlineButton}>Cancel</button>
+          <button type="button" onClick={onCancel} className={outlineButton}>
+            Cancel
+          </button>
           <button
             type="button"
             disabled={!start}
@@ -298,7 +388,12 @@ export function DateRangeButton({ label, preset, range, today, onPreset, onCusto
 
   return (
     <div ref={ref} className="relative">
-      <button type="button" className={chip} aria-expanded={open} onClick={() => (open ? close() : setOpen(true))}>
+      <button
+        type="button"
+        className={chip}
+        aria-expanded={open}
+        onClick={() => (open ? close() : setOpen(true))}
+      >
         {label} <Chevron />
       </button>
       {open && (
@@ -349,13 +444,23 @@ export function Menu({ label, ariaLabel, children, className = "" }) {
   useClickAway(ref, () => setOpen(false));
   return (
     <div ref={ref} className="relative">
-      <button type="button" aria-label={ariaLabel} aria-expanded={open} className={className} onClick={() => setOpen((v) => !v)}>
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        aria-expanded={open}
+        className={className}
+        onClick={() => setOpen((v) => !v)}
+      >
         {label}
       </button>
-      {open && <div className={`${menuPanel} right-0 w-56`} onClick={() => setOpen(false)}>{children}</div>}
+      {open && (
+        <div className={`${menuPanel} right-0 w-56`} onClick={() => setOpen(false)}>
+          {children}
+        </div>
+      )}
     </div>
   );
 }
 
-export const menuItem = "block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-[#f1f3f7]";
-
+export const menuItem =
+  "block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-[#f1f3f7]";
