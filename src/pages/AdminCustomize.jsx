@@ -106,6 +106,60 @@ const NEW_TEMPLATE = "__new_template__";
 // The login page has no sections: it is the code file templates/login.liquid, shared by every theme
 const LOGIN_PAGE = "__login_page__";
 const REGISTER_PAGE = "__register_page__";
+// The signed-in account page (templates/account.liquid), previewed with sample customer data
+const ACCOUNT_PAGE = "__account_page__";
+
+// Runs inside the preview (as a script added to its HTML, so it must not use anything from this module).
+// The preview is the store owner's page in a sandboxed frame: it can't keep a shopper signed in (no store
+// cookie, and it is re-rendered on every reload). So signing in, creating an account and the account's own
+// links and forms open the real store (`storeBase`, e.g. https://api.example.com/s/<slug>) in a new tab.
+// Edit mode stops these clicks before they get here (see the preview script in themes/views.py), as does a
+// link the editor shows here itself (Login, Register, Account); a submit is caught first, before the theme's
+// own form script (which would show "Please wait..." for good), and left alone in Edit mode.
+export function openAccountActionsInStore(win, storeBase) {
+  function storeUrl(href) {
+    var path;
+    try {
+      path = new URL(href, win.document.baseURI).pathname;
+    } catch {
+      return null;
+    }
+    var m = path.match(/^(?:\/s\/[^/]+)?\/account(\/.*)?$/);
+    if (!m) return null;
+    var rest = (m[1] || "").replace(/\/+$/, "");
+    // Sign in / create account open those pages; everything else (profile, addresses, sign out) the account
+    return storeBase + "/account" + (rest === "/login" || rest === "/register" ? rest : "");
+  }
+  function open(event, url) {
+    event.preventDefault();
+    win.open(url, "_blank", "noopener");
+  }
+  win.addEventListener("click", function (event) {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    var link = event.target.closest && event.target.closest("a[href]");
+    var url = link && (!link.target || link.target === "_self") ? storeUrl(link.getAttribute("href")) : null;
+    if (url) open(event, url);
+  });
+  win.addEventListener(
+    "submit",
+    function (event) {
+      if (win.document.documentElement.classList.contains("tss-edit")) return;
+      var url = storeUrl(event.target.getAttribute("action") || win.location.href);
+      if (!url) return;
+      event.stopPropagation();
+      open(event, url);
+    },
+    true
+  );
+}
+
+// The preview's HTML with openAccountActionsInStore running in it
+export function withAccountActionsInStore(html, storeBase) {
+  if (!storeBase) return html;
+  const script = `<script>(${openAccountActionsInStore})(window, ${JSON.stringify(storeBase).replace(/</g, "\\u003c")});</script>`;
+  const index = html.toLowerCase().lastIndexOf("</body>");
+  return index < 0 ? html + script : html.slice(0, index) + script + html.slice(index);
+}
 
 const newSectionId = (type) => `${type}-${Math.random().toString(36).slice(2, 6)}`;
 
@@ -389,6 +443,9 @@ export default function AdminCustomizePage() {
 
   const customerPageRef = useRef("");
 
+  // The real store of the store being edited (account actions in the preview open it in a new tab)
+  const storeBaseRef = useRef("");
+
   // Keep the "latest value" refs in step after each commit (event handlers and timers read them)
   useLayoutEffect(() => {
     saveStateRef.current = saveState;
@@ -404,6 +461,7 @@ export default function AdminCustomizePage() {
     sampleQueryRef.current = sampleQuery;
     samplePageRef.current = samplePage;
     customerPageRef.current = customerPage;
+    storeBaseRef.current = store?.storeSlug ? `${API_URL}/s/${store.storeSlug}` : "";
   });
 
   // Pages written in Pages; the preview keeps its page while that page is still visible
@@ -683,7 +741,7 @@ export default function AdminCustomizePage() {
         sync.queue = [];
         sync.inflight = {};
         sync.again = {};
-        setPreviewHtml(res.html);
+        setPreviewHtml(withAccountActionsInStore(res.html, storeBaseRef.current));
         setPreviewError("");
       })
       .catch((e) => setPreviewError(e.message));
@@ -1454,7 +1512,12 @@ export default function AdminCustomizePage() {
       setSelected(null);
       return;
     }
-    if (first === "account") return;
+    if (first === "account") {
+      // The signed-in account page: shown in the preview with sample customer data
+      setCustomerPage("account");
+      setSelected(null);
+      return;
+    }
     setCustomerPage("");
     let next = "index";
     if (first === "products" && second) next = "product";
@@ -2279,7 +2342,9 @@ export default function AdminCustomizePage() {
                         ? LOGIN_PAGE
                         : customerPage === "register"
                           ? REGISTER_PAGE
-                          : page
+                          : customerPage === "account"
+                            ? ACCOUNT_PAGE
+                            : page
                     }
                     onChange={(e) => {
                       const value = e.target.value;
@@ -2287,9 +2352,11 @@ export default function AdminCustomizePage() {
                         addPageTemplate();
                         return;
                       }
-                      if (value === LOGIN_PAGE || value === REGISTER_PAGE) {
-                        // Login / register page: shown in the preview; its code is templates/<page>.liquid
-                        setCustomerPage(value === LOGIN_PAGE ? "login" : "register");
+                      if (value === LOGIN_PAGE || value === REGISTER_PAGE || value === ACCOUNT_PAGE) {
+                        // Login / register / account page: shown in the preview; its code is templates/<page>.liquid
+                        setCustomerPage(
+                          value === LOGIN_PAGE ? "login" : value === REGISTER_PAGE ? "register" : "account"
+                        );
                         setSelected(null);
                         setAdding(false);
                         setBackStack([]);
@@ -2315,6 +2382,7 @@ export default function AdminCustomizePage() {
                     <optgroup label="Account pages">
                       <option value={LOGIN_PAGE}>Login page</option>
                       <option value={REGISTER_PAGE}>Register page</option>
+                      <option value={ACCOUNT_PAGE}>Account page (sample customer)</option>
                     </optgroup>
                     <optgroup label="Page templates">
                       {pageTemplateKeys.map((key) => (
@@ -3305,7 +3373,8 @@ export default function AdminCustomizePage() {
                       title="Store preview"
                       srcDoc={previewHtml}
                       // Theme code is written by store owners: keep it off this origin
-                      sandbox="allow-scripts allow-forms allow-popups"
+                      // Popups escape it so the real store (account actions) opens as a normal tab, like the store's own sandbox
+                      sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
                       className={`mx-auto min-h-0 flex-1 rounded-xl bg-white shadow-lg ring-1 ring-[#14130F]/5 transition-[width] duration-200 ${
                         device === "mobile" ? "w-97.5 max-w-full" : "w-full"
                       } ${drag ? "pointer-events-none" : ""}`}
