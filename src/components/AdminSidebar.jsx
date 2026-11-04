@@ -223,9 +223,12 @@ const menuGroups = [
         icon: "products",
         label: "Products",
         href: `${BASE}/products`,
-        match: [`${BASE}/products`, `${BASE}/collections`],
+        match: [`${BASE}/products`, `${BASE}/collections`, `${BASE}/inventory`],
         permission: "products.view",
-        children: [{ label: "Collections", href: `${BASE}/collections` }],
+        children: [
+          { label: "Collections", href: `${BASE}/collections` },
+          { label: "Inventory", href: `${BASE}/inventory`, permission: "inventory.view" },
+        ],
       },
       {
         icon: "customers",
@@ -243,12 +246,6 @@ const menuGroups = [
         label: "Catalogues",
         href: `${BASE}/catalogues`,
         permission: "products.view",
-      },
-      {
-        icon: "inventory",
-        label: "Inventory",
-        href: `${BASE}/inventory`,
-        permission: "inventory.view",
       },
       {
         icon: "content",

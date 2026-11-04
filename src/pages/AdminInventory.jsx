@@ -940,6 +940,198 @@ function ImportModal({ onClose, onImportSuccess }) {
   );
 }
 
+
+// Shopify-style Stock Counts Modal
+function StockCountsModal({ items, locations, onClose, onStartCount }) {
+  const [downloading, setDownloading] = useState(false);
+
+  // Computed metrics
+  const totalItems = items.length;
+  const totalOnHand = items.reduce((sum, item) => {
+    return sum + (item.available || 0) + (item.committed || 0) + (item.unavailable || 0);
+  }, 0);
+  const outOfStockCount = items.filter((i) => (i.available || 0) <= 0).length;
+  const inStockCount = items.filter((i) => (i.available || 0) > 0).length;
+
+  const handleDownloadSheet = () => {
+    if (!items.length) return;
+    setDownloading(true);
+    const headers = [
+      "Product Name",
+      "SKU",
+      "Location",
+      "Available Quantity",
+      "On Hand Quantity",
+      "Physical Count (Audit)",
+      "Discrepancy (+/-)",
+      "Notes",
+    ];
+
+    const rows = items.map((item) => {
+      const onHand = (item.available || 0) + (item.committed || 0) + (item.unavailable || 0);
+      return [
+        `"${(item.title || "").replace(/"/g, '""')}"`,
+        `"${item.sku || ""}"`,
+        `"${(item.locationName || locations[0]?.name || "Primary Location").replace(/"/g, '""')}"`,
+        item.available ?? 0,
+        onHand,
+        "",
+        "",
+        "",
+      ].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `inventory_stock_count_sheet_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setDownloading(false);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stock-counts-title"
+        className="w-full max-w-2xl rounded-xl bg-white shadow-xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F1EC] text-charcoal-navy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M9 11l3 3L22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              </svg>
+            </div>
+            <div>
+              <h2 id="stock-counts-title" className="text-base font-semibold text-charcoal-navy">
+                Stock counts
+              </h2>
+              <p className="text-xs text-[#5A5750]">
+                Audit and reconcile physical inventory across locations
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-lg p-1 text-slate-400 hover:bg-[#F3F1EC] hover:text-charcoal-navy transition cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+          {/* Summary Metric Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-3 text-center">
+              <span className="block text-xl font-bold text-charcoal-navy">{totalItems}</span>
+              <span className="text-xs text-[#5A5750]">Total items</span>
+            </div>
+            <div className="rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-3 text-center">
+              <span className="block text-xl font-bold text-charcoal-navy">{totalOnHand}</span>
+              <span className="text-xs text-[#5A5750]">Units on hand</span>
+            </div>
+            <div className="rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-3 text-center">
+              <span className="block text-xl font-bold text-[#008060]">{inStockCount}</span>
+              <span className="text-xs text-[#5A5750]">In stock</span>
+            </div>
+            <div className="rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-3 text-center">
+              <span className="block text-xl font-bold text-[#B42318]">{outOfStockCount}</span>
+              <span className="text-xs text-[#5A5750]">Out of stock</span>
+            </div>
+          </div>
+
+          {/* Locations Section */}
+          <div className="rounded-xl border border-[#E7E4DC] p-4 bg-white">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#78746A] mb-3">
+              Locations ({locations.length || 1})
+            </h3>
+            <div className="divide-y divide-[#E7E4DC]">
+              {(locations.length > 0 ? locations : [{ id: "primary", name: "Primary Location" }]).map((loc, idx) => (
+                <div key={loc.id || idx} className="py-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-2 w-2 rounded-full bg-[#008060]"></span>
+                    <div>
+                      <p className="text-sm font-medium text-charcoal-navy">{loc.name}</p>
+                      <p className="text-xs text-[#78746A]">
+                        {loc.address1 ? `${loc.address1}, ${loc.city || ""}` : "All inventory variants tracked"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-[#EBF5FB] px-2.5 py-0.5 text-xs font-medium text-[#004B87]">
+                    Active
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Cycle Count Instructions & Count Sheet */}
+          <div className="rounded-xl border border-[#E7E4DC] bg-[#F7F9FC] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-charcoal-navy">Physical inventory count sheet</p>
+              <p className="text-xs text-[#5A5750] mt-0.5">
+                Download a pre-formatted worksheet with all product variants and current levels to perform an in-person stock check.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleDownloadSheet}
+              disabled={downloading || totalItems === 0}
+              className="shrink-0 flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-2 text-xs font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-50 transition cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              {downloading ? "Preparing..." : "Download count sheet"}
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 border-t border-[#E7E4DC] bg-[#FAF9F6] px-6 py-3.5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-[#E7E4DC] bg-white px-4 py-2 text-xs sm:text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onStartCount?.();
+              onClose();
+            }}
+            className="rounded-lg bg-charcoal-navy px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer"
+          >
+            Start count session
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PAGE_SIZES = [25, 50, 100];
+
 export default function InventoryPage() {
   const canManage = useCan("inventory.manage");
   const storeId = getSession()?.storeId || "default";
@@ -950,15 +1142,17 @@ export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const [filterTab, setFilterTab] = useState("all"); // 'all' | 'in_stock' | 'out_of_stock'
+  const [filterTab, setFilterTab] = useState("all"); // 'all' | 'in_stock' | 'out_of_stock' | 'low_stock' | 'committed' | 'unavailable'
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isStockCountsOpen, setIsStockCountsOpen] = useState(false);
+  const [locationsList, setLocationsList] = useState([]);
   const [notice, setNotice] = useState("");
 
   // The row whose popup is open: { id, kind: "available" | "onhand" | "unavailable" | "committed" }
   const [popover, setPopover] = useState(null);
   const [historyItem, setHistoryItem] = useState(null);
 
-  const pageSize = 50;
+  const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
 
   const flash = (message) => {
     setNotice(message);
@@ -976,7 +1170,9 @@ export default function InventoryPage() {
       setNotice(`Couldn't load stock: ${stock.error}`);
       return;
     }
-    setItems(buildRows(listOf(stock), listOf(products), listOf(locations)));
+    const locs = listOf(locations);
+    setLocationsList(locs);
+    setItems(buildRows(listOf(stock), listOf(products), locs));
   }, []);
 
   useEffect(() => {
@@ -1078,11 +1274,18 @@ export default function InventoryPage() {
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return items.filter((item) => {
-      if (filterTab === "in_stock" && item.available <= 0) return false;
-      if (filterTab === "out_of_stock" && item.available > 0) return false;
+      if (filterTab === "in_stock" && (item.available || 0) <= 0) return false;
+      if (filterTab === "out_of_stock" && (item.available || 0) > 0) return false;
+      if (filterTab === "low_stock" && ((item.available || 0) <= 0 || (item.available || 0) > 5)) return false;
+      if (filterTab === "committed" && (item.committed || 0) <= 0) return false;
+      if (filterTab === "unavailable" && (item.unavailable || 0) <= 0) return false;
 
       if (!q) return true;
-      return item.title?.toLowerCase().includes(q) || item.sku?.toLowerCase().includes(q);
+      return (
+        item.title?.toLowerCase().includes(q) ||
+        item.sku?.toLowerCase().includes(q) ||
+        String(item.product || "").toLowerCase().includes(q)
+      );
     });
   }, [items, searchQuery, filterTab]);
 
@@ -1180,10 +1383,27 @@ export default function InventoryPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                onClick={() => setIsStockCountsOpen(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] transition cursor-pointer"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+                Stock counts
+              </button>
+
+              <button
+                type="button"
                 onClick={handleExport}
                 disabled={items.length === 0}
                 className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-50 transition cursor-pointer"
               >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 Export
               </button>
 
@@ -1192,6 +1412,11 @@ export default function InventoryPage() {
                 onClick={() => setIsImportModalOpen(true)}
                 className="flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-[#F3F1EC] transition cursor-pointer"
               >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#5A5750]">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
                 Import
               </button>
             </div>
@@ -1230,6 +1455,9 @@ export default function InventoryPage() {
                     <option value="all">All</option>
                     <option value="in_stock">In stock</option>
                     <option value="out_of_stock">Out of stock</option>
+                    <option value="low_stock">Low stock (≤ 5)</option>
+                    <option value="committed">Committed</option>
+                    <option value="unavailable">Unavailable</option>
                   </select>
                   <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#5A5750] leading-1.5">
                     ▲▼
@@ -1265,8 +1493,12 @@ export default function InventoryPage() {
                   {searchQuery && (
                     <button
                       type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2.5 text-xs text-slate-400 hover:text-slate-600"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setCurrentPage(1);
+                      }}
+                      aria-label="Clear search"
+                      className="absolute right-2.5 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
                     >
                       ✕
                     </button>
@@ -1324,7 +1556,7 @@ export default function InventoryPage() {
                         className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy cursor-pointer"
                       />
                     </th>
-                    <th className="py-3 pl-15 pr-3 min-w-70">Product</th>
+                    <th className="py-3 px-3 min-w-70">Product</th>
                     <th className="py-3 px-3 min-w-50">SKU</th>
                     <th className="py-3 px-3 text-right min-w-25">
                       <span
@@ -1597,34 +1829,55 @@ export default function InventoryPage() {
             </div>
 
             {/* PAGINATION BAR */}
-            <div className="flex items-center justify-between border-t border-[#E7E4DC] bg-[#FAF9F6] px-4 py-3 text-xs sm:text-sm text-[#5A5750]">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E7E4DC] bg-[#FAF9F6] px-4 py-3 text-xs sm:text-sm text-[#5A5750]">
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  aria-label="Previous page"
-                  className="flex h-7 w-7 items-center justify-center rounded border border-[#E7E4DC] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-40 disabled:cursor-not-allowed transition"
+                <label htmlFor="inventory-page-size" className="text-xs text-[#5A5750]">
+                  Rows per page:
+                </label>
+                <select
+                  id="inventory-page-size"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="rounded-lg border border-[#E7E4DC] bg-white px-2 py-1 text-xs font-medium text-charcoal-navy outline-none hover:bg-[#F3F1EC] cursor-pointer"
                 >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  aria-label="Next page"
-                  className="flex h-7 w-7 items-center justify-center rounded border border-[#E7E4DC] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
-                  ›
-                </button>
-                <span className="ml-1 font-medium text-charcoal-navy">
-                  {totalItems > 0
-                    ? `${startIndex + 1}-${Math.min(startIndex + pageSize, totalItems)}`
-                    : "0-0"}
-                </span>
+                  {PAGE_SIZES.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div className="text-xs text-slate-500">Showing {totalItems} total items</div>
+              <div className="flex items-center gap-3">
+                <span className="font-medium text-charcoal-navy">
+                  {totalItems > 0
+                    ? `${startIndex + 1}–${Math.min(startIndex + pageSize, totalItems)} of ${totalItems}`
+                    : "0 of 0"}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Next page"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-slate-700 shadow-2xs hover:bg-[#F3F1EC] disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -1644,6 +1897,18 @@ export default function InventoryPage() {
 
       {/* STOCK HISTORY */}
       {historyItem && <HistoryModal item={historyItem} onClose={() => setHistoryItem(null)} />}
+
+      {/* STOCK COUNTS MODAL */}
+      {isStockCountsOpen && (
+        <StockCountsModal
+          items={items}
+          locations={locationsList}
+          onClose={() => setIsStockCountsOpen(false)}
+          onStartCount={() =>
+            flash("Stock count session initiated. Use the count sheet to record physical inventory.")
+          }
+        />
+      )}
 
       {/* REUSABLE IMPORT MODAL */}
       {isImportModalOpen && (
