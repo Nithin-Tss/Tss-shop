@@ -1,5 +1,327 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import { apiGet, apiPost } from "@/lib/api";
+
+const asList = (data) => (Array.isArray(data) ? data : data?.results || []);
+
+const STATUS_STYLES = {
+  draft: "bg-[#F3F1EC] text-[#5A5750]",
+  ordered: "bg-[#EBF5FB] text-[#004B87]",
+  received: "bg-[#E3F5EC] text-[#265C48]",
+  cancelled: "bg-[#FDECEC] text-[#B42318]",
+};
+
+const inputCls =
+  "h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F]";
+
+function ModalShell({ title, onClose, children, wide = false }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`w-full ${wide ? "max-w-3xl" : "max-w-xl"} rounded-xl bg-white shadow-xl`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
+          <h2 className="text-base font-semibold text-charcoal-navy">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-lg p-1 text-slate-400 hover:bg-[#F3F1EC] hover:text-charcoal-navy cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
+  const [supplier, setSupplier] = useState("");
+  const [items, setItems] = useState([]); // [{ variant, quantity }]
+  const [query, setQuery] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const byId = useMemo(() => new Map(variants.map((v) => [String(v.id), v])), [variants]);
+  const picked = new Set(items.map((i) => String(i.variant)));
+
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return variants
+      .filter((v) => !picked.has(String(v.id)))
+      .filter((v) => !q || `${v.product} ${v.options} ${v.sku}`.toLowerCase().includes(q))
+      .slice(0, 8);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variants, query, items]);
+
+  const addVariant = (v) => {
+    setItems((prev) => [...prev, { variant: v.id, quantity: 1 }]);
+    setQuery("");
+  };
+
+  const setQty = (id, value) =>
+    setItems((prev) =>
+      prev.map((i) =>
+        i.variant === id ? { ...i, quantity: Math.max(1, parseInt(value, 10) || 1) } : i
+      )
+    );
+
+  const totalUnits = items.reduce((n, i) => n + i.quantity, 0);
+  const canSubmit = supplier.trim() && items.length > 0 && !saving;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    setSaving(true);
+    setError("");
+    const res = await apiPost("/api/v1/purchase-orders/", {
+      supplier_name: supplier.trim(),
+      items,
+    });
+    setSaving(false);
+    if (res.ok) {
+      onCreated();
+      onClose();
+    } else {
+      setError(res.error || "Could not create the purchase order.");
+    }
+  };
+
+  return (
+    <ModalShell title="Create purchase order" onClose={onClose} wide>
+      <form onSubmit={submit}>
+        <div className="space-y-5 p-6 max-h-[68vh] overflow-y-auto">
+          {error && (
+            <div
+              role="alert"
+              className="rounded-lg bg-[#FDECEC] px-4 py-2.5 text-xs text-[#B42318]"
+            >
+              {error}
+            </div>
+          )}
+          <div>
+            <label htmlFor="po-supplier" className="mb-1.5 block text-xs font-medium">
+              Supplier
+            </label>
+            <input
+              id="po-supplier"
+              className={inputCls}
+              value={supplier}
+              onChange={(e) => setSupplier(e.target.value)}
+              placeholder="Supplier name"
+              maxLength={255}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="po-search" className="mb-1.5 block text-xs font-medium">
+              Add products
+            </label>
+            <div className="relative">
+              <input
+                id="po-search"
+                className={inputCls}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search products by name or SKU"
+                autoComplete="off"
+              />
+              {query.trim() && (
+                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-[#E7E4DC] bg-white shadow-lg">
+                  {matches.length === 0 ? (
+                    <li className="px-3 py-2.5 text-sm text-[#78746A]">No matching products</li>
+                  ) : (
+                    matches.map((v) => (
+                      <li key={v.id}>
+                        <button
+                          type="button"
+                          onClick={() => addVariant(v)}
+                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-[#F3F1EC] cursor-pointer"
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium">{v.product}</span>
+                            <span className="block truncate text-xs text-[#78746A]">
+                              {[v.options, v.sku && `SKU ${v.sku}`].filter(Boolean).join(" · ") ||
+                                "Default variant"}
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-xs text-[#78746A]">
+                            {v.stock} in stock
+                          </span>
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          {items.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-[#E7E4DC] py-8 text-center text-sm text-[#78746A]">
+              Search above to add the products you want to restock.
+            </p>
+          ) : (
+            <div className="overflow-hidden rounded-lg border border-[#E7E4DC]">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-medium text-[#5A5750]">
+                    <th className="px-3 py-2">Product</th>
+                    <th className="px-3 py-2 text-right">In stock</th>
+                    <th className="px-3 py-2 text-right">Quantity to order</th>
+                    <th className="w-8 px-3 py-2" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E7E4DC]">
+                  {items.map((it) => {
+                    const v = byId.get(String(it.variant));
+                    return (
+                      <tr key={it.variant}>
+                        <td className="px-3 py-2">
+                          <span className="block font-medium">{v?.product || "Product"}</span>
+                          <span className="block text-xs text-[#78746A]">
+                            {[v?.options, v?.sku && `SKU ${v.sku}`].filter(Boolean).join(" · ") ||
+                              "Default variant"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-[#5A5750]">{v?.stock ?? 0}</td>
+                        <td className="px-3 py-2 text-right">
+                          <input
+                            type="number"
+                            min="1"
+                            aria-label={`Quantity of ${v?.product || "product"}`}
+                            value={it.quantity}
+                            onChange={(e) => setQty(it.variant, e.target.value)}
+                            className="h-8 w-20 rounded-lg border border-[#E7E4DC] px-2 text-right text-sm outline-none focus:border-charcoal-navy"
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            type="button"
+                            aria-label="Remove product"
+                            onClick={() =>
+                              setItems((p) => p.filter((i) => i.variant !== it.variant))
+                            }
+                            className="text-slate-400 hover:text-[#B42318] cursor-pointer"
+                          >
+                            ✕
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-2 border-t border-[#E7E4DC] px-6 py-4">
+          <span className="text-sm text-[#5A5750]">
+            {items.length} product{items.length === 1 ? "" : "s"} · {totalUnits} unit
+            {totalUnits === 1 ? "" : "s"}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-[#E7E4DC] px-3.5 py-2 text-sm font-medium hover:bg-[#F3F1EC] cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
+            >
+              {saving ? "Creating…" : "Create purchase order"}
+            </button>
+          </div>
+        </div>
+      </form>
+    </ModalShell>
+  );
+}
+
+function ReceiveModal({ order, locations, onClose, onDone }) {
+  const [locationId, setLocationId] = useState(locations[0]?.id || "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    const res = await apiPost(`/api/v1/purchase-orders/${order.id}/receive/`, {
+      location: locationId,
+    });
+    setSaving(false);
+    if (res.ok) {
+      onDone(`${order.po_number} received into stock.`);
+      onClose();
+    } else {
+      setError(res.error || "Could not receive this purchase order.");
+    }
+  };
+
+  return (
+    <ModalShell title={`Receive ${order.po_number}`} onClose={onClose}>
+      <form onSubmit={submit} className="space-y-4 p-6">
+        {error && (
+          <div role="alert" className="rounded-lg bg-[#FDECEC] px-4 py-2.5 text-xs text-[#B42318]">
+            {error}
+          </div>
+        )}
+        {locations.length === 0 && (
+          <p className="text-xs text-[#B42318]">Add a location in Settings → Locations first.</p>
+        )}
+        <div>
+          <label htmlFor="po-location" className="mb-1.5 block text-xs font-medium">
+            Receive stock into
+          </label>
+          <select
+            id="po-location"
+            className={inputCls}
+            value={locationId}
+            onChange={(e) => setLocationId(e.target.value)}
+          >
+            {locations.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-[#E7E4DC] px-3.5 py-2 text-sm font-medium hover:bg-[#F3F1EC] cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving || !locationId}
+            className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
+          >
+            {saving ? "Receiving…" : "Receive stock"}
+          </button>
+        </div>
+      </form>
+    </ModalShell>
+  );
+}
 
 // Professional SVG illustration representing purchase orders (clipboard with itemized rows & supplier shipment)
 function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
@@ -81,10 +403,14 @@ function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
 }
 
 export default function AdminPurchaseOrders() {
-  // Existing purchase orders state (dynamic; ready for backend data integration)
-  const [orders] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [receiving, setReceiving] = useState(null);
   const [notice, setNotice] = useState("");
 
   const flash = (message) => {
@@ -92,14 +418,54 @@ export default function AdminPurchaseOrders() {
     setTimeout(() => setNotice(""), 4500);
   };
 
-  const handleCreatePurchaseOrder = () => {
-    // There is currently no backend endpoint or creation screen for supplier purchase orders
-    flash(
-      "Purchase order creation requires supplier configuration and is not yet configured on the backend."
-    );
+  const loadData = async () => {
+    try {
+      const [poRes, locRes, prodRes] = await Promise.all([
+        apiGet("/api/v1/purchase-orders/"),
+        apiGet("/api/v1/inventory/locations/"),
+        apiGet("/api/v1/catalog/products/"),
+      ]);
+      if (poRes.ok) setOrders(asList(poRes.data));
+      else flash(poRes.error || "Could not load purchase orders.");
+      if (locRes.ok) setLocations(asList(locRes.data));
+      if (prodRes.ok) setProducts(asList(prodRes.data));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Filter existing orders if present
+  useEffect(() => {
+    loadData();
+    // Load once on mount; loadData only sets state after the requests resolve.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const variants = useMemo(
+    () =>
+      products.flatMap((p) =>
+        (p.variants || []).map((v) => ({
+          id: v.id,
+          product: p.title,
+          options: Object.values(v.options || {})
+            .filter(Boolean)
+            .join(" / "),
+          sku: v.sku || "",
+          stock: v.quantity ?? 0,
+        }))
+      ),
+    [products]
+  );
+
+  const runAction = async (order, action, message) => {
+    const res = await apiPost(`/api/v1/purchase-orders/${order.id}/${action}/`);
+    if (res.ok) {
+      flash(message);
+      loadData();
+    } else {
+      flash(res.error || "Action failed.");
+    }
+  };
+
   const filteredOrders = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return orders.filter((order) => {
@@ -108,9 +474,8 @@ export default function AdminPurchaseOrders() {
       }
       if (!q) return true;
       return (
-        (order.reference || "").toLowerCase().includes(q) ||
-        (order.supplier || "").toLowerCase().includes(q) ||
-        (order.destination || "").toLowerCase().includes(q)
+        (order.po_number || "").toLowerCase().includes(q) ||
+        (order.supplier_name || "").toLowerCase().includes(q)
       );
     });
   }, [orders, searchQuery, filterStatus]);
@@ -132,6 +497,15 @@ export default function AdminPurchaseOrders() {
               <PageIcon name="purchase_orders" />
               Purchase orders
             </h1>
+            {orders.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsCreateOpen(true)}
+                className="rounded-lg bg-charcoal-navy px-3.5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] cursor-pointer"
+              >
+                Create purchase order
+              </button>
+            )}
           </div>
 
           {/* NOTIFICATION FEEDBACK */}
@@ -166,9 +540,10 @@ export default function AdminPurchaseOrders() {
                     className="h-9 appearance-none rounded-lg border border-[#E7E4DC] bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#F3F1EC] cursor-pointer transition"
                   >
                     <option value="all">All</option>
-                    <option value="open">Open</option>
                     <option value="draft">Draft</option>
-                    <option value="closed">Closed</option>
+                    <option value="ordered">Ordered</option>
+                    <option value="received">Received</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                   <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#5A5750] leading-1.5">
                     ▲▼
@@ -234,7 +609,11 @@ export default function AdminPurchaseOrders() {
             </div>
 
             {/* CONTENT AREA: EMPTY STATE OR DATA TABLE */}
-            {filteredOrders.length === 0 ? (
+            {loading ? (
+              <div className="py-24 text-center text-sm text-[#5A5750]">
+                Loading purchase orders…
+              </div>
+            ) : filteredOrders.length === 0 ? (
               searchQuery || filterStatus !== "all" ? (
                 /* Search / Filter yields no items */
                 <div className="py-20 text-center px-4">
@@ -284,7 +663,7 @@ export default function AdminPurchaseOrders() {
                     {/* Primary Button */}
                     <button
                       type="button"
-                      onClick={handleCreatePurchaseOrder}
+                      onClick={() => setIsCreateOpen(true)}
                       className="inline-flex items-center justify-center rounded-lg bg-charcoal-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer active:scale-[0.98]"
                     >
                       Create purchase order
@@ -312,30 +691,64 @@ export default function AdminPurchaseOrders() {
                     <tr className="border-b border-[#E7E4DC] bg-white text-xs font-medium text-[#2A2925] whitespace-nowrap">
                       <th className="py-3 px-4">Purchase order</th>
                       <th className="py-3 px-4">Supplier</th>
-                      <th className="py-3 px-4">Destination</th>
                       <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Received</th>
-                      <th className="py-3 px-4 text-right">Expected arrival</th>
+                      <th className="py-3 px-4 text-right">Units</th>
+                      <th className="py-3 px-4 text-right">Created</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E7E4DC]">
                     {filteredOrders.map((po) => (
                       <tr key={po.id} className="hover:bg-[#FAF9F6] transition-colors">
-                        <td className="py-3 px-4 font-medium text-charcoal-navy">
-                          {po.reference || `#PO-${po.id}`}
-                        </td>
-                        <td className="py-3 px-4 text-[#5A5750]">{po.supplier || "—"}</td>
-                        <td className="py-3 px-4 text-[#5A5750]">{po.destination || "—"}</td>
+                        <td className="py-3 px-4 font-medium">{po.po_number}</td>
+                        <td className="py-3 px-4 text-[#5A5750]">{po.supplier_name || "—"}</td>
                         <td className="py-3 px-4">
-                          <span className="rounded-full bg-[#EBF5FB] px-2.5 py-0.5 text-xs font-medium text-[#004B87]">
-                            {po.status || "Open"}
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                              STATUS_STYLES[po.status] || STATUS_STYLES.draft
+                            }`}
+                          >
+                            {po.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-right font-medium">
-                          {po.received || 0} / {po.total || 0}
+                        <td className="py-3 px-4 text-right">
+                          {(po.items || []).reduce((n, i) => n + i.quantity, 0)}
                         </td>
                         <td className="py-3 px-4 text-right text-[#5A5750]">
-                          {po.expected_date || "—"}
+                          {po.created_at ? new Date(po.created_at).toLocaleDateString() : "—"}
+                        </td>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          {po.status === "draft" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                runAction(po, "order", `${po.po_number} marked as ordered.`)
+                              }
+                              className="mr-3 text-xs font-semibold hover:underline cursor-pointer"
+                            >
+                              Mark ordered
+                            </button>
+                          )}
+                          {(po.status === "draft" || po.status === "ordered") && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => setReceiving(po)}
+                                className="mr-3 text-xs font-semibold hover:underline cursor-pointer"
+                              >
+                                Receive
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  runAction(po, "cancel", `${po.po_number} cancelled.`)
+                                }
+                                className="text-xs font-semibold text-[#B42318] hover:underline cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -358,6 +771,28 @@ export default function AdminPurchaseOrders() {
           </div>
         </main>
       </div>
+
+      {isCreateOpen && (
+        <CreatePurchaseOrderModal
+          variants={variants}
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => {
+            flash("Purchase order created.");
+            loadData();
+          }}
+        />
+      )}
+      {receiving && (
+        <ReceiveModal
+          order={receiving}
+          locations={locations}
+          onClose={() => setReceiving(null)}
+          onDone={(msg) => {
+            flash(msg);
+            loadData();
+          }}
+        />
+      )}
     </div>
   );
 }
