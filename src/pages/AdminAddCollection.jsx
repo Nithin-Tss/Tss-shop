@@ -204,7 +204,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
 // ---------------------------------------------------------------- include products from collections
 
 // "Include products from collections": a searchable dropdown of the store's other collections with an Add
-// button; the added ones show as chips ("Pinot Noir · 6 products") with a × to remove. Collections already
+// button; the added ones are listed as rows ("Pinot Noir · 6 products") with a × to remove. Collections already
 // added are not offered again. `collections` is the store's current list (the collection being edited left out).
 
 export const productsLabel = (count) => `${count ?? 0} product${count === 1 ? "" : "s"}`;
@@ -253,10 +253,10 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
 
   return (
     <section className={`${card} p-5`} aria-labelledby="include-collections-title">
-      <h2 id="include-collections-title" className="mb-1 text-[15px] font-semibold text-[#14130F]">
+      <h2 id="include-collections-title" className={`${cardTitle} mb-1`}>
         Include products from collections
       </h2>
-      <p className="mb-3 text-[13px] text-[#78746A]">
+      <p className="mb-4 text-[13px] leading-relaxed text-[#78746A]">
         Products in the collections you add also show here, and follow them when they change.
       </p>
 
@@ -315,24 +315,24 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
                 id={listId}
                 role="listbox"
                 aria-label="Collections to add"
-                className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-[#E7E4DC] bg-white p-1 shadow-lg"
+                className="absolute z-20 mt-1.5 max-h-60 w-full overflow-y-auto rounded-lg border border-[#E7E4DC] bg-white py-1 shadow-[0_8px_24px_rgba(20,19,15,0.10)]"
               >
                 {offered.map((c) => (
                   <li key={c.id} role="option" aria-selected={chosen?.id === c.id}>
                     <button
                       type="button"
                       onClick={() => pick(c)}
-                      className="flex w-full items-center justify-between gap-3 rounded-md px-2.5 py-1.5 text-left text-[14px] hover:bg-[#F6F7F8]"
+                      className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-[14px] text-[#14130F] transition hover:bg-[#F3F1EC] ${chosen?.id === c.id ? "bg-[#F3F1EC]" : ""}`}
                     >
                       <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                      <span className="text-[12px] text-[#78746A]">
+                      <span className="shrink-0 text-[12px] text-[#78746A]">
                         {productsLabel(c.products_count)}
                       </span>
                     </button>
                   </li>
                 ))}
                 {offered.length === 0 && (
-                  <li className="px-2.5 py-1.5 text-[13px] text-[#78746A]">
+                  <li className="px-3 py-2 text-[13px] text-[#78746A]">
                     {query.trim() ? "No collections match." : "All collections are added."}
                   </li>
                 )}
@@ -343,7 +343,7 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
             type="button"
             onClick={add}
             disabled={!chosen}
-            className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white px-4 py-2.5 text-[13px] font-medium text-[#30343B] transition hover:bg-[#F6F7F8] disabled:opacity-40"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-charcoal-navy px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#2A2925] disabled:cursor-not-allowed disabled:bg-[#E7E4DC] disabled:text-[#A29E92]"
           >
             Add
           </button>
@@ -351,23 +351,27 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
       )}
 
       {added.length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Added collections">
+        <ul
+          className="mt-4 divide-y divide-[#F3F1EC] rounded-lg border border-[#E7E4DC]"
+          aria-label="Added collections"
+        >
           {added.map((c) => (
-            <li
-              key={c.id}
-              className="inline-flex max-w-full items-center gap-1 rounded-full border border-[#D4D0C5] bg-[#FAF9F6] py-1 pl-3 pr-1 text-[13px] text-[#30343B]"
-            >
-              <span className="truncate">
-                {c.name} · {productsLabel(c.products_count)}
+            <li key={c.id} className="flex items-center gap-3 py-1.5 pl-3 pr-1.5 text-[14px]">
+              <span className="min-w-0 flex-1 truncate font-medium text-[#14130F]">
+                {c.name}
+                <span className="font-normal text-[#78746A]">
+                  {" "}
+                  · {productsLabel(c.products_count)}
+                </span>
               </span>
               <button
                 type="button"
                 onClick={() => onChange(selected.filter((id) => id !== c.id))}
                 aria-label={`Remove ${c.name}`}
-                className="rounded-full p-1 hover:bg-[#E9EAEC]"
+                className={iconButton}
               >
                 <svg
-                  className="h-3.5 w-3.5"
+                  className="h-4 w-4"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
