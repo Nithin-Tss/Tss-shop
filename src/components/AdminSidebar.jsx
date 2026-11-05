@@ -319,7 +319,6 @@ const menuGroups = [
         href: `${BASE}/discounts`,
         permission: "discounts.view",
       },
-      { icon: "discounts", label: "Taxes", href: `${BASE}/tax`, permission: "shipping.view" },
     ],
   },
   {
