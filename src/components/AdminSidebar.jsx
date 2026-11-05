@@ -287,10 +287,9 @@ const menuGroups = [
       },
       {
         icon: "content",
-        label: "Content",
-        href: `${BASE}/content`,
+        label: "Menus",
+        href: `${BASE}/content/menus`,
         match: [`${BASE}/content`, `${BASE}/menus`],
-        children: [{ label: "Menus", href: `${BASE}/content/menus` }],
       },
     ],
   },

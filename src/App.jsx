@@ -22,7 +22,6 @@ const AdminCollections = lazy(() => import("@/pages/AdminCollections"));
 const AdminAddCollection = lazy(() => import("@/pages/AdminAddCollection"));
 const AdminCatalogues = lazy(() => import("@/pages/AdminCatalogues"));
 const AdminAddCatalogue = lazy(() => import("@/pages/AdminAddCatalogue"));
-const AdminContent = lazy(() => import("@/pages/AdminContent"));
 const BlogPostsPage = lazy(() =>
   import("@/pages/AdminContent").then((m) => ({ default: m.BlogPostsPage }))
 );
@@ -93,7 +92,10 @@ export default function App() {
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/online-store/home" element={<AdminHome />} />
           <Route path="/admin/online-store/settings" element={<AdminSettings />} />
-          <Route path="/admin/online-store/content" element={<AdminContent />} />
+          <Route
+            path="/admin/online-store/content"
+            element={<Navigate to="/admin/online-store/content/menus" replace />}
+          />
           <Route path="/admin/online-store/content/menus" element={<AdminMenus />} />
           <Route
             path="/admin/online-store/menus"
