@@ -235,7 +235,10 @@ export default function App() {
           {/* Platform administration: the API refuses anyone who isn't a platform administrator */}
           <Route path="/admin/platform" element={<AdminPlatform />} />
           <Route element={<RequirePermission permission="shipping.view" />}>
-            <Route path="/admin/online-store/shipping" element={<Navigate to="/admin/settings" replace />} />
+            <Route
+              path="/admin/online-store/shipping"
+              element={<Navigate to="/admin/settings" replace />}
+            />
             <Route path="/admin/online-store/tax" element={<AdminTax />} />
           </Route>
           <Route element={<RequirePermission permission="webhooks.manage" />}>

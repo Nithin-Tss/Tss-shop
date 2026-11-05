@@ -189,7 +189,13 @@ function CircleAddButton({ label, onClick, disabled }) {
       title={label}
       className="inline-flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] border-slate-600 text-slate-700 hover:bg-slate-100 disabled:opacity-40"
     >
-      <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        viewBox="0 0 20 20"
+        className="h-3.5 w-3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <path d="M10 5v10M5 10h10" strokeLinecap="round" />
       </svg>
     </button>
@@ -227,7 +233,16 @@ function ChipBox({ values, onRemove, empty }) {
 }
 
 // Search popover shared by the "+" buttons: filters existing values, offers Add "typed value"
-function AddValuePopover({ title, options, selected = [], onPick, onClose, canCreate = true, busy, error }) {
+function AddValuePopover({
+  title,
+  options,
+  selected = [],
+  onPick,
+  onClose,
+  canCreate = true,
+  busy,
+  error,
+}) {
   const [query, setQuery] = useState("");
   const boxRef = useRef(null);
   const typed = query.trim();
@@ -341,7 +356,6 @@ const uniqueText = (values) =>
     .filter((v, i, all) => v && all.findIndex((x) => sameText(x, v)) === i)
     .sort((a, b) => a.localeCompare(b));
 
-
 /* ---------- variants ---------- */
 
 // Product.options: [{ name, values }] in display order; each variant's values: variant.options = { [name]: value }
@@ -359,7 +373,9 @@ const isMoney = (s) => /^\d+(\.\d{1,2})?$/.test(String(s).trim());
 const isWhole = (s) => /^\d+$/.test(String(s).trim());
 const isWeight = (s) => /^\d+(\.\d{1,3})?$/.test(String(s).trim());
 const formatAud = (value) =>
-  value === "" || value == null || Number.isNaN(Number(value)) ? "" : `$${Number(value).toFixed(2)}`;
+  value === "" || value == null || Number.isNaN(Number(value))
+    ? ""
+    : `$${Number(value).toFixed(2)}`;
 
 // "Single / 375ML", else the SKU, else "Default variant"
 const variantName = (v, options) => {
@@ -383,7 +399,8 @@ const draftId = () => `draft-${(draftSeq += 1)}`;
 function stockOf(variant, items, location) {
   const rows = items.filter((i) => i.variant === variant.id);
   if (!rows.length) return { tracked: false, available: null };
-  if (location === "all") return { tracked: true, available: rows.reduce((n, i) => n + i.available, 0) };
+  if (location === "all")
+    return { tracked: true, available: rows.reduce((n, i) => n + i.available, 0) };
   const row = rows.find((i) => i.location === location);
   return { tracked: true, available: row ? row.available : null };
 }
@@ -488,7 +505,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(null); // { optionId, index }
-  const changed = JSON.stringify(opts.map((o) => [o.name, o.values.map((v) => v.value)])) !==
+  const changed =
+    JSON.stringify(opts.map((o) => [o.name, o.values.map((v) => v.value)])) !==
     JSON.stringify(options.map((o) => [o.name, o.values]));
 
   const close = () => {
@@ -513,7 +531,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
   opts.forEach((o, i) => {
     const name = o.name.trim();
     if (!name) problems.push(`Option ${i + 1} needs a name.`);
-    else if (names.has(name.toLowerCase())) problems.push(`There are two options called "${name}".`);
+    else if (names.has(name.toLowerCase()))
+      problems.push(`There are two options called "${name}".`);
     names.add(name.toLowerCase());
     const seen = new Set();
     if (!o.values.length) problems.push(`${name || `Option ${i + 1}`} needs at least one value.`);
@@ -529,7 +548,10 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
   });
 
   const plan = () => {
-    const newOptions = opts.map((o) => ({ name: o.name.trim(), values: o.values.map((v) => v.value.trim()) }));
+    const newOptions = opts.map((o) => ({
+      name: o.name.trim(),
+      values: o.values.map((v) => v.value.trim()),
+    }));
     const kept = [];
     const removed = [];
     const taken = new Map();
@@ -545,7 +567,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
         }
         const current = v.options?.[o.original];
         const entry = o.values.find((x) => x.original != null && x.original === current);
-        if (!entry) why = current ? `${o.original} "${current}" is removed` : `it has no ${o.original}`;
+        if (!entry)
+          why = current ? `${o.original} "${current}" is removed` : `it has no ${o.original}`;
         else values[name] = entry.value.trim();
       });
       if (!why) {
@@ -564,7 +587,9 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
     const created = combinations(newOptions)
       .filter((combo) => !taken.has(comboKey(combo, newOptions)))
       .map((combo) => {
-        const stem = `${base}-${Object.values(combo).join("-")}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "");
+        const stem = `${base}-${Object.values(combo).join("-")}`
+          .toUpperCase()
+          .replace(/[^A-Z0-9-]+/g, "");
         let sku = stem;
         for (let n = 2; skus.has(sku.toLowerCase()); n += 1) sku = `${stem}-${n}`;
         skus.add(sku.toLowerCase());
@@ -591,7 +616,12 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
     });
     setSaving(false);
     if (!res.ok) {
-      setError(res.formError || Object.values(res.fieldErrors || {})[0] || res.error || "The options couldn't be saved.");
+      setError(
+        res.formError ||
+          Object.values(res.fieldErrors || {})[0] ||
+          res.error ||
+          "The options couldn't be saved."
+      );
       return;
     }
     onApplied(res.data);
@@ -617,13 +647,20 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
       </>
     ) : (
       <>
-        <button type="button" onClick={() => setStep("edit")} disabled={saving} className={ghostButton}>
+        <button
+          type="button"
+          onClick={() => setStep("edit")}
+          disabled={saving}
+          className={ghostButton}
+        >
           Back
         </button>
         <button
           type="button"
           onClick={apply}
-          disabled={saving || total > MAX_VARIANTS || (preview.removed.length > 0 && !confirmDelete)}
+          disabled={
+            saving || total > MAX_VARIANTS || (preview.removed.length > 0 && !confirmDelete)
+          }
           className={primaryButton}
         >
           {saving ? "Saving..." : "Save options"}
@@ -632,14 +669,21 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
     );
 
   return (
-    <Modal title={step === "edit" ? "Edit options" : "Review variant changes"} onClose={close} footer={footer} wide>
+    <Modal
+      title={step === "edit" ? "Edit options" : "Review variant changes"}
+      onClose={close}
+      footer={footer}
+      wide
+    >
       {step === "edit" ? (
         <div className="space-y-4">
           {opts.map((o, oi) => (
             <div key={o.id} className="rounded-xl border border-slate-200 p-4">
               <div className="flex items-end gap-2">
                 <label className="block flex-1">
-                  <span className="mb-1 block text-xs font-semibold text-slate-700">Option name</span>
+                  <span className="mb-1 block text-xs font-semibold text-slate-700">
+                    Option name
+                  </span>
                   <input
                     value={o.name}
                     onChange={(e) => update(o.id, () => ({ name: e.target.value }))}
@@ -683,7 +727,9 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
                       aria-label={`${o.name || `Option ${oi + 1}`} value ${vi + 1}`}
                       onChange={(e) =>
                         update(o.id, (opt) => ({
-                          values: opt.values.map((x) => (x.id === v.id ? { ...x, value: e.target.value } : x)),
+                          values: opt.values.map((x) =>
+                            x.id === v.id ? { ...x, value: e.target.value } : x
+                          ),
                         }))
                       }
                       onKeyDown={(e) => {
@@ -731,7 +777,9 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
               <button
                 type="button"
                 onClick={() =>
-                  update(o.id, (opt) => ({ values: [...opt.values, { id: draftId(), value: "", original: null }] }))
+                  update(o.id, (opt) => ({
+                    values: [...opt.values, { id: draftId(), value: "", original: null }],
+                  }))
                 }
                 className="mt-2 text-xs font-semibold text-charcoal-navy hover:underline"
               >
@@ -740,7 +788,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
               {o.original == null && variants.length > 0 && (
                 <label className="mt-3 block">
                   <span className="mb-1 block text-xs font-semibold text-slate-700">
-                    Value for the {variants.length} existing variant{variants.length === 1 ? "" : "s"}
+                    Value for the {variants.length} existing variant
+                    {variants.length === 1 ? "" : "s"}
                   </span>
                   <select
                     value={o.defaultValue}
@@ -780,16 +829,18 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
       ) : (
         <div className="space-y-4 text-sm">
           <p className="text-slate-600">
-            {preview.kept.length} variant{preview.kept.length === 1 ? "" : "s"} keep their ID, price and stock.
+            {preview.kept.length} variant{preview.kept.length === 1 ? "" : "s"} keep their ID, price
+            and stock.
           </p>
           {preview.created.length > 0 && (
             <div>
               <p className="font-semibold text-slate-900">
-                {preview.created.length} variant{preview.created.length === 1 ? "" : "s"} will be created
+                {preview.created.length} variant{preview.created.length === 1 ? "" : "s"} will be
+                created
               </p>
               <p className="text-xs text-slate-500">
-                Each gets the first variant's price ({formatAud(basePrice)}) and the SKU shown, which you can change
-                later. They start as Not tracked.
+                Each gets the first variant's price ({formatAud(basePrice)}) and the SKU shown,
+                which you can change later. They start as Not tracked.
               </p>
               <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5 text-slate-700">
                 {preview.created.map((c) => (
@@ -804,7 +855,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
           {preview.removed.length > 0 && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">
               <p className="font-semibold text-red-800">
-                ⚠ {preview.removed.length} variant{preview.removed.length === 1 ? "" : "s"} will be deleted
+                ⚠ {preview.removed.length} variant{preview.removed.length === 1 ? "" : "s"} will be
+                deleted
               </p>
               <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5 text-red-800">
                 {preview.removed.map((r) => (
@@ -820,7 +872,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
                   onChange={(e) => setConfirmDelete(e.target.checked)}
                   className="h-4 w-4"
                 />
-                Delete these {preview.removed.length} variant{preview.removed.length === 1 ? "" : "s"}
+                Delete these {preview.removed.length} variant
+                {preview.removed.length === 1 ? "" : "s"}
               </label>
             </div>
           )}
@@ -830,7 +883,9 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
             </p>
           )}
           {!preview.created.length && !preview.removed.length && (
-            <p className="text-slate-600">No variants are created or deleted; only names and order change.</p>
+            <p className="text-slate-600">
+              No variants are created or deleted; only names and order change.
+            </p>
           )}
         </div>
       )}
@@ -844,7 +899,18 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
 }
 
 // Add a variant (variant null) or edit one. Stock goes through the inventory API (adjust_inventory)
-function VariantEditor({ productId, variant, options, variants, locations, items, canSeeStock, canSetStock, onClose, onSaved }) {
+function VariantEditor({
+  productId,
+  variant,
+  options,
+  variants,
+  locations,
+  items,
+  canSeeStock,
+  canSetStock,
+  onClose,
+  onSaved,
+}) {
   const [savedId, setSavedId] = useState(variant?.id || null);
   const start = variant || {};
   const initial = {
@@ -882,12 +948,14 @@ function VariantEditor({ productId, variant, options, variants, locations, items
     if (clash) errors.combo = `${variantName(clash, options)} already exists.`;
   }
   if (!isMoney(form.price)) errors.price = "Enter a price, like 12.50.";
-  if (form.compareAt !== "" && !isMoney(form.compareAt)) errors.compareAt = "Enter a price, like 15.00.";
+  if (form.compareAt !== "" && !isMoney(form.compareAt))
+    errors.compareAt = "Enter a price, like 15.00.";
   if (!form.sku.trim()) errors.sku = "Enter a SKU.";
   if (form.weight !== "" && !isWeight(form.weight)) errors.weight = "Enter a weight of 0 or more.";
   Object.entries(stock).forEach(([loc, value]) => {
     if (value !== "" && !isWhole(value)) errors[`stock-${loc}`] = "Whole number of 0 or more.";
-    if (value === "" && savedStock[loc] !== "") errors[`stock-${loc}`] = "Enter a number to keep this stock.";
+    if (value === "" && savedStock[loc] !== "")
+      errors[`stock-${loc}`] = "Enter a number to keep this stock.";
   });
 
   const close = () => {
@@ -901,11 +969,17 @@ function VariantEditor({ productId, variant, options, variants, locations, items
     setError("");
     const body = {};
     if (!savedId || form.price !== savedForm.price) body.price = form.price;
-    if (!savedId || form.compareAt !== savedForm.compareAt) body.compare_at_price = form.compareAt === "" ? null : form.compareAt;
+    if (!savedId || form.compareAt !== savedForm.compareAt)
+      body.compare_at_price = form.compareAt === "" ? null : form.compareAt;
     if (!savedId || form.sku !== savedForm.sku) body.sku = form.sku.trim();
-    if (!savedId || form.weight !== savedForm.weight) body.weight = form.weight === "" ? "0" : form.weight;
-    if (!savedId || form.continueSelling !== savedForm.continueSelling) body.continue_selling = form.continueSelling;
-    if (options.length && (!savedId || comboKey(form.options, options) !== comboKey(savedForm.options, options)))
+    if (!savedId || form.weight !== savedForm.weight)
+      body.weight = form.weight === "" ? "0" : form.weight;
+    if (!savedId || form.continueSelling !== savedForm.continueSelling)
+      body.continue_selling = form.continueSelling;
+    if (
+      options.length &&
+      (!savedId || comboKey(form.options, options) !== comboKey(savedForm.options, options))
+    )
       body.options = form.options;
 
     let id = savedId;
@@ -915,7 +989,12 @@ function VariantEditor({ productId, variant, options, variants, locations, items
         : await apiPost("/api/v1/catalog/variants/", { product: productId, ...body });
       if (!res.ok) {
         setSaving(false);
-        setError(res.formError || Object.values(res.fieldErrors || {})[0] || res.error || "The variant couldn't be saved.");
+        setError(
+          res.formError ||
+            Object.values(res.fieldErrors || {})[0] ||
+            res.error ||
+            "The variant couldn't be saved."
+        );
         return;
       }
       id = res.data.id;
@@ -928,7 +1007,10 @@ function VariantEditor({ productId, variant, options, variants, locations, items
     for (const [loc, value] of Object.entries(stock)) {
       if (value === savedStock[loc] || value === "") continue;
       const res = await apiPost("/api/v1/inventory/items/set/", {
-        variant: id, location: loc, available: Number(value), reason: "correction",
+        variant: id,
+        location: loc,
+        available: Number(value),
+        reason: "correction",
       });
       if (res.ok) nowSaved[loc] = value;
       else failed.push(`${locations.find((l) => l.id === loc)?.name}: ${res.error}`);
@@ -963,12 +1045,18 @@ function VariantEditor({ productId, variant, options, variants, locations, items
 
   return (
     <Modal
-      title={savedId ? `Edit ${variantName({ ...start, options: savedForm.options, sku: savedForm.sku }, options)}` : "Add variant"}
+      title={
+        savedId
+          ? `Edit ${variantName({ ...start, options: savedForm.options, sku: savedForm.sku }, options)}`
+          : "Add variant"
+      }
       onClose={close}
       wide
       footer={
         <>
-          {dirty && <span className="mr-auto text-xs font-medium text-amber-700">● Unsaved changes</span>}
+          {dirty && (
+            <span className="mr-auto text-xs font-medium text-amber-700">● Unsaved changes</span>
+          )}
           <button type="button" onClick={close} disabled={saving} className={ghostButton}>
             Cancel
           </button>
@@ -1008,12 +1096,48 @@ function VariantEditor({ productId, variant, options, variants, locations, items
           </div>
         )}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {field("Price (AUD)", "price", <input value={form.price} onChange={(e) => set("price", e.target.value)} inputMode="decimal" className={cellInput} />)}
-          {field("Compare-at price (AUD)", "compareAt", <input value={form.compareAt} onChange={(e) => set("compareAt", e.target.value)} inputMode="decimal" className={cellInput} />)}
+          {field(
+            "Price (AUD)",
+            "price",
+            <input
+              value={form.price}
+              onChange={(e) => set("price", e.target.value)}
+              inputMode="decimal"
+              className={cellInput}
+            />
+          )}
+          {field(
+            "Compare-at price (AUD)",
+            "compareAt",
+            <input
+              value={form.compareAt}
+              onChange={(e) => set("compareAt", e.target.value)}
+              inputMode="decimal"
+              className={cellInput}
+            />
+          )}
           {disabledField("Cost per item")}
-          {field("SKU", "sku", <input value={form.sku} onChange={(e) => set("sku", e.target.value)} className={cellInput} />)}
+          {field(
+            "SKU",
+            "sku",
+            <input
+              value={form.sku}
+              onChange={(e) => set("sku", e.target.value)}
+              className={cellInput}
+            />
+          )}
           {disabledField("Barcode")}
-          {field("Weight", "weight", <input value={form.weight} onChange={(e) => set("weight", e.target.value)} inputMode="decimal" className={cellInput} />, "In your store's weight unit")}
+          {field(
+            "Weight",
+            "weight",
+            <input
+              value={form.weight}
+              onChange={(e) => set("weight", e.target.value)}
+              inputMode="decimal"
+              className={cellInput}
+            />,
+            "In your store's weight unit"
+          )}
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {disabledField("Image")}
@@ -1046,7 +1170,9 @@ function VariantEditor({ productId, variant, options, variants, locations, items
               {!locations.length && <p className="text-xs text-slate-500">No locations yet.</p>}
             </div>
           ) : (
-            <p className="mt-2 text-xs text-slate-500">Stock is managed by people with inventory access.</p>
+            <p className="mt-2 text-xs text-slate-500">
+              Stock is managed by people with inventory access.
+            </p>
           )}
           <label className="mt-3 flex items-center gap-2 text-sm text-slate-800">
             <input
@@ -1078,14 +1204,25 @@ const BULK_COLUMNS = [
 
 function bulkError(key, value) {
   if (key === "price") return isMoney(value) ? "" : "Enter a price, like 12.50.";
-  if (key === "compare_at_price") return value === "" || isMoney(value) ? "" : "Enter a price or leave it empty.";
+  if (key === "compare_at_price")
+    return value === "" || isMoney(value) ? "" : "Enter a price or leave it empty.";
   if (key === "sku") return value.trim() ? "" : "Enter a SKU.";
-  if (key === "weight") return value === "" || isWeight(value) ? "" : "Enter a weight of 0 or more.";
+  if (key === "weight")
+    return value === "" || isWeight(value) ? "" : "Enter a weight of 0 or more.";
   return value === "" || isWhole(value) ? "" : "Whole number of 0 or more.";
 }
 
 // Spreadsheet-style editor for the selected variants only
-function BulkEditor({ rows, options, location, locationName, items, canSetStock, onClose, onSaved }) {
+function BulkEditor({
+  rows,
+  options,
+  location,
+  locationName,
+  items,
+  canSetStock,
+  onClose,
+  onSaved,
+}) {
   const stockColumn = canSetStock && location !== "all";
   const available = BULK_COLUMNS.filter((c) => c.key !== "stock" || stockColumn);
   const [columns, setColumns] = useState(() => ["price", "sku", ...(stockColumn ? ["stock"] : [])]);
@@ -1118,7 +1255,8 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
   rows.forEach((v) =>
     Object.entries(edits[v.id] || {}).forEach(([key, value]) => {
       const message = bulkError(key, value);
-      if (message) problems.push({ id: v.id, key, message: `${variantName(v, options)}: ${message}` });
+      if (message)
+        problems.push({ id: v.id, key, message: `${variantName(v, options)}: ${message}` });
     })
   );
 
@@ -1126,7 +1264,12 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
     if (!range) return false;
     const [r1, c1] = range.anchor;
     const [r2, c2] = range.focus;
-    return r >= Math.min(r1, r2) && r <= Math.max(r1, r2) && c >= Math.min(c1, c2) && c <= Math.max(c1, c2);
+    return (
+      r >= Math.min(r1, r2) &&
+      r <= Math.max(r1, r2) &&
+      c >= Math.min(c1, c2) &&
+      c <= Math.max(c1, c2)
+    );
   };
   const focusCell = (r, c) => document.querySelector(`[data-bulk-cell="${r}-${c}"]`)?.focus();
 
@@ -1140,7 +1283,8 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
       for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c += 1) {
         const key = shownColumns[c].key;
         const value = valueOf(rows[top], key);
-        for (let r = top + 1; r <= Math.max(r1, r2); r += 1) next = setCell(next, rows[r], key, value);
+        for (let r = top + 1; r <= Math.max(r1, r2); r += 1)
+          next = setCell(next, rows[r], key, value);
       }
       return next;
     });
@@ -1150,7 +1294,11 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
     const text = e.clipboardData.getData("text");
     if (!/[\t\n]/.test(text.trim())) return; // one value: the input handles it
     e.preventDefault();
-    const grid = text.replace(/\r/g, "").replace(/\n$/, "").split("\n").map((line) => line.split("\t"));
+    const grid = text
+      .replace(/\r/g, "")
+      .replace(/\n$/, "")
+      .split("\n")
+      .map((line) => line.split("\t"));
     setEdits((prev) => {
       let next = prev;
       grid.forEach((line, dr) =>
@@ -1189,11 +1337,15 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
       let message = "";
       if (Object.keys(body).length) {
         const res = await apiPatch(`/api/v1/catalog/variants/${v.id}/`, body);
-        if (!res.ok) message = res.formError || Object.values(res.fieldErrors || {})[0] || res.error;
+        if (!res.ok)
+          message = res.formError || Object.values(res.fieldErrors || {})[0] || res.error;
       }
       if (!message && "stock" in rowEdits && rowEdits.stock !== "") {
         const res = await apiPost("/api/v1/inventory/items/set/", {
-          variant: v.id, location, available: Number(rowEdits.stock), reason: "correction",
+          variant: v.id,
+          location,
+          available: Number(rowEdits.stock),
+          reason: "correction",
         });
         if (res.ok) stockSaved = true;
         else message = `Price and details saved; stock failed: ${res.error}`;
@@ -1201,7 +1353,9 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
       if (message) failed.push({ id: v.id, name: variantName(v, options), message });
       else saved.push(v.id);
     }
-    setEdits((prev) => Object.fromEntries(Object.entries(prev).filter(([id]) => !saved.includes(id))));
+    setEdits((prev) =>
+      Object.fromEntries(Object.entries(prev).filter(([id]) => !saved.includes(id)))
+    );
     setSaving(false);
     setResult({ saved: saved.length, failed });
     await onSaved({ stock: stockSaved, closing: !failed.length, count: saved.length });
@@ -1215,7 +1369,9 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
       footer={
         <>
           <span className="mr-auto text-xs text-slate-500">
-            {changedCount ? `${changedCount} changed cell${changedCount === 1 ? "" : "s"}` : "No changes yet"}
+            {changedCount
+              ? `${changedCount} changed cell${changedCount === 1 ? "" : "s"}`
+              : "No changes yet"}
           </span>
           <button type="button" onClick={close} disabled={saving} className={ghostButton}>
             Cancel
@@ -1239,14 +1395,21 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
               type="checkbox"
               checked={columns.includes(c.key)}
               onChange={(e) =>
-                setColumns((prev) => (e.target.checked ? [...prev, c.key] : prev.filter((k) => k !== c.key)))
+                setColumns((prev) =>
+                  e.target.checked ? [...prev, c.key] : prev.filter((k) => k !== c.key)
+                )
               }
               className="h-3.5 w-3.5 accent-charcoal-navy"
             />
             {c.key === "stock" ? `Available at ${locationName}` : c.label}
           </label>
         ))}
-        <button type="button" onClick={fillDown} disabled={!range} className={`${outlineButton} ml-auto`}>
+        <button
+          type="button"
+          onClick={fillDown}
+          disabled={!range}
+          className={`${outlineButton} ml-auto`}
+        >
           Fill down (Ctrl+D)
         </button>
       </div>
@@ -1258,10 +1421,13 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
         </p>
       )}
       <p className="mb-2 text-xs text-slate-500">
-        Tab moves right, Enter moves down. Shift+click or drag to select cells, then Fill down. Paste rows copied
-        from a spreadsheet.
+        Tab moves right, Enter moves down. Shift+click or drag to select cells, then Fill down.
+        Paste rows copied from a spreadsheet.
       </p>
-      <div className="overflow-x-auto rounded-lg border border-slate-200" onMouseUp={() => setMouseDown(false)}>
+      <div
+        className="overflow-x-auto rounded-lg border border-slate-200"
+        onMouseUp={() => setMouseDown(false)}
+      >
         <table className="min-w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
             <tr>
@@ -1276,13 +1442,18 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
           <tbody>
             {rows.map((v, r) => (
               <tr key={v.id} className="border-t border-slate-100">
-                <td className="whitespace-nowrap px-3 py-1.5 text-slate-700">{variantName(v, options)}</td>
+                <td className="whitespace-nowrap px-3 py-1.5 text-slate-700">
+                  {variantName(v, options)}
+                </td>
                 {shownColumns.map((col, c) => {
                   const value = valueOf(v, col.key);
                   const edited = edits[v.id] && col.key in edits[v.id];
                   const message = edited ? bulkError(col.key, value) : "";
                   return (
-                    <td key={col.key} className={`px-1.5 py-1 ${inRange(r, c) ? "bg-blue-50" : ""}`}>
+                    <td
+                      key={col.key}
+                      className={`px-1.5 py-1 ${inRange(r, c) ? "bg-blue-50" : ""}`}
+                    >
                       <div className="relative">
                         <input
                           data-bulk-cell={`${r}-${c}`}
@@ -1291,15 +1462,26 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
                           aria-invalid={Boolean(message)}
                           title={message || undefined}
                           placeholder={col.key === "stock" ? "Not stocked" : ""}
-                          onChange={(e) => setEdits((prev) => setCell(prev, v, col.key, e.target.value))}
+                          onChange={(e) =>
+                            setEdits((prev) => setCell(prev, v, col.key, e.target.value))
+                          }
                           onMouseDown={(e) => {
                             setMouseDown(true);
                             setRange((prev) =>
-                              e.shiftKey && prev ? { ...prev, focus: [r, c] } : { anchor: [r, c], focus: [r, c] }
+                              e.shiftKey && prev
+                                ? { ...prev, focus: [r, c] }
+                                : { anchor: [r, c], focus: [r, c] }
                             );
                           }}
-                          onMouseEnter={() => mouseDown && setRange((prev) => prev && { ...prev, focus: [r, c] })}
-                          onFocus={() => !mouseDown && setRange((prev) => (prev && inRange(r, c) ? prev : { anchor: [r, c], focus: [r, c] }))}
+                          onMouseEnter={() =>
+                            mouseDown && setRange((prev) => prev && { ...prev, focus: [r, c] })
+                          }
+                          onFocus={() =>
+                            !mouseDown &&
+                            setRange((prev) =>
+                              prev && inRange(r, c) ? prev : { anchor: [r, c], focus: [r, c] }
+                            )
+                          }
                           onPaste={(e) => paste(e, r, c)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
@@ -1313,7 +1495,10 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
                           className={`${cellInput} min-w-24 ${edited ? "border-amber-400 bg-amber-50" : ""} ${message ? "border-red-500" : ""}`}
                         />
                         {edited && (
-                          <span aria-hidden className="absolute right-1 top-0.5 text-[10px] text-amber-600">
+                          <span
+                            aria-hidden
+                            className="absolute right-1 top-0.5 text-[10px] text-amber-600"
+                          >
                             ●
                           </span>
                         )}
@@ -1341,7 +1526,8 @@ function BulkEditor({ rows, options, location, locationName, items, canSetStock,
           {result.failed.length > 0 && (
             <>
               <p className="mt-1 font-semibold text-red-700">
-                {result.failed.length} failed. Their edits are kept so you can fix them and save again:
+                {result.failed.length} failed. Their edits are kept so you can fix them and save
+                again:
               </p>
               <ul className="list-disc pl-5 text-red-700">
                 {result.failed.map((f) => (
@@ -1417,7 +1603,10 @@ function VariantsSection({
     if (stock) setReloadKey((n) => n + 1);
     const res = await apiGet(`/api/v1/catalog/products/${productId}/`);
     if (!res.ok) {
-      setNotice({ kind: "error", text: "Saved, but the list couldn't be refreshed. Reload the page to see it." });
+      setNotice({
+        kind: "error",
+        text: "Saved, but the list couldn't be refreshed. Reload the page to see it.",
+      });
       return false;
     }
     const fresh = res.data.variants || [];
@@ -1429,27 +1618,42 @@ function VariantsSection({
 
   if (!productId) {
     return (
-      <Card title="Variants" hint="Options such as pack size or volume, each with its own price, SKU and stock.">
-        <p className="text-sm text-slate-500">Save the product first, then add options and variants here.</p>
+      <Card
+        title="Variants"
+        hint="Options such as pack size or volume, each with its own price, SKU and stock."
+      >
+        <p className="text-sm text-slate-500">
+          Save the product first, then add options and variants here.
+        </p>
       </Card>
     );
   }
 
-  const locationName = location === "all" ? "all locations" : locations.find((l) => l.id === location)?.name || "";
+  const locationName =
+    location === "all" ? "all locations" : locations.find((l) => l.id === location)?.name || "";
   const stockFor = (v) => stockOf(v, items, location);
   const q = search.trim().toLowerCase();
   const shown = variants.filter((v) => {
-    if (q && ![productTitle, variantName(v, options), v.sku, ...Object.values(v.options || {})]
-      .some((text) => (text || "").toLowerCase().includes(q))) return false;
-    for (const [name, value] of Object.entries(optionFilters)) if (value && v.options?.[name] !== value) return false;
-    if (stockFilter && stockState === "ready" && stockStatus(stockFor(v)) !== stockFilter) return false;
+    if (
+      q &&
+      ![productTitle, variantName(v, options), v.sku, ...Object.values(v.options || {})].some(
+        (text) => (text || "").toLowerCase().includes(q)
+      )
+    )
+      return false;
+    for (const [name, value] of Object.entries(optionFilters))
+      if (value && v.options?.[name] !== value) return false;
+    if (stockFilter && stockState === "ready" && stockStatus(stockFor(v)) !== stockFilter)
+      return false;
     return true;
   });
   const shownIds = shown.map((v) => v.id);
   const allShownSelected = shown.length > 0 && shownIds.every((id) => selected.includes(id));
   const someShownSelected = shownIds.some((id) => selected.includes(id));
   const toggleIds = (ids, on) =>
-    setSelected((prev) => (on ? [...new Set([...prev, ...ids])] : prev.filter((id) => !ids.includes(id))));
+    setSelected((prev) =>
+      on ? [...new Set([...prev, ...ids])] : prev.filter((id) => !ids.includes(id))
+    );
   const selectedVariants = variants.filter((v) => selected.includes(v.id));
 
   const activeFilters = [
@@ -1461,7 +1665,11 @@ function VariantsSection({
         label: `${name}: ${value}`,
         clear: () => setOptionFilters((prev) => ({ ...prev, [name]: "" })),
       })),
-    location !== "all" && { key: "location", label: `Location: ${locationName}`, clear: () => setLocation("all") },
+    location !== "all" && {
+      key: "location",
+      label: `Location: ${locationName}`,
+      clear: () => setLocation("all"),
+    },
     stockFilter && {
       key: "stock",
       label: STOCK_FILTERS.find((f) => f.value === stockFilter)?.label,
@@ -1494,10 +1702,16 @@ function VariantsSection({
   const draftProblems = [
     ...Object.entries(priceDrafts)
       .filter(([, value]) => !isMoney(value))
-      .map(([id]) => `${variantName(variants.find((v) => v.id === id) || {}, options)}: enter a price, like 12.50.`),
+      .map(
+        ([id]) =>
+          `${variantName(variants.find((v) => v.id === id) || {}, options)}: enter a price, like 12.50.`
+      ),
     ...Object.entries(stockDrafts)
       .filter(([, value]) => !isWhole(value))
-      .map(([key]) => `${variantName(variants.find((v) => v.id === key.split("|")[0]) || {}, options)}: stock must be a whole number.`),
+      .map(
+        ([key]) =>
+          `${variantName(variants.find((v) => v.id === key.split("|")[0]) || {}, options)}: stock must be a whole number.`
+      ),
   ];
 
   const discardDrafts = () => {
@@ -1524,20 +1738,27 @@ function VariantsSection({
       if (res.ok) savedCount += 1;
       else {
         keptPrices[id] = value;
-        failed.push(`${variantName(variants.find((v) => v.id === id) || {}, options)} price: ${res.formError || Object.values(res.fieldErrors || {})[0] || res.error}`);
+        failed.push(
+          `${variantName(variants.find((v) => v.id === id) || {}, options)} price: ${res.formError || Object.values(res.fieldErrors || {})[0] || res.error}`
+        );
       }
     }
     for (const [key, value] of Object.entries(stockDrafts)) {
       const [variant, loc] = key.split("|");
       const res = await apiPost("/api/v1/inventory/items/set/", {
-        variant, location: loc, available: Number(value), reason: "correction",
+        variant,
+        location: loc,
+        available: Number(value),
+        reason: "correction",
       });
       if (res.ok) {
         savedCount += 1;
         stockSaved = true;
       } else {
         keptStock[key] = value;
-        failed.push(`${variantName(variants.find((v) => v.id === variant) || {}, options)} stock: ${res.error}`);
+        failed.push(
+          `${variantName(variants.find((v) => v.id === variant) || {}, options)} stock: ${res.error}`
+        );
       }
     }
     setPriceDrafts(keptPrices);
@@ -1547,7 +1768,11 @@ function VariantsSection({
     setSaving(false);
     setNotice(
       failed.length
-        ? { kind: "error", text: `${savedCount} saved, ${failed.length} failed. The failed edits are kept.`, failed }
+        ? {
+            kind: "error",
+            text: `${savedCount} saved, ${failed.length} failed. The failed edits are kept.`,
+            failed,
+          }
         : { kind: "success", text: `Saved ${savedCount} change${savedCount === 1 ? "" : "s"}.` }
     );
   };
@@ -1564,8 +1789,15 @@ function VariantsSection({
     await refresh({ stock: true });
     setNotice(
       failed.length
-        ? { kind: "error", text: `${targets.length - failed.length} deleted, ${failed.length} not deleted.`, failed }
-        : { kind: "success", text: `Deleted ${targets.length} variant${targets.length === 1 ? "" : "s"}.` }
+        ? {
+            kind: "error",
+            text: `${targets.length - failed.length} deleted, ${failed.length} not deleted.`,
+            failed,
+          }
+        : {
+            kind: "success",
+            text: `Deleted ${targets.length} variant${targets.length === 1 ? "" : "s"}.`,
+          }
     );
   };
 
@@ -1578,7 +1810,9 @@ function VariantsSection({
     const bad = edited && !isMoney(value);
     return (
       <div className="relative w-28" onClick={stop}>
-        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+          $
+        </span>
         <input
           value={value}
           onChange={(e) => setPriceDraft(v, e.target.value)}
@@ -1599,12 +1833,20 @@ function VariantsSection({
     if (stockState === "error") return <span className="text-xs text-red-600">Unavailable</span>;
     const stock = stockFor(v);
     const key = `${v.id}|${location}`;
-    const label = !stock.tracked ? "Not tracked" : stock.available == null ? "Not stocked" : String(stock.available);
+    const label = !stock.tracked
+      ? "Not tracked"
+      : stock.available == null
+        ? "Not stocked"
+        : String(stock.available);
     if (location === "all" || !canSetStock || !canEdit) {
       return (
-        <span className={stock.tracked && stock.available != null ? "text-slate-900" : "text-slate-500"}>
+        <span
+          className={stock.tracked && stock.available != null ? "text-slate-900" : "text-slate-500"}
+        >
           {label}
-          {stock.tracked && stock.available < 0 && <span className="ml-1 text-xs text-red-700">(oversold)</span>}
+          {stock.tracked && stock.available < 0 && (
+            <span className="ml-1 text-xs text-red-700">(oversold)</span>
+          )}
         </span>
       );
     }
@@ -1634,7 +1876,14 @@ function VariantsSection({
       aria-label={label}
       className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-slate-500"
     >
-      <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+      <svg
+        viewBox="0 0 20 20"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        aria-hidden="true"
+      >
         <rect x="3" y="4" width="14" height="12" rx="2" />
         <path d="M3 13l4-4 3 3 2-2 5 5" />
       </svg>
@@ -1705,7 +1954,9 @@ function VariantsSection({
             label={`Select all ${g.rows.length} ${g.value} variants`}
           />
         </td>
-        <td className="px-2 py-2">{imageButton(g.rows.length, `Image for the ${g.rows.length} ${g.value} variants`)}</td>
+        <td className="px-2 py-2">
+          {imageButton(g.rows.length, `Image for the ${g.rows.length} ${g.value} variants`)}
+        </td>
         <td className="px-2 py-2">
           <button
             type="button"
@@ -1722,7 +1973,9 @@ function VariantsSection({
         </td>
         <td className="px-2 py-2">
           <div className="relative w-28">
-            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+              $
+            </span>
             <input
               value={groupPrices[g.value] ?? ""}
               placeholder={low === high ? low.toFixed(2) : `${low.toFixed(2)}–${high.toFixed(2)}`}
@@ -1762,7 +2015,11 @@ function VariantsSection({
       hint="Options such as pack size or volume, each with its own price, SKU and stock. Each variant keeps its own stock."
       action={
         canEdit && (
-          <button type="button" onClick={() => setModal({ type: "variant", id: null })} className={outlineButton}>
+          <button
+            type="button"
+            onClick={() => setModal({ type: "variant", id: null })}
+            className={outlineButton}
+          >
             + Add variant
           </button>
         )
@@ -1776,7 +2033,10 @@ function VariantsSection({
               <p className="text-sm font-semibold text-slate-900">{o.name}</p>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {o.values.map((value) => (
-                  <span key={value} className="rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-800">
+                  <span
+                    key={value}
+                    className="rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-800"
+                  >
                     {value}
                   </span>
                 ))}
@@ -1785,7 +2045,8 @@ function VariantsSection({
           ))
         ) : (
           <p className="px-4 py-3 text-sm text-slate-500">
-            No options yet. Add one, such as Pack size (Single, 4-pack, Case) or Volume (375ML, 700ML).
+            No options yet. Add one, such as Pack size (Single, 4-pack, Case) or Volume (375ML,
+            700ML).
           </p>
         )}
         {canEdit && (
@@ -1887,14 +2148,26 @@ function VariantsSection({
       {activeFilters.length > 0 && (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {activeFilters.map((f) => (
-            <span key={f.key} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-700">
+            <span
+              key={f.key}
+              className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-700"
+            >
               {f.label}
-              <button type="button" onClick={f.clear} aria-label={`Remove filter ${f.label}`} className="text-slate-500 hover:text-slate-900">
+              <button
+                type="button"
+                onClick={f.clear}
+                aria-label={`Remove filter ${f.label}`}
+                className="text-slate-500 hover:text-slate-900"
+              >
                 ×
               </button>
             </span>
           ))}
-          <button type="button" onClick={clearFilters} className="text-xs font-semibold text-charcoal-navy hover:underline">
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="text-xs font-semibold text-charcoal-navy hover:underline"
+          >
             Clear filters
           </button>
         </div>
@@ -1908,16 +2181,33 @@ function VariantsSection({
       {selected.length > 0 && canEdit && (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white">
           <span className="font-semibold">{selected.length} selected</span>
-          <button type="button" onClick={() => setModal({ type: "bulk" })} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold hover:bg-white/20">
+          <button
+            type="button"
+            onClick={() => setModal({ type: "bulk" })}
+            className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold hover:bg-white/20"
+          >
             Bulk edit
           </button>
-          <button type="button" disabled title={`Per-variant publishing: ${notYet.toLowerCase()}`} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold opacity-50">
+          <button
+            type="button"
+            disabled
+            title={`Per-variant publishing: ${notYet.toLowerCase()}`}
+            className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold opacity-50"
+          >
             Manage publishing ({notYet})
           </button>
-          <button type="button" onClick={() => setModal({ type: "delete" })} className="rounded-full bg-red-500/80 px-3 py-1 text-xs font-semibold hover:bg-red-500">
+          <button
+            type="button"
+            onClick={() => setModal({ type: "delete" })}
+            className="rounded-full bg-red-500/80 px-3 py-1 text-xs font-semibold hover:bg-red-500"
+          >
             Delete variants
           </button>
-          <button type="button" onClick={() => setSelected([])} className="ml-auto text-xs font-semibold text-white/80 hover:text-white">
+          <button
+            type="button"
+            onClick={() => setSelected([])}
+            className="ml-auto text-xs font-semibold text-white/80 hover:text-white"
+          >
             Clear selection
           </button>
         </div>
@@ -1939,21 +2229,34 @@ function VariantsSection({
               <th className="px-2 py-2">Image</th>
               <th className="px-2 py-2">Variant</th>
               <th className="px-2 py-2">Price (AUD)</th>
-              <th className="px-2 py-2">Available{location === "all" ? "" : ` at ${locationName}`}</th>
+              <th className="px-2 py-2">
+                Available{location === "all" ? "" : ` at ${locationName}`}
+              </th>
               <th className="px-2 py-2">Publishing</th>
             </tr>
           </thead>
           <tbody>
             {groups
-              ? groups.flatMap((g) => [groupRow(g), ...(expanded[g.value] ? g.rows.map((v) => row(v, true)) : [])])
+              ? groups.flatMap((g) => [
+                  groupRow(g),
+                  ...(expanded[g.value] ? g.rows.map((v) => row(v, true)) : []),
+                ])
               : shown.map((v) => row(v, false))}
           </tbody>
         </table>
-        {!variants.length && <p className="px-4 py-6 text-center text-sm text-slate-500">This product has no variants.</p>}
+        {!variants.length && (
+          <p className="px-4 py-6 text-center text-sm text-slate-500">
+            This product has no variants.
+          </p>
+        )}
         {variants.length > 0 && !shown.length && (
           <div className="px-4 py-6 text-center text-sm text-slate-500">
             No variants match these filters.{" "}
-            <button type="button" onClick={clearFilters} className="font-semibold text-charcoal-navy hover:underline">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="font-semibold text-charcoal-navy hover:underline"
+            >
               Clear filters
             </button>
           </div>
@@ -1966,10 +2269,20 @@ function VariantsSection({
           <span className="font-medium text-amber-900">
             ● {draftCount} unsaved change{draftCount === 1 ? "" : "s"} in the table
           </span>
-          <button type="button" onClick={discardDrafts} disabled={saving} className={`${ghostButton} ml-auto h-8`}>
+          <button
+            type="button"
+            onClick={discardDrafts}
+            disabled={saving}
+            className={`${ghostButton} ml-auto h-8`}
+          >
             Discard
           </button>
-          <button type="button" onClick={saveDrafts} disabled={saving || draftProblems.length > 0} className={`${primaryButton} h-8`}>
+          <button
+            type="button"
+            onClick={saveDrafts}
+            disabled={saving || draftProblems.length > 0}
+            className={`${primaryButton} h-8`}
+          >
             {saving ? "Saving..." : "Save table changes"}
           </button>
           {draftProblems.length > 0 && (
@@ -2002,9 +2315,13 @@ function VariantsSection({
         <p className="mt-3 border-t border-slate-200 pt-3 text-sm text-slate-700">
           {stockState === "ready" ? (
             <>
-              Total inventory at {locationName}: <span className="font-semibold">{totalAvailable} available</span>{" "}
+              Total inventory at {locationName}:{" "}
+              <span className="font-semibold">{totalAvailable} available</span>{" "}
               <span className="text-xs text-slate-500">
-                ({shown.length === variants.length ? "all variants" : `${shown.length} filtered variants`}
+                (
+                {shown.length === variants.length
+                  ? "all variants"
+                  : `${shown.length} filtered variants`}
                 {untrackedCount ? `; ${untrackedCount} not tracked` : ""}. Saved stock only.)
               </span>
             </>
@@ -2044,7 +2361,8 @@ function VariantsSection({
           onSaved={async ({ keepOpen }) => {
             if (!keepOpen) setModal(null);
             await refresh({ stock: true });
-            if (!keepOpen) setNotice({ kind: "success", text: modal.id ? "Variant saved." : "Variant added." });
+            if (!keepOpen)
+              setNotice({ kind: "success", text: modal.id ? "Variant saved." : "Variant added." });
           }}
         />
       )}
@@ -2061,7 +2379,10 @@ function VariantsSection({
             await refresh({ stock });
             if (closing) {
               setModal(null);
-              setNotice({ kind: "success", text: `Saved ${count} variant${count === 1 ? "" : "s"}.` });
+              setNotice({
+                kind: "success",
+                text: `Saved ${count} variant${count === 1 ? "" : "s"}.`,
+              });
             }
           }}
         />
@@ -2072,7 +2393,12 @@ function VariantsSection({
           onClose={() => !modal.busy && setModal(null)}
           footer={
             <>
-              <button type="button" onClick={() => setModal(null)} disabled={modal.busy} className={ghostButton}>
+              <button
+                type="button"
+                onClick={() => setModal(null)}
+                disabled={modal.busy}
+                className={ghostButton}
+              >
                 Cancel
               </button>
               <button
@@ -2086,16 +2412,21 @@ function VariantsSection({
             </>
           }
         >
-          <p className="text-sm text-slate-700">These variants will be deleted. This can't be undone:</p>
+          <p className="text-sm text-slate-700">
+            These variants will be deleted. This can't be undone:
+          </p>
           <ul className="mt-2 max-h-48 list-disc overflow-y-auto pl-5 text-sm text-slate-800">
             {selectedVariants.map((v) => (
               <li key={v.id}>
-                {variantName(v, options)} {v.sku && <span className="text-xs text-slate-500">({v.sku})</span>}
+                {variantName(v, options)}{" "}
+                {v.sku && <span className="text-xs text-slate-500">({v.sku})</span>}
               </li>
             ))}
           </ul>
           {selectedVariants.length >= variants.length && (
-            <p className="mt-2 text-sm text-red-600">A product needs at least one variant. Leave one unselected.</p>
+            <p className="mt-2 text-sm text-red-600">
+              A product needs at least one variant. Leave one unselected.
+            </p>
           )}
           <p className="mt-2 text-xs text-slate-500">
             Variants used by orders or with stock records can't be deleted; those are reported back.
@@ -2214,7 +2545,8 @@ export function ProductForm({ productId }) {
     if (!editing || !canSeeSales) return undefined;
     let cancelled = false;
     apiGet(`/api/v1/reports/net-sales-by-product/?product=${productId}`).then((res) => {
-      if (!cancelled) setSales(res.ok ? res.data : { error: res.error || "Sales couldn't be loaded." });
+      if (!cancelled)
+        setSales(res.ok ? res.data : { error: res.error || "Sales couldn't be loaded." });
     });
     return () => {
       cancelled = true;
@@ -2828,7 +3160,10 @@ export function ProductForm({ productId }) {
   // Right sidebar. Status also shows near the top on phones (statusSection("main"))
   const statusSection = (key) => (
     <div>
-      <label htmlFor={`status-${key}`} className="mb-2 block text-[15px] font-semibold text-slate-900">
+      <label
+        htmlFor={`status-${key}`}
+        className="mb-2 block text-[15px] font-semibold text-slate-900"
+      >
         Status
       </label>
       <ChevronSelect id={`status-${key}`} value={status} onChange={setStatus}>
@@ -2897,9 +3232,14 @@ export function ProductForm({ productId }) {
     } else if (field === "tags") {
       if (!tags.some((t) => sameText(t, value))) setTags([...tags, value]);
     } else {
-      const existing = [...storeCollections, ...automatedCollections].find((c) => sameText(c, value));
+      const existing = [...storeCollections, ...automatedCollections].find((c) =>
+        sameText(c, value)
+      );
       if (existing) {
-        if (!automatedCollections.includes(existing) && !collections.some((c) => sameText(c, existing))) {
+        if (
+          !automatedCollections.includes(existing) &&
+          !collections.some((c) => sameText(c, existing))
+        ) {
           setCollections([...collections, existing]);
         }
       } else {
@@ -2952,9 +3292,10 @@ export function ProductForm({ productId }) {
   const vendorOptions = uniqueText([...knownVendors, vendor]);
   const salesRow = sales?.rows?.[0];
   const formatMoney = (value) =>
-    new Intl.NumberFormat("en-AU", { style: "currency", currency: sales?.currency_code || "AUD" }).format(
-      Number(value) || 0
-    );
+    new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency: sales?.currency_code || "AUD",
+    }).format(Number(value) || 0);
 
   const sidebar = (
     <div className="rounded-[22px] border border-[#E7E4DC] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
@@ -2971,7 +3312,13 @@ export function ProductForm({ productId }) {
             title="Manage sales channels"
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-40"
           >
-            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <svg
+              viewBox="0 0 20 20"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
               <path d="M3 6h9M15 6h2M3 14h3M9 14h8" strokeLinecap="round" />
               <circle cx="13.5" cy="6" r="1.8" />
               <circle cx="7.5" cy="14" r="1.8" />
@@ -3132,8 +3479,8 @@ export function ProductForm({ productId }) {
                 Manage sales channels
               </h2>
               <p className="mt-1 text-xs text-slate-500">
-                Choosing a channel doesn't change the product's status. A Draft product stays
-                hidden until it's Active.
+                Choosing a channel doesn't change the product's status. A Draft product stays hidden
+                until it's Active.
               </p>
             </div>
             <div className="space-y-1 px-5 py-3">
@@ -3297,142 +3644,52 @@ export function ProductForm({ productId }) {
             <fieldset disabled={!canEdit} className="m-0 min-w-0 border-0 p-0">
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
                 <div className="min-w-0 space-y-6">
-                {/* 1 BASIC INFO */}
-                <Card
-                  title="Basic info"
-                  hint="Give your product a clear name and describe it in a few simple sentences."
-                >
-                  <div className="space-y-4">
-                    <Field label="Product name" error={fieldErrors.title}>
-                      <input
-                        value={name}
-                        onChange={(e) => changeName(e.target.value)}
-                        placeholder="e.g. Zonzo Chardonnay 2023 750ml"
-                        className={`${inputClass} ${withError(fieldErrors.title)}`}
-                        autoFocus
-                      />
-                    </Field>
-
-                    <Field
-                      label="About this product"
-                      help={`${about.length} characters`}
-                      error={fieldErrors.description}
-                    >
-                      <textarea
-                        value={about}
-                        onChange={(e) => setAbout(e.target.value)}
-                        rows={6}
-                        placeholder="Tell shoppers what it is, what it's made of and why they'll love it."
-                        className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors.description)}`}
-                      />
-                    </Field>
-                  </div>
-                </Card>
-
-                <div className="rounded-[22px] border border-[#E7E4DC] bg-white p-5 lg:hidden">
-                  {statusSection("main")}
-                </div>
-
-                {/* 2 MEDIA */}
-                <Card
-                  title="Media"
-                  hint="Add clear photos of your product. The first photo is the primary cover shoppers see."
-                  action={
-                    <button
-                      type="button"
-                      onClick={() => mainFileInputRef.current?.click()}
-                      disabled={saving}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3 py-1.5 text-xs font-semibold text-charcoal-navy shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2.5"
-                          d="M12 4v16m8-8H4"
+                  {/* 1 BASIC INFO */}
+                  <Card
+                    title="Basic info"
+                    hint="Give your product a clear name and describe it in a few simple sentences."
+                  >
+                    <div className="space-y-4">
+                      <Field label="Product name" error={fieldErrors.title}>
+                        <input
+                          value={name}
+                          onChange={(e) => changeName(e.target.value)}
+                          placeholder="e.g. Zonzo Chardonnay 2023 750ml"
+                          className={`${inputClass} ${withError(fieldErrors.title)}`}
+                          autoFocus
                         />
-                      </svg>
-                      Add media
-                    </button>
-                  }
-                >
-                  {/* Hidden file input for adding multiple images */}
-                  <input
-                    ref={mainFileInputRef}
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                    multiple
-                    className="hidden"
-                    disabled={saving}
-                    onChange={(e) => {
-                      addPhotos(e.target.files);
-                      e.target.value = "";
-                    }}
-                  />
+                      </Field>
 
-                  {/* Hidden file input for replacing an individual image */}
-                  <input
-                    ref={replaceFileInputRef}
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    disabled={saving}
-                    onChange={handleReplaceFileChange}
-                  />
+                      <Field
+                        label="About this product"
+                        help={`${about.length} characters`}
+                        error={fieldErrors.description}
+                      >
+                        <textarea
+                          value={about}
+                          onChange={(e) => setAbout(e.target.value)}
+                          rows={6}
+                          placeholder="Tell shoppers what it is, what it's made of and why they'll love it."
+                          className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors.description)}`}
+                        />
+                      </Field>
+                    </div>
+                  </Card>
 
-                  {/* Photos Grid or Empty Drag & Drop Area */}
-                  {photos.length === 0 ? (
-                    <div
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        setDragging(true);
-                      }}
-                      onDragLeave={() => setDragging(false)}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        setDragging(false);
-                        if (!saving) addPhotos(e.dataTransfer.files);
-                      }}
-                      className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
-                        dragging
-                          ? "border-charcoal-navy bg-[#F3F1EC]"
-                          : "border-[#E7E4DC] bg-[#FAF9F6] hover:bg-slate-50"
-                      }`}
-                    >
-                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                        <svg
-                          className="h-6 w-6 text-slate-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1.7"
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-semibold text-charcoal-navy">
-                        Upload product images
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Drag and drop images here, or browse files from your computer
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-slate-400">
-                        Accepted formats: JPG, PNG, WEBP (up to 1MB each)
-                      </p>
+                  <div className="rounded-[22px] border border-[#E7E4DC] bg-white p-5 lg:hidden">
+                    {statusSection("main")}
+                  </div>
+
+                  {/* 2 MEDIA */}
+                  <Card
+                    title="Media"
+                    hint="Add clear photos of your product. The first photo is the primary cover shoppers see."
+                    action={
                       <button
                         type="button"
                         onClick={() => mainFileInputRef.current?.click()}
                         disabled={saving}
-                        className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1e2842] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3 py-1.5 text-xs font-semibold text-charcoal-navy shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <svg
                           className="h-3.5 w-3.5"
@@ -3447,154 +3704,36 @@ export function ProductForm({ productId }) {
                             d="M12 4v16m8-8H4"
                           />
                         </svg>
-                        Select images
+                        Add media
                       </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
-                      {photos.map((photo, i) => {
-                        const isCover = i === 0;
-                        const isBroken = brokenImages.includes(photo.id);
-                        const isUploading = uploadingPhotoId === photo.id;
+                    }
+                  >
+                    {/* Hidden file input for adding multiple images */}
+                    <input
+                      ref={mainFileInputRef}
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      multiple
+                      className="hidden"
+                      disabled={saving}
+                      onChange={(e) => {
+                        addPhotos(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
 
-                        return (
-                          <div
-                            key={photo.id}
-                            className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF9F6] transition ${
-                              isCover
-                                ? "border-charcoal-navy ring-2 ring-[#14130F]/15 col-span-2 row-span-2"
-                                : "border-[#E7E4DC] hover:border-slate-400"
-                            }`}
-                          >
-                            {/* Image or Broken fallback */}
-                            {isBroken ? (
-                              <div className="flex h-full w-full flex-col items-center justify-center p-3 text-center text-slate-400">
-                                <svg
-                                  className="mb-1 h-7 w-7 text-slate-300"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="1.5"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                  />
-                                </svg>
-                                <span className="text-[11px] font-medium text-slate-600">
-                                  Image unavailable
-                                </span>
-                                <span className="truncate max-w-30 text-[10px] text-slate-400">
-                                  {photo.name}
-                                </span>
-                              </div>
-                            ) : (
-                              <img
-                                src={photo.url}
-                                alt={photo.name || "Product image"}
-                                loading="lazy"
-                                onError={() => handleImageError(photo.id)}
-                                className="h-full w-full object-cover transition duration-200 group-hover:scale-102"
-                              />
-                            )}
+                    {/* Hidden file input for replacing an individual image */}
+                    <input
+                      ref={replaceFileInputRef}
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      disabled={saving}
+                      onChange={handleReplaceFileChange}
+                    />
 
-                            {/* Uploading Spinner Overlay */}
-                            {isUploading && (
-                              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-2xs">
-                                <svg
-                                  className="mb-1.5 h-6 w-6 animate-spin text-white"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                  />
-                                  <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v8H4z"
-                                  />
-                                </svg>
-                                <span className="text-[11px] font-semibold">Uploading…</span>
-                              </div>
-                            )}
-
-                            {/* Top Badges */}
-                            <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
-                              {isCover && (
-                                <span className="rounded-md bg-charcoal-navy px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
-                                  ★ Primary
-                                </span>
-                              )}
-                              {photo.isSaved ? (
-                                <span className="rounded-md border border-emerald-200 bg-white/95 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 shadow-2xs">
-                                  Saved
-                                </span>
-                              ) : (
-                                <span className="rounded-md bg-violet-600 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
-                                  New preview
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Bottom info banner & action buttons */}
-                            <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-linear-to-t from-black/85 via-black/50 to-transparent p-2.5 text-white">
-                              {/* File information */}
-                              <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium leading-tight text-slate-100">
-                                <span className="truncate max-w-35" title={photo.name}>
-                                  {photo.name || "image"}
-                                </span>
-                                {photo.size && (
-                                  <span className="ml-1 shrink-0 text-[10px] text-slate-300">
-                                    {formatFileSize(photo.size)}
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex flex-wrap items-center justify-end gap-1.5">
-                                {!isCover && (
-                                  <button
-                                    type="button"
-                                    onClick={() => makeCover(photo.id)}
-                                    disabled={saving}
-                                    className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-charcoal-navy shadow-sm transition disabled:opacity-50"
-                                    title="Set as primary product image"
-                                  >
-                                    Make primary
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleStartReplace(photo.id)}
-                                  disabled={saving}
-                                  className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm transition disabled:opacity-50"
-                                  title="Replace with another image"
-                                >
-                                  Replace
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => removePhoto(photo.id)}
-                                  disabled={saving}
-                                  className="rounded-md bg-red-600/90 hover:bg-red-600 px-2 py-1 text-[10px] font-semibold text-white shadow-sm transition disabled:opacity-50"
-                                  title="Remove this image"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                      {/* Add More Drop Target inside Grid */}
+                    {/* Photos Grid or Empty Drag & Drop Area */}
+                    {photos.length === 0 ? (
                       <div
                         onDragOver={(e) => {
                           e.preventDefault();
@@ -3606,18 +3745,44 @@ export function ProductForm({ productId }) {
                           setDragging(false);
                           if (!saving) addPhotos(e.dataTransfer.files);
                         }}
-                        onClick={() => {
-                          if (!saving) mainFileInputRef.current?.click();
-                        }}
-                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
+                        className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
                           dragging
                             ? "border-charcoal-navy bg-[#F3F1EC]"
-                            : "border-[#E7E4DC] bg-[#FAF9F6] hover:border-slate-400 hover:bg-slate-50"
-                        } ${saving ? "pointer-events-none opacity-50" : ""}`}
+                            : "border-[#E7E4DC] bg-[#FAF9F6] hover:bg-slate-50"
+                        }`}
                       >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-charcoal-navy">
+                        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
                           <svg
-                            className="h-4 w-4"
+                            className="h-6 w-6 text-slate-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="1.7"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-semibold text-charcoal-navy">
+                          Upload product images
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          Drag and drop images here, or browse files from your computer
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-400">
+                          Accepted formats: JPG, PNG, WEBP (up to 1MB each)
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => mainFileInputRef.current?.click()}
+                          disabled={saving}
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1e2842] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -3629,453 +3794,642 @@ export function ProductForm({ productId }) {
                               d="M12 4v16m8-8H4"
                             />
                           </svg>
-                        </div>
-                        <span className="text-xs font-semibold text-charcoal-navy">Add image</span>
-                        <span className="text-[10px] text-slate-400">or drop here</span>
+                          Select images
+                        </button>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+                        {photos.map((photo, i) => {
+                          const isCover = i === 0;
+                          const isBroken = brokenImages.includes(photo.id);
+                          const isUploading = uploadingPhotoId === photo.id;
 
-                  {/* Validation Error Alerts */}
-                  {photoErrors.length > 0 && (
-                    <div
-                      role="alert"
-                      className="mt-3 flex items-start justify-between rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
-                    >
-                      <div>
-                        <p className="font-semibold text-red-800">
-                          {photoErrors.length === 1
-                            ? "1 file could not be added:"
-                            : `${photoErrors.length} files could not be added:`}
-                        </p>
-                        <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs">
-                          {photoErrors.map((item, i) => (
-                            <li key={`${item.name}-${i}`}>
-                              <span className="font-medium break-all">{item.name}</span>:{" "}
-                              {item.message}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setPhotoErrors([])}
-                        className="ml-3 inline-flex h-5 w-5 items-center justify-center rounded text-red-500 hover:bg-red-100 hover:text-red-700"
-                        aria-label="Dismiss errors"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                  <FieldError message={fieldErrors.images} />
-                </Card>
+                          return (
+                            <div
+                              key={photo.id}
+                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF9F6] transition ${
+                                isCover
+                                  ? "border-charcoal-navy ring-2 ring-[#14130F]/15 col-span-2 row-span-2"
+                                  : "border-[#E7E4DC] hover:border-slate-400"
+                              }`}
+                            >
+                              {/* Image or Broken fallback */}
+                              {isBroken ? (
+                                <div className="flex h-full w-full flex-col items-center justify-center p-3 text-center text-slate-400">
+                                  <svg
+                                    className="mb-1 h-7 w-7 text-slate-300"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="1.5"
+                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                    />
+                                  </svg>
+                                  <span className="text-[11px] font-medium text-slate-600">
+                                    Image unavailable
+                                  </span>
+                                  <span className="truncate max-w-30 text-[10px] text-slate-400">
+                                    {photo.name}
+                                  </span>
+                                </div>
+                              ) : (
+                                <img
+                                  src={photo.url}
+                                  alt={photo.name || "Product image"}
+                                  loading="lazy"
+                                  onError={() => handleImageError(photo.id)}
+                                  className="h-full w-full object-cover transition duration-200 group-hover:scale-102"
+                                />
+                              )}
 
-                {/* 3 PRICING */}
-                <Card title="Pricing" hint="What customers pay, in Australian dollars (AUD).">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Field label="Selling price (AUD)" error={fieldErrors.price}>
-                      <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
-                    </Field>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowDisplayPrices((v) => !v)}
-                    aria-expanded={showDisplayPrices}
-                    className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-charcoal-navy hover:underline"
-                  >
-                    Additional display prices
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className={`h-4 w-4 transition-transform ${showDisplayPrices ? "rotate-180" : ""}`}
-                      aria-hidden="true"
-                    >
-                      <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
-                    </svg>
-                  </button>
-                  {showDisplayPrices && (
-                    <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                      <div>
-                        <span className="mb-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-charcoal-navy">
-                          Compare-at price
-                          <span
-                            title="To show a reduced price, move the product's original price into Compare-at price. Enter a lower value into Price."
-                            aria-label="To show a reduced price, move the product's original price into Compare-at price. Enter a lower value into Price."
-                            className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-slate-400 text-[10px] font-bold text-slate-500"
-                          >
-                            ?
+                              {/* Uploading Spinner Overlay */}
+                              {isUploading && (
+                                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-2xs">
+                                  <svg
+                                    className="mb-1.5 h-6 w-6 animate-spin text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    />
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8v8H4z"
+                                    />
+                                  </svg>
+                                  <span className="text-[11px] font-semibold">Uploading…</span>
+                                </div>
+                              )}
+
+                              {/* Top Badges */}
+                              <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
+                                {isCover && (
+                                  <span className="rounded-md bg-charcoal-navy px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                                    ★ Primary
+                                  </span>
+                                )}
+                                {photo.isSaved ? (
+                                  <span className="rounded-md border border-emerald-200 bg-white/95 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 shadow-2xs">
+                                    Saved
+                                  </span>
+                                ) : (
+                                  <span className="rounded-md bg-violet-600 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
+                                    New preview
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Bottom info banner & action buttons */}
+                              <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-linear-to-t from-black/85 via-black/50 to-transparent p-2.5 text-white">
+                                {/* File information */}
+                                <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium leading-tight text-slate-100">
+                                  <span className="truncate max-w-35" title={photo.name}>
+                                    {photo.name || "image"}
+                                  </span>
+                                  {photo.size && (
+                                    <span className="ml-1 shrink-0 text-[10px] text-slate-300">
+                                      {formatFileSize(photo.size)}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex flex-wrap items-center justify-end gap-1.5">
+                                  {!isCover && (
+                                    <button
+                                      type="button"
+                                      onClick={() => makeCover(photo.id)}
+                                      disabled={saving}
+                                      className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-charcoal-navy shadow-sm transition disabled:opacity-50"
+                                      title="Set as primary product image"
+                                    >
+                                      Make primary
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartReplace(photo.id)}
+                                    disabled={saving}
+                                    className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm transition disabled:opacity-50"
+                                    title="Replace with another image"
+                                  >
+                                    Replace
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => removePhoto(photo.id)}
+                                    disabled={saving}
+                                    className="rounded-md bg-red-600/90 hover:bg-red-600 px-2 py-1 text-[10px] font-semibold text-white shadow-sm transition disabled:opacity-50"
+                                    title="Remove this image"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* Add More Drop Target inside Grid */}
+                        <div
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setDragging(true);
+                          }}
+                          onDragLeave={() => setDragging(false)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setDragging(false);
+                            if (!saving) addPhotos(e.dataTransfer.files);
+                          }}
+                          onClick={() => {
+                            if (!saving) mainFileInputRef.current?.click();
+                          }}
+                          className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
+                            dragging
+                              ? "border-charcoal-navy bg-[#F3F1EC]"
+                              : "border-[#E7E4DC] bg-[#FAF9F6] hover:border-slate-400 hover:bg-slate-50"
+                          } ${saving ? "pointer-events-none opacity-50" : ""}`}
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-charcoal-navy">
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2.5"
+                                d="M12 4v16m8-8H4"
+                              />
+                            </svg>
+                          </div>
+                          <span className="text-xs font-semibold text-charcoal-navy">
+                            Add image
                           </span>
-                        </span>
-                        <MoneyInput
-                          value={compareAt}
-                          onChange={setCompareAt}
-                          error={fieldErrors.compareAt}
-                        />
-                        <FieldError message={fieldErrors.compareAt} />
-                        {!fieldErrors.compareAt &&
-                          compareAt !== "" &&
-                          parseFloat(compareAt) >= 0 &&
-                          !(parseFloat(compareAt) > (parseFloat(price) || 0)) && (
-                            <span className="mt-1 block text-xs text-amber-600">
-                              Compare-at price should be higher than Price to show a discount
+                          <span className="text-[10px] text-slate-400">or drop here</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Validation Error Alerts */}
+                    {photoErrors.length > 0 && (
+                      <div
+                        role="alert"
+                        className="mt-3 flex items-start justify-between rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                      >
+                        <div>
+                          <p className="font-semibold text-red-800">
+                            {photoErrors.length === 1
+                              ? "1 file could not be added:"
+                              : `${photoErrors.length} files could not be added:`}
+                          </p>
+                          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs">
+                            {photoErrors.map((item, i) => (
+                              <li key={`${item.name}-${i}`}>
+                                <span className="font-medium break-all">{item.name}</span>:{" "}
+                                {item.message}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setPhotoErrors([])}
+                          className="ml-3 inline-flex h-5 w-5 items-center justify-center rounded text-red-500 hover:bg-red-100 hover:text-red-700"
+                          aria-label="Dismiss errors"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                    <FieldError message={fieldErrors.images} />
+                  </Card>
+
+                  {/* 3 PRICING */}
+                  <Card title="Pricing" hint="What customers pay, in Australian dollars (AUD).">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <Field label="Selling price (AUD)" error={fieldErrors.price}>
+                        <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
+                      </Field>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowDisplayPrices((v) => !v)}
+                      aria-expanded={showDisplayPrices}
+                      className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-charcoal-navy hover:underline"
+                    >
+                      Additional display prices
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className={`h-4 w-4 transition-transform ${showDisplayPrices ? "rotate-180" : ""}`}
+                        aria-hidden="true"
+                      >
+                        <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
+                      </svg>
+                    </button>
+                    {showDisplayPrices && (
+                      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                          <span className="mb-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-charcoal-navy">
+                            Compare-at price
+                            <span
+                              title="To show a reduced price, move the product's original price into Compare-at price. Enter a lower value into Price."
+                              aria-label="To show a reduced price, move the product's original price into Compare-at price. Enter a lower value into Price."
+                              className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-slate-400 text-[10px] font-bold text-slate-500"
+                            >
+                              ?
                             </span>
-                          )}
+                          </span>
+                          <MoneyInput
+                            value={compareAt}
+                            onChange={setCompareAt}
+                            error={fieldErrors.compareAt}
+                          />
+                          <FieldError message={fieldErrors.compareAt} />
+                          {!fieldErrors.compareAt &&
+                            compareAt !== "" &&
+                            parseFloat(compareAt) >= 0 &&
+                            !(parseFloat(compareAt) > (parseFloat(price) || 0)) && (
+                              <span className="mt-1 block text-xs text-amber-600">
+                                Compare-at price should be higher than Price to show a discount
+                              </span>
+                            )}
+                        </div>
+                      </div>
+                    )}
+                    <label className="mt-4 flex items-center gap-2 text-[13px] text-charcoal-navy">
+                      <input
+                        type="checkbox"
+                        checked={isTaxable}
+                        onChange={(e) => setIsTaxable(e.target.checked)}
+                      />
+                      Charge GST on this product
+                    </label>
+
+                    <div className="mt-5 border-t border-[#E7E4DC] pt-4">
+                      <p className="text-[13px] font-semibold text-charcoal-navy">
+                        Internal costs{" "}
+                        <span className="font-normal text-slate-500">
+                          (never shown to customers)
+                        </span>
+                      </p>
+                      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        {["Cost per item", "Profit", "Margin"].map((label) => (
+                          <Field key={label} label={label}>
+                            <input
+                              disabled
+                              placeholder="Not available yet"
+                              className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400`}
+                            />
+                          </Field>
+                        ))}
                       </div>
                     </div>
-                  )}
-                  <label className="mt-4 flex items-center gap-2 text-[13px] text-charcoal-navy">
-                    <input
-                      type="checkbox"
-                      checked={isTaxable}
-                      onChange={(e) => setIsTaxable(e.target.checked)}
-                    />
-                    Charge GST on this product
-                  </label>
+                  </Card>
 
-                  <div className="mt-5 border-t border-[#E7E4DC] pt-4">
-                    <p className="text-[13px] font-semibold text-charcoal-navy">
-                      Internal costs{" "}
-                      <span className="font-normal text-slate-500">(never shown to customers)</span>
-                    </p>
-                    <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                      {["Cost per item", "Profit", "Margin"].map((label) => (
-                        <Field key={label} label={label}>
-                          <input
-                            disabled
-                            placeholder="Not available yet"
-                            className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400`}
+                  <VariantsSection
+                    productId={editing ? productId : null}
+                    productTitle={name}
+                    options={productOptions}
+                    variants={variants}
+                    locations={locations}
+                    canEdit={canEdit}
+                    canSeeStock={canSeeStock}
+                    canSetStock={canSetStock}
+                    stockVersion={stockVersion}
+                    onSaved={variantsSaved}
+                    onDirtyChange={setVariantsDirty}
+                  />
+
+                  {/* 4 STOCK */}
+                  <Card
+                    title="Inventory"
+                    hint="Your stock codes, and how many you have at each location."
+                    action={
+                      canSeeStock && (
+                        <Link
+                          to="/admin/online-store/inventory"
+                          className="inline-flex h-8 items-center rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-charcoal-navy hover:text-white"
+                        >
+                          Adjust stock and history
+                        </Link>
+                      )
+                    }
+                  >
+                    {variants.length > 1 && (
+                      <p className="mb-4 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2 text-xs text-slate-600">
+                        This product has {variants.length} variants. The SKU, price and stock here
+                        are for the first one ({variants[0].sku || "no SKU"}). Each variant keeps
+                        its own stock; manage them all in Variants above.
+                      </p>
+                    )}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <Field label="SKU" help="Your own stock code" error={fieldErrors.sku}>
+                        <input
+                          value={sku}
+                          onChange={(e) => setSku(e.target.value)}
+                          placeholder="e.g. WINE-ZC-750"
+                          className={`${inputClass} ${withError(fieldErrors.sku)}`}
+                        />
+                      </Field>
+                      <Field label="Barcode" help="GTIN, EAN or UPC">
+                        <input
+                          disabled
+                          placeholder="Not available yet"
+                          className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400`}
+                        />
+                      </Field>
+                      <Field
+                        label="Weight"
+                        help="Per item, in your store's weight unit. Used for shipping rates."
+                        error={fieldErrors.weight}
+                      >
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.001"
+                          value={weight}
+                          onChange={(e) => setWeight(e.target.value)}
+                          placeholder="0"
+                          className={`${inputClass} ${withError(fieldErrors.weight)}`}
+                        />
+                      </Field>
+                      {!canSeeStock ? (
+                        <p className="text-sm text-slate-500 sm:col-span-2 sm:self-end">
+                          Stock levels are managed by people with inventory access.
+                        </p>
+                      ) : (
+                        <>
+                          <div>
+                            <Field
+                              label="Location"
+                              help={locations.length ? "Where this stock is kept" : undefined}
+                              error={fieldErrors.location}
+                            >
+                              <select
+                                value={locationId}
+                                onChange={(e) => chooseLocation(e.target.value)}
+                                disabled={!locations.length}
+                                className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.location)}`}
+                              >
+                                {locations.length ? (
+                                  locations.map((l) => (
+                                    <option key={l.id} value={l.id}>
+                                      {l.name}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option value="">No locations yet</option>
+                                )}
+                              </select>
+                            </Field>
+                            {!locations.length && !fieldErrors.location && (
+                              <span className="mt-1 block text-xs text-slate-500">
+                                Add one under{" "}
+                                <Link
+                                  to="/admin/online-store/inventory"
+                                  className="font-medium text-charcoal-navy underline"
+                                >
+                                  Inventory
+                                </Link>
+                              </span>
+                            )}
+                          </div>
+                          <Field
+                            label="Available quantity"
+                            help={
+                              canSetStock
+                                ? "Units that can be sold now"
+                                : "Your role can see stock but not change it"
+                            }
+                            error={fieldErrors.quantity}
+                          >
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              value={quantity}
+                              onChange={(e) => setQuantity(e.target.value)}
+                              disabled={!canSetStock}
+                              placeholder="0"
+                              className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.quantity)}`}
+                            />
+                          </Field>
+                        </>
+                      )}
+                    </div>
+
+                    {canSeeStock && editing && (
+                      <div className="mt-5 border-t border-[#E7E4DC] pt-4">
+                        {!Object.keys(levels).length ? (
+                          <p className="text-sm text-slate-600">
+                            <span className="mr-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
+                              Not tracked
+                            </span>
+                            This variant has no stock records yet, so it never blocks a sale. Enter
+                            an available quantity and save to start tracking it.
+                          </p>
+                        ) : !levels[locationId] ? (
+                          <p className="text-sm text-slate-600">
+                            No stock is kept at this location yet.
+                          </p>
+                        ) : (
+                          <>
+                            <div className="mb-3 flex items-center gap-2">
+                              <span className="text-[13px] font-semibold text-charcoal-navy">
+                                Stock at {levels[locationId].location_name}
+                              </span>
+                              {(() => {
+                                const a = levels[locationId].available;
+                                const [label, cls] =
+                                  a < 0
+                                    ? ["⚠ Oversold", "bg-red-100 text-red-800"]
+                                    : a === 0
+                                      ? ["✕ Out of stock", "bg-red-50 text-red-700"]
+                                      : ["✓ In stock", "bg-emerald-100 text-emerald-800"];
+                                return (
+                                  <span
+                                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}
+                                  >
+                                    {label}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                            <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                              {[
+                                ["On hand", "on_hand", "All physical units here"],
+                                ["Available", "available", "Can be sold now"],
+                                ["Committed", "committed", "Reserved for unfulfilled orders"],
+                                ["Unavailable", "unavailable", "Held back or damaged"],
+                                ["Incoming", "incoming", "Expected, not received yet"],
+                              ].map(([label, key, help]) => (
+                                <div
+                                  key={key}
+                                  className="rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2"
+                                  title={help}
+                                >
+                                  <dt className="text-[11px] font-medium text-slate-500">
+                                    {label}
+                                  </dt>
+                                  <dd className="text-lg font-bold text-charcoal-navy">
+                                    {levels[locationId][key] ?? "Unavailable"}
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
+                            <p className="mt-2 text-xs text-slate-500">
+                              On hand = Available + Committed + Unavailable. Incoming isn't counted
+                              until it's received. Reorder threshold and target stock: not available
+                              yet.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </Card>
+
+                  {/* EXTRA DETAILS */}
+                  <Card
+                    title="Additional details"
+                    hint="Optional notes about this product. Fill in only what applies; empty fields are left out."
+                  >
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {withLabels(fieldLabels).map((f) => (
+                        <Field key={f.key} label={f.label} error={fieldErrors[f.key]}>
+                          <textarea
+                            value={extra[f.key]}
+                            onChange={(e) =>
+                              setExtra((prev) => ({ ...prev, [f.key]: e.target.value }))
+                            }
+                            rows={2}
+                            className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors[f.key])}`}
                           />
                         </Field>
                       ))}
                     </div>
-                  </div>
-                </Card>
+                  </Card>
 
-                <VariantsSection
-                  productId={editing ? productId : null}
-                  productTitle={name}
-                  options={productOptions}
-                  variants={variants}
-                  locations={locations}
-                  canEdit={canEdit}
-                  canSeeStock={canSeeStock}
-                  canSetStock={canSetStock}
-                  stockVersion={stockVersion}
-                  onSaved={variantsSaved}
-                  onDirtyChange={setVariantsDirty}
-                />
-
-                {/* 4 STOCK */}
-                <Card
-                  title="Inventory"
-                  hint="Your stock codes, and how many you have at each location."
-                  action={
-                    canSeeStock && (
-                      <Link
-                        to="/admin/online-store/inventory"
-                        className="inline-flex h-8 items-center rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-charcoal-navy hover:text-white"
+                  {/* 9 GOOGLE PREVIEW */}
+                  <Card
+                    title="Search engine listing"
+                    hint="An illustrative preview only. Search engines decide how the product actually appears."
+                    action={
+                      <button
+                        type="button"
+                        onClick={() => setEditingSeo((v) => !v)}
+                        className="h-8 rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-charcoal-navy hover:text-white"
                       >
-                        Adjust stock and history
-                      </Link>
-                    )
-                  }
-                >
-                  {variants.length > 1 && (
-                    <p className="mb-4 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2 text-xs text-slate-600">
-                      This product has {variants.length} variants. The SKU, price and stock here
-                      are for the first one ({variants[0].sku || "no SKU"}). Each variant keeps
-                      its own stock; manage them all in Variants above.
-                    </p>
-                  )}
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Field label="SKU" help="Your own stock code" error={fieldErrors.sku}>
-                      <input
-                        value={sku}
-                        onChange={(e) => setSku(e.target.value)}
-                        placeholder="e.g. WINE-ZC-750"
-                        className={`${inputClass} ${withError(fieldErrors.sku)}`}
-                      />
-                    </Field>
-                    <Field label="Barcode" help="GTIN, EAN or UPC">
-                      <input
-                        disabled
-                        placeholder="Not available yet"
-                        className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400`}
-                      />
-                    </Field>
-                    <Field
-                      label="Weight"
-                      help="Per item, in your store's weight unit. Used for shipping rates."
-                      error={fieldErrors.weight}
-                    >
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.001"
-                        value={weight}
-                        onChange={(e) => setWeight(e.target.value)}
-                        placeholder="0"
-                        className={`${inputClass} ${withError(fieldErrors.weight)}`}
-                      />
-                    </Field>
-                    {!canSeeStock ? (
-                      <p className="text-sm text-slate-500 sm:col-span-2 sm:self-end">
-                        Stock levels are managed by people with inventory access.
+                        {editingSeo ? "Done" : "Edit"}
+                      </button>
+                    }
+                  >
+                    <div className="rounded-lg border border-[#E7E4DC] bg-white p-4 shadow-sm">
+                      <p className="text-sm font-semibold uppercase tracking-wide text-slate-800">
+                        {storeBrand}
                       </p>
-                    ) : (
-                      <>
-                        <div>
-                          <Field
-                            label="Location"
-                            help={locations.length ? "Where this stock is kept" : undefined}
-                            error={fieldErrors.location}
-                          >
-                            <select
-                              value={locationId}
-                              onChange={(e) => chooseLocation(e.target.value)}
-                              disabled={!locations.length}
-                              className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.location)}`}
-                            >
-                              {locations.length ? (
-                                locations.map((l) => (
-                                  <option key={l.id} value={l.id}>
-                                    {l.name}
-                                  </option>
-                                ))
-                              ) : (
-                                <option value="">No locations yet</option>
-                              )}
-                            </select>
-                          </Field>
-                          {!locations.length && !fieldErrors.location && (
-                            <span className="mt-1 block text-xs text-slate-500">
-                              Add one under{" "}
-                              <Link
-                                to="/admin/online-store/inventory"
-                                className="font-medium text-charcoal-navy underline"
-                              >
-                                Inventory
-                              </Link>
-                            </span>
-                          )}
-                        </div>
-                        <Field
-                          label="Available quantity"
-                          help={
-                            canSetStock
-                              ? "Units that can be sold now"
-                              : "Your role can see stock but not change it"
-                          }
-                          error={fieldErrors.quantity}
-                        >
-                          <input
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={quantity}
-                            onChange={(e) => setQuantity(e.target.value)}
-                            disabled={!canSetStock}
-                            placeholder="0"
-                            className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400 ${withError(fieldErrors.quantity)}`}
-                          />
-                        </Field>
-                      </>
-                    )}
-                  </div>
-
-                  {canSeeStock && editing && (
-                    <div className="mt-5 border-t border-[#E7E4DC] pt-4">
-                      {!Object.keys(levels).length ? (
-                        <p className="text-sm text-slate-600">
-                          <span className="mr-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
-                            Not tracked
-                          </span>
-                          This variant has no stock records yet, so it never blocks a sale. Enter
-                          an available quantity and save to start tracking it.
+                      <p className="break-all text-xs text-slate-600">
+                        {storeDomain} › products › {currentHandle}
+                      </p>
+                      <p className="mt-0.5 truncate text-lg text-[#1a0dab]">{shownSeoTitle}</p>
+                      <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
+                      {price !== "" && !isNaN(Number(price)) && (
+                        <p className="mt-1 text-xs text-slate-500">
+                          ${Number(price).toFixed(2)} AUD
                         </p>
-                      ) : !levels[locationId] ? (
-                        <p className="text-sm text-slate-600">
-                          No stock is kept at this location yet.
-                        </p>
-                      ) : (
-                        <>
-                          <div className="mb-3 flex items-center gap-2">
-                            <span className="text-[13px] font-semibold text-charcoal-navy">
-                              Stock at {levels[locationId].location_name}
-                            </span>
-                            {(() => {
-                              const a = levels[locationId].available;
-                              const [label, cls] =
-                                a < 0
-                                  ? ["⚠ Oversold", "bg-red-100 text-red-800"]
-                                  : a === 0
-                                    ? ["✕ Out of stock", "bg-red-50 text-red-700"]
-                                    : ["✓ In stock", "bg-emerald-100 text-emerald-800"];
-                              return (
-                                <span
-                                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}
-                                >
-                                  {label}
-                                </span>
-                              );
-                            })()}
-                          </div>
-                          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                            {[
-                              ["On hand", "on_hand", "All physical units here"],
-                              ["Available", "available", "Can be sold now"],
-                              ["Committed", "committed", "Reserved for unfulfilled orders"],
-                              ["Unavailable", "unavailable", "Held back or damaged"],
-                              ["Incoming", "incoming", "Expected, not received yet"],
-                            ].map(([label, key, help]) => (
-                              <div
-                                key={key}
-                                className="rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2"
-                                title={help}
-                              >
-                                <dt className="text-[11px] font-medium text-slate-500">{label}</dt>
-                                <dd className="text-lg font-bold text-charcoal-navy">
-                                  {levels[locationId][key] ?? "Unavailable"}
-                                </dd>
-                              </div>
-                            ))}
-                          </dl>
-                          <p className="mt-2 text-xs text-slate-500">
-                            On hand = Available + Committed + Unavailable. Incoming isn't counted
-                            until it's received. Reorder threshold and target stock: not available
-                            yet.
-                          </p>
-                        </>
                       )}
                     </div>
-                  )}
-                </Card>
 
-
-                {/* EXTRA DETAILS */}
-                <Card
-                  title="Additional details"
-                  hint="Optional notes about this product. Fill in only what applies; empty fields are left out."
-                >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {withLabels(fieldLabels).map((f) => (
-                      <Field key={f.key} label={f.label} error={fieldErrors[f.key]}>
-                        <textarea
-                          value={extra[f.key]}
-                          onChange={(e) =>
-                            setExtra((prev) => ({ ...prev, [f.key]: e.target.value }))
-                          }
-                          rows={2}
-                          className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors[f.key])}`}
-                        />
-                      </Field>
-                    ))}
-                  </div>
-                </Card>
-
-                {/* 9 GOOGLE PREVIEW */}
-                <Card
-                  title="Search engine listing"
-                  hint="An illustrative preview only. Search engines decide how the product actually appears."
-                  action={
-                    <button
-                      type="button"
-                      onClick={() => setEditingSeo((v) => !v)}
-                      className="h-8 rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-charcoal-navy hover:text-white"
-                    >
-                      {editingSeo ? "Done" : "Edit"}
-                    </button>
-                  }
-                >
-                  <div className="rounded-lg border border-[#E7E4DC] bg-white p-4 shadow-sm">
-                    <p className="text-sm font-semibold uppercase tracking-wide text-slate-800">
-                      {storeBrand}
-                    </p>
-                    <p className="break-all text-xs text-slate-600">
-                      {storeDomain} › products › {currentHandle}
-                    </p>
-                    <p className="mt-0.5 truncate text-lg text-[#1a0dab]">{shownSeoTitle}</p>
-                    <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
-                    {price !== "" && !isNaN(Number(price)) && (
-                      <p className="mt-1 text-xs text-slate-500">${Number(price).toFixed(2)} AUD</p>
-                    )}
-                  </div>
-
-                  {(editingSeo ||
-                    fieldErrors.seo_title ||
-                    fieldErrors.seo_description ||
-                    fieldErrors.handle) && (
-                    <div className="mt-4 space-y-4">
-                      <Field
-                        label="SEO title"
-                        help={`${seoTitle.length} of 70 characters`}
-                        error={fieldErrors.seo_title}
-                      >
-                        <input
-                          value={seoTitle}
-                          maxLength={70}
-                          onChange={(e) => setSeoTitle(e.target.value)}
-                          placeholder={name}
-                          className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
-                        />
-                      </Field>
-                      <Field
-                        label="SEO description"
-                        help={`${seoDescription.length} of 160 characters`}
-                        error={fieldErrors.seo_description}
-                      >
-                        <textarea
-                          value={seoDescription}
-                          maxLength={160}
-                          rows={3}
-                          onChange={(e) => setSeoDescription(e.target.value)}
-                          className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
-                        />
-                      </Field>
-                      <Field
-                        label="URL handle"
-                        help={`${storeDomain}/products/${currentHandle}`}
-                        error={fieldErrors.handle}
-                      >
-                        <div
-                          className={`flex h-11 items-center rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3.5 transition focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#14130F]/[0.07] ${withError(fieldErrors.handle)}`}
+                    {(editingSeo ||
+                      fieldErrors.seo_title ||
+                      fieldErrors.seo_description ||
+                      fieldErrors.handle) && (
+                      <div className="mt-4 space-y-4">
+                        <Field
+                          label="SEO title"
+                          help={`${seoTitle.length} of 70 characters`}
+                          error={fieldErrors.seo_title}
                         >
-                          <span className="select-none text-sm text-slate-500">products/</span>
                           <input
-                            value={handle}
-                            onChange={(e) => setHandle(cleanHandle(e.target.value))}
-                            placeholder={slugify(name)}
-                            className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                            value={seoTitle}
+                            maxLength={70}
+                            onChange={(e) => setSeoTitle(e.target.value)}
+                            placeholder={name}
+                            className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
                           />
-                        </div>
-                      </Field>
-                    </div>
-                  )}
-                </Card>
+                        </Field>
+                        <Field
+                          label="SEO description"
+                          help={`${seoDescription.length} of 160 characters`}
+                          error={fieldErrors.seo_description}
+                        >
+                          <textarea
+                            value={seoDescription}
+                            maxLength={160}
+                            rows={3}
+                            onChange={(e) => setSeoDescription(e.target.value)}
+                            className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
+                          />
+                        </Field>
+                        <Field
+                          label="URL handle"
+                          help={`${storeDomain}/products/${currentHandle}`}
+                          error={fieldErrors.handle}
+                        >
+                          <div
+                            className={`flex h-11 items-center rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3.5 transition focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#14130F]/[0.07] ${withError(fieldErrors.handle)}`}
+                          >
+                            <span className="select-none text-sm text-slate-500">products/</span>
+                            <input
+                              value={handle}
+                              onChange={(e) => setHandle(cleanHandle(e.target.value))}
+                              placeholder={slugify(name)}
+                              className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                            />
+                          </div>
+                        </Field>
+                      </div>
+                    )}
+                  </Card>
                 </div>
 
                 <aside className="space-y-6">
                   {sidebar}
-                <Card
-                  title="Page layout"
-                  hint="Choose which product page template your store uses for this product."
-                >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Product page template" error={fieldErrors.theme_template}>
-                      <select
-                        value={pageLayout}
-                        onChange={(e) => setPageLayout(e.target.value)}
-                        className={`${inputClass} ${withError(fieldErrors.theme_template)}`}
-                      >
-                        {PAGE_LAYOUTS.map((layout) => (
-                          <option key={layout.value} value={layout.value}>
-                            {layout.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                  </div>
-                </Card>
+                  <Card
+                    title="Page layout"
+                    hint="Choose which product page template your store uses for this product."
+                  >
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field label="Product page template" error={fieldErrors.theme_template}>
+                        <select
+                          value={pageLayout}
+                          onChange={(e) => setPageLayout(e.target.value)}
+                          className={`${inputClass} ${withError(fieldErrors.theme_template)}`}
+                        >
+                          {PAGE_LAYOUTS.map((layout) => (
+                            <option key={layout.value} value={layout.value}>
+                              {layout.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                    </div>
+                  </Card>
                   {editing && (
                     <>
                       <Card title="Activity">
@@ -4090,8 +4444,7 @@ export function ProductForm({ productId }) {
                           </div>
                         </dl>
                         <p className="mt-3 text-xs text-slate-500">
-                          A detailed history of who changed what is not available on this page
-                          yet.
+                          A detailed history of who changed what is not available on this page yet.
                         </p>
                       </Card>
                     </>
@@ -4099,7 +4452,6 @@ export function ProductForm({ productId }) {
                 </aside>
               </div>
             </fieldset>
-
           </div>
         </main>
       </div>
