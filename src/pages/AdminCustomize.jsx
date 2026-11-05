@@ -3130,6 +3130,23 @@ export default function AdminCustomizePage() {
                               }
                               extra={
                                 <>
+                                  {shown === "header" && (
+                                    <div className="mt-4 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] p-3 text-xs text-[#5A5750]">
+                                      <p>
+                                        The mega menu's columns and links are edited in Admin
+                                        &gt; Menus. The look is set by the Mega menu options above.
+                                      </p>
+                                      <Link
+                                        className="mt-1 inline-block font-medium text-[#14130F] underline"
+                                        to="/admin/online-store/content/menus"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        Edit menu columns
+                                      </Link>
+                                    </div>
+                                  )}
+
                                   {shownSpec.blocks && (
                                     <SectionBlocks
                                       key={`blocks-${shown}`}

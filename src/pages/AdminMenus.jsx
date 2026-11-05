@@ -1010,6 +1010,13 @@ export default function AdminMenus() {
                                   </button>
                                 </div>
 
+                                {item.is_mega && (
+                                  <p className="pl-6 text-[11px] text-slate-500">
+                                    The column link becomes the column's "Shop All" link, shown
+                                    at the end of the column. Leave it empty for no Shop All.
+                                  </p>
+                                )}
+
                                 {/* Level 3 items (Links under Column) */}
                                 {child.children && child.children.length > 0 && (
                                   <div className="ml-6 pl-3 border-l-2 border-violet-300 space-y-2 pt-1">
