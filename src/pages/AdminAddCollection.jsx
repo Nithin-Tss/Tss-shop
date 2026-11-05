@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { storeBaseUrl, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
@@ -48,6 +48,7 @@ const EMPTY_FORM = {
   rules: [],
   products: [],
   excluded_products: [],
+  include_collections: [],
   theme_template: "Default collection",
   seo_title: "",
   seo_description: "",
@@ -200,6 +201,198 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
   );
 }
 
+// ---------------------------------------------------------------- include products from collections
+
+// "Include products from collections": a searchable dropdown of the store's other collections with an Add
+// button; the added ones show as chips ("Pinot Noir · 6 products") with a × to remove. Collections already
+// added are not offered again. `collections` is the store's current list (the collection being edited left out).
+
+export const productsLabel = (count) => `${count ?? 0} product${count === 1 ? "" : "s"}`;
+
+// The collections still on offer: not added yet, and matching what was typed
+export function availableCollections(collections, selected, query) {
+  const q = (query || "").trim().toLowerCase();
+  return collections.filter(
+    (c) => !selected.includes(c.id) && (!q || c.name.toLowerCase().includes(q))
+  );
+}
+
+export function IncludeCollectionsPicker({ collections, selected, error, onChange }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [chosen, setChosen] = useState(null); // the collection picked in the dropdown, not added yet
+  const box = useRef(null);
+  const listId = useId();
+
+  const byId = useMemo(() => Object.fromEntries(collections.map((c) => [c.id, c])), [collections]);
+  const offered = availableCollections(collections, selected, query);
+  // An added id whose collection no longer exists is not shown
+  const added = selected.map((id) => byId[id]).filter(Boolean);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => {
+      if (box.current && !box.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open]);
+
+  const pick = (c) => {
+    setChosen(c);
+    setQuery(c.name);
+    setOpen(false);
+  };
+
+  const add = () => {
+    if (!chosen || selected.includes(chosen.id)) return;
+    onChange([...selected, chosen.id]);
+    setChosen(null);
+    setQuery("");
+  };
+
+  return (
+    <section className={`${card} p-5`} aria-labelledby="include-collections-title">
+      <h2 id="include-collections-title" className="mb-1 text-[15px] font-semibold text-[#14130F]">
+        Include products from collections
+      </h2>
+      <p className="mb-3 text-[13px] text-[#78746A]">
+        Products in the collections you add also show here, and follow them when they change.
+      </p>
+
+      {collections.length === 0 ? (
+        <p className="text-[13px] text-[#78746A]">There are no other collections yet.</p>
+      ) : (
+        <div className="flex items-start gap-2">
+          <div ref={box} className="relative min-w-0 flex-1">
+            <input
+              type="text"
+              role="combobox"
+              aria-expanded={open}
+              aria-controls={listId}
+              aria-label="Search collections"
+              autoComplete="off"
+              value={query}
+              placeholder="Search collections"
+              onFocus={() => setOpen(true)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setChosen(null);
+                setOpen(true);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setOpen(false);
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (chosen) add();
+                  else if (offered.length === 1) pick(offered[0]);
+                }
+              }}
+              className={`${inputClass} pr-9`}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Show collections"
+              onClick={() => setOpen((o) => !o)}
+              className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-[#78746A]"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            {open && (
+              <ul
+                id={listId}
+                role="listbox"
+                aria-label="Collections to add"
+                className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-[#E7E4DC] bg-white p-1 shadow-lg"
+              >
+                {offered.map((c) => (
+                  <li key={c.id} role="option" aria-selected={chosen?.id === c.id}>
+                    <button
+                      type="button"
+                      onClick={() => pick(c)}
+                      className="flex w-full items-center justify-between gap-3 rounded-md px-2.5 py-1.5 text-left text-[14px] hover:bg-[#F6F7F8]"
+                    >
+                      <span className="min-w-0 flex-1 truncate">{c.name}</span>
+                      <span className="text-[12px] text-[#78746A]">
+                        {productsLabel(c.products_count)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+                {offered.length === 0 && (
+                  <li className="px-2.5 py-1.5 text-[13px] text-[#78746A]">
+                    {query.trim() ? "No collections match." : "All collections are added."}
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={add}
+            disabled={!chosen}
+            className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white px-4 py-2.5 text-[13px] font-medium text-[#30343B] transition hover:bg-[#F6F7F8] disabled:opacity-40"
+          >
+            Add
+          </button>
+        </div>
+      )}
+
+      {added.length > 0 && (
+        <ul className="mt-3 flex flex-wrap gap-2" aria-label="Added collections">
+          {added.map((c) => (
+            <li
+              key={c.id}
+              className="inline-flex max-w-full items-center gap-1 rounded-full border border-[#D4D0C5] bg-[#FAF9F6] py-1 pl-3 pr-1 text-[13px] text-[#30343B]"
+            >
+              <span className="truncate">
+                {c.name} · {productsLabel(c.products_count)}
+              </span>
+              <button
+                type="button"
+                onClick={() => onChange(selected.filter((id) => id !== c.id))}
+                aria-label={`Remove ${c.name}`}
+                className="rounded-full p-1 hover:bg-[#E9EAEC]"
+              >
+                <svg
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {error && (
+        <p className="mt-3 text-[13px] text-[#B42318]" role="alert">
+          {error}
+        </p>
+      )}
+    </section>
+  );
+}
+
 // ---------------------------------------------------------------- product picker
 
 // Popup with search and checkboxes; Done returns the ticked ids
@@ -343,6 +536,7 @@ export default function AdminAddCollection() {
   const [initial, setInitial] = useState(EMPTY_FORM); // last saved state, for "changed?" and Discard
   const [allProducts, setAllProducts] = useState([]);
   const [channels, setChannels] = useState([]);
+  const [allCollections, setAllCollections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -360,6 +554,8 @@ export default function AdminAddCollection() {
   const [filterOpen, setFilterOpen] = useState(false);
   // Server preview of an automated collection, tagged with the conditions it was made for
   const [fetchedPreview, setFetchedPreview] = useState({ key: null, count: 0, products: [] });
+  // Products coming from the added collections (nested ones too), tagged with what they were fetched for
+  const [fetchedIncluded, setFetchedIncluded] = useState({ key: null, count: 0, products: [] });
 
   const fileRef = useRef(null);
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
@@ -371,9 +567,10 @@ export default function AdminAddCollection() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [productsRes, channelsRes, collectionRes] = await Promise.all([
+      const [productsRes, channelsRes, collectionsRes, collectionRes] = await Promise.all([
         apiGet("/api/v1/catalog/products/"),
         apiGet("/api/v1/catalog/sales-channels/"),
+        apiGet("/api/v1/catalog/collections/"),
         editing ? apiGet(`/api/v1/catalog/collections/${collectionId}/`) : Promise.resolve(null),
       ]);
       if (cancelled) return;
@@ -381,6 +578,12 @@ export default function AdminAddCollection() {
       const storeChannels = channelsRes.ok ? channelsRes.data || [] : [];
       setAllProducts(productsRes.ok ? productsRes.data || [] : []);
       setChannels(storeChannels);
+      // Every other collection of the store, A to Z (a collection can't include itself)
+      setAllCollections(
+        (Array.isArray(collectionsRes.data) ? collectionsRes.data : [])
+          .filter((c) => c.id !== collectionId)
+          .sort((a, b) => a.name.localeCompare(b.name))
+      );
 
       let loaded;
       if (editing) {
@@ -496,11 +699,54 @@ export default function AdminAddCollection() {
     ? { ...fetchedPreview, loading: fetchedPreview.key !== rulesKey }
     : { loading: false, count: 0, products: [] };
 
-  const items =
+  // Products from the added collections: asked again whenever the list, the picks or the conditions change,
+  // so adding or removing a collection updates the grid before Save
+  const added = form.include_collections;
+  const includedKey = JSON.stringify([
+    added,
+    form.type,
+    form.type === "manual" ? form.products : [completeRules, form.match, form.excluded_products],
+  ]);
+  useEffect(() => {
+    if (loading || !added.length) return undefined;
+    let live = true;
+    const t = setTimeout(async () => {
+      const res = await apiPost("/api/v1/catalog/collections/preview/", {
+        type: form.type,
+        rules: completeRules,
+        match: form.match,
+        excluded_products: form.excluded_products,
+        products: form.products,
+        include_collections: added,
+      });
+      if (!live) return;
+      setFetchedIncluded(
+        res.ok
+          ? { key: includedKey, count: res.data.included_count, products: res.data.included }
+          : { key: includedKey, count: 0, products: [] }
+      );
+    }, 300);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [includedKey, loading]);
+  const included = added.length
+    ? { ...fetchedIncluded, loading: fetchedIncluded.key !== includedKey }
+    : { loading: false, count: 0, products: [] };
+
+  const ownItems =
     form.type === "automated"
       ? preview.products
       : form.products.map((id) => byId[id]).filter(Boolean);
-  const itemCount = form.type === "automated" ? preview.count : items.length;
+  const ownCount = form.type === "automated" ? preview.count : ownItems.length;
+  // Own products first; a product the collection already holds is not listed again as an included one
+  const ownIds = new Set(ownItems.map((p) => p.id));
+  const includedItems = included.products.filter((p) => !ownIds.has(p.id));
+  const items = [...ownItems, ...includedItems];
+  const itemCount = ownCount + (included.count - (included.products.length - includedItems.length));
+  const countLoading = (form.type === "automated" && preview.loading) || included.loading;
   const shownItems =
     statusFilter === "all" ? items : items.filter((p) => p.status === statusFilter);
 
@@ -603,6 +849,7 @@ export default function AdminAddCollection() {
       handle: c.handle,
       rules: (c.rules || []).map(({ field, operator, value }) => ({ field, operator, value })),
       products: form.type === "manual" ? c.products : form.products,
+      include_collections: c.include_collections || [],
       sales_channels: (c.sales_channels || []).map((ch) => ch.id),
     };
     setForm(saved);
@@ -827,7 +1074,7 @@ export default function AdminAddCollection() {
                         Collection items
                       </h2>
                       <span className="rounded-full bg-[#F3F1EC] px-2 py-0.5 text-[12px] font-medium text-[#5A5750]">
-                        {preview.loading && form.type === "automated" ? "…" : itemCount}
+                        {countLoading ? "…" : itemCount}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -912,7 +1159,7 @@ export default function AdminAddCollection() {
                         ))}
                       </div>
                       <p className="mt-5 text-center text-[13px] text-[#78746A]">
-                        {preview.loading
+                        {countLoading
                           ? "Finding matching products…"
                           : "Add conditions or products to populate your collection"}
                       </p>
@@ -938,7 +1185,14 @@ export default function AdminAddCollection() {
                             {formatPrice(p.price) || "—"}
                             {p.status !== "active" && <span> · {capitalize(p.status)}</span>}
                           </p>
-                          <ItemAction product={p} type={form.type} form={form} set={set} />
+                          {p.from_collection && (
+                            <p className="mt-1 truncate text-[11px] text-[#78746A]">
+                              from {p.from_collection.name}
+                            </p>
+                          )}
+                          {!p.from_collection && (
+                            <ItemAction product={p} type={form.type} form={form} set={set} />
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -950,21 +1204,31 @@ export default function AdminAddCollection() {
                           className="group relative flex items-center gap-3 px-3 py-2.5"
                         >
                           <Thumb product={p} size="h-10 w-10" />
-                          <span className="min-w-0 flex-1 truncate text-[14px]">{p.title}</span>
+                          <span className="min-w-0 flex-1 truncate text-[14px]">
+                            {p.title}
+                            {p.from_collection && (
+                              <span className="ml-2 text-[11px] text-[#78746A]">
+                                from {p.from_collection.name}
+                              </span>
+                            )}
+                          </span>
                           <span className="hidden text-[12px] text-[#78746A] sm:inline">
                             {capitalize(p.status)}
                           </span>
                           <span className="w-20 text-right text-[13px] text-[#5A5750]">
                             {formatPrice(p.price) || "—"}
                           </span>
-                          <ItemAction product={p} type={form.type} form={form} set={set} inline />
+                          {!p.from_collection && (
+                            <ItemAction product={p} type={form.type} form={form} set={set} inline />
+                          )}
                         </li>
                       ))}
                     </ul>
                   )}
-                  {form.type === "automated" && preview.count > preview.products.length && (
+                  {((form.type === "automated" && preview.count > preview.products.length) ||
+                    included.count > included.products.length) && (
                     <p className="mt-3 text-[12px] text-[#78746A]">
-                      Showing the first {preview.products.length} of {preview.count} products.
+                      Showing the first {items.length} of {itemCount} products.
                     </p>
                   )}
                 </section>
@@ -1271,6 +1535,13 @@ export default function AdminAddCollection() {
                     </>
                   )}
                 </section>
+
+                <IncludeCollectionsPicker
+                  collections={allCollections}
+                  selected={form.include_collections}
+                  error={errors.include_collections}
+                  onChange={(ids) => set("include_collections", ids)}
+                />
 
                 {/* Publishing */}
                 <section className={`${card} p-5`} aria-labelledby="publishing-title">
