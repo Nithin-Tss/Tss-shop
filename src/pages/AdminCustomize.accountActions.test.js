@@ -40,7 +40,7 @@ describe("account actions in the customizer preview", () => {
     );
     const event = submit(win, win.document.querySelector("form"));
     expect(event).toBe(false); // the preview did not post the form
-    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login`, "_blank", "noopener");
+    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login?switch=1`, "_blank", "noopener");
   });
 
   it("opens the store before the theme's form script, so the preview's button isn't left on 'Please wait...'", () => {
@@ -55,7 +55,7 @@ describe("account actions in the customizer preview", () => {
     });
     form.addEventListener("submit", theme);
     submit(win, form);
-    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login`, "_blank", "noopener");
+    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login?switch=1`, "_blank", "noopener");
     expect(theme).not.toHaveBeenCalled();
     expect(form.dataset.sending).toBeUndefined();
   });
@@ -83,7 +83,7 @@ describe("account actions in the customizer preview", () => {
       '<a href="https://elsewhere.example/s/other-store/account/login">Sign in</a>'
     );
     click(win, win.document.querySelector("a"));
-    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login`, "_blank", "noopener");
+    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login?switch=1`, "_blank", "noopener");
   });
 
   it("leaves other store links to the editor", () => {
@@ -115,7 +115,7 @@ describe("account actions in the customizer preview", () => {
     const body = html.match(/<script>([\s\S]*)<\/script>/)[1];
     new Function("window", body)(win);
     submit(win, win.document.querySelector("form"));
-    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login`, "_blank", "noopener");
+    expect(win.open).toHaveBeenCalledWith(`${BASE}/account/login?switch=1`, "_blank", "noopener");
   });
 
   it("can't be broken out of by the store address, and needs a store", () => {

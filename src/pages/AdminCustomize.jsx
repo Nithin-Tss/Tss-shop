@@ -128,7 +128,10 @@ export function openAccountActionsInStore(win, storeBase) {
     if (!m) return null;
     var rest = (m[1] || "").replace(/\/+$/, "");
     // Sign in / create account open those pages; everything else (profile, addresses, sign out) the account
-    return storeBase + "/account" + (rest === "/login" || rest === "/register" ? rest : "");
+    // ?switch=1: the store's login page signs out whoever this browser was last signed in as, instead of
+    // skipping the form and opening that other customer's account
+    if (rest === "/login") return storeBase + "/account/login?switch=1";
+    return storeBase + "/account" + (rest === "/register" ? rest : "");
   }
   function open(event, url) {
     event.preventDefault();
