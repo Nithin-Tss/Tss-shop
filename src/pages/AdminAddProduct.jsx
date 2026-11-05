@@ -176,428 +176,1950 @@ function MoneyInput({ value, onChange, placeholder = "0.00", error }) {
   );
 }
 
-// Text box that turns typed words into removable chips (Enter or comma adds one)
-function ChipInput({ values, onChange, placeholder }) {
-  const [draft, setDraft] = useState("");
+const sameText = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
-  const add = (raw) => {
-    const value = raw.trim().replace(/,$/, "");
-    if (value && !values.some((v) => v.toLowerCase() === value.toLowerCase())) {
-      onChange([...values, value]);
-    }
-    setDraft("");
-  };
-
+// Round "+" button beside a sidebar label
+function CircleAddButton({ label, onClick, disabled }) {
   return (
-    <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-2 py-1.5 focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#14130F]/[0.07]">
-      {values.map((v) => (
-        <span
-          key={v}
-          className="inline-flex items-center gap-1 rounded-full bg-charcoal-navy px-2.5 py-0.5 text-xs font-medium text-white"
-        >
-          {v}
-          <button
-            type="button"
-            aria-label={`Remove ${v}`}
-            onClick={() => onChange(values.filter((x) => x !== v))}
-            className="text-white/60 hover:text-white"
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className="inline-flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] border-slate-600 text-slate-700 hover:bg-slate-100 disabled:opacity-40"
+    >
+      <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M10 5v10M5 10h10" strokeLinecap="round" />
+      </svg>
+    </button>
+  );
+}
+
+// Removable grey chips in a rounded box
+function ChipBox({ values, onRemove, empty }) {
+  return (
+    <div className="flex min-h-11 flex-wrap items-center gap-1.5 rounded-xl border border-slate-300 bg-white p-1.5">
+      {values.length ? (
+        values.map((v) => (
+          <span
+            key={v}
+            className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-800"
           >
-            ×
-          </button>
-        </span>
-      ))}
-      <input
-        value={draft}
-        onChange={(e) =>
-          e.target.value.endsWith(",") ? add(e.target.value) : setDraft(e.target.value)
-        }
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            add(draft);
-          } else if (e.key === "Backspace" && !draft && values.length) {
-            onChange(values.slice(0, -1));
-          }
-        }}
-        onBlur={() => draft && add(draft)}
-        placeholder={values.length ? "" : placeholder}
-        className="min-w-22.5 flex-1 bg-transparent px-1.5 text-sm outline-none placeholder:text-slate-400"
-      />
+            {v}
+            {onRemove && (
+              <button
+                type="button"
+                aria-label={`Remove ${v}`}
+                onClick={() => onRemove(v)}
+                className="text-slate-500 hover:text-slate-900"
+              >
+                ×
+              </button>
+            )}
+          </span>
+        ))
+      ) : (
+        <span className="px-1.5 text-sm text-slate-400">{empty}</span>
+      )}
     </div>
   );
 }
 
-// Collections field with removable tags and dropdown popup (search, multi-select checkboxes, add new collection)
-function CollectionsPicker({
-  selectedCollections,
-  onChange,
-  availableCollections = [],
-  onCollectionCreated,
-  error,
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isCreatingInline, setIsCreatingInline] = useState(false);
-  const [newCollectionName, setNewCollectionName] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [createError, setCreateError] = useState("");
+// Search popover shared by the "+" buttons: filters existing values, offers Add "typed value"
+function AddValuePopover({ title, options, selected = [], onPick, onClose, canCreate = true, busy, error }) {
+  const [query, setQuery] = useState("");
+  const boxRef = useRef(null);
+  const typed = query.trim();
 
-  const dropdownRef = useRef(null);
-  const searchInputRef = useRef(null);
-  const inlineInputRef = useRef(null);
-
-  // Close when clicking outside or pressing Escape
   useEffect(() => {
-    if (!isOpen) return undefined;
-    const handleOutsideClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("keydown", handleKeyDown);
+    const outside = (e) => boxRef.current && !boxRef.current.contains(e.target) && onClose();
+    const escape = (e) => e.key === "Escape" && onClose();
+    document.addEventListener("mousedown", outside);
+    document.addEventListener("keydown", escape);
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", outside);
+      document.removeEventListener("keydown", escape);
     };
-  }, [isOpen]);
+  }, [onClose]);
 
-  // Focus search input on open
-  useEffect(() => {
-    if (isOpen) setTimeout(() => searchInputRef.current?.focus(), 50);
-  }, [isOpen]);
-
-  // Closing the dropdown clears what was typed in it
-  const [wasOpen, setWasOpen] = useState(isOpen);
-  if (wasOpen !== isOpen) {
-    setWasOpen(isOpen);
-    if (!isOpen) {
-      setSearchQuery("");
-      setIsCreatingInline(false);
-      setNewCollectionName("");
-      setCreateError("");
-    }
-  }
-
-  // Focus inline input when opened
-  useEffect(() => {
-    if (isCreatingInline) {
-      setTimeout(() => inlineInputRef.current?.focus(), 50);
-    }
-  }, [isCreatingInline]);
-
-  // Merge store collections and selected collections to show full available list
-  const allCollections = useMemo(() => {
-    const list = [...new Set([...availableCollections, ...selectedCollections])].filter(Boolean);
-    return list.sort((a, b) => a.localeCompare(b));
-  }, [availableCollections, selectedCollections]);
-
-  // Filter based on search query
-  const filteredCollections = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return allCollections;
-    return allCollections.filter((c) => c.toLowerCase().includes(q));
-  }, [allCollections, searchQuery]);
-
-  const handleToggle = (name) => {
-    if (selectedCollections.includes(name)) {
-      onChange(selectedCollections.filter((c) => c !== name));
-    } else {
-      onChange([...selectedCollections, name]);
-    }
-  };
-
-  const handleRemove = (name) => {
-    onChange(selectedCollections.filter((c) => c !== name));
-  };
-
-  const handleCreateCollection = async (rawName) => {
-    const trimmed = rawName.trim();
-    if (!trimmed) return;
-
-    // Check if collection already exists in all collections (case-insensitive check to prevent duplicates)
-    const existing = allCollections.find((c) => c.toLowerCase() === trimmed.toLowerCase());
-    if (existing) {
-      if (!selectedCollections.includes(existing)) {
-        onChange([...selectedCollections, existing]);
-      }
-      setSearchQuery("");
-      setIsCreatingInline(false);
-      setNewCollectionName("");
-      return;
-    }
-
-    setIsCreating(true);
-    setCreateError("");
-
-    const res = await apiPost("/api/v1/catalog/collections/", { name: trimmed });
-    setIsCreating(false);
-
-    if (res.ok && res.data) {
-      const createdName = res.data.name || trimmed;
-      if (onCollectionCreated) {
-        onCollectionCreated(createdName);
-      }
-      if (!selectedCollections.includes(createdName)) {
-        onChange([...selectedCollections, createdName]);
-      }
-      setSearchQuery("");
-      setIsCreatingInline(false);
-      setNewCollectionName("");
-    } else {
-      setCreateError(res.error || res.formError || "Failed to create collection.");
-    }
-  };
+  const matches = options.filter(
+    (o) => !selected.some((s) => sameText(s, o)) && o.toLowerCase().includes(typed.toLowerCase())
+  );
+  const exact = [...options, ...selected].find((o) => typed && sameText(o, typed));
+  const pick = (value) => !busy && onPick(value);
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Header with Title and Circle Plus Icon (Screenshot 1) */}
-      <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-[13px] font-semibold text-charcoal-navy">Collections</span>
-        <button
-          type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="rounded-full p-0.5 text-gray-400 hover:text-slate-800 transition hover:bg-slate-100"
-          title="Add or manage collections"
-          aria-label="Add or manage collections"
-        >
-          <svg
-            className="h-5 w-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="9.5" />
-            <line x1="12" y1="8" x2="12" y2="16" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-          </svg>
-        </button>
-      </div>
+    <div
+      ref={boxRef}
+      role="dialog"
+      aria-label={title}
+      className="absolute right-0 top-8 z-40 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-lg"
+    >
+      <input
+        autoFocus
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          if (exact && !selected.some((s) => sameText(s, exact))) pick(exact);
+          else if (!exact && typed && canCreate) pick(typed);
+        }}
+        placeholder="Search"
+        aria-label={`Search ${title.toLowerCase()}`}
+        className="h-9 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-charcoal-navy"
+      />
+      <ul className="mt-1 max-h-56 overflow-y-auto text-sm">
+        {matches.map((o) => (
+          <li key={o}>
+            <button
+              type="button"
+              onClick={() => pick(o)}
+              className="w-full rounded-md px-2.5 py-1.5 text-left hover:bg-slate-100"
+            >
+              {o}
+            </button>
+          </li>
+        ))}
+        {typed && !exact && canCreate && (
+          <li>
+            <button
+              type="button"
+              onClick={() => pick(typed)}
+              disabled={busy}
+              className="w-full rounded-md px-2.5 py-1.5 text-left font-medium text-charcoal-navy hover:bg-slate-100 disabled:opacity-50"
+            >
+              {busy ? "Adding..." : `Add "${typed}"`}
+            </button>
+          </li>
+        )}
+        {!matches.length && !(typed && !exact && canCreate) && (
+          <li className="px-2.5 py-1.5 text-slate-400">No matches</li>
+        )}
+      </ul>
+      {error && <p className="px-2.5 pb-1 text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
 
-      {/* Selected Collections Box with Removable Tags (Screenshot 1) */}
-      <div
-        onClick={() => setIsOpen(true)}
-        className={`min-h-14.5 cursor-pointer rounded-lg border border-[#E7E4DC] bg-white p-2.5 transition focus-within:border-charcoal-navy ${
-          error ? "border-red-400" : "hover:border-slate-400"
-        }`}
+// Full-width rounded dropdown with up/down chevrons
+function ChevronSelect({ id, value, onChange, label, children }) {
+  return (
+    <div className="relative">
+      <select
+        id={id}
+        aria-label={label}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-11 w-full appearance-none rounded-xl border border-slate-300 bg-white pl-3.5 pr-9 text-sm text-slate-900 outline-none focus:border-charcoal-navy focus:ring-4 focus:ring-[#14130F]/[0.07]"
       >
-        {selectedCollections.length === 0 ? (
-          <p className="flex items-center text-sm text-slate-400 select-none py-1">
-            No collections selected
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2 items-center">
-            {selectedCollections.map((col) => (
-              <span
-                key={col}
-                className="group inline-flex items-center gap-1.5 rounded-xl bg-[#E7E4DC] px-3 py-1 text-sm font-normal text-slate-800 transition hover:bg-[#DCDFE4]"
-              >
-                <span>{col}</span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove(col);
-                  }}
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-500 hover:bg-slate-300 hover:text-slate-800 transition"
-                  title={`Remove ${col}`}
-                  aria-label={`Remove ${col}`}
-                >
-                  <svg
-                    className="h-3 w-3"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <line x1="3" y1="3" x2="9" y2="9" />
-                    <line x1="9" y1="3" x2="3" y2="9" />
-                  </svg>
-                </button>
-              </span>
-            ))}
+        {children}
+      </select>
+      <svg
+        viewBox="0 0 20 20"
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        aria-hidden="true"
+      >
+        <path
+          d="M6.5 8L10 4.5 13.5 8M6.5 12l3.5 3.5 3.5-3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
+
+// Trimmed, non-empty values without case-insensitive duplicates, sorted
+const uniqueText = (values) =>
+  values
+    .map((v) => (v || "").trim())
+    .filter((v, i, all) => v && all.findIndex((x) => sameText(x, v)) === i)
+    .sort((a, b) => a.localeCompare(b));
+
+
+/* ---------- variants ---------- */
+
+// Product.options: [{ name, values }] in display order; each variant's values: variant.options = { [name]: value }
+const MAX_PRODUCT_OPTIONS = 3;
+const MAX_VARIANTS = 100;
+
+const firstFields = (v) => ({
+  price: v?.price ?? "",
+  compareAt: v?.compare_at_price ?? "",
+  sku: v?.sku || "",
+  weight: v?.weight && Number(v.weight) > 0 ? v.weight : "",
+});
+
+const isMoney = (s) => /^\d+(\.\d{1,2})?$/.test(String(s).trim());
+const isWhole = (s) => /^\d+$/.test(String(s).trim());
+const isWeight = (s) => /^\d+(\.\d{1,3})?$/.test(String(s).trim());
+const formatAud = (value) =>
+  value === "" || value == null || Number.isNaN(Number(value)) ? "" : `$${Number(value).toFixed(2)}`;
+
+// "Single / 375ML", else the SKU, else "Default variant"
+const variantName = (v, options) => {
+  const values = options.map((o) => v.options?.[o.name]).filter(Boolean);
+  return values.length ? values.join(" / ") : v.sku || "Default variant";
+};
+const comboKey = (values, options) =>
+  options.map((o) => (values?.[o.name] || "").toLowerCase()).join("\u0000");
+
+// Every combination of the options' values, in option order
+const combinations = (options) =>
+  options.reduce(
+    (acc, o) => acc.flatMap((combo) => o.values.map((value) => ({ ...combo, [o.name]: value }))),
+    [{}]
+  );
+
+let draftSeq = 0;
+const draftId = () => `draft-${(draftSeq += 1)}`;
+
+// Stock of a variant from the inventory rows: not tracked when it has no row anywhere
+function stockOf(variant, items, location) {
+  const rows = items.filter((i) => i.variant === variant.id);
+  if (!rows.length) return { tracked: false, available: null };
+  if (location === "all") return { tracked: true, available: rows.reduce((n, i) => n + i.available, 0) };
+  const row = rows.find((i) => i.location === location);
+  return { tracked: true, available: row ? row.available : null };
+}
+
+function stockStatus(stock) {
+  if (!stock.tracked) return "untracked";
+  if (stock.available == null || stock.available === 0) return "out";
+  return stock.available < 0 ? "oversold" : "in";
+}
+
+const STOCK_FILTERS = [
+  { value: "in", label: "In stock" },
+  { value: "out", label: "Out of stock" },
+  { value: "oversold", label: "Oversold" },
+  { value: "untracked", label: "Not tracked" },
+];
+
+function TriCheckbox({ checked, indeterminate, onChange, label }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (ref.current) ref.current.indeterminate = Boolean(indeterminate) && !checked;
+  });
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      aria-label={label}
+      className="h-4 w-4 cursor-pointer accent-charcoal-navy"
+    />
+  );
+}
+
+function Modal({ title, onClose, children, footer, wide }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+      onKeyDown={(e) => e.key === "Escape" && onClose()}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`flex max-h-[90vh] w-full flex-col rounded-2xl bg-white shadow-xl ${wide ? "max-w-5xl" : "max-w-lg"}`}
+      >
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-md px-2 text-lg text-slate-500 hover:bg-slate-100"
+          >
+            ×
+          </button>
+        </div>
+        <div className="overflow-y-auto px-5 py-4">{children}</div>
+        {footer && (
+          <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 px-5 py-3">
+            {footer}
           </div>
         )}
       </div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
 
-      {/* Dropdown Popup (Screenshot 2) */}
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-1.5 w-72 sm:w-80 rounded-xl border border-gray-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.15)] z-50 overflow-hidden">
-          {/* Header */}
-          <div className="px-3.5 pt-3 pb-1">
-            <span className="text-xs font-semibold text-slate-600">Collections</span>
-          </div>
+const ghostButton =
+  "h-9 rounded-full px-4 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50";
+const outlineButton =
+  "h-8 rounded-full border border-slate-300 bg-white px-3.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50";
+const primaryButton =
+  "h-9 rounded-full bg-charcoal-navy px-5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50";
+const cellInput =
+  "h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm outline-none focus:border-charcoal-navy focus:ring-2 focus:ring-[#14130F]/10";
+const notYet = "Not available yet";
 
-          {/* Search Bar with Search/Plus Icon */}
-          <div className="relative flex items-center border-b border-gray-200 px-3.5 py-2">
-            <svg
-              className="h-4 w-4 shrink-0 text-slate-500"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="8" cy="8" r="5" />
-              <line x1="11.5" y1="11.5" x2="16.5" y2="16.5" />
-              <line x1="13.5" y1="3" x2="13.5" y2="7" />
-              <line x1="11.5" y1="5" x2="15.5" y2="5" />
-            </svg>
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  if (searchQuery.trim()) {
-                    handleCreateCollection(searchQuery.trim());
-                  }
-                }
-              }}
-              placeholder="Search or add collections"
-              className="ml-2.5 w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="text-slate-400 hover:text-slate-600 text-xs px-1"
-                aria-label="Clear search"
-              >
-                ✕
-              </button>
-            )}
-          </div>
+// Edit option names and values; preview the variants created and removed, then save them in one product PATCH
+const blankOption = () => ({
+  id: draftId(),
+  name: "",
+  original: null,
+  values: [{ id: draftId(), value: "", original: null }],
+  defaultValue: "",
+});
 
-          {/* List of Available Collections with Checkboxes */}
-          <div className="max-h-60 overflow-y-auto py-1">
-            {filteredCollections.length === 0 ? (
-              <div className="px-4 py-6 text-center">
-                <p className="text-sm text-slate-500">
-                  {searchQuery
-                    ? `No collections matching "${searchQuery}"`
-                    : "No collections available"}
-                </p>
-              </div>
-            ) : (
-              filteredCollections.map((colName) => {
-                const isChecked = selectedCollections.includes(colName);
-                return (
-                  <label
-                    key={colName}
-                    className="flex cursor-pointer select-none items-center gap-2.5 px-3.5 py-2 hover:bg-slate-50 transition"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => handleToggle(colName)}
-                      className="h-4 w-4 rounded border-gray-300 text-slate-900 focus:ring-0 cursor-pointer accent-charcoal-navy"
-                    />
-                    <span className="text-sm text-slate-800">{colName}</span>
-                  </label>
-                );
-              })
-            )}
-          </div>
+function OptionsEditor({ productId, options, variants, startWithNew, onClose, onApplied }) {
+  const [opts, setOpts] = useState(() => [
+    ...options.map((o) => ({
+      id: draftId(),
+      name: o.name,
+      original: o.name,
+      values: o.values.map((value) => ({ id: draftId(), value, original: value })),
+      defaultValue: "",
+    })),
+    ...(startWithNew ? [blankOption()] : []),
+  ]);
+  const [step, setStep] = useState("edit");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(null); // { optionId, index }
+  const changed = JSON.stringify(opts.map((o) => [o.name, o.values.map((v) => v.value)])) !==
+    JSON.stringify(options.map((o) => [o.name, o.values]));
 
-          {/* Create Error */}
-          {createError && (
-            <div className="border-t border-red-100 bg-red-50 px-3 py-1.5 text-xs text-red-600">
-              {createError}
-            </div>
-          )}
+  const close = () => {
+    if (saving) return;
+    if (!changed || window.confirm("Discard your option changes?")) onClose();
+  };
 
-          {/* Footer: Add new collection option */}
-          {isCreatingInline ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (newCollectionName.trim()) {
-                  handleCreateCollection(newCollectionName.trim());
-                }
-              }}
-              className="border-t border-gray-200 bg-slate-50 p-2.5"
-            >
-              <div className="flex items-center gap-1.5">
-                <input
-                  ref={inlineInputRef}
-                  type="text"
-                  value={newCollectionName}
-                  onChange={(e) => setNewCollectionName(e.target.value)}
-                  placeholder="Collection name..."
-                  className="w-full rounded border border-gray-300 bg-white px-2.5 py-1 text-xs text-slate-800 outline-none focus:border-slate-500"
-                />
-                <button
-                  type="submit"
-                  disabled={isCreating || !newCollectionName.trim()}
-                  className="rounded bg-charcoal-navy px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-                >
-                  {isCreating ? "Adding..." : "Add"}
-                </button>
+  const update = (optionId, change) =>
+    setOpts((prev) => prev.map((o) => (o.id === optionId ? { ...o, ...change(o) } : o)));
+  const moveValue = (optionId, from, to) =>
+    update(optionId, (o) => {
+      if (to < 0 || to >= o.values.length) return {};
+      const values = [...o.values];
+      const [item] = values.splice(from, 1);
+      values.splice(to, 0, item);
+      return { values };
+    });
+
+  // Problems that stop the preview, by field
+  const problems = [];
+  const names = new Set();
+  opts.forEach((o, i) => {
+    const name = o.name.trim();
+    if (!name) problems.push(`Option ${i + 1} needs a name.`);
+    else if (names.has(name.toLowerCase())) problems.push(`There are two options called "${name}".`);
+    names.add(name.toLowerCase());
+    const seen = new Set();
+    if (!o.values.length) problems.push(`${name || `Option ${i + 1}`} needs at least one value.`);
+    o.values.forEach((v) => {
+      const value = v.value.trim();
+      if (!value) problems.push(`${name || `Option ${i + 1}`} has a blank value.`);
+      else if (seen.has(value.toLowerCase()))
+        problems.push(`${name || `Option ${i + 1}`} has "${value}" more than once.`);
+      seen.add(value.toLowerCase());
+    });
+    if (o.original == null && variants.length && !o.defaultValue)
+      problems.push(`Choose which ${name || "new option"} value the existing variants get.`);
+  });
+
+  const plan = () => {
+    const newOptions = opts.map((o) => ({ name: o.name.trim(), values: o.values.map((v) => v.value.trim()) }));
+    const kept = [];
+    const removed = [];
+    const taken = new Map();
+    variants.forEach((v) => {
+      const values = {};
+      let why = null;
+      opts.forEach((o) => {
+        if (why) return;
+        const name = o.name.trim();
+        if (o.original == null) {
+          values[name] = (o.values.find((x) => x.id === o.defaultValue)?.value || "").trim();
+          return;
+        }
+        const current = v.options?.[o.original];
+        const entry = o.values.find((x) => x.original != null && x.original === current);
+        if (!entry) why = current ? `${o.original} "${current}" is removed` : `it has no ${o.original}`;
+        else values[name] = entry.value.trim();
+      });
+      if (!why) {
+        const key = comboKey(values, newOptions);
+        if (taken.has(key)) why = `same options as ${variantName(taken.get(key), options)}`;
+        else {
+          taken.set(key, v);
+          kept.push({ variant: v, values });
+          return;
+        }
+      }
+      removed.push({ variant: v, why });
+    });
+    const skus = new Set(variants.map((v) => (v.sku || "").toLowerCase()));
+    const base = variants[0]?.sku || "SKU";
+    const created = combinations(newOptions)
+      .filter((combo) => !taken.has(comboKey(combo, newOptions)))
+      .map((combo) => {
+        const stem = `${base}-${Object.values(combo).join("-")}`.toUpperCase().replace(/[^A-Z0-9-]+/g, "");
+        let sku = stem;
+        for (let n = 2; skus.has(sku.toLowerCase()); n += 1) sku = `${stem}-${n}`;
+        skus.add(sku.toLowerCase());
+        return { values: combo, sku };
+      });
+    return { newOptions, kept, removed, created };
+  };
+
+  const preview = step === "review" ? plan() : null;
+  const total = preview ? preview.kept.length + preview.created.length : 0;
+  const basePrice = variants[0]?.price ?? "0";
+
+  const apply = async () => {
+    if (saving || !preview) return;
+    setSaving(true);
+    setError("");
+    // The complete list: every variant that stays plus the new ones. Only the confirmed removals are left out
+    const res = await apiPatch(`/api/v1/catalog/products/${productId}/`, {
+      options: preview.newOptions,
+      variants: [
+        ...preview.kept.map((k) => ({ id: k.variant.id, options: k.values })),
+        ...preview.created.map((c) => ({ sku: c.sku, price: basePrice, options: c.values })),
+      ],
+    });
+    setSaving(false);
+    if (!res.ok) {
+      setError(res.formError || Object.values(res.fieldErrors || {})[0] || res.error || "The options couldn't be saved.");
+      return;
+    }
+    onApplied(res.data);
+  };
+
+  const footer =
+    step === "edit" ? (
+      <>
+        <button type="button" onClick={close} className={ghostButton}>
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setConfirmDelete(false);
+            setStep("review");
+          }}
+          disabled={!changed || problems.length > 0}
+          className={primaryButton}
+        >
+          Review changes
+        </button>
+      </>
+    ) : (
+      <>
+        <button type="button" onClick={() => setStep("edit")} disabled={saving} className={ghostButton}>
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={apply}
+          disabled={saving || total > MAX_VARIANTS || (preview.removed.length > 0 && !confirmDelete)}
+          className={primaryButton}
+        >
+          {saving ? "Saving..." : "Save options"}
+        </button>
+      </>
+    );
+
+  return (
+    <Modal title={step === "edit" ? "Edit options" : "Review variant changes"} onClose={close} footer={footer} wide>
+      {step === "edit" ? (
+        <div className="space-y-4">
+          {opts.map((o, oi) => (
+            <div key={o.id} className="rounded-xl border border-slate-200 p-4">
+              <div className="flex items-end gap-2">
+                <label className="block flex-1">
+                  <span className="mb-1 block text-xs font-semibold text-slate-700">Option name</span>
+                  <input
+                    value={o.name}
+                    onChange={(e) => update(o.id, () => ({ name: e.target.value }))}
+                    placeholder="e.g. Pack size"
+                    className={cellInput}
+                  />
+                </label>
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsCreatingInline(false);
-                    setNewCollectionName("");
-                    setCreateError("");
-                  }}
-                  className="px-1 text-xs text-slate-500 hover:text-slate-700"
+                  onClick={() => setOpts((prev) => prev.filter((x) => x.id !== o.id))}
+                  className="h-9 rounded-full px-3 text-xs font-semibold text-red-700 hover:bg-red-50"
                 >
-                  Cancel
+                  Remove option
                 </button>
               </div>
-            </form>
-          ) : (
+              <p className="mt-3 mb-1 text-xs font-semibold text-slate-700">
+                Values{" "}
+                <span className="font-normal text-slate-500">
+                  (drag, or use the arrows or Alt+↑/↓, to reorder)
+                </span>
+              </p>
+              <ul className="space-y-1.5">
+                {o.values.map((v, vi) => (
+                  <li
+                    key={v.id}
+                    draggable
+                    onDragStart={() => setDragging({ optionId: o.id, index: vi })}
+                    onDragOver={(e) => dragging?.optionId === o.id && e.preventDefault()}
+                    onDrop={() => {
+                      if (dragging?.optionId === o.id) moveValue(o.id, dragging.index, vi);
+                      setDragging(null);
+                    }}
+                    onDragEnd={() => setDragging(null)}
+                    className="flex items-center gap-1.5"
+                  >
+                    <span aria-hidden className="cursor-grab select-none px-1 text-slate-400">
+                      ⋮⋮
+                    </span>
+                    <input
+                      value={v.value}
+                      aria-label={`${o.name || `Option ${oi + 1}`} value ${vi + 1}`}
+                      onChange={(e) =>
+                        update(o.id, (opt) => ({
+                          values: opt.values.map((x) => (x.id === v.id ? { ...x, value: e.target.value } : x)),
+                        }))
+                      }
+                      onKeyDown={(e) => {
+                        if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+                          e.preventDefault();
+                          moveValue(o.id, vi, vi + (e.key === "ArrowUp" ? -1 : 1));
+                        }
+                      }}
+                      className={cellInput}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => moveValue(o.id, vi, vi - 1)}
+                      disabled={vi === 0}
+                      aria-label={`Move ${v.value || "value"} up`}
+                      className="h-8 w-8 rounded-md text-slate-600 hover:bg-slate-100 disabled:opacity-30"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveValue(o.id, vi, vi + 1)}
+                      disabled={vi === o.values.length - 1}
+                      aria-label={`Move ${v.value || "value"} down`}
+                      className="h-8 w-8 rounded-md text-slate-600 hover:bg-slate-100 disabled:opacity-30"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update(o.id, (opt) => ({
+                          values: opt.values.filter((x) => x.id !== v.id),
+                          defaultValue: opt.defaultValue === v.id ? "" : opt.defaultValue,
+                        }))
+                      }
+                      aria-label={`Remove ${v.value || "value"}`}
+                      className="h-8 w-8 rounded-md text-slate-500 hover:bg-red-50 hover:text-red-700"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() =>
+                  update(o.id, (opt) => ({ values: [...opt.values, { id: draftId(), value: "", original: null }] }))
+                }
+                className="mt-2 text-xs font-semibold text-charcoal-navy hover:underline"
+              >
+                + Add value
+              </button>
+              {o.original == null && variants.length > 0 && (
+                <label className="mt-3 block">
+                  <span className="mb-1 block text-xs font-semibold text-slate-700">
+                    Value for the {variants.length} existing variant{variants.length === 1 ? "" : "s"}
+                  </span>
+                  <select
+                    value={o.defaultValue}
+                    onChange={(e) => update(o.id, () => ({ defaultValue: e.target.value }))}
+                    className={cellInput}
+                  >
+                    <option value="">Choose a value</option>
+                    {o.values
+                      .filter((v) => v.value.trim())
+                      .map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.value.trim()}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+            </div>
+          ))}
+          {opts.length < MAX_PRODUCT_OPTIONS && (
             <button
               type="button"
-              disabled={isCreating}
-              onClick={() => {
-                if (searchQuery.trim()) {
-                  handleCreateCollection(searchQuery.trim());
-                } else {
-                  setIsCreatingInline(true);
-                }
-              }}
-              className="flex w-full cursor-pointer select-none items-center gap-2 border-t border-gray-200 px-3.5 py-2.5 text-left hover:bg-slate-50 transition disabled:opacity-50"
+              onClick={() => setOpts((prev) => [...prev, blankOption()])}
+              className="text-sm font-semibold text-charcoal-navy hover:underline"
             >
-              <svg
-                className="h-4 w-4 shrink-0 text-slate-700"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="9" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-                <line x1="8" y1="12" x2="16" y2="12" />
-              </svg>
-              <span className="text-sm font-semibold text-slate-800">
-                {isCreating
-                  ? "Adding collection..."
-                  : searchQuery.trim()
-                    ? `Add "${searchQuery.trim()}"`
-                    : "Add new collection"}
-              </span>
+              + Add another option
             </button>
+          )}
+          {problems.length > 0 && changed && (
+            <ul role="alert" className="list-disc space-y-0.5 pl-5 text-xs text-red-600">
+              {[...new Set(problems)].map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-4 text-sm">
+          <p className="text-slate-600">
+            {preview.kept.length} variant{preview.kept.length === 1 ? "" : "s"} keep their ID, price and stock.
+          </p>
+          {preview.created.length > 0 && (
+            <div>
+              <p className="font-semibold text-slate-900">
+                {preview.created.length} variant{preview.created.length === 1 ? "" : "s"} will be created
+              </p>
+              <p className="text-xs text-slate-500">
+                Each gets the first variant's price ({formatAud(basePrice)}) and the SKU shown, which you can change
+                later. They start as Not tracked.
+              </p>
+              <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5 text-slate-700">
+                {preview.created.map((c) => (
+                  <li key={c.sku}>
+                    {Object.values(c.values).join(" / ") || "Default variant"}{" "}
+                    <span className="text-xs text-slate-500">({c.sku})</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {preview.removed.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <p className="font-semibold text-red-800">
+                ⚠ {preview.removed.length} variant{preview.removed.length === 1 ? "" : "s"} will be deleted
+              </p>
+              <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5 text-red-800">
+                {preview.removed.map((r) => (
+                  <li key={r.variant.id}>
+                    {variantName(r.variant, options)} <span className="text-xs">({r.why})</span>
+                  </li>
+                ))}
+              </ul>
+              <label className="mt-2 flex items-center gap-2 text-xs font-medium text-red-900">
+                <input
+                  type="checkbox"
+                  checked={confirmDelete}
+                  onChange={(e) => setConfirmDelete(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                Delete these {preview.removed.length} variant{preview.removed.length === 1 ? "" : "s"}
+              </label>
+            </div>
+          )}
+          {total > MAX_VARIANTS && (
+            <p role="alert" className="text-red-600">
+              That would make {total} variants. A product can have at most {MAX_VARIANTS}.
+            </p>
+          )}
+          {!preview.created.length && !preview.removed.length && (
+            <p className="text-slate-600">No variants are created or deleted; only names and order change.</p>
           )}
         </div>
       )}
-    </div>
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+    </Modal>
+  );
+}
+
+// Add a variant (variant null) or edit one. Stock goes through the inventory API (adjust_inventory)
+function VariantEditor({ productId, variant, options, variants, locations, items, canSeeStock, canSetStock, onClose, onSaved }) {
+  const [savedId, setSavedId] = useState(variant?.id || null);
+  const start = variant || {};
+  const initial = {
+    options: Object.fromEntries(options.map((o) => [o.name, start.options?.[o.name] || ""])),
+    price: start.price ?? variants[0]?.price ?? "",
+    compareAt: start.compare_at_price ?? "",
+    sku: start.sku || "",
+    weight: start.weight && Number(start.weight) > 0 ? start.weight : "",
+    continueSelling: Boolean(start.continue_selling),
+  };
+  const initialStock = Object.fromEntries(
+    locations.map((l) => {
+      const row = variant && items.find((i) => i.variant === variant.id && i.location === l.id);
+      return [l.id, row ? String(row.available) : ""];
+    })
+  );
+  const [form, setForm] = useState(initial);
+  const [stock, setStock] = useState(initialStock);
+  const [savedForm, setSavedForm] = useState(initial);
+  const [savedStock, setSavedStock] = useState(initialStock);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const dirty = JSON.stringify([form, stock]) !== JSON.stringify([savedForm, savedStock]);
+  const tracked = Boolean(variant) && items.some((i) => i.variant === variant.id);
+
+  const errors = {};
+  options.forEach((o) => {
+    if (!form.options[o.name]) errors[o.name] = `Choose a ${o.name}.`;
+  });
+  if (options.length && !Object.keys(errors).length) {
+    const key = comboKey(form.options, options);
+    const clash = variants.find((v) => v.id !== savedId && comboKey(v.options, options) === key);
+    if (clash) errors.combo = `${variantName(clash, options)} already exists.`;
+  }
+  if (!isMoney(form.price)) errors.price = "Enter a price, like 12.50.";
+  if (form.compareAt !== "" && !isMoney(form.compareAt)) errors.compareAt = "Enter a price, like 15.00.";
+  if (!form.sku.trim()) errors.sku = "Enter a SKU.";
+  if (form.weight !== "" && !isWeight(form.weight)) errors.weight = "Enter a weight of 0 or more.";
+  Object.entries(stock).forEach(([loc, value]) => {
+    if (value !== "" && !isWhole(value)) errors[`stock-${loc}`] = "Whole number of 0 or more.";
+    if (value === "" && savedStock[loc] !== "") errors[`stock-${loc}`] = "Enter a number to keep this stock.";
+  });
+
+  const close = () => {
+    if (saving) return;
+    if (!dirty || window.confirm("Discard your changes to this variant?")) onClose();
+  };
+
+  const save = async () => {
+    if (saving || Object.keys(errors).length) return;
+    setSaving(true);
+    setError("");
+    const body = {};
+    if (!savedId || form.price !== savedForm.price) body.price = form.price;
+    if (!savedId || form.compareAt !== savedForm.compareAt) body.compare_at_price = form.compareAt === "" ? null : form.compareAt;
+    if (!savedId || form.sku !== savedForm.sku) body.sku = form.sku.trim();
+    if (!savedId || form.weight !== savedForm.weight) body.weight = form.weight === "" ? "0" : form.weight;
+    if (!savedId || form.continueSelling !== savedForm.continueSelling) body.continue_selling = form.continueSelling;
+    if (options.length && (!savedId || comboKey(form.options, options) !== comboKey(savedForm.options, options)))
+      body.options = form.options;
+
+    let id = savedId;
+    if (!id || Object.keys(body).length) {
+      const res = id
+        ? await apiPatch(`/api/v1/catalog/variants/${id}/`, body)
+        : await apiPost("/api/v1/catalog/variants/", { product: productId, ...body });
+      if (!res.ok) {
+        setSaving(false);
+        setError(res.formError || Object.values(res.fieldErrors || {})[0] || res.error || "The variant couldn't be saved.");
+        return;
+      }
+      id = res.data.id;
+      setSavedId(id); // a retry updates this variant instead of creating another
+      setSavedForm(form);
+    }
+
+    const failed = [];
+    const nowSaved = { ...savedStock };
+    for (const [loc, value] of Object.entries(stock)) {
+      if (value === savedStock[loc] || value === "") continue;
+      const res = await apiPost("/api/v1/inventory/items/set/", {
+        variant: id, location: loc, available: Number(value), reason: "correction",
+      });
+      if (res.ok) nowSaved[loc] = value;
+      else failed.push(`${locations.find((l) => l.id === loc)?.name}: ${res.error}`);
+    }
+    setSavedStock(nowSaved);
+    setSaving(false);
+    if (failed.length) {
+      setError(`The variant was saved, but some stock wasn't: ${failed.join(" ")}`);
+      onSaved({ keepOpen: true });
+      return;
+    }
+    onSaved({});
+  };
+
+  const field = (label, key, input, help) => (
+    <label className="block">
+      <span className="mb-1 block text-xs font-semibold text-slate-700">{label}</span>
+      {input}
+      {errors[key] ? (
+        <span className="mt-1 block text-xs text-red-600">{errors[key]}</span>
+      ) : (
+        help && <span className="mt-1 block text-xs text-slate-500">{help}</span>
+      )}
+    </label>
+  );
+  const disabledField = (label) => (
+    <label className="block">
+      <span className="mb-1 block text-xs font-semibold text-slate-700">{label}</span>
+      <input disabled placeholder={notYet} className={`${cellInput} bg-slate-50 text-slate-400`} />
+    </label>
+  );
+
+  return (
+    <Modal
+      title={savedId ? `Edit ${variantName({ ...start, options: savedForm.options, sku: savedForm.sku }, options)}` : "Add variant"}
+      onClose={close}
+      wide
+      footer={
+        <>
+          {dirty && <span className="mr-auto text-xs font-medium text-amber-700">● Unsaved changes</span>}
+          <button type="button" onClick={close} disabled={saving} className={ghostButton}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving || !dirty || Object.keys(errors).length > 0}
+            className={primaryButton}
+          >
+            {saving ? "Saving..." : savedId ? "Save variant" : "Add variant"}
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        {options.length > 0 && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {options.map((o) =>
+              field(
+                o.name,
+                o.name,
+                <select
+                  value={form.options[o.name]}
+                  onChange={(e) => set("options", { ...form.options, [o.name]: e.target.value })}
+                  className={cellInput}
+                >
+                  <option value="">Choose</option>
+                  {o.values.map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              )
+            )}
+            {errors.combo && <p className="text-xs text-red-600 sm:col-span-3">{errors.combo}</p>}
+          </div>
+        )}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {field("Price (AUD)", "price", <input value={form.price} onChange={(e) => set("price", e.target.value)} inputMode="decimal" className={cellInput} />)}
+          {field("Compare-at price (AUD)", "compareAt", <input value={form.compareAt} onChange={(e) => set("compareAt", e.target.value)} inputMode="decimal" className={cellInput} />)}
+          {disabledField("Cost per item")}
+          {field("SKU", "sku", <input value={form.sku} onChange={(e) => set("sku", e.target.value)} className={cellInput} />)}
+          {disabledField("Barcode")}
+          {field("Weight", "weight", <input value={form.weight} onChange={(e) => set("weight", e.target.value)} inputMode="decimal" className={cellInput} />, "In your store's weight unit")}
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {disabledField("Image")}
+          {disabledField("Physical product")}
+          {disabledField("Publishing")}
+        </div>
+        <div className="rounded-xl border border-slate-200 p-4">
+          <p className="text-sm font-semibold text-slate-900">Inventory</p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {tracked
+              ? "Tracked. Changes are recorded in the stock history as corrections."
+              : "Not tracked yet. Enter a quantity at a location to start tracking it. Turning tracking off is not available yet."}
+          </p>
+          {canSeeStock ? (
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {locations.map((l) =>
+                field(
+                  `Available at ${l.name}`,
+                  `stock-${l.id}`,
+                  <input
+                    value={stock[l.id]}
+                    onChange={(e) => setStock((prev) => ({ ...prev, [l.id]: e.target.value }))}
+                    disabled={!canSetStock}
+                    placeholder="Not stocked"
+                    inputMode="numeric"
+                    className={`${cellInput} disabled:bg-slate-50 disabled:text-slate-400`}
+                  />
+                )
+              )}
+              {!locations.length && <p className="text-xs text-slate-500">No locations yet.</p>}
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-slate-500">Stock is managed by people with inventory access.</p>
+          )}
+          <label className="mt-3 flex items-center gap-2 text-sm text-slate-800">
+            <input
+              type="checkbox"
+              checked={form.continueSelling}
+              onChange={(e) => set("continueSelling", e.target.checked)}
+              className="h-4 w-4 accent-charcoal-navy"
+            />
+            Continue selling when out of stock
+          </label>
+        </div>
+        {error && (
+          <p role="alert" className="text-sm text-red-600">
+            {error}
+          </p>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+const BULK_COLUMNS = [
+  { key: "price", label: "Price (AUD)" },
+  { key: "compare_at_price", label: "Compare-at (AUD)" },
+  { key: "sku", label: "SKU" },
+  { key: "weight", label: "Weight" },
+  { key: "stock", label: "Available" },
+];
+
+function bulkError(key, value) {
+  if (key === "price") return isMoney(value) ? "" : "Enter a price, like 12.50.";
+  if (key === "compare_at_price") return value === "" || isMoney(value) ? "" : "Enter a price or leave it empty.";
+  if (key === "sku") return value.trim() ? "" : "Enter a SKU.";
+  if (key === "weight") return value === "" || isWeight(value) ? "" : "Enter a weight of 0 or more.";
+  return value === "" || isWhole(value) ? "" : "Whole number of 0 or more.";
+}
+
+// Spreadsheet-style editor for the selected variants only
+function BulkEditor({ rows, options, location, locationName, items, canSetStock, onClose, onSaved }) {
+  const stockColumn = canSetStock && location !== "all";
+  const available = BULK_COLUMNS.filter((c) => c.key !== "stock" || stockColumn);
+  const [columns, setColumns] = useState(() => ["price", "sku", ...(stockColumn ? ["stock"] : [])]);
+  const [edits, setEdits] = useState({}); // { [variantId]: { [column]: value } }
+  const [range, setRange] = useState(null); // { anchor: [row, col], focus: [row, col] }
+  const [mouseDown, setMouseDown] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [result, setResult] = useState(null);
+  const shownColumns = available.filter((c) => columns.includes(c.key));
+
+  const original = (v, key) => {
+    if (key === "stock") {
+      const row = items.find((i) => i.variant === v.id && i.location === location);
+      return row ? String(row.available) : "";
+    }
+    if (key === "compare_at_price") return v.compare_at_price ?? "";
+    if (key === "weight") return v.weight && Number(v.weight) > 0 ? v.weight : "";
+    return v[key] ?? "";
+  };
+  const valueOf = (v, key) => edits[v.id]?.[key] ?? original(v, key);
+  const setCell = (prev, v, key, value) => {
+    const next = { ...prev, [v.id]: { ...prev[v.id] } };
+    if (value === original(v, key)) delete next[v.id][key];
+    else next[v.id][key] = value;
+    if (!Object.keys(next[v.id]).length) delete next[v.id];
+    return next;
+  };
+  const changedCount = Object.values(edits).reduce((n, row) => n + Object.keys(row).length, 0);
+  const problems = [];
+  rows.forEach((v) =>
+    Object.entries(edits[v.id] || {}).forEach(([key, value]) => {
+      const message = bulkError(key, value);
+      if (message) problems.push({ id: v.id, key, message: `${variantName(v, options)}: ${message}` });
+    })
+  );
+
+  const inRange = (r, c) => {
+    if (!range) return false;
+    const [r1, c1] = range.anchor;
+    const [r2, c2] = range.focus;
+    return r >= Math.min(r1, r2) && r <= Math.max(r1, r2) && c >= Math.min(c1, c2) && c <= Math.max(c1, c2);
+  };
+  const focusCell = (r, c) => document.querySelector(`[data-bulk-cell="${r}-${c}"]`)?.focus();
+
+  const fillDown = () => {
+    if (!range) return;
+    const [r1, c1] = range.anchor;
+    const [r2, c2] = range.focus;
+    const top = Math.min(r1, r2);
+    setEdits((prev) => {
+      let next = prev;
+      for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c += 1) {
+        const key = shownColumns[c].key;
+        const value = valueOf(rows[top], key);
+        for (let r = top + 1; r <= Math.max(r1, r2); r += 1) next = setCell(next, rows[r], key, value);
+      }
+      return next;
+    });
+  };
+
+  const paste = (e, r, c) => {
+    const text = e.clipboardData.getData("text");
+    if (!/[\t\n]/.test(text.trim())) return; // one value: the input handles it
+    e.preventDefault();
+    const grid = text.replace(/\r/g, "").replace(/\n$/, "").split("\n").map((line) => line.split("\t"));
+    setEdits((prev) => {
+      let next = prev;
+      grid.forEach((line, dr) =>
+        line.forEach((value, dc) => {
+          const v = rows[r + dr];
+          const col = shownColumns[c + dc];
+          if (v && col) next = setCell(next, v, col.key, value.trim());
+        })
+      );
+      return next;
+    });
+  };
+
+  const close = () => {
+    if (saving) return;
+    if (!changedCount || window.confirm("Discard your bulk edits?")) onClose();
+  };
+
+  // Saves only the edited fields, one variant at a time; failed rows keep their edits
+  const save = async () => {
+    if (saving || !changedCount || problems.length) return;
+    setSaving(true);
+    const saved = [];
+    const failed = [];
+    let stockSaved = false;
+    for (const v of rows) {
+      const rowEdits = edits[v.id];
+      if (!rowEdits) continue;
+      const body = {};
+      Object.entries(rowEdits).forEach(([key, value]) => {
+        if (key === "stock") return;
+        if (key === "compare_at_price") body[key] = value === "" ? null : value;
+        else if (key === "weight") body[key] = value === "" ? "0" : value;
+        else body[key] = key === "sku" ? value.trim() : value;
+      });
+      let message = "";
+      if (Object.keys(body).length) {
+        const res = await apiPatch(`/api/v1/catalog/variants/${v.id}/`, body);
+        if (!res.ok) message = res.formError || Object.values(res.fieldErrors || {})[0] || res.error;
+      }
+      if (!message && "stock" in rowEdits && rowEdits.stock !== "") {
+        const res = await apiPost("/api/v1/inventory/items/set/", {
+          variant: v.id, location, available: Number(rowEdits.stock), reason: "correction",
+        });
+        if (res.ok) stockSaved = true;
+        else message = `Price and details saved; stock failed: ${res.error}`;
+      }
+      if (message) failed.push({ id: v.id, name: variantName(v, options), message });
+      else saved.push(v.id);
+    }
+    setEdits((prev) => Object.fromEntries(Object.entries(prev).filter(([id]) => !saved.includes(id))));
+    setSaving(false);
+    setResult({ saved: saved.length, failed });
+    await onSaved({ stock: stockSaved, closing: !failed.length, count: saved.length });
+  };
+
+  return (
+    <Modal
+      title={`Bulk edit ${rows.length} variant${rows.length === 1 ? "" : "s"}`}
+      onClose={close}
+      wide
+      footer={
+        <>
+          <span className="mr-auto text-xs text-slate-500">
+            {changedCount ? `${changedCount} changed cell${changedCount === 1 ? "" : "s"}` : "No changes yet"}
+          </span>
+          <button type="button" onClick={close} disabled={saving} className={ghostButton}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving || !changedCount || problems.length > 0}
+            className={primaryButton}
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
+        </>
+      }
+    >
+      <div className="mb-3 flex flex-wrap items-center gap-3 text-xs">
+        <span className="font-semibold text-slate-700">Columns:</span>
+        {available.map((c) => (
+          <label key={c.key} className="flex items-center gap-1.5">
+            <input
+              type="checkbox"
+              checked={columns.includes(c.key)}
+              onChange={(e) =>
+                setColumns((prev) => (e.target.checked ? [...prev, c.key] : prev.filter((k) => k !== c.key)))
+              }
+              className="h-3.5 w-3.5 accent-charcoal-navy"
+            />
+            {c.key === "stock" ? `Available at ${locationName}` : c.label}
+          </label>
+        ))}
+        <button type="button" onClick={fillDown} disabled={!range} className={`${outlineButton} ml-auto`}>
+          Fill down (Ctrl+D)
+        </button>
+      </div>
+      {!stockColumn && (
+        <p className="mb-2 text-xs text-slate-500">
+          {canSetStock
+            ? "Choose a specific location above the table to edit stock here."
+            : "Your role can't change stock."}
+        </p>
+      )}
+      <p className="mb-2 text-xs text-slate-500">
+        Tab moves right, Enter moves down. Shift+click or drag to select cells, then Fill down. Paste rows copied
+        from a spreadsheet.
+      </p>
+      <div className="overflow-x-auto rounded-lg border border-slate-200" onMouseUp={() => setMouseDown(false)}>
+        <table className="min-w-full text-sm">
+          <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
+            <tr>
+              <th className="px-3 py-2">Variant</th>
+              {shownColumns.map((c) => (
+                <th key={c.key} className="px-2 py-2">
+                  {c.key === "stock" ? `Available at ${locationName}` : c.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((v, r) => (
+              <tr key={v.id} className="border-t border-slate-100">
+                <td className="whitespace-nowrap px-3 py-1.5 text-slate-700">{variantName(v, options)}</td>
+                {shownColumns.map((col, c) => {
+                  const value = valueOf(v, col.key);
+                  const edited = edits[v.id] && col.key in edits[v.id];
+                  const message = edited ? bulkError(col.key, value) : "";
+                  return (
+                    <td key={col.key} className={`px-1.5 py-1 ${inRange(r, c) ? "bg-blue-50" : ""}`}>
+                      <div className="relative">
+                        <input
+                          data-bulk-cell={`${r}-${c}`}
+                          value={value}
+                          aria-label={`${col.label} for ${variantName(v, options)}`}
+                          aria-invalid={Boolean(message)}
+                          title={message || undefined}
+                          placeholder={col.key === "stock" ? "Not stocked" : ""}
+                          onChange={(e) => setEdits((prev) => setCell(prev, v, col.key, e.target.value))}
+                          onMouseDown={(e) => {
+                            setMouseDown(true);
+                            setRange((prev) =>
+                              e.shiftKey && prev ? { ...prev, focus: [r, c] } : { anchor: [r, c], focus: [r, c] }
+                            );
+                          }}
+                          onMouseEnter={() => mouseDown && setRange((prev) => prev && { ...prev, focus: [r, c] })}
+                          onFocus={() => !mouseDown && setRange((prev) => (prev && inRange(r, c) ? prev : { anchor: [r, c], focus: [r, c] }))}
+                          onPaste={(e) => paste(e, r, c)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              focusCell(r + (e.shiftKey ? -1 : 1), c);
+                            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
+                              e.preventDefault();
+                              fillDown();
+                            }
+                          }}
+                          className={`${cellInput} min-w-24 ${edited ? "border-amber-400 bg-amber-50" : ""} ${message ? "border-red-500" : ""}`}
+                        />
+                        {edited && (
+                          <span aria-hidden className="absolute right-1 top-0.5 text-[10px] text-amber-600">
+                            ●
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {problems.length > 0 && (
+        <ul role="alert" className="mt-3 list-disc space-y-0.5 pl-5 text-xs text-red-600">
+          {problems.map((p) => (
+            <li key={`${p.id}-${p.key}`}>{p.message}</li>
+          ))}
+        </ul>
+      )}
+      {result && (
+        <div role="status" className="mt-3 text-sm">
+          <p className="text-emerald-700">
+            {result.saved} variant{result.saved === 1 ? "" : "s"} saved.
+          </p>
+          {result.failed.length > 0 && (
+            <>
+              <p className="mt-1 font-semibold text-red-700">
+                {result.failed.length} failed. Their edits are kept so you can fix them and save again:
+              </p>
+              <ul className="list-disc pl-5 text-red-700">
+                {result.failed.map((f) => (
+                  <li key={f.id}>
+                    {f.name}: {f.message}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+function VariantsSection({
+  productId,
+  productTitle,
+  options,
+  variants,
+  locations,
+  canEdit,
+  canSeeStock,
+  canSetStock,
+  stockVersion,
+  onSaved,
+  onDirtyChange,
+}) {
+  const [items, setItems] = useState([]);
+  const [stockState, setStockState] = useState(canSeeStock ? "loading" : "hidden");
+  const [stockError, setStockError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [location, setLocation] = useState("all");
+  const [search, setSearch] = useState("");
+  const [optionFilters, setOptionFilters] = useState({});
+  const [stockFilter, setStockFilter] = useState("");
+  const [groupBy, setGroupBy] = useState("");
+  const [expanded, setExpanded] = useState({});
+  const [selected, setSelected] = useState([]);
+  const [priceDrafts, setPriceDrafts] = useState({}); // { [variantId]: "12.50" }
+  const [stockDrafts, setStockDrafts] = useState({}); // { "variantId|locationId": "5" }
+  const [groupPrices, setGroupPrices] = useState({}); // what was typed in each group's price box
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState(null); // { kind: "success" | "error", text, failed? }
+  const [modal, setModal] = useState(null); // { type: "options" | "variant" | "bulk" | "delete" | "image", ... }
+
+  useEffect(() => {
+    if (!canSeeStock || !productId) return undefined;
+    let cancelled = false;
+    apiGet(`/api/v1/inventory/items/?product=${productId}`).then((res) => {
+      if (cancelled) return;
+      if (res.ok) {
+        setItems(listOf(res));
+        setStockState("ready");
+      } else {
+        setStockError(res.error || "Stock couldn't be loaded.");
+        setStockState("error");
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, canSeeStock, stockVersion, reloadKey]);
+
+  const draftCount = Object.keys(priceDrafts).length + Object.keys(stockDrafts).length;
+  useEffect(() => {
+    onDirtyChange(draftCount > 0);
+  }, [draftCount]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fresh variants and options from the server after any save
+  const refresh = async ({ stock } = {}) => {
+    if (stock) setReloadKey((n) => n + 1);
+    const res = await apiGet(`/api/v1/catalog/products/${productId}/`);
+    if (!res.ok) {
+      setNotice({ kind: "error", text: "Saved, but the list couldn't be refreshed. Reload the page to see it." });
+      return false;
+    }
+    const fresh = res.data.variants || [];
+    onSaved(fresh, res.data.options || []);
+    const ids = new Set(fresh.map((v) => v.id));
+    setSelected((prev) => prev.filter((id) => ids.has(id)));
+    return true;
+  };
+
+  if (!productId) {
+    return (
+      <Card title="Variants" hint="Options such as pack size or volume, each with its own price, SKU and stock.">
+        <p className="text-sm text-slate-500">Save the product first, then add options and variants here.</p>
+      </Card>
+    );
+  }
+
+  const locationName = location === "all" ? "all locations" : locations.find((l) => l.id === location)?.name || "";
+  const stockFor = (v) => stockOf(v, items, location);
+  const q = search.trim().toLowerCase();
+  const shown = variants.filter((v) => {
+    if (q && ![productTitle, variantName(v, options), v.sku, ...Object.values(v.options || {})]
+      .some((text) => (text || "").toLowerCase().includes(q))) return false;
+    for (const [name, value] of Object.entries(optionFilters)) if (value && v.options?.[name] !== value) return false;
+    if (stockFilter && stockState === "ready" && stockStatus(stockFor(v)) !== stockFilter) return false;
+    return true;
+  });
+  const shownIds = shown.map((v) => v.id);
+  const allShownSelected = shown.length > 0 && shownIds.every((id) => selected.includes(id));
+  const someShownSelected = shownIds.some((id) => selected.includes(id));
+  const toggleIds = (ids, on) =>
+    setSelected((prev) => (on ? [...new Set([...prev, ...ids])] : prev.filter((id) => !ids.includes(id))));
+  const selectedVariants = variants.filter((v) => selected.includes(v.id));
+
+  const activeFilters = [
+    q && { key: "search", label: `Search: "${search.trim()}"`, clear: () => setSearch("") },
+    ...Object.entries(optionFilters)
+      .filter(([, value]) => value)
+      .map(([name, value]) => ({
+        key: `opt-${name}`,
+        label: `${name}: ${value}`,
+        clear: () => setOptionFilters((prev) => ({ ...prev, [name]: "" })),
+      })),
+    location !== "all" && { key: "location", label: `Location: ${locationName}`, clear: () => setLocation("all") },
+    stockFilter && {
+      key: "stock",
+      label: STOCK_FILTERS.find((f) => f.value === stockFilter)?.label,
+      clear: () => setStockFilter(""),
+    },
+  ].filter(Boolean);
+  const clearFilters = () => {
+    setSearch("");
+    setOptionFilters({});
+    setLocation("all");
+    setStockFilter("");
+  };
+
+  const setPriceDraft = (v, value) =>
+    setPriceDrafts((prev) => {
+      const next = { ...prev };
+      if (value === v.price) delete next[v.id];
+      else next[v.id] = value;
+      return next;
+    });
+  const setStockDraft = (v, value) =>
+    setStockDrafts((prev) => {
+      const key = `${v.id}|${location}`;
+      const saved = items.find((i) => i.variant === v.id && i.location === location);
+      const next = { ...prev };
+      if (value === (saved ? String(saved.available) : "")) delete next[key];
+      else next[key] = value;
+      return next;
+    });
+  const draftProblems = [
+    ...Object.entries(priceDrafts)
+      .filter(([, value]) => !isMoney(value))
+      .map(([id]) => `${variantName(variants.find((v) => v.id === id) || {}, options)}: enter a price, like 12.50.`),
+    ...Object.entries(stockDrafts)
+      .filter(([, value]) => !isWhole(value))
+      .map(([key]) => `${variantName(variants.find((v) => v.id === key.split("|")[0]) || {}, options)}: stock must be a whole number.`),
+  ];
+
+  const discardDrafts = () => {
+    if (window.confirm(`Discard ${draftCount} unsaved change${draftCount === 1 ? "" : "s"}?`)) {
+      setPriceDrafts({});
+      setStockDrafts({});
+      setGroupPrices({});
+      setNotice(null);
+    }
+  };
+
+  // Inline edits: each price on its own variant, each stock count through the inventory API
+  const saveDrafts = async () => {
+    if (saving || !draftCount || draftProblems.length) return;
+    setSaving(true);
+    setNotice(null);
+    const failed = [];
+    let savedCount = 0;
+    let stockSaved = false;
+    const keptPrices = {};
+    const keptStock = {};
+    for (const [id, value] of Object.entries(priceDrafts)) {
+      const res = await apiPatch(`/api/v1/catalog/variants/${id}/`, { price: value });
+      if (res.ok) savedCount += 1;
+      else {
+        keptPrices[id] = value;
+        failed.push(`${variantName(variants.find((v) => v.id === id) || {}, options)} price: ${res.formError || Object.values(res.fieldErrors || {})[0] || res.error}`);
+      }
+    }
+    for (const [key, value] of Object.entries(stockDrafts)) {
+      const [variant, loc] = key.split("|");
+      const res = await apiPost("/api/v1/inventory/items/set/", {
+        variant, location: loc, available: Number(value), reason: "correction",
+      });
+      if (res.ok) {
+        savedCount += 1;
+        stockSaved = true;
+      } else {
+        keptStock[key] = value;
+        failed.push(`${variantName(variants.find((v) => v.id === variant) || {}, options)} stock: ${res.error}`);
+      }
+    }
+    setPriceDrafts(keptPrices);
+    setStockDrafts(keptStock);
+    setGroupPrices({});
+    await refresh({ stock: stockSaved });
+    setSaving(false);
+    setNotice(
+      failed.length
+        ? { kind: "error", text: `${savedCount} saved, ${failed.length} failed. The failed edits are kept.`, failed }
+        : { kind: "success", text: `Saved ${savedCount} change${savedCount === 1 ? "" : "s"}.` }
+    );
+  };
+
+  const deleteSelected = async () => {
+    const targets = selectedVariants;
+    setModal({ type: "delete", busy: true });
+    const failed = [];
+    for (const v of targets) {
+      const res = await apiDelete(`/api/v1/catalog/variants/${v.id}/`);
+      if (!res.ok) failed.push(`${variantName(v, options)}: ${res.error}`);
+    }
+    setModal(null);
+    await refresh({ stock: true });
+    setNotice(
+      failed.length
+        ? { kind: "error", text: `${targets.length - failed.length} deleted, ${failed.length} not deleted.`, failed }
+        : { kind: "success", text: `Deleted ${targets.length} variant${targets.length === 1 ? "" : "s"}.` }
+    );
+  };
+
+  const stop = (e) => e.stopPropagation();
+  const openEditor = (v) => canEdit && setModal({ type: "variant", id: v.id });
+
+  const priceCell = (v) => {
+    const value = priceDrafts[v.id] ?? v.price;
+    const edited = v.id in priceDrafts;
+    const bad = edited && !isMoney(value);
+    return (
+      <div className="relative w-28" onClick={stop}>
+        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+        <input
+          value={value}
+          onChange={(e) => setPriceDraft(v, e.target.value)}
+          onBlur={() => edited && isMoney(value) && setPriceDraft(v, Number(value).toFixed(2))}
+          inputMode="decimal"
+          aria-label={`Price for ${variantName(v, options)} in AUD`}
+          aria-invalid={bad}
+          title={bad ? "Enter a price, like 12.50." : undefined}
+          className={`${cellInput} pl-6 ${edited ? "border-amber-400 bg-amber-50" : ""} ${bad ? "border-red-500" : ""}`}
+        />
+      </div>
+    );
+  };
+
+  const stockCell = (v) => {
+    if (!canSeeStock) return <span className="text-slate-400">—</span>;
+    if (stockState === "loading") return <span className="text-xs text-slate-400">Loading...</span>;
+    if (stockState === "error") return <span className="text-xs text-red-600">Unavailable</span>;
+    const stock = stockFor(v);
+    const key = `${v.id}|${location}`;
+    const label = !stock.tracked ? "Not tracked" : stock.available == null ? "Not stocked" : String(stock.available);
+    if (location === "all" || !canSetStock || !canEdit) {
+      return (
+        <span className={stock.tracked && stock.available != null ? "text-slate-900" : "text-slate-500"}>
+          {label}
+          {stock.tracked && stock.available < 0 && <span className="ml-1 text-xs text-red-700">(oversold)</span>}
+        </span>
+      );
+    }
+    const edited = key in stockDrafts;
+    const value = stockDrafts[key] ?? (stock.available == null ? "" : String(stock.available));
+    return (
+      <div onClick={stop} className="w-24">
+        <input
+          value={value}
+          onChange={(e) => setStockDraft(v, e.target.value)}
+          placeholder={stock.tracked ? "Not stocked" : "Not tracked"}
+          inputMode="numeric"
+          aria-label={`Available at ${locationName} for ${variantName(v, options)}`}
+          className={`${cellInput} ${edited ? "border-amber-400 bg-amber-50" : ""} ${edited && !isWhole(value) ? "border-red-500" : ""}`}
+        />
+      </div>
+    );
+  };
+
+  const imageButton = (count, label) => (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (canEdit) setModal({ type: "image", count });
+      }}
+      aria-label={label}
+      className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-slate-500"
+    >
+      <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+        <rect x="3" y="4" width="14" height="12" rx="2" />
+        <path d="M3 13l4-4 3 3 2-2 5 5" />
+      </svg>
+    </button>
+  );
+
+  const row = (v, indent) => (
+    <tr
+      key={v.id}
+      onClick={() => openEditor(v)}
+      className={`border-t border-slate-100 ${canEdit ? "cursor-pointer hover:bg-slate-50" : ""}`}
+    >
+      <td className={`py-2 pr-2 ${indent ? "pl-10" : "pl-4"}`} onClick={stop}>
+        <TriCheckbox
+          checked={selected.includes(v.id)}
+          onChange={(e) => toggleIds([v.id], e.target.checked)}
+          label={`Select ${variantName(v, options)}`}
+        />
+      </td>
+      <td className="px-2 py-2">{imageButton(1, `Image for ${variantName(v, options)}`)}</td>
+      <td className="px-2 py-2">
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditor(v);
+            }}
+            className="text-left text-sm font-medium text-slate-900 hover:underline"
+          >
+            {variantName(v, options)}
+          </button>
+        ) : (
+          <span className="text-sm font-medium text-slate-900">{variantName(v, options)}</span>
+        )}
+        <span className="block text-xs text-slate-500">{v.sku ? `SKU ${v.sku}` : "No SKU"}</span>
+      </td>
+      <td className="px-2 py-2">{priceCell(v)}</td>
+      <td className="px-2 py-2">{stockCell(v)}</td>
+      <td className="px-2 py-2 text-xs text-slate-400" onClick={stop}>
+        {notYet}
+      </td>
+    </tr>
+  );
+
+  const groups =
+    groupBy && options.length > 1
+      ? (options.find((o) => o.name === groupBy)?.values || [])
+          .map((value) => ({ value, rows: shown.filter((v) => v.options?.[groupBy] === value) }))
+          .filter((g) => g.rows.length)
+      : null;
+
+  const groupRow = (g) => {
+    const ids = g.rows.map((v) => v.id);
+    const open = expanded[g.value];
+    const prices = g.rows.map((v) => Number(priceDrafts[v.id] ?? v.price));
+    const low = Math.min(...prices);
+    const high = Math.max(...prices);
+    const tracked = g.rows.filter((v) => stockFor(v).tracked);
+    const total = tracked.reduce((n, v) => n + (stockFor(v).available || 0), 0);
+    return (
+      <tr key={`group-${g.value}`} className="border-t border-slate-200 bg-slate-50/60">
+        <td className="py-2 pl-4 pr-2">
+          <TriCheckbox
+            checked={ids.every((id) => selected.includes(id))}
+            indeterminate={ids.some((id) => selected.includes(id))}
+            onChange={(e) => toggleIds(ids, e.target.checked)}
+            label={`Select all ${g.rows.length} ${g.value} variants`}
+          />
+        </td>
+        <td className="px-2 py-2">{imageButton(g.rows.length, `Image for the ${g.rows.length} ${g.value} variants`)}</td>
+        <td className="px-2 py-2">
+          <button
+            type="button"
+            onClick={() => setExpanded((prev) => ({ ...prev, [g.value]: !open }))}
+            aria-expanded={Boolean(open)}
+            className="flex items-center gap-1.5 text-left text-sm font-semibold text-slate-900"
+          >
+            <span aria-hidden>{open ? "▾" : "▸"}</span>
+            {g.value}
+          </button>
+          <span className="block pl-4 text-xs text-slate-500">
+            {g.rows.length} variant{g.rows.length === 1 ? "" : "s"}
+          </span>
+        </td>
+        <td className="px-2 py-2">
+          <div className="relative w-28">
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">$</span>
+            <input
+              value={groupPrices[g.value] ?? ""}
+              placeholder={low === high ? low.toFixed(2) : `${low.toFixed(2)}–${high.toFixed(2)}`}
+              onChange={(e) => {
+                const value = e.target.value;
+                setGroupPrices((prev) => ({ ...prev, [g.value]: value }));
+                g.rows.forEach((v) => setPriceDraft(v, value));
+              }}
+              inputMode="decimal"
+              aria-label={`Price for all ${g.rows.length} ${g.value} variants`}
+              aria-describedby={`group-help-${g.value}`}
+              className={`${cellInput} pl-6`}
+            />
+          </div>
+          <span id={`group-help-${g.value}`} className="mt-0.5 block text-[11px] text-slate-500">
+            Applies to {g.rows.length} variant{g.rows.length === 1 ? "" : "s"}
+          </span>
+        </td>
+        <td className="px-2 py-2 text-sm text-slate-700">
+          {!canSeeStock || stockState !== "ready" ? "—" : tracked.length ? total : "Not tracked"}
+          <span className="block text-[11px] text-slate-500">Total, read-only</span>
+        </td>
+        <td className="px-2 py-2 text-xs text-slate-400">{notYet}</td>
+      </tr>
+    );
+  };
+
+  const totals = shown.filter((v) => stockFor(v).tracked);
+  const totalAvailable = totals.reduce((n, v) => n + (stockFor(v).available || 0), 0);
+  const untrackedCount = shown.length - totals.length;
+  const selectClass =
+    "h-9 rounded-lg border border-slate-300 bg-white px-2.5 text-sm text-slate-800 outline-none focus:border-charcoal-navy";
+
+  return (
+    <Card
+      title="Variants"
+      hint="Options such as pack size or volume, each with its own price, SKU and stock. Each variant keeps its own stock."
+      action={
+        canEdit && (
+          <button type="button" onClick={() => setModal({ type: "variant", id: null })} className={outlineButton}>
+            + Add variant
+          </button>
+        )
+      }
+    >
+      {/* Options */}
+      <div className="rounded-xl border border-slate-200">
+        {options.length ? (
+          options.map((o) => (
+            <div key={o.name} className="border-b border-slate-200 px-4 py-3 last:border-b-0">
+              <p className="text-sm font-semibold text-slate-900">{o.name}</p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {o.values.map((value) => (
+                  <span key={value} className="rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-800">
+                    {value}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="px-4 py-3 text-sm text-slate-500">
+            No options yet. Add one, such as Pack size (Single, 4-pack, Case) or Volume (375ML, 700ML).
+          </p>
+        )}
+        {canEdit && (
+          <div className="flex flex-wrap gap-3 border-t border-slate-200 px-4 py-2.5">
+            {options.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setModal({ type: "options" })}
+                className="text-sm font-semibold text-charcoal-navy hover:underline"
+              >
+                Edit options
+              </button>
+            )}
+            {options.length < MAX_PRODUCT_OPTIONS && (
+              <button
+                type="button"
+                onClick={() => setModal({ type: "options", add: true })}
+                className="text-sm font-semibold text-charcoal-navy hover:underline"
+              >
+                + Add {options.length ? "another option" : "options like size or colour"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Toolbar */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, option value or SKU"
+          aria-label="Search variants"
+          className={`${selectClass} min-w-48 flex-1`}
+        />
+        {options.map((o) => (
+          <select
+            key={o.name}
+            value={optionFilters[o.name] || ""}
+            onChange={(e) => setOptionFilters((prev) => ({ ...prev, [o.name]: e.target.value }))}
+            aria-label={`Filter by ${o.name}`}
+            className={selectClass}
+          >
+            <option value="">Any {o.name}</option>
+            {o.values.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        ))}
+        {canSeeStock && (
+          <>
+            <select
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              aria-label="Location for stock"
+              className={selectClass}
+            >
+              <option value="all">All locations</option>
+              {locations.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={stockFilter}
+              onChange={(e) => setStockFilter(e.target.value)}
+              aria-label="Filter by stock status"
+              className={selectClass}
+            >
+              <option value="">Any stock status</option>
+              {STOCK_FILTERS.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+        {options.length > 1 && (
+          <select
+            value={groupBy}
+            onChange={(e) => setGroupBy(e.target.value)}
+            aria-label="Group variants by"
+            className={selectClass}
+          >
+            <option value="">No grouping</option>
+            {options.map((o) => (
+              <option key={o.name} value={o.name}>
+                Group by {o.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+      {activeFilters.length > 0 && (
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          {activeFilters.map((f) => (
+            <span key={f.key} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-700">
+              {f.label}
+              <button type="button" onClick={f.clear} aria-label={`Remove filter ${f.label}`} className="text-slate-500 hover:text-slate-900">
+                ×
+              </button>
+            </span>
+          ))}
+          <button type="button" onClick={clearFilters} className="text-xs font-semibold text-charcoal-navy hover:underline">
+            Clear filters
+          </button>
+        </div>
+      )}
+      {canSeeStock && location === "all" && canSetStock && canEdit && (
+        <p className="mt-2 text-xs text-slate-500">Choose a location to edit stock in the table.</p>
+      )}
+      {stockState === "error" && <p className="mt-2 text-xs text-red-600">{stockError}</p>}
+
+      {/* Selection bar */}
+      {selected.length > 0 && canEdit && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white">
+          <span className="font-semibold">{selected.length} selected</span>
+          <button type="button" onClick={() => setModal({ type: "bulk" })} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold hover:bg-white/20">
+            Bulk edit
+          </button>
+          <button type="button" disabled title={`Per-variant publishing: ${notYet.toLowerCase()}`} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold opacity-50">
+            Manage publishing ({notYet})
+          </button>
+          <button type="button" onClick={() => setModal({ type: "delete" })} className="rounded-full bg-red-500/80 px-3 py-1 text-xs font-semibold hover:bg-red-500">
+            Delete variants
+          </button>
+          <button type="button" onClick={() => setSelected([])} className="ml-auto text-xs font-semibold text-white/80 hover:text-white">
+            Clear selection
+          </button>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200">
+        <table className="min-w-full text-sm">
+          <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
+            <tr>
+              <th className="py-2 pl-4 pr-2">
+                <TriCheckbox
+                  checked={allShownSelected}
+                  indeterminate={someShownSelected}
+                  onChange={(e) => toggleIds(shownIds, e.target.checked)}
+                  label={`Select all ${shown.length} shown variants`}
+                />
+              </th>
+              <th className="px-2 py-2">Image</th>
+              <th className="px-2 py-2">Variant</th>
+              <th className="px-2 py-2">Price (AUD)</th>
+              <th className="px-2 py-2">Available{location === "all" ? "" : ` at ${locationName}`}</th>
+              <th className="px-2 py-2">Publishing</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groups
+              ? groups.flatMap((g) => [groupRow(g), ...(expanded[g.value] ? g.rows.map((v) => row(v, true)) : [])])
+              : shown.map((v) => row(v, false))}
+          </tbody>
+        </table>
+        {!variants.length && <p className="px-4 py-6 text-center text-sm text-slate-500">This product has no variants.</p>}
+        {variants.length > 0 && !shown.length && (
+          <div className="px-4 py-6 text-center text-sm text-slate-500">
+            No variants match these filters.{" "}
+            <button type="button" onClick={clearFilters} className="font-semibold text-charcoal-navy hover:underline">
+              Clear filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Unsaved inline edits */}
+      {draftCount > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm">
+          <span className="font-medium text-amber-900">
+            ● {draftCount} unsaved change{draftCount === 1 ? "" : "s"} in the table
+          </span>
+          <button type="button" onClick={discardDrafts} disabled={saving} className={`${ghostButton} ml-auto h-8`}>
+            Discard
+          </button>
+          <button type="button" onClick={saveDrafts} disabled={saving || draftProblems.length > 0} className={`${primaryButton} h-8`}>
+            {saving ? "Saving..." : "Save table changes"}
+          </button>
+          {draftProblems.length > 0 && (
+            <ul role="alert" className="w-full list-disc pl-5 text-xs text-red-600">
+              {draftProblems.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      {notice && (
+        <div
+          role="status"
+          className={`mt-3 rounded-xl border px-3 py-2 text-sm ${notice.kind === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}
+        >
+          {notice.text}
+          {notice.failed && (
+            <ul className="mt-1 list-disc pl-5 text-xs">
+              {notice.failed.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Footer */}
+      {canSeeStock && (
+        <p className="mt-3 border-t border-slate-200 pt-3 text-sm text-slate-700">
+          {stockState === "ready" ? (
+            <>
+              Total inventory at {locationName}: <span className="font-semibold">{totalAvailable} available</span>{" "}
+              <span className="text-xs text-slate-500">
+                ({shown.length === variants.length ? "all variants" : `${shown.length} filtered variants`}
+                {untrackedCount ? `; ${untrackedCount} not tracked` : ""}. Saved stock only.)
+              </span>
+            </>
+          ) : stockState === "loading" ? (
+            "Loading stock..."
+          ) : (
+            "Total inventory: Unavailable"
+          )}
+        </p>
+      )}
+
+      {modal?.type === "options" && (
+        <OptionsEditor
+          productId={productId}
+          options={options}
+          variants={variants}
+          startWithNew={Boolean(modal.add)}
+          onClose={() => setModal(null)}
+          onApplied={async () => {
+            setModal(null);
+            await refresh({ stock: true });
+            setNotice({ kind: "success", text: "Options and variants saved." });
+          }}
+        />
+      )}
+      {modal?.type === "variant" && (
+        <VariantEditor
+          productId={productId}
+          variant={variants.find((v) => v.id === modal.id) || null}
+          options={options}
+          variants={variants}
+          locations={locations}
+          items={items}
+          canSeeStock={canSeeStock}
+          canSetStock={canSetStock}
+          onClose={() => setModal(null)}
+          onSaved={async ({ keepOpen }) => {
+            if (!keepOpen) setModal(null);
+            await refresh({ stock: true });
+            if (!keepOpen) setNotice({ kind: "success", text: modal.id ? "Variant saved." : "Variant added." });
+          }}
+        />
+      )}
+      {modal?.type === "bulk" && (
+        <BulkEditor
+          rows={selectedVariants}
+          options={options}
+          location={location}
+          locationName={locationName}
+          items={items}
+          canSetStock={canSetStock && canSeeStock}
+          onClose={() => setModal(null)}
+          onSaved={async ({ stock, closing, count }) => {
+            await refresh({ stock });
+            if (closing) {
+              setModal(null);
+              setNotice({ kind: "success", text: `Saved ${count} variant${count === 1 ? "" : "s"}.` });
+            }
+          }}
+        />
+      )}
+      {modal?.type === "delete" && (
+        <Modal
+          title={`Delete ${selectedVariants.length} variant${selectedVariants.length === 1 ? "" : "s"}?`}
+          onClose={() => !modal.busy && setModal(null)}
+          footer={
+            <>
+              <button type="button" onClick={() => setModal(null)} disabled={modal.busy} className={ghostButton}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={deleteSelected}
+                disabled={modal.busy || selectedVariants.length >= variants.length}
+                className="h-9 rounded-full bg-red-600 px-5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {modal.busy ? "Deleting..." : `Delete ${selectedVariants.length}`}
+              </button>
+            </>
+          }
+        >
+          <p className="text-sm text-slate-700">These variants will be deleted. This can't be undone:</p>
+          <ul className="mt-2 max-h-48 list-disc overflow-y-auto pl-5 text-sm text-slate-800">
+            {selectedVariants.map((v) => (
+              <li key={v.id}>
+                {variantName(v, options)} {v.sku && <span className="text-xs text-slate-500">({v.sku})</span>}
+              </li>
+            ))}
+          </ul>
+          {selectedVariants.length >= variants.length && (
+            <p className="mt-2 text-sm text-red-600">A product needs at least one variant. Leave one unselected.</p>
+          )}
+          <p className="mt-2 text-xs text-slate-500">
+            Variants used by orders or with stock records can't be deleted; those are reported back.
+          </p>
+        </Modal>
+      )}
+      {modal?.type === "image" && (
+        <Modal
+          title="Variant image"
+          onClose={() => setModal(null)}
+          footer={
+            <button type="button" onClick={() => setModal(null)} className={ghostButton}>
+              Close
+            </button>
+          }
+        >
+          <p className="text-sm text-slate-700">
+            Variant images are not available yet.{" "}
+            {modal.count > 1 && `This would apply to ${modal.count} variants. `}
+            Product images are managed in Media above.
+          </p>
+        </Modal>
+      )}
+    </Card>
   );
 }
 
@@ -623,6 +2145,7 @@ export function ProductForm({ productId }) {
   const canDelete = can(session, "products.delete");
   const canSeeStock = can(session, "inventory.view");
   const canSetStock = can(session, "inventory.manage");
+  const canSeeSales = can(session, "reports.view");
 
   // 1 Basic info
   const [name, setName] = useState("");
@@ -663,6 +2186,41 @@ export function ProductForm({ productId }) {
   // 7 Sales channels (ids)
   const [channelIds, setChannelIds] = useState([]);
 
+  // Sidebar: channel modal, the shared "+" popover, known types/vendors and recent sales
+  const [channelsOpen, setChannelsOpen] = useState(false);
+  const [channelDraft, setChannelDraft] = useState([]);
+  const [adding, setAdding] = useState(null); // "type" | "vendor" | "collections" | "tags"
+  const [addBusy, setAddBusy] = useState(false);
+  const [addError, setAddError] = useState("");
+  const [knownTypes, setKnownTypes] = useState([]);
+  const [knownVendors, setKnownVendors] = useState([]);
+  const [sales, setSales] = useState(null);
+
+  // Types and vendors already used by the store's products, for the dropdowns
+  useEffect(() => {
+    let cancelled = false;
+    apiGet("/api/v1/catalog/products/").then((res) => {
+      if (cancelled || !res.ok) return;
+      setKnownTypes(uniqueText(listOf(res).map((p) => p.product_type)));
+      setKnownVendors(uniqueText(listOf(res).map((p) => p.vendor)));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Net sales of this product over the last 30 days, from the Reports API
+  useEffect(() => {
+    if (!editing || !canSeeSales) return undefined;
+    let cancelled = false;
+    apiGet(`/api/v1/reports/net-sales-by-product/?product=${productId}`).then((res) => {
+      if (!cancelled) setSales(res.ok ? res.data : { error: res.error || "Sales couldn't be loaded." });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // 8 Page layout
   const [pageLayout, setPageLayout] = useState("default");
 
@@ -695,7 +2253,14 @@ export function ProductForm({ productId }) {
 
   // Edit mode: the saved product's variants, its stock per location id, and its dates
   const [variants, setVariants] = useState([]);
+  // Edit mode: saved option names and value order, unsaved Variants edits, and a counter that reloads its stock
+  const [productOptions, setProductOptions] = useState([]);
+  const [variantsDirty, setVariantsDirty] = useState(false);
+  const [stockVersion, setStockVersion] = useState(0);
   const [stockByLocation, setStockByLocation] = useState({});
+  // Edit mode: the first variant's full stock levels per location id (on hand, committed...)
+  const [levels, setLevels] = useState({});
+  const [savedStatus, setSavedStatus] = useState("draft");
   const [dates, setDates] = useState({ createdAt: null, updatedAt: null });
   const [loading, setLoading] = useState(editing);
   const [loadError, setLoadError] = useState("");
@@ -727,18 +2292,20 @@ export function ProductForm({ productId }) {
           size: null,
         }))
     );
-    setPrice(first?.price ?? "");
-    setCompareAt(first?.compare_at_price ?? "");
-    setShowDisplayPrices(first?.compare_at_price != null && first.compare_at_price !== "");
+    const firstValues = firstFields(first);
+    setPrice(firstValues.price);
+    setCompareAt(firstValues.compareAt);
+    setShowDisplayPrices(firstValues.compareAt !== "");
     setIsTaxable(p.is_taxable ?? true);
-    setSku(first?.sku || "");
-    setWeight(first?.weight && Number(first.weight) > 0 ? first.weight : "");
+    setSku(firstValues.sku);
+    setWeight(firstValues.weight);
     setCategoryId(p.category_id || "");
     setProductType(p.product_type || "");
     setVendor(p.vendor || "");
     setCollections(p.collections || []);
     setTags(p.tags || []);
     setStatus(p.status || "draft");
+    setSavedStatus(p.status || "draft");
     setChannelIds(p.sales_channels || []);
     setPageLayout(p.theme_template || "default");
     setSeoTitle(p.seo_title || "");
@@ -746,6 +2313,7 @@ export function ProductForm({ productId }) {
     setExtra(Object.fromEntries(EXTRA_FIELDS.map((f) => [f.key, p[f.key] || ""])));
     setHandle(p.handle || slugify(p.title));
     setVariants(p.variants || []);
+    setProductOptions(p.options || []);
     setDates({ createdAt: p.createdAt, updatedAt: p.updatedAt });
   };
 
@@ -810,12 +2378,17 @@ export function ProductForm({ productId }) {
       // Stock of the product's first variant, per location; the form opens on the first stocked location
       const firstVariant = productRes.data.variants?.[0]?.id;
       const stock = {};
+      const stockLevels = {};
       listOf(stockRes)
         .filter((item) => item.variant === firstVariant)
-        .forEach((item) => (stock[item.location] = item.available));
+        .forEach((item) => {
+          stock[item.location] = item.available;
+          stockLevels[item.location] = item;
+        });
       if (!stockRes.ok) setError(`The stock couldn't be loaded: ${stockRes.error}`);
       const stockedLocation = Object.keys(stock)[0];
       setStockByLocation(stock);
+      setLevels(stockLevels);
       setLocationId(stockedLocation || locationList[0]?.id || "");
       setQuantity(stockedLocation ? String(stock[stockedLocation]) : "");
       setNeedsBaseline(true);
@@ -832,11 +2405,9 @@ export function ProductForm({ productId }) {
     name,
     about,
     photos.map((p) => p.id),
-    price,
-    compareAt,
+    // Edit mode compares these with the saved first variant instead (firstDirty), so Variants saves keep them in step
+    editing ? null : [price, compareAt, sku, weight],
     isTaxable,
-    sku,
-    weight,
     locationId,
     quantity,
     categoryId,
@@ -856,7 +2427,29 @@ export function ProductForm({ productId }) {
     setBaseline(snapshot);
     setNeedsBaseline(false);
   }
-  const dirty = baseline !== null && snapshot !== baseline;
+  const savedFirst = firstFields(variants[0]);
+  const firstDirty =
+    editing &&
+    Boolean(variants[0]) &&
+    (price !== savedFirst.price ||
+      compareAt !== savedFirst.compareAt ||
+      sku !== savedFirst.sku ||
+      weight !== savedFirst.weight);
+  const dirty = (baseline !== null && snapshot !== baseline) || firstDirty || variantsDirty;
+
+  // The Variants section saved: take its fresh variants, and refresh any first-variant field the user hasn't edited
+  const variantsSaved = (fresh, options) => {
+    const before = firstFields(variants[0]);
+    const after = firstFields(fresh[0]);
+    if (fresh[0] && variants[0] && fresh[0].id === variants[0].id) {
+      if (price === before.price) setPrice(after.price);
+      if (compareAt === before.compareAt) setCompareAt(after.compareAt);
+      if (sku === before.sku) setSku(after.sku);
+      if (weight === before.weight) setWeight(after.weight);
+    }
+    setVariants(fresh);
+    if (options) setProductOptions(options);
+  };
 
   // Warn before closing the tab with unsaved changes
   useEffect(() => {
@@ -868,6 +2461,12 @@ export function ProductForm({ productId }) {
 
   const categoryRows = useMemo(() => categoryOptions(categories), [categories]);
   const statusInfo = STATUSES.find((s) => s.value === status) || STATUSES[1];
+
+  // What a product needs before it can go Active
+  const missingForActive = [
+    price === "" && "A selling price",
+    photos.length === 0 && "At least one main image",
+  ].filter(Boolean);
 
   const leave = () => {
     if (!dirty || window.confirm("Leave without saving? Your changes will be lost.")) {
@@ -1051,6 +2650,10 @@ export function ProductForm({ productId }) {
       errors.quantity = "Enter a whole number of 0 or more.";
     }
     if (quantity !== "" && !locationId) errors.location = "Choose a location for this stock.";
+    // Only blocks going Active; an already Active product can still be saved
+    if (status === "active" && savedStatus !== "active" && missingForActive.length) {
+      errors.status = `Before making this product Active, add: ${missingForActive.join(", ").toLowerCase()}.`;
+    }
 
     if (Object.keys(errors).length) {
       fail("Please fix the highlighted fields.", errors);
@@ -1098,18 +2701,26 @@ export function ProductForm({ productId }) {
     if (!failedLists.includes("channels")) payload.sales_channels = channelIds;
 
     if (editing) {
-      // Price and SKU belong to the first variant; any other variants go back unchanged so none is lost
-      const [first, ...others] = variants;
-      payload.variants = [
-        {
-          ...(first && { id: first.id }),
+      // The price and SKU fields belong to the first variant. They're saved on that variant alone, and the
+      // product PATCH carries no variant list, so no other variant can be removed by this save
+      if (firstDirty) {
+        const firstRes = await apiPatch(`/api/v1/catalog/variants/${variants[0].id}/`, {
           sku: sku.trim(),
-          price: price === "" ? null : price,
+          ...(price !== "" && { price }),
           compare_at_price: compareAt === "" ? null : compareAt,
           weight: weight === "" ? "0" : weight,
-        },
-        ...others.map((v) => ({ id: v.id, sku: v.sku, price: v.price })),
-      ];
+        });
+        if (!firstRes.ok) {
+          const fe = firstRes.fieldErrors || {};
+          fail(firstRes.formError || Object.values(fe)[0] || "Please fix the highlighted fields.", {
+            sku: fe.sku,
+            price: fe.price,
+            compareAt: fe.compare_at_price,
+            weight: fe.weight,
+          });
+          return;
+        }
+      }
     } else {
       payload.price = price === "" ? null : price;
       payload.compare_at_price = compareAt === "" ? null : compareAt;
@@ -1138,13 +2749,31 @@ export function ProductForm({ productId }) {
     }
 
     fill(res.data);
-    if (stockChanged) setStockByLocation((prev) => ({ ...prev, [locationId]: Number(quantity) }));
+    if (stockChanged) {
+      // Reload the levels: the saved quantity may have created this location's first stock row
+      setStockByLocation((prev) => ({ ...prev, [locationId]: Number(quantity) }));
+      const stockRes = await apiGet(`/api/v1/inventory/items/?product=${productId}`);
+      if (stockRes.ok) {
+        const firstVariant = res.data.variants?.[0]?.id;
+        const stockLevels = {};
+        listOf(stockRes)
+          .filter((item) => item.variant === firstVariant)
+          .forEach((item) => (stockLevels[item.location] = item));
+        setLevels(stockLevels);
+      }
+      setStockVersion((n) => n + 1);
+    }
     setNeedsBaseline(true);
     setSavedMessage("Changes saved.");
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`Delete "${name.trim() || "this product"}"? This can't be undone.`)) return;
+    if (
+      !window.confirm(
+        `Delete "${name.trim() || "this product"}"? This can't be undone.\n\nTo hide it but keep its records, cancel and set its status to Archived instead.`
+      )
+    )
+      return;
     setDeleting(true);
     setError("");
     setSavedMessage("");
@@ -1196,6 +2825,361 @@ export function ProductForm({ productId }) {
     );
   }
 
+  // Right sidebar. Status also shows near the top on phones (statusSection("main"))
+  const statusSection = (key) => (
+    <div>
+      <label htmlFor={`status-${key}`} className="mb-2 block text-[15px] font-semibold text-slate-900">
+        Status
+      </label>
+      <ChevronSelect id={`status-${key}`} value={status} onChange={setStatus}>
+        {STATUSES.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </ChevronSelect>
+      <p className="mt-2 text-xs text-slate-500">{statusInfo.text}</p>
+      {status === "active" && missingForActive.length > 0 && (
+        <div
+          role="alert"
+          className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900"
+        >
+          <p className="font-semibold">⚠ Before this product can be Active, add:</p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-4">
+            {missingForActive.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <FieldError message={fieldErrors.status} />
+    </div>
+  );
+
+  const checkedChannels = displayedChannels.filter(isChannelChecked).length;
+  const channelSummary = !displayedChannels.length
+    ? "Channels not connected yet"
+    : checkedChannels === displayedChannels.length
+      ? "All channels"
+      : checkedChannels === 0
+        ? "No channels"
+        : `${checkedChannels} of ${displayedChannels.length} channels`;
+
+  const openChannels = () => {
+    setChannelDraft(displayedChannels.filter(isChannelChecked).map((c) => c.id));
+    setChannelsOpen(true);
+  };
+
+  // Done: apply the ticked channels. Only the channels change, never the status
+  const applyChannels = () => {
+    displayedChannels.forEach((ch) => {
+      if (channelDraft.includes(ch.id) !== isChannelChecked(ch)) toggleChannel(ch);
+    });
+    setChannelsOpen(false);
+  };
+
+  const closeAdding = () => {
+    setAdding(null);
+    setAddError("");
+  };
+
+  // A value picked or typed in the "+" popover. Type, vendor and tags save with the product;
+  // a new collection is created straight away, after the user confirms
+  const addValue = async (field, raw) => {
+    const value = raw.trim();
+    if (!value) return;
+    if (field === "type") {
+      setProductType(value);
+      setKnownTypes((prev) => uniqueText([...prev, value]));
+    } else if (field === "vendor") {
+      setVendor(value);
+      setKnownVendors((prev) => uniqueText([...prev, value]));
+    } else if (field === "tags") {
+      if (!tags.some((t) => sameText(t, value))) setTags([...tags, value]);
+    } else {
+      const existing = [...storeCollections, ...automatedCollections].find((c) => sameText(c, value));
+      if (existing) {
+        if (!automatedCollections.includes(existing) && !collections.some((c) => sameText(c, existing))) {
+          setCollections([...collections, existing]);
+        }
+      } else {
+        if (
+          !window.confirm(
+            `Create a new collection called "${value}"? It's created now, before you save the product. Collections don't apply discounts.`
+          )
+        )
+          return;
+        setAddBusy(true);
+        setAddError("");
+        const res = await apiPost("/api/v1/catalog/collections/", { name: value });
+        setAddBusy(false);
+        if (!res.ok) {
+          setAddError(res.error || "The collection couldn't be created.");
+          return;
+        }
+        const created = res.data?.name || value;
+        setStoreCollections((prev) => uniqueText([...prev, created]));
+        setCollections((prev) => [...prev, created]);
+      }
+    }
+    closeAdding();
+  };
+
+  // Label row with a "+" button that opens the shared search popover
+  const addRow = (field, label, options, selected) => (
+    <div className="relative mb-2 flex items-center justify-between">
+      <span className="text-[15px] font-semibold text-slate-900">{label}</span>
+      <CircleAddButton
+        label={`Add ${label.toLowerCase()}`}
+        onClick={() => (adding === field ? closeAdding() : setAdding(field))}
+      />
+      {adding === field && (
+        <AddValuePopover
+          title={label}
+          options={options}
+          selected={selected}
+          onPick={(value) => addValue(field, value)}
+          onClose={closeAdding}
+          busy={addBusy}
+          error={addError}
+        />
+      )}
+    </div>
+  );
+
+  const manualCollections = collections.filter((c) => !automatedCollections.includes(c));
+  const typeOptions = uniqueText([...knownTypes, productType]);
+  const vendorOptions = uniqueText([...knownVendors, vendor]);
+  const salesRow = sales?.rows?.[0];
+  const formatMoney = (value) =>
+    new Intl.NumberFormat("en-AU", { style: "currency", currency: sales?.currency_code || "AUD" }).format(
+      Number(value) || 0
+    );
+
+  const sidebar = (
+    <div className="rounded-[22px] border border-[#E7E4DC] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
+      <section className="hidden px-5 py-5 lg:block">{statusSection("side")}</section>
+
+      <section className="px-5 py-5 lg:border-t lg:border-slate-200">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[15px] font-semibold text-slate-900">Publishing</h2>
+          <button
+            type="button"
+            onClick={openChannels}
+            disabled={!displayedChannels.length}
+            aria-label="Manage sales channels"
+            title="Manage sales channels"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-40"
+          >
+            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <path d="M3 6h9M15 6h2M3 14h3M9 14h8" strokeLinecap="round" />
+              <circle cx="13.5" cy="6" r="1.8" />
+              <circle cx="7.5" cy="14" r="1.8" />
+            </svg>
+          </button>
+        </div>
+        {/* No issue-count badge: the backend doesn't report channel issues */}
+        <p className="flex items-center gap-2 text-sm font-medium text-slate-800">
+          <svg
+            viewBox="0 0 20 20"
+            className="h-4.5 w-4.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            aria-hidden="true"
+          >
+            <circle cx="10" cy="5" r="2.2" />
+            <circle cx="5" cy="14" r="2.2" />
+            <circle cx="15" cy="14" r="2.2" />
+            <path d="M9 7l-3 5M11 7l3 5M7.2 14h5.6" />
+          </svg>
+          {channelSummary}
+        </p>
+        <FieldError message={fieldErrors.sales_channels} />
+      </section>
+
+      <section className="border-t border-slate-200 px-5 py-5">
+        <h2 className="mb-2 text-[15px] font-semibold text-slate-900">Sales</h2>
+        {!editing ? (
+          <p className="text-sm text-slate-600">No recent sales of this product</p>
+        ) : !canSeeSales ? (
+          <p className="text-sm text-slate-500">Your role can't view sales.</p>
+        ) : sales === null ? (
+          <p className="text-sm text-slate-500">Loading sales...</p>
+        ) : sales.error ? (
+          <p className="text-sm text-red-600">{sales.error}</p>
+        ) : !salesRow || !Number(salesRow.units) ? (
+          <p className="text-sm text-slate-600">No recent sales of this product</p>
+        ) : (
+          <>
+            <p className="text-sm text-slate-800">
+              <span className="font-semibold">{salesRow.units}</span> units sold ·{" "}
+              <span className="font-semibold">{formatMoney(salesRow.net_sales)}</span> net sales
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              Last 30 days. Net sales = gross sales minus discounts.
+            </p>
+          </>
+        )}
+        {editing && canSeeSales && (
+          <Link
+            to="/admin/online-store/reports/net-sales-by-product"
+            className="mt-3 inline-block text-sm font-medium text-blue-700 hover:underline"
+          >
+            View details
+          </Link>
+        )}
+      </section>
+
+      <section className="space-y-5 border-t border-slate-200 px-5 py-5">
+        <h2 className="flex items-center gap-2 text-[15px] font-semibold text-slate-900">
+          Product organization
+          <span
+            tabIndex={0}
+            title="Type, vendor, collections and tags help staff and shoppers find and sort products. Being in a collection doesn't apply a discount."
+            aria-label="Type, vendor, collections and tags help staff and shoppers find and sort products. Being in a collection doesn't apply a discount."
+            className="inline-flex h-4.5 w-4.5 cursor-help items-center justify-center rounded-full border-[1.5px] border-slate-600 text-[10px] font-bold text-slate-700"
+          >
+            i
+          </span>
+        </h2>
+
+        <div>
+          <label
+            htmlFor="product-category"
+            className="mb-2 block text-[15px] font-semibold text-slate-900"
+          >
+            Category
+          </label>
+          <ChevronSelect id="product-category" value={categoryId} onChange={setCategoryId}>
+            <option value="">{categoryRows.length ? "No category" : "No categories yet"}</option>
+            {categoryRows.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.label}
+              </option>
+            ))}
+          </ChevronSelect>
+          <FieldError message={fieldErrors.category_id} />
+        </div>
+
+        <div>
+          {addRow("type", "Type", typeOptions, [])}
+          <ChevronSelect value={productType} onChange={setProductType} label="Type">
+            <option value="">No type</option>
+            {typeOptions.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </ChevronSelect>
+          <FieldError message={fieldErrors.product_type} />
+        </div>
+
+        <div>
+          {addRow("vendor", "Vendor", vendorOptions, [])}
+          <ChevronSelect value={vendor} onChange={setVendor} label="Vendor">
+            <option value="">No vendor</option>
+            {vendorOptions.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </ChevronSelect>
+          <FieldError message={fieldErrors.vendor} />
+        </div>
+
+        <div>
+          {addRow("collections", "Collections", storeCollections, collections)}
+          <ChipBox
+            values={manualCollections}
+            onRemove={(c) => setCollections(collections.filter((x) => x !== c))}
+            empty="No collections"
+          />
+          {collections.some((c) => automatedCollections.includes(c)) && (
+            <p className="mt-1.5 text-[12px] text-slate-500">
+              Also in, by their conditions:{" "}
+              {collections.filter((c) => automatedCollections.includes(c)).join(", ")}
+            </p>
+          )}
+          <FieldError message={fieldErrors.collections} />
+        </div>
+
+        <div>
+          {addRow("tags", "Tags", [], tags)}
+          <ChipBox
+            values={tags}
+            onRemove={(t) => setTags(tags.filter((x) => x !== t))}
+            empty="No tags"
+          />
+          <FieldError message={fieldErrors.tags} />
+        </div>
+      </section>
+
+      {channelsOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onMouseDown={(e) => e.target === e.currentTarget && setChannelsOpen(false)}
+          onKeyDown={(e) => e.key === "Escape" && setChannelsOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="channels-title"
+            className="w-full max-w-sm rounded-2xl bg-white shadow-xl"
+          >
+            <div className="border-b border-slate-200 px-5 py-4">
+              <h2 id="channels-title" className="text-base font-semibold text-slate-900">
+                Manage sales channels
+              </h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Choosing a channel doesn't change the product's status. A Draft product stays
+                hidden until it's Active.
+              </p>
+            </div>
+            <div className="space-y-1 px-5 py-3">
+              {displayedChannels.map((ch, i) => (
+                <label
+                  key={ch.id}
+                  className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-slate-50"
+                >
+                  <input
+                    type="checkbox"
+                    autoFocus={i === 0}
+                    checked={channelDraft.includes(ch.id)}
+                    onChange={(e) =>
+                      setChannelDraft((prev) =>
+                        e.target.checked ? [...prev, ch.id] : prev.filter((id) => id !== ch.id)
+                      )
+                    }
+                    className="h-4 w-4 accent-charcoal-navy"
+                  />
+                  {ch.name}
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-3">
+              <button
+                type="button"
+                onClick={() => setChannelsOpen(false)}
+                className="h-9 rounded-full px-4 text-sm font-medium text-slate-600 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={applyChannels}
+                className="h-9 rounded-full px-5 text-sm font-semibold text-white"
+                style={{ backgroundColor: NAVY }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <AdminHeader />
@@ -1223,6 +3207,11 @@ export function ProductForm({ productId }) {
                 >
                   {statusInfo.label}
                 </span>
+                {dirty && (
+                  <span className="hidden md:inline text-xs font-medium text-amber-700">
+                    ● Unsaved changes
+                  </span>
+                )}
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
@@ -1230,6 +3219,16 @@ export function ProductForm({ productId }) {
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                     View only
                   </span>
+                )}
+                {editing && canEdit && (
+                  <button
+                    type="button"
+                    onClick={leave}
+                    disabled={saving || deleting}
+                    className="h-9 rounded-full px-4 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
                 )}
                 {editing ? (
                   canDelete && (
@@ -1266,7 +3265,7 @@ export function ProductForm({ productId }) {
             </div>
           </div>
 
-          <div className="mx-auto max-w-240 px-3 py-8 sm:px-4">
+          <div className="mx-auto max-w-300 px-3 py-8 sm:px-4">
             <div className="mb-8">
               <h2 className="text-2xl font-bold tracking-tight text-charcoal-navy">
                 {!canEdit ? "Product details" : editing ? "Edit product" : "Add a new product"}
@@ -1296,7 +3295,8 @@ export function ProductForm({ productId }) {
 
             {/* View-only roles: every field and button inside is disabled */}
             <fieldset disabled={!canEdit} className="m-0 min-w-0 border-0 p-0">
-              <div className="space-y-6">
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                <div className="min-w-0 space-y-6">
                 {/* 1 BASIC INFO */}
                 <Card
                   title="Basic info"
@@ -1328,6 +3328,10 @@ export function ProductForm({ productId }) {
                     </Field>
                   </div>
                 </Card>
+
+                <div className="rounded-[22px] border border-[#E7E4DC] bg-white p-5 lg:hidden">
+                  {statusSection("main")}
+                </div>
 
                 {/* 2 MEDIA */}
                 <Card
@@ -1667,9 +3671,9 @@ export function ProductForm({ productId }) {
                 </Card>
 
                 {/* 3 PRICING */}
-                <Card title="Price">
+                <Card title="Pricing" hint="What customers pay, in Australian dollars (AUD).">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Field label="Price" error={fieldErrors.price}>
+                    <Field label="Selling price (AUD)" error={fieldErrors.price}>
                       <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
                     </Field>
                   </div>
@@ -1725,15 +3729,64 @@ export function ProductForm({ productId }) {
                       checked={isTaxable}
                       onChange={(e) => setIsTaxable(e.target.checked)}
                     />
-                    Charge tax on this product
+                    Charge GST on this product
                   </label>
+
+                  <div className="mt-5 border-t border-[#E7E4DC] pt-4">
+                    <p className="text-[13px] font-semibold text-charcoal-navy">
+                      Internal costs{" "}
+                      <span className="font-normal text-slate-500">(never shown to customers)</span>
+                    </p>
+                    <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      {["Cost per item", "Profit", "Margin"].map((label) => (
+                        <Field key={label} label={label}>
+                          <input
+                            disabled
+                            placeholder="Not available yet"
+                            className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400`}
+                          />
+                        </Field>
+                      ))}
+                    </div>
+                  </div>
                 </Card>
+
+                <VariantsSection
+                  productId={editing ? productId : null}
+                  productTitle={name}
+                  options={productOptions}
+                  variants={variants}
+                  locations={locations}
+                  canEdit={canEdit}
+                  canSeeStock={canSeeStock}
+                  canSetStock={canSetStock}
+                  stockVersion={stockVersion}
+                  onSaved={variantsSaved}
+                  onDirtyChange={setVariantsDirty}
+                />
 
                 {/* 4 STOCK */}
                 <Card
-                  title="Stock"
-                  hint="Enter how many you have, plus your own codes to keep track of it."
+                  title="Inventory"
+                  hint="Your stock codes, and how many you have at each location."
+                  action={
+                    canSeeStock && (
+                      <Link
+                        to="/admin/online-store/inventory"
+                        className="inline-flex h-8 items-center rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-charcoal-navy hover:text-white"
+                      >
+                        Adjust stock and history
+                      </Link>
+                    )
+                  }
                 >
+                  {variants.length > 1 && (
+                    <p className="mb-4 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2 text-xs text-slate-600">
+                      This product has {variants.length} variants. The SKU, price and stock here
+                      are for the first one ({variants[0].sku || "no SKU"}). Each variant keeps
+                      its own stock; manage them all in Variants above.
+                    </p>
+                  )}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Field label="SKU" help="Your own stock code" error={fieldErrors.sku}>
                       <input
@@ -1741,6 +3794,13 @@ export function ProductForm({ productId }) {
                         onChange={(e) => setSku(e.target.value)}
                         placeholder="e.g. WINE-ZC-750"
                         className={`${inputClass} ${withError(fieldErrors.sku)}`}
+                      />
+                    </Field>
+                    <Field label="Barcode" help="GTIN, EAN or UPC">
+                      <input
+                        disabled
+                        placeholder="Not available yet"
+                        className={`${inputClass} disabled:bg-slate-50 disabled:text-slate-400`}
                       />
                     </Field>
                     <Field
@@ -1800,9 +3860,11 @@ export function ProductForm({ productId }) {
                           )}
                         </div>
                         <Field
-                          label="Quantity"
+                          label="Available quantity"
                           help={
-                            canSetStock ? undefined : "Your role can see stock but not change it"
+                            canSetStock
+                              ? "Units that can be sold now"
+                              : "Your role can see stock but not change it"
                           }
                           error={fieldErrors.quantity}
                         >
@@ -1820,85 +3882,75 @@ export function ProductForm({ productId }) {
                       </>
                     )}
                   </div>
-                </Card>
 
-                {/* 5 ORGANIZE */}
-                <Card
-                  title="Organize"
-                  hint="Add a category, vendor, collections and tags so the product is easy to find and sort."
-                >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Category" error={fieldErrors.category_id}>
-                      <select
-                        value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
-                        className={`${inputClass} ${withError(fieldErrors.category_id)}`}
-                      >
-                        <option value="">
-                          {categoryRows.length ? "No category" : "No categories yet"}
-                        </option>
-                        {categoryRows.map((row) => (
-                          <option key={row.id} value={row.id}>
-                            {row.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Product type" error={fieldErrors.product_type}>
-                      <input
-                        value={productType}
-                        onChange={(e) => setProductType(e.target.value)}
-                        placeholder="e.g. White wine"
-                        className={`${inputClass} ${withError(fieldErrors.product_type)}`}
-                      />
-                    </Field>
-                    <Field label="Vendor" error={fieldErrors.vendor}>
-                      <input
-                        value={vendor}
-                        onChange={(e) => setVendor(e.target.value)}
-                        placeholder="e.g. Sipnow"
-                        className={`${inputClass} ${withError(fieldErrors.vendor)}`}
-                      />
-                    </Field>
-                    <div>
-                      <CollectionsPicker
-                        selectedCollections={collections.filter(
-                          (c) => !automatedCollections.includes(c)
-                        )}
-                        onChange={(picked) =>
-                          setCollections([
-                            ...picked,
-                            ...collections.filter((c) => automatedCollections.includes(c)),
-                          ])
-                        }
-                        availableCollections={storeCollections}
-                        onCollectionCreated={(newCol) => {
-                          setStoreCollections((prev) =>
-                            prev.includes(newCol) ? prev : [...prev, newCol]
-                          );
-                        }}
-                        error={fieldErrors.collections}
-                      />
-                      {collections.some((c) => automatedCollections.includes(c)) && (
-                        <p className="mt-1.5 text-[12px] text-slate-500">
-                          Also in, by their conditions:{" "}
-                          {collections.filter((c) => automatedCollections.includes(c)).join(", ")}
+                  {canSeeStock && editing && (
+                    <div className="mt-5 border-t border-[#E7E4DC] pt-4">
+                      {!Object.keys(levels).length ? (
+                        <p className="text-sm text-slate-600">
+                          <span className="mr-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
+                            Not tracked
+                          </span>
+                          This variant has no stock records yet, so it never blocks a sale. Enter
+                          an available quantity and save to start tracking it.
                         </p>
+                      ) : !levels[locationId] ? (
+                        <p className="text-sm text-slate-600">
+                          No stock is kept at this location yet.
+                        </p>
+                      ) : (
+                        <>
+                          <div className="mb-3 flex items-center gap-2">
+                            <span className="text-[13px] font-semibold text-charcoal-navy">
+                              Stock at {levels[locationId].location_name}
+                            </span>
+                            {(() => {
+                              const a = levels[locationId].available;
+                              const [label, cls] =
+                                a < 0
+                                  ? ["⚠ Oversold", "bg-red-100 text-red-800"]
+                                  : a === 0
+                                    ? ["✕ Out of stock", "bg-red-50 text-red-700"]
+                                    : ["✓ In stock", "bg-emerald-100 text-emerald-800"];
+                              return (
+                                <span
+                                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}
+                                >
+                                  {label}
+                                </span>
+                              );
+                            })()}
+                          </div>
+                          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                            {[
+                              ["On hand", "on_hand", "All physical units here"],
+                              ["Available", "available", "Can be sold now"],
+                              ["Committed", "committed", "Reserved for unfulfilled orders"],
+                              ["Unavailable", "unavailable", "Held back or damaged"],
+                              ["Incoming", "incoming", "Expected, not received yet"],
+                            ].map(([label, key, help]) => (
+                              <div
+                                key={key}
+                                className="rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2"
+                                title={help}
+                              >
+                                <dt className="text-[11px] font-medium text-slate-500">{label}</dt>
+                                <dd className="text-lg font-bold text-charcoal-navy">
+                                  {levels[locationId][key] ?? "Unavailable"}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                          <p className="mt-2 text-xs text-slate-500">
+                            On hand = Available + Committed + Unavailable. Incoming isn't counted
+                            until it's received. Reorder threshold and target stock: not available
+                            yet.
+                          </p>
+                        </>
                       )}
                     </div>
-                    <div className="sm:col-span-2">
-                      <span className="mb-1.5 block text-[13px] font-semibold text-charcoal-navy">
-                        Tags
-                      </span>
-                      <ChipInput
-                        values={tags}
-                        onChange={setTags}
-                        placeholder="Type a tag and press Enter"
-                      />
-                      <FieldError message={fieldErrors.tags} />
-                    </div>
-                  </div>
+                  )}
                 </Card>
+
 
                 {/* EXTRA DETAILS */}
                 <Card
@@ -1921,93 +3973,10 @@ export function ProductForm({ productId }) {
                   </div>
                 </Card>
 
-                {/* 6 VISIBILITY */}
-                <Card
-                  title="Visibility"
-                  hint="Choose whether shoppers can see this product now, or keep it hidden for later."
-                >
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {STATUSES.map((opt) => (
-                      <label
-                        key={opt.value}
-                        className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${
-                          status === opt.value
-                            ? "border-charcoal-navy bg-[#F3F1EC] ring-1 ring-[#14130F]"
-                            : "border-[#E7E4DC] hover:bg-slate-50"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="visibility"
-                          value={opt.value}
-                          checked={status === opt.value}
-                          onChange={() => setStatus(opt.value)}
-                          className="mt-0.5 accent-charcoal-navy"
-                        />
-                        <span>
-                          <span className="block text-sm font-semibold">{opt.label}</span>
-                          <span className="block text-xs text-slate-500">{opt.text}</span>
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                  <FieldError message={fieldErrors.status} />
-                </Card>
-
-                {/* 7 SALES CHANNELS */}
-                <Card title="Sales channels" hint="Choose where you want to sell this product.">
-                  {displayedChannels.length ? (
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                      {displayedChannels.map((ch) => {
-                        const checked = isChannelChecked(ch);
-                        return (
-                          <label
-                            key={ch.id}
-                            className="flex cursor-pointer items-center justify-between rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-4 py-3 text-sm font-medium transition hover:border-charcoal-navy hover:bg-white"
-                          >
-                            <span className="text-charcoal-navy">{ch.name}</span>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleChannel(ch)}
-                              className="h-4 w-4 accent-charcoal-navy cursor-pointer rounded"
-                            />
-                          </label>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-slate-500">Loading your sales channels…</p>
-                  )}
-                  <FieldError message={fieldErrors.sales_channels} />
-                </Card>
-
-                {/* 8 PAGE LAYOUT */}
-                <Card
-                  title="Page layout"
-                  hint="Choose which product page template your store uses for this product."
-                >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Product page template" error={fieldErrors.theme_template}>
-                      <select
-                        value={pageLayout}
-                        onChange={(e) => setPageLayout(e.target.value)}
-                        className={`${inputClass} ${withError(fieldErrors.theme_template)}`}
-                      >
-                        {PAGE_LAYOUTS.map((layout) => (
-                          <option key={layout.value} value={layout.value}>
-                            {layout.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                  </div>
-                </Card>
-
                 {/* 9 GOOGLE PREVIEW */}
                 <Card
-                  title="Google preview"
-                  hint="This is how the product may look on Google. Edit it if you want to change it."
+                  title="Search engine listing"
+                  hint="An illustrative preview only. Search engines decide how the product actually appears."
                   action={
                     <button
                       type="button"
@@ -2083,14 +4052,54 @@ export function ProductForm({ productId }) {
                     </div>
                   )}
                 </Card>
+                </div>
+
+                <aside className="space-y-6">
+                  {sidebar}
+                <Card
+                  title="Page layout"
+                  hint="Choose which product page template your store uses for this product."
+                >
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="Product page template" error={fieldErrors.theme_template}>
+                      <select
+                        value={pageLayout}
+                        onChange={(e) => setPageLayout(e.target.value)}
+                        className={`${inputClass} ${withError(fieldErrors.theme_template)}`}
+                      >
+                        {PAGE_LAYOUTS.map((layout) => (
+                          <option key={layout.value} value={layout.value}>
+                            {layout.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                  </div>
+                </Card>
+                  {editing && (
+                    <>
+                      <Card title="Activity">
+                        <dl className="space-y-1 text-xs text-slate-600">
+                          <div className="flex justify-between gap-3">
+                            <dt>Created</dt>
+                            <dd>{formatDate(dates.createdAt)}</dd>
+                          </div>
+                          <div className="flex justify-between gap-3">
+                            <dt>Last updated</dt>
+                            <dd>{formatDate(dates.updatedAt)}</dd>
+                          </div>
+                        </dl>
+                        <p className="mt-3 text-xs text-slate-500">
+                          A detailed history of who changed what is not available on this page
+                          yet.
+                        </p>
+                      </Card>
+                    </>
+                  )}
+                </aside>
               </div>
             </fieldset>
 
-            {editing && (
-              <p className="mt-6 text-xs text-slate-500">
-                Created {formatDate(dates.createdAt)} · Updated {formatDate(dates.updatedAt)}
-              </p>
-            )}
           </div>
         </main>
       </div>
