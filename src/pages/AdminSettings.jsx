@@ -11,6 +11,7 @@ import NotificationsSettings from "@/components/NotificationsSettings";
 import { useFlags } from "@/lib/featureFlags";
 import LanguagesSettings from "@/components/LanguagesSettings";
 import PoliciesSettings from "@/components/PoliciesSettings";
+import CustomerPrivacySettings from "@/components/CustomerPrivacySettings";
 
 // [IANA name, label]; the backend validates the name
 const TIME_ZONES = [
@@ -1196,6 +1197,8 @@ export default function AdminSettings() {
                 <RolesSettings />
               ) : selectedSection === "Notifications" ? (
                 <NotificationsSettings />
+              ) : selectedSection === "Customer privacy" ? (
+                <CustomerPrivacySettings onOpenSection={handleMenuClick} />
               ) : selectedSection === "Policies" ? (
                 <PoliciesSettings />
               ) : selectedSection === "API keys" ? (
