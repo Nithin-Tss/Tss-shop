@@ -192,3 +192,18 @@ img {
   scrollbar-width: thin;
   scrollbar-color: var(--color-slate-300) transparent;
 }
+
+/* Hide Google Translate's own banner/widget; language is chosen in Settings > Languages. */
+.skiptranslate:not(html),
+iframe.goog-te-banner-frame,
+#goog-gt-tt,
+.goog-te-balloon-frame {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+}
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}

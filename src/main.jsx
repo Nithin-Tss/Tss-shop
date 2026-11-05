@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
+import { initLanguage } from "./lib/language";
+
+initLanguage();
 
 // After a new deploy, a page opened earlier asks for script files that no longer exist.
 // Reload once to get the new ones (not again within a minute, so a real outage can't loop).

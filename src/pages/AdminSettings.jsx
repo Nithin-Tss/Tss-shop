@@ -9,6 +9,7 @@ import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
 import ApiKeysSettings from "@/components/ApiKeysSettings";
 import NotificationsSettings from "@/components/NotificationsSettings";
 import { useFlags } from "@/lib/featureFlags";
+import LanguagesSettings from "@/components/LanguagesSettings";
 
 // [IANA name, label]; the backend validates the name
 const TIME_ZONES = [
@@ -1041,6 +1042,7 @@ export default function AdminSettings() {
      ========================================================= */
 
   const renderOtherSection = () => {
+    if (selectedSection === "Languages") return <LanguagesSettings />;
     return (
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex min-h-[500px] items-center justify-center p-10">
