@@ -7,6 +7,7 @@ import PaymentsSettings from "@/components/PaymentsSettings";
 import ShippingSettings from "@/components/ShippingSettings";
 import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
 import ApiKeysSettings from "@/components/ApiKeysSettings";
+import NotificationsSettings from "@/components/NotificationsSettings";
 import { useFlags } from "@/lib/featureFlags";
 
 // [IANA name, label]; the backend validates the name
@@ -1190,6 +1191,8 @@ export default function AdminSettings() {
                 <UsersSettings />
               ) : selectedSection === "Roles" ? (
                 <RolesSettings />
+              ) : selectedSection === "Notifications" ? (
+                <NotificationsSettings />
               ) : selectedSection === "API keys" ? (
                 <ApiKeysSettings />
               ) : (
