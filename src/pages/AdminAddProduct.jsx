@@ -9,7 +9,7 @@ const NAVY = "#14130F";
 const PRODUCTS_URL = "/admin/online-store/products";
 
 const inputClass =
-  "w-full h-11 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#14130F] focus:bg-white focus:ring-4 focus:ring-[#14130F]/[0.07]";
+  "w-full h-11 rounded-[10px] border border-slate-300 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10";
 
 // Photos: JPG, PNG or WEBP, up to 1MB each
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -122,15 +122,17 @@ function categoryOptions(categories) {
 function Card({ title, hint, action, children }) {
   return (
     <section>
-      <div className="rounded-[22px] border border-[#E7E4DC] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
-        <header className="flex flex-wrap items-start justify-between gap-3 rounded-t-[21px] border-b border-[#E6E9F2] bg-[#F3F1EC] px-5 py-4 sm:px-6">
-          <div className="min-w-0">
-            <h2 className="text-base font-bold tracking-tight text-charcoal-navy">{title}</h2>
-            {hint && <p className="mt-0.5 text-[13px] leading-snug text-[#55607A]">{hint}</p>}
-          </div>
-          {action && <div className="shrink-0 pt-0.5">{action}</div>}
-        </header>
-        <div className="px-5 py-5 sm:px-6">{children}</div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+        {(title || action) && (
+          <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              {title && <h2 className="text-[15px] font-semibold text-slate-900">{title}</h2>}
+              {hint && <p className="mt-0.5 text-[13px] leading-snug text-slate-500">{hint}</p>}
+            </div>
+            {action && <div className="shrink-0">{action}</div>}
+          </header>
+        )}
+        {children}
       </div>
     </section>
   );
@@ -139,7 +141,7 @@ function Card({ title, hint, action, children }) {
 function Field({ label, help, error, children, className = "" }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-[13px] font-semibold text-charcoal-navy">{label}</span>
+      <span className="mb-1.5 block text-[13px] font-medium text-slate-900">{label}</span>
       {children}
       {error ? (
         <span className="mt-1 block text-xs text-red-600">{error}</span>
@@ -283,7 +285,7 @@ function AddValuePopover({
         }}
         placeholder="Search"
         aria-label={`Search ${title.toLowerCase()}`}
-        className="h-9 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-charcoal-navy"
+        className="h-9 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10"
       />
       <ul className="mt-1 max-h-56 overflow-y-auto text-sm">
         {matches.map((o) => (
@@ -318,6 +320,184 @@ function AddValuePopover({
   );
 }
 
+const RECOMMENDED_OPTIONS = [
+  "Allergen information",
+  "Beer style",
+  "Beer variety",
+  "Country",
+  "Dietary preferences",
+  "Dietary supplements",
+  "Package type",
+  "Volume",
+  "Pack size",
+];
+
+// "Add another option" dropdown: search the recommended names, or start a custom option
+function OptionPicker({ label, usedNames, onPick }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const buttonRef = useRef(null);
+  const boxRef = useRef(null);
+  const listRef = useRef(null);
+  const typed = query.trim();
+
+  const used = usedNames.map((n) => n.toLowerCase());
+  const matches = RECOMMENDED_OPTIONS.filter(
+    (n) => !used.includes(n.toLowerCase()) && n.toLowerCase().includes(typed.toLowerCase())
+  );
+  // Keyboard order: the matches (or Create "typed" when none), then the fixed custom row
+  const items = [
+    ...matches.map((n) => ({ key: n, label: n, name: n })),
+    ...(!matches.length && typed ? [{ key: "typed", label: `Create "${typed}"`, name: typed, custom: true }] : []),
+    { key: "custom", name: typed, custom: true, footer: true },
+  ];
+  const current = Math.min(active, items.length - 1);
+
+  const close = (refocus) => {
+    setOpen(false);
+    setQuery("");
+    setActive(0);
+    if (refocus) buttonRef.current?.focus();
+  };
+  const pick = (item) => {
+    close(true);
+    onPick(item.name, item.custom);
+  };
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const outside = (e) => {
+      if (boxRef.current?.contains(e.target) || buttonRef.current?.contains(e.target)) return;
+      close(boxRef.current?.contains(document.activeElement));
+    };
+    document.addEventListener("mousedown", outside);
+    return () => document.removeEventListener("mousedown", outside);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    listRef.current?.querySelector(`[data-index="${current}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [current, open]);
+
+  const onKeyDown = (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      setActive((current + step + items.length) % items.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      pick(items[current]);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      close(true);
+    }
+  };
+
+  const rowClass = (i) =>
+    `flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-100 ${
+      i === current ? "bg-slate-100" : ""
+    }`;
+  const footerIndex = items.length - 1;
+
+  return (
+    <div className="relative">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => (open ? close(false) : setOpen(true))}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-charcoal-navy hover:underline"
+      >
+        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+          <circle cx="10" cy="10" r="7.5" />
+          <path d="M10 6.5v7M6.5 10h7" strokeLinecap="round" />
+        </svg>
+        {label}
+      </button>
+      {open && (
+        <div
+          ref={boxRef}
+          role="dialog"
+          aria-label="Add an option"
+          onKeyDown={onKeyDown}
+          className="absolute left-0 top-full z-40 mt-2 flex w-72 max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_8px_24px_-6px_rgba(15,23,42,0.18)]"
+        >
+          <div className="p-3 pb-2">
+            <div className="relative">
+              <svg
+                viewBox="0 0 20 20"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                aria-hidden="true"
+              >
+                <circle cx="9" cy="9" r="5.5" />
+                <path d="M13.5 13.5L17 17" strokeLinecap="round" />
+              </svg>
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setActive(0);
+                }}
+                placeholder="Search"
+                aria-label="Search options"
+                aria-controls="option-picker-list"
+                aria-activedescendant={`option-picker-${items[current].key}`}
+                className="h-10 w-full rounded-[10px] border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10"
+              />
+            </div>
+          </div>
+          <ul id="option-picker-list" role="listbox" ref={listRef} className="max-h-64 overflow-y-auto px-2 pb-2">
+            {matches.length > 0 && (
+              <li role="presentation" className="px-3 pb-1 pt-1 text-xs font-medium text-slate-500">
+                Recommended
+              </li>
+            )}
+            {items.slice(0, -1).map((item, i) => (
+              <li
+                key={item.key}
+                id={`option-picker-${item.key}`}
+                role="option"
+                aria-selected={i === current}
+                data-index={i}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => pick(item)}
+                onMouseEnter={() => setActive(i)}
+                className={`cursor-pointer ${rowClass(i)}`}
+              >
+                {item.label}
+              </li>
+            ))}
+            {items.length === 1 && <li className="px-3 py-2 text-sm text-slate-400">No more suggestions</li>}
+          </ul>
+          <div className="border-t border-slate-200 p-2">
+            <button
+              type="button"
+              id={`option-picker-${items[footerIndex].key}`}
+              data-index={footerIndex}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => pick(items[footerIndex])}
+              onMouseEnter={() => setActive(footerIndex)}
+              className={`${rowClass(footerIndex)} font-medium`}
+            >
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                <circle cx="10" cy="10" r="7.5" />
+                <path d="M10 6.5v7M6.5 10h7" strokeLinecap="round" />
+              </svg>
+              Create custom option
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Full-width rounded dropdown with up/down chevrons
 function ChevronSelect({ id, value, onChange, label, children }) {
   return (
@@ -327,7 +507,7 @@ function ChevronSelect({ id, value, onChange, label, children }) {
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full appearance-none rounded-xl border border-slate-300 bg-white pl-3.5 pr-9 text-sm text-slate-900 outline-none focus:border-charcoal-navy focus:ring-4 focus:ring-[#14130F]/[0.07]"
+        className="h-11 w-full appearance-none rounded-[10px] border border-slate-300 bg-white pl-3.5 pr-9 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10"
       >
         {children}
       </select>
@@ -477,7 +657,7 @@ const outlineButton =
 const primaryButton =
   "h-9 rounded-full bg-charcoal-navy px-5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50";
 const cellInput =
-  "h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm outline-none focus:border-charcoal-navy focus:ring-2 focus:ring-[#14130F]/10";
+  "h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10";
 const notYet = "Not available yet";
 
 // Edit option names and values; preview the variants created and removed, then save them in one product PATCH
@@ -498,7 +678,10 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
       values: o.values.map((value) => ({ id: draftId(), value, original: value })),
       defaultValue: "",
     })),
-    ...(startWithNew ? [blankOption()] : []),
+    // startWithNew: the new option's name ("" for a blank one); focus goes to its first value once named
+    ...(startWithNew != null
+      ? [{ ...blankOption(), name: startWithNew, focus: startWithNew.trim() ? "value" : "name" }]
+      : []),
   ]);
   const [step, setStep] = useState("edit");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -663,7 +846,7 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
           }
           className={primaryButton}
         >
-          {saving ? "Saving..." : "Save options"}
+          {saving ? "Saving..." : "Done"}
         </button>
       </>
     );
@@ -688,6 +871,7 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
                     value={o.name}
                     onChange={(e) => update(o.id, () => ({ name: e.target.value }))}
                     placeholder="e.g. Pack size"
+                    autoFocus={o.focus === "name"}
                     className={cellInput}
                   />
                 </label>
@@ -725,6 +909,7 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
                     <input
                       value={v.value}
                       aria-label={`${o.name || `Option ${oi + 1}`} value ${vi + 1}`}
+                      autoFocus={o.focus === "value" && vi === 0}
                       onChange={(e) =>
                         update(o.id, (opt) => ({
                           values: opt.values.map((x) =>
@@ -2007,7 +2192,7 @@ function VariantsSection({
   const totalAvailable = totals.reduce((n, v) => n + (stockFor(v).available || 0), 0);
   const untrackedCount = shown.length - totals.length;
   const selectClass =
-    "h-9 rounded-lg border border-slate-300 bg-white px-2.5 text-sm text-slate-800 outline-none focus:border-charcoal-navy";
+    "h-9 rounded-lg border border-slate-300 bg-white px-2.5 text-sm text-slate-800 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10";
 
   return (
     <Card
@@ -2060,14 +2245,16 @@ function VariantsSection({
                 Edit options
               </button>
             )}
-            {options.length < MAX_PRODUCT_OPTIONS && (
-              <button
-                type="button"
-                onClick={() => setModal({ type: "options", add: true })}
-                className="text-sm font-semibold text-charcoal-navy hover:underline"
-              >
-                + Add {options.length ? "another option" : "options like size or colour"}
-              </button>
+            {options.length < MAX_PRODUCT_OPTIONS ? (
+              <OptionPicker
+                label={options.length ? "Add another option" : "Add options like size or colour"}
+                usedNames={options.map((o) => o.name)}
+                onPick={(name) => setModal({ type: "options", add: name })}
+              />
+            ) : (
+              <p className="text-sm text-slate-500">
+                A product can have up to {MAX_PRODUCT_OPTIONS} options. Edit or remove one to add another.
+              </p>
             )}
           </div>
         )}
@@ -2338,7 +2525,7 @@ function VariantsSection({
           productId={productId}
           options={options}
           variants={variants}
-          startWithNew={Boolean(modal.add)}
+          startWithNew={modal.add ?? null}
           onClose={() => setModal(null)}
           onApplied={async () => {
             setModal(null);
@@ -3136,7 +3323,7 @@ export function ProductForm({ productId }) {
 
   if (loading || loadError) {
     return (
-      <div className="min-h-screen bg-white text-slate-900">
+      <div className="min-h-screen bg-slate-50 text-slate-900">
         <AdminHeader />
         <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
           <AdminSidebar />
@@ -3298,10 +3485,10 @@ export function ProductForm({ productId }) {
     }).format(Number(value) || 0);
 
   const sidebar = (
-    <div className="rounded-[22px] border border-[#E7E4DC] bg-white shadow-[0_4px_16px_-6px_rgba(20,27,45,0.12)]">
-      <section className="hidden px-5 py-5 lg:block">{statusSection("side")}</section>
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+      <section className="hidden p-5 xl:block">{statusSection("side")}</section>
 
-      <section className="px-5 py-5 lg:border-t lg:border-slate-200">
+      <section className="p-5 xl:border-t xl:border-slate-200">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[15px] font-semibold text-slate-900">Publishing</h2>
           <button
@@ -3528,32 +3715,35 @@ export function ProductForm({ productId }) {
   );
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
-        <main className="flex-1 min-w-0 bg-white">
+        <main className="flex-1 min-w-0 overflow-x-clip bg-slate-50">
           {/* STICKY ACTION BAR */}
-          <div className="sticky top-18 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <div className="sticky top-14 z-30 border-b border-slate-200 bg-slate-50 md:top-0">
             <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-6">
-              <div className="flex min-w-0 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-2.5">
                 <button
                   type="button"
                   onClick={leave}
-                  className="-ml-1 flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                  aria-label="Back to products"
+                  title="Back to products"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition hover:bg-slate-100"
                 >
-                  <span aria-hidden>←</span> Back
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </button>
-                <h1 className="truncate text-lg font-bold">
-                  {name.trim() || (editing ? "Product" : "New product")}
-                </h1>
-                <span
-                  className={`hidden sm:inline rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusInfo.badge}`}
+                <button
+                  type="button"
+                  onClick={leave}
+                  className="text-sm font-medium text-slate-600 hover:text-slate-900"
                 >
-                  {statusInfo.label}
-                </span>
+                  Products
+                </button>
                 {dirty && (
                   <span className="hidden md:inline text-xs font-medium text-amber-700">
                     ● Unsaved changes
@@ -3612,18 +3802,23 @@ export function ProductForm({ productId }) {
             </div>
           </div>
 
-          <div className="mx-auto max-w-300 px-3 py-8 sm:px-4">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold tracking-tight text-charcoal-navy">
-                {!canEdit ? "Product details" : editing ? "Edit product" : "Add a new product"}
-              </h2>
-              <p className="mt-1 text-sm text-[#55607A]">
-                {!canEdit
-                  ? "Your role can view this product but not change it."
-                  : editing
-                    ? "Change any of the steps below. Only the product name is required."
-                    : "Work down the steps below. Only the product name is required. You can come back and fill in the rest later."}
-              </p>
+          <div className="mx-auto max-w-300 px-4 py-6 sm:px-6">
+            <div className="mb-6">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="min-w-0 break-words text-[30px] font-semibold leading-tight tracking-tight text-slate-900">
+                  {name.trim() || (editing ? "Product" : "New product")}
+                </h1>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusInfo.badge}`}>
+                  {statusInfo.label}
+                </span>
+              </div>
+              {(!canEdit || !editing) && (
+                <p className="mt-1 text-sm text-slate-500">
+                  {!canEdit
+                    ? "Your role can view this product but not change it."
+                    : "Only the title is required. You can come back and fill in the rest later."}
+                </p>
+              )}
             </div>
 
             {error && (
@@ -3642,15 +3837,12 @@ export function ProductForm({ productId }) {
 
             {/* View-only roles: every field and button inside is disabled */}
             <fieldset disabled={!canEdit} className="m-0 min-w-0 border-0 p-0">
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-                <div className="min-w-0 space-y-6">
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_310px] xl:items-start">
+                <div className="min-w-0 space-y-5">
                   {/* 1 BASIC INFO */}
-                  <Card
-                    title="Basic info"
-                    hint="Give your product a clear name and describe it in a few simple sentences."
-                  >
+                  <Card>
                     <div className="space-y-4">
-                      <Field label="Product name" error={fieldErrors.title}>
+                      <Field label="Title" error={fieldErrors.title}>
                         <input
                           value={name}
                           onChange={(e) => changeName(e.target.value)}
@@ -3661,7 +3853,7 @@ export function ProductForm({ productId }) {
                       </Field>
 
                       <Field
-                        label="About this product"
+                        label="Description"
                         help={`${about.length} characters`}
                         error={fieldErrors.description}
                       >
@@ -3676,7 +3868,7 @@ export function ProductForm({ productId }) {
                     </div>
                   </Card>
 
-                  <div className="rounded-[22px] border border-[#E7E4DC] bg-white p-5 lg:hidden">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] xl:hidden">
                     {statusSection("main")}
                   </div>
 
@@ -3689,7 +3881,7 @@ export function ProductForm({ productId }) {
                         type="button"
                         onClick={() => mainFileInputRef.current?.click()}
                         disabled={saving}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3 py-1.5 text-xs font-semibold text-charcoal-navy shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-charcoal-navy shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <svg
                           className="h-3.5 w-3.5"
@@ -3747,8 +3939,8 @@ export function ProductForm({ productId }) {
                         }}
                         className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
                           dragging
-                            ? "border-charcoal-navy bg-[#F3F1EC]"
-                            : "border-[#E7E4DC] bg-[#FAF9F6] hover:bg-slate-50"
+                            ? "border-charcoal-navy bg-slate-100"
+                            : "border-slate-200 bg-slate-50 hover:bg-slate-50"
                         }`}
                       >
                         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
@@ -3807,10 +3999,10 @@ export function ProductForm({ productId }) {
                           return (
                             <div
                               key={photo.id}
-                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-[#FAF9F6] transition ${
+                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-slate-50 transition ${
                                 isCover
                                   ? "border-charcoal-navy ring-2 ring-[#14130F]/15 col-span-2 row-span-2"
-                                  : "border-[#E7E4DC] hover:border-slate-400"
+                                  : "border-slate-200 hover:border-slate-400"
                               }`}
                             >
                               {/* Image or Broken fallback */}
@@ -3958,8 +4150,8 @@ export function ProductForm({ productId }) {
                           }}
                           className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
                             dragging
-                              ? "border-charcoal-navy bg-[#F3F1EC]"
-                              : "border-[#E7E4DC] bg-[#FAF9F6] hover:border-slate-400 hover:bg-slate-50"
+                              ? "border-charcoal-navy bg-slate-100"
+                              : "border-slate-200 bg-slate-50 hover:border-slate-400 hover:bg-slate-50"
                           } ${saving ? "pointer-events-none opacity-50" : ""}`}
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-charcoal-navy">
@@ -4081,7 +4273,7 @@ export function ProductForm({ productId }) {
                       Charge GST on this product
                     </label>
 
-                    <div className="mt-5 border-t border-[#E7E4DC] pt-4">
+                    <div className="mt-5 border-t border-slate-200 pt-4">
                       <p className="text-[13px] font-semibold text-charcoal-navy">
                         Internal costs{" "}
                         <span className="font-normal text-slate-500">
@@ -4132,7 +4324,7 @@ export function ProductForm({ productId }) {
                     }
                   >
                     {variants.length > 1 && (
-                      <p className="mb-4 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2 text-xs text-slate-600">
+                      <p className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
                         This product has {variants.length} variants. The SKU, price and stock here
                         are for the first one ({variants[0].sku || "no SKU"}). Each variant keeps
                         its own stock; manage them all in Variants above.
@@ -4235,7 +4427,7 @@ export function ProductForm({ productId }) {
                     </div>
 
                     {canSeeStock && editing && (
-                      <div className="mt-5 border-t border-[#E7E4DC] pt-4">
+                      <div className="mt-5 border-t border-slate-200 pt-4">
                         {!Object.keys(levels).length ? (
                           <p className="text-sm text-slate-600">
                             <span className="mr-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
@@ -4281,7 +4473,7 @@ export function ProductForm({ productId }) {
                               ].map(([label, key, help]) => (
                                 <div
                                   key={key}
-                                  className="rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2"
+                                  className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
                                   title={help}
                                 >
                                   <dt className="text-[11px] font-medium text-slate-500">
@@ -4339,7 +4531,7 @@ export function ProductForm({ productId }) {
                       </button>
                     }
                   >
-                    <div className="rounded-lg border border-[#E7E4DC] bg-white p-4 shadow-sm">
+                    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                       <p className="text-sm font-semibold uppercase tracking-wide text-slate-800">
                         {storeBrand}
                       </p>
@@ -4392,7 +4584,7 @@ export function ProductForm({ productId }) {
                           error={fieldErrors.handle}
                         >
                           <div
-                            className={`flex h-11 items-center rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3.5 transition focus-within:border-charcoal-navy focus-within:bg-white focus-within:ring-4 focus-within:ring-[#14130F]/[0.07] ${withError(fieldErrors.handle)}`}
+                            className={`flex h-11 items-center rounded-lg border border-slate-200 bg-slate-50 px-3.5 transition focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-900/10 ${withError(fieldErrors.handle)}`}
                           >
                             <span className="select-none text-sm text-slate-500">products/</span>
                             <input
@@ -4408,7 +4600,7 @@ export function ProductForm({ productId }) {
                   </Card>
                 </div>
 
-                <aside className="space-y-6">
+                <aside className="min-w-0 space-y-5">
                   {sidebar}
                   <Card
                     title="Page layout"
