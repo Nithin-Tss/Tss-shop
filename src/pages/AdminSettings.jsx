@@ -10,6 +10,7 @@ import ApiKeysSettings from "@/components/ApiKeysSettings";
 import NotificationsSettings from "@/components/NotificationsSettings";
 import { useFlags } from "@/lib/featureFlags";
 import LanguagesSettings from "@/components/LanguagesSettings";
+import MetafieldsSettings from "@/components/MetafieldsSettings";
 import PoliciesSettings from "@/components/PoliciesSettings";
 import CustomerPrivacySettings from "@/components/CustomerPrivacySettings";
 
@@ -1045,6 +1046,7 @@ export default function AdminSettings() {
 
   const renderOtherSection = () => {
     if (selectedSection === "Languages") return <LanguagesSettings />;
+    if (selectedSection === "Metafields and metaobjects") return <MetafieldsSettings />;
     return (
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex min-h-[500px] items-center justify-center p-10">
