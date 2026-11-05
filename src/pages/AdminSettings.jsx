@@ -4,15 +4,19 @@ import { apiDelete, apiGet, apiPatch, syncAccess } from "@/lib/api";
 import { STORES_PATH, getActiveStore, getSession, storeCan } from "@/lib/auth";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import PaymentsSettings from "@/components/PaymentsSettings";
+import TaxSettings from "@/components/TaxSettings";
 import ShippingSettings from "@/components/ShippingSettings";
 import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
 import ApiKeysSettings from "@/components/ApiKeysSettings";
 import NotificationsSettings from "@/components/NotificationsSettings";
 import { useFlags } from "@/lib/featureFlags";
+import DomainsSettings from "@/components/DomainsSettings";
 import LanguagesSettings from "@/components/LanguagesSettings";
 import MetafieldsSettings from "@/components/MetafieldsSettings";
 import PoliciesSettings from "@/components/PoliciesSettings";
 import CustomerPrivacySettings from "@/components/CustomerPrivacySettings";
+import CheckoutSettings from "@/components/CheckoutSettings";
+import CustomerAccountsSettings from "@/components/CustomerAccountsSettings";
 
 // [IANA name, label]; the backend validates the name
 const TIME_ZONES = [
@@ -1193,16 +1197,24 @@ export default function AdminSettings() {
                 <PaymentsSettings />
               ) : selectedSection === "Shipping and delivery" ? (
                 <ShippingSettings />
+              ) : selectedSection === "Taxes and duties" ? (
+                <TaxSettings />
               ) : selectedSection === "Users" ? (
                 <UsersSettings />
               ) : selectedSection === "Roles" ? (
                 <RolesSettings />
               ) : selectedSection === "Notifications" ? (
                 <NotificationsSettings />
+              ) : selectedSection === "Checkout" ? (
+                <CheckoutSettings onOpenSection={handleMenuClick} />
+              ) : selectedSection === "Customer accounts" ? (
+                <CustomerAccountsSettings onOpenSection={handleMenuClick} />
               ) : selectedSection === "Customer privacy" ? (
                 <CustomerPrivacySettings onOpenSection={handleMenuClick} />
               ) : selectedSection === "Policies" ? (
                 <PoliciesSettings />
+              ) : selectedSection === "Domains" ? (
+                <DomainsSettings />
               ) : selectedSection === "API keys" ? (
                 <ApiKeysSettings />
               ) : (
