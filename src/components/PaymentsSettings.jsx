@@ -99,7 +99,9 @@ function BankPayoutSettings() {
         aria-invalid={Boolean(fieldErrors[key])}
         {...props}
       />
-      {fieldErrors[key] && <span className="mt-1 block text-xs text-red-700">{fieldErrors[key]}</span>}
+      {fieldErrors[key] && (
+        <span className="mt-1 block text-xs text-red-700">{fieldErrors[key]}</span>
+      )}
     </label>
   );
 
@@ -122,14 +124,22 @@ function BankPayoutSettings() {
         ) : editing ? (
           <form onSubmit={save} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              {field("account_holder_name", "Account holder name", { required: true, autoComplete: "name" })}
+              {field("account_holder_name", "Account holder name", {
+                required: true,
+                autoComplete: "name",
+              })}
               {field("bank_name", "Bank name", { required: true })}
               {field("account_number", "Account number / IBAN", {
                 required: !saved?.configured,
-                placeholder: saved?.configured ? `•••• ${saved.account_last4} (leave blank to keep)` : "",
+                placeholder: saved?.configured
+                  ? `•••• ${saved.account_last4} (leave blank to keep)`
+                  : "",
                 autoComplete: "off",
               })}
-              {field("routing_code", "Routing / sort code / IFSC", { required: true, autoComplete: "off" })}
+              {field("routing_code", "Routing / sort code / IFSC", {
+                required: true,
+                autoComplete: "off",
+              })}
               {field("currency", "Currency", { required: true, maxLength: 3 })}
             </div>
             <p className="text-xs text-slate-500">
@@ -270,7 +280,9 @@ function StripeSettings() {
         aria-invalid={Boolean(fieldErrors[key])}
         {...props}
       />
-      {fieldErrors[key] && <span className="mt-1 block text-xs text-red-700">{fieldErrors[key]}</span>}
+      {fieldErrors[key] && (
+        <span className="mt-1 block text-xs text-red-700">{fieldErrors[key]}</span>
+      )}
     </label>
   );
 
@@ -311,9 +323,9 @@ function StripeSettings() {
               placeholder: "whsec_…",
             })}
             <p className="text-xs text-slate-500">
-              Use matching keys (both test or both live). Your secret key is encrypted and never shown
-              again. Leave the webhook secret blank and we'll register the webhook for you; if you add
-              it yourself in Stripe, point it at the URL shown after connecting.
+              Use matching keys (both test or both live). Your secret key is encrypted and never
+              shown again. Leave the webhook secret blank and we'll register the webhook for you; if
+              you add it yourself in Stripe, point it at the URL shown after connecting.
             </p>
             <div className="flex gap-2">
               <button
