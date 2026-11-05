@@ -4,6 +4,7 @@ import { apiDelete, apiGet, apiPatch, syncAccess } from "@/lib/api";
 import { STORES_PATH, getActiveStore, getSession, storeCan } from "@/lib/auth";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import PaymentsSettings from "@/components/PaymentsSettings";
+import ShippingSettings from "@/components/ShippingSettings";
 import { RolesSettings, UsersSettings } from "@/components/TeamSettings";
 import ApiKeysSettings from "@/components/ApiKeysSettings";
 import { useFlags } from "@/lib/featureFlags";
@@ -1183,6 +1184,8 @@ export default function AdminSettings() {
                 renderGeneral()
               ) : selectedSection === "Payments" && isOwner ? (
                 <PaymentsSettings />
+              ) : selectedSection === "Shipping and delivery" ? (
+                <ShippingSettings />
               ) : selectedSection === "Users" ? (
                 <UsersSettings />
               ) : selectedSection === "Roles" ? (

@@ -50,7 +50,6 @@ const AdminLiveView = lazy(() => import("@/pages/AdminLiveView"));
 const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
 const AdminCreateDiscount = lazy(() => import("@/pages/AdminCreateDiscount"));
 const AdminPlatform = lazy(() => import("@/pages/AdminPlatform"));
-const AdminShipping = lazy(() => import("@/pages/AdminShipping"));
 const AdminTax = lazy(() => import("@/pages/AdminTax"));
 const AdminWebhooks = lazy(() => import("@/pages/AdminWebhooks"));
 const AdminAuditLog = lazy(() => import("@/pages/AdminAuditLog"));
@@ -236,7 +235,7 @@ export default function App() {
           {/* Platform administration: the API refuses anyone who isn't a platform administrator */}
           <Route path="/admin/platform" element={<AdminPlatform />} />
           <Route element={<RequirePermission permission="shipping.view" />}>
-            <Route path="/admin/online-store/shipping" element={<AdminShipping />} />
+            <Route path="/admin/online-store/shipping" element={<Navigate to="/admin/settings" replace />} />
             <Route path="/admin/online-store/tax" element={<AdminTax />} />
           </Route>
           <Route element={<RequirePermission permission="webhooks.manage" />}>

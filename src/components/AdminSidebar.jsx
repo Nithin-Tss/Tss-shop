@@ -319,12 +319,6 @@ const menuGroups = [
         href: `${BASE}/discounts`,
         permission: "discounts.view",
       },
-      {
-        icon: "shipping",
-        label: "Shipping",
-        href: `${BASE}/shipping`,
-        permission: "shipping.view",
-      },
       { icon: "discounts", label: "Taxes", href: `${BASE}/tax`, permission: "shipping.view" },
     ],
   },
