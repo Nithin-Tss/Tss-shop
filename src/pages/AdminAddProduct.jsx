@@ -349,7 +349,9 @@ function OptionPicker({ label, usedNames, onPick }) {
   // Keyboard order: the matches (or Create "typed" when none), then the fixed custom row
   const items = [
     ...matches.map((n) => ({ key: n, label: n, name: n })),
-    ...(!matches.length && typed ? [{ key: "typed", label: `Create "${typed}"`, name: typed, custom: true }] : []),
+    ...(!matches.length && typed
+      ? [{ key: "typed", label: `Create "${typed}"`, name: typed, custom: true }]
+      : []),
     { key: "custom", name: typed, custom: true, footer: true },
   ];
   const current = Math.min(active, items.length - 1);
@@ -373,10 +375,12 @@ function OptionPicker({ label, usedNames, onPick }) {
     };
     document.addEventListener("mousedown", outside);
     return () => document.removeEventListener("mousedown", outside);
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
-    listRef.current?.querySelector(`[data-index="${current}"]`)?.scrollIntoView({ block: "nearest" });
+    listRef.current
+      ?.querySelector(`[data-index="${current}"]`)
+      ?.scrollIntoView({ block: "nearest" });
   }, [current, open]);
 
   const onKeyDown = (e) => {
@@ -410,7 +414,14 @@ function OptionPicker({ label, usedNames, onPick }) {
         aria-expanded={open}
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-charcoal-navy hover:underline"
       >
-        <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+        <svg
+          viewBox="0 0 20 20"
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          aria-hidden="true"
+        >
           <circle cx="10" cy="10" r="7.5" />
           <path d="M10 6.5v7M6.5 10h7" strokeLinecap="round" />
         </svg>
@@ -452,7 +463,12 @@ function OptionPicker({ label, usedNames, onPick }) {
               />
             </div>
           </div>
-          <ul id="option-picker-list" role="listbox" ref={listRef} className="max-h-64 overflow-y-auto px-2 pb-2">
+          <ul
+            id="option-picker-list"
+            role="listbox"
+            ref={listRef}
+            className="max-h-64 overflow-y-auto px-2 pb-2"
+          >
             {matches.length > 0 && (
               <li role="presentation" className="px-3 pb-1 pt-1 text-xs font-medium text-slate-500">
                 Recommended
@@ -473,7 +489,9 @@ function OptionPicker({ label, usedNames, onPick }) {
                 {item.label}
               </li>
             ))}
-            {items.length === 1 && <li className="px-3 py-2 text-sm text-slate-400">No more suggestions</li>}
+            {items.length === 1 && (
+              <li className="px-3 py-2 text-sm text-slate-400">No more suggestions</li>
+            )}
           </ul>
           <div className="border-t border-slate-200 p-2">
             <button
@@ -485,7 +503,14 @@ function OptionPicker({ label, usedNames, onPick }) {
               onMouseEnter={() => setActive(footerIndex)}
               className={`${rowClass(footerIndex)} font-medium`}
             >
-              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+              <svg
+                viewBox="0 0 20 20"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden="true"
+              >
                 <circle cx="10" cy="10" r="7.5" />
                 <path d="M10 6.5v7M6.5 10h7" strokeLinecap="round" />
               </svg>
@@ -2253,7 +2278,8 @@ function VariantsSection({
               />
             ) : (
               <p className="text-sm text-slate-500">
-                A product can have up to {MAX_PRODUCT_OPTIONS} options. Edit or remove one to add another.
+                A product can have up to {MAX_PRODUCT_OPTIONS} options. Edit or remove one to add
+                another.
               </p>
             )}
           </div>
@@ -3733,7 +3759,14 @@ export function ProductForm({ productId }) {
                   title="Back to products"
                   className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition hover:bg-slate-100"
                 >
-                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 20 20"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
                     <path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
@@ -3808,7 +3841,9 @@ export function ProductForm({ productId }) {
                 <h1 className="min-w-0 break-words text-[30px] font-semibold leading-tight tracking-tight text-slate-900">
                   {name.trim() || (editing ? "Product" : "New product")}
                 </h1>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusInfo.badge}`}>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusInfo.badge}`}
+                >
                   {statusInfo.label}
                 </span>
               </div>
