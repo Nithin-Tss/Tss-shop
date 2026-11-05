@@ -1012,8 +1012,8 @@ export default function AdminMenus() {
 
                                 {item.is_mega && (
                                   <p className="pl-6 text-[11px] text-slate-500">
-                                    The column link becomes the column's "Shop All" link, shown
-                                    at the end of the column. Leave it empty for no Shop All.
+                                    The column link becomes the column's "Shop All" link, shown at
+                                    the end of the column. Leave it empty for no Shop All.
                                   </p>
                                 )}
 
