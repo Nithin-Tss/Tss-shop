@@ -1,5 +1,8 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import { apiDownload, apiGet, apiPost } from "@/lib/api";
+import { useCan } from "@/lib/auth";
 
 // SVG Illustration for Empty State
 function GiftCardsIllustration({ className = "h-36 w-44" }) {
@@ -82,8 +85,332 @@ function GiftCardsIllustration({ className = "h-36 w-44" }) {
   );
 }
 
+const inputClass =
+  "h-9 rounded-lg border border-[#D4D0C5] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-charcoal-navy";
+
+const STATUS_BADGE = {
+  active: "bg-[#E3F5EC] border-[#B7EBD0] text-[#008060]",
+  disabled: "bg-[#F3F1EC] border-[#E7E4DC] text-[#5A5750]",
+};
+
+function StatusBadge({ status }) {
+  const cls = STATUS_BADGE[status] || STATUS_BADGE.disabled;
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {status === "active" ? "Active" : "Deactivated"}
+    </span>
+  );
+}
+
+function money(amount, currency) {
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(Number(amount));
+  } catch {
+    return `${currency} ${amount}`;
+  }
+}
+
+function CreateGiftCardModal({ onClose, onCreated }) {
+  const [form, setForm] = useState({ initial_balance: "", currency_code: "", customer: "", note: "" });
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [issuedCode, setIssuedCode] = useState(null);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setErrors({});
+    const payload = {
+      initial_balance: form.initial_balance,
+      note: form.note || undefined,
+      currency_code: form.currency_code || undefined,
+      customer: form.customer || undefined,
+    };
+    const res = await apiPost("/api/v1/gift-cards/", payload);
+    setSaving(false);
+    if (!res.ok) {
+      setErrors(res.fieldErrors || {});
+      return;
+    }
+    setIssuedCode(res.data.code);
+    onCreated();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+        {issuedCode ? (
+          <div>
+            <h2 className="text-base font-semibold text-charcoal-navy mb-2">Gift card issued</h2>
+            <p className="text-sm text-[#5A5750] mb-3">
+              This code is shown once. Copy it now -- it can't be shown again, only resent by email.
+            </p>
+            <div className="mb-4 rounded-lg border border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2 font-mono text-sm tracking-wide">
+              {issuedCode}
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full rounded-lg bg-charcoal-navy px-3.5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916]"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit}>
+            <h2 className="text-base font-semibold text-charcoal-navy mb-4">Create gift card</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[#78746A]">Value</label>
+                <input
+                  className={`${inputClass} w-full`}
+                  value={form.initial_balance}
+                  onChange={(e) => setForm({ ...form, initial_balance: e.target.value })}
+                  placeholder="50.00"
+                  required
+                />
+                {errors.initial_balance && (
+                  <p className="mt-1 text-xs text-red-600">{errors.initial_balance}</p>
+                )}
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[#78746A]">
+                  Currency (ISO 4217, defaults to this store's gift card currency)
+                </label>
+                <input
+                  className={`${inputClass} w-full`}
+                  value={form.currency_code}
+                  onChange={(e) => setForm({ ...form, currency_code: e.target.value.toUpperCase() })}
+                  placeholder="AUD"
+                  maxLength={3}
+                />
+                {errors.currency_code && (
+                  <p className="mt-1 text-xs text-red-600">{errors.currency_code}</p>
+                )}
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[#78746A]">Customer id (optional)</label>
+                <input
+                  className={`${inputClass} w-full`}
+                  value={form.customer}
+                  onChange={(e) => setForm({ ...form, customer: e.target.value })}
+                  placeholder="Leave blank to issue unassigned"
+                />
+                {errors.customer && <p className="mt-1 text-xs text-red-600">{errors.customer}</p>}
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[#78746A]">Note (optional)</label>
+                <input
+                  className={`${inputClass} w-full`}
+                  value={form.note}
+                  onChange={(e) => setForm({ ...form, note: e.target.value })}
+                  placeholder="Why this card was issued"
+                />
+              </div>
+            </div>
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-2 text-sm font-semibold text-charcoal-navy hover:bg-[#FAF9F6]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-lg bg-charcoal-navy px-3.5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60"
+              >
+                {saving ? "Issuing..." : "Issue gift card"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function GiftCardDetailModal({ card, onClose, onChanged }) {
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  const resend = async () => {
+    setBusy(true);
+    setNotice("");
+    const res = await apiPost(`/api/v1/gift-cards/${card.id}/resend/`, {});
+    setBusy(false);
+    setNotice(res.ok ? `Resent to ${res.data.sent_to}.` : res.formError || "Couldn't resend.");
+  };
+
+  const deactivate = async () => {
+    if (!window.confirm("Deactivate this gift card? This cannot be undone.")) return;
+    setBusy(true);
+    const res = await apiPost(`/api/v1/gift-cards/${card.id}/deactivate/`, {});
+    setBusy(false);
+    if (res.ok) {
+      setNotice("Deactivated.");
+      onChanged();
+    } else {
+      setNotice(res.formError || "Couldn't deactivate.");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl max-h-[85vh] overflow-y-auto">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-charcoal-navy">Gift card &bull;&bull;&bull;&bull;{card.code_last4}</h2>
+          <StatusBadge status={card.status} />
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <div className="text-xs text-[#78746A]">Current balance</div>
+            <div className="font-semibold text-charcoal-navy">{money(card.current_balance, card.currency_code)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-[#78746A]">Initial value</div>
+            <div className="font-semibold text-charcoal-navy">{money(card.initial_balance, card.currency_code)}</div>
+          </div>
+          <div>
+            <div className="text-xs text-[#78746A]">Expiry</div>
+            <div className="text-charcoal-navy">{card.expires_at ? new Date(card.expires_at).toLocaleDateString() : "Never expires"}</div>
+          </div>
+          <div>
+            <div className="text-xs text-[#78746A]">Issued</div>
+            <div className="text-charcoal-navy">{new Date(card.created_at).toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <h3 className="mb-2 text-sm font-semibold text-charcoal-navy">Activity history</h3>
+        <div className="mb-4 max-h-56 overflow-y-auto rounded-lg border border-[#E7E4DC]">
+          <table className="w-full text-xs">
+            <thead className="bg-[#FAF9F6] text-[#78746A]">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium">Date</th>
+                <th className="px-3 py-2 text-left font-medium">Type</th>
+                <th className="px-3 py-2 text-left font-medium">Order</th>
+                <th className="px-3 py-2 text-right font-medium">Amount</th>
+                <th className="px-3 py-2 text-right font-medium">Balance after</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(card.transactions || []).length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-3 py-4 text-center text-[#A8A49C]">
+                    No activity yet
+                  </td>
+                </tr>
+              )}
+              {(card.transactions || []).map((t) => (
+                <tr key={t.id} className="border-t border-[#E7E4DC]">
+                  <td className="px-3 py-2">{new Date(t.created_at).toLocaleDateString()}</td>
+                  <td className="px-3 py-2 capitalize">{t.transaction_type}</td>
+                  <td className="px-3 py-2">{t.order ? t.order.slice(0, 8) : "—"}</td>
+                  <td className="px-3 py-2 text-right">{money(t.amount, card.currency_code)}</td>
+                  <td className="px-3 py-2 text-right">{money(t.balance_after, card.currency_code)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {notice && <p className="mb-3 text-xs text-[#5A5750]">{notice}</p>}
+
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-2 text-sm font-semibold text-charcoal-navy hover:bg-[#FAF9F6]"
+          >
+            Close
+          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={resend}
+              className="rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-2 text-sm font-semibold text-charcoal-navy hover:bg-[#FAF9F6] disabled:opacity-60"
+            >
+              Resend code
+            </button>
+            {card.status === "active" && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={deactivate}
+                className="rounded-lg bg-red-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+              >
+                Deactivate
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminGiftCards() {
   const navigate = useNavigate();
+  const canManage = useCan("gift_cards.manage");
+
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
+  const [sort, setSort] = useState("created_desc");
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
+  const [showCreate, setShowCreate] = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const ordering = { created_desc: "-created_at", created_asc: "created_at", balance_desc: "-current_balance", balance_asc: "current_balance" }[sort];
+
+  const load = async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (search.trim()) params.set("search", search.trim());
+    if (status !== "all") params.set("status", status);
+    params.set("ordering", ordering);
+    const res = await apiGet(`/api/v1/gift-cards/?${params}`);
+    if (res.ok && Array.isArray(res.data?.results || res.data)) {
+      setCards(res.data?.results || res.data);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setPage(1);
+      load();
+    }, 250); // debounce search
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, status, ordering]);
+
+  const pageCount = Math.max(Math.ceil(cards.length / pageSize), 1);
+  const pageRows = useMemo(
+    () => cards.slice((page - 1) * pageSize, page * pageSize),
+    [cards, page, pageSize]
+  );
+
+  const exportCsv = async () => {
+    const params = new URLSearchParams();
+    if (search.trim()) params.set("search", search.trim());
+    if (status !== "all") params.set("status", status);
+    params.set("ordering", ordering);
+    const res = await apiDownload(`/api/v1/gift-cards/export/?${params}`);
+    if (!res.ok) return;
+    const url = URL.createObjectURL(res.blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "gift-cards.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="min-h-screen bg-white text-charcoal-navy">
@@ -118,6 +445,7 @@ export default function AdminGiftCards() {
               </button>
               <button
                 type="button"
+                onClick={exportCsv}
                 className="flex items-center gap-1.5 rounded-lg border border-[#D4D0C5] bg-white px-3 py-1.5 text-xs sm:text-sm font-semibold text-charcoal-navy hover:bg-[#FAF9F6] transition shadow-2xs cursor-pointer"
               >
                 <svg
@@ -133,30 +461,32 @@ export default function AdminGiftCards() {
                 </svg>
                 Export
               </button>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-[#1A1916] transition cursor-pointer"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="h-4 w-4"
+              {canManage && (
+                <button
+                  type="button"
+                  onClick={() => setShowCreate(true)}
+                  className="flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-[#1A1916] transition cursor-pointer"
                 >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                Create gift card
-              </button>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="h-4 w-4"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Create gift card
+                </button>
+              )}
             </div>
           </div>
 
           {/* Table Container Card */}
           <div className="rounded-2xl border border-[#E7E4DC] bg-white shadow-xs overflow-hidden">
-            {/* Search and Filters Toolbar (Visual UI) */}
+            {/* Search and Filters Toolbar */}
             <div className="p-3.5 sm:p-4 border-b border-[#E7E4DC] flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-              {/* Search input */}
               <div className="relative flex-1 max-w-md">
                 <svg
                   viewBox="0 0 24 24"
@@ -170,46 +500,39 @@ export default function AdminGiftCards() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search and filter"
-                  defaultValue=""
+                  placeholder="Search by code ending or customer"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="h-9 w-full rounded-lg border border-[#D4D0C5] bg-white pl-9 pr-3 text-xs sm:text-sm text-charcoal-navy outline-none placeholder:text-[#A8A49C] focus:border-charcoal-navy focus:ring-1 focus:ring-charcoal-navy"
                 />
               </div>
 
-              {/* Filter and Sort Dropdowns */}
               <div className="flex flex-wrap items-center gap-2">
-                {/* Status Filter */}
                 <div className="flex items-center gap-1.5">
-                  <label
-                    htmlFor="status-filter"
-                    className="text-xs text-[#78746A] font-medium hidden sm:inline"
-                  >
+                  <label htmlFor="status-filter" className="text-xs text-[#78746A] font-medium hidden sm:inline">
                     Status:
                   </label>
                   <select
                     id="status-filter"
-                    defaultValue="all"
-                    className="h-9 rounded-lg border border-[#D4D0C5] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-charcoal-navy cursor-pointer"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className={`${inputClass} cursor-pointer`}
                   >
                     <option value="all">All statuses</option>
                     <option value="active">Active</option>
-                    <option value="deactivated">Deactivated</option>
-                    <option value="expired">Expired</option>
+                    <option value="disabled">Deactivated</option>
                   </select>
                 </div>
 
-                {/* Sort By */}
                 <div className="flex items-center gap-1.5">
-                  <label
-                    htmlFor="sort-by"
-                    className="text-xs text-[#78746A] font-medium hidden sm:inline"
-                  >
+                  <label htmlFor="sort-by" className="text-xs text-[#78746A] font-medium hidden sm:inline">
                     Sort:
                   </label>
                   <select
                     id="sort-by"
-                    defaultValue="created_desc"
-                    className="h-9 rounded-lg border border-[#D4D0C5] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-charcoal-navy cursor-pointer"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value)}
+                    className={`${inputClass} cursor-pointer`}
                   >
                     <option value="created_desc">Date (newest first)</option>
                     <option value="created_asc">Date (oldest first)</option>
@@ -217,31 +540,12 @@ export default function AdminGiftCards() {
                     <option value="balance_asc">Balance (low to high)</option>
                   </select>
                 </div>
-
-                {/* Table Views / Columns Icon Button */}
-                <button
-                  type="button"
-                  title="Table columns & view"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-[#5A5750] hover:bg-[#FAF9F6] transition shrink-0 cursor-pointer"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    className="h-4 w-4"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" />
-                    <line x1="9" y1="3" x2="9" y2="21" />
-                    <line x1="15" y1="3" x2="15" y2="21" />
-                  </svg>
-                </button>
               </div>
             </div>
 
             {/* Status Badges Showcase Bar */}
             <div className="px-4 py-2 bg-[#FAF9F6] border-b border-[#E7E4DC] flex flex-wrap items-center justify-between text-xs text-[#78746A] gap-2">
-              <span className="font-medium">Status classifications:</span>
+              <span className="font-medium">{loading ? "Loading..." : `${cards.length} gift card${cards.length === 1 ? "" : "s"}`}</span>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E3F5EC] border border-[#B7EBD0] px-2.5 py-0.5 text-xs font-medium text-[#008060]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#008060]" />
@@ -251,67 +555,80 @@ export default function AdminGiftCards() {
                   <span className="h-1.5 w-1.5 rounded-full bg-[#78746A]" />
                   Deactivated
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FDECEC] border border-[#F8D7DA] px-2.5 py-0.5 text-xs font-medium text-[#B42318]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#B42318]" />
-                  Expired
-                </span>
               </div>
             </div>
 
-            {/* Gift Cards Table Structure with Empty State */}
+            {/* Gift Cards Table */}
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-[#78746A]">
-                    <th className="w-10 px-4 py-3">
-                      <input
-                        type="checkbox"
-                        disabled
-                        aria-label="Select all gift cards"
-                        className="h-4 w-4 rounded border-[#D4D0C5] text-charcoal-navy focus:ring-charcoal-navy opacity-60 cursor-not-allowed"
-                      />
-                    </th>
                     <th className="px-4 py-3 font-semibold">Code ending</th>
                     <th className="px-4 py-3 font-semibold">Status</th>
                     <th className="px-4 py-3 font-semibold">Customer</th>
-                    <th className="px-4 py-3 font-semibold">Recipient</th>
+                    <th className="px-4 py-3 font-semibold">Currency</th>
                     <th className="px-4 py-3 font-semibold">Created</th>
-                    <th className="px-4 py-3 font-semibold text-right">
-                      Current / Initial Balance
-                    </th>
+                    <th className="px-4 py-3 font-semibold text-right">Current / Initial Balance</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td colSpan={7} className="p-12 sm:p-16 text-center">
-                      <div className="mx-auto flex max-w-md flex-col items-center justify-center">
-                        <GiftCardsIllustration className="h-32 w-44 sm:h-36 sm:w-48 mb-4" />
-                        <h2 className="text-base sm:text-lg font-semibold text-charcoal-navy mb-1.5">
-                          No gift cards issued yet
-                        </h2>
-                        <p className="text-xs sm:text-sm text-[#78746A] max-w-sm leading-relaxed mb-5">
-                          Issue a gift card directly to a customer or start selling digital gift
-                          card products in your store.
-                        </p>
-                        <button
-                          type="button"
-                          className="inline-flex items-center justify-center rounded-lg bg-charcoal-navy px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer"
-                        >
-                          Create gift card
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                  {pageRows.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-12 sm:p-16 text-center">
+                        <div className="mx-auto flex max-w-md flex-col items-center justify-center">
+                          <GiftCardsIllustration className="h-32 w-44 sm:h-36 sm:w-48 mb-4" />
+                          <h2 className="text-base sm:text-lg font-semibold text-charcoal-navy mb-1.5">
+                            No gift cards {search || status !== "all" ? "match these filters" : "issued yet"}
+                          </h2>
+                          <p className="text-xs sm:text-sm text-[#78746A] max-w-sm leading-relaxed mb-5">
+                            Issue a gift card directly to a customer or start selling digital gift
+                            card products in your store.
+                          </p>
+                          {canManage && (
+                            <button
+                              type="button"
+                              onClick={() => setShowCreate(true)}
+                              className="inline-flex items-center justify-center rounded-lg bg-charcoal-navy px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer"
+                            >
+                              Create gift card
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {pageRows.map((card) => (
+                    <tr
+                      key={card.id}
+                      onClick={() => setSelected(card)}
+                      className="border-b border-[#E7E4DC] last:border-0 hover:bg-[#FAF9F6] cursor-pointer"
+                    >
+                      <td className="px-4 py-3 font-mono">&bull;&bull;&bull;&bull;{card.code_last4}</td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={card.status} />
+                      </td>
+                      <td className="px-4 py-3">{card.customer || "—"}</td>
+                      <td className="px-4 py-3">{card.currency_code}</td>
+                      <td className="px-4 py-3">{new Date(card.created_at).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-right">
+                        {money(card.current_balance, card.currency_code)} / {money(card.initial_balance, card.currency_code)}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
 
-            {/* Pagination Controls Design */}
+            {/* Pagination Controls */}
             <div className="flex flex-wrap items-center justify-between border-t border-[#E7E4DC] px-4 py-3 text-xs sm:text-sm text-[#78746A] gap-3">
               <div className="flex items-center gap-2">
                 <span>Rows per page:</span>
                 <select
-                  defaultValue="10"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPage(1);
+                  }}
                   className="h-8 rounded-lg border border-[#D4D0C5] bg-white px-2 text-xs text-charcoal-navy outline-none focus:border-charcoal-navy cursor-pointer"
                 >
                   {[10, 25, 50, 100].map((sz) => (
@@ -323,21 +640,27 @@ export default function AdminGiftCards() {
               </div>
 
               <div className="flex items-center gap-3">
-                <span>0–0 of 0</span>
+                <span>
+                  {cards.length === 0
+                    ? "0–0 of 0"
+                    : `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, cards.length)} of ${cards.length}`}
+                </span>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
-                    disabled
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => p - 1)}
                     aria-label="Previous page"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-charcoal-navy opacity-40 cursor-not-allowed"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-charcoal-navy disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     ‹
                   </button>
                   <button
                     type="button"
-                    disabled
+                    disabled={page >= pageCount}
+                    onClick={() => setPage((p) => p + 1)}
                     aria-label="Next page"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-charcoal-navy opacity-40 cursor-not-allowed"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-charcoal-navy disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     ›
                   </button>
@@ -347,6 +670,20 @@ export default function AdminGiftCards() {
           </div>
         </main>
       </div>
+
+      {showCreate && (
+        <CreateGiftCardModal onClose={() => setShowCreate(false)} onCreated={load} />
+      )}
+      {selected && (
+        <GiftCardDetailModal
+          card={selected}
+          onClose={() => setSelected(null)}
+          onChanged={() => {
+            load();
+            setSelected(null);
+          }}
+        />
+      )}
     </div>
   );
 }
