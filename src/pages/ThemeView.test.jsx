@@ -45,7 +45,10 @@ describe("ThemeView", () => {
     await waitFor(() => expect(container.querySelector("iframe")).toBeTruthy());
     const frame = container.querySelector("iframe");
     const path = "/products/abc?back=%2Fcollections%2Fshoes%3Fpage%3D2";
-    fireEvent(window, new MessageEvent("message", { data: { type: "navigate", path }, source: frame.contentWindow }));
+    fireEvent(
+      window,
+      new MessageEvent("message", { data: { type: "navigate", path }, source: frame.contentWindow })
+    );
     await waitFor(() => expect(renderThemePage).toHaveBeenLastCalledWith("t1", path));
   });
 
@@ -53,19 +56,36 @@ describe("ThemeView", () => {
     const { container } = mount();
     await waitFor(() => expect(container.querySelector("iframe")).toBeTruthy());
     const send = (data) =>
-      fireEvent(window, new MessageEvent("message", { data, source: container.querySelector("iframe").contentWindow }));
+      fireEvent(
+        window,
+        new MessageEvent("message", {
+          data,
+          source: container.querySelector("iframe").contentWindow,
+        })
+      );
     send({ type: "navigate", path: "/collections/shoes" });
-    await waitFor(() => expect(renderThemePage).toHaveBeenLastCalledWith("t1", "/collections/shoes"));
+    await waitFor(() =>
+      expect(renderThemePage).toHaveBeenLastCalledWith("t1", "/collections/shoes")
+    );
     send({ type: "navigate", path: "/products/abc?back=/collections/shoes" });
-    await waitFor(() => expect(renderThemePage).toHaveBeenLastCalledWith("t1", "/products/abc?back=/collections/shoes"));
+    await waitFor(() =>
+      expect(renderThemePage).toHaveBeenLastCalledWith(
+        "t1",
+        "/products/abc?back=/collections/shoes"
+      )
+    );
     send({ type: "back", fallback: "/collections/all" });
-    await waitFor(() => expect(renderThemePage).toHaveBeenLastCalledWith("t1", "/collections/shoes"));
+    await waitFor(() =>
+      expect(renderThemePage).toHaveBeenLastCalledWith("t1", "/collections/shoes")
+    );
     send({ type: "back", fallback: "/collections/all" });
     await waitFor(() => expect(renderThemePage).toHaveBeenLastCalledWith("t1", "/"));
   });
 
   it("falls back to ?back= when nothing was visited before", () => {
-    expect(backTarget("/products/abc?back=/search?q=hat", "/collections/all")).toBe("/search?q=hat");
+    expect(backTarget("/products/abc?back=/search?q=hat", "/collections/all")).toBe(
+      "/search?q=hat"
+    );
     expect(backTarget("/products/abc", "")).toBe("/collections/all");
     expect(backTarget("/products/abc?back=//evil.com", "")).toBe("/collections/all");
   });

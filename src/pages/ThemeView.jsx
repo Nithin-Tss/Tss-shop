@@ -8,7 +8,8 @@ import { renderThemePage } from "@/lib/themeApi";
 // The theme is drawn in a sandboxed frame whose own history never grows, so the frame asks us to go back.
 export function backTarget(currentPath, fallback) {
   const at = currentPath.indexOf("?");
-  const fromPath = at < 0 ? null : new URLSearchParams(currentPath.slice(at + 1).split("#")[0]).get("back");
+  const fromPath =
+    at < 0 ? null : new URLSearchParams(currentPath.slice(at + 1).split("#")[0]).get("back");
   const target = fromPath || fallback || "/collections/all";
   // Only store paths: never follow an address that points elsewhere
   return target.startsWith("/") && !target.startsWith("//") ? target : "/collections/all";
@@ -61,7 +62,11 @@ export default function ThemeView() {
         const { path: current, depth } = stateRef.current;
         // Pages visited here: step back through them. Opened straight on a product: use ?back=.
         if (depth > 0) navigate(-1);
-        else navigate({ search: `?p=${encodeURIComponent(backTarget(current, message.fallback))}` }, { replace: true });
+        else
+          navigate(
+            { search: `?p=${encodeURIComponent(backTarget(current, message.fallback))}` },
+            { replace: true }
+          );
       }
     }
     window.addEventListener("message", onMessage);
