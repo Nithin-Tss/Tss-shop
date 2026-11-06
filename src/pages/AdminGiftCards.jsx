@@ -96,7 +96,9 @@ const STATUS_BADGE = {
 function StatusBadge({ status }) {
   const cls = STATUS_BADGE[status] || STATUS_BADGE.disabled;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}`}
+    >
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {status === "active" ? "Active" : "Deactivated"}
     </span>
@@ -112,7 +114,12 @@ function money(amount, currency) {
 }
 
 function CreateGiftCardModal({ onClose, onCreated }) {
-  const [form, setForm] = useState({ initial_balance: "", currency_code: "", customer: "", note: "" });
+  const [form, setForm] = useState({
+    initial_balance: "",
+    currency_code: "",
+    customer: "",
+    note: "",
+  });
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [issuedCode, setIssuedCode] = useState(null);
@@ -181,7 +188,9 @@ function CreateGiftCardModal({ onClose, onCreated }) {
                 <input
                   className={`${inputClass} w-full`}
                   value={form.currency_code}
-                  onChange={(e) => setForm({ ...form, currency_code: e.target.value.toUpperCase() })}
+                  onChange={(e) =>
+                    setForm({ ...form, currency_code: e.target.value.toUpperCase() })
+                  }
                   placeholder="AUD"
                   maxLength={3}
                 />
@@ -190,7 +199,9 @@ function CreateGiftCardModal({ onClose, onCreated }) {
                 )}
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-[#78746A]">Customer id (optional)</label>
+                <label className="mb-1 block text-xs font-medium text-[#78746A]">
+                  Customer id (optional)
+                </label>
                 <input
                   className={`${inputClass} w-full`}
                   value={form.customer}
@@ -200,7 +211,9 @@ function CreateGiftCardModal({ onClose, onCreated }) {
                 {errors.customer && <p className="mt-1 text-xs text-red-600">{errors.customer}</p>}
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-[#78746A]">Note (optional)</label>
+                <label className="mb-1 block text-xs font-medium text-[#78746A]">
+                  Note (optional)
+                </label>
                 <input
                   className={`${inputClass} w-full`}
                   value={form.note}
@@ -261,26 +274,36 @@ function GiftCardDetailModal({ card, onClose, onChanged }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl max-h-[85vh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-charcoal-navy">Gift card &bull;&bull;&bull;&bull;{card.code_last4}</h2>
+          <h2 className="text-base font-semibold text-charcoal-navy">
+            Gift card &bull;&bull;&bull;&bull;{card.code_last4}
+          </h2>
           <StatusBadge status={card.status} />
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
           <div>
             <div className="text-xs text-[#78746A]">Current balance</div>
-            <div className="font-semibold text-charcoal-navy">{money(card.current_balance, card.currency_code)}</div>
+            <div className="font-semibold text-charcoal-navy">
+              {money(card.current_balance, card.currency_code)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-[#78746A]">Initial value</div>
-            <div className="font-semibold text-charcoal-navy">{money(card.initial_balance, card.currency_code)}</div>
+            <div className="font-semibold text-charcoal-navy">
+              {money(card.initial_balance, card.currency_code)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-[#78746A]">Expiry</div>
-            <div className="text-charcoal-navy">{card.expires_at ? new Date(card.expires_at).toLocaleDateString() : "Never expires"}</div>
+            <div className="text-charcoal-navy">
+              {card.expires_at ? new Date(card.expires_at).toLocaleDateString() : "Never expires"}
+            </div>
           </div>
           <div>
             <div className="text-xs text-[#78746A]">Issued</div>
-            <div className="text-charcoal-navy">{new Date(card.created_at).toLocaleDateString()}</div>
+            <div className="text-charcoal-navy">
+              {new Date(card.created_at).toLocaleDateString()}
+            </div>
           </div>
         </div>
 
@@ -310,7 +333,9 @@ function GiftCardDetailModal({ card, onClose, onChanged }) {
                   <td className="px-3 py-2 capitalize">{t.transaction_type}</td>
                   <td className="px-3 py-2">{t.order ? t.order.slice(0, 8) : "—"}</td>
                   <td className="px-3 py-2 text-right">{money(t.amount, card.currency_code)}</td>
-                  <td className="px-3 py-2 text-right">{money(t.balance_after, card.currency_code)}</td>
+                  <td className="px-3 py-2 text-right">
+                    {money(t.balance_after, card.currency_code)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -367,7 +392,12 @@ export default function AdminGiftCards() {
   const [showCreate, setShowCreate] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  const ordering = { created_desc: "-created_at", created_asc: "created_at", balance_desc: "-current_balance", balance_asc: "current_balance" }[sort];
+  const ordering = {
+    created_desc: "-created_at",
+    created_asc: "created_at",
+    balance_desc: "-current_balance",
+    balance_asc: "current_balance",
+  }[sort];
 
   const load = async () => {
     setLoading(true);
@@ -509,7 +539,10 @@ export default function AdminGiftCards() {
 
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-1.5">
-                  <label htmlFor="status-filter" className="text-xs text-[#78746A] font-medium hidden sm:inline">
+                  <label
+                    htmlFor="status-filter"
+                    className="text-xs text-[#78746A] font-medium hidden sm:inline"
+                  >
                     Status:
                   </label>
                   <select
@@ -525,7 +558,10 @@ export default function AdminGiftCards() {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <label htmlFor="sort-by" className="text-xs text-[#78746A] font-medium hidden sm:inline">
+                  <label
+                    htmlFor="sort-by"
+                    className="text-xs text-[#78746A] font-medium hidden sm:inline"
+                  >
                     Sort:
                   </label>
                   <select
@@ -545,7 +581,11 @@ export default function AdminGiftCards() {
 
             {/* Status Badges Showcase Bar */}
             <div className="px-4 py-2 bg-[#FAF9F6] border-b border-[#E7E4DC] flex flex-wrap items-center justify-between text-xs text-[#78746A] gap-2">
-              <span className="font-medium">{loading ? "Loading..." : `${cards.length} gift card${cards.length === 1 ? "" : "s"}`}</span>
+              <span className="font-medium">
+                {loading
+                  ? "Loading..."
+                  : `${cards.length} gift card${cards.length === 1 ? "" : "s"}`}
+              </span>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E3F5EC] border border-[#B7EBD0] px-2.5 py-0.5 text-xs font-medium text-[#008060]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#008060]" />
@@ -568,7 +608,9 @@ export default function AdminGiftCards() {
                     <th className="px-4 py-3 font-semibold">Customer</th>
                     <th className="px-4 py-3 font-semibold">Currency</th>
                     <th className="px-4 py-3 font-semibold">Created</th>
-                    <th className="px-4 py-3 font-semibold text-right">Current / Initial Balance</th>
+                    <th className="px-4 py-3 font-semibold text-right">
+                      Current / Initial Balance
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -578,7 +620,8 @@ export default function AdminGiftCards() {
                         <div className="mx-auto flex max-w-md flex-col items-center justify-center">
                           <GiftCardsIllustration className="h-32 w-44 sm:h-36 sm:w-48 mb-4" />
                           <h2 className="text-base sm:text-lg font-semibold text-charcoal-navy mb-1.5">
-                            No gift cards {search || status !== "all" ? "match these filters" : "issued yet"}
+                            No gift cards{" "}
+                            {search || status !== "all" ? "match these filters" : "issued yet"}
                           </h2>
                           <p className="text-xs sm:text-sm text-[#78746A] max-w-sm leading-relaxed mb-5">
                             Issue a gift card directly to a customer or start selling digital gift
@@ -603,15 +646,20 @@ export default function AdminGiftCards() {
                       onClick={() => setSelected(card)}
                       className="border-b border-[#E7E4DC] last:border-0 hover:bg-[#FAF9F6] cursor-pointer"
                     >
-                      <td className="px-4 py-3 font-mono">&bull;&bull;&bull;&bull;{card.code_last4}</td>
+                      <td className="px-4 py-3 font-mono">
+                        &bull;&bull;&bull;&bull;{card.code_last4}
+                      </td>
                       <td className="px-4 py-3">
                         <StatusBadge status={card.status} />
                       </td>
                       <td className="px-4 py-3">{card.customer || "—"}</td>
                       <td className="px-4 py-3">{card.currency_code}</td>
-                      <td className="px-4 py-3">{new Date(card.created_at).toLocaleDateString()}</td>
+                      <td className="px-4 py-3">
+                        {new Date(card.created_at).toLocaleDateString()}
+                      </td>
                       <td className="px-4 py-3 text-right">
-                        {money(card.current_balance, card.currency_code)} / {money(card.initial_balance, card.currency_code)}
+                        {money(card.current_balance, card.currency_code)} /{" "}
+                        {money(card.initial_balance, card.currency_code)}
                       </td>
                     </tr>
                   ))}
@@ -671,9 +719,7 @@ export default function AdminGiftCards() {
         </main>
       </div>
 
-      {showCreate && (
-        <CreateGiftCardModal onClose={() => setShowCreate(false)} onCreated={load} />
-      )}
+      {showCreate && <CreateGiftCardModal onClose={() => setShowCreate(false)} onCreated={load} />}
       {selected && (
         <GiftCardDetailModal
           card={selected}
