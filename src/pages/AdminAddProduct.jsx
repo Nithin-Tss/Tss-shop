@@ -1404,19 +1404,41 @@ function VariantEditor({
   );
 }
 
-const BULK_COLUMNS = [
-  { key: "price", label: "Price (AUD)" },
-  { key: "compare_at_price", label: "Compare-at (AUD)" },
-  { key: "sku", label: "SKU" },
-  { key: "weight", label: "Weight" },
-  { key: "stock", label: "Available" },
+// Fields the backend supports today. Everything else stays in BULK_NOT_AVAILABLE_BY_GROUP
+// until the backend grows a field for it; move it up here the day it does.
+const BULK_FIELD_COLUMNS = [
+  { key: "price", label: "Price", group: "Pricing" },
+  { key: "compare_at_price", label: "Compare-at price", group: "Pricing" },
+  { key: "sku", label: "SKU", group: "Inventory" },
+  { key: "continue_selling", label: "Continue selling", group: "Inventory" },
+  { key: "weight", label: "Weight", group: "Shipping" },
 ];
-
+const BULK_COLUMN_GROUPS = [
+  "General",
+  "Pricing",
+  "Inventory",
+  "Shipping",
+  "Quantities by location",
+  "Publishing",
+];
+const BULK_NOT_AVAILABLE_BY_GROUP = {
+  Pricing: ["Cost per item", "Charge taxes", "Unit price"],
+  Inventory: ["Barcodes", "Track quantity", "Bin names"],
+  Shipping: [
+    "Package",
+    "Packed dimensions",
+    "Physical product",
+    "Harmonized system code",
+    "Country of origin",
+  ],
+  Publishing: ["Sales channels"],
+};
 function bulkError(key, value) {
   if (key === "price") return isMoney(value) ? "" : "Enter a price, like 12.50.";
   if (key === "compare_at_price")
     return value === "" || isMoney(value) ? "" : "Enter a price or leave it empty.";
   if (key === "sku") return value.trim() ? "" : "Enter a SKU.";
+  if (key === "continue_selling") return "";
   if (key === "weight")
     return value === "" || isWeight(value) ? "" : "Enter a weight of 0 or more.";
   return value === "" || isWhole(value) ? "" : "Whole number of 0 or more.";
@@ -1426,30 +1448,109 @@ function bulkError(key, value) {
 function BulkEditor({
   rows,
   options,
+  locations,
   location,
-  locationName,
   items,
   canSetStock,
+  productTitle,
+  productImage,
   onClose,
   onSaved,
 }) {
-  const stockColumn = canSetStock && location !== "all";
-  const available = BULK_COLUMNS.filter((c) => c.key !== "stock" || stockColumn);
-  const [columns, setColumns] = useState(() => ["price", "sku", ...(stockColumn ? ["stock"] : [])]);
+  const stockColumns = canSetStock
+    ? locations.flatMap((l) => [
+        {
+          key: `avail-${l.id}`,
+          label: `${l.name} - Available`,
+          locationId: l.id,
+          group: "Quantities by location",
+        },
+        {
+          key: `onhand-${l.id}`,
+          label: `${l.name} - On hand`,
+          locationId: l.id,
+          group: "Quantities by location",
+          readOnly: true,
+        },
+      ])
+    : [];
+  const allColumns = [...BULK_FIELD_COLUMNS, ...stockColumns];
+  const isAvailCol = (key) => key.startsWith("avail-");
+  const isOnHandCol = (key) => key.startsWith("onhand-");
+  const locIdOf = (key) => key.slice(key.indexOf("-") + 1);
+  const isNumericCol = (key) =>
+    key === "price" ||
+    key === "compare_at_price" ||
+    key === "weight" ||
+    isAvailCol(key) ||
+    isOnHandCol(key);
+  const TITLE_COL_WIDTH = 400;
+  const colWidthFor = (key) => {
+    if (key === "price") return 180;
+    if (key === "sku") return 400;
+    if (isAvailCol(key) || isOnHandCol(key)) return 260;
+    return 180;
+  };
+
+  const [columns, setColumns] = useState(() => {
+    const base = ["price", "sku"];
+    const preferredAvail =
+      stockColumns.find((c) => c.locationId === location && isAvailCol(c.key)) ||
+      stockColumns.find((c) => isAvailCol(c.key));
+    const preferredOnHand =
+      stockColumns.find((c) => c.locationId === location && isOnHandCol(c.key)) ||
+      stockColumns.find((c) => isOnHandCol(c.key));
+    if (preferredAvail) base.push(preferredAvail.key);
+    if (preferredOnHand) base.push(preferredOnHand.key);
+    return base;
+  });
+  const [columnsMenuOpen, setColumnsMenuOpen] = useState(false);
+  const [columnSearch, setColumnSearch] = useState("");
+  const shownColumns = allColumns.filter((c) => columns.includes(c.key));
+  const matchesSearch = (label) => label.toLowerCase().includes(columnSearch.trim().toLowerCase());
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!columnsMenuOpen) return undefined;
+    const onKey = (e) => e.key === "Escape" && setColumnsMenuOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [columnsMenuOpen]);
+
+  const titleLabel = (v) => {
+    const values = options.map((o) => v.options?.[o.name]).filter(Boolean);
+    const variantPart = values.length ? values.join(" / ") : "Default variant";
+    return `${productTitle || "Untitled product"} - ${variantPart}`;
+  };
+
   const [edits, setEdits] = useState({}); // { [variantId]: { [column]: value } }
   const [range, setRange] = useState(null); // { anchor: [row, col], focus: [row, col] }
+  const [extraCells, setExtraCells] = useState([]); // [[row, col], ...] from Ctrl/Alt-click
   const [mouseDown, setMouseDown] = useState(false);
+  const [focusedCell, setFocusedCell] = useState(null); // "r-c" of the cell currently focused
+  const [step, setStep] = useState("edit"); // "edit" | "confirm"
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState(null);
-  const shownColumns = available.filter((c) => columns.includes(c.key));
 
+  const trackedVariant = (v) => items.some((i) => i.variant === v.id);
   const original = (v, key) => {
-    if (key === "stock") {
-      const row = items.find((i) => i.variant === v.id && i.location === location);
+    if (isAvailCol(key)) {
+      const row = items.find((i) => i.variant === v.id && i.location === locIdOf(key));
       return row ? String(row.available) : "";
+    }
+    if (isOnHandCol(key)) {
+      const row = items.find((i) => i.variant === v.id && i.location === locIdOf(key));
+      return row && row.on_hand != null ? String(row.on_hand) : "";
     }
     if (key === "compare_at_price") return v.compare_at_price ?? "";
     if (key === "weight") return v.weight && Number(v.weight) > 0 ? v.weight : "";
+    if (key === "continue_selling") return v.continue_selling ? "true" : "false";
     return v[key] ?? "";
   };
   const valueOf = (v, key) => edits[v.id]?.[key] ?? original(v, key);
@@ -1469,6 +1570,12 @@ function BulkEditor({
         problems.push({ id: v.id, key, message: `${variantName(v, options)}: ${message}` });
     })
   );
+  // A hidden column can still hold an invalid edit (e.g. it was hidden after the error appeared);
+  // bring it back into view so the error is visible, rather than failing silently.
+  useEffect(() => {
+    const hidden = [...new Set(problems.map((p) => p.key))].filter((k) => !columns.includes(k));
+    if (hidden.length) setColumns((prev) => [...prev, ...hidden]);
+  }, [problems.map((p) => p.key).join(","), columns.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const inRange = (r, c) => {
     if (!range) return false;
@@ -1481,21 +1588,33 @@ function BulkEditor({
       c <= Math.max(c1, c2)
     );
   };
+  const isExtra = (r, c) => extraCells.some(([rr, cc]) => rr === r && cc === c);
+  const isSelected = (r, c) => inRange(r, c) || isExtra(r, c);
+  const selectedCells = () => {
+    const map = new Map();
+    if (range) {
+      const [r1, c1] = range.anchor;
+      const [r2, c2] = range.focus;
+      for (let r = Math.min(r1, r2); r <= Math.max(r1, r2); r += 1)
+        for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c += 1) map.set(`${r}-${c}`, [r, c]);
+    }
+    extraCells.forEach(([r, c]) => map.set(`${r}-${c}`, [r, c]));
+    return [...map.values()];
+  };
   const focusCell = (r, c) => document.querySelector(`[data-bulk-cell="${r}-${c}"]`)?.focus();
 
-  const fillDown = () => {
-    if (!range) return;
-    const [r1, c1] = range.anchor;
-    const [r2, c2] = range.focus;
-    const top = Math.min(r1, r2);
+  // Typing in the active cell updates every other selected cell in the same column
+  const editCell = (r, c, value) => {
+    const col = shownColumns[c];
+    if (!col || isOnHandCol(col.key)) return;
+    const targets = isSelected(r, c) ? selectedCells().filter(([, cc]) => cc === c) : [[r, c]];
     setEdits((prev) => {
       let next = prev;
-      for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c += 1) {
-        const key = shownColumns[c].key;
-        const value = valueOf(rows[top], key);
-        for (let r = top + 1; r <= Math.max(r1, r2); r += 1)
-          next = setCell(next, rows[r], key, value);
-      }
+      targets.forEach(([rr]) => {
+        const v = rows[rr];
+        if (v && !(isAvailCol(col.key) && !trackedVariant(v)))
+          next = setCell(next, v, col.key, value);
+      });
       return next;
     });
   };
@@ -1515,7 +1634,8 @@ function BulkEditor({
         line.forEach((value, dc) => {
           const v = rows[r + dr];
           const col = shownColumns[c + dc];
-          if (v && col) next = setCell(next, v, col.key, value.trim());
+          if (v && col && !isOnHandCol(col.key) && !(isAvailCol(col.key) && !trackedVariant(v)))
+            next = setCell(next, v, col.key, value.trim());
         })
       );
       return next;
@@ -1527,9 +1647,9 @@ function BulkEditor({
     if (!changedCount || window.confirm("Discard your bulk edits?")) onClose();
   };
 
-  // Saves only the edited fields, one variant at a time; failed rows keep their edits
-  const save = async () => {
-    if (saving || !changedCount || problems.length) return;
+  // Saves only the edited fields, one variant at a time; failed rows keep their edits so a
+  // retry only touches them (succeeded rows are pruned from `edits` below)
+  const doSave = async () => {
     setSaving(true);
     const saved = [];
     const failed = [];
@@ -1539,9 +1659,10 @@ function BulkEditor({
       if (!rowEdits) continue;
       const body = {};
       Object.entries(rowEdits).forEach(([key, value]) => {
-        if (key === "stock") return;
+        if (isAvailCol(key) || isOnHandCol(key)) return;
         if (key === "compare_at_price") body[key] = value === "" ? null : value;
         else if (key === "weight") body[key] = value === "" ? "0" : value;
+        else if (key === "continue_selling") body[key] = value === "true";
         else body[key] = key === "sku" ? value.trim() : value;
       });
       let message = "";
@@ -1550,15 +1671,24 @@ function BulkEditor({
         if (!res.ok)
           message = res.formError || Object.values(res.fieldErrors || {})[0] || res.error;
       }
-      if (!message && "stock" in rowEdits && rowEdits.stock !== "") {
-        const res = await apiPost("/api/v1/inventory/items/set/", {
-          variant: v.id,
-          location,
-          available: Number(rowEdits.stock),
-          reason: "correction",
-        });
-        if (res.ok) stockSaved = true;
-        else message = `Price and details saved; stock failed: ${res.error}`;
+      if (!message) {
+        const stockKeys = Object.keys(rowEdits).filter(isAvailCol);
+        for (const key of stockKeys) {
+          const value = rowEdits[key];
+          if (value === "") continue;
+          const locId = locIdOf(key);
+          const res = await apiPost("/api/v1/inventory/items/set/", {
+            variant: v.id,
+            location: locId,
+            available: Number(value),
+            reason: "correction",
+          });
+          if (res.ok) stockSaved = true;
+          else {
+            message = `Stock failed: ${res.error}`;
+            break;
+          }
+        }
       }
       if (message) failed.push({ id: v.id, name: variantName(v, options), message });
       else saved.push(v.id);
@@ -1567,152 +1697,329 @@ function BulkEditor({
       Object.fromEntries(Object.entries(prev).filter(([id]) => !saved.includes(id)))
     );
     setSaving(false);
+    setStep("edit");
     setResult({ saved: saved.length, failed });
     await onSaved({ stock: stockSaved, closing: !failed.length, count: saved.length });
   };
 
+  const openConfirm = () => {
+    if (saving || !changedCount || problems.length) return;
+    setResult(null);
+    setStep("confirm");
+  };
+  const retryFailed = () => doSave();
+
+  if (step === "confirm") {
+    const changes = [];
+    rows.forEach((v) => {
+      const rowEdits = edits[v.id];
+      if (!rowEdits) return;
+      Object.entries(rowEdits).forEach(([key, value]) => {
+        const col = allColumns.find((c) => c.key === key);
+        changes.push({
+          id: `${v.id}-${key}`,
+          variant: variantName(v, options),
+          label: col?.label || key,
+          from: original(v, key) || "(empty)",
+          to: value || "(empty)",
+        });
+      });
+    });
+    return (
+      <Modal
+        title="Review changes"
+        onClose={close}
+        wide
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setStep("edit")}
+              disabled={saving}
+              className={ghostButton}
+            >
+              Back
+            </button>
+            <button type="button" onClick={doSave} disabled={saving} className={primaryButton}>
+              {saving ? "Saving..." : "Save changes"}
+            </button>
+          </>
+        }
+      >
+        <p className="mb-3 text-sm text-slate-600">
+          {changes.length} change{changes.length === 1 ? "" : "s"} across{" "}
+          {Object.keys(edits).length} variant{Object.keys(edits).length === 1 ? "" : "s"}.
+        </p>
+        <ul className="max-h-96 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 text-sm">
+          {changes.map((c) => (
+            <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+              <span className="text-slate-700">
+                {c.variant} <span className="text-slate-400">·</span> {c.label}
+              </span>
+              <span className="font-medium text-slate-900">
+                {c.from} <span className="text-slate-400">→</span> {c.to}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Modal>
+    );
+  }
+
   return (
-    <Modal
-      title={`Bulk edit ${rows.length} variant${rows.length === 1 ? "" : "s"}`}
-      onClose={close}
-      wide
-      footer={
-        <>
-          <span className="mr-auto text-xs text-slate-500">
+    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+      <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-2.5">
+        <button type="button" onClick={close} disabled={saving} className={ghostButton}>
+          ← Back
+        </button>
+        <h2 className="text-sm font-semibold text-slate-900">
+          Editing {rows.length} variant{rows.length === 1 ? "" : "s"}
+        </h2>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-xs text-slate-500">
             {changedCount
               ? `${changedCount} changed cell${changedCount === 1 ? "" : "s"}`
               : "No changes yet"}
           </span>
-          <button type="button" onClick={close} disabled={saving} className={ghostButton}>
-            Cancel
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setColumnsMenuOpen((v) => !v)}
+              aria-expanded={columnsMenuOpen}
+              className={outlineButton}
+            >
+              Columns
+            </button>
+            {columnsMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setColumnsMenuOpen(false)} />
+                <div
+                  role="dialog"
+                  aria-label="Columns"
+                  className="fixed inset-y-0 right-0 z-50 flex w-80 flex-col border-l border-slate-200 bg-white shadow-xl"
+                >
+                  <div className="border-b border-slate-200 p-3">
+                    <input
+                      type="text"
+                      value={columnSearch}
+                      onChange={(e) => setColumnSearch(e.target.value)}
+                      placeholder="Search fields"
+                      autoFocus
+                      className="h-9 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10"
+                    />
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-2">
+                    {BULK_COLUMN_GROUPS.map((group) => {
+                      const groupColumns = allColumns.filter(
+                        (c) => c.group === group && matchesSearch(c.label)
+                      );
+                      const disabledLabels = (BULK_NOT_AVAILABLE_BY_GROUP[group] || []).filter(
+                        matchesSearch
+                      );
+                      const showTitleRow = group === "General" && matchesSearch("Title");
+                      if (!groupColumns.length && !disabledLabels.length && !showTitleRow)
+                        return null;
+                      return (
+                        <div key={group} className="mb-2">
+                          <p className="px-2 pb-1 pt-2 text-[11px] font-semibold uppercase text-slate-400">
+                            {group}
+                          </p>
+                          {showTitleRow && (
+                            <label className="flex items-center gap-2 rounded-lg px-2 py-1.5 opacity-80">
+                              <input type="checkbox" checked disabled className="h-3.5 w-3.5" />
+                              <span className="text-sm text-slate-800">Title</span>
+                            </label>
+                          )}
+                          {groupColumns.map((c) => (
+                            <label
+                              key={c.key}
+                              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={columns.includes(c.key)}
+                                onChange={(e) =>
+                                  setColumns((prev) =>
+                                    e.target.checked
+                                      ? [...prev, c.key]
+                                      : prev.filter((k) => k !== c.key)
+                                  )
+                                }
+                                className="h-3.5 w-3.5 accent-charcoal-navy"
+                              />
+                              <span className="text-sm text-slate-800">{c.label}</span>
+                            </label>
+                          ))}
+                          {disabledLabels.map((label) => (
+                            <label
+                              key={label}
+                              className="flex items-center gap-2 rounded-lg px-2 py-1.5 opacity-50"
+                            >
+                              <input type="checkbox" disabled className="h-3.5 w-3.5" />
+                              <span className="text-sm text-slate-600">
+                                {label} (Not available yet)
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           <button
             type="button"
-            onClick={save}
+            onClick={openConfirm}
             disabled={saving || !changedCount || problems.length > 0}
             className={primaryButton}
           >
             {saving ? "Saving..." : "Save"}
           </button>
-        </>
-      }
-    >
-      <div className="mb-3 flex flex-wrap items-center gap-3 text-xs">
-        <span className="font-semibold text-slate-700">Columns:</span>
-        {available.map((c) => (
-          <label key={c.key} className="flex items-center gap-1.5">
-            <input
-              type="checkbox"
-              checked={columns.includes(c.key)}
-              onChange={(e) =>
-                setColumns((prev) =>
-                  e.target.checked ? [...prev, c.key] : prev.filter((k) => k !== c.key)
-                )
-              }
-              className="h-3.5 w-3.5 accent-charcoal-navy"
-            />
-            {c.key === "stock" ? `Available at ${locationName}` : c.label}
-          </label>
-        ))}
-        <button
-          type="button"
-          onClick={fillDown}
-          disabled={!range}
-          className={`${outlineButton} ml-auto`}
-        >
-          Fill down (Ctrl+D)
-        </button>
+        </div>
       </div>
-      {!stockColumn && (
-        <p className="mb-2 text-xs text-slate-500">
-          {canSetStock
-            ? "Choose a specific location above the table to edit stock here."
-            : "Your role can't change stock."}
+
+      {canSetStock && !stockColumns.length && (
+        <p className="border-b border-slate-200 px-4 py-1.5 text-xs text-slate-500">
+          No locations to show stock for.
         </p>
       )}
-      <p className="mb-2 text-xs text-slate-500">
-        Tab moves right, Enter moves down. Shift+click or drag to select cells, then Fill down.
-        Paste rows copied from a spreadsheet.
-      </p>
+      {problems.length > 0 && (
+        <p className="border-b border-red-200 bg-red-50 px-4 py-1.5 text-xs font-semibold text-red-600">
+          Update the invalid values, then save again.
+        </p>
+      )}
+
       <div
-        className="overflow-x-auto rounded-lg border border-slate-200"
+        className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-x-contain"
+        style={{ scrollPaddingLeft: TITLE_COL_WIDTH }}
         onMouseUp={() => setMouseDown(false)}
       >
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-semibold text-slate-600">
+        <table
+          className="border-collapse text-sm"
+          style={{ width: "max-content", tableLayout: "fixed" }}
+        >
+          <colgroup>
+            <col style={{ width: TITLE_COL_WIDTH }} />
+            {shownColumns.map((c) => (
+              <col key={c.key} style={{ width: colWidthFor(c.key) }} />
+            ))}
+          </colgroup>
+          <thead>
             <tr>
-              <th className="px-3 py-2">Variant</th>
+              <th className="sticky left-0 top-0 z-20 h-9 whitespace-nowrap border border-slate-200 border-r-2 border-r-slate-300 bg-slate-50 px-3 text-left font-semibold text-slate-900">
+                Title
+              </th>
               {shownColumns.map((c) => (
-                <th key={c.key} className="px-2 py-2">
-                  {c.key === "stock" ? `Available at ${locationName}` : c.label}
+                <th
+                  key={c.key}
+                  className={`sticky top-0 z-10 h-9 whitespace-nowrap border border-slate-200 bg-slate-50 px-2 font-semibold text-slate-900 ${isNumericCol(c.key) ? "text-right" : "text-left"}`}
+                >
+                  {c.key === "price" ? (
+                    <>
+                      Price <span className="font-normal text-slate-400">AUD</span>
+                    </>
+                  ) : (
+                    c.label
+                  )}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((v, r) => (
-              <tr key={v.id} className="border-t border-slate-100">
-                <td className="whitespace-nowrap px-3 py-1.5 text-slate-700">
-                  {variantName(v, options)}
+              <tr key={v.id}>
+                <td className="sticky left-0 z-[5] h-9 whitespace-nowrap border border-slate-200 border-r-2 border-r-slate-300 bg-white px-3">
+                  <div className="flex items-center gap-2">
+                    {productImage ? (
+                      <img
+                        src={productImage}
+                        alt=""
+                        className="h-6 w-6 shrink-0 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="h-6 w-6 shrink-0 rounded bg-slate-100" aria-hidden="true" />
+                    )}
+                    <span className="min-w-0 truncate text-slate-500">{titleLabel(v)}</span>
+                  </div>
                 </td>
                 {shownColumns.map((col, c) => {
+                  const isAvail = isAvailCol(col.key);
+                  const isOnHand = isOnHandCol(col.key);
+                  if ((isAvail || isOnHand) && !trackedVariant(v)) {
+                    return (
+                      <td
+                        key={col.key}
+                        className="h-9 border border-slate-200 px-2 text-center text-slate-400"
+                      >
+                        -
+                      </td>
+                    );
+                  }
                   const value = valueOf(v, col.key);
                   const edited = edits[v.id] && col.key in edits[v.id];
                   const message = edited ? bulkError(col.key, value) : "";
+                  const cellKey = `${r}-${c}`;
+                  const isFocused = focusedCell === cellKey;
+                  const showArrow = isAvail && edited && !isFocused;
+                  const from = Number(original(v, col.key) || 0);
+                  const to = Number(value || 0);
+                  const selected = isSelected(r, c);
                   return (
                     <td
                       key={col.key}
-                      className={`px-1.5 py-1 ${inRange(r, c) ? "bg-blue-50" : ""}`}
+                      className={`relative h-9 border border-slate-200 p-0 ${selected ? "bg-blue-50" : ""} ${isFocused ? "ring-2 ring-inset ring-blue-600" : selected ? "ring-1 ring-inset ring-blue-200" : ""}`}
                     >
-                      <div className="relative">
+                      {isOnHand ? (
                         <input
-                          data-bulk-cell={`${r}-${c}`}
+                          data-bulk-cell={cellKey}
                           value={value}
-                          aria-label={`${col.label} for ${variantName(v, options)}`}
+                          readOnly
+                          aria-label={`${col.label} for ${titleLabel(v)}`}
+                          className="h-full w-full border-0 bg-transparent px-2 text-right text-slate-500 outline-none"
+                        />
+                      ) : col.key === "continue_selling" ? (
+                        <select
+                          data-bulk-cell={cellKey}
+                          value={value || "false"}
+                          aria-label={`${col.label} for ${titleLabel(v)}`}
+                          onChange={(e) => editCell(r, c, e.target.value)}
+                          onMouseDown={(e) => startSelect(e, r, c)}
+                          onFocus={() => onCellFocus(r, c)}
+                          onBlur={() => setFocusedCell(null)}
+                          className={`h-full w-full border-0 px-2 text-slate-900 outline-none ${edited ? "bg-amber-50" : "bg-transparent"}`}
+                        >
+                          <option value="false">No</option>
+                          <option value="true">Yes</option>
+                        </select>
+                      ) : (
+                        <input
+                          data-bulk-cell={cellKey}
+                          value={showArrow ? `${from} → ${to}` : value}
+                          readOnly={showArrow}
+                          aria-label={`${col.label} for ${titleLabel(v)}`}
                           aria-invalid={Boolean(message)}
                           title={message || undefined}
-                          placeholder={col.key === "stock" ? "Not stocked" : ""}
-                          onChange={(e) =>
-                            setEdits((prev) => setCell(prev, v, col.key, e.target.value))
-                          }
-                          onMouseDown={(e) => {
-                            setMouseDown(true);
-                            setRange((prev) =>
-                              e.shiftKey && prev
-                                ? { ...prev, focus: [r, c] }
-                                : { anchor: [r, c], focus: [r, c] }
-                            );
-                          }}
-                          onMouseEnter={() =>
-                            mouseDown && setRange((prev) => prev && { ...prev, focus: [r, c] })
-                          }
-                          onFocus={() =>
-                            !mouseDown &&
-                            setRange((prev) =>
-                              prev && inRange(r, c) ? prev : { anchor: [r, c], focus: [r, c] }
-                            )
-                          }
+                          placeholder={isAvail ? "Not stocked" : ""}
+                          onChange={(e) => editCell(r, c, e.target.value)}
+                          onMouseDown={(e) => startSelect(e, r, c)}
+                          onMouseEnter={() => onCellMouseEnter(r, c)}
+                          onFocus={() => onCellFocus(r, c)}
+                          onBlur={() => setFocusedCell(null)}
                           onPaste={(e) => paste(e, r, c)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              focusCell(r + (e.shiftKey ? -1 : 1), c);
-                            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
-                              e.preventDefault();
-                              fillDown();
-                            }
-                          }}
-                          className={`${cellInput} min-w-24 ${edited ? "border-amber-400 bg-amber-50" : ""} ${message ? "border-red-500" : ""}`}
+                          onKeyDown={(e) => onCellKeyDown(e, r, c)}
+                          className={`h-full w-full border-0 px-2 text-slate-900 outline-none ${isNumericCol(col.key) ? "text-right" : ""} ${edited ? "bg-amber-50" : "bg-transparent"} ${message ? "text-red-600" : ""} ${showArrow ? (to > from ? "text-emerald-700" : to < from ? "text-red-700" : "") : ""}`}
                         />
-                        {edited && (
-                          <span
-                            aria-hidden
-                            className="absolute right-1 top-0.5 text-[10px] text-amber-600"
-                          >
-                            ●
-                          </span>
-                        )}
-                      </div>
+                      )}
+                      {edited && !showArrow && (
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute right-1 top-0.5 text-[10px] text-amber-600"
+                        >
+                          ●
+                        </span>
+                      )}
                     </td>
                   );
                 })}
@@ -1721,42 +2028,112 @@ function BulkEditor({
           </tbody>
         </table>
       </div>
-      {problems.length > 0 && (
-        <ul role="alert" className="mt-3 list-disc space-y-0.5 pl-5 text-xs text-red-600">
-          {problems.map((p) => (
-            <li key={`${p.id}-${p.key}`}>{p.message}</li>
-          ))}
-        </ul>
-      )}
-      {result && (
-        <div role="status" className="mt-3 text-sm">
-          <p className="text-emerald-700">
-            {result.saved} variant{result.saved === 1 ? "" : "s"} saved.
-          </p>
-          {result.failed.length > 0 && (
-            <>
-              <p className="mt-1 font-semibold text-red-700">
-                {result.failed.length} failed. Their edits are kept so you can fix them and save
-                again:
+
+      {(problems.length > 0 || result) && (
+        <div className="max-h-40 overflow-y-auto border-t border-slate-200 px-4 py-2 text-xs">
+          {problems.length > 0 && (
+            <ul role="alert" className="list-disc space-y-0.5 pl-5 text-red-600">
+              {problems.map((p) => (
+                <li key={`${p.id}-${p.key}`}>{p.message}</li>
+              ))}
+            </ul>
+          )}
+          {result && (
+            <div role="status" className="text-sm">
+              <p className="text-emerald-700">
+                {result.saved} variant{result.saved === 1 ? "" : "s"} saved.
               </p>
-              <ul className="list-disc pl-5 text-red-700">
-                {result.failed.map((f) => (
-                  <li key={f.id}>
-                    {f.name}: {f.message}
-                  </li>
-                ))}
-              </ul>
-            </>
+              {result.failed.length > 0 && (
+                <>
+                  <p className="mt-1 font-semibold text-red-700">
+                    {result.failed.length} failed. Their edits are kept so you can fix them:
+                  </p>
+                  <ul className="list-disc pl-5 text-red-700">
+                    {result.failed.map((f) => (
+                      <li key={f.id}>
+                        {f.name}: {f.message}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={retryFailed}
+                    disabled={saving}
+                    className={`${outlineButton} mt-2`}
+                  >
+                    {saving ? "Retrying..." : `Retry ${result.failed.length} failed`}
+                  </button>
+                </>
+              )}
+            </div>
           )}
         </div>
       )}
-    </Modal>
+    </div>
   );
+
+  function startSelect(e, r, c) {
+    setMouseDown(true);
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      e.preventDefault();
+      setExtraCells((prev) =>
+        prev.some(([rr, cc]) => rr === r && cc === c)
+          ? prev.filter(([rr, cc]) => !(rr === r && cc === c))
+          : [...prev, [r, c]]
+      );
+      return;
+    }
+    setExtraCells([]);
+    setRange((prev) =>
+      e.shiftKey && prev ? { ...prev, focus: [r, c] } : { anchor: [r, c], focus: [r, c] }
+    );
+  }
+  function onCellMouseEnter(r, c) {
+    if (mouseDown) setRange((prev) => prev && { ...prev, focus: [r, c] });
+  }
+  function onCellFocus(r, c) {
+    setFocusedCell(`${r}-${c}`);
+    if (!mouseDown)
+      setRange((prev) => (prev && inRange(r, c) ? prev : { anchor: [r, c], focus: [r, c] }));
+    const el = document.querySelector(`[data-bulk-cell="${r}-${c}"]`);
+    if (el) {
+      const reduced =
+        window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+        behavior: reduced ? "auto" : "smooth",
+      });
+    }
+  }
+  function onCellKeyDown(e, r, c) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      focusCell(r + (e.shiftKey ? -1 : 1), c);
+    } else if (e.key === "ArrowDown" && !e.shiftKey) {
+      e.preventDefault();
+      focusCell(r + 1, c);
+    } else if (e.key === "ArrowUp" && !e.shiftKey) {
+      e.preventDefault();
+      focusCell(r - 1, c);
+    } else if (e.key === "ArrowLeft" && !e.shiftKey && e.target.selectionStart === 0) {
+      e.preventDefault();
+      focusCell(r, c - 1);
+    } else if (
+      e.key === "ArrowRight" &&
+      !e.shiftKey &&
+      e.target.selectionStart === e.target.value.length
+    ) {
+      e.preventDefault();
+      focusCell(r, c + 1);
+    }
+  }
 }
 
 function VariantsSection({
   productId,
   productTitle,
+  productImage,
   options,
   variants,
   locations,
@@ -1764,6 +2141,7 @@ function VariantsSection({
   canSeeStock,
   canSetStock,
   stockVersion,
+  channelCount,
   onSaved,
   onDirtyChange,
 }) {
@@ -1776,6 +2154,7 @@ function VariantsSection({
   const [optionFilters, setOptionFilters] = useState({});
   const [stockFilter, setStockFilter] = useState("");
   const [groupBy, setGroupBy] = useState("");
+  const [toolbarOpen, setToolbarOpen] = useState(false);
   const [expanded, setExpanded] = useState({});
   const [selected, setSelected] = useState([]);
   const [priceDrafts, setPriceDrafts] = useState({}); // { [variantId]: "12.50" }
@@ -2019,7 +2398,7 @@ function VariantsSection({
     const edited = v.id in priceDrafts;
     const bad = edited && !isMoney(value);
     return (
-      <div className="relative w-28" onClick={stop}>
+      <div className="relative w-[130px]" onClick={stop}>
         <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">
           $
         </span>
@@ -2084,11 +2463,11 @@ function VariantsSection({
         if (canEdit) setModal({ type: "image", count });
       }}
       aria-label={label}
-      className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-slate-500"
+      className="flex h-[56px] w-[72px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-blue-500 hover:border-blue-400"
     >
       <svg
         viewBox="0 0 20 20"
-        className="h-4 w-4"
+        className="h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.6"
@@ -2098,6 +2477,25 @@ function VariantsSection({
         <path d="M3 13l4-4 3 3 2-2 5 5" />
       </svg>
     </button>
+  );
+
+  const publishingCell = () => (
+    <span
+      className="inline-flex items-center gap-1 text-xs text-slate-600"
+      title="Set on the product"
+    >
+      <svg
+        viewBox="0 0 20 20"
+        className="h-3.5 w-3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        aria-hidden="true"
+      >
+        <circle cx="10" cy="10" r="7" />
+      </svg>
+      {channelCount ?? 0}
+    </span>
   );
 
   const row = (v, indent) => (
@@ -2133,8 +2531,8 @@ function VariantsSection({
       </td>
       <td className="px-2 py-2">{priceCell(v)}</td>
       <td className="px-2 py-2">{stockCell(v)}</td>
-      <td className="px-2 py-2 text-xs text-slate-400" onClick={stop}>
-        {notYet}
+      <td className="px-2 py-2" onClick={stop}>
+        {publishingCell()}
       </td>
     </tr>
   );
@@ -2182,7 +2580,7 @@ function VariantsSection({
           </span>
         </td>
         <td className="px-2 py-2">
-          <div className="relative w-28">
+          <div className="relative w-[130px]">
             <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">
               $
             </span>
@@ -2208,7 +2606,7 @@ function VariantsSection({
           {!canSeeStock || stockState !== "ready" ? "—" : tracked.length ? total : "Not tracked"}
           <span className="block text-[11px] text-slate-500">Total, read-only</span>
         </td>
-        <td className="px-2 py-2 text-xs text-slate-400">{notYet}</td>
+        <td className="px-2 py-2">{publishingCell()}</td>
       </tr>
     );
   };
@@ -2239,18 +2637,40 @@ function VariantsSection({
       <div className="rounded-xl border border-slate-200">
         {options.length ? (
           options.map((o) => (
-            <div key={o.name} className="border-b border-slate-200 px-4 py-3 last:border-b-0">
-              <p className="text-sm font-semibold text-slate-900">{o.name}</p>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {o.values.map((value) => (
-                  <span
-                    key={value}
-                    className="rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-800"
-                  >
-                    {value}
-                  </span>
+            <div
+              key={o.name}
+              className="flex items-start gap-3 border-b border-slate-200 px-4 py-3 last:border-b-0"
+            >
+              <span
+                aria-hidden="true"
+                className="mt-1 flex h-5 w-4 shrink-0 cursor-grab flex-col flex-wrap items-center justify-center gap-[3px] text-slate-400"
+              >
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <span key={i} className="h-[3px] w-[3px] rounded-full bg-slate-400" />
                 ))}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-slate-900">{o.name}</p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {o.values.map((value) => (
+                    <span
+                      key={value}
+                      className="rounded-lg bg-slate-100 px-2.5 py-1 text-sm text-slate-800"
+                    >
+                      {value}
+                    </span>
+                  ))}
+                </div>
               </div>
+              {canEdit && (
+                <button
+                  type="button"
+                  onClick={() => setModal({ type: "options" })}
+                  className="shrink-0 text-sm font-semibold text-charcoal-navy hover:underline"
+                >
+                  Edit
+                </button>
+              )}
             </div>
           ))
         ) : (
@@ -2261,15 +2681,6 @@ function VariantsSection({
         )}
         {canEdit && (
           <div className="flex flex-wrap gap-3 border-t border-slate-200 px-4 py-2.5">
-            {options.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setModal({ type: "options" })}
-                className="text-sm font-semibold text-charcoal-navy hover:underline"
-              >
-                Edit options
-              </button>
-            )}
             {options.length < MAX_PRODUCT_OPTIONS ? (
               <OptionPicker
                 label={options.length ? "Add another option" : "Add options like size or colour"}
@@ -2287,62 +2698,8 @@ function VariantsSection({
       </div>
 
       {/* Toolbar */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, option value or SKU"
-          aria-label="Search variants"
-          className={`${selectClass} min-w-48 flex-1`}
-        />
-        {options.map((o) => (
-          <select
-            key={o.name}
-            value={optionFilters[o.name] || ""}
-            onChange={(e) => setOptionFilters((prev) => ({ ...prev, [o.name]: e.target.value }))}
-            aria-label={`Filter by ${o.name}`}
-            className={selectClass}
-          >
-            <option value="">Any {o.name}</option>
-            {o.values.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        ))}
-        {canSeeStock && (
-          <>
-            <select
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              aria-label="Location for stock"
-              className={selectClass}
-            >
-              <option value="all">All locations</option>
-              {locations.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value)}
-              aria-label="Filter by stock status"
-              className={selectClass}
-            >
-              <option value="">Any stock status</option>
-              {STOCK_FILTERS.map((f) => (
-                <option key={f.value} value={f.value}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-        {options.length > 1 && (
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+        {options.length > 1 ? (
           <select
             value={groupBy}
             onChange={(e) => setGroupBy(e.target.value)}
@@ -2356,8 +2713,88 @@ function VariantsSection({
               </option>
             ))}
           </select>
+        ) : (
+          <span />
         )}
+        <button
+          type="button"
+          onClick={() => setToolbarOpen((v) => !v)}
+          aria-expanded={toolbarOpen}
+          aria-label="Search and filter variants"
+          title="Search and filter"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+        >
+          <svg
+            viewBox="0 0 20 20"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            aria-hidden="true"
+          >
+            <circle cx="9" cy="9" r="6" />
+            <path d="M17 17l-4-4" />
+          </svg>
+        </button>
       </div>
+      {toolbarOpen && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, option value or SKU"
+            aria-label="Search variants"
+            className={`${selectClass} min-w-48 flex-1`}
+          />
+          {options.map((o) => (
+            <select
+              key={o.name}
+              value={optionFilters[o.name] || ""}
+              onChange={(e) => setOptionFilters((prev) => ({ ...prev, [o.name]: e.target.value }))}
+              aria-label={`Filter by ${o.name}`}
+              className={selectClass}
+            >
+              <option value="">Any {o.name}</option>
+              {o.values.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          ))}
+          {canSeeStock && (
+            <>
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                aria-label="Location for stock"
+                className={selectClass}
+              >
+                <option value="all">All locations</option>
+                {locations.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={stockFilter}
+                onChange={(e) => setStockFilter(e.target.value)}
+                aria-label="Filter by stock status"
+                className={selectClass}
+              >
+                <option value="">Any stock status</option>
+                {STOCK_FILTERS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+      )}
       {activeFilters.length > 0 && (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {activeFilters.map((f) => (
@@ -2583,10 +3020,12 @@ function VariantsSection({
         <BulkEditor
           rows={selectedVariants}
           options={options}
+          locations={locations}
           location={location}
-          locationName={locationName}
           items={items}
           canSetStock={canSetStock && canSeeStock}
+          productTitle={productTitle}
+          productImage={productImage}
           onClose={() => setModal(null)}
           onSaved={async ({ stock, closing, count }) => {
             await refresh({ stock });
@@ -4332,6 +4771,7 @@ export function ProductForm({ productId }) {
                   <VariantsSection
                     productId={editing ? productId : null}
                     productTitle={name}
+                    productImage={photos[0]?.url || null}
                     options={productOptions}
                     variants={variants}
                     locations={locations}
@@ -4339,6 +4779,7 @@ export function ProductForm({ productId }) {
                     canSeeStock={canSeeStock}
                     canSetStock={canSetStock}
                     stockVersion={stockVersion}
+                    channelCount={checkedChannels}
                     onSaved={variantsSaved}
                     onDirtyChange={setVariantsDirty}
                   />
