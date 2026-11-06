@@ -3,7 +3,7 @@ import { createContext, memo, useContext, useEffect, useRef, useState } from "re
 import LinkField from "@/components/LinkField";
 import { getEditingThemeId } from "@/lib/editingTheme";
 
-import { uploadThemeImage } from "@/lib/themeApi";
+import { listMenus, uploadThemeImage } from "@/lib/themeApi";
 
 import {
   inputClass,
@@ -326,6 +326,207 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
         className="flex h-10 items-center justify-center gap-2 rounded-lg border border-dashed border-[#E7E4DC] text-sm font-medium text-[#265C48] hover:bg-[#F3F1EC]"
       >
         <span aria-hidden="true">+</span> Add link
+      </button>
+    </div>
+  );
+}
+
+// A menu from Admin > Menus: the section follows it when the menu changes. Stored as the menu's handle (or its id).
+export function MenuPicker({ value, onChange, label }) {
+  const [menus, setMenus] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    listMenus()
+      .then((list) => !cancelled && setMenus(Array.isArray(list) ? list : []))
+      .catch(() => !cancelled && setMenus([]));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const key = (menu) => menu.handle || menu.id;
+  const missing =
+    Boolean(value) && menus !== null && !menus.some((m) => key(m) === value || m.id === value);
+
+  return (
+    <div className="grid gap-1.5">
+      <select
+        className={inputClass}
+        value={value || ""}
+        aria-label={label}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">{menus === null ? "Loading menus..." : "Choose a menu"}</option>
+        {missing && <option value={value}>{value} (not found)</option>}
+        {(menus || []).map((menu) => (
+          <option key={menu.id} value={key(menu)}>
+            {menu.name}
+            {menu.items_count ? ` (${menu.items_count} items)` : ""}
+          </option>
+        ))}
+      </select>
+
+      {menus !== null && !menus.length && (
+        <p className="text-[11px] leading-snug text-[#5A5750]">
+          You have no menus yet. Make one in{" "}
+          <a className="underline" href="/admin/online-store/content/menus">
+            Online Store &gt; Menus
+          </a>
+          .
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Social networks the footer can show, with the word the theme stores for each
+export const SOCIAL_NETWORKS = [
+  ["facebook", "Facebook"],
+  ["instagram", "Instagram"],
+  ["youtube", "YouTube"],
+  ["tiktok", "TikTok"],
+  ["x", "X"],
+  ["threads", "Threads"],
+  ["linkedin", "LinkedIn"],
+  ["pinterest", "Pinterest"],
+  ["snapchat", "Snapchat"],
+  ["whatsapp", "WhatsApp"],
+  ["telegram", "Telegram"],
+  ["bluesky", "Bluesky"],
+  ["custom", "Custom"],
+];
+
+// One "network | link | label | icon image" line per social link, which is what the theme reads
+export function parseSocialLines(text) {
+  return String(text || "")
+    .split("\n")
+    .filter((line) => line.trim())
+    .map((line) => {
+      const [network = "", url = "", label = "", icon = ""] = line.split("|").map((p) => p.trim());
+      const known = SOCIAL_NETWORKS.some(([id]) => id === network.toLowerCase());
+      return { network: known ? network.toLowerCase() : "custom", url, label, icon };
+    });
+}
+
+export function socialLinesText(rows) {
+  return rows
+    .filter((r) => r.url)
+    .map((r) => [r.network, r.url, r.label, r.icon].join(" | ").replace(/(\s*\|\s*)+$/, ""))
+    .join("\n");
+}
+
+// Any number of social icons: a network and a link each (a name and an icon image too for "Custom")
+export function SocialLinksEditor({ value, onChange, label }) {
+  const [rows, setRows] = useState(() => parseSocialLines(value));
+  const emitted = useRef(socialLinesText(rows));
+
+  // Take in a change made elsewhere (the code editor, undo), not our own echo
+  useEffect(() => {
+    if ((value || "") !== emitted.current) {
+      emitted.current = value || "";
+      setRows(parseSocialLines(value));
+    }
+  }, [value]);
+
+  const commit = (next) => {
+    setRows(next);
+    emitted.current = socialLinesText(next);
+    onChange(emitted.current);
+  };
+
+  const update = (index, patch) =>
+    commit(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+
+  const move = (index, step) => {
+    const to = index + step;
+    if (to < 0 || to >= rows.length) return;
+    const next = [...rows];
+    [next[index], next[to]] = [next[to], next[index]];
+    commit(next);
+  };
+
+  return (
+    <div className="grid gap-2">
+      {rows.map((row, i) => (
+        <div key={i} className="grid gap-1.5 rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-2.5">
+          <div className="flex items-center gap-1.5">
+            <select
+              className={inputClass}
+              value={row.network}
+              aria-label={`${label}: network ${i + 1}`}
+              onChange={(e) => update(i, { network: e.target.value })}
+            >
+              {SOCIAL_NETWORKS.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => move(i, -1)}
+              disabled={i === 0}
+              className="rounded p-1 text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
+              aria-label="Move link up"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              onClick={() => move(i, 1)}
+              disabled={i === rows.length - 1}
+              className="rounded p-1 text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
+              aria-label="Move link down"
+            >
+              ▼
+            </button>
+            <button
+              type="button"
+              onClick={() => commit(rows.filter((_, j) => j !== i))}
+              className="rounded p-1 text-[#5A5750] hover:text-red-600"
+              aria-label="Delete link"
+            >
+              ✕
+            </button>
+          </div>
+
+          <input
+            className={inputClass}
+            type="url"
+            value={row.url}
+            placeholder="https://"
+            aria-label={`${label}: link ${i + 1}`}
+            onChange={(e) => update(i, { url: e.target.value })}
+          />
+
+          {row.network === "custom" && (
+            <>
+              <input
+                className={inputClass}
+                value={row.label}
+                placeholder="Name (read out by screen readers)"
+                aria-label={`${label}: name ${i + 1}`}
+                onChange={(e) => update(i, { label: e.target.value })}
+              />
+              <input
+                className={inputClass}
+                type="url"
+                value={row.icon}
+                placeholder="Icon image address (optional)"
+                aria-label={`${label}: icon image ${i + 1}`}
+                onChange={(e) => update(i, { icon: e.target.value })}
+              />
+            </>
+          )}
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => commit([...rows, { network: "instagram", url: "", label: "", icon: "" }])}
+        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-dashed border-[#E7E4DC] text-sm font-medium text-[#265C48] hover:bg-[#F3F1EC]"
+      >
+        <span aria-hidden="true">+</span> Add social link
       </button>
     </div>
   );
@@ -891,6 +1092,28 @@ export const Field = memo(function Field({
             onChange={onChange}
             label={spec.label}
           />
+
+          <Help spec={spec} />
+        </div>
+      );
+
+    case "menu_ref":
+      return (
+        <div>
+          {label}
+
+          <MenuPicker value={value || ""} onChange={onChange} label={spec.label} />
+
+          <Help spec={spec} />
+        </div>
+      );
+
+    case "social":
+      return (
+        <div>
+          {label}
+
+          <SocialLinksEditor value={value || ""} onChange={onChange} label={spec.label} />
 
           <Help spec={spec} />
         </div>
