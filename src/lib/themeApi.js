@@ -77,6 +77,7 @@ export function previewTheme(
     article = "",
     handle = "",
     collection = "",
+    q = "",
     customer = "",
     customerToken = "",
   } = {}
@@ -87,6 +88,7 @@ export function previewTheme(
   if (article) query.set("article", article);
   if (handle) query.set("handle", handle);
   if (collection) query.set("collection", collection);
+  if (q) query.set("q", q);
   if (customer) query.set("customer", customer);
   if (customer && customerToken) query.set("ct", customerToken);
   return apiRequest(`${BASE}/preview/?${query}`, {
@@ -468,6 +470,7 @@ export function previewKeyOf({
   product = "",
   article = "",
   collection = "",
+  q = "",
   handle = "",
   customer = "",
 }) {
@@ -477,6 +480,7 @@ export function previewKeyOf({
     page === "product" ? product || "" : "",
     page === "article" ? article || "" : "",
     page === "collection" ? collection || "" : "",
+    page === "collection" ? q || "" : "",
     base === "page" ? handle || "" : "",
     customer || "",
   ].join("|");

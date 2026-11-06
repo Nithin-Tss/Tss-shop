@@ -1619,6 +1619,7 @@ export default function AdminCustomizePage() {
     product: sampleProductId,
     article: sampleArticle,
     collection: sampleCollection,
+    q: sampleQuery,
     handle: samplePage,
     customer: customerPage === "account" ? `account|${customerToken}` : customerPage,
   });
