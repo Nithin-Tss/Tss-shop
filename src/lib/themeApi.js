@@ -101,8 +101,11 @@ export function previewTheme(
 export async function renderThemePage(themeId, path = "/") {
   const headers = { "X-Theme-Id": themeId };
   const data = await apiRequest(`${BASE}/settings/`, { headers });
-  const [first, second, third] = path.split("/").filter(Boolean);
+  // "/products/<id>?back=/collections/x": the segments come from the path alone, the query goes along
+  const [pathname, search = ""] = path.split("#")[0].split(/\?(.*)/s);
+  const [first, second, third] = pathname.split("/").filter(Boolean);
   const query = new URLSearchParams({ scroll: "0", selected: "", page: "index" });
+  const given = new URLSearchParams(search);
   if (first === "account" && (second === "login" || second === "register")) {
     query.set("customer", second);
   } else if (first === "products" && second) {
@@ -126,6 +129,11 @@ export async function renderThemePage(themeId, path = "/") {
   } else if (first === "cart") {
     query.set("page", "cart");
   }
+  // The page's own query (?q=, ?sort=, ?page=, ?back=) is kept; it never overrides what the path chose
+  given.forEach((value, key) => {
+    if (key === "page") query.set("page_number", value);
+    else if (!query.has(key)) query.set(key, value);
+  });
   const page = query.get("page");
   if (page === "checkout" && !data.templates?.checkout) {
     data.templates = {
