@@ -1413,11 +1413,24 @@ const BULK_FIELD_COLUMNS = [
   { key: "continue_selling", label: "Continue selling", group: "Inventory" },
   { key: "weight", label: "Weight", group: "Shipping" },
 ];
-const BULK_COLUMN_GROUPS = ["General", "Pricing", "Inventory", "Shipping", "Quantities by location", "Publishing"];
+const BULK_COLUMN_GROUPS = [
+  "General",
+  "Pricing",
+  "Inventory",
+  "Shipping",
+  "Quantities by location",
+  "Publishing",
+];
 const BULK_NOT_AVAILABLE_BY_GROUP = {
   Pricing: ["Cost per item", "Charge taxes", "Unit price"],
   Inventory: ["Barcodes", "Track quantity", "Bin names"],
-  Shipping: ["Package", "Packed dimensions", "Physical product", "Harmonized system code", "Country of origin"],
+  Shipping: [
+    "Package",
+    "Packed dimensions",
+    "Physical product",
+    "Harmonized system code",
+    "Country of origin",
+  ],
   Publishing: ["Sales channels"],
 };
 function bulkError(key, value) {
@@ -1446,7 +1459,12 @@ function BulkEditor({
 }) {
   const stockColumns = canSetStock
     ? locations.flatMap((l) => [
-        { key: `avail-${l.id}`, label: `${l.name} - Available`, locationId: l.id, group: "Quantities by location" },
+        {
+          key: `avail-${l.id}`,
+          label: `${l.name} - Available`,
+          locationId: l.id,
+          group: "Quantities by location",
+        },
         {
           key: `onhand-${l.id}`,
           label: `${l.name} - On hand`,
@@ -1461,7 +1479,11 @@ function BulkEditor({
   const isOnHandCol = (key) => key.startsWith("onhand-");
   const locIdOf = (key) => key.slice(key.indexOf("-") + 1);
   const isNumericCol = (key) =>
-    key === "price" || key === "compare_at_price" || key === "weight" || isAvailCol(key) || isOnHandCol(key);
+    key === "price" ||
+    key === "compare_at_price" ||
+    key === "weight" ||
+    isAvailCol(key) ||
+    isOnHandCol(key);
   const TITLE_COL_WIDTH = 400;
   const colWidthFor = (key) => {
     if (key === "price") return 180;
@@ -1590,7 +1612,8 @@ function BulkEditor({
       let next = prev;
       targets.forEach(([rr]) => {
         const v = rows[rr];
-        if (v && !(isAvailCol(col.key) && !trackedVariant(v))) next = setCell(next, v, col.key, value);
+        if (v && !(isAvailCol(col.key) && !trackedVariant(v)))
+          next = setCell(next, v, col.key, value);
       });
       return next;
     });
@@ -1709,7 +1732,12 @@ function BulkEditor({
         wide
         footer={
           <>
-            <button type="button" onClick={() => setStep("edit")} disabled={saving} className={ghostButton}>
+            <button
+              type="button"
+              onClick={() => setStep("edit")}
+              disabled={saving}
+              className={ghostButton}
+            >
               Back
             </button>
             <button type="button" onClick={doSave} disabled={saving} className={primaryButton}>
@@ -1719,8 +1747,8 @@ function BulkEditor({
         }
       >
         <p className="mb-3 text-sm text-slate-600">
-          {changes.length} change{changes.length === 1 ? "" : "s"} across {Object.keys(edits).length}{" "}
-          variant{Object.keys(edits).length === 1 ? "" : "s"}.
+          {changes.length} change{changes.length === 1 ? "" : "s"} across{" "}
+          {Object.keys(edits).length} variant{Object.keys(edits).length === 1 ? "" : "s"}.
         </p>
         <ul className="max-h-96 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 text-sm">
           {changes.map((c) => (
@@ -1785,9 +1813,12 @@ function BulkEditor({
                       const groupColumns = allColumns.filter(
                         (c) => c.group === group && matchesSearch(c.label)
                       );
-                      const disabledLabels = (BULK_NOT_AVAILABLE_BY_GROUP[group] || []).filter(matchesSearch);
+                      const disabledLabels = (BULK_NOT_AVAILABLE_BY_GROUP[group] || []).filter(
+                        matchesSearch
+                      );
                       const showTitleRow = group === "General" && matchesSearch("Title");
-                      if (!groupColumns.length && !disabledLabels.length && !showTitleRow) return null;
+                      if (!groupColumns.length && !disabledLabels.length && !showTitleRow)
+                        return null;
                       return (
                         <div key={group} className="mb-2">
                           <p className="px-2 pb-1 pt-2 text-[11px] font-semibold uppercase text-slate-400">
@@ -1809,7 +1840,9 @@ function BulkEditor({
                                 checked={columns.includes(c.key)}
                                 onChange={(e) =>
                                   setColumns((prev) =>
-                                    e.target.checked ? [...prev, c.key] : prev.filter((k) => k !== c.key)
+                                    e.target.checked
+                                      ? [...prev, c.key]
+                                      : prev.filter((k) => k !== c.key)
                                   )
                                 }
                                 className="h-3.5 w-3.5 accent-charcoal-navy"
@@ -1818,9 +1851,14 @@ function BulkEditor({
                             </label>
                           ))}
                           {disabledLabels.map((label) => (
-                            <label key={label} className="flex items-center gap-2 rounded-lg px-2 py-1.5 opacity-50">
+                            <label
+                              key={label}
+                              className="flex items-center gap-2 rounded-lg px-2 py-1.5 opacity-50"
+                            >
                               <input type="checkbox" disabled className="h-3.5 w-3.5" />
-                              <span className="text-sm text-slate-600">{label} (Not available yet)</span>
+                              <span className="text-sm text-slate-600">
+                                {label} (Not available yet)
+                              </span>
                             </label>
                           ))}
                         </div>
@@ -1858,7 +1896,10 @@ function BulkEditor({
         style={{ scrollPaddingLeft: TITLE_COL_WIDTH }}
         onMouseUp={() => setMouseDown(false)}
       >
-        <table className="border-collapse text-sm" style={{ width: "max-content", tableLayout: "fixed" }}>
+        <table
+          className="border-collapse text-sm"
+          style={{ width: "max-content", tableLayout: "fixed" }}
+        >
           <colgroup>
             <col style={{ width: TITLE_COL_WIDTH }} />
             {shownColumns.map((c) => (
@@ -1892,7 +1933,11 @@ function BulkEditor({
                 <td className="sticky left-0 z-[5] h-9 whitespace-nowrap border border-slate-200 border-r-2 border-r-slate-300 bg-white px-3">
                   <div className="flex items-center gap-2">
                     {productImage ? (
-                      <img src={productImage} alt="" className="h-6 w-6 shrink-0 rounded object-cover" />
+                      <img
+                        src={productImage}
+                        alt=""
+                        className="h-6 w-6 shrink-0 rounded object-cover"
+                      />
                     ) : (
                       <div className="h-6 w-6 shrink-0 rounded bg-slate-100" aria-hidden="true" />
                     )}
@@ -1904,7 +1949,10 @@ function BulkEditor({
                   const isOnHand = isOnHandCol(col.key);
                   if ((isAvail || isOnHand) && !trackedVariant(v)) {
                     return (
-                      <td key={col.key} className="h-9 border border-slate-200 px-2 text-center text-slate-400">
+                      <td
+                        key={col.key}
+                        className="h-9 border border-slate-200 px-2 text-center text-slate-400"
+                      >
                         -
                       </td>
                     );
@@ -2007,7 +2055,12 @@ function BulkEditor({
                       </li>
                     ))}
                   </ul>
-                  <button type="button" onClick={retryFailed} disabled={saving} className={`${outlineButton} mt-2`}>
+                  <button
+                    type="button"
+                    onClick={retryFailed}
+                    disabled={saving}
+                    className={`${outlineButton} mt-2`}
+                  >
                     {saving ? "Retrying..." : `Retry ${result.failed.length} failed`}
                   </button>
                 </>
@@ -2040,12 +2093,17 @@ function BulkEditor({
   }
   function onCellFocus(r, c) {
     setFocusedCell(`${r}-${c}`);
-    if (!mouseDown) setRange((prev) => (prev && inRange(r, c) ? prev : { anchor: [r, c], focus: [r, c] }));
+    if (!mouseDown)
+      setRange((prev) => (prev && inRange(r, c) ? prev : { anchor: [r, c], focus: [r, c] }));
     const el = document.querySelector(`[data-bulk-cell="${r}-${c}"]`);
     if (el) {
       const reduced =
         window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: reduced ? "auto" : "smooth" });
+      el.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+        behavior: reduced ? "auto" : "smooth",
+      });
     }
   }
   function onCellKeyDown(e, r, c) {
