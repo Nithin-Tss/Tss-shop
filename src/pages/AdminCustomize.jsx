@@ -112,30 +112,110 @@ const ACCOUNT_PAGE = "__account_page__";
 // Runs inside the preview (as a script added to its HTML, so it must not use anything from this module).
 // The preview is the store owner's page in a sandboxed frame: it can't keep a shopper signed in (no store
 // cookie, and it is re-rendered on every reload). So signing in, creating an account and the account's own
-// links and forms open the real store (`storeBase`, e.g. https://api.example.com/s/<slug>) in a new tab.
+// forms are not performed here, and they don't open the real store in another tab either: the editor stays
+// on the page being edited and a short notice says that signing in works on the live store.
+// Sign in and create account are the exception: they are sent to the store as JSON and the result is shown in the notice.
 // Edit mode stops these clicks before they get here (see the preview script in themes/views.py), as does a
 // link the editor shows here itself (Login, Register, Account); a submit is caught first, before the theme's
 // own form script (which would show "Please wait..." for good), and left alone in Edit mode.
-export function openAccountActionsInStore(win, storeBase) {
-  function storeUrl(href) {
-    var path;
+// `storeBase` is kept for callers; it is no longer opened.
+export function openAccountActionsInStore(win) {
+  function isAccountUrl(href) {
     try {
-      path = new URL(href, win.document.baseURI).pathname;
+      var path = new URL(href, win.document.baseURI).pathname;
+      return /^(?:\/s\/[^/]+)?\/account(\/.*)?$/.test(path);
     } catch {
-      return null;
+      return false;
     }
-    var m = path.match(/^(?:\/s\/[^/]+)?\/account(\/.*)?$/);
-    if (!m) return null;
-    var rest = (m[1] || "").replace(/\/+$/, "");
-    // Sign in / create account open those pages; everything else (profile, addresses, sign out) the account
-    // ?switch=1: the store's login page signs out whoever this browser was last signed in as, instead of
-    // skipping the form and opening that other customer's account
-    if (rest === "/login") return storeBase + "/account/login?switch=1";
-    return storeBase + "/account" + (rest === "/register" ? rest : "");
   }
-  function open(event, url) {
-    event.preventDefault();
-    win.open(url, "_blank", "noopener");
+  var timer;
+  function notice(text, isError) {
+    var doc = win.document;
+    var el = doc.getElementById("tss-account-notice");
+    if (!el) {
+      el = doc.createElement("div");
+      el.id = "tss-account-notice";
+      el.setAttribute("role", "status");
+      el.style.cssText =
+        "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483647;" +
+        "background:#14130F;color:#fff;font:500 13px/1.4 system-ui,sans-serif;padding:10px 16px;" +
+        "border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:90%;text-align:center";
+      doc.body.appendChild(el);
+    }
+    el.textContent =
+      text ||
+      "Signing in and creating an account work on the live store, not in the editor preview.";
+    el.style.background = isError ? "#B42318" : "#14130F";
+    el.style.display = "block";
+    win.clearTimeout(timer);
+    timer = win.setTimeout(
+      function () {
+        el.style.display = "none";
+      },
+      isError || text ? 6000 : 3500
+    );
+  }
+  // Sign in / create account really run against the store (the same server code as the live page), but the
+  // preview itself can't keep the shopper signed in, so the outcome is shown here instead of navigating.
+  function isAuthForm(action) {
+    try {
+      return /^(?:\/s\/[^/]+)?\/account\/(login|register)\/?$/.test(
+        new URL(action, win.document.baseURI).pathname
+      );
+    } catch {
+      return false;
+    }
+  }
+  function sendAuthForm(form) {
+    if (form.dataset.tssSending) return;
+    var button = form.querySelector("[data-auth-submit], [type=submit]");
+    var label = button && button.textContent;
+    form.dataset.tssSending = "1";
+    if (button) button.disabled = true;
+    var register = /\/register\/?$/.test(new URL(form.action, win.document.baseURI).pathname);
+    win
+      .fetch(form.action, {
+        method: "POST",
+        body: new win.FormData(form),
+        headers: { Accept: "application/json" },
+        credentials: "omit",
+      })
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (data) {
+        if (data && data.ok) {
+          // Go where the live store would: the account page (or the page the shopper came from), which the
+          // editor opens with sample customer data so its code can be edited right there
+          var path = "/account";
+          try {
+            var target = new URL(data.redirect, win.document.baseURI).pathname.replace(
+              /^\/s\/[^/]+/,
+              ""
+            );
+            path =
+              (target.replace(/\/+$/, "") || "/account") +
+              new URL(data.redirect, win.document.baseURI).search;
+          } catch {
+            /* keep the default path */
+          }
+          win.parent.postMessage({ source: "tss-preview", type: "navigate", path: path }, "*");
+          notice(register ? "Account created." : "Signed in.");
+        } else {
+          notice((data && data.error) || "Something went wrong. Please try again.", true);
+        }
+      })
+      .catch(function () {
+        notice("Could not reach the store. Please try again.", true);
+      })
+      .then(function () {
+        delete form.dataset.tssSending;
+        delete form.dataset.sending;
+        if (button) {
+          button.disabled = false;
+          if (label) button.textContent = label;
+        }
+      });
   }
   win.addEventListener("click", function (event) {
     if (
@@ -148,29 +228,61 @@ export function openAccountActionsInStore(win, storeBase) {
     )
       return;
     var link = event.target.closest && event.target.closest("a[href]");
-    var url =
-      link && (!link.target || link.target === "_self")
-        ? storeUrl(link.getAttribute("href"))
-        : null;
-    if (url) open(event, url);
+    if (
+      link &&
+      (!link.target || link.target === "_self") &&
+      isAccountUrl(link.getAttribute("href"))
+    ) {
+      event.preventDefault();
+      if (
+        /\/account\/logout\/?$/.test(
+          new URL(link.getAttribute("href"), win.document.baseURI).pathname
+        )
+      ) {
+        // Signing out lands on the login page, as on the live store
+        win.parent.postMessage(
+          { source: "tss-preview", type: "navigate", path: "/account/login" },
+          "*"
+        );
+        return;
+      }
+      notice();
+    }
   });
   win.addEventListener(
     "submit",
     function (event) {
       if (win.document.documentElement.classList.contains("tss-edit")) return;
-      var url = storeUrl(event.target.getAttribute("action") || win.location.href);
-      if (!url) return;
+      var action = event.target.getAttribute("action") || win.location.href;
+      if (!isAccountUrl(action)) return;
+      event.preventDefault();
       event.stopPropagation();
-      open(event, url);
+      if (
+        isAuthForm(action) &&
+        win.fetch &&
+        win.FormData &&
+        event.target.checkValidity !== undefined
+      ) {
+        // Same checks the theme's own form script makes, before anything is sent
+        var form = event.target;
+        var invalid = false;
+        form.querySelectorAll("input:not([type=hidden])").forEach(function (input) {
+          if (input.required && (input.type === "checkbox" ? !input.checked : !input.value.trim()))
+            invalid = true;
+        });
+        if (invalid) return notice("Please fill in all required fields.", true);
+        sendAuthForm(form);
+        return;
+      }
+      notice();
     },
     true
   );
 }
 
 // The preview's HTML with openAccountActionsInStore running in it
-export function withAccountActionsInStore(html, storeBase) {
-  if (!storeBase) return html;
-  const script = `<script>(${openAccountActionsInStore})(window, ${JSON.stringify(storeBase).replace(/</g, "\\u003c")});</script>`;
+export function withAccountActionsInStore(html) {
+  const script = `<script>(${openAccountActionsInStore})(window);</script>`;
   const index = html.toLowerCase().lastIndexOf("</body>");
   return index < 0 ? html + script : html.slice(0, index) + script + html.slice(index);
 }
@@ -316,6 +428,8 @@ export default function AdminCustomizePage() {
   const [samplePage, setSamplePage] = useState(() => startParams.get("handle") || "");
   // "login" / "register": the preview shows that customer page (templates/login.liquid) instead of the page being edited
   const [customerPage, setCustomerPage] = useState("");
+  // The customer who just signed in or registered in the preview: the account page shows their details
+  const [customerToken, setCustomerToken] = useState("");
 
   const [products, setProducts] = useState([]);
 
@@ -457,6 +571,7 @@ export default function AdminCustomizePage() {
   const samplePageRef = useRef("");
 
   const customerPageRef = useRef("");
+  const customerTokenRef = useRef("");
 
   // The real store of the store being edited (account actions in the preview open it in a new tab)
   const storeBaseRef = useRef("");
@@ -476,6 +591,7 @@ export default function AdminCustomizePage() {
     sampleQueryRef.current = sampleQuery;
     samplePageRef.current = samplePage;
     customerPageRef.current = customerPage;
+    customerTokenRef.current = customerToken;
     storeBaseRef.current = store?.storeSlug ? `${API_URL}/s/${store.storeSlug}` : "";
   });
 
@@ -705,6 +821,7 @@ export default function AdminCustomizePage() {
       q: pageRef.current === "collection" ? sampleQueryRef.current || "" : "",
       handle: basePage(pageRef.current) === "page" ? samplePageRef.current : "",
       customer: customerPageRef.current,
+      customerToken: customerTokenRef.current,
     };
   }
 
@@ -757,7 +874,7 @@ export default function AdminCustomizePage() {
         sync.queue = [];
         sync.inflight = {};
         sync.again = {};
-        setPreviewHtml(withAccountActionsInStore(res.html, storeBaseRef.current));
+        setPreviewHtml(withAccountActionsInStore(res.html));
         setPreviewError("");
       })
       .catch((e) => setPreviewError(e.message));
@@ -1503,7 +1620,7 @@ export default function AdminCustomizePage() {
     article: sampleArticle,
     collection: sampleCollection,
     handle: samplePage,
-    customer: customerPage,
+    customer: customerPage === "account" ? `account|${customerToken}` : customerPage,
   });
 
   // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed
@@ -1539,12 +1656,14 @@ export default function AdminCustomizePage() {
     const [first, second, third] = pathname.split("/").filter(Boolean);
     if (first === "account" && (second === "login" || second === "register")) {
       // Sign in / create account: shown in the preview; "Edit code" there opens templates/<page>.liquid
+      setCustomerToken("");
       setCustomerPage(second);
       setSelected(null);
       return;
     }
     if (first === "account") {
-      // The signed-in account page: shown in the preview with sample customer data
+      // The account page: the customer who just signed in (their link token), else sample customer data
+      setCustomerToken(searchParams.get("ct") || "");
       setCustomerPage("account");
       setSelected(null);
       return;

@@ -78,6 +78,7 @@ export function previewTheme(
     handle = "",
     collection = "",
     customer = "",
+    customerToken = "",
   } = {}
 ) {
   const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected, page });
@@ -87,6 +88,7 @@ export function previewTheme(
   if (handle) query.set("handle", handle);
   if (collection) query.set("collection", collection);
   if (customer) query.set("customer", customer);
+  if (customer && customerToken) query.set("ct", customerToken);
   return apiRequest(`${BASE}/preview/?${query}`, {
     method: "POST",
     body: withoutCartTemplate(data),
@@ -349,6 +351,11 @@ export function subscribeThemeEvents(onEvent) {
 
   async function connect() {
     while (!stopped) {
+      // Signed out (or the sign-in expired): nothing to stream, and every retry would only add a 401
+      if (!getSession()?.token) {
+        stopped = true;
+        return;
+      }
       controller = new AbortController();
       try {
         const session = getSession();
@@ -364,6 +371,10 @@ export function subscribeThemeEvents(onEvent) {
         if (response.status === 401) {
           // Let the normal request path refresh the sign-in, then reconnect
           await getSyncedSections().catch(() => null);
+          if (!getSession()?.token) {
+            stopped = true;
+            return;
+          }
           throw new Error("signed out");
         }
         if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);

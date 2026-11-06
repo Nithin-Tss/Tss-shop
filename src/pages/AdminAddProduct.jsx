@@ -1492,7 +1492,7 @@ function BulkEditor({
     return 180;
   };
 
-  const [columns, setColumns] = useState(() => {
+  const [pickedColumns, setColumns] = useState(() => {
     const base = ["price", "sku"];
     const preferredAvail =
       stockColumns.find((c) => c.locationId === location && isAvailCol(c.key)) ||
@@ -1506,7 +1506,6 @@ function BulkEditor({
   });
   const [columnsMenuOpen, setColumnsMenuOpen] = useState(false);
   const [columnSearch, setColumnSearch] = useState("");
-  const shownColumns = allColumns.filter((c) => columns.includes(c.key));
   const matchesSearch = (label) => label.toLowerCase().includes(columnSearch.trim().toLowerCase());
 
   useEffect(() => {
@@ -1572,10 +1571,13 @@ function BulkEditor({
   );
   // A hidden column can still hold an invalid edit (e.g. it was hidden after the error appeared);
   // bring it back into view so the error is visible, rather than failing silently.
-  useEffect(() => {
-    const hidden = [...new Set(problems.map((p) => p.key))].filter((k) => !columns.includes(k));
-    if (hidden.length) setColumns((prev) => [...prev, ...hidden]);
-  }, [problems.map((p) => p.key).join(","), columns.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  const hiddenProblemKeys = [...new Set(problems.map((p) => p.key))].filter(
+    (k) => !pickedColumns.includes(k)
+  );
+  const columns = hiddenProblemKeys.length
+    ? [...pickedColumns, ...hiddenProblemKeys]
+    : pickedColumns;
+  const shownColumns = allColumns.filter((c) => columns.includes(c.key));
 
   const inRange = (r, c) => {
     if (!range) return false;
