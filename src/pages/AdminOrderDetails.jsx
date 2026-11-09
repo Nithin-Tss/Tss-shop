@@ -73,8 +73,10 @@ function paymentLabel(p) {
 // Why the card can't take a refund right now (null when it can)
 function giftCardRefundProblem(p) {
   if (p.provider !== "gift_card" || !p.gift_card) return null;
-  if (p.gift_card.status !== "active") return "This gift card is deactivated and can't receive a refund.";
-  if (p.gift_card.is_expired) return "This gift card has expired. Set a new expiry date before refunding to it.";
+  if (p.gift_card.status !== "active")
+    return "This gift card is deactivated and can't receive a refund.";
+  if (p.gift_card.is_expired)
+    return "This gift card has expired. Set a new expiry date before refunding to it.";
   return null;
 }
 
@@ -1693,7 +1695,8 @@ export default function AdminOrderDetails() {
               )}
               {(() => {
                 const chosen =
-                  refundablePayments(order).find((p) => p.id === refundPaymentId) || refundablePayments(order)[0];
+                  refundablePayments(order).find((p) => p.id === refundPaymentId) ||
+                  refundablePayments(order)[0];
                 const problem = chosen && giftCardRefundProblem(chosen);
                 return problem ? <p className="text-red-600">{problem}</p> : null;
               })()}
@@ -1768,11 +1771,15 @@ export default function AdminOrderDetails() {
                     <div key={p.id} className="rounded-lg border border-slate-200 p-3">
                       <div className="flex justify-between mb-2">
                         <span className="font-medium text-slate-800">{paymentLabel(p)}</span>
-                        <span className="font-mono">{formatCurrency(p.left, order.currency_code)}</span>
+                        <span className="font-mono">
+                          {formatCurrency(p.left, order.currency_code)}
+                        </span>
                       </div>
                       <select
                         value={value}
-                        onChange={(e) => setCancelDestinations({ ...cancelDestinations, [p.id]: e.target.value })}
+                        onChange={(e) =>
+                          setCancelDestinations({ ...cancelDestinations, [p.id]: e.target.value })
+                        }
                         className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none bg-white"
                       >
                         {isCard ? (
@@ -1791,7 +1798,9 @@ export default function AdminOrderDetails() {
                                 type="date"
                                 value={newExpiry[p.gift_card.id] || ""}
                                 min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
-                                onChange={(e) => setNewExpiry({ ...newExpiry, [p.gift_card.id]: e.target.value })}
+                                onChange={(e) =>
+                                  setNewExpiry({ ...newExpiry, [p.gift_card.id]: e.target.value })
+                                }
                                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-800"
                               />
                               <button

@@ -341,7 +341,9 @@ function GiftCardDetailModal({ card, onClose, onChanged, onUpdated }) {
             <div className="text-xs text-slate-500">Expiry</div>
             <div className="text-charcoal-navy">
               {card.expires_at ? new Date(card.expires_at).toLocaleDateString() : "Never expires"}
-              {card.is_expired && <span className="ml-1.5 font-medium text-red-600">(expired)</span>}
+              {card.is_expired && (
+                <span className="ml-1.5 font-medium text-red-600">(expired)</span>
+              )}
             </div>
           </div>
           <div>
@@ -352,7 +354,9 @@ function GiftCardDetailModal({ card, onClose, onChanged, onUpdated }) {
           </div>
           <div>
             <div className="text-xs text-slate-500">Customer</div>
-            <div className="text-charcoal-navy">{card.customer_email || (card.customer ? "Linked customer" : "None")}</div>
+            <div className="text-charcoal-navy">
+              {card.customer_email || (card.customer ? "Linked customer" : "None")}
+            </div>
           </div>
           <div>
             <div className="text-xs text-slate-500">Note</div>
