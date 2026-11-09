@@ -14,9 +14,9 @@ const P = "/api/v1/platform";
 const PAGE = 25;
 
 const inputClass =
-  "rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]";
+  "rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600";
 const primaryButton =
-  "rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60";
+  "rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-60";
 const secondaryButton =
   "rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60";
 const dangerButton =
@@ -760,14 +760,14 @@ export default function AdminPlatform() {
   const [tab, setTab] = useState("overview");
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F]">
+    <div className="min-h-screen bg-slate-100 text-ink">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1">
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#F3F1EC] px-4 py-5 sm:px-6">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-100 px-4 py-5 sm:px-6">
             <div className="flex items-center gap-2.5">
               <PageIcon name="platform" />
               <h1 className="text-xl font-semibold">Platform administration</h1>
@@ -795,7 +795,7 @@ export default function AdminPlatform() {
                     aria-current={tab === id ? "page" : undefined}
                     className={`rounded-lg px-3 py-2 text-sm ${
                       tab === id
-                        ? "bg-[#14130F] font-semibold text-white"
+                        ? "bg-ink font-semibold text-white"
                         : "text-slate-700 hover:bg-white"
                     }`}
                   >

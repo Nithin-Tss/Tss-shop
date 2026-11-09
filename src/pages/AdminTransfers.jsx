@@ -14,7 +14,7 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
     >
       <defs>
         <filter id="hub-shadow" x="15" y="40" width="70" height="70" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#14130F" floodOpacity="0.08" />
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#18181B" floodOpacity="0.08" />
         </filter>
         <filter
           id="hub-shadow-2"
@@ -24,20 +24,20 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
           height="70"
           filterUnits="userSpaceOnUse"
         >
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#14130F" floodOpacity="0.08" />
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#18181B" floodOpacity="0.08" />
         </filter>
         <filter id="cargo-shadow" x="80" y="30" width="60" height="60" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#14130F" floodOpacity="0.12" />
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#18181B" floodOpacity="0.12" />
         </filter>
       </defs>
 
       {/* Ambient background circle */}
-      <circle cx="110" cy="80" r="70" fill="#F3F1EC" opacity="0.8" />
+      <circle cx="110" cy="80" r="70" fill="rgba(234,88,12,0.08)" opacity="0.8" />
 
       {/* Transit dotted pathway */}
       <path
         d="M50 75 C 80 50, 140 50, 170 75"
-        stroke="#D4D0C5"
+        stroke="rgba(24,24,27,0.22)"
         strokeWidth="2.5"
         strokeDasharray="5 5"
         strokeLinecap="round"
@@ -52,18 +52,18 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
           height="50"
           rx="10"
           fill="#FFFFFF"
-          stroke="#E7E4DC"
+          stroke="rgba(24,24,27,0.12)"
           strokeWidth="1.5"
         />
         <path
           d="M40 78 V64 L50 58 L60 64 V78 H40 Z"
-          fill="#F3F1EC"
-          stroke="#2B2925"
+          fill="rgba(234,88,12,0.08)"
+          stroke="#18181B"
           strokeWidth="1.5"
           strokeLinejoin="round"
         />
-        <rect x="47" y="70" width="6" height="8" fill="#2B2925" />
-        <circle cx="50" cy="46" r="4" fill="#008060" />
+        <rect x="47" y="70" width="6" height="8" fill="#18181B" />
+        <circle cx="50" cy="46" r="4" fill="#18181B" />
       </g>
 
       {/* Destination Location Hub (Right) */}
@@ -75,32 +75,32 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
           height="50"
           rx="10"
           fill="#FFFFFF"
-          stroke="#E7E4DC"
+          stroke="rgba(24,24,27,0.12)"
           strokeWidth="1.5"
         />
         <path
           d="M160 78 V64 L170 58 L180 64 V78 H160 Z"
-          fill="#F3F1EC"
-          stroke="#2B2925"
+          fill="rgba(234,88,12,0.08)"
+          stroke="#18181B"
           strokeWidth="1.5"
           strokeLinejoin="round"
         />
-        <rect x="167" y="70" width="6" height="8" fill="#2B2925" />
-        <circle cx="170" cy="46" r="#004B87" fill="#004B87" />
+        <rect x="167" y="70" width="6" height="8" fill="#18181B" />
+        <circle cx="170" cy="46" r="#18181B" fill="#18181B" />
       </g>
 
       {/* Moving Inventory Box (Center cargo in transit) */}
       <g filter="url(#cargo-shadow)">
         {/* Isometric Box */}
-        <path d="M96 52 L110 59 L110 75 L96 68 Z" fill="#D4B382" />
-        <path d="M110 59 L124 52 L124 68 L110 75 Z" fill="#BE9967" />
-        <path d="M110 45 L124 52 L110 59 L96 52 Z" fill="#E7CBA0" />
+        <path d="M96 52 L110 59 L110 75 L96 68 Z" fill="#FB923C" />
+        <path d="M110 59 L124 52 L124 68 L110 75 Z" fill="#FB923C" />
+        <path d="M110 45 L124 52 L110 59 L96 52 Z" fill="rgba(234,88,12,0.25)" />
         {/* Box tape */}
-        <path d="M108 48 L112 50 L112 75 L108 73 Z" fill="#F4E6D2" opacity="0.9" />
+        <path d="M108 48 L112 50 L112 75 L108 73 Z" fill="rgba(234,88,12,0.25)" opacity="0.9" />
         {/* Forward transit arrow */}
         <path
           d="M102 85 H118 M114 81 L118 85 L114 89"
-          stroke="#14130F"
+          stroke="#18181B"
           strokeWidth="1.75"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -237,9 +237,9 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F3F1EC] text-charcoal-navy">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-charcoal-navy">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -259,7 +259,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
               <h2 id="create-transfer-title" className="text-base font-semibold text-charcoal-navy">
                 Create transfer
               </h2>
-              <p className="text-xs text-[#5A5750]">
+              <p className="text-xs text-slate-600">
                 Move inventory from one store location to another
               </p>
             </div>
@@ -268,7 +268,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-lg p-1 text-slate-400 hover:bg-[#F3F1EC] hover:text-charcoal-navy transition cursor-pointer"
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-orange-600 transition cursor-pointer"
           >
             ✕
           </button>
@@ -279,20 +279,20 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
           {error && (
             <div
               role="alert"
-              className="rounded-lg bg-[#FDECEC] px-4 py-2.5 text-xs text-[#B42318] border border-[#F8D7DA]"
+              className="rounded-lg bg-orange-50 px-4 py-2.5 text-xs text-orange-700 border border-[rgba(234,88,12,0.08)]"
             >
               {error}
             </div>
           )}
 
           {/* Location Routing Section */}
-          <div className="rounded-xl border border-[#E7E4DC] p-4 bg-[#FAF9F6] space-y-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#78746A]">
+          <div className="rounded-xl border border-slate-200 p-4 bg-slate-50 space-y-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Locations
             </h3>
 
             {locations.length < 2 && (
-              <p className="text-xs text-[#B42318] bg-[#FDECEC] p-2.5 rounded-lg border border-[#F8D7DA]">
+              <p className="text-xs text-orange-700 bg-orange-50 p-2.5 rounded-lg border border-[rgba(234,88,12,0.08)]">
                 Transferring inventory requires at least two registered locations. Please create an
                 additional location in Settings → Locations first.
               </p>
@@ -311,7 +311,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                   id="transfer-source"
                   value={sourceId}
                   onChange={(e) => setSourceId(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F] cursor-pointer"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 cursor-pointer"
                 >
                   <option value="" disabled>
                     Select origin location
@@ -336,7 +336,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                   id="transfer-dest"
                   value={destId}
                   onChange={(e) => setDestId(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F] cursor-pointer"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 cursor-pointer"
                 >
                   <option value="" disabled>
                     Select destination location
@@ -352,7 +352,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
 
             {/* Same location inline validation */}
             {isSameLocation && (
-              <p className="text-xs text-[#B42318] flex items-center gap-1.5 font-medium">
+              <p className="text-xs text-orange-700 flex items-center gap-1.5 font-medium">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -370,8 +370,8 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
           </div>
 
           {/* Add Products Section */}
-          <div className="rounded-xl border border-[#E7E4DC] p-4 bg-white space-y-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#78746A]">
+          <div className="rounded-xl border border-slate-200 p-4 bg-white space-y-4">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Add Products to Transfer
             </h3>
 
@@ -380,7 +380,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                 <select
                   value={selectedVariantId}
                   onChange={(e) => setSelectedVariantId(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F] cursor-pointer"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 cursor-pointer"
                 >
                   <option value="">Select a product / variant…</option>
                   {allVariants.map((v) => (
@@ -397,7 +397,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                   min="1"
                   value={itemQuantity}
                   onChange={(e) => setItemQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                  className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-charcoal-navy text-center"
+                  className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs sm:text-sm text-charcoal-navy outline-none focus:border-orange-600 text-center"
                   placeholder="Qty"
                 />
               </div>
@@ -406,7 +406,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                 type="button"
                 onClick={handleAddItem}
                 disabled={!selectedVariantId}
-                className="h-9 px-4 rounded-lg border border-[#E7E4DC] bg-white text-xs font-semibold text-charcoal-navy hover:bg-[#F3F1EC] disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+                className="h-9 px-4 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-charcoal-navy hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
               >
                 Add item
               </button>
@@ -414,13 +414,13 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
 
             {/* Items Table */}
             {items.length === 0 ? (
-              <div className="py-6 text-center text-xs text-[#78746A] border border-dashed border-[#E7E4DC] rounded-lg">
+              <div className="py-6 text-center text-xs text-slate-500 border border-dashed border-slate-200 rounded-lg">
                 No items added yet. Select a product above to add to this transfer.
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-lg border border-[#E7E4DC]">
+              <div className="overflow-x-auto rounded-lg border border-slate-200">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FAF9F6] border-b border-[#E7E4DC] text-[#78746A] uppercase tracking-wider font-semibold">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold">
                     <tr>
                       <th className="py-2.5 px-3">Product</th>
                       <th className="py-2.5 px-3">SKU</th>
@@ -428,18 +428,18 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                       <th className="py-2.5 px-3 text-right w-16">Remove</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E7E4DC]">
+                  <tbody className="divide-y divide-slate-200">
                     {items.map((it, idx) => (
-                      <tr key={it.variant} className="hover:bg-[#FAF9F6]">
+                      <tr key={it.variant} className="hover:bg-slate-50">
                         <td className="py-2.5 px-3 font-medium text-charcoal-navy">{it.title}</td>
-                        <td className="py-2.5 px-3 text-[#5A5750]">{it.sku || "—"}</td>
+                        <td className="py-2.5 px-3 text-slate-600">{it.sku || "—"}</td>
                         <td className="py-2.5 px-3 text-center">
                           <input
                             type="number"
                             min="1"
                             value={it.quantity}
                             onChange={(e) => handleUpdateItemQty(idx, e.target.value)}
-                            className="h-7 w-16 rounded border border-[#E7E4DC] bg-white px-1.5 text-center text-xs text-charcoal-navy outline-none"
+                            className="h-7 w-16 rounded border border-slate-200 bg-white px-1.5 text-center text-xs text-charcoal-navy outline-none"
                           />
                         </td>
                         <td className="py-2.5 px-3 text-right">
@@ -447,7 +447,7 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
                             type="button"
                             onClick={() => handleRemoveItem(idx)}
                             aria-label={`Remove ${it.title}`}
-                            className="text-slate-400 hover:text-[#B42318] transition p-1 cursor-pointer"
+                            className="text-slate-400 hover:text-orange-700 transition p-1 cursor-pointer"
                           >
                             ✕
                           </button>
@@ -461,19 +461,19 @@ function CreateTransferModal({ locations, products, onClose, onCreated }) {
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E7E4DC]">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="rounded-lg border border-[#E7E4DC] bg-white px-4 py-2 text-xs sm:text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer disabled:opacity-50"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs sm:text-sm font-medium text-charcoal-navy hover:bg-slate-100 transition cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!isFormValid || saving || locations.length < 2}
-              className="rounded-lg bg-charcoal-navy px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-lg bg-orange-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-orange-600/90 transition shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {saving ? "Creating…" : "Save transfer"}
             </button>
@@ -600,7 +600,7 @@ export default function AdminTransfers() {
         <AdminSidebar />
 
         {/* MAIN CONTENT AREA */}
-        <main className="min-w-0 flex-1 bg-[#F3F1EC] px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
+        <main className="min-w-0 flex-1 bg-slate-100 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & HEADER ACTIONS */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[20px] sm:text-[22px] font-bold text-charcoal-navy">
@@ -612,7 +612,7 @@ export default function AdminTransfers() {
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-[#1A1916] transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg bg-orange-600 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-orange-600/90 transition cursor-pointer"
               >
                 Create transfer
               </button>
@@ -623,7 +623,7 @@ export default function AdminTransfers() {
           {notice && (
             <div
               role="alert"
-              className="mb-4 flex items-center justify-between rounded-lg bg-[#EBF5FB] px-4 py-2.5 text-sm text-[#004B87] border border-[#BCE1F5]"
+              className="mb-4 flex items-center justify-between rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-ink border border-[rgba(24,24,27,0.22)]"
             >
               <span>{notice}</span>
               <button
@@ -637,9 +637,9 @@ export default function AdminTransfers() {
           )}
 
           {/* MAIN CARD CONTAINER */}
-          <section className="rounded-xl border border-[#E7E4DC] bg-white shadow-2xs overflow-hidden">
+          <section className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
             {/* FULL-WIDTH SEARCH & FILTER TOOLBAR */}
-            <div className="flex items-center justify-between border-b border-[#E7E4DC] px-3 sm:px-4 py-2.5 bg-white">
+            <div className="flex items-center justify-between border-b border-slate-200 px-3 sm:px-4 py-2.5 bg-white">
               {/* Left: View Filter (All ⇅) + Search input */}
               <div className="flex items-center gap-2 flex-1 max-w-xl">
                 {/* View dropdown: All ⇅ matching Shopify layout */}
@@ -648,14 +648,14 @@ export default function AdminTransfers() {
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
                     aria-label="Filter transfers"
-                    className="h-9 appearance-none rounded-lg border border-[#E7E4DC] bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#F3F1EC] cursor-pointer transition"
+                    className="h-9 appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-slate-100 cursor-pointer transition"
                   >
                     <option value="all">All</option>
                     <option value="pending">Pending</option>
                     <option value="completed">Completed</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
-                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#5A5750] leading-1.5">
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-slate-600 leading-1.5">
                     ▲▼
                   </span>
                 </div>
@@ -681,7 +681,7 @@ export default function AdminTransfers() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search and filter"
-                    className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white pl-9 pr-8 text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400 outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F]"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-8 text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400 outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600"
                   />
                   {searchQuery && (
                     <button
@@ -700,7 +700,7 @@ export default function AdminTransfers() {
               <button
                 type="button"
                 title="Table columns & view"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-[#5A5750] hover:bg-[#F3F1EC] transition shrink-0 ml-2 cursor-pointer"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition shrink-0 ml-2 cursor-pointer"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -720,19 +720,19 @@ export default function AdminTransfers() {
 
             {/* CONTENT AREA: EMPTY STATE OR DATA TABLE */}
             {loading ? (
-              <div className="py-20 text-center text-sm text-[#78746A]">Loading transfers…</div>
+              <div className="py-20 text-center text-sm text-slate-500">Loading transfers…</div>
             ) : filteredTransfers.length === 0 ? (
               searchQuery || filterStatus !== "all" ? (
                 /* Search / Filter yields no items */
                 <div className="py-20 text-center px-4">
                   <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
-                    <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F3F1EC] text-charcoal-navy">
+                    <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-charcoal-navy">
                       <PageIcon name="transfers" />
                     </span>
                     <p className="font-semibold text-base text-charcoal-navy">
                       No matching transfers found
                     </p>
-                    <p className="mt-1 text-xs text-[#5A5750]">
+                    <p className="mt-1 text-xs text-slate-600">
                       {searchQuery
                         ? `No transfers match "${searchQuery}".`
                         : "No transfers match the selected filter."}
@@ -743,7 +743,7 @@ export default function AdminTransfers() {
                         setSearchQuery("");
                         setFilterStatus("all");
                       }}
-                      className="mt-4 inline-flex items-center rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer"
+                      className="mt-4 inline-flex items-center rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-charcoal-navy hover:bg-slate-100 transition cursor-pointer"
                     >
                       Clear filters
                     </button>
@@ -764,7 +764,7 @@ export default function AdminTransfers() {
                     </h2>
 
                     {/* Supporting Text */}
-                    <p className="text-sm text-[#78746A] max-w-sm leading-relaxed mb-6">
+                    <p className="text-sm text-slate-500 max-w-sm leading-relaxed mb-6">
                       Move and track inventory between your business locations.
                     </p>
 
@@ -772,7 +772,7 @@ export default function AdminTransfers() {
                     <button
                       type="button"
                       onClick={() => setIsCreateOpen(true)}
-                      className="inline-flex items-center justify-center rounded-lg bg-charcoal-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer active:scale-[0.98]"
+                      className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-600/90 transition shadow-xs cursor-pointer active:scale-[0.98]"
                     >
                       Create transfer
                     </button>
@@ -783,7 +783,7 @@ export default function AdminTransfers() {
                         href="https://help.shopify.com/en/manual/products/inventory/transfers-purchase-orders/transfers"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-[#5A5750] hover:text-charcoal-navy hover:underline transition"
+                        className="text-xs text-slate-600 hover:text-orange-600 hover:underline transition"
                       >
                         Learn more about transfers
                       </a>
@@ -796,7 +796,7 @@ export default function AdminTransfers() {
               <div className="overflow-x-auto min-h-60">
                 <table className="w-full border-collapse text-left text-sm text-charcoal-navy">
                   <thead>
-                    <tr className="border-b border-[#E7E4DC] bg-white text-xs font-medium text-[#2A2925] whitespace-nowrap">
+                    <tr className="border-b border-slate-200 bg-white text-xs font-medium text-ink whitespace-nowrap">
                       <th className="py-3 px-4">Transfer</th>
                       <th className="py-3 px-4">Origin</th>
                       <th className="py-3 px-4">Destination</th>
@@ -806,7 +806,7 @@ export default function AdminTransfers() {
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E7E4DC]">
+                  <tbody className="divide-y divide-slate-200">
                     {filteredTransfers.map((t) => {
                       const originName =
                         locationMap.get(String(t.source_location)) || "Origin location";
@@ -819,20 +819,20 @@ export default function AdminTransfers() {
                       const isPending = (t.status || "").toLowerCase() === "pending";
 
                       return (
-                        <tr key={t.id} className="hover:bg-[#FAF9F6] transition-colors">
+                        <tr key={t.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3 px-4 font-medium text-charcoal-navy">
                             {t.transfer_number || `#T-${t.id}`}
                           </td>
-                          <td className="py-3 px-4 text-[#5A5750]">{originName}</td>
-                          <td className="py-3 px-4 text-[#5A5750]">{destName}</td>
+                          <td className="py-3 px-4 text-slate-600">{originName}</td>
+                          <td className="py-3 px-4 text-slate-600">{destName}</td>
                           <td className="py-3 px-4">
                             <span
                               className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                 t.status === "completed"
-                                  ? "bg-[#EDF7ED] text-[#1E4620]"
+                                  ? "bg-[rgba(24,24,27,0.06)] text-[#18181B]"
                                   : t.status === "cancelled"
-                                    ? "bg-[#FDECEC] text-[#B42318]"
-                                    : "bg-[#EBF5FB] text-[#004B87]"
+                                    ? "bg-orange-50 text-orange-700"
+                                    : "bg-slate-100 text-ink"
                               }`}
                             >
                               {t.status
@@ -840,10 +840,10 @@ export default function AdminTransfers() {
                                 : "Pending"}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-center text-[#5A5750] font-medium">
+                          <td className="py-3 px-4 text-center text-slate-600 font-medium">
                             {itemsCount}
                           </td>
-                          <td className="py-3 px-4 text-right text-xs text-[#78746A]">
+                          <td className="py-3 px-4 text-right text-xs text-slate-500">
                             {t.created_at ? new Date(t.created_at).toLocaleDateString() : "—"}
                           </td>
                           <td className="py-3 px-4 text-right">
@@ -852,7 +852,7 @@ export default function AdminTransfers() {
                                 <button
                                   type="button"
                                   onClick={() => handleComplete(t.id)}
-                                  className="rounded px-2 py-1 text-xs font-medium text-[#1E4620] hover:bg-[#EDF7ED] transition cursor-pointer"
+                                  className="rounded px-2 py-1 text-xs font-medium text-[#18181B] hover:bg-[rgba(24,24,27,0.06)] transition cursor-pointer"
                                   title="Mark as received and update stock"
                                 >
                                   Complete
@@ -860,7 +860,7 @@ export default function AdminTransfers() {
                                 <button
                                   type="button"
                                   onClick={() => handleCancel(t.id)}
-                                  className="rounded px-2 py-1 text-xs font-medium text-[#B42318] hover:bg-[#FDECEC] transition cursor-pointer"
+                                  className="rounded px-2 py-1 text-xs font-medium text-orange-700 hover:bg-orange-50 transition cursor-pointer"
                                   title="Cancel this transfer"
                                 >
                                   Cancel
@@ -883,7 +883,7 @@ export default function AdminTransfers() {
               href="https://help.shopify.com/en/manual/products/inventory/transfers-purchase-orders/transfers"
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-[#5A5750] hover:text-charcoal-navy hover:underline transition"
+              className="text-xs text-slate-600 hover:text-orange-600 hover:underline transition"
             >
               Learn more about managing inventory transfers
             </a>

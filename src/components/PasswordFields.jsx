@@ -20,7 +20,7 @@ export function PasswordInput({ id, value, onChange, placeholder, autoComplete, 
         className={`w-full rounded-lg border py-3 pl-4 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
           hasError
             ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-            : "border-slate-300 focus:border-charcoal-navy focus:ring-slate-100"
+            : "border-slate-300 focus:border-orange-600 focus:ring-slate-100"
         }`}
       />
 

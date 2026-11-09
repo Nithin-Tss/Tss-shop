@@ -42,8 +42,8 @@ const DEFAULT_RULES = {
 const RULE_KEYS = Object.keys(DEFAULT_RULES);
 
 const fieldClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#14130F] disabled:bg-slate-50 disabled:text-slate-400";
-const labelClass = "mb-1 block text-sm font-medium text-[#14130F]";
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-orange-600 disabled:bg-slate-50 disabled:text-slate-400";
+const labelClass = "mb-1 block text-sm font-medium text-ink";
 
 function Toggle({ checked, onChange, label }) {
   return (
@@ -53,7 +53,7 @@ function Toggle({ checked, onChange, label }) {
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-[#14130F]" : "bg-slate-300"}`}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition ${checked ? "bg-ink" : "bg-slate-300"}`}
     >
       <span
         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${checked ? "left-[22px]" : "left-0.5"}`}
@@ -67,7 +67,7 @@ function Card({ title, hint, enabled, onToggle, children, note }) {
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
         <div>
-          <h2 className="text-base font-semibold text-[#14130F]">{title}</h2>
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
           <p className="mt-1 text-sm text-slate-500">{hint}</p>
         </div>
         <Toggle checked={enabled} onChange={onToggle} label={title} />
@@ -285,7 +285,7 @@ export default function PoliciesSettings() {
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 p-5">
-          <h2 className="text-base font-semibold text-[#14130F]">Store policies</h2>
+          <h2 className="text-base font-semibold text-ink">Store policies</h2>
           <p className="mt-1 text-sm text-slate-500">
             A policy with text is published on its own page of your store. Leave it empty to hide
             the page.
@@ -297,7 +297,7 @@ export default function PoliciesSettings() {
             return (
               <div key={key}>
                 <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                  <label htmlFor={`policy-${key}`} className="text-sm font-medium text-[#14130F]">
+                  <label htmlFor={`policy-${key}`} className="text-sm font-medium text-ink">
                     {title}
                   </label>
                   {info?.visible ? (
@@ -305,7 +305,7 @@ export default function PoliciesSettings() {
                       href={info.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs text-slate-500 underline hover:text-[#14130F]"
+                      className="text-xs text-slate-500 underline hover:text-orange-600"
                     >
                       View page ↗
                     </a>
@@ -332,7 +332,7 @@ export default function PoliciesSettings() {
           type="button"
           onClick={save}
           disabled={saving}
-          className="rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60"
+          className="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save"}
         </button>

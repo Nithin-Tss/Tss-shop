@@ -31,8 +31,8 @@ const sparkle = (
 const illustration = (
   <svg
     viewBox="3 2 19 19"
-    fill="#C4B5FD"
-    stroke="#265C48"
+    fill="rgba(24,24,27,0.22)"
+    stroke="#18181B"
     strokeWidth={1.4}
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -45,15 +45,15 @@ const illustration = (
 );
 
 const avatar =
-  "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F3F1EC] text-[#5A5750]";
+  "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600";
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916] focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2";
 
 // Example questions: fully rounded pills with a soft lavender border
-const chip = `inline-flex min-h-9 max-w-full items-center rounded-full border border-[#E7E4DC] bg-white px-4 py-2 text-center text-[13px] leading-5 text-[#1F2433] transition-colors hover:border-[#C4B5FD] hover:bg-[#FAF9F6] disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
+const chip = `inline-flex min-h-9 max-w-full items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-center text-[13px] leading-5 text-ink transition-colors hover:border-[rgba(24,24,27,0.22)] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 
 // Action buttons ("Open ... in Code editor"): compact, solid and dark, so they read as the thing to click
-const actionButton = `inline-flex h-8 items-center gap-1.5 rounded-md bg-[#1A1916] px-3 text-[12px] font-medium text-white transition-colors hover:bg-[#2A3042] active:bg-black ${focusRing}`;
+const actionButton = `inline-flex h-8 items-center gap-1.5 rounded-md bg-ink px-3 text-[12px] font-medium text-white transition-colors hover:bg-[rgba(24,24,27,0.88)] active:bg-black ${focusRing}`;
 
 const arrow = (
   <svg
@@ -72,7 +72,7 @@ const arrow = (
 
 // The round button inside the input bar: Send (up arrow) and, while an answer is pending, Stop (filled square).
 // Light violet while the box is empty, a stronger violet when there is something to send.
-const roundButton = `flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1E4A3A] text-white transition-colors hover:bg-[#5B21B6] disabled:cursor-not-allowed disabled:bg-[#E7E4DC] disabled:hover:bg-[#E7E4DC] ${focusRing}`;
+const roundButton = `flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-700 text-white transition-colors hover:bg-[#EA580C] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:hover:bg-slate-200 ${focusRing}`;
 
 const upArrow = (
   <svg
@@ -98,13 +98,13 @@ const stopSquare = (
 function Bubble({ message, onAction }) {
   if (message.role === "note") {
     // "Stopped.": a muted line, not a bubble
-    return <p className="text-center text-[12px] leading-4 text-[#A29E92]">{message.text}</p>;
+    return <p className="text-center text-[12px] leading-4 text-slate-400">{message.text}</p>;
   }
 
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <p className="max-w-[85%] whitespace-pre-wrap rounded-xl rounded-br-sm bg-[#1A1916] px-3.5 py-2 text-[13px] leading-5 text-white">
+        <p className="max-w-[85%] whitespace-pre-wrap rounded-xl rounded-br-sm bg-orange-600 px-3.5 py-2 text-[13px] leading-5 text-white">
           {message.text}
         </p>
       </div>
@@ -124,7 +124,7 @@ function Bubble({ message, onAction }) {
           </p>
         ) : (
           // Rendered by a small safe renderer: whatever the model writes is shown as text, never as HTML
-          <div className="rounded-xl rounded-tl-sm bg-[#F7F8FA] px-3.5 py-2.5 text-[13px] leading-5 text-[#1F2433]">
+          <div className="rounded-xl rounded-tl-sm bg-[#FAFAFA] px-3.5 py-2.5 text-[13px] leading-5 text-ink">
             <AssistantMarkdown text={message.text} />
           </div>
         )}
@@ -148,7 +148,7 @@ function Bubble({ message, onAction }) {
             {tools.map((name) => (
               <span
                 key={name}
-                className="rounded bg-[#F1F3F5] px-1.5 py-0.5 text-[11px] leading-4 text-[#78746A]"
+                className="rounded bg-[rgba(24,24,27,0.06)] px-1.5 py-0.5 text-[11px] leading-4 text-slate-500"
               >
                 Used {name}
               </span>
@@ -164,19 +164,19 @@ function Thinking({ seconds }) {
   return (
     <div className="flex items-start gap-2" role="status">
       <span className={avatar}>{sparkle}</span>
-      <div className="pt-1 text-[12px] leading-5 text-[#78746A]">
+      <div className="pt-1 text-[12px] leading-5 text-slate-500">
         <span className="mr-1.5 inline-flex items-center gap-[3px] align-middle" aria-hidden="true">
           {[0, 160, 320].map((delay) => (
             <span
               key={delay}
               style={{ animationDelay: `${delay}ms` }}
-              className="h-1 w-1 animate-pulse rounded-full bg-[#A29E92]"
+              className="h-1 w-1 animate-pulse rounded-full bg-slate-400"
             />
           ))}
         </span>
         Thinking... {seconds}s
         {seconds >= 15 && (
-          <span className="mt-0.5 block text-xs text-[#A29E92]">
+          <span className="mt-0.5 block text-xs text-slate-400">
             The model runs on this computer, so it can take a minute or two.
           </span>
         )}
@@ -246,7 +246,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
         {messages.length === 0 && !pending && (
           <div className="flex h-full flex-col items-center justify-center text-center">
             {illustration}
-            <h2 className="mt-4 text-[21px] font-semibold leading-7 text-[#1A1916]">
+            <h2 className="mt-4 text-[21px] font-semibold leading-7 text-ink">
               Where should we begin?
             </h2>
             {/* Only here, in the empty chat: stacked under the greeting, never next to the input */}
@@ -270,13 +270,13 @@ export default function AssistantChat({ chat, ask, onAction }) {
         {pending && <Thinking seconds={seconds} />}
       </div>
 
-      <div className="border-t border-[#ECE9F8] px-4 py-3">
+      <div className="border-t border-slate-100 px-4 py-3">
         <form
           onSubmit={(event) => {
             event.preventDefault();
             send(input);
           }}
-          className="flex items-center gap-2 rounded-full border border-[#E7E4DC] bg-white py-1 pl-4 pr-1 transition-colors focus-within:border-[#A78BFA]"
+          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-4 pr-1 transition-colors focus-within:border-[rgba(24,24,27,0.22)]"
         >
           <input
             ref={inputRef}
@@ -287,7 +287,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
             onChange={(event) => setInput(event.target.value)}
             placeholder="Ask a question about your store"
             aria-label="Your question"
-            className="h-9 min-w-0 flex-1 bg-transparent text-[13px] text-[#1A1916] outline-none placeholder:text-[#A29E92] disabled:cursor-not-allowed disabled:text-[#A29E92]"
+            className="h-9 min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-400"
           />
           {pending ? (
             <button
@@ -311,7 +311,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
             </button>
           )}
         </form>
-        <p className="mt-1.5 px-4 text-[11px] leading-4 text-[#A29E92]">{INPUT_HINT}</p>
+        <p className="mt-1.5 px-4 text-[11px] leading-4 text-slate-400">{INPUT_HINT}</p>
       </div>
     </section>
   );

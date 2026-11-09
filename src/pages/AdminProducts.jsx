@@ -449,11 +449,11 @@ function ImportProductsModal({ onClose, onImported }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="import-products-title"
-        className="w-full max-w-140 overflow-hidden rounded-2xl border border-[#E7E4DC] bg-white shadow-xl"
+        className="w-full max-w-140 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <h2 id="import-products-title" className="text-base font-semibold text-charcoal-navy">
             Import products
           </h2>
@@ -461,7 +461,7 @@ function ImportProductsModal({ onClose, onImported }) {
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#F3F1EC] transition"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
           >
             <svg {...lineIcon} strokeWidth="1.8" className="h-4 w-4">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -481,7 +481,7 @@ function ImportProductsModal({ onClose, onImported }) {
 
           {sheet ? (
             <div>
-              <p className="text-sm text-[#5A5750]">
+              <p className="text-sm text-slate-600">
                 Choose which column in{" "}
                 <span className="font-medium text-charcoal-navy">{file.name}</span> fills each
                 product field. {sheet.rows.length} {sheet.rows.length === 1 ? "row" : "rows"} found.
@@ -501,12 +501,12 @@ function ImportProductsModal({ onClose, onImported }) {
                         onChange={(e) =>
                           setLabels((prev) => ({ ...prev, [field.key]: e.target.value }))
                         }
-                        className="h-10 w-[38%] rounded-lg border border-dashed border-[#E7E4DC] bg-white px-3 text-sm text-charcoal-navy outline-none placeholder:text-[#7A869A] focus:border-[#14130F]"
+                        className="h-10 w-[38%] rounded-lg border border-dashed border-slate-200 bg-white px-3 text-sm text-charcoal-navy outline-none placeholder:text-[rgba(24,24,27,0.5)] focus:border-orange-600"
                       />
                     ) : (
                       <span className="text-sm text-charcoal-navy">
                         {field.label}
-                        {field.required && <span className="text-[#B42318]"> *</span>}
+                        {field.required && <span className="text-orange-700"> *</span>}
                       </span>
                     )}
                     <select
@@ -525,7 +525,7 @@ function ImportProductsModal({ onClose, onImported }) {
                           if (header) setLabels((prev) => ({ ...prev, [field.key]: header }));
                         }
                       }}
-                      className="h-10 w-[55%] rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-[#14130F]"
+                      className="h-10 w-[55%] rounded-lg border border-slate-200 bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-orange-600"
                     >
                       <option value="">Don't import</option>
                       {sheet.headers.map((h, i) => (
@@ -539,8 +539,8 @@ function ImportProductsModal({ onClose, onImported }) {
               </div>
             </div>
           ) : file ? (
-            <div className="flex items-center gap-3 rounded-xl border border-[#E7E4DC] bg-[#F3F1EC] px-4 py-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#265C48]">
+            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-violet-600">
                 <svg {...lineIcon} className="h-5 w-5">
                   <path d="M14 3H6v18h12V7Z" />
                   <path d="M14 3v4h4M9 12h6M9 16h6" />
@@ -548,12 +548,12 @@ function ImportProductsModal({ onClose, onImported }) {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-charcoal-navy">{file.name}</p>
-                <p className="text-xs text-[#5A5750]">{formatFileSize(file.size)}</p>
+                <p className="text-xs text-slate-600">{formatFileSize(file.size)}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setFile(null)}
-                className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-[#5A5750] hover:bg-white hover:text-charcoal-navy transition"
+                className="rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 hover:bg-white hover:text-orange-600 transition"
               >
                 Remove
               </button>
@@ -570,13 +570,13 @@ function ImportProductsModal({ onClose, onImported }) {
               onDrop={handleDrop}
               className={`flex w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
                 isDragging
-                  ? "border-[#14130F] bg-[#DFEAE4]"
+                  ? "border-orange-600 bg-violet-100"
                   : error
-                    ? "border-[#E5484D]/60 bg-white hover:border-[#14130F]"
-                    : "border-[#E7E4DC] bg-white hover:border-[#14130F] hover:bg-[#F3F1EC]"
+                    ? "border-[#FB923C]/60 bg-white hover:border-orange-600"
+                    : "border-slate-200 bg-white hover:border-orange-600 hover:bg-slate-100"
               }`}
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#DFEAE4] text-[#265C48]">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-violet-100 text-violet-600">
                 <svg {...lineIcon} strokeWidth="1.8" className="h-5 w-5">
                   <path d="M12 15V3M7 8l5-5 5 5M5 21h14" />
                 </svg>
@@ -585,14 +585,14 @@ function ImportProductsModal({ onClose, onImported }) {
                 <span className="underline underline-offset-2">Click to browse</span> or drag and
                 drop
               </p>
-              <p className="mt-1 text-xs text-[#5A5750]">
+              <p className="mt-1 text-xs text-slate-600">
                 Excel (.xlsx, .xls) or CSV (.csv), up to 10MB
               </p>
             </button>
           )}
 
           {importing && progress && (
-            <p role="status" className="mt-3 text-sm text-[#5A5750]">
+            <p role="status" className="mt-3 text-sm text-slate-600">
               {progress}
             </p>
           )}
@@ -600,7 +600,7 @@ function ImportProductsModal({ onClose, onImported }) {
           {error && (
             <p
               role="alert"
-              className="mt-3 flex items-start gap-2 rounded-lg bg-[#FDECEC] px-3 py-2 text-sm text-[#B42318]"
+              className="mt-3 flex items-start gap-2 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-700"
             >
               <svg {...lineIcon} strokeWidth="1.8" className="mt-0.5 h-4 w-4 shrink-0">
                 <circle cx="12" cy="12" r="9" />
@@ -612,12 +612,12 @@ function ImportProductsModal({ onClose, onImported }) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 border-t border-[#E7E4DC] bg-[#F3F1EC] px-5 py-4">
+        <div className="flex justify-end gap-3 border-t border-slate-200 bg-slate-100 px-5 py-4">
           <button
             type="button"
             disabled={importing}
             onClick={sheet ? () => setSheet(null) : onClose}
-            className="rounded-lg border border-[#E7E4DC] bg-white px-5 py-2.5 text-base font-medium text-charcoal-navy hover:border-charcoal-navy transition disabled:opacity-50"
+            className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-base font-medium text-charcoal-navy hover:border-orange-600 transition disabled:opacity-50"
           >
             {sheet ? "Back" : "Cancel"}
           </button>
@@ -630,7 +630,7 @@ function ImportProductsModal({ onClose, onImported }) {
                 : undefined
             }
             onClick={sheet ? handleImport : handleContinue}
-            className="rounded-lg bg-[#14130F] px-5 py-2.5 text-base font-semibold text-white hover:bg-[#1A1916] transition disabled:cursor-not-allowed disabled:bg-[#C5CCD8] disabled:hover:bg-[#C5CCD8]"
+            className="rounded-lg bg-orange-600 px-5 py-2.5 text-base font-semibold text-white hover:bg-orange-600/90 transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:hover:bg-slate-300"
           >
             {importing ? "Importing..." : sheet ? "Import" : "Continue"}
           </button>
@@ -949,7 +949,7 @@ export default function ProductsPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F3F1EC] p-5 lg:p-6">
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-slate-100 p-5 lg:p-6">
           {/* TITLE */}
           <h1 className="flex items-center gap-2.5 text-2xl font-bold text-charcoal-navy">
             <PageIcon name="products" />
@@ -957,9 +957,9 @@ export default function ProductsPage() {
           </h1>
 
           {/* PRODUCTS CARD */}
-          <section className="mt-5 flex flex-1 flex-col overflow-hidden rounded-2xl border border-[#E7E4DC] bg-white shadow-sm">
+          <section className="mt-5 flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             {/* Tabs & Controls */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E4DC] px-4 py-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 px-4 py-2.5">
               <div className="flex flex-1 items-center gap-3">
                 {/* Status Filter Dropdown: "All ▼" */}
                 <div className="relative inline-flex items-center shrink-0">
@@ -971,7 +971,7 @@ export default function ProductsPage() {
                       setStatusFilter(e.target.value);
                       setPage(1);
                     }}
-                    className="h-8 appearance-none rounded-lg bg-[#DFEAE4] pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#E7E4DC] transition cursor-pointer"
+                    className="h-8 appearance-none rounded-lg bg-violet-100 pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-slate-200 transition cursor-pointer"
                   >
                     {STATUS_TABS.map((tab) => (
                       <option key={tab.id} value={tab.id} className="bg-white text-charcoal-navy">
@@ -985,7 +985,7 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Search */}
-                <div className="flex items-center gap-2 h-8 w-full max-w-xs sm:max-w-sm md:max-w-md rounded-lg border border-[#E7E4DC] bg-white px-2.5 text-xs sm:text-sm">
+                <div className="flex items-center gap-2 h-8 w-full max-w-xs sm:max-w-sm md:max-w-md rounded-lg border border-slate-200 bg-white px-2.5 text-xs sm:text-sm">
                   <span className="text-slate-400">⌕</span>
                   <input
                     type="text"
@@ -996,7 +996,7 @@ export default function ProductsPage() {
                     }}
                     placeholder="Search products"
                     aria-label="Search products"
-                    className="w-full bg-transparent outline-none text-xs text-[#14130F] placeholder:text-slate-400"
+                    className="w-full bg-transparent outline-none text-xs text-ink placeholder:text-slate-400"
                   />
                   {searchQuery && (
                     <button
@@ -1024,7 +1024,7 @@ export default function ProductsPage() {
                     setSortBy(e.target.value);
                     setPage(1);
                   }}
-                  className="h-8 appearance-none rounded-lg border border-[#E7E4DC] bg-white pl-2.5 pr-6 text-xs font-medium text-charcoal-navy outline-none hover:border-charcoal-navy transition cursor-pointer"
+                  className="h-8 appearance-none rounded-lg border border-slate-200 bg-white pl-2.5 pr-6 text-xs font-medium text-charcoal-navy outline-none hover:border-orange-600 transition cursor-pointer"
                 >
                   {SORT_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -1032,7 +1032,7 @@ export default function ProductsPage() {
                     </option>
                   ))}
                 </select>
-                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-[#5A5750]">
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-600">
                   ▼
                 </span>
               </div>
@@ -1041,7 +1041,7 @@ export default function ProductsPage() {
             {products.length > 0 && (
               <div>
                 <div className="flex items-center justify-between px-6 py-4">
-                  <p className="text-sm text-[#5A5750]">
+                  <p className="text-sm text-slate-600">
                     {selectedCount
                       ? `${selectedCount.toLocaleString()} selected`
                       : `${filteredAndSortedProducts.length} product${filteredAndSortedProducts.length === 1 ? "" : "s"}`}
@@ -1050,7 +1050,7 @@ export default function ProductsPage() {
                     <button
                       type="button"
                       onClick={exportCsv}
-                      className="rounded-lg border border-[#E7E4DC] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-charcoal-navy transition"
+                      className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-orange-600 transition"
                     >
                       {selectedCount ? `Export ${selectedCount.toLocaleString()}` : "Export"}
                     </button>
@@ -1059,7 +1059,7 @@ export default function ProductsPage() {
                         type="button"
                         onClick={activateSelected}
                         disabled={activating}
-                        className="rounded-lg border border-[#E7E4DC] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-charcoal-navy transition disabled:opacity-50"
+                        className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-orange-600 transition disabled:opacity-50"
                       >
                         {activating
                           ? "Activating..."
@@ -1074,7 +1074,7 @@ export default function ProductsPage() {
                         value=""
                         disabled={activating}
                         onChange={(e) => setStatusOfSelected(e.target.value)}
-                        className="rounded-lg border border-[#E7E4DC] bg-white px-3 py-2 text-sm font-medium text-charcoal-navy disabled:opacity-50"
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-charcoal-navy disabled:opacity-50"
                       >
                         <option value="">Set status...</option>
                         <option value="active">Active</option>
@@ -1107,13 +1107,13 @@ export default function ProductsPage() {
                         <button
                           type="button"
                           onClick={() => setIsImportOpen(true)}
-                          className="rounded-lg border border-[#E7E4DC] bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-charcoal-navy transition"
+                          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-charcoal-navy hover:border-orange-600 transition"
                         >
                           Import
                         </button>
                         <Link
                           to="/admin/online-store/products/new"
-                          className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition"
+                          className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 transition"
                         >
                           + Add product
                         </Link>
@@ -1125,7 +1125,7 @@ export default function ProductsPage() {
                   (allMatching || (allSelected && matchCount > pageProducts.length)) && (
                     <p
                       role="status"
-                      className="mx-6 mb-3 rounded-lg bg-[#F3F1EC] px-3 py-2 text-center text-sm text-[#5A5750]"
+                      className="mx-6 mb-3 rounded-lg bg-slate-100 px-3 py-2 text-center text-sm text-slate-600"
                     >
                       {allMatching ? (
                         <>All {matchCount.toLocaleString()} products selected · </>
@@ -1146,14 +1146,14 @@ export default function ProductsPage() {
                 {notice && (
                   <p
                     role="status"
-                    className="mx-6 mb-3 rounded-lg bg-[#FFF6E5] px-3 py-2 text-sm text-[#7A4B00]"
+                    className="mx-6 mb-3 rounded-lg bg-[rgba(234,88,12,0.08)] px-3 py-2 text-sm text-[#18181B]"
                   >
                     {notice}
                   </p>
                 )}
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
-                    <thead className="border-y border-[#E7E4DC] bg-[#F3F1EC] text-[#5A5750]">
+                    <thead className="border-y border-slate-200 bg-slate-100 text-slate-600">
                       <tr>
                         {/* Selecting is only for bulk delete */}
                         {canDelete && (
@@ -1180,7 +1180,7 @@ export default function ProductsPage() {
                         <tr>
                           <td
                             colSpan={canDelete ? 6 : 5}
-                            className="px-6 py-10 text-center text-sm text-[#5A5750]"
+                            className="px-6 py-10 text-center text-sm text-slate-600"
                           >
                             No products found
                           </td>
@@ -1189,8 +1189,8 @@ export default function ProductsPage() {
                         pageProducts.map((product) => (
                           <tr
                             key={product.id}
-                            className={`border-b border-[#E7E4DC] last:border-0 hover:bg-[#F3F1EC] ${
-                              selected.has(product.id) ? "bg-[#F3F1EC]" : ""
+                            className={`border-b border-slate-200 last:border-0 hover:bg-slate-100 ${
+                              selected.has(product.id) ? "bg-slate-100" : ""
                             }`}
                           >
                             {canDelete && (
@@ -1213,11 +1213,11 @@ export default function ProductsPage() {
                                 {product.title}
                               </Link>
                             </td>
-                            <td className="px-4 py-3 capitalize text-[#5A5750]">
+                            <td className="px-4 py-3 capitalize text-slate-600">
                               {product.status}
                             </td>
-                            <td className="px-4 py-3 text-[#5A5750]">{product.category || "-"}</td>
-                            <td className="px-4 py-3 text-[#5A5750]">{product.sku || "-"}</td>
+                            <td className="px-4 py-3 text-slate-600">{product.category || "-"}</td>
+                            <td className="px-4 py-3 text-slate-600">{product.sku || "-"}</td>
                             <td className="px-6 py-3 text-right text-charcoal-navy">
                               {product.price ?? "-"}
                             </td>
@@ -1230,7 +1230,7 @@ export default function ProductsPage() {
 
                 <nav
                   aria-label="Pagination"
-                  className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E7E4DC] px-6 py-3 text-sm text-[#5A5750]"
+                  className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-6 py-3 text-sm text-slate-600"
                 >
                   <div className="flex items-center gap-2">
                     <label htmlFor="products-page-size">Rows per page</label>
@@ -1241,7 +1241,7 @@ export default function ProductsPage() {
                         setPageSize(Number(e.target.value));
                         setPage(1);
                       }}
-                      className="rounded-lg border border-[#E7E4DC] bg-white px-2 py-1 text-charcoal-navy"
+                      className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-charcoal-navy"
                     >
                       {PAGE_SIZES.map((n) => (
                         <option key={n} value={n}>
@@ -1261,7 +1261,7 @@ export default function ProductsPage() {
                       type="button"
                       onClick={() => setPage(currentPage - 1)}
                       disabled={currentPage <= 1}
-                      className="rounded-lg border border-[#E7E4DC] bg-white px-3 py-1.5 font-medium text-charcoal-navy hover:border-charcoal-navy transition disabled:opacity-40"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-charcoal-navy hover:border-orange-600 transition disabled:opacity-40"
                     >
                       Previous
                     </button>
@@ -1269,7 +1269,7 @@ export default function ProductsPage() {
                       type="button"
                       onClick={() => setPage(currentPage + 1)}
                       disabled={currentPage >= pageCount}
-                      className="rounded-lg border border-[#E7E4DC] bg-white px-3 py-1.5 font-medium text-charcoal-navy hover:border-charcoal-navy transition disabled:opacity-40"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-charcoal-navy hover:border-orange-600 transition disabled:opacity-40"
                     >
                       Next
                     </button>
@@ -1279,7 +1279,7 @@ export default function ProductsPage() {
             )}
 
             {!loaded && products.length === 0 && (
-              <p role="status" className="px-6 py-14 text-center text-sm text-[#5A5750]">
+              <p role="status" className="px-6 py-14 text-center text-sm text-slate-600">
                 Loading products...
               </p>
             )}
@@ -1292,7 +1292,7 @@ export default function ProductsPage() {
                     {canManage ? "Add your products" : "No products yet"}
                   </h2>
 
-                  <p className="mt-3 text-xl leading-relaxed text-[#5A5750]">
+                  <p className="mt-3 text-xl leading-relaxed text-slate-600">
                     {canManage
                       ? "Start by stocking your store with products your customers will love"
                       : "Products added to this store will show up here."}
@@ -1302,7 +1302,7 @@ export default function ProductsPage() {
                     <div className="mt-7 flex flex-wrap items-center gap-3">
                       <Link
                         to="/admin/online-store/products/new"
-                        className="flex items-center gap-2 rounded-lg bg-[#14130F] px-7 py-3.5 text-[17px] font-semibold text-white hover:bg-[#1A1916] transition"
+                        className="flex items-center gap-2 rounded-lg bg-orange-600 px-7 py-3.5 text-[17px] font-semibold text-white hover:bg-orange-600/90 transition"
                       >
                         <span className="text-2xl leading-none">+</span>
                         Add product
@@ -1311,7 +1311,7 @@ export default function ProductsPage() {
                       <button
                         type="button"
                         onClick={() => setIsImportOpen(true)}
-                        className="flex items-center gap-2 rounded-lg border border-[#E7E4DC] bg-white px-7 py-3.5 text-[17px] font-medium text-charcoal-navy hover:border-charcoal-navy transition"
+                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-7 py-3.5 text-[17px] font-medium text-charcoal-navy hover:border-orange-600 transition"
                       >
                         <svg {...lineIcon} strokeWidth="1.8" className="h-5 w-5">
                           <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
@@ -1325,30 +1325,30 @@ export default function ProductsPage() {
                 {/* Storefront mockup */}
                 <div
                   aria-hidden="true"
-                  className="hidden xl:block w-105 shrink-0 overflow-hidden rounded-xl border border-[#E6E9EF] bg-white shadow-[0_12px_32px_-24px_rgba(20,27,45,0.3)]"
+                  className="hidden xl:block w-105 shrink-0 overflow-hidden rounded-xl border border-[rgba(24,24,27,0.06)] bg-white shadow-[0_12px_32px_-24px_rgba(24,24,27,0.3)]"
                 >
                   {/* Browser bar */}
-                  <div className="flex items-center gap-3 border-b border-[#F3F1EC] bg-[#FAFBFC] px-4 py-2.5">
+                  <div className="flex items-center gap-3 border-b border-slate-100 bg-[#FAFAFA] px-4 py-2.5">
                     <div className="flex gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
-                      <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
-                      <span className="h-2 w-2 rounded-full bg-[#D9DEE6]" />
+                      <span className="h-2 w-2 rounded-full bg-slate-200" />
+                      <span className="h-2 w-2 rounded-full bg-slate-200" />
+                      <span className="h-2 w-2 rounded-full bg-slate-200" />
                     </div>
-                    <span className="flex-1 rounded-md border border-[#F3F1EC] bg-white px-3 py-0.5 text-center text-[11px] text-[#A29E92]">
+                    <span className="flex-1 rounded-md border border-slate-100 bg-white px-3 py-0.5 text-center text-[11px] text-slate-400">
                       yourstore.com
                     </span>
                   </div>
 
                   {/* Shop header */}
                   <div className="px-5 pb-1 pt-4">
-                    <span className="text-xs font-bold tracking-[0.2em] text-[#14130F]">STORE</span>
+                    <span className="text-xs font-bold tracking-[0.2em] text-ink">STORE</span>
                   </div>
 
                   {/* Product grid */}
                   <div className="grid grid-cols-2 gap-x-4 gap-y-5 p-5">
                     {sampleProducts.map((product) => (
                       <div key={product.name}>
-                        <div className="flex h-26 items-center justify-center rounded-lg bg-[#F5F6F8] text-[#5A5750]">
+                        <div className="flex h-26 items-center justify-center rounded-lg bg-[#FAFAFA] text-slate-600">
                           <span className="block h-9 w-9 [&>svg]:h-full [&>svg]:w-full [&>svg]:stroke-[1.25]">
                             {product.icon}
                           </span>
@@ -1356,7 +1356,7 @@ export default function ProductsPage() {
                         <p className="mt-2.5 text-[13px] font-medium text-charcoal-navy">
                           {product.name}
                         </p>
-                        <p className="text-xs text-[#A29E92]">{product.price}</p>
+                        <p className="text-xs text-slate-400">{product.price}</p>
                       </div>
                     ))}
                   </div>

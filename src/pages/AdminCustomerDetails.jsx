@@ -497,7 +497,7 @@ export default function AdminCustomerDetails() {
     "RC";
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+    <div className="min-h-screen bg-slate-100 text-charcoal-navy">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
@@ -506,7 +506,7 @@ export default function AdminCustomerDetails() {
         <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">
           {/* TOAST MESSAGE */}
           {toastMsg && (
-            <div className="fixed bottom-6 right-6 z-50 bg-charcoal-navy text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
+            <div className="fixed bottom-6 right-6 z-50 bg-orange-600 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
               <svg
                 className="w-4 h-4 text-emerald-400"
                 fill="none"
@@ -559,7 +559,7 @@ export default function AdminCustomerDetails() {
               <p className="text-xs text-slate-500 mb-6">{error}</p>
               <Link
                 to="/admin/online-store/customers"
-                className="px-4 py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-xl hover:bg-slate-800 transition"
+                className="px-4 py-2 text-xs font-semibold bg-orange-600 text-white rounded-xl hover:bg-orange-600/90 transition"
               >
                 Back to Customers
               </Link>
@@ -574,7 +574,7 @@ export default function AdminCustomerDetails() {
                 <div className="flex items-center gap-2 text-slate-800">
                   <Link
                     to="/admin/online-store/customers"
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 transition"
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-orange-600 hover:bg-slate-200/60 transition"
                     title="Back to Customers"
                   >
                     <NavIcon name="customers" className="h-5 w-5" />
@@ -759,13 +759,13 @@ export default function AdminCustomerDetails() {
                         <div className="flex items-center gap-3">
                           <Link
                             to={`/admin/online-store/orders?search=${encodeURIComponent(customer.email || "")}`}
-                            className="text-xs font-semibold text-slate-600 hover:text-slate-900 hover:underline"
+                            className="text-xs font-semibold text-slate-600 hover:text-orange-600 hover:underline"
                           >
                             View all orders
                           </Link>
                           <Link
                             to="/admin/online-store/orders/create"
-                            className="px-3.5 py-1.5 text-xs font-semibold bg-[#1A1916] text-white rounded-lg hover:bg-[#303134] transition"
+                            className="px-3.5 py-1.5 text-xs font-semibold bg-orange-600 text-white rounded-lg hover:bg-[#18181B] transition"
                           >
                             Create order
                           </Link>
@@ -801,34 +801,62 @@ export default function AdminCustomerDetails() {
                               width="70"
                               height="90"
                               rx="8"
-                              fill="#F8FAFC"
-                              stroke="#D4D0C5"
+                              fill="rgba(24,24,27,0.06)"
+                              stroke="rgba(24,24,27,0.22)"
                               strokeWidth="2"
                             />
                             <path
                               d="M75 15v16h16"
-                              fill="#E2E8F0"
-                              stroke="#D4D0C5"
+                              fill="rgba(24,24,27,0.12)"
+                              stroke="rgba(24,24,27,0.22)"
                               strokeWidth="2"
                             />
-                            <rect x="36" y="28" width="28" height="6" rx="3" fill="#0EA5E9" />
-                            <rect x="36" y="42" width="48" height="4" rx="2" fill="#E2E8F0" />
-                            <rect x="36" y="52" width="48" height="4" rx="2" fill="#E2E8F0" />
+                            <rect x="36" y="28" width="28" height="6" rx="3" fill="#EA580C" />
+                            <rect
+                              x="36"
+                              y="42"
+                              width="48"
+                              height="4"
+                              rx="2"
+                              fill="rgba(24,24,27,0.12)"
+                            />
+                            <rect
+                              x="36"
+                              y="52"
+                              width="48"
+                              height="4"
+                              rx="2"
+                              fill="rgba(24,24,27,0.12)"
+                            />
                             <rect
                               x="36"
                               y="68"
                               width="16"
                               height="16"
                               rx="4"
-                              fill="#F97316"
+                              fill="#EA580C"
                               opacity="0.85"
                             />
-                            <rect x="58" y="72" width="26" height="4" rx="2" fill="#D4D0C5" />
-                            <rect x="58" y="80" width="18" height="4" rx="2" fill="#D4D0C5" />
-                            <circle cx="60" cy="108" r="16" fill="#10B981" opacity="0.15" />
+                            <rect
+                              x="58"
+                              y="72"
+                              width="26"
+                              height="4"
+                              rx="2"
+                              fill="rgba(24,24,27,0.22)"
+                            />
+                            <rect
+                              x="58"
+                              y="80"
+                              width="18"
+                              height="4"
+                              rx="2"
+                              fill="rgba(24,24,27,0.22)"
+                            />
+                            <circle cx="60" cy="108" r="16" fill="#EA580C" opacity="0.15" />
                             <path
                               d="M54 108l4 4 8-8"
-                              stroke="#10B981"
+                              stroke="#EA580C"
                               strokeWidth="2.5"
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -840,9 +868,9 @@ export default function AdminCustomerDetails() {
                       /* HAS ORDERS STATE */
                       <div>
                         {/* Test Order Warning Banner */}
-                        <div className="bg-[#FFF5EA] border border-[#FFE2B8] text-[#9A4B00] rounded-xl px-4 py-2.5 text-xs font-medium flex items-center gap-2 mb-4">
+                        <div className="bg-[rgba(234,88,12,0.08)] border border-orange-200 text-orange-700 rounded-xl px-4 py-2.5 text-xs font-medium flex items-center gap-2 mb-4">
                           <svg
-                            className="w-4 h-4 text-[#D97706] shrink-0"
+                            className="w-4 h-4 text-orange-600 shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -868,19 +896,19 @@ export default function AdminCustomerDetails() {
                                 #{latestOrder.order_number}
                               </Link>
                               {/* Payment badge */}
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-charcoal-navy">
                                 <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                                 {latestOrder.payment_status === "paid" ? "Paid" : "Paid"}
                               </span>
                               {/* Fulfillment badge */}
                               {latestOrder.fulfillment_status === "fulfilled" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-charcoal-navy">
                                   <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                                   Fulfilled
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFFBEA] text-[#8C6B00] border border-[#FDE68A]">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]" />
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
                                   Unfulfilled
                                 </span>
                               )}
@@ -990,7 +1018,7 @@ export default function AdminCustomerDetails() {
                     {/* Staff Comment Card */}
                     <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
                       <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#0080FF] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                        <div className="w-8 h-8 rounded-lg bg-[#EA580C] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                           {userInitials}
                         </div>
                         <div className="flex-1">
@@ -1063,7 +1091,7 @@ export default function AdminCustomerDetails() {
                               {dateEvents.map((ev) => (
                                 <div key={ev.id} className="relative flex items-start gap-4 pl-6">
                                   {/* Node bullet */}
-                                  <div className="absolute left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-[#F3F1EC]" />
+                                  <div className="absolute left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-slate-100" />
 
                                   {/* Event Content */}
                                   <div className="flex-1 min-w-0">
@@ -1224,7 +1252,7 @@ export default function AdminCustomerDetails() {
                             setAddressModalError("");
                             setShowAddressModal(true);
                           }}
-                          className="text-xs font-semibold text-slate-600 hover:text-slate-900 hover:underline"
+                          className="text-xs font-semibold text-slate-600 hover:text-orange-600 hover:underline"
                         >
                           Manage
                         </button>
@@ -1406,14 +1434,14 @@ export default function AdminCustomerDetails() {
                           <button
                             type="button"
                             onClick={() => setIsEditingNotes(false)}
-                            className="px-3 py-1 text-xs text-slate-600 hover:text-slate-900 font-medium"
+                            className="px-3 py-1 text-xs text-slate-600 hover:text-orange-600 font-medium"
                           >
                             Cancel
                           </button>
                           <button
                             type="button"
                             onClick={handleSaveNotes}
-                            className="px-3 py-1 text-xs font-semibold bg-charcoal-navy text-white rounded-md hover:bg-slate-800"
+                            className="px-3 py-1 text-xs font-semibold bg-orange-600 text-white rounded-md hover:bg-orange-600/90"
                           >
                             Save
                           </button>
@@ -1506,7 +1534,7 @@ export default function AdminCustomerDetails() {
                   <button
                     type="button"
                     onClick={() => setActiveEmailOrder(null)}
-                    className="px-4 py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-lg hover:bg-slate-800 transition"
+                    className="px-4 py-2 text-xs font-semibold bg-orange-600 text-white rounded-lg hover:bg-orange-600/90 transition"
                   >
                     Done
                   </button>
@@ -1537,7 +1565,7 @@ export default function AdminCustomerDetails() {
                 <button
                   type="button"
                   onClick={() => setShowBlocksModal(false)}
-                  className="w-full py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-xl hover:bg-slate-800 transition"
+                  className="w-full py-2 text-xs font-semibold bg-orange-600 text-white rounded-xl hover:bg-orange-600/90 transition"
                 >
                   Close
                 </button>
@@ -1614,7 +1642,7 @@ export default function AdminCustomerDetails() {
                               : "not_subscribed",
                           })
                         }
-                        className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy"
+                        className="h-4 w-4 rounded border-slate-300 accent-orange-600"
                       />
                       <span className="text-slate-700 font-medium">
                         Customer agreed to receive marketing emails
@@ -1626,14 +1654,14 @@ export default function AdminCustomerDetails() {
                     <button
                       type="button"
                       onClick={() => setShowEditCustomerModal(false)}
-                      className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                      className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-orange-600"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={savingCustomer}
-                      className="px-4 py-2 text-xs font-semibold bg-charcoal-navy text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 transition"
+                      className="px-4 py-2 text-xs font-semibold bg-orange-600 text-white rounded-xl hover:bg-orange-600/90 disabled:opacity-50 transition"
                     >
                       {savingCustomer ? "Saving..." : "Save changes"}
                     </button>

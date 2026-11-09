@@ -12,7 +12,7 @@ const SETTINGS = "/api/v1/notifications/settings/";
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-300 disabled:bg-slate-50";
 const primaryButton =
-  "rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60";
+  "rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-60";
 const secondaryButton =
   "rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60";
 
@@ -43,7 +43,7 @@ const EMPTY = {
 function Card({ title, description, children }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h2 className="text-base font-semibold text-[#14130F]">{title}</h2>
+      <h2 className="text-base font-semibold text-ink">{title}</h2>
       {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
       <div className="mt-4">{children}</div>
     </section>
@@ -56,7 +56,7 @@ function Toggle({ checked, disabled, onChange, label, hint }) {
       className={`flex items-start justify-between gap-4 py-3 ${disabled ? "opacity-60" : "cursor-pointer"}`}
     >
       <span>
-        <span className="block text-sm font-medium text-[#14130F]">{label}</span>
+        <span className="block text-sm font-medium text-ink">{label}</span>
         <span className="block text-sm text-slate-500">{hint}</span>
       </span>
       <input
@@ -66,7 +66,7 @@ function Toggle({ checked, disabled, onChange, label, hint }) {
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-5 w-5 shrink-0 accent-[#14130F]"
+        className="mt-1 h-5 w-5 shrink-0 accent-orange-600"
       />
     </label>
   );

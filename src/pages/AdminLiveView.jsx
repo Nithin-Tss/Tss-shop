@@ -6,16 +6,16 @@ function Stat({ title, value }) {
   return (
     <div className={card}>
       <h2 className={cardHeading}>{title}</h2>
-      <p className="mt-2 text-2xl font-bold text-[#14130F]">{value}</p>
+      <p className="mt-2 text-2xl font-bold text-ink">{value}</p>
     </div>
   );
 }
 
 function Row({ label, value }) {
   return (
-    <li className="flex items-center justify-between gap-3 border-b border-[#F3F1EC] py-2 text-[13px] last:border-0">
-      <span className="min-w-0 truncate text-[#14130F]">{label}</span>
-      <span className="shrink-0 font-medium text-[#14130F]">{value}</span>
+    <li className="flex items-center justify-between gap-3 border-b border-slate-100 py-2 text-[13px] last:border-0">
+      <span className="min-w-0 truncate text-ink">{label}</span>
+      <span className="shrink-0 font-medium text-ink">{value}</span>
     </li>
   );
 }
@@ -34,18 +34,18 @@ export default function AdminLiveView() {
     : "—";
 
   return (
-    <div className="min-h-screen overflow-y-auto bg-[#F3F1EC] text-charcoal-navy">
+    <div className="min-h-screen overflow-y-auto bg-slate-100 text-charcoal-navy">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
         <main className="min-w-0 flex-1 overflow-x-hidden">
-          <header className="border-b border-[#E7E4DC] bg-white">
+          <header className="border-b border-slate-200 bg-white">
             <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
               <h1 className="flex items-center gap-2.5 text-xl font-semibold text-charcoal-navy">
                 <PageIcon name="analytics" />
                 Live View
               </h1>
-              <p className="mt-0.5 text-[13px] text-[#5A5750]">
+              <p className="mt-0.5 text-[13px] text-slate-600">
                 Today&apos;s totals use your store&apos;s timezone ({data?.timezone || "…"}) · Last
                 updated {updated}
               </p>
@@ -65,9 +65,7 @@ export default function AdminLiveView() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className={card}>
                 <h2 className={cardHeading}>Visitors right now</h2>
-                <p className="mt-2 text-4xl font-bold text-[#14130F]">
-                  {count(data?.visitors_now)}
-                </p>
+                <p className="mt-2 text-4xl font-bold text-ink">{count(data?.visitors_now)}</p>
                 <p className={`mt-1 ${smallLabel}`}>Active in the last 5 minutes</p>
               </div>
               <Stat title="Total sales" value={money(data?.total_sales)} />
@@ -80,12 +78,12 @@ export default function AdminLiveView() {
               <p className={smallLabel}>Sessions active in the last 10 minutes</p>
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
                 {steps.map(([label, value], i) => (
-                  <div key={label} className="rounded-lg bg-[#F3F1EC] p-4">
-                    <p className="text-[13px] text-[#5A5750]">
+                  <div key={label} className="rounded-lg bg-slate-100 p-4">
+                    <p className="text-[13px] text-slate-600">
                       {i > 0 && "→ "}
                       {label}
                     </p>
-                    <p className="mt-1 text-2xl font-bold text-[#14130F]">{count(value)}</p>
+                    <p className="mt-1 text-2xl font-bold text-ink">{count(value)}</p>
                   </div>
                 ))}
               </div>

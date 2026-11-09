@@ -132,7 +132,7 @@ export default function AdminAddCustomer() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+    <div className="min-h-screen bg-slate-100 text-charcoal-navy">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -147,7 +147,7 @@ export default function AdminAddCustomer() {
             <div className="flex items-center gap-2 text-slate-700">
               <Link
                 to="/admin/online-store/customers"
-                className="hover:text-slate-900 transition-colors flex items-center gap-1 text-slate-500 hover:underline"
+                className="hover:text-orange-600 transition-colors flex items-center gap-1 text-slate-500 hover:underline"
               >
                 <NavIcon name="customers" className="h-4 w-4" />
                 <span>›</span>
@@ -160,7 +160,7 @@ export default function AdminAddCustomer() {
             <div className="flex items-center gap-3">
               <Link
                 to="/admin/online-store/customers"
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-orange-600 hover:bg-slate-200/60 rounded-lg transition-colors"
               >
                 Discard
               </Link>
@@ -168,7 +168,7 @@ export default function AdminAddCustomer() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-2 rounded-lg bg-charcoal-navy hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
+                className="px-5 py-2 rounded-lg bg-orange-600 hover:bg-orange-600/90 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -293,7 +293,7 @@ export default function AdminAddCustomer() {
                       type="checkbox"
                       checked={marketingEmail}
                       onChange={(e) => setMarketingEmail(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy"
+                      className="h-4 w-4 rounded border-slate-300 accent-orange-600"
                     />
                     <span className="text-xs text-slate-600">
                       Customer agreed to receive marketing emails.

@@ -41,7 +41,7 @@ export default function ForgotPassword() {
       <div className="w-full max-w-md rounded-xl bg-white ring-1 ring-ink/5 p-8 shadow-lg sm:p-10">
         <Link
           to="/auth/signin"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-orange-600"
         >
           <span aria-hidden="true">←</span> Back to Sign In
         </Link>
@@ -96,7 +96,7 @@ export default function ForgotPassword() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-xl bg-[#14130F] px-4 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-orange-600 px-4 py-3 font-semibold text-white transition hover:bg-orange-600/90 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Sending..." : "Send Reset Link"}
             </button>

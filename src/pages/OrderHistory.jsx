@@ -141,7 +141,7 @@ export default function OrderHistory() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
-                <Link to="/" className="hover:text-slate-900 transition flex items-center gap-1">
+                <Link to="/" className="hover:text-orange-600 transition flex items-center gap-1">
                   <span>←</span>
                   <span>Store</span>
                 </Link>
@@ -160,7 +160,7 @@ export default function OrderHistory() {
             <button
               type="button"
               onClick={handleLogout}
-              className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-orange-600 cursor-pointer"
             >
               <span>Log out</span>
               <span className="text-slate-400">→</span>
@@ -179,7 +179,7 @@ export default function OrderHistory() {
 
             <Link
               to="/account/orders"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-[#14130F] text-white shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-orange-600 text-white shadow-xs"
             >
               <span>📦</span>
               <span>Order History</span>
@@ -211,7 +211,7 @@ export default function OrderHistory() {
             </p>
             <Link
               to="/"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#14130F] px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#1A1916] shadow-xs cursor-pointer"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-orange-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-orange-600/90 shadow-xs cursor-pointer"
             >
               <span>Start shopping</span>
               <span>→</span>
@@ -254,7 +254,7 @@ export default function OrderHistory() {
                           <button
                             type="button"
                             onClick={() => setSelectedOrder(order)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-orange-600 transition cursor-pointer"
                           >
                             <span>View Order</span>
                             <span className="text-slate-400">→</span>
@@ -433,7 +433,7 @@ export default function OrderHistory() {
               <button
                 type="button"
                 onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer text-xs"
+                className="px-4 py-2 font-semibold text-slate-600 hover:text-orange-600 hover:bg-slate-100 rounded-lg transition cursor-pointer text-xs"
               >
                 Close
               </button>

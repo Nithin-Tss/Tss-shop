@@ -113,7 +113,7 @@ export default function MfaSettings() {
           type="button"
           onClick={begin}
           disabled={busy}
-          className="mt-4 rounded-lg bg-charcoal-navy px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+          className="mt-4 rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
         >
           Set up
         </button>
@@ -143,7 +143,7 @@ export default function MfaSettings() {
           <button
             type="submit"
             disabled={busy}
-            className="rounded-lg bg-charcoal-navy px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
           >
             Turn on
           </button>

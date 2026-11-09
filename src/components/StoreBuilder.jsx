@@ -2,31 +2,31 @@ const stores = [
   {
     name: "Beauty",
     category: "Beauty & Cosmetics",
-    tone: "bg-[#E9D9CF]",
+    tone: "bg-[rgba(234,88,12,0.25)]",
     note: "Shade finders, subscriptions",
   },
   {
     name: "Fashion",
     category: "Fashion & Clothing",
-    tone: "bg-[#D6D9CC]",
+    tone: "bg-[rgba(24,24,27,0.22)]",
     note: "Size grids, drops, lookbooks",
   },
   {
     name: "Electronics",
     category: "Electronics",
-    tone: "bg-[#CBD3D6]",
+    tone: "bg-[rgba(24,24,27,0.22)]",
     note: "Spec tables, bundles",
   },
   {
     name: "Manufacturing",
     category: "Manufacturing",
-    tone: "bg-[#DAD3C3]",
+    tone: "bg-[rgba(234,88,12,0.25)]",
     note: "Wholesale tiers, quotes",
   },
   {
     name: "Grocery",
     category: "Grocery & Food",
-    tone: "bg-[#D2DDCB]",
+    tone: "bg-[rgba(24,24,27,0.22)]",
     note: "Weight pricing, delivery slots",
   },
 ];

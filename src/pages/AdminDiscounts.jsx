@@ -41,7 +41,7 @@ export default function DiscountsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC]">
+    <div className="min-h-screen bg-slate-100">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
@@ -49,17 +49,17 @@ export default function DiscountsPage() {
 
         <main className="min-w-0 flex-1">
           {/* HEADER */}
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#F3F1EC] px-4 py-5 sm:px-6">
-            <div className="flex items-center gap-2.5 text-[#14130F]">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-100 px-4 py-5 sm:px-6">
+            <div className="flex items-center gap-2.5 text-ink">
               <PageIcon name="discounts" />
 
-              <h1 className="text-xl font-semibold text-[#14130F]">Discounts</h1>
+              <h1 className="text-xl font-semibold text-ink">Discounts</h1>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg bg-[#E7E4DC] px-4 py-2 text-sm font-medium text-[#14130F] hover:bg-[#D9D9D9] transition"
+                className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-ink hover:bg-[rgba(24,24,27,0.12)] transition"
               >
                 ⇧ Export
               </button>
@@ -69,7 +69,7 @@ export default function DiscountsPage() {
                   type="button"
                   id="create-discount-button"
                   onClick={() => setIsTypeModalOpen(true)}
-                  className="rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-black transition cursor-pointer"
+                  className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-black transition cursor-pointer"
                 >
                   Create discount
                 </button>
@@ -84,7 +84,7 @@ export default function DiscountsPage() {
               <div className="flex h-14 items-center border-b border-slate-200">
                 <button
                   type="button"
-                  className="flex h-full items-center gap-2 px-5 text-sm font-medium text-[#14130F]"
+                  className="flex h-full items-center gap-2 px-5 text-sm font-medium text-ink"
                 >
                   All
                   <span>⌃</span>
@@ -152,9 +152,7 @@ export default function DiscountsPage() {
                             <div>
                               <input type="checkbox" className="h-4 w-4 rounded border-slate-300" />
                             </div>
-                            <div className="font-medium text-[#14130F] truncate pr-2">
-                              {codeDisplay}
-                            </div>
+                            <div className="font-medium text-ink truncate pr-2">{codeDisplay}</div>
                             <div>
                               <span
                                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -189,7 +187,7 @@ export default function DiscountsPage() {
 
             {/* LEARN MORE */}
             <div className="pt-8 text-center">
-              <button type="button" className="text-sm font-medium text-[#14130F] hover:underline">
+              <button type="button" className="text-sm font-medium text-ink hover:underline">
                 Learn more about discounts
               </button>
             </div>

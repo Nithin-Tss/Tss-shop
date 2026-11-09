@@ -110,14 +110,14 @@ export default function AdminReportExploration() {
   const availableVisualizations = ["Table", "Bar chart", "Line chart", "Donut chart"];
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F] font-sans">
+    <div className="min-h-screen bg-slate-100 text-ink font-sans">
       <AdminHeader />
 
       {/* FEEDBACK TOAST */}
       {notice && (
         <div
           role="status"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-[#14130F] px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all animate-in fade-in slide-in-from-bottom-2"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all animate-in fade-in slide-in-from-bottom-2"
         >
           <span>{notice}</span>
           <button
@@ -146,7 +146,7 @@ export default function AdminReportExploration() {
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-[#5A5750] hover:bg-[#E7E4DC] hover:text-[#14130F] transition-colors"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-200 hover:text-orange-600 transition-colors"
                   title="Back"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,9 +159,9 @@ export default function AdminReportExploration() {
                   </svg>
                 </button>
 
-                <span className="text-[#A29E92] text-sm">›</span>
+                <span className="text-slate-400 text-sm">›</span>
 
-                <h1 className="text-[19px] sm:text-[20px] font-semibold text-[#1A1916] tracking-tight">
+                <h1 className="text-[19px] sm:text-[20px] font-semibold text-ink tracking-tight">
                   New exploration
                 </h1>
 
@@ -170,7 +170,7 @@ export default function AdminReportExploration() {
                   type="button"
                   onClick={handleReset}
                   title="Reset exploration"
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-[#5A5750] hover:bg-[#F3F1EC] hover:text-[#14130F] shadow-2xs transition-colors"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 hover:text-orange-600 shadow-2xs transition-colors"
                 >
                   <svg
                     className="h-3.5 w-3.5"
@@ -193,7 +193,7 @@ export default function AdminReportExploration() {
                     type="button"
                     onClick={() => setIsMoreMenuOpen((prev) => !prev)}
                     title="More options"
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#D4D0C5] bg-white text-[#5A5750] hover:bg-[#F3F1EC] hover:text-[#14130F] shadow-2xs transition-colors"
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 hover:text-orange-600 shadow-2xs transition-colors"
                   >
                     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                       <circle cx="5" cy="12" r="2" />
@@ -203,14 +203,14 @@ export default function AdminReportExploration() {
                   </button>
 
                   {isMoreMenuOpen && (
-                    <div className="absolute left-0 top-full z-40 mt-1 min-w-[170px] rounded-xl border border-[#E7E4DC] bg-white p-1 text-left shadow-lg">
+                    <div className="absolute left-0 top-full z-40 mt-1 min-w-[170px] rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg">
                       <button
                         type="button"
                         onClick={() => {
                           setIsMoreMenuOpen(false);
                           showToast("Exploration saved.");
                         }}
-                        className="flex w-full items-center rounded-lg px-3 py-1.5 text-[13px] text-[#1A1916] hover:bg-[#F3F1EC]"
+                        className="flex w-full items-center rounded-lg px-3 py-1.5 text-[13px] text-ink hover:bg-slate-100"
                       >
                         Save as report
                       </button>
@@ -220,18 +220,18 @@ export default function AdminReportExploration() {
                           setIsMoreMenuOpen(false);
                           showToast("Exploration duplicated.");
                         }}
-                        className="flex w-full items-center rounded-lg px-3 py-1.5 text-[13px] text-[#1A1916] hover:bg-[#F3F1EC]"
+                        className="flex w-full items-center rounded-lg px-3 py-1.5 text-[13px] text-ink hover:bg-slate-100"
                       >
                         Duplicate
                       </button>
-                      <div className="my-1 border-t border-[#F3F1EC]" />
+                      <div className="my-1 border-t border-slate-100" />
                       <button
                         type="button"
                         onClick={() => {
                           setIsMoreMenuOpen(false);
                           handleReset();
                         }}
-                        className="flex w-full items-center rounded-lg px-3 py-1.5 text-[13px] text-[#B42318] hover:bg-[#FFF4F2]"
+                        className="flex w-full items-center rounded-lg px-3 py-1.5 text-[13px] text-orange-700 hover:bg-orange-50"
                       >
                         Discard exploration
                       </button>
@@ -246,7 +246,7 @@ export default function AdminReportExploration() {
                 <button
                   type="button"
                   onClick={() => showToast("Annotations feature.")}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#E7E4DC] px-3 py-1.5 text-xs font-medium text-[#78746A] hover:bg-[#DCDFE3] hover:text-[#1A1916] transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-[rgba(24,24,27,0.12)] hover:text-orange-600 transition-colors"
                 >
                   <svg
                     className="h-3.5 w-3.5"
@@ -270,13 +270,13 @@ export default function AdminReportExploration() {
                   onClick={() => setShowControls((prev) => !prev)}
                   className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors ${
                     showControls
-                      ? "bg-[#D4D0C5] text-[#14130F] hover:bg-[#C4C9D0]"
-                      : "bg-white border border-[#D4D0C5] text-[#5A5750] hover:bg-[#F3F1EC]"
+                      ? "bg-slate-300 text-ink hover:bg-[rgba(24,24,27,0.22)]"
+                      : "bg-white border border-slate-300 text-slate-600 hover:bg-slate-100"
                   }`}
                   aria-pressed={showControls}
                 >
                   <svg
-                    className="h-3.5 w-3.5 text-[#14130F]"
+                    className="h-3.5 w-3.5 text-ink"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -300,10 +300,10 @@ export default function AdminReportExploration() {
                 <button
                   type="button"
                   onClick={() => setIsDateMenuOpen((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#F3F1EC] px-2.5 py-1 text-xs font-medium text-[#1A1916] shadow-2xs hover:bg-[#E4E6E8] transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-ink shadow-2xs hover:bg-[rgba(24,24,27,0.12)] transition-colors"
                 >
                   <svg
-                    className="h-3.5 w-3.5 text-[#78746A]"
+                    className="h-3.5 w-3.5 text-slate-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -317,7 +317,7 @@ export default function AdminReportExploration() {
                   </svg>
                   <span>{dateRange}</span>
                   <svg
-                    className="h-3 w-3 text-[#78746A]"
+                    className="h-3 w-3 text-slate-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -332,7 +332,7 @@ export default function AdminReportExploration() {
                 </button>
 
                 {isDateMenuOpen && (
-                  <div className="absolute left-0 top-full z-40 mt-1 min-w-[160px] rounded-xl border border-[#E7E4DC] bg-white p-1 text-left shadow-lg">
+                  <div className="absolute left-0 top-full z-40 mt-1 min-w-[160px] rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg">
                     {[
                       "All time",
                       "Today",
@@ -351,8 +351,8 @@ export default function AdminReportExploration() {
                         }}
                         className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                           dateRange === preset
-                            ? "bg-[#F3F1EC] font-semibold text-[#14130F]"
-                            : "text-[#403E39] hover:bg-[#FAF9F6]"
+                            ? "bg-slate-100 font-semibold text-ink"
+                            : "text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         <span>{preset}</span>
@@ -368,14 +368,14 @@ export default function AdminReportExploration() {
                 <button
                   type="button"
                   onClick={() => setIsCurrencyMenuOpen((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#F3F1EC] px-2.5 py-1 text-xs font-medium text-[#1A1916] shadow-2xs hover:bg-[#E4E6E8] transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-ink shadow-2xs hover:bg-[rgba(24,24,27,0.12)] transition-colors"
                 >
-                  <span className="font-semibold text-[#78746A] text-[11px]">$⇄</span>
+                  <span className="font-semibold text-slate-500 text-[11px]">$⇄</span>
                   <span>{currency}</span>
                 </button>
 
                 {isCurrencyMenuOpen && (
-                  <div className="absolute left-0 top-full z-40 mt-1 min-w-[130px] rounded-xl border border-[#E7E4DC] bg-white p-1 text-left shadow-lg">
+                  <div className="absolute left-0 top-full z-40 mt-1 min-w-[130px] rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg">
                     {["AUD $", "USD $", "EUR €", "GBP £", "INR ₹"].map((curr) => (
                       <button
                         key={curr}
@@ -387,8 +387,8 @@ export default function AdminReportExploration() {
                         }}
                         className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[13px] ${
                           currency === curr
-                            ? "bg-[#F3F1EC] font-semibold text-[#14130F]"
-                            : "text-[#403E39] hover:bg-[#FAF9F6]"
+                            ? "bg-slate-100 font-semibold text-ink"
+                            : "text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         <span>{curr}</span>
@@ -407,7 +407,7 @@ export default function AdminReportExploration() {
             <div className="min-w-0 flex-1 w-full space-y-3">
               {/* Prompt / Search Field */}
               <div
-                className="relative rounded-2xl border border-[#E7E4DC] bg-white px-4 py-2.5 shadow-2xs"
+                className="relative rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-2xs"
                 ref={explorationDropdownRef}
               >
                 <div className="flex items-center gap-3">
@@ -433,14 +433,14 @@ export default function AdminReportExploration() {
                     onChange={(e) => setSearchExploration(e.target.value)}
                     onFocus={() => setIsExplorationDropdownOpen(true)}
                     placeholder="What do you want to explore?"
-                    className="w-full bg-transparent text-[14px] text-[#14130F] placeholder:text-[#78746A] outline-none"
+                    className="w-full bg-transparent text-[14px] text-ink placeholder:text-slate-500 outline-none"
                   />
 
                   {/* Dropdown Chevron Button */}
                   <button
                     type="button"
                     onClick={() => setIsExplorationDropdownOpen((prev) => !prev)}
-                    className="text-[#78746A] hover:text-[#14130F] p-1 transition-colors"
+                    className="text-slate-500 hover:text-orange-600 p-1 transition-colors"
                     aria-label="Toggle exploration dropdown"
                   >
                     <svg
@@ -463,8 +463,8 @@ export default function AdminReportExploration() {
 
                 {/* Suggestions Dropdown Popover */}
                 {isExplorationDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full z-40 mt-1.5 rounded-xl border border-[#E7E4DC] bg-white p-2 shadow-lg">
-                    <p className="px-3 py-1 text-[11px] font-semibold text-[#A29E92] uppercase tracking-wider">
+                  <div className="absolute left-0 right-0 top-full z-40 mt-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+                    <p className="px-3 py-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                       Suggested prompts
                     </p>
                     {[
@@ -481,9 +481,9 @@ export default function AdminReportExploration() {
                           setIsExplorationDropdownOpen(false);
                           showToast(`Selected: ${sug}`);
                         }}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] text-[#1A1916] hover:bg-[#F3F1EC] transition-colors"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] text-ink hover:bg-slate-100 transition-colors"
                       >
-                        <span className="text-[#A29E92]">✦</span>
+                        <span className="text-slate-400">✦</span>
                         <span>{sug}</span>
                       </button>
                     ))}
@@ -492,11 +492,11 @@ export default function AdminReportExploration() {
               </div>
 
               {/* Central Workspace Card: PURE EMPTY STRUCTURE MATCHING SCREENSHOT */}
-              <div className="min-h-[580px] rounded-2xl border border-[#E7E4DC] bg-white shadow-2xs flex flex-col items-center justify-center p-8 transition-all">
+              <div className="min-h-[580px] rounded-2xl border border-slate-200 bg-white shadow-2xs flex flex-col items-center justify-center p-8 transition-all">
                 {/* Empty State Illustration */}
                 <div className="flex flex-col items-center justify-center text-center">
                   {/* Soft circle with report sheet graphic */}
-                  <div className="relative mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-[#F3F1EC]">
+                  <div className="relative mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-slate-100">
                     {/* Document Sheet Graphic with Bar Chart and Grid */}
                     <svg className="h-16 w-12 drop-shadow-2xs" viewBox="0 0 48 64" fill="none">
                       <rect
@@ -506,24 +506,59 @@ export default function AdminReportExploration() {
                         height="60"
                         rx="4"
                         fill="white"
-                        stroke="#D4D0C5"
+                        stroke="rgba(24,24,27,0.22)"
                         strokeWidth="1.8"
                       />
                       {/* 3 Vertical Bars */}
-                      <rect x="11" y="16" width="5" height="12" rx="1" fill="#A29E92" />
-                      <rect x="21" y="10" width="6" height="18" rx="1" fill="#5A5750" />
-                      <rect x="32" y="14" width="5" height="14" rx="1" fill="#A29E92" />
+                      <rect x="11" y="16" width="5" height="12" rx="1" fill="rgba(24,24,27,0.5)" />
+                      <rect x="21" y="10" width="6" height="18" rx="1" fill="rgba(24,24,27,0.78)" />
+                      <rect x="32" y="14" width="5" height="14" rx="1" fill="rgba(24,24,27,0.5)" />
                       {/* Table Grid Horizontal Lines */}
-                      <line x1="8" y1="36" x2="40" y2="36" stroke="#E7E4DC" strokeWidth="1.5" />
-                      <line x1="8" y1="44" x2="40" y2="44" stroke="#E7E4DC" strokeWidth="1.5" />
-                      <line x1="8" y1="52" x2="40" y2="52" stroke="#E7E4DC" strokeWidth="1.5" />
+                      <line
+                        x1="8"
+                        y1="36"
+                        x2="40"
+                        y2="36"
+                        stroke="rgba(24,24,27,0.12)"
+                        strokeWidth="1.5"
+                      />
+                      <line
+                        x1="8"
+                        y1="44"
+                        x2="40"
+                        y2="44"
+                        stroke="rgba(24,24,27,0.12)"
+                        strokeWidth="1.5"
+                      />
+                      <line
+                        x1="8"
+                        y1="52"
+                        x2="40"
+                        y2="52"
+                        stroke="rgba(24,24,27,0.12)"
+                        strokeWidth="1.5"
+                      />
                       {/* Table Grid Vertical Lines */}
-                      <line x1="18" y1="36" x2="18" y2="56" stroke="#E7E4DC" strokeWidth="1.5" />
-                      <line x1="28" y1="36" x2="28" y2="56" stroke="#E7E4DC" strokeWidth="1.5" />
+                      <line
+                        x1="18"
+                        y1="36"
+                        x2="18"
+                        y2="56"
+                        stroke="rgba(24,24,27,0.12)"
+                        strokeWidth="1.5"
+                      />
+                      <line
+                        x1="28"
+                        y1="36"
+                        x2="28"
+                        y2="56"
+                        stroke="rgba(24,24,27,0.12)"
+                        strokeWidth="1.5"
+                      />
                     </svg>
                   </div>
 
-                  <p className="text-[14px] font-medium text-[#78746A]">
+                  <p className="text-[14px] font-medium text-slate-500">
                     Add a metric to see results
                   </p>
                 </div>
@@ -541,8 +576,8 @@ export default function AdminReportExploration() {
                     onClick={() => setActiveTab("freeform")}
                     className={`relative flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs rounded-t-xl transition-colors ${
                       activeTab === "freeform"
-                        ? "bg-white font-semibold text-[#14130F] border-t border-l border-r border-[#E7E4DC]"
-                        : "bg-[#F3F1EC] font-medium text-[#78746A] hover:bg-[#E2E4E7]"
+                        ? "bg-white font-semibold text-ink border-t border-l border-r border-slate-200"
+                        : "bg-slate-100 font-medium text-slate-500 hover:bg-[rgba(24,24,27,0.12)]"
                     }`}
                   >
                     {/* Bar chart icon */}
@@ -571,8 +606,8 @@ export default function AdminReportExploration() {
                     onClick={() => setActiveTab("cohorts")}
                     className={`relative flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs rounded-t-xl transition-colors ${
                       activeTab === "cohorts"
-                        ? "bg-white font-semibold text-[#14130F] border-t border-l border-r border-[#E7E4DC]"
-                        : "bg-[#F3F1EC] font-medium text-[#78746A] hover:bg-[#E2E4E7]"
+                        ? "bg-white font-semibold text-ink border-t border-l border-r border-slate-200"
+                        : "bg-slate-100 font-medium text-slate-500 hover:bg-[rgba(24,24,27,0.12)]"
                     }`}
                   >
                     {/* Grid/cohort icon */}
@@ -597,23 +632,23 @@ export default function AdminReportExploration() {
                 </div>
 
                 {/* CONFIGURATION PANEL BODY */}
-                <div className="rounded-b-2xl rounded-tr-2xl border border-[#E7E4DC] bg-white p-3 space-y-2.5 shadow-2xs">
+                <div className="rounded-b-2xl rounded-tr-2xl border border-slate-200 bg-white p-3 space-y-2.5 shadow-2xs">
                   {/* SECTION 1: METRICS */}
                   <div>
                     <button
                       type="button"
                       onClick={() => toggleSection("metrics")}
-                      className="w-full group flex items-center justify-between rounded-xl bg-[#F3F1EC] px-3.5 py-2.5 text-xs font-semibold text-[#1A1916] hover:bg-[#E7E4DC] transition-colors cursor-pointer"
+                      className="w-full group flex items-center justify-between rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-semibold text-ink hover:bg-slate-200 transition-colors cursor-pointer"
                     >
                       <span>Metrics</span>
-                      <span className="text-base font-normal text-[#78746A] group-hover:text-[#1A1916]">
+                      <span className="text-base font-normal text-slate-500 group-hover:text-orange-600">
                         {expandedSection === "metrics" ? "−" : "+"}
                       </span>
                     </button>
 
                     {expandedSection === "metrics" && (
-                      <div className="mt-2 space-y-1 rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-2 text-xs animate-in fade-in">
-                        <p className="px-2 py-1 text-[11px] font-semibold text-[#A29E92] uppercase">
+                      <div className="mt-2 space-y-1 rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs animate-in fade-in">
+                        <p className="px-2 py-1 text-[11px] font-semibold text-slate-400 uppercase">
                           Available metrics
                         </p>
                         {availableMetrics.map((metric) => {
@@ -625,8 +660,8 @@ export default function AdminReportExploration() {
                               onClick={() => handleToggleMetric(metric)}
                               className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                                 isSelected
-                                  ? "bg-[#14130F] text-white font-medium"
-                                  : "text-[#403E39] hover:bg-[#F3F1EC]"
+                                  ? "bg-ink text-white font-medium"
+                                  : "text-slate-700 hover:bg-slate-100"
                               }`}
                             >
                               <span>{metric}</span>
@@ -643,17 +678,17 @@ export default function AdminReportExploration() {
                     <button
                       type="button"
                       onClick={() => toggleSection("dimensions")}
-                      className="w-full group flex items-center justify-between rounded-xl bg-[#F3F1EC] px-3.5 py-2.5 text-xs font-semibold text-[#1A1916] hover:bg-[#E7E4DC] transition-colors cursor-pointer"
+                      className="w-full group flex items-center justify-between rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-semibold text-ink hover:bg-slate-200 transition-colors cursor-pointer"
                     >
                       <span>Dimensions</span>
-                      <span className="text-base font-normal text-[#78746A] group-hover:text-[#1A1916]">
+                      <span className="text-base font-normal text-slate-500 group-hover:text-orange-600">
                         {expandedSection === "dimensions" ? "−" : "+"}
                       </span>
                     </button>
 
                     {expandedSection === "dimensions" && (
-                      <div className="mt-2 space-y-1 rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-2 text-xs animate-in fade-in">
-                        <p className="px-2 py-1 text-[11px] font-semibold text-[#A29E92] uppercase">
+                      <div className="mt-2 space-y-1 rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs animate-in fade-in">
+                        <p className="px-2 py-1 text-[11px] font-semibold text-slate-400 uppercase">
                           Available dimensions
                         </p>
                         {availableDimensions.map((dim) => {
@@ -665,8 +700,8 @@ export default function AdminReportExploration() {
                               onClick={() => handleToggleDimension(dim)}
                               className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                                 isSelected
-                                  ? "bg-[#14130F] text-white font-medium"
-                                  : "text-[#403E39] hover:bg-[#F3F1EC]"
+                                  ? "bg-ink text-white font-medium"
+                                  : "text-slate-700 hover:bg-slate-100"
                               }`}
                             >
                               <span>{dim}</span>
@@ -683,14 +718,14 @@ export default function AdminReportExploration() {
                     <button
                       type="button"
                       onClick={() => toggleSection("visualization")}
-                      className="w-full group flex items-center justify-between rounded-xl bg-[#F3F1EC] px-3.5 py-2.5 text-xs font-semibold text-[#1A1916] hover:bg-[#E7E4DC] transition-colors cursor-pointer"
+                      className="w-full group flex items-center justify-between rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-semibold text-ink hover:bg-slate-200 transition-colors cursor-pointer"
                     >
                       <span>Visualization</span>
                     </button>
 
                     {expandedSection === "visualization" && (
-                      <div className="mt-2 space-y-1 rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-2 text-xs animate-in fade-in">
-                        <p className="px-2 py-1 text-[11px] font-semibold text-[#A29E92] uppercase">
+                      <div className="mt-2 space-y-1 rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs animate-in fade-in">
+                        <p className="px-2 py-1 text-[11px] font-semibold text-slate-400 uppercase">
                           Select visualization
                         </p>
                         {availableVisualizations.map((type) => (
@@ -704,8 +739,8 @@ export default function AdminReportExploration() {
                             }}
                             className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                               visualizationType === type
-                                ? "bg-[#14130F] text-white font-medium"
-                                : "text-[#403E39] hover:bg-[#F3F1EC]"
+                                ? "bg-ink text-white font-medium"
+                                : "text-slate-700 hover:bg-slate-100"
                             }`}
                           >
                             <span>{type}</span>
@@ -721,17 +756,17 @@ export default function AdminReportExploration() {
                     <button
                       type="button"
                       onClick={() => toggleSection("filters")}
-                      className="w-full group flex items-center justify-between rounded-xl bg-[#F3F1EC] px-3.5 py-2.5 text-xs font-semibold text-[#1A1916] hover:bg-[#E7E4DC] transition-colors cursor-pointer"
+                      className="w-full group flex items-center justify-between rounded-xl bg-slate-100 px-3.5 py-2.5 text-xs font-semibold text-ink hover:bg-slate-200 transition-colors cursor-pointer"
                     >
                       <span>Filters</span>
-                      <span className="text-base font-normal text-[#78746A] group-hover:text-[#1A1916]">
+                      <span className="text-base font-normal text-slate-500 group-hover:text-orange-600">
                         {expandedSection === "filters" ? "−" : "+"}
                       </span>
                     </button>
 
                     {expandedSection === "filters" && (
-                      <div className="mt-2 space-y-1 rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-2 text-xs animate-in fade-in">
-                        <p className="px-2 py-1 text-[11px] font-semibold text-[#A29E92] uppercase">
+                      <div className="mt-2 space-y-1 rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs animate-in fade-in">
+                        <p className="px-2 py-1 text-[11px] font-semibold text-slate-400 uppercase">
                           Filter options
                         </p>
                         {[
@@ -753,8 +788,8 @@ export default function AdminReportExploration() {
                               }}
                               className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                                 isSelected
-                                  ? "bg-[#14130F] text-white font-medium"
-                                  : "text-[#403E39] hover:bg-[#F3F1EC]"
+                                  ? "bg-ink text-white font-medium"
+                                  : "text-slate-700 hover:bg-slate-100"
                               }`}
                             >
                               <span>{filter}</span>

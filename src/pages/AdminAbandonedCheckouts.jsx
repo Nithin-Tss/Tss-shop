@@ -3,8 +3,8 @@ import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/Admin
 import { apiGet } from "@/lib/api";
 
 const RECOVERY_STYLES = {
-  pending: "bg-[#FFFBEA] text-[#8C6B00] border border-[#FDE68A]",
-  recovered: "bg-[#E9F7EF] text-[#16653A] border border-[#BBE5CC]",
+  pending: "bg-orange-50 text-orange-700 border border-orange-200",
+  recovered: "bg-[rgba(24,24,27,0.06)] text-[#18181B] border border-[rgba(24,24,27,0.22)]",
 };
 
 function formatDate(dateString) {
@@ -20,7 +20,7 @@ function formatDate(dateString) {
 
 function RecoveryBadge({ status }) {
   const key = (status || "pending").toLowerCase();
-  const style = RECOVERY_STYLES[key] || "bg-[#F3F1EC] text-[#14130F]";
+  const style = RECOVERY_STYLES[key] || "bg-slate-100 text-ink";
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${style}`}
@@ -69,7 +69,7 @@ export default function AdminAbandonedCheckouts() {
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+    <div className="min-h-screen bg-slate-100 text-charcoal-navy">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
@@ -80,9 +80,9 @@ export default function AdminAbandonedCheckouts() {
             Abandoned checkouts
           </h1>
 
-          <section className="rounded-2xl border border-[#E7E4DC] bg-white shadow-sm overflow-hidden">
-            <div className="flex items-center justify-end border-b border-[#E7E4DC] px-4 py-2.5">
-              <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm">
+          <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="flex items-center justify-end border-b border-slate-200 px-4 py-2.5">
+              <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm">
                 <span className="text-slate-400">⌕</span>
                 <input
                   type="text"
@@ -98,7 +98,7 @@ export default function AdminAbandonedCheckouts() {
             </div>
 
             {error && (
-              <p role="alert" className="border-b border-[#E7E4DC] px-4 py-3 text-sm text-red-600">
+              <p role="alert" className="border-b border-slate-200 px-4 py-3 text-sm text-red-600">
                 {error}
               </p>
             )}
@@ -106,7 +106,7 @@ export default function AdminAbandonedCheckouts() {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-semibold text-slate-700 whitespace-nowrap">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 whitespace-nowrap">
                     <th className="py-3.5 pl-5 pr-3">Abandoned</th>
                     <th className="py-3.5 px-3">Customer</th>
                     <th className="py-3.5 px-3">Items</th>
@@ -114,7 +114,7 @@ export default function AdminAbandonedCheckouts() {
                     <th className="py-3.5 pl-3 pr-6 text-right">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E7E4DC]">
+                <tbody className="divide-y divide-slate-200">
                   {loading ? (
                     [...Array(4)].map((_, i) => (
                       <tr key={i} className="animate-pulse">
@@ -130,7 +130,7 @@ export default function AdminAbandonedCheckouts() {
                       const items = c.items || [];
                       const count = items.reduce((n, i) => n + (i.quantity || 0), 0);
                       return (
-                        <tr key={c.id} className="whitespace-nowrap hover:bg-[#FAF9F6]">
+                        <tr key={c.id} className="whitespace-nowrap hover:bg-slate-50">
                           <td className="py-3.5 pl-5 pr-3 text-slate-600">
                             {formatDate(c.abandoned_at)}
                           </td>
@@ -174,14 +174,14 @@ export default function AdminAbandonedCheckouts() {
             </div>
 
             {filtered.length > 0 && (
-              <div className="flex items-center justify-between gap-4 border-t border-[#E7E4DC] px-4 py-3 text-xs text-slate-500">
+              <div className="flex items-center justify-between gap-4 border-t border-slate-200 px-4 py-3 text-xs text-slate-500">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     disabled={page <= 1}
                     onClick={() => setCurrentPage(page - 1)}
                     aria-label="Previous page"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E7E4DC] bg-white text-slate-600 hover:bg-[#F3F1EC] disabled:pointer-events-none disabled:opacity-40"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40"
                   >
                     ‹
                   </button>
@@ -190,7 +190,7 @@ export default function AdminAbandonedCheckouts() {
                     disabled={page >= totalPages}
                     onClick={() => setCurrentPage(page + 1)}
                     aria-label="Next page"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#E7E4DC] bg-white text-slate-600 hover:bg-[#F3F1EC] disabled:pointer-events-none disabled:opacity-40"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40"
                   >
                     ›
                   </button>

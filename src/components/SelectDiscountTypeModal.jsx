@@ -123,15 +123,15 @@ export default function SelectDiscountTypeModal({ isOpen, onClose }) {
         aria-labelledby="select-discount-type-title"
       >
         {/* MODAL HEADER */}
-        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
-          <h2 id="select-discount-type-title" className="text-[17px] font-semibold text-[#1A1916]">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 id="select-discount-type-title" className="text-[17px] font-semibold text-ink">
             Select discount type
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="rounded-lg p-1 text-[#5A5750] hover:bg-[#F1F2F3] hover:text-[#1A1916] transition-colors focus:outline-none"
+            className="rounded-lg p-1 text-slate-600 hover:bg-[rgba(24,24,27,0.06)] hover:text-orange-600 transition-colors focus:outline-none"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -151,16 +151,14 @@ export default function SelectDiscountTypeModal({ isOpen, onClose }) {
               key={type.id}
               type="button"
               onClick={() => handleSelect(type.id)}
-              className="group flex w-full items-center justify-between rounded-xl border border-slate-200/80 p-4 text-left transition hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#14130F]/10"
+              className="group flex w-full items-center justify-between rounded-xl border border-slate-200/80 p-4 text-left transition hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-ink/10"
             >
               <div className="flex items-center gap-3.5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition group-hover:bg-[#14130F] group-hover:text-white">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition group-hover:bg-ink group-hover:text-white">
                   {type.icon}
                 </div>
                 <div>
-                  <div className="text-[15px] font-semibold text-[#14130F] transition">
-                    {type.title}
-                  </div>
+                  <div className="text-[15px] font-semibold text-ink transition">{type.title}</div>
                   <div className="mt-0.5 text-xs text-slate-500">{type.description}</div>
                 </div>
               </div>
@@ -180,7 +178,7 @@ export default function SelectDiscountTypeModal({ isOpen, onClose }) {
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="flex items-center justify-end border-t border-[#E7E4DC] bg-[#FAF9F6] px-6 py-3.5">
+        <div className="flex items-center justify-end border-t border-slate-200 bg-slate-50 px-6 py-3.5">
           <button
             type="button"
             onClick={onClose}

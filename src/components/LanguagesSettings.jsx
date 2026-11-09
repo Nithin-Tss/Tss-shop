@@ -36,7 +36,7 @@ export default function LanguagesSettings() {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 p-5">
-        <h2 className="text-lg font-semibold text-[#14130F]">Languages</h2>
+        <h2 className="text-lg font-semibold text-ink">Languages</h2>
         <p className="mt-1 text-sm text-slate-500">
           Choose a language. The entire website switches to it and remembers your choice.
         </p>
@@ -53,7 +53,7 @@ export default function LanguagesSettings() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search languages"
-          className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]"
+          className="mt-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600"
         />
       </div>
 
@@ -69,7 +69,7 @@ export default function LanguagesSettings() {
                 aria-pressed={active}
                 className={`flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-left text-sm transition ${
                   active
-                    ? "border-[#14130F] bg-[#14130F] text-white"
+                    ? "border-orange-600 bg-ink text-white"
                     : "border-slate-200 hover:border-slate-400"
                 }`}
               >

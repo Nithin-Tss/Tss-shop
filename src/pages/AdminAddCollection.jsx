@@ -85,15 +85,15 @@ function formatPrice(value) {
 // ---------------------------------------------------------------- shared styles
 
 const card =
-  "rounded-xl border border-[#E7E4DC] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04)]";
-const cardTitle = "text-[15px] font-semibold text-[#14130F]";
-const labelClass = "mb-1.5 block text-[13px] font-medium text-[#5A5750]";
+  "rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(24,24,27,0.04)]";
+const cardTitle = "text-[15px] font-semibold text-ink";
+const labelClass = "mb-1.5 block text-[13px] font-medium text-slate-600";
 const inputClass =
-  "w-full rounded-lg border border-[#D4D0C5] bg-white px-3 py-2.5 text-[14px] text-[#14130F] outline-none transition placeholder:text-[#A29E92] focus:border-[#14130F] focus:ring-2 focus:ring-[#14130F]/10";
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-[14px] text-ink outline-none transition placeholder:text-slate-400 focus:border-orange-600 focus:ring-2 focus:ring-ink/10";
 const subtleButton =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#D4D0C5] bg-white px-3 py-2 text-[13px] font-medium text-[#30343B] transition hover:bg-[#F6F7F8] disabled:opacity-40";
+  "inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-[13px] font-medium text-[rgba(24,24,27,0.88)] transition hover:bg-slate-50 disabled:opacity-40";
 const iconButton =
-  "inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#78746A] transition hover:bg-[#F3F1EC] hover:text-[#14130F]";
+  "inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-orange-600";
 
 function Icon({ d, className = "h-4 w-4" }) {
   return (
@@ -166,9 +166,9 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#D4D0C5] focus-within:border-charcoal-navy focus-within:ring-2 focus-within:ring-[#14130F]/10">
+    <div className="overflow-hidden rounded-lg border border-slate-300 focus-within:border-orange-600 focus-within:ring-2 focus-within:ring-ink/10">
       <div
-        className="flex flex-wrap gap-0.5 border-b border-[#E7E4DC] bg-[#FAF9F6] px-1.5 py-1"
+        className="flex flex-wrap gap-0.5 border-b border-slate-200 bg-slate-50 px-1.5 py-1"
         role="toolbar"
         aria-label="Text formatting"
       >
@@ -180,7 +180,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
             aria-label={tool.label}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => apply(tool)}
-            className="rounded-md px-2 py-1 text-[12px] text-[#5A5750] hover:bg-[#EDEEF0] hover:text-charcoal-navy"
+            className="rounded-md px-2 py-1 text-[12px] text-slate-600 hover:bg-[rgba(24,24,27,0.06)] hover:text-orange-600"
           >
             {tool.text}
           </button>
@@ -195,7 +195,7 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
         suppressContentEditableWarning
         data-placeholder={placeholder}
         onInput={emit}
-        className="min-h-30 px-3 py-2.5 text-[14px] leading-relaxed text-charcoal-navy outline-none empty:before:pointer-events-none empty:before:text-[#A29E92] empty:before:content-[attr(data-placeholder)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+        className="min-h-30 px-3 py-2.5 text-[14px] leading-relaxed text-charcoal-navy outline-none empty:before:pointer-events-none empty:before:text-slate-400 empty:before:content-[attr(data-placeholder)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
       />
     </div>
   );
@@ -256,12 +256,12 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
       <h2 id="include-collections-title" className={`${cardTitle} mb-1`}>
         Include products from collections
       </h2>
-      <p className="mb-4 text-[13px] leading-relaxed text-[#78746A]">
+      <p className="mb-4 text-[13px] leading-relaxed text-slate-500">
         Products in the collections you add also show here, and follow them when they change.
       </p>
 
       {collections.length === 0 ? (
-        <p className="text-[13px] text-[#78746A]">There are no other collections yet.</p>
+        <p className="text-[13px] text-slate-500">There are no other collections yet.</p>
       ) : (
         <div className="flex items-start gap-2">
           <div ref={box} className="relative min-w-0 flex-1">
@@ -295,7 +295,7 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
               tabIndex={-1}
               aria-label="Show collections"
               onClick={() => setOpen((o) => !o)}
-              className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-[#78746A]"
+              className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-slate-500"
             >
               <svg
                 className="h-4 w-4"
@@ -315,24 +315,24 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
                 id={listId}
                 role="listbox"
                 aria-label="Collections to add"
-                className="absolute z-20 mt-1.5 max-h-60 w-full overflow-y-auto rounded-lg border border-[#E7E4DC] bg-white py-1 shadow-[0_8px_24px_rgba(20,19,15,0.10)]"
+                className="absolute z-20 mt-1.5 max-h-60 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-[0_8px_24px_rgba(24,24,27,0.10)]"
               >
                 {offered.map((c) => (
                   <li key={c.id} role="option" aria-selected={chosen?.id === c.id}>
                     <button
                       type="button"
                       onClick={() => pick(c)}
-                      className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-[14px] text-[#14130F] transition hover:bg-[#F3F1EC] ${chosen?.id === c.id ? "bg-[#F3F1EC]" : ""}`}
+                      className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-[14px] text-ink transition hover:bg-slate-100 ${chosen?.id === c.id ? "bg-slate-100" : ""}`}
                     >
                       <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                      <span className="shrink-0 text-[12px] text-[#78746A]">
+                      <span className="shrink-0 text-[12px] text-slate-500">
                         {productsLabel(c.products_count)}
                       </span>
                     </button>
                   </li>
                 ))}
                 {offered.length === 0 && (
-                  <li className="px-3 py-2 text-[13px] text-[#78746A]">
+                  <li className="px-3 py-2 text-[13px] text-slate-500">
                     {query.trim() ? "No collections match." : "All collections are added."}
                   </li>
                 )}
@@ -343,7 +343,7 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
             type="button"
             onClick={add}
             disabled={!chosen}
-            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-charcoal-navy px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#2A2925] disabled:cursor-not-allowed disabled:bg-[#E7E4DC] disabled:text-[#A29E92]"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-orange-600 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-orange-600/90 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
             Add
           </button>
@@ -352,14 +352,14 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
 
       {added.length > 0 && (
         <ul
-          className="mt-4 divide-y divide-[#F3F1EC] rounded-lg border border-[#E7E4DC]"
+          className="mt-4 divide-y divide-slate-100 rounded-lg border border-slate-200"
           aria-label="Added collections"
         >
           {added.map((c) => (
             <li key={c.id} className="flex items-center gap-3 py-1.5 pl-3 pr-1.5 text-[14px]">
-              <span className="min-w-0 flex-1 truncate font-medium text-[#14130F]">
+              <span className="min-w-0 flex-1 truncate font-medium text-ink">
                 {c.name}
-                <span className="font-normal text-[#78746A]">
+                <span className="font-normal text-slate-500">
                   {" "}
                   · {productsLabel(c.products_count)}
                 </span>
@@ -389,7 +389,7 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
       )}
 
       {error && (
-        <p className="mt-3 text-[13px] text-[#B42318]" role="alert">
+        <p className="mt-3 text-[13px] text-orange-700" role="alert">
           {error}
         </p>
       )}
@@ -439,7 +439,7 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
         aria-labelledby="picker-title"
         className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-t-xl bg-white shadow-xl sm:rounded-xl"
       >
-        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <h2 id="picker-title" className={cardTitle}>
             {title}
           </h2>
@@ -448,9 +448,9 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
           </button>
         </div>
 
-        <div className="border-b border-[#E7E4DC] px-5 py-3">
+        <div className="border-b border-slate-200 px-5 py-3">
           <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A29E92]">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
               <Icon d={ICONS.search} />
             </span>
             <input
@@ -467,23 +467,23 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
 
         <ul className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
           {shown.length === 0 && (
-            <li className="px-3 py-10 text-center text-[13px] text-[#78746A]">
+            <li className="px-3 py-10 text-center text-[13px] text-slate-500">
               No products found.
             </li>
           )}
           {shown.map((p) => (
             <li key={p.id}>
-              <label className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-[#F6F7F8]">
+              <label className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-slate-50">
                 <input
                   type="checkbox"
                   checked={picked.has(p.id)}
                   onChange={() => toggle(p.id)}
-                  className="h-4 w-4 accent-charcoal-navy"
+                  className="h-4 w-4 accent-orange-600"
                 />
                 <Thumb product={p} size="h-10 w-10" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[14px] text-charcoal-navy">{p.title}</span>
-                  <span className="block text-[12px] text-[#78746A]">
+                  <span className="block text-[12px] text-slate-500">
                     {capitalize(p.status)}
                     {p.price ? ` · ${formatPrice(p.price)}` : ""}
                   </span>
@@ -493,8 +493,8 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
           ))}
         </ul>
 
-        <div className="flex items-center justify-between gap-3 border-t border-[#E7E4DC] px-5 py-3">
-          <span className="text-[13px] text-[#78746A]">{picked.size} selected</span>
+        <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-5 py-3">
+          <span className="text-[13px] text-slate-500">{picked.size} selected</span>
           <div className="flex gap-2">
             <button type="button" onClick={onClose} className={subtleButton}>
               Cancel
@@ -502,7 +502,7 @@ function ProductPicker({ title, products, selected, onDone, onClose }) {
             <button
               type="button"
               onClick={() => onDone([...picked])}
-              className="rounded-lg bg-charcoal-navy px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#2A2925]"
+              className="rounded-lg bg-orange-600 px-4 py-2 text-[13px] font-semibold text-white hover:bg-orange-600/90"
             >
               Done
             </button>
@@ -517,7 +517,7 @@ function Thumb({ product, size = "h-full w-full" }) {
   const url = product.images?.[0]?.url;
   return (
     <span
-      className={`${size} flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#F3F1EC] text-[#B4B9C1]`}
+      className={`${size} flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-[rgba(24,24,27,0.22)]`}
     >
       {url ? (
         <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -882,7 +882,7 @@ export default function AdminAddCollection() {
   // ---------------------------------------------------------------- render
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] font-sans text-charcoal-navy">
+    <div className="min-h-screen bg-slate-100 font-sans text-charcoal-navy">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
@@ -901,7 +901,7 @@ export default function AdminAddCollection() {
               </button>
               <h1 className="truncate text-[20px] font-semibold tracking-tight">{pageTitle}</h1>
               {editing && !loading && !loadError && (
-                <span className="rounded-full bg-[#E9EAEC] px-2 py-0.5 text-[12px] font-medium text-[#5A5750]">
+                <span className="rounded-full bg-[rgba(24,24,27,0.06)] px-2 py-0.5 text-[12px] font-medium text-slate-600">
                   {capitalize(initial.status)}
                 </span>
               )}
@@ -919,7 +919,7 @@ export default function AdminAddCollection() {
                 type="button"
                 onClick={save}
                 disabled={!dirty || saving || loading}
-                className="rounded-lg bg-charcoal-navy px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#2A2925] disabled:cursor-not-allowed disabled:bg-[#D4D0C5] disabled:text-[#8A909A]"
+                className="rounded-lg bg-orange-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-orange-600/90 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-[rgba(24,24,27,0.5)]"
               >
                 {saving ? "Saving…" : "Save"}
               </button>
@@ -929,7 +929,7 @@ export default function AdminAddCollection() {
           {/* Messages */}
           <div aria-live="polite">
             {notice && (
-              <div className="mb-5 flex items-center justify-between rounded-xl border border-[#D4D0C5] bg-white px-4 py-3 text-[14px] shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+              <div className="mb-5 flex items-center justify-between rounded-xl border border-slate-300 bg-white px-4 py-3 text-[14px] shadow-[0_1px_2px_rgba(24,24,27,0.04)]">
                 <span>✓ {notice}</span>
                 <button
                   type="button"
@@ -953,7 +953,7 @@ export default function AdminAddCollection() {
 
           {loadError ? (
             <div className={`${card} text-center`}>
-              <p className="text-[14px] text-[#5A5750]">{loadError}</p>
+              <p className="text-[14px] text-slate-600">{loadError}</p>
               <button
                 type="button"
                 onClick={() => navigate(LIST_PATH)}
@@ -981,7 +981,7 @@ export default function AdminAddCollection() {
                     <div className="shrink-0">
                       {form.image_url ? (
                         <div className="w-full sm:w-36">
-                          <div className="aspect-square overflow-hidden rounded-xl border border-[#E7E4DC] bg-[#F3F1EC]">
+                          <div className="aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
                             <img
                               src={form.image_url}
                               alt="Collection"
@@ -1016,7 +1016,7 @@ export default function AdminAddCollection() {
                             e.preventDefault();
                             uploadImage(e.dataTransfer.files?.[0]);
                           }}
-                          className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#C4C8CE] bg-[#FAF9F6] text-[#78746A] transition hover:border-[#8A909A] hover:bg-white sm:w-36"
+                          className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[rgba(24,24,27,0.22)] bg-slate-50 text-slate-500 transition hover:border-[rgba(24,24,27,0.5)] hover:bg-white sm:w-36"
                         >
                           <Icon d={ICONS.upload} className="h-5 w-5" />
                           <span className="text-[12px]">
@@ -1077,13 +1077,13 @@ export default function AdminAddCollection() {
                       <h2 id="items-title" className={cardTitle}>
                         Collection items
                       </h2>
-                      <span className="rounded-full bg-[#F3F1EC] px-2 py-0.5 text-[12px] font-medium text-[#5A5750]">
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-medium text-slate-600">
                         {countLoading ? "…" : itemCount}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <div
-                        className="flex rounded-lg border border-[#E7E4DC] p-0.5"
+                        className="flex rounded-lg border border-slate-200 p-0.5"
                         role="radiogroup"
                         aria-label="View"
                       >
@@ -1095,7 +1095,7 @@ export default function AdminAddCollection() {
                             aria-checked={viewMode === mode}
                             aria-label={`${capitalize(mode)} view`}
                             onClick={() => setViewMode(mode)}
-                            className={`flex h-7 w-7 items-center justify-center rounded-md ${viewMode === mode ? "bg-[#F3F1EC] text-charcoal-navy" : "text-[#A29E92] hover:text-[#5A5750]"}`}
+                            className={`flex h-7 w-7 items-center justify-center rounded-md ${viewMode === mode ? "bg-slate-100 text-charcoal-navy" : "text-slate-400 hover:text-slate-600"}`}
                           >
                             <Icon d={ICONS[mode]} />
                           </button>
@@ -1112,8 +1112,8 @@ export default function AdminAddCollection() {
                           <Icon d={ICONS.filter} />
                         </button>
                         {filterOpen && (
-                          <div className="absolute right-0 top-9 z-20 w-44 rounded-lg border border-[#E7E4DC] bg-white p-1 shadow-lg">
-                            <p className="px-2.5 py-1.5 text-[12px] font-medium text-[#78746A]">
+                          <div className="absolute right-0 top-9 z-20 w-44 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+                            <p className="px-2.5 py-1.5 text-[12px] font-medium text-slate-500">
                               Product status
                             </p>
                             {["all", ...PRODUCT_STATUSES].map((s) => (
@@ -1124,7 +1124,7 @@ export default function AdminAddCollection() {
                                   setStatusFilter(s);
                                   setFilterOpen(false);
                                 }}
-                                className={`block w-full rounded-md px-2.5 py-1.5 text-left text-[13px] hover:bg-[#F6F7F8] ${statusFilter === s ? "font-semibold" : ""}`}
+                                className={`block w-full rounded-md px-2.5 py-1.5 text-left text-[13px] hover:bg-slate-50 ${statusFilter === s ? "font-semibold" : ""}`}
                               >
                                 {s === "all" ? "All" : capitalize(s)}
                               </button>
@@ -1137,12 +1137,12 @@ export default function AdminAddCollection() {
 
                   {statusFilter !== "all" && (
                     <div className="mb-4">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-[#D4D0C5] bg-[#FAF9F6] py-1 pl-3 pr-1 text-[12px] text-[#30343B]">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 py-1 pl-3 pr-1 text-[12px] text-[rgba(24,24,27,0.88)]">
                         Status: {capitalize(statusFilter)}
                         <button
                           type="button"
                           onClick={() => setStatusFilter("all")}
-                          className="rounded-full p-0.5 hover:bg-[#E9EAEC]"
+                          className="rounded-full p-0.5 hover:bg-[rgba(24,24,27,0.06)]"
                           aria-label="Clear status filter"
                         >
                           <Icon d={ICONS.x} className="h-3.5 w-3.5" />
@@ -1155,21 +1155,21 @@ export default function AdminAddCollection() {
                     <div>
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden="true">
                         {[0, 1, 2, 3].map((i) => (
-                          <div key={i} className="rounded-xl border border-[#F3F1EC] p-2.5">
-                            <div className="mb-2.5 aspect-square rounded-lg bg-[#F4F5F6]" />
-                            <div className="mb-1.5 h-2.5 w-3/4 rounded bg-[#F3F1EC]" />
-                            <div className="h-2 w-1/3 rounded bg-[#F4F5F6]" />
+                          <div key={i} className="rounded-xl border border-slate-100 p-2.5">
+                            <div className="mb-2.5 aspect-square rounded-lg bg-[#FAFAFA]" />
+                            <div className="mb-1.5 h-2.5 w-3/4 rounded bg-slate-100" />
+                            <div className="h-2 w-1/3 rounded bg-[#FAFAFA]" />
                           </div>
                         ))}
                       </div>
-                      <p className="mt-5 text-center text-[13px] text-[#78746A]">
+                      <p className="mt-5 text-center text-[13px] text-slate-500">
                         {countLoading
                           ? "Finding matching products…"
                           : "Add conditions or products to populate your collection"}
                       </p>
                     </div>
                   ) : shownItems.length === 0 ? (
-                    <p className="py-10 text-center text-[13px] text-[#78746A]">
+                    <p className="py-10 text-center text-[13px] text-slate-500">
                       No {statusFilter} products in this collection.
                     </p>
                   ) : viewMode === "grid" ? (
@@ -1177,7 +1177,7 @@ export default function AdminAddCollection() {
                       {shownItems.map((p) => (
                         <li
                           key={p.id}
-                          className="group relative rounded-xl border border-[#E7E4DC] p-2.5"
+                          className="group relative rounded-xl border border-slate-200 p-2.5"
                         >
                           <div className="mb-2.5 aspect-square">
                             <Thumb product={p} />
@@ -1185,12 +1185,12 @@ export default function AdminAddCollection() {
                           <p className="truncate text-[13px] font-medium text-charcoal-navy">
                             {p.title}
                           </p>
-                          <p className="text-[12px] text-[#78746A]">
+                          <p className="text-[12px] text-slate-500">
                             {formatPrice(p.price) || "—"}
                             {p.status !== "active" && <span> · {capitalize(p.status)}</span>}
                           </p>
                           {p.from_collection && (
-                            <p className="mt-1 truncate text-[11px] text-[#78746A]">
+                            <p className="mt-1 truncate text-[11px] text-slate-500">
                               from {p.from_collection.name}
                             </p>
                           )}
@@ -1201,7 +1201,7 @@ export default function AdminAddCollection() {
                       ))}
                     </ul>
                   ) : (
-                    <ul className="divide-y divide-[#F3F1EC] rounded-xl border border-[#E7E4DC]">
+                    <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200">
                       {shownItems.map((p) => (
                         <li
                           key={p.id}
@@ -1211,15 +1211,15 @@ export default function AdminAddCollection() {
                           <span className="min-w-0 flex-1 truncate text-[14px]">
                             {p.title}
                             {p.from_collection && (
-                              <span className="ml-2 text-[11px] text-[#78746A]">
+                              <span className="ml-2 text-[11px] text-slate-500">
                                 from {p.from_collection.name}
                               </span>
                             )}
                           </span>
-                          <span className="hidden text-[12px] text-[#78746A] sm:inline">
+                          <span className="hidden text-[12px] text-slate-500 sm:inline">
                             {capitalize(p.status)}
                           </span>
-                          <span className="w-20 text-right text-[13px] text-[#5A5750]">
+                          <span className="w-20 text-right text-[13px] text-slate-600">
                             {formatPrice(p.price) || "—"}
                           </span>
                           {!p.from_collection && (
@@ -1231,7 +1231,7 @@ export default function AdminAddCollection() {
                   )}
                   {((form.type === "automated" && preview.count > preview.products.length) ||
                     included.count > included.products.length) && (
-                    <p className="mt-3 text-[12px] text-[#78746A]">
+                    <p className="mt-3 text-[12px] text-slate-500">
                       Showing the first {items.length} of {itemCount} products.
                     </p>
                   )}
@@ -1274,13 +1274,13 @@ export default function AdminAddCollection() {
                   </div>
 
                   <div className="space-y-0.5">
-                    <p className="truncate text-[16px] text-[#1A0DAB]">{seoTitle}</p>
-                    <p className="truncate text-[13px] text-[#5A5750]">{collectionUrl}</p>
-                    <p className="line-clamp-2 text-[13px] text-[#78746A]">{seoDescription}</p>
+                    <p className="truncate text-[16px] text-[#EA580C]">{seoTitle}</p>
+                    <p className="truncate text-[13px] text-slate-600">{collectionUrl}</p>
+                    <p className="line-clamp-2 text-[13px] text-slate-500">{seoDescription}</p>
                   </div>
 
                   {seoOpen && (
-                    <div className="mt-5 space-y-4 border-t border-[#F3F1EC] pt-5">
+                    <div className="mt-5 space-y-4 border-t border-slate-100 pt-5">
                       <div>
                         <label htmlFor="seo-page-title" className={labelClass}>
                           Page title
@@ -1293,7 +1293,7 @@ export default function AdminAddCollection() {
                           maxLength={255}
                           className={inputClass}
                         />
-                        <p className="mt-1 text-[12px] text-[#A29E92]">
+                        <p className="mt-1 text-[12px] text-slate-400">
                           {form.seo_title.length} of 70 characters used
                         </p>
                       </div>
@@ -1311,7 +1311,7 @@ export default function AdminAddCollection() {
                           }
                           className={`${inputClass} resize-y`}
                         />
-                        <p className="mt-1 text-[12px] text-[#A29E92]">
+                        <p className="mt-1 text-[12px] text-slate-400">
                           {form.seo_description.length} of 160 characters used
                         </p>
                       </div>
@@ -1320,9 +1320,9 @@ export default function AdminAddCollection() {
                           URL handle
                         </label>
                         <div
-                          className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-charcoal-navy ${errors.handle ? "border-red-400" : "border-[#D4D0C5]"}`}
+                          className={`flex items-center overflow-hidden rounded-lg border bg-white focus-within:border-charcoal-navy ${errors.handle ? "border-red-400" : "border-slate-300"}`}
                         >
-                          <span className="hidden max-w-[45%] truncate border-r border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2.5 text-[13px] text-[#78746A] sm:block">
+                          <span className="hidden max-w-[45%] truncate border-r border-slate-200 bg-slate-50 px-3 py-2.5 text-[13px] text-slate-500 sm:block">
                             {storeUrl}/collections/
                           </span>
                           <input
@@ -1355,7 +1355,7 @@ export default function AdminAddCollection() {
                   </h2>
 
                   <div
-                    className="mb-4 grid grid-cols-2 rounded-lg bg-[#F3F1EC] p-0.5"
+                    className="mb-4 grid grid-cols-2 rounded-lg bg-slate-100 p-0.5"
                     role="radiogroup"
                     aria-label="Collection type"
                   >
@@ -1369,7 +1369,7 @@ export default function AdminAddCollection() {
                         role="radio"
                         aria-checked={form.type === value}
                         onClick={() => switchType(value)}
-                        className={`rounded-md py-1.5 text-[13px] font-medium transition ${form.type === value ? "bg-white text-charcoal-navy shadow-sm" : "text-[#78746A] hover:text-charcoal-navy"}`}
+                        className={`rounded-md py-1.5 text-[13px] font-medium transition ${form.type === value ? "bg-white text-charcoal-navy shadow-sm" : "text-slate-500 hover:text-charcoal-navy"}`}
                       >
                         {label}
                       </button>
@@ -1378,7 +1378,7 @@ export default function AdminAddCollection() {
 
                   {form.type === "manual" ? (
                     <>
-                      <p className="mb-3 text-[13px] text-[#78746A]">Pick products one by one.</p>
+                      <p className="mb-3 text-[13px] text-slate-500">Pick products one by one.</p>
                       <button
                         type="button"
                         onClick={() => setPicker("include")}
@@ -1387,7 +1387,7 @@ export default function AdminAddCollection() {
                         <Icon d={ICONS.plus} /> Add products
                       </button>
                       {form.products.length > 0 && (
-                        <p className="mt-3 text-[12px] text-[#78746A]">
+                        <p className="mt-3 text-[12px] text-slate-500">
                           {form.products.length} product{form.products.length === 1 ? "" : "s"}{" "}
                           selected
                         </p>
@@ -1396,7 +1396,7 @@ export default function AdminAddCollection() {
                   ) : (
                     <>
                       <fieldset className="mb-4">
-                        <legend className="mb-2 text-[13px] text-[#5A5750]">
+                        <legend className="mb-2 text-[13px] text-slate-600">
                           Products must match
                         </legend>
                         <div className="flex gap-4">
@@ -1413,7 +1413,7 @@ export default function AdminAddCollection() {
                                 name="match"
                                 checked={form.match === value}
                                 onChange={() => set("match", value)}
-                                className="accent-charcoal-navy"
+                                className="accent-orange-600"
                               />
                               {label}
                             </label>
@@ -1425,7 +1425,7 @@ export default function AdminAddCollection() {
                         {form.rules.map((rule, i) => {
                           const kind = fieldKind(rule.field);
                           return (
-                            <li key={i} className="rounded-lg border border-[#E7E4DC] p-3">
+                            <li key={i} className="rounded-lg border border-slate-200 p-3">
                               <div className="mb-2 flex items-center gap-2">
                                 <select
                                   value={rule.field}
@@ -1508,8 +1508,8 @@ export default function AdminAddCollection() {
                       </div>
 
                       {excludedProducts.length > 0 && (
-                        <div className="mt-4 border-t border-[#F3F1EC] pt-3">
-                          <p className="mb-2 text-[12px] font-medium text-[#5A5750]">
+                        <div className="mt-4 border-t border-slate-100 pt-3">
+                          <p className="mb-2 text-[12px] font-medium text-slate-600">
                             Excluded ({excludedProducts.length})
                           </p>
                           <ul className="space-y-1">
@@ -1527,7 +1527,7 @@ export default function AdminAddCollection() {
                                       form.excluded_products.filter((id) => id !== p.id)
                                     )
                                   }
-                                  className="shrink-0 text-[12px] text-[#5A5750] underline hover:text-charcoal-navy"
+                                  className="shrink-0 text-[12px] text-slate-600 underline hover:text-orange-600"
                                 >
                                   Include
                                 </button>
@@ -1566,8 +1566,8 @@ export default function AdminAddCollection() {
                     <option value="draft">Draft</option>
                   </select>
 
-                  <p className="mb-2 text-[13px] font-medium text-[#5A5750]">Sales channels</p>
-                  <div className="flex items-center justify-between gap-3 rounded-lg border border-[#E7E4DC] px-3 py-2.5">
+                  <p className="mb-2 text-[13px] font-medium text-slate-600">Sales channels</p>
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2.5">
                     <span className="text-[14px]">Online Store</span>
                     <button
                       type="button"
@@ -1576,14 +1576,14 @@ export default function AdminAddCollection() {
                       aria-label="Show on the Online Store"
                       disabled={!onlineIds.length}
                       onClick={() => setOnlineStore(!onOnlineStore)}
-                      className={`relative h-5 w-9 rounded-full transition ${onOnlineStore ? "bg-charcoal-navy" : "bg-[#D4D0C5]"} disabled:opacity-40`}
+                      className={`relative h-5 w-9 rounded-full transition ${onOnlineStore ? "bg-charcoal-navy" : "bg-slate-300"} disabled:opacity-40`}
                     >
                       <span
                         className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${onOnlineStore ? "left-4.5" : "left-0.5"}`}
                       />
                     </button>
                   </div>
-                  <p className="mt-3 text-[12px] leading-relaxed text-[#78746A]">
+                  <p className="mt-3 text-[12px] leading-relaxed text-slate-500">
                     {form.status === "draft"
                       ? "Draft collections are hidden from your store."
                       : onOnlineStore
@@ -1635,7 +1635,7 @@ function ItemAction({ product, type, form, set, inline = false }) {
       className={
         inline
           ? iconButton
-          : "absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#5A5750] opacity-100 shadow-sm transition hover:text-charcoal-navy sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+          : "absolute right-3.5 top-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-slate-600 opacity-100 shadow-sm transition hover:text-orange-600 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
       }
     >
       <Icon d={manual ? ICONS.x : ICONS.minus} />

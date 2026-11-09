@@ -89,7 +89,7 @@ describe("the look of the panel", () => {
   it("has a faint lavender background and no heavy shadow", () => {
     mount();
     openPanel();
-    expect(panel().className).toContain("bg-[#FDFCFF]");
+    expect(panel().className).toContain("bg-[rgba(24,24,27,0.06)]");
     expect(panel().className).not.toContain("shadow-2xl");
   });
 
@@ -117,7 +117,7 @@ describe("the look of the panel", () => {
     const chips = EXAMPLE_QUESTIONS.map((q) => screen.getByRole("button", { name: q }));
     for (const chip of chips) {
       expect(chip.className).toContain("rounded-full");
-      expect(chip.className).toContain("border-[#E7E4DC]");
+      expect(chip.className).toContain("border-slate-200");
       expect(chip.className).toContain("bg-white");
       expect(chip.className).toContain("text-[13px]");
     }
@@ -134,13 +134,13 @@ describe("the look of the panel", () => {
     const input = screen.getByLabelText("Your question");
     const bar = input.closest("form");
     expect(bar.className).toContain("rounded-full");
-    expect(bar.className).toContain("border-[#E7E4DC]");
+    expect(bar.className).toContain("border-slate-200");
 
     const send = screen.getByRole("button", { name: "Send" });
     expect(bar.contains(send)).toBe(true);
     expect(send.className).toContain("rounded-full");
-    expect(send.className).toContain("disabled:bg-[#E7E4DC]"); // light violet while empty
-    expect(send.className).toContain("bg-[#1E4A3A]"); // stronger violet with text
+    expect(send.className).toContain("disabled:bg-slate-200"); // light violet while empty
+    expect(send.className).toContain("bg-violet-700"); // stronger violet with text
     expect(send.disabled).toBe(true);
 
     fireEvent.change(input, { target: { value: "hello" } });

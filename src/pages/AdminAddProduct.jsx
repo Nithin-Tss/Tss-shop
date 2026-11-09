@@ -5,7 +5,7 @@ import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/li
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
 
-const NAVY = "#14130F";
+const NAVY = "#18181B";
 const PRODUCTS_URL = "/admin/online-store/products";
 
 const inputClass =
@@ -122,7 +122,7 @@ function categoryOptions(categories) {
 function Card({ title, hint, action, children }) {
   return (
     <section>
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(24,24,27,0.05)]">
         {(title || action) && (
           <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
@@ -220,7 +220,7 @@ function ChipBox({ values, onRemove, empty }) {
                 type="button"
                 aria-label={`Remove ${v}`}
                 onClick={() => onRemove(v)}
-                className="text-slate-500 hover:text-slate-900"
+                className="text-slate-500 hover:text-orange-600"
               >
                 ×
               </button>
@@ -433,7 +433,7 @@ function OptionPicker({ label, usedNames, onPick }) {
           role="dialog"
           aria-label="Add an option"
           onKeyDown={onKeyDown}
-          className="absolute left-0 top-full z-40 mt-2 flex w-72 max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_8px_24px_-6px_rgba(15,23,42,0.18)]"
+          className="absolute left-0 top-full z-40 mt-2 flex w-72 max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_8px_24px_-6px_rgba(24,24,27,0.18)]"
         >
           <div className="p-3 pb-2">
             <div className="relative">
@@ -635,7 +635,7 @@ function TriCheckbox({ checked, indeterminate, onChange, label }) {
       checked={checked}
       onChange={onChange}
       aria-label={label}
-      className="h-4 w-4 cursor-pointer accent-charcoal-navy"
+      className="h-4 w-4 cursor-pointer accent-orange-600"
     />
   );
 }
@@ -680,7 +680,7 @@ const ghostButton =
 const outlineButton =
   "h-8 rounded-full border border-slate-300 bg-white px-3.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50";
 const primaryButton =
-  "h-9 rounded-full bg-charcoal-navy px-5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50";
+  "h-9 rounded-full bg-orange-600 px-5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50";
 const cellInput =
   "h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/10";
 const notYet = "Not available yet";
@@ -1389,7 +1389,7 @@ function VariantEditor({
               type="checkbox"
               checked={form.continueSelling}
               onChange={(e) => set("continueSelling", e.target.checked)}
-              className="h-4 w-4 accent-charcoal-navy"
+              className="h-4 w-4 accent-orange-600"
             />
             Continue selling when out of stock
           </label>
@@ -1847,7 +1847,7 @@ function BulkEditor({
                                       : prev.filter((k) => k !== c.key)
                                   )
                                 }
-                                className="h-3.5 w-3.5 accent-charcoal-navy"
+                                className="h-3.5 w-3.5 accent-orange-600"
                               />
                               <span className="text-sm text-slate-800">{c.label}</span>
                             </label>
@@ -2809,7 +2809,7 @@ function VariantsSection({
                 type="button"
                 onClick={f.clear}
                 aria-label={`Remove filter ${f.label}`}
-                className="text-slate-500 hover:text-slate-900"
+                className="text-slate-500 hover:text-orange-600"
               >
                 ×
               </button>
@@ -2831,7 +2831,7 @@ function VariantsSection({
 
       {/* Selection bar */}
       {selected.length > 0 && canEdit && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm text-white">
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-orange-600 px-3 py-2 text-sm text-white">
           <span className="font-semibold">{selected.length} selected</span>
           <button
             type="button"
@@ -3952,7 +3952,7 @@ export function ProductForm({ productId }) {
     }).format(Number(value) || 0);
 
   const sidebar = (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(24,24,27,0.05)]">
       <section className="hidden p-5 xl:block">{statusSection("side")}</section>
 
       <section className="p-5 xl:border-t xl:border-slate-200">
@@ -4152,7 +4152,7 @@ export function ProductForm({ productId }) {
                         e.target.checked ? [...prev, ch.id] : prev.filter((id) => id !== ch.id)
                       )
                     }
-                    className="h-4 w-4 accent-charcoal-navy"
+                    className="h-4 w-4 accent-orange-600"
                   />
                   {ch.name}
                 </label>
@@ -4198,7 +4198,7 @@ export function ProductForm({ productId }) {
                   onClick={leave}
                   aria-label="Back to products"
                   title="Back to products"
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition hover:bg-slate-100"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-[0_1px_2px_rgba(24,24,27,0.05)] transition hover:bg-slate-100"
                 >
                   <svg
                     viewBox="0 0 20 20"
@@ -4214,7 +4214,7 @@ export function ProductForm({ productId }) {
                 <button
                   type="button"
                   onClick={leave}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                  className="text-sm font-medium text-slate-600 hover:text-orange-600"
                 >
                   Products
                 </button>
@@ -4344,7 +4344,7 @@ export function ProductForm({ productId }) {
                     </div>
                   </Card>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.05)] xl:hidden">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(24,24,27,0.05)] xl:hidden">
                     {statusSection("main")}
                   </div>
 
@@ -4415,7 +4415,7 @@ export function ProductForm({ productId }) {
                         }}
                         className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
                           dragging
-                            ? "border-charcoal-navy bg-slate-100"
+                            ? "border-orange-600 bg-slate-100"
                             : "border-slate-200 bg-slate-50 hover:bg-slate-50"
                         }`}
                       >
@@ -4447,7 +4447,7 @@ export function ProductForm({ productId }) {
                           type="button"
                           onClick={() => mainFileInputRef.current?.click()}
                           disabled={saving}
-                          className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-charcoal-navy px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1e2842] disabled:cursor-not-allowed disabled:opacity-50"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#18181B] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <svg
                             className="h-3.5 w-3.5"
@@ -4477,7 +4477,7 @@ export function ProductForm({ productId }) {
                               key={photo.id}
                               className={`group relative aspect-square overflow-hidden rounded-xl border bg-slate-50 transition ${
                                 isCover
-                                  ? "border-charcoal-navy ring-2 ring-[#14130F]/15 col-span-2 row-span-2"
+                                  ? "border-orange-600 ring-2 ring-ink/15 col-span-2 row-span-2"
                                   : "border-slate-200 hover:border-slate-400"
                               }`}
                             >
@@ -4543,7 +4543,7 @@ export function ProductForm({ productId }) {
                               {/* Top Badges */}
                               <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
                                 {isCover && (
-                                  <span className="rounded-md bg-charcoal-navy px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                                  <span className="rounded-md bg-orange-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
                                     ★ Primary
                                   </span>
                                 )}
@@ -4626,7 +4626,7 @@ export function ProductForm({ productId }) {
                           }}
                           className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
                             dragging
-                              ? "border-charcoal-navy bg-slate-100"
+                              ? "border-orange-600 bg-slate-100"
                               : "border-slate-200 bg-slate-50 hover:border-slate-400 hover:bg-slate-50"
                           } ${saving ? "pointer-events-none opacity-50" : ""}`}
                         >
@@ -4794,7 +4794,7 @@ export function ProductForm({ productId }) {
                       canSeeStock && (
                         <Link
                           to="/admin/online-store/inventory"
-                          className="inline-flex h-8 items-center rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-charcoal-navy hover:text-white"
+                          className="inline-flex h-8 items-center rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-orange-600/90 hover:text-white"
                         >
                           Adjust stock and history
                         </Link>
@@ -5003,7 +5003,7 @@ export function ProductForm({ productId }) {
                       <button
                         type="button"
                         onClick={() => setEditingSeo((v) => !v)}
-                        className="h-8 rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-charcoal-navy hover:text-white"
+                        className="h-8 rounded-full border border-charcoal-navy/20 bg-white px-3.5 text-xs font-semibold text-charcoal-navy hover:bg-orange-600/90 hover:text-white"
                       >
                         {editingSeo ? "Done" : "Edit"}
                       </button>
@@ -5016,7 +5016,7 @@ export function ProductForm({ productId }) {
                       <p className="break-all text-xs text-slate-600">
                         {storeDomain} › products › {currentHandle}
                       </p>
-                      <p className="mt-0.5 truncate text-lg text-[#1a0dab]">{shownSeoTitle}</p>
+                      <p className="mt-0.5 truncate text-lg text-[#EA580C]">{shownSeoTitle}</p>
                       <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
                       {price !== "" && !isNaN(Number(price)) && (
                         <p className="mt-1 text-xs text-slate-500">

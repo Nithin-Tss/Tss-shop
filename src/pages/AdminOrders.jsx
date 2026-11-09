@@ -52,8 +52,8 @@ function renderPaymentStatusBadge(status) {
 
   if (s.includes("pending")) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFF4E5] text-[#B76E00] border border-[#FFE2B8]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#B76E00]" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[rgba(234,88,12,0.08)] text-orange-700 border border-orange-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-orange-700" />
         Payment pending
       </span>
     );
@@ -61,8 +61,8 @@ function renderPaymentStatusBadge(status) {
 
   if (s === "partially_paid") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEF3E2] text-[#9A4B00] border border-[#FCD399]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#C25E00]" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-orange-700" />
         Partially paid
       </span>
     );
@@ -78,7 +78,7 @@ function renderPaymentStatusBadge(status) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-charcoal-navy">
       <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
       Paid
     </span>
@@ -90,8 +90,8 @@ function renderFulfillmentStatusBadge(status) {
 
   if (s.includes("unfulfilled") || s === "open") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFFBEA] text-[#8C6B00] border border-[#FDE68A]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
         Unfulfilled
       </span>
     );
@@ -99,8 +99,8 @@ function renderFulfillmentStatusBadge(status) {
 
   if (s.includes("partial")) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEF3E2] text-[#9A4B00] border border-[#FCD399]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#C25E00]" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-orange-700" />
         Partially fulfilled
       </span>
     );
@@ -108,7 +108,7 @@ function renderFulfillmentStatusBadge(status) {
 
   if (s.includes("fulfilled") || s === "closed") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-charcoal-navy">
         <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
         Fulfilled
       </span>
@@ -349,7 +349,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+    <div className="min-h-screen bg-slate-100 text-charcoal-navy">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -370,7 +370,7 @@ export default function AdminOrders() {
               <button
                 type="button"
                 onClick={handleExport}
-                className="flex items-center gap-2 rounded-lg bg-white border border-[#E7E4DC] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer"
+                className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-slate-100 transition cursor-pointer"
               >
                 Export
               </button>
@@ -379,23 +379,23 @@ export default function AdminOrders() {
                 <button
                   type="button"
                   onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-lg bg-white border border-[#E7E4DC] px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer"
+                  className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-slate-100 transition cursor-pointer"
                 >
                   More actions
                   <span className="text-xs">⌄</span>
                 </button>
                 {isMoreMenuOpen && (
-                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#E7E4DC] bg-white py-1.5 shadow-lg z-20">
+                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white py-1.5 shadow-lg z-20">
                     <Link
                       to="/admin/online-store/orders/drafts"
-                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F1EC] transition"
+                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 transition"
                       onClick={() => setIsMoreMenuOpen(false)}
                     >
                       Draft orders
                     </Link>
                     <Link
                       to="/admin/online-store/orders/abandoned-checkouts"
-                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F1EC] transition"
+                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 transition"
                       onClick={() => setIsMoreMenuOpen(false)}
                     >
                       Abandoned checkouts
@@ -406,7 +406,7 @@ export default function AdminOrders() {
                         setIsMoreMenuOpen(false);
                         handleExport();
                       }}
-                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Export CSV
                     </button>
@@ -417,7 +417,7 @@ export default function AdminOrders() {
               {canCreate && (
                 <Link
                   to="/admin/online-store/orders/create"
-                  className="flex items-center gap-2 rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] transition"
+                  className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 transition"
                 >
                   Create order
                 </Link>
@@ -426,13 +426,13 @@ export default function AdminOrders() {
           </div>
 
           {/* ORDERS TABLE CARD */}
-          <section className="rounded-2xl border border-[#E7E4DC] bg-white shadow-sm overflow-hidden">
+          <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             {/* TABS & SEARCH / FILTER HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7E4DC] px-4 py-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-lg bg-[#DFEAE4] px-3.5 py-1.5 text-sm font-medium text-charcoal-navy"
+                  className="rounded-lg bg-violet-100 px-3.5 py-1.5 text-sm font-medium text-charcoal-navy"
                 >
                   All
                 </button>
@@ -440,7 +440,7 @@ export default function AdminOrders() {
 
               <div className="flex items-center gap-3">
                 {/* Search & Filter Input */}
-                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm">
+                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm">
                   <span className="text-slate-400">⌕</span>
                   <input
                     type="text"
@@ -464,7 +464,7 @@ export default function AdminOrders() {
                 <button
                   type="button"
                   title="Table columns"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-slate-600 hover:bg-[#F3F1EC] transition"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition"
                 >
                   ▥
                 </button>
@@ -472,7 +472,7 @@ export default function AdminOrders() {
             </div>
 
             {/* SECONDARY HEADER */}
-            <div className="px-5 py-3 border-b border-[#E7E4DC] bg-white flex items-center justify-between">
+            <div className="px-5 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
               <span className="text-sm font-semibold text-charcoal-navy">Orders</span>
               {selectedIds.size > 0 && (
                 <span className="text-xs font-medium text-slate-500">
@@ -485,13 +485,13 @@ export default function AdminOrders() {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm text-charcoal-navy">
                 <thead>
-                  <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-medium text-slate-600 whitespace-nowrap select-none">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-xs font-medium text-slate-600 whitespace-nowrap select-none">
                     <th className="py-3.5 pl-5 pr-3 w-10">
                       <input
                         type="checkbox"
                         checked={allSelected}
                         onChange={handleSelectAll}
-                        className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-300 accent-orange-600 cursor-pointer"
                       />
                     </th>
                     <th className="py-3.5 px-3 font-semibold text-slate-700">Order</th>
@@ -501,7 +501,7 @@ export default function AdminOrders() {
                         onClick={() =>
                           setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))
                         }
-                        className="inline-flex items-center gap-1 cursor-pointer hover:text-slate-900 font-semibold"
+                        className="inline-flex items-center gap-1 cursor-pointer hover:text-orange-600 font-semibold"
                         title={`Sort by date (${sortDirection === "desc" ? "oldest first" : "newest first"})`}
                       >
                         Date <span>{sortDirection === "desc" ? "↓" : "↑"}</span>
@@ -524,7 +524,7 @@ export default function AdminOrders() {
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-[#E7E4DC]">
+                <tbody className="divide-y divide-slate-200">
                   {loading ? (
                     // LOADING SKELETON ROWS
                     [...Array(6)].map((_, i) => (
@@ -582,7 +582,7 @@ export default function AdminOrders() {
                           <button
                             type="button"
                             onClick={() => fetchOrders()}
-                            className="px-4 py-1.5 rounded-lg bg-charcoal-navy text-white text-xs font-medium hover:bg-[#1A1916] transition shadow-xs cursor-pointer"
+                            className="px-4 py-1.5 rounded-lg bg-orange-600 text-white text-xs font-medium hover:bg-orange-600/90 transition shadow-xs cursor-pointer"
                           >
                             Retry
                           </button>
@@ -608,8 +608,8 @@ export default function AdminOrders() {
                       return (
                         <tr
                           key={order.id}
-                          className={`transition-colors whitespace-nowrap hover:bg-[#FAF9F6] ${
-                            isSelected ? "bg-[#F3F1EC]" : ""
+                          className={`transition-colors whitespace-nowrap hover:bg-slate-50 ${
+                            isSelected ? "bg-slate-100" : ""
                           }`}
                         >
                           {/* Checkbox */}
@@ -618,7 +618,7 @@ export default function AdminOrders() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelect(order.id)}
-                              className="h-4 w-4 rounded border-slate-300 accent-charcoal-navy cursor-pointer"
+                              className="h-4 w-4 rounded border-slate-300 accent-orange-600 cursor-pointer"
                             />
                           </td>
 
@@ -694,7 +694,7 @@ export default function AdminOrders() {
                           <td className="py-3.5 pl-3 pr-6">
                             {tagsList.length > 0 ? (
                               <div className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-[#EEF2F6] text-[11px] font-mono text-slate-700 max-w-42.5 truncate border border-slate-200">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-[rgba(24,24,27,0.06)] text-[11px] font-mono text-slate-700 max-w-42.5 truncate border border-slate-200">
                                   {tagsList[0]}
                                 </span>
                                 {tagsList.length > 1 && (
@@ -733,7 +733,7 @@ export default function AdminOrders() {
 
           {/* LEARN MORE */}
           <p className="mt-8 text-center text-sm font-medium text-charcoal-navy">
-            <a href="#" className="hover:underline text-slate-700 hover:text-slate-900">
+            <a href="#" className="hover:underline text-slate-700 hover:text-orange-600">
               Learn more about orders
             </a>
           </p>
@@ -753,7 +753,7 @@ export default function AdminOrders() {
           <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
             <div className="w-screen max-w-xl bg-white shadow-2xl flex flex-col">
               {/* Drawer Header */}
-              <div className="px-6 py-5 border-b border-[#E7E4DC] flex items-center justify-between bg-[#FAF9F6]">
+              <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <div>
                   <div className="flex items-center gap-3">
                     <h2 className="text-lg font-bold text-charcoal-navy">
@@ -794,7 +794,7 @@ export default function AdminOrders() {
               {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
                 {/* Customer Section */}
-                <div className="rounded-xl border border-[#E7E4DC] p-4 bg-white">
+                <div className="rounded-xl border border-slate-200 p-4 bg-white">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
                     Customer Details
                   </h3>
@@ -812,7 +812,7 @@ export default function AdminOrders() {
                 </div>
 
                 {/* Items Ordered Section */}
-                <div className="rounded-xl border border-[#E7E4DC] p-4 bg-white">
+                <div className="rounded-xl border border-slate-200 p-4 bg-white">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
                     Items ({Array.isArray(selectedOrder.items) ? selectedOrder.items.length : 0})
                   </h3>
@@ -824,7 +824,7 @@ export default function AdminOrders() {
                           className="py-3 flex items-center justify-between gap-3"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-[#FAF9F6] border border-[#E7E4DC] flex items-center justify-center text-slate-500 shrink-0 text-sm">
+                            <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 text-sm">
                               📦
                             </div>
                             <div>
@@ -857,7 +857,7 @@ export default function AdminOrders() {
                 </div>
 
                 {/* Payment & Totals Breakdown */}
-                <div className="rounded-xl border border-[#E7E4DC] p-4 bg-[#FAF9F6] space-y-2 text-sm">
+                <div className="rounded-xl border border-slate-200 p-4 bg-slate-50 space-y-2 text-sm">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
                     Payment Summary
                   </h3>
@@ -898,7 +898,7 @@ export default function AdminOrders() {
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold text-base text-slate-900 pt-2 border-t border-[#E7E4DC]">
+                  <div className="flex justify-between font-bold text-base text-slate-900 pt-2 border-t border-slate-200">
                     <span>Total</span>
                     <span>
                       {formatOrderCurrency(selectedOrder.total, selectedOrder.currency_code)}
@@ -908,7 +908,7 @@ export default function AdminOrders() {
               </div>
 
               {/* Drawer Footer Actions */}
-              <div className="p-4 border-t border-[#E7E4DC] bg-[#FAF9F6] flex items-center justify-between">
+              <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
                 {selectedOrder.status === "open" ? (
                   <button
                     type="button"
@@ -929,7 +929,7 @@ export default function AdminOrders() {
                     setSelectedOrder(null);
                     if (routeOrderId) navigate("/admin/online-store/orders");
                   }}
-                  className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] transition cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90 transition cursor-pointer"
                 >
                   Close
                 </button>

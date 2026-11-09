@@ -54,7 +54,7 @@ export default function DeleteAddressModal({
             type="button"
             onClick={onClose}
             disabled={deleting}
-            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-orange-600 hover:bg-slate-100 rounded-lg transition"
           >
             Cancel
           </button>

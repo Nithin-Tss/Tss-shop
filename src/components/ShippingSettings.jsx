@@ -9,7 +9,7 @@ const GATEWAYS = "/api/v1/delivery/gateways/";
 const RATES = "/api/v1/delivery/rates/";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]";
+  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600";
 
 const bandLabel = (rate, unit) => {
   const min = Number(rate.min_weight);
@@ -216,7 +216,7 @@ export default function ShippingSettings() {
             onChange={(e) => setCredentials({ ...credentials, [f.name]: e.target.value })}
             placeholder={editingExisting && f.secret ? "Saved. Type to replace" : ""}
             autoComplete="off"
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600"
           />
           {f.help && <span className="mt-1 block text-xs text-slate-500">{f.help}</span>}
         </label>
@@ -228,7 +228,7 @@ export default function ShippingSettings() {
             value={trackingTemplate}
             onChange={(e) => setTrackingTemplate(e.target.value)}
             placeholder="https://courier.com/track/{tracking}"
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600"
           />
           <span className="mt-1 block text-xs text-slate-500">
             {"{tracking}"} is replaced with the tracking number.
@@ -245,7 +245,7 @@ export default function ShippingSettings() {
               onChange={(e) => setWebhookSecret(e.target.value)}
               placeholder={editingExisting ? "Saved. Type to replace" : "Choose one, or generate"}
               autoComplete="off"
-              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]"
+              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600"
             />
             <button
               type="button"
@@ -336,7 +336,7 @@ export default function ShippingSettings() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                    className="rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
                   >
                     {saving ? "Saving…" : "Save connection"}
                   </button>
@@ -435,7 +435,7 @@ export default function ShippingSettings() {
               <button
                 type="submit"
                 disabled={savingPricing}
-                className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
+                className="rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-50"
               >
                 {savingPricing ? "Saving…" : "Save"}
               </button>
@@ -542,7 +542,7 @@ export default function ShippingSettings() {
             <button
               type="submit"
               disabled={savingRate || rateForm.price === ""}
-              className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
+              className="rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-50"
             >
               {savingRate ? "Adding…" : "Add rate"}
             </button>
@@ -587,12 +587,12 @@ export default function ShippingSettings() {
               placeholder="Name, e.g. Our van"
               aria-label="Local delivery name"
               maxLength={100}
-              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]"
+              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600"
             />
             <button
               type="submit"
               disabled={saving || connecting || !name.trim()}
-              className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
+              className="rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-50"
             >
               {saving && !connecting ? "Adding…" : "Add local delivery"}
             </button>
@@ -630,7 +630,7 @@ export default function ShippingSettings() {
                     }}
                     className={`rounded-lg border px-4 py-2 text-sm font-medium ${
                       connecting === p.code
-                        ? "border-[#14130F] bg-slate-50"
+                        ? "border-orange-600 bg-slate-50"
                         : "border-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -650,13 +650,13 @@ export default function ShippingSettings() {
                   placeholder={`Name, e.g. ${selected.label}`}
                   aria-label="Carrier name"
                   maxLength={100}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600"
                 />
                 {connectionFields(selected)}
                 <button
                   type="submit"
                   disabled={saving || !name.trim()}
-                  className="rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50"
+                  className="rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-50"
                 >
                   {saving ? "Connecting…" : `Connect ${selected.label}`}
                 </button>

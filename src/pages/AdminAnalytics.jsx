@@ -31,16 +31,14 @@ function KpiCard({ title, metric, format, spark, loaded }) {
   return (
     <div className={card}>
       <h2 className={cardHeading}>{title}</h2>
-      <p className="mt-2 text-2xl font-bold text-[#14130F]">
-        {loaded ? format(metric.value) : "—"}
-      </p>
+      <p className="mt-2 text-2xl font-bold text-ink">{loaded ? format(metric.value) : "—"}</p>
       <div className="mt-1 flex items-center gap-2">
         {loaded && <Delta change={metric.change} />}
         {loaded && metric.previous !== null && (
           <span className={smallLabel}>from {format(metric.previous)}</span>
         )}
       </div>
-      <div className="mt-3 border-t border-[#E7E4DC] pt-3">
+      <div className="mt-3 border-t border-slate-200 pt-3">
         <Sparkline values={spark} />
       </div>
     </div>
@@ -54,12 +52,12 @@ function BarList({ rows, label, value, format }) {
       {rows.map((r) => (
         <li key={`${r.product_id || ""}${r.type || ""}${r[label]}`}>
           <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="truncate text-[#14130F]">{r[label]}</span>
-            <span className="font-semibold text-[#14130F]">{format(r[value])}</span>
+            <span className="truncate text-ink">{r[label]}</span>
+            <span className="font-semibold text-ink">{format(r[value])}</span>
           </div>
-          <div className="mt-1 h-1.5 rounded-full bg-[#F3F1EC]">
+          <div className="mt-1 h-1.5 rounded-full bg-slate-100">
             <div
-              className="h-1.5 rounded-full bg-[#5B9BD5]"
+              className="h-1.5 rounded-full bg-violet-600"
               style={{ width: `${Math.max((Number(r[value]) / max) * 100, 2)}%` }}
             />
           </div>
@@ -135,21 +133,21 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div ref={pageRef} className="min-h-screen overflow-y-auto bg-[#F3F1EC] text-charcoal-navy">
+    <div ref={pageRef} className="min-h-screen overflow-y-auto bg-slate-100 text-charcoal-navy">
       {!fullScreen && <AdminHeader />}
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         {!fullScreen && <AdminSidebar />}
 
         <main className="min-w-0 flex-1 overflow-x-hidden">
-          <header className="border-b border-[#E7E4DC] bg-white">
+          <header className="border-b border-slate-200 bg-white">
             <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div className="min-w-0">
                 <h1 className="flex items-center gap-2.5 text-xl font-semibold text-charcoal-navy">
                   <PageIcon name="analytics" />
                   Analytics
                 </h1>
-                <p className="mt-0.5 text-[13px] text-[#5A5750]">
+                <p className="mt-0.5 text-[13px] text-slate-600">
                   Last refreshed: {refreshed}
                   {autoRefresh && " · auto-refresh on"}
                 </p>
@@ -174,7 +172,7 @@ export default function AnalyticsPage() {
                 </Menu>
                 <Link
                   to="/admin/online-store/reports/new"
-                  className="inline-flex h-9 items-center rounded-lg bg-charcoal-navy px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#1A1916]"
+                  className="inline-flex h-9 items-center rounded-lg bg-orange-600 px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-orange-600/90"
                 >
                   New exploration
                 </Link>
@@ -282,7 +280,7 @@ export default function AnalyticsPage() {
                 </p>
                 <div className="mt-3">
                   {empty || !loaded ? (
-                    <div className="rounded-lg bg-[#F3F1EC]">
+                    <div className="rounded-lg bg-slate-100">
                       <EmptyState>
                         {loading && !loaded ? "Loading…" : "No data for this date range"}
                       </EmptyState>
@@ -307,7 +305,7 @@ export default function AnalyticsPage() {
 
               <section className={card}>
                 <h2 className={cardHeading}>Total sales breakdown</h2>
-                <div className="mt-3 divide-y divide-[#F3F1EC]">
+                <div className="mt-3 divide-y divide-slate-100">
                   {breakdown.map(([label, key, negative]) => (
                     <div key={key} className="flex h-11 items-center justify-between gap-2 px-1">
                       <span className="text-sm text-charcoal-navy">{label}</span>
@@ -429,7 +427,7 @@ export default function AnalyticsPage() {
                     {loading && !loaded ? "Loading…" : "No data for this date range"}
                   </EmptyState>
                 ) : (
-                  <div className="mt-3 divide-y divide-[#F3F1EC]">
+                  <div className="mt-3 divide-y divide-slate-100">
                     {data.funnel.map((step) => (
                       <div
                         key={step.key}

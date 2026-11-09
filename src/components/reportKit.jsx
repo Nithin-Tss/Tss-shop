@@ -13,15 +13,15 @@ export const lineIcon = {
 };
 
 export const card =
-  "rounded-xl border border-[#E7E4DC] bg-white p-5 shadow-[0_1px_2px_rgba(20,27,45,0.04)]";
-export const cardHeading = "text-sm font-semibold text-[#14130F]";
-export const smallLabel = "text-[12px] text-[#5A5750]";
+  "rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(24,24,27,0.04)]";
+export const cardHeading = "text-sm font-semibold text-ink";
+export const smallLabel = "text-[12px] text-slate-600";
 export const outlineButton =
-  "inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3.5 text-sm font-medium text-[#14130F] transition-colors duration-200 hover:border-[#14130F] hover:bg-[#f1f3f7]";
+  "inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-medium text-ink transition-colors duration-200 hover:border-orange-600 hover:bg-slate-100";
 export const chip =
-  "inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#E7E4DC] bg-white px-3 text-[13px] font-medium text-[#14130F] transition-colors duration-200 hover:border-[#14130F] hover:bg-[#f1f3f7]";
+  "inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-ink transition-colors duration-200 hover:border-orange-600 hover:bg-slate-100";
 export const menuPanel =
-  "absolute z-30 mt-1 rounded-xl border border-[#E7E4DC] bg-white p-1.5 shadow-[0_8px_24px_-8px_rgba(20,27,45,0.2)]";
+  "absolute z-30 mt-1 rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_8px_24px_-8px_rgba(24,24,27,0.2)]";
 
 export const REFRESH_MS = 60_000;
 export const COMPARE_OPTIONS = [
@@ -104,7 +104,7 @@ export function Delta({ change }) {
 
 export function Chevron() {
   return (
-    <svg {...lineIcon} className="h-3.5 w-3.5 text-[#5A5750]">
+    <svg {...lineIcon} className="h-3.5 w-3.5 text-slate-600">
       <path d="m6 9 6 6 6-6" />
     </svg>
   );
@@ -113,11 +113,11 @@ export function Chevron() {
 export function EmptyState({ children = "No data for this date range" }) {
   return (
     <div className="flex h-full min-h-32 flex-col items-center justify-center text-center">
-      <svg {...lineIcon} className="h-6 w-6 text-[#A29E92]">
+      <svg {...lineIcon} className="h-6 w-6 text-slate-400">
         <path d="M3 3v16a2 2 0 0 0 2 2h16" />
         <path d="M18 17V9M13 17V5M8 17v-3" />
       </svg>
-      <p className="mt-2 text-[13px] text-[#5A5750]">{children}</p>
+      <p className="mt-2 text-[13px] text-slate-600">{children}</p>
     </div>
   );
 }
@@ -148,7 +148,7 @@ export function Sparkline({ values }) {
       <polyline
         points={points.join(" ")}
         fill="none"
-        stroke="#5B9BD5"
+        stroke="#FB923C"
         strokeWidth="1.5"
         vectorEffect="non-scaling-stroke"
       />
@@ -206,8 +206,21 @@ export function LineChart({ series, comparison, field, format, hourly }) {
       >
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={left} x2={W} y1={y(t)} y2={y(t)} stroke="#E7E4DC" strokeWidth="1" />
-            <text x={left - 6} y={y(t) + 4} textAnchor="end" fontSize="10" fill="#5A5750">
+            <line
+              x1={left}
+              x2={W}
+              y1={y(t)}
+              y2={y(t)}
+              stroke="rgba(24,24,27,0.12)"
+              strokeWidth="1"
+            />
+            <text
+              x={left - 6}
+              y={y(t) + 4}
+              textAnchor="end"
+              fontSize="10"
+              fill="rgba(24,24,27,0.78)"
+            >
               {format(t, true)}
             </text>
           </g>
@@ -219,7 +232,7 @@ export function LineChart({ series, comparison, field, format, hourly }) {
             y={H - 6}
             textAnchor={i === 0 ? "start" : i === n - 1 ? "end" : "middle"}
             fontSize="10"
-            fill="#5A5750"
+            fill="rgba(24,24,27,0.78)"
           >
             {series[i] ? bucketLabel(series[i].bucket, hourly) : ""}
           </text>
@@ -228,30 +241,30 @@ export function LineChart({ series, comparison, field, format, hourly }) {
           <path
             d={path(prev)}
             fill="none"
-            stroke="#A29E92"
+            stroke="rgba(24,24,27,0.5)"
             strokeWidth="1.5"
             strokeDasharray="4 3"
           />
         )}
-        <path d={path(cur)} fill="none" stroke="#2F6DB5" strokeWidth="2" />
+        <path d={path(cur)} fill="none" stroke="#EA580C" strokeWidth="2" />
         {hover !== null && (
           <line
             x1={x(hover)}
             x2={x(hover)}
             y1="8"
             y2={H - bottom}
-            stroke="#A29E92"
+            stroke="rgba(24,24,27,0.5)"
             strokeWidth="1"
           />
         )}
       </svg>
       {hover !== null && series[hover] && (
-        <div className="pointer-events-none absolute right-2 top-2 rounded-lg border border-[#E7E4DC] bg-white px-3 py-2 text-[12px] shadow-md">
-          <p className="font-medium text-[#14130F]">
+        <div className="pointer-events-none absolute right-2 top-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] shadow-md">
+          <p className="font-medium text-ink">
             {bucketLabel(series[hover].bucket, hourly)}: {format(cur[hover])}
           </p>
           {comparison?.[hover] && (
-            <p className="text-[#5A5750]">
+            <p className="text-slate-600">
               {bucketLabel(comparison[hover].bucket, hourly)}: {format(prev[hover])}
             </p>
           )}
@@ -270,10 +283,10 @@ export function Month({ year, month, start, end, onPick }) {
   const cells = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
   return (
     <div className="w-56">
-      <p className="mb-2 text-center text-sm font-semibold text-[#14130F]">
+      <p className="mb-2 text-center text-sm font-semibold text-ink">
         {MONTHS[month]} {year}
       </p>
-      <div className="grid grid-cols-7 text-center text-[11px] text-[#5A5750]">
+      <div className="grid grid-cols-7 text-center text-[11px] text-slate-600">
         {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
           <span key={i} className="py-1">
             {d}
@@ -289,7 +302,7 @@ export function Month({ year, month, start, end, onPick }) {
               key={i}
               type="button"
               onClick={() => onPick(day)}
-              className={`h-8 text-[13px] ${ends ? "rounded-lg bg-[#14130F] font-semibold text-white" : inside ? "bg-[#f1f3f7] text-[#14130F]" : "rounded-lg text-[#14130F] hover:bg-[#f1f3f7]"}`}
+              className={`h-8 text-[13px] ${ends ? "rounded-lg bg-ink font-semibold text-white" : inside ? "bg-slate-100 text-ink" : "rounded-lg text-ink hover:bg-slate-100"}`}
             >
               {d}
             </button>
@@ -331,7 +344,7 @@ export function CustomRange({ initial, today, onApply, onCancel }) {
           type="button"
           aria-label="Previous month"
           onClick={() => shift(-1)}
-          className="mt-0.5 h-7 w-7 rounded-lg hover:bg-[#f1f3f7]"
+          className="mt-0.5 h-7 w-7 rounded-lg hover:bg-slate-100"
         >
           ‹
         </button>
@@ -349,12 +362,12 @@ export function CustomRange({ initial, today, onApply, onCancel }) {
           type="button"
           aria-label="Next month"
           onClick={() => shift(1)}
-          className="mt-0.5 h-7 w-7 rounded-lg hover:bg-[#f1f3f7]"
+          className="mt-0.5 h-7 w-7 rounded-lg hover:bg-slate-100"
         >
           ›
         </button>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#F3F1EC] pt-3">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
         <span className={smallLabel}>
           {start ? rangeLabel(start, end || start) : "Pick a start date"}
         </span>
@@ -366,7 +379,7 @@ export function CustomRange({ initial, today, onApply, onCancel }) {
             type="button"
             disabled={!start}
             onClick={() => onApply(start, end || start)}
-            className="inline-flex h-9 items-center rounded-lg bg-[#14130F] px-4 text-sm font-semibold text-white disabled:opacity-40"
+            className="inline-flex h-9 items-center rounded-lg bg-orange-600 px-4 text-sm font-semibold text-white disabled:opacity-40"
           >
             Apply
           </button>
@@ -418,7 +431,7 @@ export function DateRangeButton({ label, preset, range, today, onPreset, onCusto
                     onPreset(p.key);
                     close();
                   }}
-                  className={`block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-[#f1f3f7] ${preset === p.key ? "font-semibold" : ""}`}
+                  className={`block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-slate-100 ${preset === p.key ? "font-semibold" : ""}`}
                 >
                   {p.label}
                 </button>
@@ -426,7 +439,7 @@ export function DateRangeButton({ label, preset, range, today, onPreset, onCusto
               <button
                 type="button"
                 onClick={() => setCustom(true)}
-                className={`block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-[#f1f3f7] ${preset === "custom" ? "font-semibold" : ""}`}
+                className={`block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-slate-100 ${preset === "custom" ? "font-semibold" : ""}`}
               >
                 Custom range
               </button>
@@ -463,4 +476,4 @@ export function Menu({ label, ariaLabel, children, className = "" }) {
 }
 
 export const menuItem =
-  "block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-[#f1f3f7]";
+  "block w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-slate-100";

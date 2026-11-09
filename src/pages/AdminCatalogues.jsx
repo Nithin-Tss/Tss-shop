@@ -5,7 +5,7 @@ import { apiDelete, apiGet, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
 
 // Shopify Polaris CatalogIcon (20x20 viewBox)
-function CatalogHeaderIcon({ className = "h-5 w-5 text-[#1A1916] shrink-0" }) {
+function CatalogHeaderIcon({ className = "h-5 w-5 text-ink shrink-0" }) {
   return (
     <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
       <path
@@ -53,39 +53,39 @@ function CatalogsIllustration() {
     <div className="relative flex items-center justify-center select-none" aria-hidden="true">
       {/* Background circle */}
       <div className="relative flex h-38 w-38 items-center justify-center">
-        <div className="absolute inset-0 rounded-full bg-[#E5E6E8]" />
+        <div className="absolute inset-0 rounded-full bg-[rgba(24,24,27,0.12)]" />
 
         {/* Floating white card */}
-        <div className="relative z-10 w-30.5 rounded-xl border border-[#E7E4DC] bg-white px-3.5 py-4 shadow-[0_4px_18px_rgba(0,0,0,0.06)]">
+        <div className="relative z-10 w-30.5 rounded-xl border border-slate-200 bg-white px-3.5 py-4 shadow-[0_4px_18px_rgba(24,24,27,0.06)]">
           <div className="flex flex-col gap-3">
             {/* Row 1 - Personalized green customer & pricing */}
             <div className="flex items-center justify-between gap-2">
-              <PersonIcon className="h-5 w-5 text-[#008060] shrink-0" />
+              <PersonIcon className="h-5 w-5 text-violet-600 shrink-0" />
               <div className="flex flex-1 flex-col gap-1 items-start">
-                <div className="h-[3.5px] w-full rounded-full bg-[#D4D0C5]" />
-                <div className="h-[3.5px] w-5/6 rounded-full bg-[#D4D0C5]" />
+                <div className="h-[3.5px] w-full rounded-full bg-slate-300" />
+                <div className="h-[3.5px] w-5/6 rounded-full bg-slate-300" />
               </div>
-              <TagIcon className="h-4 w-4 text-[#008060] shrink-0" />
+              <TagIcon className="h-4 w-4 text-violet-600 shrink-0" />
             </div>
 
             {/* Row 2 - Secondary muted customer & pricing */}
             <div className="flex items-center justify-between gap-2">
-              <PersonIcon className="h-5 w-5 text-[#D4D0C5] shrink-0" />
+              <PersonIcon className="h-5 w-5 text-slate-300 shrink-0" />
               <div className="flex flex-1 flex-col gap-1 items-start">
-                <div className="h-[3.5px] w-full rounded-full bg-[#D4D0C5]" />
-                <div className="h-[3.5px] w-5/6 rounded-full bg-[#D4D0C5]" />
+                <div className="h-[3.5px] w-full rounded-full bg-slate-300" />
+                <div className="h-[3.5px] w-5/6 rounded-full bg-slate-300" />
               </div>
-              <TagIcon className="h-4 w-4 text-[#D4D0C5] shrink-0" />
+              <TagIcon className="h-4 w-4 text-slate-300 shrink-0" />
             </div>
 
             {/* Row 3 - Tertiary muted customer & pricing */}
             <div className="flex items-center justify-between gap-2">
-              <PersonIcon className="h-5 w-5 text-[#D4D0C5] shrink-0" />
+              <PersonIcon className="h-5 w-5 text-slate-300 shrink-0" />
               <div className="flex flex-1 flex-col gap-1 items-start">
-                <div className="h-[3.5px] w-full rounded-full bg-[#D4D0C5]" />
-                <div className="h-[3.5px] w-5/6 rounded-full bg-[#D4D0C5]" />
+                <div className="h-[3.5px] w-full rounded-full bg-slate-300" />
+                <div className="h-[3.5px] w-5/6 rounded-full bg-slate-300" />
               </div>
-              <TagIcon className="h-4 w-4 text-[#D4D0C5] shrink-0" />
+              <TagIcon className="h-4 w-4 text-slate-300 shrink-0" />
             </div>
           </div>
         </div>
@@ -223,14 +223,14 @@ export default function CataloguesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white text-[#1A1916]">
+    <div className="min-h-screen bg-white text-ink">
       <AdminHeader />
 
       {/* Toast Notification */}
       {toastMessage && (
         <div
           role="status"
-          className="fixed bottom-6 right-6 z-50 rounded-lg bg-[#1A1916] px-4 py-2.5 text-sm font-medium text-white shadow-xl transition-all"
+          className="fixed bottom-6 right-6 z-50 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white shadow-xl transition-all"
         >
           {toastMessage}
         </div>
@@ -242,10 +242,10 @@ export default function CataloguesPage() {
         <AdminSidebar />
 
         {/* MAIN CONTENT */}
-        <main className="min-w-0 flex flex-1 flex-col bg-[#F3F1EC] px-4 sm:px-6 lg:px-8 py-5 overflow-hidden">
+        <main className="min-w-0 flex flex-1 flex-col bg-slate-100 px-4 sm:px-6 lg:px-8 py-5 overflow-hidden">
           {/* HEADER ROW: Match reference design */}
           <div className="flex items-center justify-between">
-            <h1 className="flex items-center gap-2 text-[20px] font-bold text-[#1A1916] tracking-tight">
+            <h1 className="flex items-center gap-2 text-[20px] font-bold text-ink tracking-tight">
               <CatalogHeaderIcon />
               Catalogs
             </h1>
@@ -254,7 +254,7 @@ export default function CataloguesPage() {
               <button
                 type="button"
                 onClick={handleExport}
-                className="rounded-lg bg-[#F3F1EC] px-3.5 py-1.5 text-[13px] font-medium text-[#A29E92] hover:bg-[#E7E4DC] hover:text-[#1A1916] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+                className="rounded-lg bg-slate-100 px-3.5 py-1.5 text-[13px] font-medium text-slate-400 hover:bg-slate-200 hover:text-orange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
               >
                 Export
               </button>
@@ -262,7 +262,7 @@ export default function CataloguesPage() {
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(true)}
-                className="rounded-lg bg-[#F3F1EC] px-3.5 py-1.5 text-[13px] font-medium text-[#A29E92] hover:bg-[#E7E4DC] hover:text-[#1A1916] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+                className="rounded-lg bg-slate-100 px-3.5 py-1.5 text-[13px] font-medium text-slate-400 hover:bg-slate-200 hover:text-orange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
               >
                 Import
               </button>
@@ -270,7 +270,7 @@ export default function CataloguesPage() {
               {canManage && (
                 <Link
                   to="/admin/online-store/catalogues/new"
-                  className="rounded-lg bg-[#1A1916] px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs hover:bg-[#2A2925] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+                  className="rounded-lg bg-orange-600 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs hover:bg-orange-600/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                 >
                   Create catalog
                 </Link>
@@ -283,7 +283,7 @@ export default function CataloguesPage() {
             <div className="mt-4 flex flex-1 flex-col">
               <section
                 aria-labelledby="catalogs-empty-heading"
-                className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-[#E7E4DC] bg-white px-6 py-16 text-center shadow-xs min-h-120"
+                className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-xs min-h-120"
               >
                 {/* Centered Graphic Illustration */}
                 <CatalogsIllustration />
@@ -291,13 +291,13 @@ export default function CataloguesPage() {
                 {/* Heading */}
                 <h2
                   id="catalogs-empty-heading"
-                  className="mt-7 text-[16px] sm:text-[17px] font-semibold text-[#1A1916] tracking-tight"
+                  className="mt-7 text-[16px] sm:text-[17px] font-semibold text-ink tracking-tight"
                 >
                   Personalize buying with catalogs
                 </h2>
 
                 {/* Description */}
-                <p className="mt-1.5 text-[13px] text-[#78746A] leading-normal text-center">
+                <p className="mt-1.5 text-[13px] text-slate-500 leading-normal text-center">
                   Create custom product and pricing offerings for your customers with catalogs.
                 </p>
 
@@ -305,7 +305,7 @@ export default function CataloguesPage() {
                 {canManage && (
                   <Link
                     to="/admin/online-store/catalogues/new"
-                    className="mt-5 inline-flex items-center justify-center rounded-lg bg-[#1A1916] px-4 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-[#2A2925] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+                    className="mt-5 inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2 text-[13px] font-medium text-white shadow-xs hover:bg-orange-600/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                   >
                     Create catalog
                   </Link>
@@ -313,13 +313,13 @@ export default function CataloguesPage() {
               </section>
 
               {/* FOOTER: Learn more about catalogs */}
-              <div className="mt-6 text-center text-[13px] text-[#78746A]">
+              <div className="mt-6 text-center text-[13px] text-slate-500">
                 Learn more about{" "}
                 <a
                   href="https://help.shopify.com/manual/b2b/catalogs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#1A1916] underline underline-offset-2 hover:text-black"
+                  className="text-ink underline underline-offset-2 hover:text-black"
                 >
                   catalogs
                 </a>
@@ -330,19 +330,19 @@ export default function CataloguesPage() {
           {/* DYNAMIC LIST VIEW: Shown when catalogues exist */}
           {catalogues.length > 0 && (
             <div className="mt-4 flex flex-1 flex-col">
-              <section className="rounded-2xl border border-[#E7E4DC] bg-white shadow-xs overflow-hidden">
+              <section className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden">
                 {/* Search & Filter bar */}
-                <div className="flex items-center justify-between border-b border-[#E7E4DC] p-3.5">
+                <div className="flex items-center justify-between border-b border-slate-200 p-3.5">
                   <div className="relative w-full max-w-sm">
                     <input
                       type="text"
                       placeholder="Filter catalogs..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-lg border border-[#D4D0C5] px-3 py-1.5 text-sm text-[#1A1916] placeholder-[#A29E92] focus:border-[#1A1916] focus:outline-none"
+                      className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-ink placeholder-slate-400 focus:border-orange-600 focus:outline-none"
                     />
                   </div>
-                  <span className="text-xs text-[#78746A]">
+                  <span className="text-xs text-slate-500">
                     {filteredCatalogues.length}{" "}
                     {filteredCatalogues.length === 1 ? "catalog" : "catalogs"}
                   </span>
@@ -351,7 +351,7 @@ export default function CataloguesPage() {
                 {/* Table of catalogs */}
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
-                    <thead className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-semibold text-[#78746A]">
+                    <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-500">
                       <tr>
                         <th className="px-4 py-3">Title</th>
                         <th className="px-4 py-3">Status</th>
@@ -360,10 +360,10 @@ export default function CataloguesPage() {
                         <th className="px-4 py-3 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E7E4DC]">
+                    <tbody className="divide-y divide-slate-200">
                       {filteredCatalogues.map((cat) => (
-                        <tr key={cat.id} className="hover:bg-[#F3F1EC] transition-colors">
-                          <td className="px-4 py-3 font-medium text-[#1A1916]">
+                        <tr key={cat.id} className="hover:bg-slate-100 transition-colors">
+                          <td className="px-4 py-3 font-medium text-ink">
                             <Link
                               to={`/admin/online-store/catalogues/${cat.id}`}
                               className="hover:underline"
@@ -375,15 +375,15 @@ export default function CataloguesPage() {
                             <span
                               className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                                 cat.status === "active"
-                                  ? "bg-[#E3F1DF] text-[#0D5B22]"
-                                  : "bg-[#E7E4DC] text-[#78746A]"
+                                  ? "bg-[rgba(24,24,27,0.06)] text-[#18181B]"
+                                  : "bg-slate-200 text-slate-500"
                               }`}
                             >
                               {titleCase(cat.status)}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-[#78746A]">{cat.description || "—"}</td>
-                          <td className="px-4 py-3 text-[#78746A]">{formatDate(cat.created_at)}</td>
+                          <td className="px-4 py-3 text-slate-500">{cat.description || "—"}</td>
+                          <td className="px-4 py-3 text-slate-500">{formatDate(cat.created_at)}</td>
                           <td className="px-4 py-3 text-right">
                             {canManage && (
                               <button
@@ -403,13 +403,13 @@ export default function CataloguesPage() {
               </section>
 
               {/* FOOTER: Learn more about catalogs */}
-              <div className="mt-6 text-center text-[13px] text-[#78746A]">
+              <div className="mt-6 text-center text-[13px] text-slate-500">
                 Learn more about{" "}
                 <a
                   href="https://help.shopify.com/manual/b2b/catalogs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#1A1916] underline underline-offset-2 hover:text-black"
+                  className="text-ink underline underline-offset-2 hover:text-black"
                 >
                   catalogs
                 </a>
@@ -427,36 +427,33 @@ export default function CataloguesPage() {
           aria-labelledby="import-catalog-modal-title"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
         >
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#E7E4DC]">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E7E4DC]">
-              <h3
-                id="import-catalog-modal-title"
-                className="text-base font-semibold text-[#1A1916]"
-              >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h3 id="import-catalog-modal-title" className="text-base font-semibold text-ink">
                 Import catalogs
               </h3>
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(false)}
-                className="text-[#78746A] hover:text-[#1A1916] text-lg font-bold"
+                className="text-slate-500 hover:text-orange-600 text-lg font-bold"
                 aria-label="Close"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#D4D0C5] p-6 text-center">
-              <svg className="h-8 w-8 text-[#A29E92] mb-2" viewBox="0 0 20 20" fill="currentColor">
+            <div className="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-6 text-center">
+              <svg className="h-8 w-8 text-slate-400 mb-2" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.56l2.22 2.22a.75.75 0 1 0 1.06-1.06l-3.5-3.5a.75.75 0 0 0-1.06 0l-3.5 3.5a.75.75 0 0 0 1.06 1.06l2.22-2.22v8.69Z" />
                 <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
               </svg>
-              <p className="text-xs text-[#78746A]">
+              <p className="text-xs text-slate-500">
                 Select a CSV file with a Name column (Status and Description are optional).
               </p>
               <input
                 type="file"
                 accept=".csv"
-                className="mt-3 text-xs text-[#78746A]"
+                className="mt-3 text-xs text-slate-500"
                 onChange={(e) => {
                   if (e.target.files?.[0]) handleImport(e.target.files[0]);
                 }}
@@ -467,7 +464,7 @@ export default function CataloguesPage() {
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(false)}
-                className="rounded-lg border border-[#D4D0C5] bg-white px-3.5 py-1.5 text-xs font-medium text-[#1A1916] hover:bg-[#F3F1EC] transition"
+                className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-medium text-ink hover:bg-slate-100 transition"
               >
                 Cancel
               </button>

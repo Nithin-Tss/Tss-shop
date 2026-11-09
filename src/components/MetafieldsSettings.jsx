@@ -50,9 +50,9 @@ function save(kind, value) {
 }
 
 const inputCls =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]";
+  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600";
 const btnPrimary =
-  "rounded-lg bg-[#14130F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60";
+  "rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-60";
 const btnGhost =
   "rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50";
 
@@ -69,7 +69,7 @@ function Field({ label, children, hint }) {
 function Empty({ title, text, action }) {
   return (
     <div className="px-6 py-14 text-center">
-      <p className="text-sm font-semibold text-[#14130F]">{title}</p>
+      <p className="text-sm font-semibold text-ink">{title}</p>
       <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">{text}</p>
       <div className="mt-4">{action}</div>
     </div>
@@ -227,7 +227,7 @@ function Definitions() {
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 p-5">
         <div>
-          <h2 className="text-lg font-semibold text-[#14130F]">Metafield definitions</h2>
+          <h2 className="text-lg font-semibold text-ink">Metafield definitions</h2>
           <p className="mt-1 text-sm text-slate-500">
             Add custom fields to products, variants, collections, customers and orders.
           </p>
@@ -262,7 +262,7 @@ function Definitions() {
                   aria-pressed={filter === v}
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
                     filter === v
-                      ? "bg-[#14130F] text-white"
+                      ? "bg-ink text-white"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -385,7 +385,7 @@ function ObjectTypeForm({ initial, existing, onCancel, onSave }) {
           onClick={() =>
             setFields((cur) => [...cur, { id: uid(), name: "", type: "single_line_text" }])
           }
-          className="mt-2 text-sm font-medium text-[#14130F] underline"
+          className="mt-2 text-sm font-medium text-ink underline"
         >
           + Add field
         </button>
@@ -456,7 +456,7 @@ function EntryInput({ field, value, onChange }) {
       return (
         <input
           type="color"
-          value={value || "#000000"}
+          value={value || "#18181B"}
           onChange={(e) => onChange(e.target.value)}
           className="h-10 w-20 rounded border border-slate-300"
           aria-label={field.name}
@@ -552,11 +552,11 @@ function Metaobjects() {
                 setOpenId(null);
                 setEntryForm(null);
               }}
-              className="text-sm text-slate-500 hover:text-slate-800"
+              className="text-sm text-slate-500 hover:text-orange-600"
             >
               ← Metaobjects
             </button>
-            <h2 className="mt-1 text-lg font-semibold text-[#14130F]">{open.name}</h2>
+            <h2 className="mt-1 text-lg font-semibold text-ink">{open.name}</h2>
           </div>
           {!entryForm && (
             <button type="button" onClick={() => setEntryForm("new")} className={btnPrimary}>
@@ -618,7 +618,7 @@ function Metaobjects() {
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 p-5">
         <div>
-          <h2 className="text-lg font-semibold text-[#14130F]">Metaobjects</h2>
+          <h2 className="text-lg font-semibold text-ink">Metaobjects</h2>
           <p className="mt-1 text-sm text-slate-500">
             Reusable structured content such as size guides, designers or FAQs.
           </p>
@@ -688,9 +688,7 @@ export default function MetafieldsSettings() {
             onClick={() => setTab(v)}
             aria-pressed={tab === v}
             className={`rounded-md px-4 py-1.5 ${
-              tab === v
-                ? "bg-white text-[#14130F] shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+              tab === v ? "bg-white text-ink shadow-sm" : "text-slate-600 hover:text-orange-600"
             }`}
           >
             {l}

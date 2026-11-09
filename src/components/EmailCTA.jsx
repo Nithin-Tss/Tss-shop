@@ -27,31 +27,31 @@ export default function EmailCTA() {
   };
 
   return (
-    <section className="bg-ink text-white">
+    <section className="bg-orange-600 text-ink">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-24 lg:grid-cols-12 lg:items-end lg:px-10 lg:py-32">
         <h2 className="display text-5xl lg:col-span-6 lg:text-7xl">Open the doors this week.</h2>
 
         <form onSubmit={handleSubmit} className="lg:col-span-5 lg:col-start-8" noValidate>
-          <label htmlFor="cta-email" className="text-sm text-slate-400">
+          <label htmlFor="cta-email" className="text-sm text-ink">
             Your email
           </label>
-          <div className="mt-2 flex border-b border-slate-600 focus-within:border-white">
+          <div className="mt-2 flex border-b border-ink/40 focus-within:border-ink">
             <input
               id="cta-email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@company.com"
-              className="h-12 min-w-0 flex-1 bg-transparent text-lg text-white outline-none placeholder:text-slate-600"
+              className="h-12 min-w-0 flex-1 bg-transparent text-lg text-ink outline-none placeholder:text-ink/60"
             />
             <button
               type="submit"
-              className="h-12 whitespace-nowrap pl-4 text-sm font-medium text-white hover:text-violet-300"
+              className="h-12 whitespace-nowrap pl-4 text-sm font-medium text-ink hover:text-white"
             >
               Start free trial &rarr;
             </button>
           </div>
-          {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
+          {error && <p className="mt-3 text-sm text-white">{error}</p>}
         </form>
       </div>
     </section>

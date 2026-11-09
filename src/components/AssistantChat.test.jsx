@@ -172,8 +172,8 @@ describe("AssistantChat", () => {
     const open = await screen.findByRole("button", { name: "Open footer.liquid in Code editor" });
 
     expect(open.tagName).toBe("BUTTON");
-    expect(open.className).toContain("bg-[#1A1916]"); // solid and dark
-    expect(chip.className).not.toContain("bg-[#1A1916]"); // the chips stay subtle
+    expect(open.className).toContain("bg-ink"); // solid and dark
+    expect(chip.className).not.toContain("bg-ink"); // the chips stay subtle
     expect(open.querySelector("svg")).not.toBeNull(); // the small arrow
 
     fireEvent.click(open);

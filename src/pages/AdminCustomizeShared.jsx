@@ -1,11 +1,11 @@
 export const inputClass =
-  "h-10 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm outline-none focus:border-[#14130F]";
+  "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-orange-600";
 
 export const smallButton =
-  "rounded-md border border-[#E7E4DC] bg-white px-2 py-1 text-xs text-[#265C48] hover:border-[#14130F] disabled:opacity-30";
+  "rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-violet-600 hover:border-orange-600 disabled:opacity-30";
 
 export const iconButton =
-  "flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#5A5750] hover:bg-white hover:text-[#14130F]";
+  "flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-orange-600";
 
 export const iconProps = {
   fill: "none",
@@ -32,7 +32,7 @@ export function DropLine({ after }) {
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute left-1 right-1 z-10 h-0.75 rounded-full bg-charcoal-navy shadow-[0_0_0_3px_rgba(20,27,45,0.12)]"
+      className="pointer-events-none absolute left-1 right-1 z-10 h-0.75 rounded-full bg-charcoal-navy shadow-[0_0_0_3px_rgba(24,24,27,0.12)]"
       style={{ top: after ? "calc(100% - 1px)" : "-2px" }}
     />
   );
@@ -44,7 +44,7 @@ export function DragHandle({ label, onPointerDown, onKeyDown }) {
       type="button"
       onPointerDown={onPointerDown}
       onKeyDown={onKeyDown}
-      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-[#A29E92] hover:text-charcoal-navy active:cursor-grabbing"
+      className="flex h-6 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded text-slate-400 hover:text-orange-600 active:cursor-grabbing"
       aria-label={label}
       title="Drag to reorder (or use the arrow keys)"
     >
