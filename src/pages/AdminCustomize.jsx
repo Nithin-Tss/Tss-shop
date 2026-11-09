@@ -1644,7 +1644,8 @@ export default function AdminCustomizePage() {
     put("handle", basePage(page) === "page" ? samplePage : "");
     put("section", selected);
     put("customer", customerPage);
-    put("ct", customerPage === "account" ? customerToken : "");
+    // Kept on every page, so the signed-in preview customer survives going elsewhere and a refresh
+    put("ct", customerToken);
     const query = params.toString();
     window.history.replaceState(
       window.history.state,
@@ -1679,7 +1680,8 @@ export default function AdminCustomizePage() {
     }
     if (first === "account") {
       // The account page: the customer who just signed in (their link token), else sample customer data
-      setCustomerToken(searchParams.get("ct") || "");
+      // Keep the customer already signed in when the link carries no token (e.g. the header's Account link)
+      setCustomerToken((prev) => searchParams.get("ct") || prev);
       setCustomerPage("account");
       setSelected(null);
       return;
