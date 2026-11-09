@@ -102,8 +102,10 @@ function refreshSession(expiredToken) {
       body: JSON.stringify({ refresh: session.refresh }),
     });
 
-    if (response.status >= 500) return "offline";
-    if (!response.ok) return false;
+    // Only a 401 means the refresh token is really finished. A 429 (rate limit), 403, 5xx or a
+    // proxy error is temporary: keep the session and let the next request try again.
+    if (response.status === 401) return false;
+    if (!response.ok) return "offline";
     setTokens(await response.json());
     return true;
   })
