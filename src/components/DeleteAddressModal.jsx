@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 export default function DeleteAddressModal({
   isOpen,
   onClose,
@@ -5,6 +7,53 @@ export default function DeleteAddressModal({
   address = null,
   deleting = false,
 }) {
+  const modalRef = useRef(null);
+  const previousActiveElement = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    previousActiveElement.current = document.activeElement;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab" && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    const timer = setTimeout(() => {
+      const cancelBtn = modalRef.current?.querySelector("button");
+      cancelBtn?.focus();
+    }, 50);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(timer);
+      if (
+        previousActiveElement.current &&
+        typeof previousActiveElement.current.focus === "function"
+      ) {
+        previousActiveElement.current.focus();
+      }
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !address) return null;
 
   const fullName = [address.first_name, address.last_name].filter(Boolean).join(" ");
@@ -14,16 +63,34 @@ export default function DeleteAddressModal({
     .join(", ");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-      <div className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 p-6 space-y-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+      onClick={onClose}
+    >
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-address-title"
+        aria-describedby="delete-address-description"
+        className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 p-6 space-y-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 text-lg">
+          <div
+            aria-hidden="true"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 text-lg"
+          >
             ⚠
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">Delete Address</h3>
-            <p className="text-xs text-slate-500">Are you sure you want to delete this address?</p>
+            <h2 id="delete-address-title" className="text-base font-bold text-slate-900">
+              Delete Address
+            </h2>
+            <p id="delete-address-description" className="text-xs text-slate-500">
+              Are you sure you want to delete this address?
+            </p>
           </div>
         </div>
 
@@ -66,7 +133,9 @@ export default function DeleteAddressModal({
           >
             {deleting ? (
               <>
-                <span className="inline-block animate-spin">↻</span>
+                <span aria-hidden="true" className="inline-block animate-spin">
+                  ↻
+                </span>
                 <span>Deleting...</span>
               </>
             ) : (

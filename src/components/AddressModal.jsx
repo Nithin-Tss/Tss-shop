@@ -40,6 +40,51 @@ export default function AddressModal({
 
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
+  const modalRef = useRef(null);
+  const previousActiveElement = useRef(null);
+
+  // Focus trap & Escape key listener
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    previousActiveElement.current = document.activeElement;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab" && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    const timer = setTimeout(() => {
+      const firstInput = modalRef.current?.querySelector("input, button");
+      firstInput?.focus();
+    }, 50);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(timer);
+      if (
+        previousActiveElement.current &&
+        typeof previousActiveElement.current.focus === "function"
+      ) {
+        previousActiveElement.current.focus();
+      }
+    };
+  }, [isOpen, onClose]);
 
   // Reset the form whenever the modal opens or gets different data (during render, not in an effect)
   const [formSource, setFormSource] = useState(null);
@@ -234,28 +279,46 @@ export default function AddressModal({
     });
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 my-8">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="address-modal-title"
+        className="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-slate-200 my-8"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50 rounded-t-2xl">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+            <h2 id="address-modal-title" className="text-lg font-bold text-slate-900">
+              {title}
+            </h2>
             <p className="text-xs text-slate-500 mt-0.5">Fill in the address details below.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+            aria-label="Close dialog"
             title="Close"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         </div>
 
         {/* Global Error Banner */}
         {apiError && (
-          <div className="mx-6 mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+          <div
+            role="alert"
+            className="mx-6 mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700"
+          >
             {apiError}
           </div>
         )}
@@ -317,6 +380,9 @@ export default function AddressModal({
                 value={formData.first_name}
                 onChange={handleChange}
                 placeholder="e.g. Jane"
+                aria-required="true"
+                aria-invalid={Boolean(errors.first_name)}
+                aria-describedby={errors.first_name ? "first_name-error" : undefined}
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.first_name
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
@@ -324,7 +390,9 @@ export default function AddressModal({
                 }`}
               />
               {errors.first_name && (
-                <p className="mt-1 text-[11px] text-red-500">{errors.first_name}</p>
+                <p id="first_name-error" role="alert" className="mt-1 text-[11px] text-red-500">
+                  {errors.first_name}
+                </p>
               )}
             </div>
 
@@ -339,6 +407,9 @@ export default function AddressModal({
                 value={formData.last_name}
                 onChange={handleChange}
                 placeholder="e.g. Doe"
+                aria-required="true"
+                aria-invalid={Boolean(errors.last_name)}
+                aria-describedby={errors.last_name ? "last_name-error" : undefined}
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.last_name
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
@@ -346,7 +417,9 @@ export default function AddressModal({
                 }`}
               />
               {errors.last_name && (
-                <p className="mt-1 text-[11px] text-red-500">{errors.last_name}</p>
+                <p id="last_name-error" role="alert" className="mt-1 text-[11px] text-red-500">
+                  {errors.last_name}
+                </p>
               )}
             </div>
           </div>
@@ -379,6 +452,9 @@ export default function AddressModal({
               value={formData.address_line_1}
               onChange={handleChange}
               placeholder="Street address, P.O. box"
+              aria-required="true"
+              aria-invalid={Boolean(errors.address_line_1)}
+              aria-describedby={errors.address_line_1 ? "address_line_1-error" : undefined}
               className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                 errors.address_line_1
                   ? "border-red-400 bg-red-50/30 focus:border-red-500"
@@ -386,7 +462,9 @@ export default function AddressModal({
               }`}
             />
             {errors.address_line_1 && (
-              <p className="mt-1 text-[11px] text-red-500">{errors.address_line_1}</p>
+              <p id="address_line_1-error" role="alert" className="mt-1 text-[11px] text-red-500">
+                {errors.address_line_1}
+              </p>
             )}
           </div>
 
@@ -419,13 +497,20 @@ export default function AddressModal({
                 value={formData.city}
                 onChange={handleChange}
                 placeholder="City / Suburb"
+                aria-required="true"
+                aria-invalid={Boolean(errors.city)}
+                aria-describedby={errors.city ? "city-error" : undefined}
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.city
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
                     : "border-slate-300 focus:border-orange-600"
                 }`}
               />
-              {errors.city && <p className="mt-1 text-[11px] text-red-500">{errors.city}</p>}
+              {errors.city && (
+                <p id="city-error" role="alert" className="mt-1 text-[11px] text-red-500">
+                  {errors.city}
+                </p>
+              )}
             </div>
 
             <div>
@@ -439,13 +524,20 @@ export default function AddressModal({
                 value={formData.state}
                 onChange={handleChange}
                 placeholder="State / Region"
+                aria-required="true"
+                aria-invalid={Boolean(errors.state)}
+                aria-describedby={errors.state ? "state-error" : undefined}
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.state
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
                     : "border-slate-300 focus:border-orange-600"
                 }`}
               />
-              {errors.state && <p className="mt-1 text-[11px] text-red-500">{errors.state}</p>}
+              {errors.state && (
+                <p id="state-error" role="alert" className="mt-1 text-[11px] text-red-500">
+                  {errors.state}
+                </p>
+              )}
             </div>
 
             <div>
@@ -459,6 +551,9 @@ export default function AddressModal({
                 value={formData.postal_code}
                 onChange={handleChange}
                 placeholder="ZIP / Postcode"
+                aria-required="true"
+                aria-invalid={Boolean(errors.postal_code)}
+                aria-describedby={errors.postal_code ? "postal_code-error" : undefined}
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.postal_code
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
@@ -466,7 +561,9 @@ export default function AddressModal({
                 }`}
               />
               {errors.postal_code && (
-                <p className="mt-1 text-[11px] text-red-500">{errors.postal_code}</p>
+                <p id="postal_code-error" role="alert" className="mt-1 text-[11px] text-red-500">
+                  {errors.postal_code}
+                </p>
               )}
             </div>
           </div>
@@ -584,6 +681,8 @@ export default function AddressModal({
                   name="phone"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
+                  aria-invalid={Boolean(errors.phone)}
+                  aria-describedby={errors.phone ? "phone-error" : undefined}
                   placeholder={
                     selectedCountry.code === "AU"
                       ? "412 345 678"
@@ -599,7 +698,9 @@ export default function AddressModal({
                 />
               </div>
               {errors.phone ? (
-                <p className="mt-1 text-[11px] text-red-500">{errors.phone}</p>
+                <p id="phone-error" role="alert" className="mt-1 text-[11px] text-red-500">
+                  {errors.phone}
+                </p>
               ) : null}
             </div>
           </div>

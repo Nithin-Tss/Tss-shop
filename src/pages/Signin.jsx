@@ -145,6 +145,10 @@ export default function SignInPage() {
                 id="email"
                 name="email"
                 type="email"
+                required
+                aria-required="true"
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? "email-error" : undefined}
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
@@ -156,7 +160,11 @@ export default function SignInPage() {
                 }`}
               />
 
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              {errors.email && (
+                <p id="email-error" role="alert" className="mt-1 text-xs text-red-500">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             {/* Password */}
@@ -170,6 +178,10 @@ export default function SignInPage() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
+                  required
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? "password-error" : undefined}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
@@ -184,13 +196,19 @@ export default function SignInPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((previousValue) => !previousValue)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-violet-600 hover:text-violet-700"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
 
-              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+              {errors.password && (
+                <p id="password-error" role="alert" className="mt-1 text-xs text-red-500">
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             {/* Second factor: shown after the password was accepted */}
@@ -207,6 +225,10 @@ export default function SignInPage() {
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   autoFocus
+                  required
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.mfaCode)}
+                  aria-describedby={errors.mfaCode ? "mfaCode-error" : undefined}
                   value={mfaCode}
                   onChange={(event) => {
                     setMfaCode(event.target.value);
@@ -220,7 +242,11 @@ export default function SignInPage() {
                   }`}
                 />
 
-                {errors.mfaCode && <p className="mt-1 text-xs text-red-500">{errors.mfaCode}</p>}
+                {errors.mfaCode && (
+                  <p id="mfaCode-error" role="alert" className="mt-1 text-xs text-red-500">
+                    {errors.mfaCode}
+                  </p>
+                )}
               </div>
             )}
 

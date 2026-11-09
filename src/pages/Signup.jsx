@@ -195,7 +195,10 @@ export default function SignUpPage() {
           {/* Form Error */}
 
           {errors.form && (
-            <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div
+              role="alert"
+              className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+            >
               {errors.form}
             </div>
           )}
@@ -203,7 +206,10 @@ export default function SignUpPage() {
           {/* Success / Frontend Message */}
 
           {message && (
-            <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-violet-700">
+            <div
+              role="status"
+              className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-violet-700"
+            >
               {message}
             </div>
           )}
@@ -215,7 +221,6 @@ export default function SignUpPage() {
               <div>
                 <label
                   htmlFor="firstName"
-
                   className="mb-2 block text-sm font-medium text-slate-700"
                 >
                   First Name
@@ -223,19 +228,16 @@ export default function SignUpPage() {
 
                 <input
                   id="firstName"
-
                   name="firstName"
-
                   type="text"
-
+                  required
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.firstName)}
+                  aria-describedby={errors.firstName ? "firstName-error" : undefined}
                   value={formData.firstName}
-
                   onChange={handleChange}
-
                   placeholder="Enter first name"
-
                   autoComplete="given-name"
-
                   className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
                     errors.firstName
                       ? "border-red-400 focus:border-red-500 focus:ring-red-100"
@@ -244,35 +246,30 @@ export default function SignUpPage() {
                 />
 
                 {errors.firstName && (
-                  <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>
+                  <p id="firstName-error" role="alert" className="mt-1 text-xs text-red-500">
+                    {errors.firstName}
+                  </p>
                 )}
               </div>
 
               {/* Last Name */}
               <div>
-                <label
-                  htmlFor="lastName"
-
-                  className="mb-2 block text-sm font-medium text-slate-700"
-                >
+                <label htmlFor="lastName" className="mb-2 block text-sm font-medium text-slate-700">
                   Last Name
                 </label>
 
                 <input
                   id="lastName"
-
                   name="lastName"
-
                   type="text"
-
+                  required
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.lastName)}
+                  aria-describedby={errors.lastName ? "lastName-error" : undefined}
                   value={formData.lastName}
-
                   onChange={handleChange}
-
                   placeholder="Enter last name"
-
                   autoComplete="family-name"
-
                   className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
                     errors.lastName
                       ? "border-red-400 focus:border-red-500 focus:ring-red-100"
@@ -280,35 +277,32 @@ export default function SignUpPage() {
                   }`}
                 />
 
-                {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
+                {errors.lastName && (
+                  <p id="lastName-error" role="alert" className="mt-1 text-xs text-red-500">
+                    {errors.lastName}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Email */}
             <div className="mt-5">
-              <label
-                htmlFor="email"
-
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
                 Email
               </label>
 
               <input
                 id="email"
-
                 name="email"
-
                 type="email"
-
+                required
+                aria-required="true"
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? "signup-email-error" : undefined}
                 value={formData.email}
-
                 onChange={handleChange}
-
                 placeholder="Enter your email"
-
                 autoComplete="email"
-
                 className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
                   errors.email
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
@@ -316,14 +310,17 @@ export default function SignUpPage() {
                 }`}
               />
 
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              {errors.email && (
+                <p id="signup-email-error" role="alert" className="mt-1 text-xs text-red-500">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             {/* Mobile Number */}
             <div className="mt-5">
               <label
                 htmlFor="mobileNumber"
-
                 className="mb-2 block text-sm font-medium text-slate-700"
               >
                 Mobile Number
@@ -331,21 +328,15 @@ export default function SignUpPage() {
 
               <input
                 id="mobileNumber"
-
                 name="mobileNumber"
-
                 type="tel"
-
+                aria-invalid={Boolean(errors.mobileNumber)}
+                aria-describedby={errors.mobileNumber ? "mobileNumber-error" : undefined}
                 value={formData.mobileNumber}
-
                 onChange={handleChange}
-
                 placeholder="Enter 10-digit mobile number"
-
                 autoComplete="tel"
-
                 inputMode="numeric"
-
                 maxLength={10}
 
                 className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${

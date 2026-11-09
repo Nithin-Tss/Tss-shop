@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const DISCOUNT_TYPES = [
@@ -15,6 +15,7 @@ export const DISCOUNT_TYPES = [
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
       >
         <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
         <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" />
@@ -34,6 +35,7 @@ export const DISCOUNT_TYPES = [
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
       >
         <rect x="3" y="8" width="18" height="4" rx="1" />
         <path d="M12 8v13" />
@@ -55,6 +57,7 @@ export const DISCOUNT_TYPES = [
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
       >
         <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
         <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
@@ -75,6 +78,7 @@ export const DISCOUNT_TYPES = [
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
       >
         <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
         <path d="M15 18H9" />
@@ -88,18 +92,50 @@ export const DISCOUNT_TYPES = [
 
 export default function SelectDiscountTypeModal({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const modalRef = useRef(null);
+  const previousActiveElement = useRef(null);
 
   useEffect(() => {
+    if (!isOpen) return undefined;
+    previousActiveElement.current = document.activeElement;
+
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape") {
         onClose();
+        return;
+      }
+      if (e.key === "Tab" && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    const timer = setTimeout(() => {
+      const firstBtn = modalRef.current?.querySelector("button");
+      firstBtn?.focus();
+    }, 50);
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(timer);
+      if (
+        previousActiveElement.current &&
+        typeof previousActiveElement.current.focus === "function"
+      ) {
+        previousActiveElement.current.focus();
+      }
     };
   }, [isOpen, onClose]);
 
@@ -116,6 +152,7 @@ export default function SelectDiscountTypeModal({ isOpen, onClose }) {
       onClick={onClose}
     >
       <div
+        ref={modalRef}
         className="w-full max-w-[560px] rounded-2xl bg-white shadow-2xl transition-all overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -133,7 +170,13 @@ export default function SelectDiscountTypeModal({ isOpen, onClose }) {
             aria-label="Close modal"
             className="rounded-lg p-1 text-slate-600 hover:bg-[rgba(24,24,27,0.06)] hover:text-orange-600 transition-colors focus:outline-none"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

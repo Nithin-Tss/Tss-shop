@@ -145,11 +145,22 @@ function CreateGiftCardModal({ onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="issue-modal-title"
+        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {issuedCode ? (
           <div>
-            <h2 className="text-base font-semibold text-charcoal-navy mb-2">Gift card issued</h2>
+            <h2 id="issue-modal-title" className="text-base font-semibold text-charcoal-navy mb-2">
+              Gift card issued
+            </h2>
             <p className="text-sm text-slate-600 mb-3">
               This code is shown once. Copy it now -- it can't be shown again, only resent by email.
             </p>
@@ -271,10 +282,19 @@ function GiftCardDetailModal({ card, onClose, onChanged }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl max-h-[85vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="card-details-title"
+        className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl max-h-[85vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-charcoal-navy">
+          <h2 id="card-details-title" className="text-base font-semibold text-charcoal-navy">
             Gift card &bull;&bull;&bull;&bull;{card.code_last4}
           </h2>
           <StatusBadge status={card.status} />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 function escapeCsv(val) {
   if (val === null || val === undefined) return '""';
@@ -37,18 +37,51 @@ export default function ExportDraftOrdersModal({
       ? "current_page"
       : chosenScope;
 
-  // Handle escape key
+  const modalRef = useRef(null);
+  const previousActiveElement = useRef(null);
+
+  // Handle escape key and focus trap
   useEffect(() => {
+    if (!isOpen) return undefined;
+    previousActiveElement.current = document.activeElement;
+
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape") {
         onClose();
+        return;
+      }
+      if (e.key === "Tab" && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    const timer = setTimeout(() => {
+      const firstInput = modalRef.current?.querySelector("input, button");
+      firstInput?.focus();
+    }, 50);
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(timer);
+      if (
+        previousActiveElement.current &&
+        typeof previousActiveElement.current.focus === "function"
+      ) {
+        previousActiveElement.current.focus();
+      }
     };
   }, [isOpen, onClose]);
 
@@ -142,6 +175,7 @@ export default function ExportDraftOrdersModal({
       onClick={onClose}
     >
       <div
+        ref={modalRef}
         className="w-full max-w-[560px] rounded-2xl bg-white shadow-2xl transition-all"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
@@ -159,7 +193,13 @@ export default function ExportDraftOrdersModal({
             aria-label="Close modal"
             className="rounded-lg p-1 text-slate-600 hover:bg-[rgba(24,24,27,0.06)] hover:text-orange-600 transition-colors focus:outline-none"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
