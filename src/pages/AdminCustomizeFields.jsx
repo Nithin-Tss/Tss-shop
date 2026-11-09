@@ -579,7 +579,7 @@ function ContrastWarning({ spec, values }) {
   const ratio = contrastRatio(a, b);
   if (ratio >= 4.5) return null;
   return (
-    <p role="status" className="mt-1 text-[11px] font-medium leading-snug text-[#EA580C]">
+    <p role="status" className="mt-1 text-[11px] font-medium leading-snug text-[#B08D57]">
       Low contrast ({ratio.toFixed(1)}:1). Text may be hard to read; aim for at least 4.5:1.
     </p>
   );
@@ -610,7 +610,7 @@ function HexInput({ value, onChange, label }) {
       }}
       onBlur={() => setText(value || "")}
       className={`h-10 w-24 rounded-lg border px-2 text-sm tabular-nums uppercase ${
-        invalid ? "border-[#EA580C]" : "border-slate-200"
+        invalid ? "border-[#B08D57]" : "border-slate-200"
       }`}
     />
   );
@@ -1712,7 +1712,7 @@ export function ImageUpload({ value, onChange }) {
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1 bg-linear-to-t from-black/50 to-transparent p-1.5">
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1 bg-linear-to-t from-brand-navy-500/50 to-transparent p-1.5">
             {progress !== null && (
               <span className="mr-auto rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium text-white">
                 Uploading {Math.round(progress * 100)}%

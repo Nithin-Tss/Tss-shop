@@ -5,7 +5,7 @@ import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/li
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
 
-const NAVY = "#18181B";
+const NAVY = "#111827";
 const PRODUCTS_URL = "/admin/online-store/products";
 
 const inputClass =
@@ -4447,7 +4447,7 @@ export function ProductForm({ productId }) {
                           type="button"
                           onClick={() => mainFileInputRef.current?.click()}
                           disabled={saving}
-                          className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#18181B] disabled:cursor-not-allowed disabled:opacity-50"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-navy-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <svg
                             className="h-3.5 w-3.5"
@@ -4559,7 +4559,7 @@ export function ProductForm({ productId }) {
                               </div>
 
                               {/* Bottom info banner & action buttons */}
-                              <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-linear-to-t from-black/85 via-black/50 to-transparent p-2.5 text-white">
+                              <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-linear-to-t from-brand-navy-500/85 via-brand-navy-500/50 to-transparent p-2.5 text-white">
                                 {/* File information */}
                                 <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium leading-tight text-slate-100">
                                   <span className="truncate max-w-35" title={photo.name}>
@@ -5016,7 +5016,7 @@ export function ProductForm({ productId }) {
                       <p className="break-all text-xs text-slate-600">
                         {storeDomain} › products › {currentHandle}
                       </p>
-                      <p className="mt-0.5 truncate text-lg text-[#EA580C]">{shownSeoTitle}</p>
+                      <p className="mt-0.5 truncate text-lg text-[#B08D57]">{shownSeoTitle}</p>
                       <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
                       {price !== "" && !isNaN(Number(price)) && (
                         <p className="mt-1 text-xs text-slate-500">

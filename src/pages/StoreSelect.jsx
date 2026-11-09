@@ -17,17 +17,17 @@ function StoreIllustration() {
   return (
     <svg width="136" height="144" viewBox="0 0 136 144" fill="none" aria-hidden="true">
       <circle cx="68" cy="76" r="68" fill="rgba(234,88,12,0.08)" />
-      <path d="M30 56h76l8 66a8 8 0 0 1-8 9H30a8 8 0 0 1-8-9l8-66Z" fill="#18181B" />
-      <path d="M36 56h64l6 40H30l6-40Z" fill="#EA580C" />
-      <path d="M26 104h84v8H26z" fill="#EA580C" />
+      <path d="M30 56h76l8 66a8 8 0 0 1-8 9H30a8 8 0 0 1-8-9l8-66Z" fill="#111827" />
+      <path d="M36 56h64l6 40H30l6-40Z" fill="#B08D57" />
+      <path d="M26 104h84v8H26z" fill="#B08D57" />
       <path
         d="M50 56V40a12 12 0 0 1 24 0v16M68 56V40a12 12 0 0 1 24 0v16"
-        stroke="#18181B"
+        stroke="#111827"
         strokeWidth="7"
         strokeLinecap="round"
       />
       <rect x="86" y="70" width="18" height="30" rx="4" fill="#FFFFFF" />
-      <circle cx="95" cy="78" r="2" fill="#18181B" />
+      <circle cx="95" cy="78" r="2" fill="#111827" />
     </svg>
   );
 }

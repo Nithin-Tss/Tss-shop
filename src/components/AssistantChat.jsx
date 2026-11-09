@@ -32,7 +32,7 @@ const illustration = (
   <svg
     viewBox="3 2 19 19"
     fill="rgba(24,24,27,0.22)"
-    stroke="#18181B"
+    stroke="#111827"
     strokeWidth={1.4}
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -72,7 +72,7 @@ const arrow = (
 
 // The round button inside the input bar: Send (up arrow) and, while an answer is pending, Stop (filled square).
 // Light violet while the box is empty, a stronger violet when there is something to send.
-const roundButton = `flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-700 text-white transition-colors hover:bg-[#EA580C] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:hover:bg-slate-200 ${focusRing}`;
+const roundButton = `flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-700 text-white transition-colors hover:bg-brand-gold-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:hover:bg-slate-200 ${focusRing}`;
 
 const upArrow = (
   <svg
@@ -124,7 +124,7 @@ function Bubble({ message, onAction }) {
           </p>
         ) : (
           // Rendered by a small safe renderer: whatever the model writes is shown as text, never as HTML
-          <div className="rounded-xl rounded-tl-sm bg-[#FAFAFA] px-3.5 py-2.5 text-[13px] leading-5 text-ink">
+          <div className="rounded-xl rounded-tl-sm bg-brand-cream-100 px-3.5 py-2.5 text-[13px] leading-5 text-ink">
             <AssistantMarkdown text={message.text} />
           </div>
         )}

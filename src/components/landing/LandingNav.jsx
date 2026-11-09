@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import Icon from "./Icon";
 import { ONBOARDING_PATH, STORES_PATH, useSession } from "@/lib/auth";
 
 const links = [
@@ -39,7 +40,10 @@ export default function LandingNav() {
     <header className={`lp-nav ${scrolled ? "scrolled" : ""}`}>
       <div className="bar">
         <a href="#top" className="logo" aria-label="Store home">
-          <i /> Store
+          <i>
+            <Icon name="bag" size={16} stroke={2} />
+          </i>{" "}
+          Store
         </a>
         <nav className="links" aria-label="Primary">
           {links.map((l) => item(l))}

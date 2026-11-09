@@ -681,7 +681,7 @@ export default function AdminAddCatalogue() {
                           <span
                             className={`w-4 h-4 rounded-full transition-all shrink-0 ${
                               sortBy === "title"
-                                ? "border-[4.5px] border-[#18181B] bg-white"
+                                ? "border-[4.5px] border-[#111827] bg-white"
                                 : "border border-slate-400 bg-white hover:border-slate-600"
                             }`}
                           />
@@ -699,7 +699,7 @@ export default function AdminAddCatalogue() {
                           <span
                             className={`w-4 h-4 rounded-full transition-all shrink-0 ${
                               sortBy === "created"
-                                ? "border-[4.5px] border-[#18181B] bg-white"
+                                ? "border-[4.5px] border-[#111827] bg-white"
                                 : "border border-slate-400 bg-white hover:border-slate-600"
                             }`}
                           />

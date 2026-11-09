@@ -6,7 +6,7 @@ import { apiGet } from "@/lib/api";
 function ShopifyBagIcon({ className = "h-4 w-4 shrink-0" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
-      <rect width="20" height="20" x="2" y="2" rx="4" fill="#EA580C" />
+      <rect width="20" height="20" x="2" y="2" rx="4" fill="#B08D57" />
       <path
         d="M12 6.5C10.6 6.5 9.5 7.6 9.5 9V10H14.5V9C14.5 7.6 13.4 6.5 12 6.5Z"
         stroke="white"
@@ -15,7 +15,7 @@ function ShopifyBagIcon({ className = "h-4 w-4 shrink-0" }) {
       />
       <path
         d="M7 10H17L16 17.5C16 18.1 15.5 18.5 15 18.5H9C8.5 18.5 8 18.1 8 17.5L7 10Z"
-        fill="#EA580C"
+        fill="#B08D57"
         stroke="white"
         strokeWidth="1.3"
         strokeLinejoin="round"
@@ -220,7 +220,7 @@ export default function AdminReports() {
 
             <Link
               to="/admin/online-store/reports/new"
-              className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-[#18181B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+              className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-xs transition-colors hover:bg-brand-navy-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
             >
               New exploration
             </Link>
@@ -294,7 +294,7 @@ export default function AdminReports() {
                     type="button"
                     onClick={() => setIsCreatedByOpen((prev) => !prev)}
                     className={`inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1 text-[13px] font-medium text-ink shadow-xs transition-colors hover:bg-slate-100 ${
-                      selectedCreator !== "all" ? "border-orange-600 bg-[#FAFAFA]" : ""
+                      selectedCreator !== "all" ? "border-orange-600 bg-brand-cream-100" : ""
                     }`}
                     aria-expanded={isCreatedByOpen}
                   >
@@ -361,7 +361,7 @@ export default function AdminReports() {
                     type="button"
                     onClick={() => setIsCategoryOpen((prev) => !prev)}
                     className={`inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1 text-[13px] font-medium text-ink shadow-xs transition-colors hover:bg-slate-100 ${
-                      selectedCategory !== "all" ? "border-orange-600 bg-[#FAFAFA]" : ""
+                      selectedCategory !== "all" ? "border-orange-600 bg-brand-cream-100" : ""
                     }`}
                     aria-expanded={isCategoryOpen}
                   >

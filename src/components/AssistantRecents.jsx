@@ -76,7 +76,7 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                   return (
                     <li
                       key={chat.id}
-                      className="group flex items-center gap-1 pr-1.5 hover:bg-[#FAFAFA]"
+                      className="group flex items-center gap-1 pr-1.5 hover:bg-brand-cream-300"
                     >
                       <button
                         type="button"

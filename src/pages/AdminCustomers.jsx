@@ -881,11 +881,11 @@ export default function AdminCustomers() {
                           {/* Email subscription */}
                           <td className="py-3.5 px-3">
                             {isSubscribed ? (
-                              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-[rgba(24,24,27,0.22)] text-[#18181B]">
+                              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-[rgba(24,24,27,0.22)] text-[#111827]">
                                 Subscribed
                               </span>
                             ) : isUnsubscribed ? (
-                              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-[rgba(234,88,12,0.25)] text-[#EA580C]">
+                              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-[rgba(234,88,12,0.25)] text-[#B08D57]">
                                 Unsubscribed
                               </span>
                             ) : (

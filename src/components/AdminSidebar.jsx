@@ -893,7 +893,7 @@ export default function AdminSidebar() {
           {/* Rounds the content's top-left corner, so the page looks like a sheet laid on the rail */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute -right-4 top-0 h-4 w-4 [background:radial-gradient(circle_at_100%_100%,transparent_16px,#0a0a0a_16.5px)]"
+            className="pointer-events-none absolute -right-4 top-0 h-4 w-4 [background:radial-gradient(circle_at_100%_100%,transparent_16px,#111827_16.5px)]"
           />
         </div>
       </aside>

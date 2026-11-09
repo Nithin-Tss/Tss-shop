@@ -336,10 +336,10 @@ function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
       <defs>
         {/* Soft drop shadows */}
         <filter id="po-shadow" x="35" y="15" width="130" height="135" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#18181B" floodOpacity="0.08" />
+          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#111827" floodOpacity="0.08" />
         </filter>
         <filter id="box-shadow" x="105" y="80" width="70" height="70" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#18181B" floodOpacity="0.12" />
+          <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#111827" floodOpacity="0.12" />
         </filter>
       </defs>
 
@@ -360,7 +360,7 @@ function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
       />
 
       {/* Clipboard top clip */}
-      <rect x="80" y="17" width="40" height="11" rx="4" fill="#18181B" />
+      <rect x="80" y="17" width="40" height="11" rx="4" fill="#111827" />
       <circle cx="100" cy="22" r="2.5" fill="rgba(234,88,12,0.08)" />
 
       {/* Document rows & placeholders */}
@@ -369,12 +369,12 @@ function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
       <rect x="126" y="38" width="14" height="6" rx="3" fill="rgba(24,24,27,0.12)" />
 
       {/* Item row 1 */}
-      <circle cx="66" cy="56" r="3.5" fill="#18181B" />
+      <circle cx="66" cy="56" r="3.5" fill="#111827" />
       <rect x="76" y="53.5" width="42" height="5" rx="2.5" fill="rgba(24,24,27,0.12)" />
       <rect x="126" y="53.5" width="14" height="5" rx="2.5" fill="rgba(24,24,27,0.06)" />
 
       {/* Item row 2 */}
-      <circle cx="66" cy="72" r="3.5" fill="#18181B" />
+      <circle cx="66" cy="72" r="3.5" fill="#111827" />
       <rect x="76" y="69.5" width="34" height="5" rx="2.5" fill="rgba(24,24,27,0.12)" />
       <rect x="126" y="69.5" width="14" height="5" rx="2.5" fill="rgba(24,24,27,0.06)" />
 
@@ -390,9 +390,9 @@ function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
       {/* Supplier Delivery Box (Overlapping 3D angle) */}
       <g filter="url(#box-shadow)">
         {/* Box side left */}
-        <path d="M112 108 L136 120 L136 142 L112 130 Z" fill="#FB923C" />
+        <path d="M112 108 L136 120 L136 142 L112 130 Z" fill="#B08D57" />
         {/* Box side right */}
-        <path d="M136 120 L160 108 L160 130 L136 142 Z" fill="#FB923C" />
+        <path d="M136 120 L160 108 L160 130 L136 142 Z" fill="#B08D57" />
         {/* Box top face */}
         <path d="M136 96 L160 108 L136 120 L112 108 Z" fill="rgba(234,88,12,0.25)" />
         {/* Packing tape */}

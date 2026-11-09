@@ -456,7 +456,7 @@ function EntryInput({ field, value, onChange }) {
       return (
         <input
           type="color"
-          value={value || "#18181B"}
+          value={value || "#111827"}
           onChange={(e) => onChange(e.target.value)}
           className="h-10 w-20 rounded border border-slate-300"
           aria-label={field.name}

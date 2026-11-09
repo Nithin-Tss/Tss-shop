@@ -765,7 +765,7 @@ export default function AdminCustomerDetails() {
                           </Link>
                           <Link
                             to="/admin/online-store/orders/create"
-                            className="px-3.5 py-1.5 text-xs font-semibold bg-orange-600 text-white rounded-lg hover:bg-[#18181B] transition"
+                            className="px-3.5 py-1.5 text-xs font-semibold bg-orange-600 text-white rounded-lg hover:bg-brand-navy-700 transition"
                           >
                             Create order
                           </Link>
@@ -811,7 +811,7 @@ export default function AdminCustomerDetails() {
                               stroke="rgba(24,24,27,0.22)"
                               strokeWidth="2"
                             />
-                            <rect x="36" y="28" width="28" height="6" rx="3" fill="#EA580C" />
+                            <rect x="36" y="28" width="28" height="6" rx="3" fill="#B08D57" />
                             <rect
                               x="36"
                               y="42"
@@ -834,7 +834,7 @@ export default function AdminCustomerDetails() {
                               width="16"
                               height="16"
                               rx="4"
-                              fill="#EA580C"
+                              fill="#B08D57"
                               opacity="0.85"
                             />
                             <rect
@@ -853,10 +853,10 @@ export default function AdminCustomerDetails() {
                               rx="2"
                               fill="rgba(24,24,27,0.22)"
                             />
-                            <circle cx="60" cy="108" r="16" fill="#EA580C" opacity="0.15" />
+                            <circle cx="60" cy="108" r="16" fill="#B08D57" opacity="0.15" />
                             <path
                               d="M54 108l4 4 8-8"
-                              stroke="#EA580C"
+                              stroke="#B08D57"
                               strokeWidth="2.5"
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -1018,7 +1018,7 @@ export default function AdminCustomerDetails() {
                     {/* Staff Comment Card */}
                     <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
                       <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#EA580C] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                        <div className="w-8 h-8 rounded-lg bg-[#B08D57] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                           {userInitials}
                         </div>
                         <div className="flex-1">

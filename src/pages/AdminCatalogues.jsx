@@ -375,7 +375,7 @@ export default function CataloguesPage() {
                             <span
                               className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                                 cat.status === "active"
-                                  ? "bg-[rgba(24,24,27,0.06)] text-[#18181B]"
+                                  ? "bg-[rgba(24,24,27,0.06)] text-[#111827]"
                                   : "bg-slate-200 text-slate-500"
                               }`}
                             >

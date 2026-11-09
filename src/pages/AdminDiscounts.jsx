@@ -113,7 +113,7 @@ export default function DiscountsPage() {
               <div className="overflow-x-auto">
                 <div className="min-w-[1180px]">
                   {/* TABLE HEADER */}
-                  <div className="grid grid-cols-[34px_minmax(220px,2fr)_150px_150px_170px_190px_190px_70px] items-center border-b border-slate-200 bg-[#FAFAFA] px-4 py-3 text-sm font-medium text-slate-700">
+                  <div className="grid grid-cols-[34px_minmax(220px,2fr)_150px_150px_170px_190px_190px_70px] items-center border-b border-slate-200 bg-brand-cream-100 px-4 py-3 text-sm font-medium text-slate-700">
                     <div>
                       <input type="checkbox" className="h-4 w-4" />
                     </div>

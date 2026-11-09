@@ -36,7 +36,7 @@ const lineIcon = {
   "aria-hidden": true,
 };
 
-const OWN_SWATCHES = ["#18181B", "#FFFFFF", "#18181B"];
+const OWN_SWATCHES = ["#111827", "#FFFFFF", "#111827"];
 
 // A small storefront drawn from a theme's colours
 function Preview({ swatches }) {
@@ -166,7 +166,7 @@ function formatAdded(value) {
 // The "..." menu on a theme row
 function ThemeMenu({ theme, full, dark, onCode, onRename, onCopy, onDelete }) {
   const item =
-    "block w-full px-3 py-1.5 text-left text-[13px] hover:bg-[#FAFAFA] disabled:opacity-50";
+    "block w-full px-3 py-1.5 text-left text-[13px] hover:bg-brand-cream-300 disabled:opacity-50";
   const pick = (fn) => (e) => {
     e.currentTarget.closest("details")?.removeAttribute("open");
     fn();
@@ -176,7 +176,7 @@ function ThemeMenu({ theme, full, dark, onCode, onRename, onCopy, onDelete }) {
       <summary
         aria-label={`More actions for ${theme.name}`}
         className={`flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-lg text-lg leading-none [&::-webkit-details-marker]:hidden ${
-          dark ? "text-white hover:bg-white/15" : "text-ink hover:bg-[#FAFAFA]"
+          dark ? "text-white hover:bg-white/15" : "text-ink hover:bg-brand-cream-300"
         }`}
       >
         ⋯
@@ -398,7 +398,7 @@ export default function OnlineStorePage() {
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
-        <main className="flex min-w-0 flex-1 flex-col bg-[#FAFAFA]">
+        <main className="flex min-w-0 flex-1 flex-col bg-brand-cream-100">
           <div className="mx-auto flex w-full max-w-[1040px] flex-1 flex-col px-4 pb-16 pt-5">
             <div className="flex items-center justify-between gap-3">
               <button
@@ -413,7 +413,7 @@ export default function OnlineStorePage() {
               </button>
               {live && (
                 <span className="inline-flex items-center gap-1.5 text-[13px] text-slate-600">
-                  <span className="h-2 w-2 rounded-full bg-[#EA580C]" />
+                  <span className="h-2 w-2 rounded-full bg-[#B08D57]" />
                   Public
                 </span>
               )}
@@ -435,7 +435,7 @@ export default function OnlineStorePage() {
             {notice && (
               <p
                 role="status"
-                className="mt-4 rounded-lg bg-[rgba(24,24,27,0.06)] px-3 py-2 text-sm text-[#18181B]"
+                className="mt-4 rounded-lg bg-[rgba(24,24,27,0.06)] px-3 py-2 text-sm text-[#111827]"
               >
                 {notice}
               </p>
@@ -454,7 +454,7 @@ export default function OnlineStorePage() {
                     swatches={presetOf(live.preset)?.swatches || OWN_SWATCHES}
                     ratio={0.5}
                   />
-                  <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-black/85 via-black/60 to-transparent px-5 pb-4 pt-12 text-white">
+                  <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-3 bg-gradient-to-t from-brand-navy-500/85 via-brand-navy-500/60 to-transparent px-5 pb-4 pt-12 text-white">
                     <div className="min-w-0">
                       <p className="truncate text-base font-semibold">{live.name}</p>
                       <p className="text-[13px] text-white/70">

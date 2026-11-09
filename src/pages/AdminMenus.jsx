@@ -556,7 +556,7 @@ export default function AdminMenus() {
                         <tr
                           key={menu.id}
                           onClick={() => handleOpenEdit(menu)}
-                          className="hover:bg-[#FAFAFA] transition-colors cursor-pointer group"
+                          className="hover:bg-brand-cream-300 transition-colors cursor-pointer group"
                         >
                           <td className="px-5 py-4 font-semibold text-ink group-hover:text-violet-600">
                             <div className="flex items-center gap-2">

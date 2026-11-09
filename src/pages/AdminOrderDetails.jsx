@@ -1058,7 +1058,7 @@ export default function AdminOrderDetails() {
                 {/* Staff Comment Card */}
                 <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#EA580C] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-[#B08D57] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                       {userInitials}
                     </div>
                     <div className="flex-1">

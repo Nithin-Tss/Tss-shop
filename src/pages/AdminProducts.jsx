@@ -572,7 +572,7 @@ function ImportProductsModal({ onClose, onImported }) {
                 isDragging
                   ? "border-orange-600 bg-violet-100"
                   : error
-                    ? "border-[#FB923C]/60 bg-white hover:border-orange-600"
+                    ? "border-[#B08D57]/60 bg-white hover:border-orange-600"
                     : "border-slate-200 bg-white hover:border-orange-600 hover:bg-slate-100"
               }`}
             >
@@ -1146,7 +1146,7 @@ export default function ProductsPage() {
                 {notice && (
                   <p
                     role="status"
-                    className="mx-6 mb-3 rounded-lg bg-[rgba(234,88,12,0.08)] px-3 py-2 text-sm text-[#18181B]"
+                    className="mx-6 mb-3 rounded-lg bg-[rgba(234,88,12,0.08)] px-3 py-2 text-sm text-[#111827]"
                   >
                     {notice}
                   </p>
@@ -1328,7 +1328,7 @@ export default function ProductsPage() {
                   className="hidden xl:block w-105 shrink-0 overflow-hidden rounded-xl border border-[rgba(24,24,27,0.06)] bg-white shadow-[0_12px_32px_-24px_rgba(24,24,27,0.3)]"
                 >
                   {/* Browser bar */}
-                  <div className="flex items-center gap-3 border-b border-slate-100 bg-[#FAFAFA] px-4 py-2.5">
+                  <div className="flex items-center gap-3 border-b border-slate-100 bg-brand-cream-100 px-4 py-2.5">
                     <div className="flex gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-slate-200" />
                       <span className="h-2 w-2 rounded-full bg-slate-200" />
@@ -1348,7 +1348,7 @@ export default function ProductsPage() {
                   <div className="grid grid-cols-2 gap-x-4 gap-y-5 p-5">
                     {sampleProducts.map((product) => (
                       <div key={product.name}>
-                        <div className="flex h-26 items-center justify-center rounded-lg bg-[#FAFAFA] text-slate-600">
+                        <div className="flex h-26 items-center justify-center rounded-lg bg-brand-cream-100 text-slate-600">
                           <span className="block h-9 w-9 [&>svg]:h-full [&>svg]:w-full [&>svg]:stroke-[1.25]">
                             {product.icon}
                           </span>

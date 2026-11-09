@@ -28,7 +28,7 @@ export default function Blog() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-[#18181B] px-6 py-20 text-white">
+      <section className="bg-[#111827] px-6 py-20 text-white">
         <div className="mx-auto max-w-6xl">
           <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-violet-600">
             TSS Shop Blog
@@ -62,7 +62,7 @@ export default function Blog() {
                 key={post.title}
                 className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-1 hover:shadow-md"
               >
-                <div className="flex h-48 items-center justify-center bg-[#18181B]">
+                <div className="flex h-48 items-center justify-center bg-[#111827]">
                   <span className="text-5xl font-bold text-white">TSS</span>
                 </div>
 

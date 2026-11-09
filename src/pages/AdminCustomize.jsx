@@ -138,14 +138,14 @@ export function openAccountActionsInStore(win) {
       el.setAttribute("role", "status");
       el.style.cssText =
         "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483647;" +
-        "background:#18181B;color:#FFFFFF;font:500 13px/1.4 system-ui,sans-serif;padding:10px 16px;" +
+        "background:#111827;color:#FFFFFF;font:500 13px/1.4 system-ui,sans-serif;padding:10px 16px;" +
         "border-radius:10px;box-shadow:0 4px 16px rgba(24,24,27,.25);max-width:90%;text-align:center";
       doc.body.appendChild(el);
     }
     el.textContent =
       text ||
       "Signing in and creating an account work on the live store, not in the editor preview.";
-    el.style.background = isError ? "#EA580C" : "#18181B";
+    el.style.background = isError ? "#B08D57" : "#111827";
     el.style.display = "block";
     win.clearTimeout(timer);
     timer = win.setTimeout(
@@ -3129,7 +3129,7 @@ export default function AdminCustomizePage() {
                             <button
                               type="button"
                               onClick={() => setAdding(true)}
-                              className="flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-[13px] font-medium text-violet-600 hover:bg-slate-50 hover:text-[#EA580C]"
+                              className="flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-[13px] font-medium text-violet-600 hover:bg-slate-50 hover:text-[#B08D57]"
                             >
                               <span
                                 className="flex h-5 w-5 items-center justify-center"

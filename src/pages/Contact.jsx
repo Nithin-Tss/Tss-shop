@@ -11,7 +11,7 @@ export default function Contact() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-[#18181B] px-6 py-20 text-white">
+      <section className="bg-[#111827] px-6 py-20 text-white">
         <div className="mx-auto max-w-6xl">
           <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-violet-600">
             Get in touch

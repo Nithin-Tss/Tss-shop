@@ -995,7 +995,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             </div>
 
             {activeSynced && (
-              <div className="border-b border-slate-200 bg-slate-100 px-3 py-1.5 text-[12px] text-[#18181B]">
+              <div className="border-b border-slate-200 bg-slate-100 px-3 py-1.5 text-[12px] text-[#111827]">
                 {activeSynced.kind === "template" ? (
                   <>
                     This file lists the {activeSynced.label}&apos;s sections in the Customize
@@ -1064,7 +1064,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             )}
 
             {activePath === IMAGES_FILE && (
-              <div className="border-b border-slate-200 bg-slate-100 px-3 py-1.5 text-[12px] text-[#EA580C]">
+              <div className="border-b border-slate-200 bg-slate-100 px-3 py-1.5 text-[12px] text-[#B08D57]">
                 Pictures uploaded in the Customize editor are stored in the database and listed
                 here. Use a picture&apos;s url in a Liquid file, or pick it in the customizer. This
                 list can&apos;t be edited.
@@ -1072,7 +1072,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             )}
 
             {activePath && isSettingsFile(activePath) && (
-              <div className="border-b border-slate-200 bg-[rgba(234,88,12,0.08)] px-3 py-1.5 text-[12px] text-[#18181B]">
+              <div className="border-b border-slate-200 bg-[rgba(234,88,12,0.08)] px-3 py-1.5 text-[12px] text-[#111827]">
                 These are the settings from the Customize editor. Changes made there appear here,
                 and when you save changes here they appear there. Settings that aren&apos;t valid
                 are refused.

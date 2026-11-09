@@ -248,7 +248,7 @@ export default function Terms() {
 
                     <button
                       type="submit"
-                      className="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-[#EA580C]"
+                      className="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-brand-gold-700"
                     >
                       Send
                     </button>

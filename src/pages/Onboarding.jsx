@@ -183,7 +183,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] text-charcoal-navy">
+    <main className="min-h-screen bg-brand-cream-100 text-charcoal-navy">
       <NavBar />
 
       {/* Skip — on the page, top-right, under the account */}

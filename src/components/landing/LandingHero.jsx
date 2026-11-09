@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ONBOARDING_PATH, STORES_PATH, useSession } from "@/lib/auth";
 import { reducedMotion, useCountUp } from "./hooks";
-
-const WORDS = ["yours", "your brand", "your trade", "you"];
+import Icon from "./Icon";
 
 const RANGES = {
   "7D": { total: 6420, delta: "+8.1%", bars: [42, 55, 38, 64, 72, 58, 90] },
@@ -12,14 +11,14 @@ const RANGES = {
 };
 
 const PEOPLE = [
-  ["Amara Okafor", "#4821", 184, "Paid", "#ffd9c2"],
-  ["Lucas Meyer", "#4820", 62.5, "Packed", "#ffe38a"],
-  ["Hana Sato", "#4819", 329, "Paid", "#c9f2dc"],
-  ["Diego Ruiz", "#4818", 48, "Shipped", "#d9ccff"],
-  ["Priya Nair", "#4817", 126, "Paid", "#ffd9c2"],
-  ["Tom Becker", "#4816", 91.2, "Shipped", "#c9f2dc"],
-  ["Sofia Rossi", "#4815", 215, "Packed", "#ffe38a"],
-  ["Noah Kim", "#4814", 74, "Paid", "#d9ccff"],
+  ["Amara Okafor", "#4821", 184, "Paid", "#F5F0E6"],
+  ["Lucas Meyer", "#4820", 62.5, "Packed", "#F5F0E6"],
+  ["Hana Sato", "#4819", 329, "Paid", "#F5F0E6"],
+  ["Diego Ruiz", "#4818", 48, "Shipped", "#F5F0E6"],
+  ["Priya Nair", "#4817", 126, "Paid", "#F5F0E6"],
+  ["Tom Becker", "#4816", 91.2, "Shipped", "#F5F0E6"],
+  ["Sofia Rossi", "#4815", 215, "Packed", "#F5F0E6"],
+  ["Noah Kim", "#4814", 74, "Paid", "#F5F0E6"],
 ];
 
 const money = (n) =>
@@ -27,19 +26,10 @@ const money = (n) =>
 
 export default function LandingHero() {
   const signedIn = Boolean(useSession()?.token);
-  const [wordIdx, setWordIdx] = useState(0);
   const [range, setRange] = useState("30D");
   const [active, setActive] = useState(null);
   const [feed, setFeed] = useState([0, 1, 2, 3]);
   const tick = useRef(4);
-  const dashRef = useRef(null);
-
-  // Rotating headline word
-  useEffect(() => {
-    if (reducedMotion()) return undefined;
-    const id = setInterval(() => setWordIdx((i) => (i + 1) % WORDS.length), 2600);
-    return () => clearInterval(id);
-  }, []);
 
   // New orders "arrive" live
   useEffect(() => {
@@ -55,68 +45,52 @@ export default function LandingHero() {
   const bar = active !== null ? data.bars[active] : null;
   const total = bar !== null ? Math.round((bar / 100) * data.total * 0.28) : Math.round(shown);
 
-  // 3D tilt toward the cursor
-  const onMove = (e) => {
-    if (reducedMotion() || !dashRef.current) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    dashRef.current.style.transform = `rotateY(${x * 9}deg) rotateX(${-y * 9}deg)`;
-  };
-  const onLeave = () => {
-    if (dashRef.current) dashRef.current.style.transform = "";
-  };
-
   return (
     <section className="lp-hero" id="top">
-      <div className="blob b1" />
-      <div className="blob b2" />
-      <div className="blob b3" />
-      <div className="grain" />
       <div className="wrap grid">
         <div>
-          <span className="pill">
-            <b>New</b> An assistant that edits your store, with your approval
-          </span>
-          <h1 className="serif">
-            A store that looks like{" "}
-            <span className="swap" aria-live="polite">
-              <span className="word" key={wordIdx}>
-                {WORDS[wordIdx]}
-              </span>
-            </span>
-            , and runs itself.
-          </h1>
+          <h1 className="serif">Build your store, without writing code.</h1>
           <p className="lede">
-            Themes you can edit down to the code, inventory that stays honest, and a checkout your
-            customers finish. One place for the whole business.
+            Choose a design, add your products and start taking orders. Payments, inventory and
+            shipping are already set up for you.
           </p>
           <div className="cta">
             <Link to={signedIn ? STORES_PATH : ONBOARDING_PATH} className="btn btn-dark">
-              {signedIn ? "Open your stores" : "Start free"} <span className="arrow">→</span>
+              {signedIn ? "Open your stores" : "Start free"}{" "}
+              <Icon name="arrow" size={16} stroke={2} className="arrow" />
             </Link>
             <a href="#features" className="btn btn-ghost">
               See how it works
             </a>
           </div>
-          <div className="fine">
-            <span>14 days free</span>
-            <span>No card</span>
-            <span>Cancel from the dashboard</span>
-          </div>
+          <p className="fine">Free for 14 days. No credit card required.</p>
+          <ul className="perks">
+            <li>
+              <Icon name="layout" size={20} />
+              <span>
+                <b>Visual editor</b>
+                Change anything by clicking it
+              </span>
+            </li>
+            <li>
+              <Icon name="card" size={20} />
+              <span>
+                <b>Payments built in</b>
+                Accept cards from day one
+              </span>
+            </li>
+            <li>
+              <Icon name="boxes" size={20} />
+              <span>
+                <b>Orders and stock</b>
+                Tracked in one dashboard
+              </span>
+            </li>
+          </ul>
         </div>
 
-        <div className="lp-stage" onMouseMove={onMove} onMouseLeave={onLeave}>
-          <div className="lp-float f2">
-            <div className="dot" style={{ background: "#c9f2dc" }}>
-              ↗
-            </div>
-            <div>
-              <b>Conversion up</b>
-              <small>vs. previous period</small>
-            </div>
-          </div>
-          <div className="lp-dash" ref={dashRef}>
+        <div className="lp-stage">
+          <div className="lp-dash">
             <div className="top">
               <span className="label">Sales dashboard</span>
               <div className="seg" role="tablist" aria-label="Date range">
@@ -183,15 +157,6 @@ export default function LandingHero() {
                   </div>
                 );
               })}
-            </div>
-          </div>
-          <div className="lp-float f1">
-            <div className="dot" style={{ background: "#ffd9c2" }}>
-              🛍️
-            </div>
-            <div>
-              <b>New order</b>
-              <small>just now</small>
             </div>
           </div>
         </div>

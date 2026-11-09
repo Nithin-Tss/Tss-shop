@@ -38,7 +38,7 @@ function StatusBadge({ status }) {
   return (
     <span
       className={`rounded-md px-2 py-0.5 text-xs font-medium ${
-        ok ? "bg-[rgba(24,24,27,0.22)] text-[#18181B]" : "bg-[rgba(234,88,12,0.08)] text-[#EA580C]"
+        ok ? "bg-[rgba(24,24,27,0.22)] text-[#111827]" : "bg-[rgba(234,88,12,0.08)] text-[#B08D57]"
       }`}
     >
       {ok ? "Connected" : "Invalid DNS"}

@@ -1156,9 +1156,9 @@ export default function AdminAddCollection() {
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden="true">
                         {[0, 1, 2, 3].map((i) => (
                           <div key={i} className="rounded-xl border border-slate-100 p-2.5">
-                            <div className="mb-2.5 aspect-square rounded-lg bg-[#FAFAFA]" />
+                            <div className="mb-2.5 aspect-square rounded-lg bg-brand-cream-100" />
                             <div className="mb-1.5 h-2.5 w-3/4 rounded bg-slate-100" />
-                            <div className="h-2 w-1/3 rounded bg-[#FAFAFA]" />
+                            <div className="h-2 w-1/3 rounded bg-brand-cream-100" />
                           </div>
                         ))}
                       </div>
@@ -1274,7 +1274,7 @@ export default function AdminAddCollection() {
                   </div>
 
                   <div className="space-y-0.5">
-                    <p className="truncate text-[16px] text-[#EA580C]">{seoTitle}</p>
+                    <p className="truncate text-[16px] text-[#B08D57]">{seoTitle}</p>
                     <p className="truncate text-[13px] text-slate-600">{collectionUrl}</p>
                     <p className="line-clamp-2 text-[13px] text-slate-500">{seoDescription}</p>
                   </div>

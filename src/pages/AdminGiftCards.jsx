@@ -16,7 +16,7 @@ function GiftCardsIllustration({ className = "h-36 w-44" }) {
     >
       <defs>
         <filter id="gc-shadow" x="25" y="30" width="150" height="95" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#18181B" floodOpacity="0.1" />
+          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#111827" floodOpacity="0.1" />
         </filter>
         <linearGradient
           id="card-grad"
@@ -26,12 +26,12 @@ function GiftCardsIllustration({ className = "h-36 w-44" }) {
           y2="115"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#18181B" />
+          <stop stopColor="#111827" />
           <stop offset="1" stopColor="rgba(24,24,27,0.88)" />
         </linearGradient>
         <linearGradient id="ribbon-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#FB923C" />
-          <stop offset="1" stopColor="#EA580C" />
+          <stop stopColor="#B08D57" />
+          <stop offset="1" stopColor="#B08D57" />
         </linearGradient>
       </defs>
 
@@ -55,12 +55,12 @@ function GiftCardsIllustration({ className = "h-36 w-44" }) {
         {/* Ribbon Vertical */}
         <rect x="86" y="42" width="12" height="76" fill="url(#ribbon-grad)" opacity="0.9" />
         {/* Ribbon Bow */}
-        <path d="M86 68 C80 58, 66 60, 72 74 C78 78, 86 74, 86 74 Z" fill="#FB923C" />
-        <path d="M98 68 C104 58, 118 60, 112 74 C106 78, 98 74, 98 74 Z" fill="#FB923C" />
-        <circle cx="92" cy="74" r="3.5" fill="#EA580C" />
+        <path d="M86 68 C80 58, 66 60, 72 74 C78 78, 86 74, 86 74 Z" fill="#B08D57" />
+        <path d="M98 68 C104 58, 118 60, 112 74 C106 78, 98 74, 98 74 Z" fill="#B08D57" />
+        <circle cx="92" cy="74" r="3.5" fill="#B08D57" />
 
         {/* Card Chip & Details */}
-        <rect x="47" y="52" width="12" height="9" rx="1.5" fill="#FB923C" opacity="0.8" />
+        <rect x="47" y="52" width="12" height="9" rx="1.5" fill="#B08D57" opacity="0.8" />
         {/* Masked numbers */}
         <circle cx="50" cy="98" r="1.5" fill="rgba(24,24,27,0.5)" />
         <circle cx="56" cy="98" r="1.5" fill="rgba(24,24,27,0.5)" />

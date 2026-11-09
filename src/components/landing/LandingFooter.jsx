@@ -1,3 +1,4 @@
+import Icon from "./Icon";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ONBOARDING_PATH, STORES_PATH, useSession } from "@/lib/auth";
@@ -35,7 +36,7 @@ export function LandingCTA() {
             placeholder="you@company.com"
           />
           <button type="submit" className="btn btn-dark">
-            Start free trial <span className="arrow">→</span>
+            Start free trial <Icon name="arrow" size={16} stroke={2} className="arrow" />
           </button>
         </form>
         {error && (

@@ -14,7 +14,7 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
     >
       <defs>
         <filter id="hub-shadow" x="15" y="40" width="70" height="70" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#18181B" floodOpacity="0.08" />
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#111827" floodOpacity="0.08" />
         </filter>
         <filter
           id="hub-shadow-2"
@@ -24,10 +24,10 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
           height="70"
           filterUnits="userSpaceOnUse"
         >
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#18181B" floodOpacity="0.08" />
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#111827" floodOpacity="0.08" />
         </filter>
         <filter id="cargo-shadow" x="80" y="30" width="60" height="60" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#18181B" floodOpacity="0.12" />
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#111827" floodOpacity="0.12" />
         </filter>
       </defs>
 
@@ -58,12 +58,12 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
         <path
           d="M40 78 V64 L50 58 L60 64 V78 H40 Z"
           fill="rgba(234,88,12,0.08)"
-          stroke="#18181B"
+          stroke="#111827"
           strokeWidth="1.5"
           strokeLinejoin="round"
         />
-        <rect x="47" y="70" width="6" height="8" fill="#18181B" />
-        <circle cx="50" cy="46" r="4" fill="#18181B" />
+        <rect x="47" y="70" width="6" height="8" fill="#111827" />
+        <circle cx="50" cy="46" r="4" fill="#111827" />
       </g>
 
       {/* Destination Location Hub (Right) */}
@@ -81,26 +81,26 @@ function TransfersIllustration({ className = "h-40 w-48" }) {
         <path
           d="M160 78 V64 L170 58 L180 64 V78 H160 Z"
           fill="rgba(234,88,12,0.08)"
-          stroke="#18181B"
+          stroke="#111827"
           strokeWidth="1.5"
           strokeLinejoin="round"
         />
-        <rect x="167" y="70" width="6" height="8" fill="#18181B" />
-        <circle cx="170" cy="46" r="#18181B" fill="#18181B" />
+        <rect x="167" y="70" width="6" height="8" fill="#111827" />
+        <circle cx="170" cy="46" r="#111827" fill="#111827" />
       </g>
 
       {/* Moving Inventory Box (Center cargo in transit) */}
       <g filter="url(#cargo-shadow)">
         {/* Isometric Box */}
-        <path d="M96 52 L110 59 L110 75 L96 68 Z" fill="#FB923C" />
-        <path d="M110 59 L124 52 L124 68 L110 75 Z" fill="#FB923C" />
+        <path d="M96 52 L110 59 L110 75 L96 68 Z" fill="#B08D57" />
+        <path d="M110 59 L124 52 L124 68 L110 75 Z" fill="#B08D57" />
         <path d="M110 45 L124 52 L110 59 L96 52 Z" fill="rgba(234,88,12,0.25)" />
         {/* Box tape */}
         <path d="M108 48 L112 50 L112 75 L108 73 Z" fill="rgba(234,88,12,0.25)" opacity="0.9" />
         {/* Forward transit arrow */}
         <path
           d="M102 85 H118 M114 81 L118 85 L114 89"
-          stroke="#18181B"
+          stroke="#111827"
           strokeWidth="1.75"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -829,7 +829,7 @@ export default function AdminTransfers() {
                             <span
                               className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                 t.status === "completed"
-                                  ? "bg-[rgba(24,24,27,0.06)] text-[#18181B]"
+                                  ? "bg-[rgba(24,24,27,0.06)] text-[#111827]"
                                   : t.status === "cancelled"
                                     ? "bg-orange-50 text-orange-700"
                                     : "bg-slate-100 text-ink"
@@ -852,7 +852,7 @@ export default function AdminTransfers() {
                                 <button
                                   type="button"
                                   onClick={() => handleComplete(t.id)}
-                                  className="rounded px-2 py-1 text-xs font-medium text-[#18181B] hover:bg-[rgba(24,24,27,0.06)] transition cursor-pointer"
+                                  className="rounded px-2 py-1 text-xs font-medium text-[#111827] hover:bg-[rgba(24,24,27,0.06)] transition cursor-pointer"
                                   title="Mark as received and update stock"
                                 >
                                   Complete

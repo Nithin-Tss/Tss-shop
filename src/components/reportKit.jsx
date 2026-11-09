@@ -148,7 +148,7 @@ export function Sparkline({ values }) {
       <polyline
         points={points.join(" ")}
         fill="none"
-        stroke="#FB923C"
+        stroke="#B08D57"
         strokeWidth="1.5"
         vectorEffect="non-scaling-stroke"
       />
@@ -246,7 +246,7 @@ export function LineChart({ series, comparison, field, format, hourly }) {
             strokeDasharray="4 3"
           />
         )}
-        <path d={path(cur)} fill="none" stroke="#EA580C" strokeWidth="2" />
+        <path d={path(cur)} fill="none" stroke="#B08D57" strokeWidth="2" />
         {hover !== null && (
           <line
             x1={x(hover)}

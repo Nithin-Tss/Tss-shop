@@ -73,8 +73,8 @@ function ReportTile() {
     <svg className="lp-spark" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id="lp-g" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#ff8a3d" stopOpacity="0.45" />
-          <stop offset="1" stopColor="#ff8a3d" stopOpacity="0" />
+          <stop offset="0" stopColor="#B08D57" stopOpacity="0.45" />
+          <stop offset="1" stopColor="#B08D57" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path
@@ -85,7 +85,7 @@ function ReportTile() {
         className="line"
         d="M0 70 C30 60 45 66 70 50 S120 52 150 36 S210 40 240 20 S280 14 300 8"
         fill="none"
-        stroke="#ff8a3d"
+        stroke="#B08D57"
         strokeWidth="2.5"
         strokeLinecap="round"
       />

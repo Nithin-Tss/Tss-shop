@@ -4,7 +4,7 @@ import { apiGet } from "@/lib/api";
 
 const RECOVERY_STYLES = {
   pending: "bg-orange-50 text-orange-700 border border-orange-200",
-  recovered: "bg-[rgba(24,24,27,0.06)] text-[#18181B] border border-[rgba(24,24,27,0.22)]",
+  recovered: "bg-[rgba(24,24,27,0.06)] text-[#111827] border border-[rgba(24,24,27,0.22)]",
 };
 
 function formatDate(dateString) {
