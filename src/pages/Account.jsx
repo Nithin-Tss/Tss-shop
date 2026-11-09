@@ -261,7 +261,7 @@ export default function AccountPage() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="hover:text-slate-900 transition flex items-center gap-1 cursor-pointer"
+                  className="hover:text-orange-600 transition flex items-center gap-1 cursor-pointer"
                 >
                   <span>←</span>
                   <span>Back</span>
@@ -281,7 +281,7 @@ export default function AccountPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-orange-600 cursor-pointer"
             >
               <span>Log out</span>
               <span className="text-slate-400">→</span>
@@ -292,7 +292,7 @@ export default function AccountPage() {
           <div className="mt-6 flex items-center gap-2">
             <Link
               to="/account"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-charcoal-navy text-white shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-orange-600 text-white shadow-xs"
             >
               <span>👤</span>
               <span>Account & Addresses</span>
@@ -454,7 +454,7 @@ export default function AccountPage() {
                       value={profileData.firstName}
                       onChange={handleProfileChange}
                       placeholder="Jane"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-orange-600"
                     />
                     {errors.firstName && (
                       <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>
@@ -471,7 +471,7 @@ export default function AccountPage() {
                       value={profileData.lastName}
                       onChange={handleProfileChange}
                       placeholder="Doe"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-orange-600"
                     />
                     {errors.lastName && (
                       <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>
@@ -488,7 +488,7 @@ export default function AccountPage() {
                       value={profileData.email}
                       onChange={handleProfileChange}
                       placeholder="jane@example.com"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-orange-600"
                     />
                     {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
                   </div>
@@ -505,7 +505,7 @@ export default function AccountPage() {
                         onChange={handleProfileChange}
                         autoComplete="current-password"
                         placeholder="Needed to change your email"
-                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-orange-600"
                       />
                       {errors.currentPassword && (
                         <p className="mt-1 text-xs text-red-500">{errors.currentPassword}</p>
@@ -524,7 +524,7 @@ export default function AccountPage() {
                       onChange={handleProfileChange}
                       placeholder="10-digit mobile number"
                       maxLength={10}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-orange-600"
                     />
                     {errors.mobileNumber && (
                       <p className="mt-1 text-xs text-red-500">{errors.mobileNumber}</p>
@@ -540,14 +540,14 @@ export default function AccountPage() {
                       setProfileData(profileFromUser(user));
                       setErrors({});
                     }}
-                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-orange-600 rounded-lg transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90 transition disabled:opacity-50 cursor-pointer"
                   >
                     {isSaving ? "Saving..." : "Save Details"}
                   </button>
@@ -617,14 +617,14 @@ export default function AccountPage() {
                       setShowChangePassword(false);
                       setErrors({});
                     }}
-                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg transition cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-orange-600 rounded-lg transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="px-5 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] transition disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90 transition disabled:opacity-50 cursor-pointer"
                   >
                     {isChangingPassword ? "Updating..." : "Update Password"}
                   </button>

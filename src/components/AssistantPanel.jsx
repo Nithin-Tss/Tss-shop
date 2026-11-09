@@ -86,10 +86,10 @@ export function AssistantButton({ tone = "rail" }) {
       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
         tone === "light"
           ? // For the white top bars of the customizer and the code editor
-            `text-[#5A5750] hover:bg-[#F3F1EC] hover:text-[#14130F] ${open ? "bg-[#DFEAE4] text-[#14130F]" : ""}`
+            `text-slate-600 hover:bg-slate-100 hover:text-ink ${open ? "bg-violet-100 text-ink" : ""}`
           : `${
               tone === "rail"
-                ? "text-[#B8B4A8] hover:bg-white/[0.08] hover:text-white"
+                ? "text-slate-300 hover:bg-white/[0.08] hover:text-white"
                 : "text-white hover:bg-white/10"
             } ${open ? "bg-white/10 text-white" : ""}`
       }`}
@@ -165,11 +165,11 @@ export function AssistantPanel() {
         aria-label="Assistant"
         aria-hidden={!open}
         inert={!open}
-        className={`fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[400px] bg-[#FDFCFF] border-l border-[#ECE9F8] shadow-[0_0_20px_rgba(76,29,149,0.06)] transition-transform duration-200 ease-out motion-reduce:transition-none ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[400px] bg-[rgba(24,24,27,0.06)] border-l border-slate-100 shadow-[0_0_20px_rgba(24,24,27,0.06)] transition-transform duration-200 ease-out motion-reduce:transition-none ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <header className="flex items-center justify-between border-b border-[#ECE9F8] px-4 py-2">
+        <header className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
           <AssistantRecents
             store={assistantStore}
             open={recentsOpen}
@@ -187,7 +187,7 @@ export function AssistantPanel() {
                 assistantStore.newChat();
                 focusInput();
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-[#78746A] transition-colors hover:bg-[#F3F1EC] hover:text-[#1A1916] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
             >
               <svg {...icon} className="h-4 w-4">
                 <path d="M12 5v14M5 12h14" />
@@ -197,7 +197,7 @@ export function AssistantPanel() {
               type="button"
               aria-label="Close assistant"
               onClick={() => assistantStore.setOpen(false)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-[#78746A] transition-colors hover:bg-[#F3F1EC] hover:text-[#1A1916] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916]"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
             >
               <svg {...icon} className="h-4 w-4">
                 <path d="M6 6l12 12M18 6 6 18" />

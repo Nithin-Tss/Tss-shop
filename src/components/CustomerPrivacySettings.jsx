@@ -41,7 +41,7 @@ function Toggle({ checked, onChange, label, disabled }) {
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-60 ${checked ? "bg-[#14130F]" : "bg-slate-300"}`}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-60 ${checked ? "bg-ink" : "bg-slate-300"}`}
     >
       <span
         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${checked ? "left-[22px]" : "left-0.5"}`}
@@ -52,7 +52,7 @@ function Toggle({ checked, onChange, label, disabled }) {
 
 function Badge({ children }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-[#14130F]">
+    <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-ink">
       <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
       {children}
     </span>
@@ -67,7 +67,7 @@ function Row({ title, hint, badge, onClick }) {
       className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left hover:bg-slate-50"
     >
       <span>
-        <span className="block text-sm font-medium text-[#14130F]">{title}</span>
+        <span className="block text-sm font-medium text-ink">{title}</span>
         <span className="block text-sm text-slate-500">{hint}</span>
       </span>
       <span className="flex items-center gap-3">
@@ -83,13 +83,13 @@ function Row({ title, hint, badge, onClick }) {
 function RadioGroup({ legend, value, modes, onChange, disabled }) {
   return (
     <fieldset className="grid gap-2" disabled={disabled}>
-      <legend className="mb-2 text-sm font-medium text-[#14130F]">{legend}</legend>
+      <legend className="mb-2 text-sm font-medium text-ink">{legend}</legend>
       {modes.map(([key, title, hint]) => (
         <label
           key={key}
           className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm ${
             value === key
-              ? "border-[#14130F] bg-slate-50"
+              ? "border-orange-600 bg-slate-50"
               : "border-slate-200 hover:border-slate-400"
           }`}
         >
@@ -101,7 +101,7 @@ function RadioGroup({ legend, value, modes, onChange, disabled }) {
             onChange={() => onChange(key)}
           />
           <span>
-            <span className="block font-medium text-[#14130F]">{title}</span>
+            <span className="block font-medium text-ink">{title}</span>
             <span className="block text-slate-500">{hint}</span>
           </span>
         </label>
@@ -181,11 +181,11 @@ export default function CustomerPrivacySettings({ onOpenSection }) {
             setView("main");
             setMessage(null);
           }}
-          className="text-sm text-slate-500 hover:text-[#14130F]"
+          className="text-sm text-slate-500 hover:text-orange-600"
         >
           ← Customer privacy
         </button>
-        <h2 className="mt-2 text-lg font-semibold text-[#14130F]">{title}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-ink">{title}</h2>
       </div>
       {banner}
       <section className={`${card} grid gap-6 p-5`}>{children}</section>
@@ -254,7 +254,7 @@ export default function CustomerPrivacySettings({ onOpenSection }) {
         ].map(([key, title, hint]) => (
           <div key={key} className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-sm font-medium text-[#14130F]">{title}</div>
+              <div className="text-sm font-medium text-ink">{title}</div>
               <div className="text-sm text-slate-500">{hint}</div>
             </div>
             <Toggle
@@ -281,7 +281,7 @@ export default function CustomerPrivacySettings({ onOpenSection }) {
       {banner}
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#14130F]">Privacy settings</h2>
+        <h2 className="text-sm font-semibold text-ink">Privacy settings</h2>
         <section className={`${card} divide-y divide-slate-100`}>
           <Row
             title="Privacy policy"
@@ -315,7 +315,7 @@ export default function CustomerPrivacySettings({ onOpenSection }) {
         </section>
 
         <section className={`${card} flex items-center justify-between gap-4 px-5 py-4`}>
-          <div className="flex items-center gap-3 text-sm font-medium text-[#14130F]">
+          <div className="flex items-center gap-3 text-sm font-medium text-ink">
             Network intelligence
             <Badge>{values.networkIntelligence ? "Enabled" : "Disabled"}</Badge>
           </div>
@@ -323,7 +323,7 @@ export default function CustomerPrivacySettings({ onOpenSection }) {
             type="button"
             disabled={saving}
             onClick={() => update({ networkIntelligence: !values.networkIntelligence })}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-[#14130F] hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-ink hover:bg-slate-50 disabled:opacity-60"
           >
             {values.networkIntelligence ? "Disable" : "Enable"}
           </button>
@@ -336,7 +336,7 @@ export default function CustomerPrivacySettings({ onOpenSection }) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#14130F]">Marketing settings</h2>
+        <h2 className="text-sm font-semibold text-ink">Marketing settings</h2>
         <section className={`${card} divide-y divide-slate-100`}>
           <Row
             title="E-mail and SMS marketing in checkout"
@@ -353,8 +353,8 @@ export default function CustomerPrivacySettings({ onOpenSection }) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#14130F]">Data storage hosting location</h2>
-        <section className={`${card} px-5 py-4 text-sm text-[#14130F]`}>
+        <h2 className="text-sm font-semibold text-ink">Data storage hosting location</h2>
+        <section className={`${card} px-5 py-4 text-sm text-ink`}>
           {values.backupRegion || "Not set"}
         </section>
       </div>

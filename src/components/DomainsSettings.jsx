@@ -38,7 +38,7 @@ function StatusBadge({ status }) {
   return (
     <span
       className={`rounded-md px-2 py-0.5 text-xs font-medium ${
-        ok ? "bg-[#AEE9A1] text-[#0C3B00]" : "bg-[#FED3D1] text-[#8E1F0B]"
+        ok ? "bg-[rgba(24,24,27,0.22)] text-[#18181B]" : "bg-[rgba(234,88,12,0.08)] text-[#EA580C]"
       }`}
     >
       {ok ? "Connected" : "Invalid DNS"}
@@ -58,7 +58,7 @@ function Modal({ title, onClose, children }) {
         className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-semibold text-[#14130F]">{title}</h3>
+        <h3 className="text-lg font-semibold text-ink">{title}</h3>
         <div className="mt-3 text-sm text-slate-600">{children}</div>
       </div>
     </div>
@@ -129,7 +129,7 @@ export default function DomainsSettings() {
 
   const scheme = window.location.protocol === "http:" ? "http" : "https";
   const inputCls =
-    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]";
+    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600";
 
   return (
     <div>
@@ -145,8 +145,8 @@ export default function DomainsSettings() {
             onClick={() => setModal(key)}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
               key === "buy"
-                ? "bg-[#14130F] text-white hover:bg-[#1A1916]"
-                : "border border-slate-200 bg-white text-[#14130F] hover:bg-slate-50"
+                ? "bg-ink text-white hover:bg-ink"
+                : "border border-slate-200 bg-white text-ink hover:bg-slate-50"
             }`}
           >
             {label}
@@ -167,9 +167,7 @@ export default function DomainsSettings() {
           if (!rows.length && k === "account") return null;
           return (
             <div key={k}>
-              <div className="bg-slate-50 px-3 py-2 text-sm font-medium text-[#14130F]">
-                {label}
-              </div>
+              <div className="bg-slate-50 px-3 py-2 text-sm font-medium text-ink">{label}</div>
               {!rows.length && !loading && (
                 <p className="px-4 py-3 text-sm text-slate-500">No domains connected.</p>
               )}
@@ -178,7 +176,7 @@ export default function DomainsSettings() {
                   key={d.id}
                   className="flex items-center justify-between border-t border-slate-100 py-2 pl-4 pr-3 text-sm"
                 >
-                  <div className="flex items-center gap-2 text-[#14130F]">
+                  <div className="flex items-center gap-2 text-ink">
                     <span>{d.host}</span>
                     {d.primary && (
                       <span className="rounded-md border border-slate-200 px-2 py-0.5 text-xs text-slate-600">
@@ -253,7 +251,7 @@ export default function DomainsSettings() {
               <button
                 type="submit"
                 disabled={busy || !host.trim()}
-                className="rounded-lg bg-[#14130F] px-3 py-1.5 font-medium text-white disabled:opacity-50"
+                className="rounded-lg bg-orange-600 px-3 py-1.5 font-medium text-white disabled:opacity-50"
               >
                 Connect
               </button>
@@ -283,7 +281,7 @@ export default function DomainsSettings() {
             <button
               type="button"
               onClick={() => setModal("connect")}
-              className="rounded-lg bg-[#14130F] px-3 py-1.5 font-medium text-white"
+              className="rounded-lg bg-orange-600 px-3 py-1.5 font-medium text-white"
             >
               Connect existing
             </button>

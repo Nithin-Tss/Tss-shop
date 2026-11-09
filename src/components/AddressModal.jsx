@@ -269,7 +269,7 @@ export default function AddressModal({
               <label
                 className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border cursor-pointer font-medium transition ${
                   formData.address_type === "shipping"
-                    ? "border-charcoal-navy bg-slate-900 text-white"
+                    ? "border-orange-600 bg-slate-900 text-white"
                     : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                 }`}
               >
@@ -287,7 +287,7 @@ export default function AddressModal({
               <label
                 className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border cursor-pointer font-medium transition ${
                   formData.address_type === "billing"
-                    ? "border-charcoal-navy bg-slate-900 text-white"
+                    ? "border-orange-600 bg-slate-900 text-white"
                     : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                 }`}
               >
@@ -320,7 +320,7 @@ export default function AddressModal({
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.first_name
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                    : "border-slate-300 focus:border-charcoal-navy"
+                    : "border-slate-300 focus:border-orange-600"
                 }`}
               />
               {errors.first_name && (
@@ -342,7 +342,7 @@ export default function AddressModal({
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.last_name
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                    : "border-slate-300 focus:border-charcoal-navy"
+                    : "border-slate-300 focus:border-orange-600"
                 }`}
               />
               {errors.last_name && (
@@ -363,7 +363,7 @@ export default function AddressModal({
               value={formData.company}
               onChange={handleChange}
               placeholder="e.g. Acme Corp"
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-orange-600"
             />
           </div>
 
@@ -382,7 +382,7 @@ export default function AddressModal({
               className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                 errors.address_line_1
                   ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                  : "border-slate-300 focus:border-charcoal-navy"
+                  : "border-slate-300 focus:border-orange-600"
               }`}
             />
             {errors.address_line_1 && (
@@ -402,7 +402,7 @@ export default function AddressModal({
               value={formData.address_line_2}
               onChange={handleChange}
               placeholder="Apartment, suite, unit, building, floor, etc."
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-charcoal-navy"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 outline-none focus:border-orange-600"
             />
           </div>
 
@@ -422,7 +422,7 @@ export default function AddressModal({
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.city
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                    : "border-slate-300 focus:border-charcoal-navy"
+                    : "border-slate-300 focus:border-orange-600"
                 }`}
               />
               {errors.city && <p className="mt-1 text-[11px] text-red-500">{errors.city}</p>}
@@ -442,7 +442,7 @@ export default function AddressModal({
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.state
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                    : "border-slate-300 focus:border-charcoal-navy"
+                    : "border-slate-300 focus:border-orange-600"
                 }`}
               />
               {errors.state && <p className="mt-1 text-[11px] text-red-500">{errors.state}</p>}
@@ -462,7 +462,7 @@ export default function AddressModal({
                 className={`w-full px-3 py-2 text-sm rounded-lg border outline-none transition ${
                   errors.postal_code
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
-                    : "border-slate-300 focus:border-charcoal-navy"
+                    : "border-slate-300 focus:border-orange-600"
                 }`}
               />
               {errors.postal_code && (
@@ -486,7 +486,7 @@ export default function AddressModal({
                   errors.country
                     ? "border-red-400 bg-red-50/30 focus:border-red-500"
                     : isCountryDropdownOpen
-                      ? "border-charcoal-navy ring-1 ring-charcoal-navy"
+                      ? "border-orange-600 ring-1 ring-orange-600"
                       : "border-slate-300 hover:border-slate-400"
                 }`}
               >
@@ -515,7 +515,7 @@ export default function AddressModal({
                         onChange={(e) => setCountrySearch(e.target.value)}
                         onKeyDown={handleSearchKeyDown}
                         placeholder="Search country or code (e.g. India, +91)..."
-                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-slate-200 bg-white outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-charcoal-navy"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-slate-200 bg-white outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600"
                       />
                     </div>
                   </div>
@@ -568,7 +568,7 @@ export default function AddressModal({
                 className={`flex items-center rounded-lg border bg-white transition overflow-hidden ${
                   errors.phone
                     ? "border-red-400 bg-red-50/20"
-                    : "border-slate-300 focus-within:border-charcoal-navy focus-within:ring-1 focus-within:ring-charcoal-navy"
+                    : "border-slate-300 focus-within:border-orange-600 focus-within:ring-1 focus-within:ring-orange-600"
                 }`}
               >
                 <div
@@ -612,7 +612,7 @@ export default function AddressModal({
                 name="is_default"
                 checked={formData.is_default}
                 onChange={handleChange}
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-[#14130F]"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-orange-600"
               />
               <div className="text-xs">
                 <span className="font-semibold text-slate-800">
@@ -632,14 +632,14 @@ export default function AddressModal({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+              className="px-4 py-2 font-semibold text-slate-600 hover:text-orange-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-lg bg-[#14130F] hover:bg-[#1A1916] text-white font-semibold transition disabled:opacity-50 shadow-xs flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2 rounded-lg bg-orange-600 hover:bg-orange-600/90 text-white font-semibold transition disabled:opacity-50 shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
               {saving ? (
                 <>

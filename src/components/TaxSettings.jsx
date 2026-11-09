@@ -5,9 +5,9 @@ import { getStoreId, useCan } from "@/lib/auth";
 const RATES = "/api/v1/delivery/tax-rates/";
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#14130F]";
+  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600";
 const primaryButton =
-  "rounded-lg bg-[#14130F] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-50";
+  "rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-50";
 
 const destination = (rate) =>
   rate.region ? `${rate.region}, ${rate.country}` : rate.country || "Everywhere";

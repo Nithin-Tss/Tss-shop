@@ -354,7 +354,7 @@ export default function AdminCreateOrder() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F]">
+    <div className="min-h-screen bg-slate-100 text-ink">
       <AdminHeader />
 
       {/* 2. BODY LAYOUT */}
@@ -371,7 +371,7 @@ export default function AdminCreateOrder() {
                 to={
                   isDraftMode ? "/admin/online-store/orders/drafts" : "/admin/online-store/orders"
                 }
-                className="hover:text-slate-900 transition-colors flex items-center gap-1 text-slate-500 hover:underline"
+                className="hover:text-orange-600 transition-colors flex items-center gap-1 text-slate-500 hover:underline"
               >
                 <NavIcon name="orders" className="h-4 w-4" />
                 <span>›</span>
@@ -386,7 +386,7 @@ export default function AdminCreateOrder() {
                 to={
                   isDraftMode ? "/admin/online-store/orders/drafts" : "/admin/online-store/orders"
                 }
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-orange-600 hover:bg-slate-200/60 rounded-lg transition-colors"
               >
                 Discard
               </Link>
@@ -394,7 +394,7 @@ export default function AdminCreateOrder() {
                 type="button"
                 onClick={handleSaveOrder}
                 disabled={saving}
-                className="px-5 py-2 rounded-lg bg-[#14130F] hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
+                className="px-5 py-2 rounded-lg bg-orange-600 hover:bg-orange-600/90 disabled:opacity-50 text-white text-sm font-semibold transition-all shadow-xs"
               >
                 {saving ? "Saving..." : isDraftMode ? "Save draft" : "Save"}
               </button>
@@ -808,7 +808,7 @@ export default function AdminCreateOrder() {
                               return next;
                             });
                           }}
-                          className="h-4 w-4 rounded border-slate-300 accent-[#14130F]"
+                          className="h-4 w-4 rounded border-slate-300 accent-orange-600"
                         />
                         <div>
                           <p className="text-sm font-semibold text-slate-900">{prod.title}</p>
@@ -841,7 +841,7 @@ export default function AdminCreateOrder() {
                 type="button"
                 onClick={handleAddSelectedProducts}
                 disabled={selectedProductIds.size === 0}
-                className="px-4 py-2 rounded-lg bg-[#14130F] disabled:opacity-50 text-white text-xs font-semibold"
+                className="px-4 py-2 rounded-lg bg-orange-600 disabled:opacity-50 text-white text-xs font-semibold"
               >
                 Add {selectedProductIds.size > 0 ? `(${selectedProductIds.size})` : ""}
               </button>
@@ -923,7 +923,7 @@ export default function AdminCreateOrder() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-[#14130F] text-white font-semibold"
+                  className="px-4 py-2 rounded-lg bg-orange-600 text-white font-semibold"
                 >
                   Add item
                 </button>

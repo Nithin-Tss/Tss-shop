@@ -85,7 +85,7 @@ function Inline({ text }) {
       parts.push(
         <code
           key={`c${i}`}
-          className="rounded bg-[#ECEEF1] px-1 py-px font-mono text-[12px] text-[#1F2433]"
+          className="rounded bg-[rgba(24,24,27,0.06)] px-1 py-px font-mono text-[12px] text-ink"
         >
           {piece.slice(1, -1)}
         </code>
@@ -124,19 +124,19 @@ function CodeBlock({ code }) {
   };
 
   return (
-    <figure className="overflow-hidden rounded-md border border-[#E7E4DC] bg-[#F3F1EC]">
-      <figcaption className="flex items-center justify-between gap-2 border-b border-[#E7E4DC] px-2.5 py-1">
-        <span className="text-[11px] text-[#78746A]">Suggested code - review before using</span>
+    <figure className="overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+      <figcaption className="flex items-center justify-between gap-2 border-b border-slate-200 px-2.5 py-1">
+        <span className="text-[11px] text-slate-500">Suggested code - review before using</span>
         <button
           type="button"
           onClick={copy}
           aria-label="Copy code"
-          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-[#403E39] transition-colors hover:bg-[#E7E4DC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916]"
+          className="rounded px-1.5 py-0.5 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
         >
           {copied ? "Copied" : "Copy"}
         </button>
       </figcaption>
-      <pre className="m-0 overflow-x-auto px-2.5 py-2 text-[12px] leading-5 text-[#1F2433]">
+      <pre className="m-0 overflow-x-auto px-2.5 py-2 text-[12px] leading-5 text-ink">
         <code className="font-mono">{code}</code>
       </pre>
     </figure>
@@ -155,7 +155,7 @@ export default function AssistantMarkdown({ text }) {
             <List
               key={index}
               start={block.type === "ol" ? block.start : undefined}
-              className={`space-y-1 pl-5 marker:text-[#A29E92] ${block.type === "ol" ? "list-decimal" : "list-disc"}`}
+              className={`space-y-1 pl-5 marker:text-slate-400 ${block.type === "ol" ? "list-decimal" : "list-disc"}`}
             >
               {block.items.map((item, n) => (
                 <li key={n} className="pl-0.5">

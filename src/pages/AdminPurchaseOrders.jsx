@@ -5,14 +5,14 @@ import { apiGet, apiPost } from "@/lib/api";
 const asList = (data) => (Array.isArray(data) ? data : data?.results || []);
 
 const STATUS_STYLES = {
-  draft: "bg-[#F3F1EC] text-[#5A5750]",
-  ordered: "bg-[#EBF5FB] text-[#004B87]",
-  received: "bg-[#E3F5EC] text-[#265C48]",
-  cancelled: "bg-[#FDECEC] text-[#B42318]",
+  draft: "bg-slate-100 text-slate-600",
+  ordered: "bg-slate-100 text-ink",
+  received: "bg-violet-100 text-violet-600",
+  cancelled: "bg-orange-50 text-orange-700",
 };
 
 const inputCls =
-  "h-9 w-full rounded-lg border border-[#E7E4DC] bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F]";
+  "h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-charcoal-navy outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600";
 
 function ModalShell({ title, onClose, children, wide = false }) {
   return (
@@ -27,13 +27,13 @@ function ModalShell({ title, onClose, children, wide = false }) {
         className={`w-full ${wide ? "max-w-3xl" : "max-w-xl"} rounded-xl bg-white shadow-xl`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#E7E4DC] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <h2 className="text-base font-semibold text-charcoal-navy">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-lg p-1 text-slate-400 hover:bg-[#F3F1EC] hover:text-charcoal-navy cursor-pointer"
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-orange-600 cursor-pointer"
           >
             ✕
           </button>
@@ -103,7 +103,7 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
           {error && (
             <div
               role="alert"
-              className="rounded-lg bg-[#FDECEC] px-4 py-2.5 text-xs text-[#B42318]"
+              className="rounded-lg bg-orange-50 px-4 py-2.5 text-xs text-orange-700"
             >
               {error}
             </div>
@@ -137,25 +137,25 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
                 autoComplete="off"
               />
               {query.trim() && (
-                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-[#E7E4DC] bg-white shadow-lg">
+                <ul className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
                   {matches.length === 0 ? (
-                    <li className="px-3 py-2.5 text-sm text-[#78746A]">No matching products</li>
+                    <li className="px-3 py-2.5 text-sm text-slate-500">No matching products</li>
                   ) : (
                     matches.map((v) => (
                       <li key={v.id}>
                         <button
                           type="button"
                           onClick={() => addVariant(v)}
-                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-[#F3F1EC] cursor-pointer"
+                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-slate-100 cursor-pointer"
                         >
                           <span className="min-w-0">
                             <span className="block truncate font-medium">{v.product}</span>
-                            <span className="block truncate text-xs text-[#78746A]">
+                            <span className="block truncate text-xs text-slate-500">
                               {[v.options, v.sku && `SKU ${v.sku}`].filter(Boolean).join(" · ") ||
                                 "Default variant"}
                             </span>
                           </span>
-                          <span className="shrink-0 text-xs text-[#78746A]">
+                          <span className="shrink-0 text-xs text-slate-500">
                             {v.stock} in stock
                           </span>
                         </button>
@@ -168,33 +168,33 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
           </div>
 
           {items.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-[#E7E4DC] py-8 text-center text-sm text-[#78746A]">
+            <p className="rounded-lg border border-dashed border-slate-200 py-8 text-center text-sm text-slate-500">
               Search above to add the products you want to restock.
             </p>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-[#E7E4DC]">
+            <div className="overflow-hidden rounded-lg border border-slate-200">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-xs font-medium text-[#5A5750]">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-xs font-medium text-slate-600">
                     <th className="px-3 py-2">Product</th>
                     <th className="px-3 py-2 text-right">In stock</th>
                     <th className="px-3 py-2 text-right">Quantity to order</th>
                     <th className="w-8 px-3 py-2" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E7E4DC]">
+                <tbody className="divide-y divide-slate-200">
                   {items.map((it) => {
                     const v = byId.get(String(it.variant));
                     return (
                       <tr key={it.variant}>
                         <td className="px-3 py-2">
                           <span className="block font-medium">{v?.product || "Product"}</span>
-                          <span className="block text-xs text-[#78746A]">
+                          <span className="block text-xs text-slate-500">
                             {[v?.options, v?.sku && `SKU ${v.sku}`].filter(Boolean).join(" · ") ||
                               "Default variant"}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-right text-[#5A5750]">{v?.stock ?? 0}</td>
+                        <td className="px-3 py-2 text-right text-slate-600">{v?.stock ?? 0}</td>
                         <td className="px-3 py-2 text-right">
                           <input
                             type="number"
@@ -202,7 +202,7 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
                             aria-label={`Quantity of ${v?.product || "product"}`}
                             value={it.quantity}
                             onChange={(e) => setQty(it.variant, e.target.value)}
-                            className="h-8 w-20 rounded-lg border border-[#E7E4DC] px-2 text-right text-sm outline-none focus:border-charcoal-navy"
+                            className="h-8 w-20 rounded-lg border border-slate-200 px-2 text-right text-sm outline-none focus:border-orange-600"
                           />
                         </td>
                         <td className="px-3 py-2 text-right">
@@ -212,7 +212,7 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
                             onClick={() =>
                               setItems((p) => p.filter((i) => i.variant !== it.variant))
                             }
-                            className="text-slate-400 hover:text-[#B42318] cursor-pointer"
+                            className="text-slate-400 hover:text-orange-700 cursor-pointer"
                           >
                             ✕
                           </button>
@@ -226,8 +226,8 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-[#E7E4DC] px-6 py-4">
-          <span className="text-sm text-[#5A5750]">
+        <div className="flex items-center justify-between gap-2 border-t border-slate-200 px-6 py-4">
+          <span className="text-sm text-slate-600">
             {items.length} product{items.length === 1 ? "" : "s"} · {totalUnits} unit
             {totalUnits === 1 ? "" : "s"}
           </span>
@@ -235,14 +235,14 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-[#E7E4DC] px-3.5 py-2 text-sm font-medium hover:bg-[#F3F1EC] cursor-pointer"
+              className="rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium hover:bg-slate-100 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!canSubmit}
-              className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
+              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
             >
               {saving ? "Creating…" : "Create purchase order"}
             </button>
@@ -278,12 +278,12 @@ function ReceiveModal({ order, locations, onClose, onDone }) {
     <ModalShell title={`Receive ${order.po_number}`} onClose={onClose}>
       <form onSubmit={submit} className="space-y-4 p-6">
         {error && (
-          <div role="alert" className="rounded-lg bg-[#FDECEC] px-4 py-2.5 text-xs text-[#B42318]">
+          <div role="alert" className="rounded-lg bg-orange-50 px-4 py-2.5 text-xs text-orange-700">
             {error}
           </div>
         )}
         {locations.length === 0 && (
-          <p className="text-xs text-[#B42318]">Add a location in Settings → Locations first.</p>
+          <p className="text-xs text-orange-700">Add a location in Settings → Locations first.</p>
         )}
         <div>
           <label htmlFor="po-location" className="mb-1.5 block text-xs font-medium">
@@ -306,14 +306,14 @@ function ReceiveModal({ order, locations, onClose, onDone }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[#E7E4DC] px-3.5 py-2 text-sm font-medium hover:bg-[#F3F1EC] cursor-pointer"
+            className="rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium hover:bg-slate-100 cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={saving || !locationId}
-            className="rounded-lg bg-charcoal-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
+            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 cursor-pointer"
           >
             {saving ? "Receiving…" : "Receive stock"}
           </button>
@@ -336,15 +336,15 @@ function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
       <defs>
         {/* Soft drop shadows */}
         <filter id="po-shadow" x="35" y="15" width="130" height="135" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#14130F" floodOpacity="0.08" />
+          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#18181B" floodOpacity="0.08" />
         </filter>
         <filter id="box-shadow" x="105" y="80" width="70" height="70" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#14130F" floodOpacity="0.12" />
+          <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#18181B" floodOpacity="0.12" />
         </filter>
       </defs>
 
       {/* Decorative ambient background circle */}
-      <circle cx="100" cy="80" r="66" fill="#F3F1EC" opacity="0.75" />
+      <circle cx="100" cy="80" r="66" fill="rgba(234,88,12,0.08)" opacity="0.75" />
 
       {/* Clipboard base */}
       <rect
@@ -354,49 +354,53 @@ function PurchaseOrdersIllustration({ className = "h-40 w-48" }) {
         height="120"
         rx="10"
         fill="#FFFFFF"
-        stroke="#E7E4DC"
+        stroke="rgba(24,24,27,0.12)"
         strokeWidth="1.5"
         filter="url(#po-shadow)"
       />
 
       {/* Clipboard top clip */}
-      <rect x="80" y="17" width="40" height="11" rx="4" fill="#2B2925" />
-      <circle cx="100" cy="22" r="2.5" fill="#FAF9F6" />
+      <rect x="80" y="17" width="40" height="11" rx="4" fill="#18181B" />
+      <circle cx="100" cy="22" r="2.5" fill="rgba(234,88,12,0.08)" />
 
       {/* Document rows & placeholders */}
       {/* Header bar */}
-      <rect x="62" y="38" width="48" height="6" rx="3" fill="#D4D0C5" />
-      <rect x="126" y="38" width="14" height="6" rx="3" fill="#E7E4DC" />
+      <rect x="62" y="38" width="48" height="6" rx="3" fill="rgba(24,24,27,0.22)" />
+      <rect x="126" y="38" width="14" height="6" rx="3" fill="rgba(24,24,27,0.12)" />
 
       {/* Item row 1 */}
-      <circle cx="66" cy="56" r="3.5" fill="#265C48" />
-      <rect x="76" y="53.5" width="42" height="5" rx="2.5" fill="#E7E4DC" />
-      <rect x="126" y="53.5" width="14" height="5" rx="2.5" fill="#EBF5FB" />
+      <circle cx="66" cy="56" r="3.5" fill="#18181B" />
+      <rect x="76" y="53.5" width="42" height="5" rx="2.5" fill="rgba(24,24,27,0.12)" />
+      <rect x="126" y="53.5" width="14" height="5" rx="2.5" fill="rgba(24,24,27,0.06)" />
 
       {/* Item row 2 */}
-      <circle cx="66" cy="72" r="3.5" fill="#265C48" />
-      <rect x="76" y="69.5" width="34" height="5" rx="2.5" fill="#E7E4DC" />
-      <rect x="126" y="69.5" width="14" height="5" rx="2.5" fill="#EBF5FB" />
+      <circle cx="66" cy="72" r="3.5" fill="#18181B" />
+      <rect x="76" y="69.5" width="34" height="5" rx="2.5" fill="rgba(24,24,27,0.12)" />
+      <rect x="126" y="69.5" width="14" height="5" rx="2.5" fill="rgba(24,24,27,0.06)" />
 
       {/* Item row 3 */}
-      <circle cx="66" cy="88" r="3.5" fill="#C5CCD8" />
-      <rect x="76" y="85.5" width="46" height="5" rx="2.5" fill="#E7E4DC" />
-      <rect x="126" y="85.5" width="14" height="5" rx="2.5" fill="#EBF5FB" />
+      <circle cx="66" cy="88" r="3.5" fill="rgba(24,24,27,0.22)" />
+      <rect x="76" y="85.5" width="46" height="5" rx="2.5" fill="rgba(24,24,27,0.12)" />
+      <rect x="126" y="85.5" width="14" height="5" rx="2.5" fill="rgba(24,24,27,0.06)" />
 
       {/* Item row 4 (faint) */}
-      <rect x="76" y="101.5" width="28" height="5" rx="2.5" fill="#F3F1EC" />
-      <rect x="126" y="101.5" width="14" height="5" rx="2.5" fill="#F3F1EC" />
+      <rect x="76" y="101.5" width="28" height="5" rx="2.5" fill="rgba(234,88,12,0.08)" />
+      <rect x="126" y="101.5" width="14" height="5" rx="2.5" fill="rgba(234,88,12,0.08)" />
 
       {/* Supplier Delivery Box (Overlapping 3D angle) */}
       <g filter="url(#box-shadow)">
         {/* Box side left */}
-        <path d="M112 108 L136 120 L136 142 L112 130 Z" fill="#D4B382" />
+        <path d="M112 108 L136 120 L136 142 L112 130 Z" fill="#FB923C" />
         {/* Box side right */}
-        <path d="M136 120 L160 108 L160 130 L136 142 Z" fill="#BE9967" />
+        <path d="M136 120 L160 108 L160 130 L136 142 Z" fill="#FB923C" />
         {/* Box top face */}
-        <path d="M136 96 L160 108 L136 120 L112 108 Z" fill="#E7CBA0" />
+        <path d="M136 96 L160 108 L136 120 L112 108 Z" fill="rgba(234,88,12,0.25)" />
         {/* Packing tape */}
-        <path d="M132 102 L140 106 L140 142 L132 138 Z" fill="#F4E6D2" opacity="0.85" />
+        <path
+          d="M132 102 L140 106 L140 142 L132 138 Z"
+          fill="rgba(234,88,12,0.25)"
+          opacity="0.85"
+        />
       </g>
     </svg>
   );
@@ -490,7 +494,7 @@ export default function AdminPurchaseOrders() {
         <AdminSidebar />
 
         {/* MAIN CONTENT AREA */}
-        <main className="min-w-0 flex-1 bg-[#F3F1EC] px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
+        <main className="min-w-0 flex-1 bg-slate-100 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
           {/* TITLE & HEADER */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h1 className="flex items-center gap-2.5 text-[20px] sm:text-[22px] font-bold text-charcoal-navy">
@@ -501,7 +505,7 @@ export default function AdminPurchaseOrders() {
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(true)}
-                className="rounded-lg bg-charcoal-navy px-3.5 py-2 text-sm font-semibold text-white hover:bg-[#1A1916] cursor-pointer"
+                className="rounded-lg bg-orange-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 cursor-pointer"
               >
                 Create purchase order
               </button>
@@ -512,7 +516,7 @@ export default function AdminPurchaseOrders() {
           {notice && (
             <div
               role="alert"
-              className="mb-4 flex items-center justify-between rounded-lg bg-[#EBF5FB] px-4 py-2.5 text-sm text-[#004B87] border border-[#BCE1F5]"
+              className="mb-4 flex items-center justify-between rounded-lg bg-slate-100 px-4 py-2.5 text-sm text-ink border border-[rgba(24,24,27,0.22)]"
             >
               <span>{notice}</span>
               <button
@@ -526,9 +530,9 @@ export default function AdminPurchaseOrders() {
           )}
 
           {/* MAIN CARD CONTAINER */}
-          <section className="rounded-xl border border-[#E7E4DC] bg-white shadow-2xs overflow-hidden">
+          <section className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden">
             {/* FULL-WIDTH SEARCH & FILTER TOOLBAR */}
-            <div className="flex items-center justify-between border-b border-[#E7E4DC] px-3 sm:px-4 py-2.5 bg-white">
+            <div className="flex items-center justify-between border-b border-slate-200 px-3 sm:px-4 py-2.5 bg-white">
               {/* Left: View Filter (All ⇅) + Search input */}
               <div className="flex items-center gap-2 flex-1 max-w-xl">
                 {/* View dropdown: All ⇅ matching Shopify layout */}
@@ -537,7 +541,7 @@ export default function AdminPurchaseOrders() {
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
                     aria-label="Filter purchase orders"
-                    className="h-9 appearance-none rounded-lg border border-[#E7E4DC] bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-[#F3F1EC] cursor-pointer transition"
+                    className="h-9 appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-7 text-xs sm:text-sm font-medium text-charcoal-navy outline-none hover:bg-slate-100 cursor-pointer transition"
                   >
                     <option value="all">All</option>
                     <option value="draft">Draft</option>
@@ -545,7 +549,7 @@ export default function AdminPurchaseOrders() {
                     <option value="received">Received</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
-                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-[#5A5750] leading-1.5">
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col text-[7px] text-slate-600 leading-1.5">
                     ▲▼
                   </span>
                 </div>
@@ -571,7 +575,7 @@ export default function AdminPurchaseOrders() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search and filter"
-                    className="h-9 w-full rounded-lg border border-[#E7E4DC] bg-white pl-9 pr-8 text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400 outline-none focus:border-charcoal-navy focus:ring-1 focus:ring-[#14130F]"
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-8 text-xs sm:text-sm text-charcoal-navy placeholder:text-slate-400 outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600"
                   />
                   {searchQuery && (
                     <button
@@ -590,7 +594,7 @@ export default function AdminPurchaseOrders() {
               <button
                 type="button"
                 title="Table columns & view"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#E7E4DC] bg-white text-[#5A5750] hover:bg-[#F3F1EC] transition shrink-0 ml-2 cursor-pointer"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition shrink-0 ml-2 cursor-pointer"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -610,7 +614,7 @@ export default function AdminPurchaseOrders() {
 
             {/* CONTENT AREA: EMPTY STATE OR DATA TABLE */}
             {loading ? (
-              <div className="py-24 text-center text-sm text-[#5A5750]">
+              <div className="py-24 text-center text-sm text-slate-600">
                 Loading purchase orders…
               </div>
             ) : filteredOrders.length === 0 ? (
@@ -618,13 +622,13 @@ export default function AdminPurchaseOrders() {
                 /* Search / Filter yields no items */
                 <div className="py-20 text-center px-4">
                   <div className="mx-auto flex max-w-sm flex-col items-center justify-center">
-                    <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#F3F1EC] text-charcoal-navy">
+                    <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-charcoal-navy">
                       <PageIcon name="purchase_orders" />
                     </span>
                     <p className="font-semibold text-base text-charcoal-navy">
                       No matching purchase orders
                     </p>
-                    <p className="mt-1 text-xs text-[#5A5750]">
+                    <p className="mt-1 text-xs text-slate-600">
                       {searchQuery
                         ? `No purchase orders match "${searchQuery}".`
                         : "No purchase orders match the selected filter."}
@@ -635,7 +639,7 @@ export default function AdminPurchaseOrders() {
                         setSearchQuery("");
                         setFilterStatus("all");
                       }}
-                      className="mt-4 inline-flex items-center rounded-lg border border-[#E7E4DC] bg-white px-3.5 py-1.5 text-xs font-medium text-charcoal-navy hover:bg-[#F3F1EC] transition cursor-pointer"
+                      className="mt-4 inline-flex items-center rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-charcoal-navy hover:bg-slate-100 transition cursor-pointer"
                     >
                       Clear filters
                     </button>
@@ -656,7 +660,7 @@ export default function AdminPurchaseOrders() {
                     </h2>
 
                     {/* Description */}
-                    <p className="text-sm text-[#78746A] max-w-sm leading-relaxed mb-6">
+                    <p className="text-sm text-slate-500 max-w-sm leading-relaxed mb-6">
                       Track and receive inventory ordered from suppliers.
                     </p>
 
@@ -664,7 +668,7 @@ export default function AdminPurchaseOrders() {
                     <button
                       type="button"
                       onClick={() => setIsCreateOpen(true)}
-                      className="inline-flex items-center justify-center rounded-lg bg-charcoal-navy px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] transition shadow-xs cursor-pointer active:scale-[0.98]"
+                      className="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-600/90 transition shadow-xs cursor-pointer active:scale-[0.98]"
                     >
                       Create purchase order
                     </button>
@@ -675,7 +679,7 @@ export default function AdminPurchaseOrders() {
                         href="https://help.shopify.com/en/manual/products/inventory/transfers-purchase-orders/purchase-orders"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-[#5A5750] hover:text-charcoal-navy hover:underline transition"
+                        className="text-xs text-slate-600 hover:text-orange-600 hover:underline transition"
                       >
                         Learn more about purchase orders
                       </a>
@@ -688,7 +692,7 @@ export default function AdminPurchaseOrders() {
               <div className="overflow-x-auto min-h-60">
                 <table className="w-full border-collapse text-left text-sm text-charcoal-navy">
                   <thead>
-                    <tr className="border-b border-[#E7E4DC] bg-white text-xs font-medium text-[#2A2925] whitespace-nowrap">
+                    <tr className="border-b border-slate-200 bg-white text-xs font-medium text-ink whitespace-nowrap">
                       <th className="py-3 px-4">Purchase order</th>
                       <th className="py-3 px-4">Supplier</th>
                       <th className="py-3 px-4">Status</th>
@@ -697,11 +701,11 @@ export default function AdminPurchaseOrders() {
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E7E4DC]">
+                  <tbody className="divide-y divide-slate-200">
                     {filteredOrders.map((po) => (
-                      <tr key={po.id} className="hover:bg-[#FAF9F6] transition-colors">
+                      <tr key={po.id} className="hover:bg-slate-50 transition-colors">
                         <td className="py-3 px-4 font-medium">{po.po_number}</td>
-                        <td className="py-3 px-4 text-[#5A5750]">{po.supplier_name || "—"}</td>
+                        <td className="py-3 px-4 text-slate-600">{po.supplier_name || "—"}</td>
                         <td className="py-3 px-4">
                           <span
                             className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
@@ -714,7 +718,7 @@ export default function AdminPurchaseOrders() {
                         <td className="py-3 px-4 text-right">
                           {(po.items || []).reduce((n, i) => n + i.quantity, 0)}
                         </td>
-                        <td className="py-3 px-4 text-right text-[#5A5750]">
+                        <td className="py-3 px-4 text-right text-slate-600">
                           {po.created_at ? new Date(po.created_at).toLocaleDateString() : "—"}
                         </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
@@ -743,7 +747,7 @@ export default function AdminPurchaseOrders() {
                                 onClick={() =>
                                   runAction(po, "cancel", `${po.po_number} cancelled.`)
                                 }
-                                className="text-xs font-semibold text-[#B42318] hover:underline cursor-pointer"
+                                className="text-xs font-semibold text-orange-700 hover:underline cursor-pointer"
                               >
                                 Cancel
                               </button>
@@ -764,7 +768,7 @@ export default function AdminPurchaseOrders() {
               href="https://help.shopify.com/en/manual/products/inventory/transfers-purchase-orders/purchase-orders"
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-[#5A5750] hover:text-charcoal-navy hover:underline transition"
+              className="text-xs text-slate-600 hover:text-orange-600 hover:underline transition"
             >
               Learn more about managing purchase orders
             </a>

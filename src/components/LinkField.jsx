@@ -216,18 +216,18 @@ export default function LinkField({
     : null;
 
   const rowClass =
-    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-[#14130F] hover:bg-[#F3F1EC]";
+    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink hover:bg-slate-100";
 
   return (
     <div ref={wrapRef} className="relative">
       <div
         className={`flex w-full items-center gap-2 rounded-lg border bg-white px-2.5 text-sm ${
-          open ? "border-[#14130F]" : "border-[#E7E4DC]"
+          open ? "border-orange-600" : "border-slate-200"
         } ${compact ? "h-9" : "h-10"}`}
       >
         {current && !open ? (
           <>
-            <span className="text-[#5A5750]">
+            <span className="text-slate-600">
               <Icon name={current.icon} />
             </span>
             <button
@@ -236,7 +236,7 @@ export default function LinkField({
                 setOpen(true);
                 setTimeout(() => inputRef.current?.focus(), 0);
               }}
-              className="min-w-0 flex-1 truncate text-left text-[#14130F]"
+              className="min-w-0 flex-1 truncate text-left text-ink"
               title={value}
               aria-label={`${label}: ${current.name}`}
             >
@@ -245,7 +245,7 @@ export default function LinkField({
             <button
               type="button"
               onClick={() => onChange("")}
-              className="rounded p-0.5 text-[#5A5750] hover:text-[#14130F]"
+              className="rounded p-0.5 text-slate-600 hover:text-orange-600"
               aria-label="Clear link"
             >
               <svg
@@ -261,7 +261,7 @@ export default function LinkField({
           </>
         ) : (
           <>
-            <span className="text-[#5A5750]">
+            <span className="text-slate-600">
               <Icon name="link" />
             </span>
             <input
@@ -282,7 +282,7 @@ export default function LinkField({
               }}
               placeholder={placeholder}
               aria-label={label}
-              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8F92B8]"
+              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[rgba(24,24,27,0.5)]"
             />
           </>
         )}
@@ -294,7 +294,7 @@ export default function LinkField({
           <div
             ref={popRef}
             style={{ position: "fixed", zIndex: 1000, ...box }}
-            className="overflow-y-auto rounded-xl border border-[#E7E4DC] bg-white p-1.5 shadow-xl"
+            className="overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
             role="listbox"
           >
             {typedAddress && (
@@ -309,14 +309,14 @@ export default function LinkField({
             {results &&
               results.map((r) => (
                 <button key={r.url} type="button" className={rowClass} onClick={() => pick(r.url)}>
-                  <span className="text-[#5A5750]">
+                  <span className="text-slate-600">
                     <Icon name={r.icon} />
                   </span>
                   <span className="min-w-0 flex-1 truncate">{r.name}</span>
                 </button>
               ))}
             {results && !results.length && !typedAddress && (
-              <p className="px-2.5 py-2 text-sm text-[#5A5750]">
+              <p className="px-2.5 py-2 text-sm text-slate-600">
                 No matches. Paste a full link instead.
               </p>
             )}
@@ -326,13 +326,13 @@ export default function LinkField({
                 <button
                   type="button"
                   onClick={() => setGroup(null)}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-[#14130F] hover:bg-[#F3F1EC]"
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-ink hover:bg-slate-100"
                 >
                   <Icon name="back" />
                   {GROUPS[group].title}
                 </button>
                 {GROUPS[group].items.length === 0 && (
-                  <p className="px-2.5 py-2 text-sm text-[#5A5750]">Nothing here yet.</p>
+                  <p className="px-2.5 py-2 text-sm text-slate-600">Nothing here yet.</p>
                 )}
                 {GROUPS[group].items.map((i) => (
                   <button
@@ -342,7 +342,7 @@ export default function LinkField({
                     onClick={() => pick(i.url)}
                   >
                     <span className="min-w-0 flex-1 truncate">{i.name}</span>
-                    {i.url === value && <span className="text-xs text-[#5A5750]">Selected</span>}
+                    {i.url === value && <span className="text-xs text-slate-600">Selected</span>}
                   </button>
                 ))}
               </>
@@ -350,7 +350,7 @@ export default function LinkField({
 
             {!results && !group && (
               <>
-                <p className="px-2.5 pb-1 pt-1.5 text-xs font-semibold text-[#5A5750]">
+                <p className="px-2.5 pb-1 pt-1.5 text-xs font-semibold text-slate-600">
                   Online store
                 </p>
                 {shortcuts.map((s) => (
@@ -360,7 +360,7 @@ export default function LinkField({
                     className={rowClass}
                     onClick={() => pick(s.url)}
                   >
-                    <span className="text-[#5A5750]">
+                    <span className="text-slate-600">
                       <Icon name={s.icon} />
                     </span>
                     {s.name}
@@ -368,11 +368,11 @@ export default function LinkField({
                 ))}
                 {groupRows.map(([id, name]) => (
                   <button key={id} type="button" className={rowClass} onClick={() => setGroup(id)}>
-                    <span className="text-[#5A5750]">
+                    <span className="text-slate-600">
                       <Icon name={GROUPS[id].icon} />
                     </span>
                     <span className="flex-1">{name}</span>
-                    <span className="text-[#5A5750]">
+                    <span className="text-slate-600">
                       <Icon name="chevron" />
                     </span>
                   </button>

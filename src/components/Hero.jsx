@@ -14,15 +14,14 @@ export default function Hero() {
   const signedIn = Boolean(useSession()?.token);
 
   return (
-    <section className="bg-slate-50">
+    <section className="bg-orange-600">
       <div className="mx-auto grid max-w-7xl gap-16 px-6 pb-24 pt-16 lg:grid-cols-12 lg:gap-12 lg:px-10 lg:pb-32 lg:pt-28">
         <div className="lg:col-span-6 lg:pt-6">
           <h1 className="display text-[3.6rem] text-ink sm:text-[4.6rem] lg:text-[5.4rem]">
-            A store that looks like <em className="italic text-violet-600">yours</em>, and runs
-            itself.
+            A store that looks like <em className="italic text-white">yours</em>, and runs itself.
           </h1>
 
-          <p className="mt-8 max-w-md text-[1.1rem] leading-relaxed text-slate-600">
+          <p className="mt-8 max-w-md text-[1.1rem] leading-relaxed text-ink">
             Themes you can edit down to the code, inventory that stays honest, and a checkout your
             customers finish. One place for the whole business.
           </p>
@@ -30,21 +29,19 @@ export default function Hero() {
           <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
             <Link
               to={signedIn ? STORES_PATH : ONBOARDING_PATH}
-              className="rounded-md bg-ink px-6 py-3.5 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-md bg-ink px-6 py-3.5 text-sm font-medium text-white hover:bg-ink/90"
             >
               {signedIn ? "Open your stores" : "Start free"}
             </Link>
             <a
               href="#features"
-              className="text-sm font-medium text-ink underline decoration-slate-300 underline-offset-[6px] hover:decoration-ink"
+              className="text-sm font-medium text-ink underline decoration-ink/40 underline-offset-[6px] hover:decoration-ink"
             >
               See how it works
             </a>
           </div>
 
-          <p className="mt-8 text-sm text-slate-600">
-            14 days free. No card. Cancel from the dashboard.
-          </p>
+          <p className="mt-8 text-sm text-ink">14 days free. No card. Cancel from the dashboard.</p>
         </div>
 
         {/* Product surface: the real admin, simplified */}
@@ -67,7 +64,7 @@ export default function Hero() {
                 <div
                   key={i}
                   style={{ height: `${h}%` }}
-                  className={`flex-1 rounded-t-sm ${i === bars.length - 1 ? "bg-violet-600" : "bg-slate-200"}`}
+                  className={`flex-1 rounded-t-sm ${i === bars.length - 1 ? "bg-ink" : "bg-slate-200"}`}
                 />
               ))}
             </div>

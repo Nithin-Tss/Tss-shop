@@ -233,21 +233,21 @@ export default function AdminHomePage() {
   const actions = quickActions.filter(allowed);
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#14130F]">
+    <div className="min-h-screen bg-slate-50 text-ink">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
-        <main className="min-w-0 flex-1 overflow-hidden bg-[#FAF9F6]">
+        <main className="min-w-0 flex-1 overflow-hidden bg-slate-50">
           {/* METRICS STRIP */}
           {canSeeReports && (
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-[#E7E4DC] bg-white/70 px-4 py-3 sm:px-6 lg:px-9">
-              <span className="text-sm text-[#5A5750]">Last 30 days</span>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-slate-200 bg-white/70 px-4 py-3 sm:px-6 lg:px-9">
+              <span className="text-sm text-slate-600">Last 30 days</span>
               <dl className="flex flex-wrap gap-x-8 gap-y-3">
                 {metrics.map((m) => (
                   <div key={m.label}>
-                    <dt className="text-xs text-[#5A5750]">{m.label}</dt>
+                    <dt className="text-xs text-slate-600">{m.label}</dt>
                     <dd className="mt-0.5 flex items-center gap-2 text-sm font-semibold">
                       {m.value}
                       <Sparkline values={m.trend} />
@@ -261,15 +261,15 @@ export default function AdminHomePage() {
           <div className="mx-auto max-w-[980px] px-4 py-12 sm:px-6 lg:px-10 lg:py-16">
             {/* GREETING + QUICK ACTIONS */}
             <section>
-              <p className="text-sm text-[#78746A]">{storeName}</p>
-              <h1 className="display mt-3 text-5xl text-[#14130F] sm:text-6xl">
+              <p className="text-sm text-slate-500">{storeName}</p>
+              <h1 className="display mt-3 text-5xl text-ink sm:text-6xl">
                 {greeting()}, {firstName}.
-                <span className="block italic text-[#265C48]">
+                <span className="block italic text-violet-600">
                   {steps.length ? "Let's get ready to sell." : "Let's keep growing."}
                 </span>
               </h1>
               {hasNoAccess && (
-                <p className="mt-4 max-w-md text-sm text-[#5A5750]">
+                <p className="mt-4 max-w-md text-sm text-slate-600">
                   You don&apos;t have any roles in this store yet. Ask the store owner to give you
                   one under Settings → Users.
                 </p>
@@ -291,11 +291,11 @@ export default function AdminHomePage() {
                             }
                           : undefined
                       }
-                      className="group inline-flex items-center gap-2 text-sm font-medium text-[#14130F] underline decoration-[#D4D0C5] underline-offset-[6px] hover:decoration-[#14130F]"
+                      className="group inline-flex items-center gap-2 text-sm font-medium text-ink underline decoration-slate-300 underline-offset-[6px] hover:decoration-ink"
                     >
                       <Icon
                         name={action.icon}
-                        className="h-4 w-4 text-[#78746A] group-hover:text-[#14130F]"
+                        className="h-4 w-4 text-slate-500 group-hover:text-orange-600"
                       />
                       {action.label}
                     </Link>
@@ -307,15 +307,15 @@ export default function AdminHomePage() {
             {/* SETUP LIST */}
             {steps.length > 0 && (
               <section className="mt-16">
-                <div className="flex items-end justify-between gap-4 border-b border-[#14130F] pb-3">
+                <div className="flex items-end justify-between gap-4 border-b border-orange-600 pb-3">
                   <h2 className="text-lg font-medium">Get your store ready</h2>
-                  <div className="flex items-center gap-3 text-sm tabular-nums text-[#5A5750]">
+                  <div className="flex items-center gap-3 text-sm tabular-nums text-slate-600">
                     <span>
                       {doneCount} of {steps.length}
                     </span>
-                    <div className="h-px w-24 bg-[#D4D0C5]">
+                    <div className="h-px w-24 bg-slate-300">
                       <div
-                        className="h-[3px] -translate-y-px bg-[#265C48] transition-[width] duration-500"
+                        className="h-[3px] -translate-y-px bg-violet-600 transition-[width] duration-500"
                         style={{ width: `${Math.max(progress, 3)}%` }}
                       />
                     </div>
@@ -326,7 +326,7 @@ export default function AdminHomePage() {
                   {steps.map((step, i) => {
                     const isNext = i === nextIndex;
                     return (
-                      <li key={step.title} className="border-b border-[#E7E4DC]">
+                      <li key={step.title} className="border-b border-slate-200">
                         <Link
                           to={step.to}
                           className="group -mx-3 flex items-center gap-5 rounded-md px-3 py-5 hover:bg-white"
@@ -334,19 +334,19 @@ export default function AdminHomePage() {
                           <span
                             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs tabular-nums ${
                               step.done
-                                ? "bg-[#265C48] text-white"
+                                ? "bg-violet-600 text-white"
                                 : isNext
-                                  ? "bg-[#14130F] text-white"
-                                  : "border border-[#D4D0C5] text-[#78746A]"
+                                  ? "bg-ink text-white"
+                                  : "border border-slate-300 text-slate-500"
                             }`}
                           >
                             {step.done ? <Icon name="check" className="h-3.5 w-3.5" /> : i + 1}
                           </span>
                           <span className={`min-w-0 flex-1 ${step.done ? "opacity-50" : ""}`}>
                             <span className="block text-[15px] font-medium">{step.title}</span>
-                            <span className="mt-0.5 block text-sm text-[#5A5750]">{step.help}</span>
+                            <span className="mt-0.5 block text-sm text-slate-600">{step.help}</span>
                           </span>
-                          <span className="inline-flex items-center gap-1 text-sm text-[#5A5750] group-hover:text-[#14130F]">
+                          <span className="inline-flex items-center gap-1 text-sm text-slate-600 group-hover:text-orange-600">
                             {step.done ? "Review" : isNext ? "Start" : ""}
                             <Icon
                               name="arrow"
@@ -362,8 +362,8 @@ export default function AdminHomePage() {
             )}
 
             {/* TIP */}
-            <p className="mt-12 max-w-lg text-sm leading-relaxed text-[#78746A]">
-              <span className="font-medium text-[#14130F]">Tip. </span>
+            <p className="mt-12 max-w-lg text-sm leading-relaxed text-slate-500">
+              <span className="font-medium text-ink">Tip. </span>
               {tip}
             </p>
           </div>

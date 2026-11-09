@@ -40,7 +40,7 @@ const columns = [
 
 export default function Footer() {
   return (
-    <footer className="bg-ink text-slate-400">
+    <footer className="bg-ink text-white/60">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="grid gap-12 border-t border-white/10 py-16 sm:grid-cols-2 lg:grid-cols-12">
           <div className="lg:col-span-4">
@@ -55,7 +55,7 @@ export default function Footer() {
               <ul className="mt-4 space-y-3 text-sm">
                 {c.links.map(([label, href]) => (
                   <li key={label}>
-                    <a href={href} className="hover:text-white">
+                    <a href={href} className="hover:text-orange-400">
                       {label}
                     </a>
                   </li>
@@ -68,13 +68,13 @@ export default function Footer() {
         <div className="flex flex-col gap-4 border-t border-white/10 py-6 text-xs sm:flex-row sm:items-center sm:justify-between">
           <span>&copy; {new Date().getFullYear()} Store. Australia, English.</span>
           <div className="flex gap-6">
-            <a href="/terms" className="hover:text-white">
+            <a href="/terms" className="hover:text-orange-400">
               Terms
             </a>
-            <a href="/privacy" className="hover:text-white">
+            <a href="/privacy" className="hover:text-orange-400">
               Privacy
             </a>
-            <a href="/sitemap.xml" className="hover:text-white">
+            <a href="/sitemap.xml" className="hover:text-orange-400">
               Sitemap
             </a>
           </div>

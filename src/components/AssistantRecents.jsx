@@ -24,7 +24,7 @@ const icon = {
   "aria-hidden": true,
 };
 
-const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1916]";
+const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600";
 
 // The "Recents" pill and the list under it. Controlled: the panel owns `open`, so its Escape key can close the
 // list first and the panel second. `onOpened()` runs after a chat is opened (the panel puts the cursor in the input).
@@ -49,8 +49,8 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => onOpenChange(!open)}
-        className={`inline-flex h-8 items-center gap-2 rounded px-1 text-[13px] font-medium transition-colors hover:text-[#1E4A3A] ${
-          open ? "text-[#1E4A3A]" : "text-[#1A1916]"
+        className={`inline-flex h-8 items-center gap-2 rounded px-1 text-[13px] font-medium transition-colors hover:text-violet-700 ${
+          open ? "text-violet-700" : "text-ink"
         } ${focusRing}`}
       >
         <svg {...icon} className="h-4 w-4">
@@ -64,10 +64,10 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
         <div
           role="region"
           aria-label="Recent chats"
-          className="absolute left-0 top-10 z-10 w-72 max-w-[calc(100vw-24px)] rounded-lg border border-[#E7E4DC] bg-white py-1 shadow-[0_4px_16px_rgba(76,29,149,0.08)]"
+          className="absolute left-0 top-10 z-10 w-72 max-w-[calc(100vw-24px)] rounded-lg border border-slate-200 bg-white py-1 shadow-[0_4px_16px_rgba(24,24,27,0.08)]"
         >
           {recents.length === 0 ? (
-            <p className="px-3 py-4 text-center text-[12px] text-[#A29E92]">No previous chats</p>
+            <p className="px-3 py-4 text-center text-[12px] text-slate-400">No previous chats</p>
           ) : (
             <>
               <ul className="max-h-72 overflow-y-auto">
@@ -76,7 +76,7 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                   return (
                     <li
                       key={chat.id}
-                      className="group flex items-center gap-1 pr-1.5 hover:bg-[#F7F8FA]"
+                      className="group flex items-center gap-1 pr-1.5 hover:bg-[#FAFAFA]"
                     >
                       <button
                         type="button"
@@ -89,8 +89,8 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                         }}
                         className={`min-w-0 flex-1 px-3 py-2 text-left disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
                       >
-                        <span className="block truncate text-[13px] text-[#1A1916]">{title}</span>
-                        <span className="block text-[11px] text-[#A29E92]">
+                        <span className="block truncate text-[13px] text-ink">{title}</span>
+                        <span className="block text-[11px] text-slate-400">
                           {formatWhen(chat.savedAt)}
                         </span>
                       </button>
@@ -99,7 +99,7 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                         aria-label={`Delete chat: ${title}`}
                         title="Delete"
                         onClick={() => store.deleteChat(chat.id)}
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded text-[#A29E92] transition-colors hover:bg-[#E7E4DC] hover:text-[#1A1916] ${focusRing}`}
+                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-200 hover:text-ink ${focusRing}`}
                       >
                         <svg {...icon} className="h-3.5 w-3.5">
                           <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3" />
@@ -109,11 +109,11 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                   );
                 })}
               </ul>
-              <div className="border-t border-[#EEF0F3] px-1.5 pt-1">
+              <div className="border-t border-[rgba(24,24,27,0.06)] px-1.5 pt-1">
                 <button
                   type="button"
                   onClick={() => store.clearRecents()}
-                  className={`w-full rounded px-2 py-1.5 text-left text-[12px] text-[#78746A] transition-colors hover:bg-[#F3F1EC] hover:text-[#1A1916] ${focusRing}`}
+                  className={`w-full rounded px-2 py-1.5 text-left text-[12px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-ink ${focusRing}`}
                 >
                   Clear all
                 </button>

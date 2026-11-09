@@ -11,9 +11,9 @@ export default function Contact() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-[#071A2B] px-6 py-20 text-white">
+      <section className="bg-[#18181B] px-6 py-20 text-white">
         <div className="mx-auto max-w-6xl">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-[#265C48]">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-violet-600">
             Get in touch
           </p>
 
@@ -40,21 +40,21 @@ export default function Contact() {
 
             <div className="mt-8 space-y-6">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-[#265C48]">
+                <p className="text-sm font-semibold uppercase tracking-wide text-violet-600">
                   Email
                 </p>
                 <p className="mt-1 text-gray-700">support@tss-shop.com</p>
               </div>
 
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-[#265C48]">
+                <p className="text-sm font-semibold uppercase tracking-wide text-violet-600">
                   Support
                 </p>
                 <p className="mt-1 text-gray-700">TSS Shop Support Team</p>
               </div>
 
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-[#265C48]">
+                <p className="text-sm font-semibold uppercase tracking-wide text-violet-600">
                   Response time
                 </p>
                 <p className="mt-1 text-gray-700">We aim to respond as soon as possible.</p>
@@ -90,7 +90,7 @@ export default function Contact() {
                     name="name"
                     type="text"
                     required
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#265C48] focus:ring-2 focus:ring-[#265C48]/20"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
                     placeholder="Your name"
                   />
                 </div>
@@ -105,7 +105,7 @@ export default function Contact() {
                     name="email"
                     type="email"
                     required
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#265C48] focus:ring-2 focus:ring-[#265C48]/20"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -120,7 +120,7 @@ export default function Contact() {
                     name="subject"
                     type="text"
                     required
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#265C48] focus:ring-2 focus:ring-[#265C48]/20"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
                     placeholder="How can we help?"
                   />
                 </div>
@@ -135,14 +135,14 @@ export default function Contact() {
                     name="message"
                     rows="6"
                     required
-                    className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-[#265C48] focus:ring-2 focus:ring-[#265C48]/20"
+                    className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
                     placeholder="Write your message..."
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="rounded-lg bg-[#265C48] px-6 py-3 font-semibold text-white transition hover:opacity-90"
+                  className="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition hover:opacity-90"
                 >
                   Send Message
                 </button>

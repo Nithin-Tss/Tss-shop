@@ -685,10 +685,10 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
   function renderNode(item, depth) {
     const isSelected = selected.path === item.path && selected.type === item.type;
-    const rowClass = `group flex cursor-pointer items-center gap-1 py-[3px] pr-2 text-[14px] text-[#403E39] ${
+    const rowClass = `group flex cursor-pointer items-center gap-1 py-[3px] pr-2 text-[14px] text-slate-700 ${
       isSelected
-        ? "border border-[#1E4A3A] bg-[#E7E4DC]"
-        : "border border-transparent hover:bg-[#E7E4DC]"
+        ? "border border-violet-700 bg-slate-200"
+        : "border border-transparent hover:bg-slate-200"
     }`;
 
     if (item.type === "folder") {
@@ -724,7 +724,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         onClick={() => openFile(item.path)}
       >
         <span className="truncate">{baseName(item.path)}</span>
-        {item.path in drafts && <span className="text-[10px] text-[#1E4A3A]">●</span>}
+        {item.path in drafts && <span className="text-[10px] text-violet-700">●</span>}
         <RowActions item={item} onRename={renameItem} onDelete={deleteItem} />
       </div>
     );
@@ -735,12 +735,12 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   if (status !== "ready") {
     return (
       <div
-        className="flex flex-col items-center justify-center gap-3 rounded-lg border border-[#D4D0C5] bg-[#FAF9F6] text-sm text-[#403E39]"
+        className="flex flex-col items-center justify-center gap-3 rounded-lg border border-slate-300 bg-slate-50 text-sm text-slate-700"
         style={{ height }}
       >
         {status === "loading" ? (
           <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#1E4A3A] border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-700 border-t-transparent" />
             <p>Loading theme files...</p>
           </div>
         ) : (
@@ -749,13 +749,13 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             <div className="flex gap-2">
               <button
                 onClick={load}
-                className="rounded border border-[#14130F] px-4 py-1.5 hover:bg-[#14130F] hover:text-white"
+                className="rounded border border-orange-600 px-4 py-1.5 hover:bg-orange-600/90 hover:text-white"
               >
                 Retry
               </button>
               <Link
                 to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
-                className="rounded border border-[#E7E4DC] px-4 py-1.5 hover:border-[#14130F]"
+                className="rounded border border-slate-200 px-4 py-1.5 hover:border-orange-600"
               >
                 Back to customizer
               </Link>
@@ -770,14 +770,14 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
     <>
       <div
         onKeyDown={onKeyDown}
-        className={`flex flex-col overflow-hidden bg-white text-[#403E39] ${
-          fullscreen ? "" : "rounded-lg border border-[#D4D0C5]"
+        className={`flex flex-col overflow-hidden bg-white text-slate-700 ${
+          fullscreen ? "" : "rounded-lg border border-slate-300"
         }`}
         style={{ height }}
       >
         <div className="flex min-h-0 flex-1">
           {/* Activity bar */}
-          <nav className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-[#E7E4DC] bg-[#FAF9F6] pt-2">
+          <nav className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-slate-200 bg-slate-50 pt-2">
             {[
               { id: "explorer", icon: <ExplorerIcon />, title: "Explorer" },
               { id: "search", icon: <SearchIcon />, title: "Search" },
@@ -788,8 +788,8 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 onClick={() => setPanel(b.id)}
                 className={`flex h-12 w-12 items-center justify-center border-l-2 ${
                   panel === b.id
-                    ? "border-[#1E4A3A] text-[#403E39]"
-                    : "border-transparent text-[#78746A]"
+                    ? "border-violet-700 text-slate-700"
+                    : "border-transparent text-slate-500"
                 }`}
               >
                 {b.icon}
@@ -798,16 +798,16 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
           </nav>
 
           {/* Side panel */}
-          <aside className="flex w-64 shrink-0 flex-col border-r border-[#E7E4DC] bg-[#FAF9F6]">
+          <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50">
             {panel === "explorer" ? (
               <>
-                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-[#403E39]">
+                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-slate-700">
                   Explorer
                 </div>
 
                 <div className="flex items-center justify-between px-2 py-1">
                   <button
-                    className="flex items-center gap-1 text-[11px] font-bold uppercase text-[#403E39]"
+                    className="flex items-center gap-1 text-[11px] font-bold uppercase text-slate-700"
                     onClick={() => {
                       setRootOpen((o) => !o);
                       setSelected({ type: "root", path: "" });
@@ -816,7 +816,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                     <Chevron open={rootOpen} />
                     {project.theme?.name || "Theme Files"}
                   </button>
-                  <div className="flex gap-1 text-[#403E39]">
+                  <div className="flex gap-1 text-slate-700">
                     <IconButton title="New File" onClick={newFile}>
                       <NewFileIcon />
                     </IconButton>
@@ -839,16 +839,16 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                   ["references", "References"],
                   ["dependencies", "Dependencies"],
                 ].map(([key, label]) => (
-                  <div key={key} className="border-t border-[#E7E4DC]">
+                  <div key={key} className="border-t border-slate-200">
                     <button
-                      className="flex w-full items-center gap-1 px-1 py-1 text-[11px] font-bold uppercase text-[#403E39]"
+                      className="flex w-full items-center gap-1 px-1 py-1 text-[11px] font-bold uppercase text-slate-700"
                       onClick={() => toggleSection(key)}
                     >
                       <Chevron open={sections[key]} />
                       {label}
                     </button>
                     {sections[key] && (
-                      <p className="px-6 pb-3 text-[13px] text-[#78746A]">
+                      <p className="px-6 pb-3 text-[13px] text-slate-500">
                         {key === "outline" || key === "timeline"
                           ? `The active editor cannot provide ${key} information.`
                           : "Nothing to show."}
@@ -859,7 +859,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               </>
             ) : (
               <>
-                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-[#403E39]">
+                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-slate-700">
                   Search
                 </div>
                 <div className="px-3 pb-2">
@@ -867,23 +867,23 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search"
-                    className="w-full rounded border border-[#D4D0C5] bg-white px-2 py-1 text-[13px] outline-none focus:border-[#1E4A3A]"
+                    className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-[13px] outline-none focus:border-violet-700"
                   />
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 text-[13px]">
                   {query && results.length === 0 && (
-                    <p className="text-[#78746A]">No results found.</p>
+                    <p className="text-slate-500">No results found.</p>
                   )}
                   {results.map((r, i) => (
                     <button
                       key={i}
                       onClick={() => openFile(r.path)}
-                      className="block w-full truncate py-0.5 text-left hover:bg-[#E7E4DC]"
+                      className="block w-full truncate py-0.5 text-left hover:bg-slate-200"
                       title={`${r.path}:${r.line}`}
                     >
                       <span className="font-medium">{baseName(r.path)}</span>
-                      <span className="text-[#78746A]"> :{r.line} </span>
-                      <span className="text-[#78746A]">{r.text}</span>
+                      <span className="text-slate-500"> :{r.line} </span>
+                      <span className="text-slate-500">{r.text}</span>
                     </button>
                   ))}
                 </div>
@@ -893,11 +893,11 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
           {/* Editor area */}
           <section className="flex min-w-0 flex-1 flex-col">
-            <div className="flex items-stretch bg-[#FAF9F6]">
+            <div className="flex items-stretch bg-slate-50">
               <Link
                 id="back-to-customizer-btn"
                 to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
-                className="flex items-center gap-1.5 border-r border-[#E7E4DC] px-3 py-2 text-[13px] font-medium text-[#5A5750] hover:bg-[#E7E4DC] hover:text-[#14130F]"
+                className="flex items-center gap-1.5 border-r border-slate-200 px-3 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-200 hover:text-orange-600"
                 title="Return to theme customizer"
               >
                 <svg
@@ -923,18 +923,18 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                         setActivePath(path);
                         setSelected({ type: "file", path });
                       }}
-                      className={`flex cursor-pointer items-center gap-2 border-r border-[#E7E4DC] px-3 py-2 text-[13px] ${
+                      className={`flex cursor-pointer items-center gap-2 border-r border-slate-200 px-3 py-2 text-[13px] ${
                         active
-                          ? "border-t-2 border-t-[#1E4A3A] bg-white text-[#403E39]"
-                          : "border-t-2 border-t-transparent text-[#78746A]"
+                          ? "border-t-2 border-t-violet-700 bg-white text-slate-700"
+                          : "border-t-2 border-t-transparent text-slate-500"
                       }`}
                     >
                       <span className="whitespace-nowrap">{baseName(path)}</span>
                       {path in drafts ? (
-                        <span className="text-[#1E4A3A]">●</span>
+                        <span className="text-violet-700">●</span>
                       ) : (
                         <button
-                          className="rounded text-[#78746A] hover:bg-[#E7E4DC]"
+                          className="rounded text-slate-500 hover:bg-slate-200"
                           onClick={(e) => {
                             e.stopPropagation();
                             closeTab(path);
@@ -952,7 +952,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 <button
                   onClick={saveActive}
                   disabled={busy || !activePath || !(activePath in drafts)}
-                  className="rounded border border-[#D4D0C5] px-2.5 py-1 hover:bg-[#E7E4DC] disabled:opacity-40"
+                  className="rounded border border-slate-300 px-2.5 py-1 hover:bg-slate-200 disabled:opacity-40"
                 >
                   Save
                 </button>
@@ -965,8 +965,8 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                     }
                     className={`rounded border px-2.5 py-1 ${
                       history?.name === activeSynced.name
-                        ? "border-[#14130F] bg-[#14130F] text-white"
-                        : "border-[#D4D0C5] hover:bg-[#E7E4DC]"
+                        ? "border-orange-600 bg-ink text-white"
+                        : "border-slate-300 hover:bg-slate-200"
                     }`}
                     title="The last 20 versions of this file"
                   >
@@ -975,7 +975,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 )}
                 <Link
                   to={`/admin/online-store/customize${currentThemeId ? `?theme=${encodeURIComponent(currentThemeId)}` : ""}`}
-                  className="rounded border border-[#D4D0C5] px-2.5 py-1 hover:bg-[#E7E4DC]"
+                  className="rounded border border-slate-300 px-2.5 py-1 hover:bg-slate-200"
                   title="Return to theme customizer"
                 >
                   Customizer
@@ -984,8 +984,8 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                   onClick={() => setPreviewOpen((o) => !o)}
                   className={`rounded border px-2.5 py-1 ${
                     previewOpen
-                      ? "border-[#14130F] bg-[#14130F] text-white"
-                      : "border-[#D4D0C5] hover:bg-[#E7E4DC]"
+                      ? "border-orange-600 bg-ink text-white"
+                      : "border-slate-300 hover:bg-slate-200"
                   }`}
                 >
                   Preview
@@ -995,7 +995,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             </div>
 
             {activeSynced && (
-              <div className="border-b border-[#E7E4DC] bg-[#F3F1EC] px-3 py-1.5 text-[12px] text-[#1d3f6e]">
+              <div className="border-b border-slate-200 bg-slate-100 px-3 py-1.5 text-[12px] text-[#18181B]">
                 {activeSynced.kind === "template" ? (
                   <>
                     This file lists the {activeSynced.label}&apos;s sections in the Customize
@@ -1032,29 +1032,29 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             )}
 
             {history && history.name === activeSynced?.name && (
-              <div className="max-h-56 overflow-y-auto border-b border-[#E7E4DC] bg-[#FAF9F6] px-3 py-2 text-[12px]">
-                <p className="mb-1 font-bold uppercase text-[#403E39]">History (latest first)</p>
+              <div className="max-h-56 overflow-y-auto border-b border-slate-200 bg-slate-50 px-3 py-2 text-[12px]">
+                <p className="mb-1 font-bold uppercase text-slate-700">History (latest first)</p>
                 {history.history.length === 0 && (
-                  <p className="text-[#78746A]">No earlier versions yet.</p>
+                  <p className="text-slate-500">No earlier versions yet.</p>
                 )}
                 {history.history.map((entry) => (
                   <div
                     key={entry.index}
-                    className="flex items-center gap-3 border-t border-[#F3F1EC] py-1 first:border-t-0"
+                    className="flex items-center gap-3 border-t border-slate-100 py-1 first:border-t-0"
                   >
                     <span className="w-40 shrink-0">
                       {new Date(entry.saved_at * 1000).toLocaleString()}
                     </span>
-                    <span className="w-24 shrink-0 text-[#78746A]">
+                    <span className="w-24 shrink-0 text-slate-500">
                       {SOURCE_LABELS[entry.source] || entry.source}
                     </span>
-                    <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-[#78746A]">
+                    <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-slate-500">
                       {entry.preview.split("\n")[0]}
                     </span>
                     <button
                       onClick={() => restoreVersion(history.name, entry)}
                       disabled={busy}
-                      className="shrink-0 rounded border border-[#D4D0C5] px-2 py-0.5 hover:bg-[#E7E4DC] disabled:opacity-40"
+                      className="shrink-0 rounded border border-slate-300 px-2 py-0.5 hover:bg-slate-200 disabled:opacity-40"
                     >
                       Restore
                     </button>
@@ -1064,7 +1064,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             )}
 
             {activePath === IMAGES_FILE && (
-              <div className="border-b border-[#E7E4DC] bg-[#F3F1EC] px-3 py-1.5 text-[12px] text-[#1f4b8f]">
+              <div className="border-b border-slate-200 bg-slate-100 px-3 py-1.5 text-[12px] text-[#EA580C]">
                 Pictures uploaded in the Customize editor are stored in the database and listed
                 here. Use a picture&apos;s url in a Liquid file, or pick it in the customizer. This
                 list can&apos;t be edited.
@@ -1072,7 +1072,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             )}
 
             {activePath && isSettingsFile(activePath) && (
-              <div className="border-b border-[#E7E4DC] bg-[#fff8e5] px-3 py-1.5 text-[12px] text-[#6b4e00]">
+              <div className="border-b border-slate-200 bg-[rgba(234,88,12,0.08)] px-3 py-1.5 text-[12px] text-[#18181B]">
                 These are the settings from the Customize editor. Changes made there appear here,
                 and when you save changes here they appear there. Settings that aren&apos;t valid
                 are refused.
@@ -1080,11 +1080,11 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
             )}
 
             {activePath && (
-              <div className="flex items-center gap-1 border-b border-[#E7E4DC] bg-white px-3 py-1 text-[13px] text-[#78746A]">
+              <div className="flex items-center gap-1 border-b border-slate-200 bg-white px-3 py-1 text-[13px] text-slate-500">
                 {activePath.split("/").map((seg, i, arr) => (
                   <span key={i} className="flex items-center gap-1">
                     {i > 0 && <span>›</span>}
-                    <span className={i === arr.length - 1 ? "text-[#403E39]" : ""}>{seg}</span>
+                    <span className={i === arr.length - 1 ? "text-slate-700" : ""}>{seg}</span>
                   </span>
                 ))}
               </div>
@@ -1111,7 +1111,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                   readOnly={activePath === IMAGES_FILE}
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-[#78746A]">
+                <div className="flex h-full items-center justify-center text-sm text-slate-500">
                   Open a file from the Explorer to start editing.
                 </div>
               )}
@@ -1119,18 +1119,18 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
           </section>
 
           {previewOpen && (
-            <aside className="flex w-[40%] shrink-0 flex-col border-l border-[#E7E4DC]">
-              <div className="flex items-center justify-between bg-[#FAF9F6] px-3 py-2 text-[12px]">
-                <span className="font-bold uppercase text-[#403E39]">Theme preview</span>
+            <aside className="flex w-[40%] shrink-0 flex-col border-l border-slate-200">
+              <div className="flex items-center justify-between bg-slate-50 px-3 py-2 text-[12px]">
+                <span className="font-bold uppercase text-slate-700">Theme preview</span>
                 <span className="flex gap-3">
                   <button
-                    className="hover:text-[#1E4A3A]"
+                    className="hover:text-violet-700"
                     onClick={() => setPreviewKey((k) => k + 1)}
                   >
                     Refresh
                   </button>
                   <a
-                    className="hover:text-[#1E4A3A]"
+                    className="hover:text-violet-700"
                     href={project.storefrontUrl}
                     onClick={(e) => {
                       e.preventDefault();
@@ -1154,7 +1154,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         </div>
 
         {/* Status bar */}
-        <div className="flex items-center justify-between border-t border-[#E7E4DC] bg-[#FAF9F6] px-3 py-1 text-[12px] text-[#403E39]">
+        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-3 py-1 text-[12px] text-slate-700">
           <span className={error ? "text-red-600" : ""}>
             {busy ? "Saving..." : error || savedNote || "Connected to server"}
           </span>
@@ -1173,7 +1173,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
 function IconButton({ title, onClick, children }) {
   return (
-    <button title={title} onClick={onClick} className="rounded p-0.5 hover:bg-[#E7E4DC]">
+    <button title={title} onClick={onClick} className="rounded p-0.5 hover:bg-slate-200">
       {children}
     </button>
   );
@@ -1181,10 +1181,10 @@ function IconButton({ title, onClick, children }) {
 
 function RowActions({ item, onRename, onDelete }) {
   return (
-    <span className="ml-auto hidden gap-2 text-[11px] text-[#78746A] group-hover:flex">
+    <span className="ml-auto hidden gap-2 text-[11px] text-slate-500 group-hover:flex">
       <button
         title="Rename"
-        className="hover:text-[#1E4A3A]"
+        className="hover:text-violet-700"
         onClick={(e) => {
           e.stopPropagation();
           onRename(item);

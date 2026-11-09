@@ -61,7 +61,7 @@ function FontFallback({ value }) {
   const stack = fonts.find((f) => f.key === value)?.stack || "";
   const fallback = stack.split(",").slice(1).join(", ").replace(/"/g, "");
   return fallback ? (
-    <span className="mt-1 block text-[11px] leading-snug text-[#A29E92]">Fallback: {fallback}</span>
+    <span className="mt-1 block text-[11px] leading-snug text-slate-400">Fallback: {fallback}</span>
   ) : null;
 }
 
@@ -101,7 +101,7 @@ export function FontPicker({ value, allowTheme, onChange, label }) {
         style={{ fontFamily: current?.stack }}
       >
         <span className="truncate">{current ? current.label : "Use theme font"}</span>
-        <svg {...iconProps} className="h-4 w-4 shrink-0 text-[#A29E92]">
+        <svg {...iconProps} className="h-4 w-4 shrink-0 text-slate-400">
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
@@ -109,7 +109,7 @@ export function FontPicker({ value, allowTheme, onChange, label }) {
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 right-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border border-[#E7E4DC] bg-white py-1 shadow-lg"
+          className="absolute left-0 right-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
         >
           {options.map((font) => (
             <li key={font.key || "theme"}>
@@ -121,14 +121,14 @@ export function FontPicker({ value, allowTheme, onChange, label }) {
                   onChange(font.key);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-[15px] hover:bg-[#F3F1EC] ${
-                  font.key === value ? "bg-[#DFEAE4]" : ""
+                className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-[15px] hover:bg-slate-100 ${
+                  font.key === value ? "bg-violet-100" : ""
                 }`}
                 style={{ fontFamily: font.stack }}
               >
                 {font.label}
                 {font.google && (
-                  <span className="font-sans text-[10px] uppercase text-[#A29E92]">Google</span>
+                  <span className="font-sans text-[10px] uppercase text-slate-400">Google</span>
                 )}
               </button>
             </li>
@@ -149,7 +149,7 @@ export function FontSizeInput({ spec, value, onChange }) {
         <button
           type="button"
           onClick={() => onChange(0)}
-          className={`rounded-md border px-2 py-1 text-[11px] ${!value ? "border-charcoal-navy bg-charcoal-navy text-white" : "border-[#E7E4DC] text-[#265C48] hover:border-charcoal-navy"}`}
+          className={`rounded-md border px-2 py-1 text-[11px] ${!value ? "border-charcoal-navy bg-charcoal-navy text-white" : "border-slate-200 text-violet-600 hover:border-charcoal-navy"}`}
         >
           Theme
         </button>
@@ -158,14 +158,14 @@ export function FontSizeInput({ spec, value, onChange }) {
             key={name}
             type="button"
             onClick={() => onChange(size)}
-            className={`rounded-md border px-2 py-1 text-[11px] ${value === size ? "border-charcoal-navy bg-charcoal-navy text-white" : "border-[#E7E4DC] text-[#265C48] hover:border-charcoal-navy"}`}
+            className={`rounded-md border px-2 py-1 text-[11px] ${value === size ? "border-charcoal-navy bg-charcoal-navy text-white" : "border-slate-200 text-violet-600 hover:border-charcoal-navy"}`}
           >
             {name}
           </button>
         ))}
       </div>
 
-      <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#E7E4DC] bg-white focus-within:border-charcoal-navy">
+      <div className="flex h-10 items-center overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-orange-600">
         <input
           type="number"
           min={spec.min}
@@ -184,7 +184,7 @@ export function FontSizeInput({ spec, value, onChange }) {
           className="h-full min-w-0 flex-1 px-3 text-sm outline-none"
           aria-label={spec.label}
         />
-        <span className="border-l border-[#E7E4DC] bg-[#F3F1EC] px-3 text-xs leading-10 text-[#5A5750]">
+        <span className="border-l border-slate-200 bg-slate-100 px-3 text-xs leading-10 text-slate-600">
           {spec.unit || "px"}
         </span>
       </div>
@@ -265,7 +265,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
   return (
     <div className="grid gap-2">
       {rows.map((row, i) => (
-        <div key={i} className="grid gap-1.5 rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-2.5">
+        <div key={i} className="grid gap-1.5 rounded-xl border border-slate-200 bg-slate-50 p-2.5">
           <div className="flex items-center gap-1.5">
             <input
               className={inputClass}
@@ -278,7 +278,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
               type="button"
               onClick={() => move(i, -1)}
               disabled={i === 0}
-              className="rounded p-1 text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
+              className="rounded p-1 text-slate-600 hover:text-orange-600 disabled:opacity-30"
               aria-label="Move link up"
             >
               ▲
@@ -287,7 +287,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
               type="button"
               onClick={() => move(i, 1)}
               disabled={i === rows.length - 1}
-              className="rounded p-1 text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
+              className="rounded p-1 text-slate-600 hover:text-orange-600 disabled:opacity-30"
               aria-label="Move link down"
             >
               ▼
@@ -295,7 +295,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
             <button
               type="button"
               onClick={() => commit(rows.filter((_, j) => j !== i))}
-              className="rounded p-1 text-[#5A5750] hover:text-red-600"
+              className="rounded p-1 text-slate-600 hover:text-red-600"
               aria-label="Delete link"
             >
               <svg
@@ -323,7 +323,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
       <button
         type="button"
         onClick={() => commit([...rows, { label: "", url: "" }])}
-        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-dashed border-[#E7E4DC] text-sm font-medium text-[#265C48] hover:bg-[#F3F1EC]"
+        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 text-sm font-medium text-violet-600 hover:bg-slate-100"
       >
         <span aria-hidden="true">+</span> Add link
       </button>
@@ -368,7 +368,7 @@ export function MenuPicker({ value, onChange, label }) {
       </select>
 
       {menus !== null && !menus.length && (
-        <p className="text-[11px] leading-snug text-[#5A5750]">
+        <p className="text-[11px] leading-snug text-slate-600">
           You have no menus yet. Make one in{" "}
           <a className="underline" href="/admin/online-store/content/menus">
             Online Store &gt; Menus
@@ -449,7 +449,7 @@ export function SocialLinksEditor({ value, onChange, label }) {
   return (
     <div className="grid gap-2">
       {rows.map((row, i) => (
-        <div key={i} className="grid gap-1.5 rounded-xl border border-[#E7E4DC] bg-[#FAF9F6] p-2.5">
+        <div key={i} className="grid gap-1.5 rounded-xl border border-slate-200 bg-slate-50 p-2.5">
           <div className="flex items-center gap-1.5">
             <select
               className={inputClass}
@@ -467,7 +467,7 @@ export function SocialLinksEditor({ value, onChange, label }) {
               type="button"
               onClick={() => move(i, -1)}
               disabled={i === 0}
-              className="rounded p-1 text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
+              className="rounded p-1 text-slate-600 hover:text-orange-600 disabled:opacity-30"
               aria-label="Move link up"
             >
               ▲
@@ -476,7 +476,7 @@ export function SocialLinksEditor({ value, onChange, label }) {
               type="button"
               onClick={() => move(i, 1)}
               disabled={i === rows.length - 1}
-              className="rounded p-1 text-[#5A5750] hover:text-charcoal-navy disabled:opacity-30"
+              className="rounded p-1 text-slate-600 hover:text-orange-600 disabled:opacity-30"
               aria-label="Move link down"
             >
               ▼
@@ -484,7 +484,7 @@ export function SocialLinksEditor({ value, onChange, label }) {
             <button
               type="button"
               onClick={() => commit(rows.filter((_, j) => j !== i))}
-              className="rounded p-1 text-[#5A5750] hover:text-red-600"
+              className="rounded p-1 text-slate-600 hover:text-red-600"
               aria-label="Delete link"
             >
               ✕
@@ -524,7 +524,7 @@ export function SocialLinksEditor({ value, onChange, label }) {
       <button
         type="button"
         onClick={() => commit([...rows, { network: "instagram", url: "", label: "", icon: "" }])}
-        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-dashed border-[#E7E4DC] text-sm font-medium text-[#265C48] hover:bg-[#F3F1EC]"
+        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 text-sm font-medium text-violet-600 hover:bg-slate-100"
       >
         <span aria-hidden="true">+</span> Add social link
       </button>
@@ -547,7 +547,7 @@ export function ResetToTheme({ spec, value, onChange, any = false }) {
     <button
       type="button"
       onClick={() => onChange(structuredClone(spec.default))}
-      className="mt-1 text-[11px] font-medium text-[#265C48] underline-offset-2 hover:underline"
+      className="mt-1 text-[11px] font-medium text-violet-600 underline-offset-2 hover:underline"
     >
       {spec.theme_default ? "Reset to theme default" : "Reset to default"}
     </button>
@@ -579,7 +579,7 @@ function ContrastWarning({ spec, values }) {
   const ratio = contrastRatio(a, b);
   if (ratio >= 4.5) return null;
   return (
-    <p role="status" className="mt-1 text-[11px] font-medium leading-snug text-[#9A3412]">
+    <p role="status" className="mt-1 text-[11px] font-medium leading-snug text-[#EA580C]">
       Low contrast ({ratio.toFixed(1)}:1). Text may be hard to read; aim for at least 4.5:1.
     </p>
   );
@@ -610,7 +610,7 @@ function HexInput({ value, onChange, label }) {
       }}
       onBlur={() => setText(value || "")}
       className={`h-10 w-24 rounded-lg border px-2 text-sm tabular-nums uppercase ${
-        invalid ? "border-[#B91C1C]" : "border-[#E7E4DC]"
+        invalid ? "border-[#EA580C]" : "border-slate-200"
       }`}
     />
   );
@@ -669,11 +669,11 @@ export function GroupedFields({
         const isOpen = Boolean(open[group.id]);
 
         return (
-          <section key={group.id} className="border-b border-[#F3F1EC] last:border-b-0">
+          <section key={group.id} className="border-b border-slate-100 last:border-b-0">
             <button
               type="button"
               onClick={() => toggle(group.id)}
-              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-charcoal-navy hover:bg-[#F3F1EC]"
+              className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold text-charcoal-navy hover:bg-slate-100"
               aria-expanded={isOpen}
               aria-controls={`group-${group.id}`}
             >
@@ -681,7 +681,7 @@ export function GroupedFields({
 
               <svg
                 {...iconProps}
-                className={`h-4 w-4 text-[#A29E92] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               >
                 <path d="m6 9 6 6 6-6" />
               </svg>
@@ -721,7 +721,7 @@ export function GroupedFields({
 
 export function Help({ spec }) {
   return spec.help ? (
-    <span className="mt-1 block text-[11px] leading-snug text-[#A29E92]">{spec.help}</span>
+    <span className="mt-1 block text-[11px] leading-snug text-slate-400">{spec.help}</span>
   ) : null;
 }
 
@@ -733,7 +733,9 @@ export const Field = memo(function Field({
   catalogErrors = {},
   onChange,
 }) {
-  const label = <span className="mb-1 block text-xs font-medium text-[#265C48]">{spec.label}</span>;
+  const label = (
+    <span className="mb-1 block text-xs font-medium text-violet-600">{spec.label}</span>
+  );
 
   switch (spec.type) {
     case "checkbox":
@@ -749,7 +751,7 @@ export const Field = memo(function Field({
                 checked={Boolean(value)}
                 onChange={(e) => onChange(e.target.checked)}
               />
-              <span className="h-5 w-9 rounded-full bg-[#D4D0C5] transition-colors peer-checked:bg-charcoal-navy peer-focus-visible:ring-2 peer-focus-visible:ring-[#14130F]/30" />
+              <span className="h-5 w-9 rounded-full bg-slate-300 transition-colors peer-checked:bg-orange-600 peer-focus-visible:ring-2 peer-focus-visible:ring-ink/30" />
               <span className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
             </span>
           </label>
@@ -761,9 +763,9 @@ export const Field = memo(function Field({
     case "range":
       return (
         <label className="block">
-          <span className="mb-1 flex items-center justify-between text-xs font-medium text-[#265C48]">
+          <span className="mb-1 flex items-center justify-between text-xs font-medium text-violet-600">
             {spec.label}
-            <span className="tabular-nums text-[#5A5750]">
+            <span className="tabular-nums text-slate-600">
               {value}
               {spec.unit || ""}
             </span>
@@ -776,7 +778,7 @@ export const Field = memo(function Field({
             step={spec.step || 1}
             value={value}
             onChange={(e) => onChange(Number(e.target.value))}
-            className="w-full accent-charcoal-navy"
+            className="w-full accent-orange-600"
           />
 
           <Help spec={spec} />
@@ -788,7 +790,7 @@ export const Field = memo(function Field({
         <label className="block">
           {label}
 
-          <div className="flex h-10 items-center overflow-hidden rounded-lg border border-[#E7E4DC] bg-white focus-within:border-charcoal-navy">
+          <div className="flex h-10 items-center overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-orange-600">
             <input
               type="number"
               min={spec.min}
@@ -809,7 +811,7 @@ export const Field = memo(function Field({
               className="h-full min-w-0 flex-1 px-3 text-sm outline-none"
             />
             {spec.unit && (
-              <span className="border-l border-[#E7E4DC] bg-[#F3F1EC] px-3 text-xs leading-10 text-[#5A5750]">
+              <span className="border-l border-slate-200 bg-slate-100 px-3 text-xs leading-10 text-slate-600">
                 {spec.unit}
               </span>
             )}
@@ -826,7 +828,7 @@ export const Field = memo(function Field({
             {label}
 
             <div
-              className="flex rounded-lg border border-[#E7E4DC] bg-[#F3F1EC] p-0.5"
+              className="flex rounded-lg border border-slate-200 bg-slate-100 p-0.5"
               role="radiogroup"
               aria-label={spec.label}
             >
@@ -840,7 +842,7 @@ export const Field = memo(function Field({
                   className={`min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
                     value === o
                       ? "bg-white text-charcoal-navy shadow-sm"
-                      : "text-[#5A5750] hover:text-charcoal-navy"
+                      : "text-slate-600 hover:text-orange-600"
                   }`}
                 >
                   {optionLabel(spec, o)}
@@ -879,7 +881,7 @@ export const Field = memo(function Field({
               type="color"
               value={value}
               onChange={(e) => onChange(e.target.value.toUpperCase())}
-              className="h-10 w-12 rounded border border-[#E7E4DC]"
+              className="h-10 w-12 rounded border border-slate-200"
               aria-label={spec.label}
             />
 
@@ -900,7 +902,7 @@ export const Field = memo(function Field({
               type="color"
               value={value || "#FFFFFF"}
               onChange={(e) => onChange(e.target.value.toUpperCase())}
-              className={`h-10 w-12 rounded border border-[#E7E4DC] ${value ? "" : "opacity-40"}`}
+              className={`h-10 w-12 rounded border border-slate-200 ${value ? "" : "opacity-40"}`}
               aria-label={spec.label}
             />
 
@@ -912,7 +914,7 @@ export const Field = memo(function Field({
               type="button"
               disabled={!value}
               onClick={() => onChange("")}
-              className="rounded-md border border-[#E7E4DC] px-2 py-1 text-xs text-[#265C48] hover:border-charcoal-navy disabled:opacity-40"
+              className="rounded-md border border-slate-200 px-2 py-1 text-xs text-violet-600 hover:border-orange-600 disabled:opacity-40"
             >
               {spec.palette ? "Use palette" : "None"}
             </button>
@@ -920,7 +922,7 @@ export const Field = memo(function Field({
 
           {/* Whether this element follows the palette or has its own colour */}
           {spec.palette && (
-            <p className="mt-1 text-xs text-[#5A5750]" data-testid="color-source">
+            <p className="mt-1 text-xs text-slate-600" data-testid="color-source">
               {value ? "Own colour" : `Follows the palette (${spec.palette})`}
             </p>
           )}
@@ -1070,10 +1072,10 @@ export const Field = memo(function Field({
             spellCheck={false}
             placeholder='<iframe src="https://www.google.com/maps/embed?..."></iframe>'
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-[#E7E4DC] px-3 py-2 font-mono text-xs outline-none focus:border-charcoal-navy"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs outline-none focus:border-orange-600"
           />
 
-          <span className="mt-1 block text-[11px] leading-snug text-[#5A5750]">
+          <span className="mt-1 block text-[11px] leading-snug text-slate-600">
             Scripts and unsafe code are removed when you save. Embeds work from Google Maps, Google
             Forms, Spotify, SoundCloud and Calendly.
           </span>
@@ -1132,10 +1134,10 @@ export const Field = memo(function Field({
             spellCheck={false}
             placeholder=".product-card__title { letter-spacing: .02em; }"
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-[#E7E4DC] px-3 py-2 font-mono text-xs outline-none focus:border-charcoal-navy"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs outline-none focus:border-orange-600"
           />
 
-          <p className="text-right text-xs text-[#A29E92]">
+          <p className="text-right text-xs text-slate-400">
             {(value || "").length} / {spec.max}
           </p>
 
@@ -1153,7 +1155,7 @@ export const Field = memo(function Field({
             value={value}
             spellCheck
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-[#E7E4DC] px-3 py-2 text-sm outline-none focus:border-charcoal-navy"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-orange-600"
           />
 
           <Help spec={spec} />
@@ -1256,11 +1258,11 @@ export function SectionBlocks({
   }
 
   return (
-    <div className="border-t border-[#F3F1EC] pt-4">
+    <div className="border-t border-slate-100 pt-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">
           Blocks{" "}
-          <span className="font-normal text-[#A29E92]">
+          <span className="font-normal text-slate-400">
             ({blocks.length}/{spec.max_blocks})
           </span>
         </h3>
@@ -1278,7 +1280,7 @@ export function SectionBlocks({
 
       {menu && (
         <div
-          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-[#E7E4DC] bg-[#F3F1EC] p-2"
+          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-slate-200 bg-slate-100 p-2"
           role="menu"
         >
           {types.map(([type, blockSpec]) => (
@@ -1293,7 +1295,7 @@ export function SectionBlocks({
                   : undefined
               }
               onClick={() => add(type, blockSpec)}
-              className="truncate rounded-md border border-[#E7E4DC] bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-charcoal-navy disabled:opacity-40 disabled:hover:border-[#E7E4DC]"
+              className="truncate rounded-md border border-slate-200 bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200"
             >
               {blockSpec.name}
             </button>
@@ -1302,7 +1304,7 @@ export function SectionBlocks({
       )}
 
       {blocks.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-[#E7E4DC] px-3 py-4 text-center text-xs text-[#5A5750]">
+        <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-xs text-slate-600">
           No blocks yet. Use "+ Add block" to add text, images, buttons, lists and more.
         </p>
       ) : (
@@ -1326,7 +1328,7 @@ export function SectionBlocks({
               <li
                 key={i}
                 data-drop-block={`${sectionId}|${i}`}
-                className={`relative rounded-lg border border-[#E7E4DC] bg-white ${dragging ? "opacity-40" : ""}`}
+                className={`relative rounded-lg border border-slate-200 bg-white ${dragging ? "opacity-40" : ""}`}
               >
                 {lineHere && <DropLine after={dropTarget.after} />}
 
@@ -1348,7 +1350,7 @@ export function SectionBlocks({
 
                   <button
                     type="button"
-                    className={`min-w-0 flex-1 truncate text-left ${block.hidden ? "text-[#A29E92]" : ""}`}
+                    className={`min-w-0 flex-1 truncate text-left ${block.hidden ? "text-slate-400" : ""}`}
                     onClick={() => onOpen(i)}
                     title={title}
                   >
@@ -1401,7 +1403,7 @@ export function SectionBlocks({
       )}
 
       {blocks.length > 0 && (
-        <p className="mt-2 text-[11px] text-[#A29E92]">
+        <p className="mt-2 text-[11px] text-slate-400">
           Click a block to edit it. Drag by the handle to reorder, or onto another section that
           appears below.
         </p>
@@ -1436,10 +1438,10 @@ export function GroupChildren({
   }
 
   return (
-    <div className="border-t border-[#F3F1EC] py-4">
+    <div className="border-t border-slate-100 py-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">
-          Blocks in group <span className="font-normal text-[#A29E92]">({items.length}/12)</span>
+          Blocks in group <span className="font-normal text-slate-400">({items.length}/12)</span>
         </h3>
         <button
           type="button"
@@ -1453,7 +1455,7 @@ export function GroupChildren({
 
       {menu && (
         <div
-          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-[#E7E4DC] bg-[#F3F1EC] p-2"
+          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-slate-200 bg-slate-100 p-2"
           role="menu"
         >
           {types.map(([type, blockSpec]) => (
@@ -1468,7 +1470,7 @@ export function GroupChildren({
                 setOpen(items.length);
                 setMenu(false);
               }}
-              className="truncate rounded-md border border-[#E7E4DC] bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-charcoal-navy"
+              className="truncate rounded-md border border-slate-200 bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-orange-600"
             >
               {blockSpec.name}
             </button>
@@ -1477,7 +1479,7 @@ export function GroupChildren({
       )}
 
       {items.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-[#E7E4DC] px-3 py-4 text-center text-xs text-[#5A5750]">
+        <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-xs text-slate-600">
           This group is empty. Use "+ Add block" to put blocks inside it.
         </p>
       ) : (
@@ -1487,11 +1489,11 @@ export function GroupChildren({
             if (!childSpec) return null;
             const isOpen = open === i;
             return (
-              <li key={i} className="rounded-lg border border-[#E7E4DC] bg-white">
+              <li key={i} className="rounded-lg border border-slate-200 bg-white">
                 <div className="flex items-center gap-1 px-1.5 py-1.5 text-sm">
                   <button
                     type="button"
-                    className={`min-w-0 flex-1 truncate text-left ${child.hidden ? "text-[#A29E92]" : ""}`}
+                    className={`min-w-0 flex-1 truncate text-left ${child.hidden ? "text-slate-400" : ""}`}
                     onClick={() => setOpen(isOpen ? null : i)}
                     aria-expanded={isOpen}
                   >
@@ -1542,7 +1544,7 @@ export function GroupChildren({
                   </button>
                 </div>
                 {isOpen && (
-                  <div className="border-t border-[#F3F1EC] px-4 py-2">
+                  <div className="border-t border-slate-100 px-4 py-2">
                     <GroupedFields
                       fields={childSpec.settings}
                       values={child.settings}
@@ -1693,18 +1695,18 @@ export function ImageUpload({ value, onChange }) {
   return (
     <div>
       {shown ? (
-        <div className="relative overflow-hidden rounded-lg border border-[#E7E4DC]">
+        <div className="relative overflow-hidden rounded-lg border border-slate-200">
           <img
             src={shown}
             alt=""
             loading="lazy"
-            className="h-28 w-full object-contain bg-[#FAF9F6] p-2"
+            className="h-28 w-full object-contain bg-slate-50 p-2"
           />
 
           {progress !== null && (
             <div className="absolute inset-x-0 top-0 h-1 bg-black/10" aria-label="Uploading">
               <div
-                className="h-full bg-charcoal-navy transition-[width] duration-150"
+                className="h-full bg-orange-600 transition-[width] duration-150"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>
@@ -1744,7 +1746,7 @@ export function ImageUpload({ value, onChange }) {
             e.preventDefault();
             choose(e.dataTransfer.files?.[0]);
           }}
-          className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-[#E7E4DC] text-xs text-[#5A5750] hover:border-charcoal-navy"
+          className="flex h-24 w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-600 hover:border-orange-600"
         >
           <span className="font-medium text-charcoal-navy">Upload image</span>
           JPG, PNG or WEBP, up to 1MB
@@ -1778,9 +1780,9 @@ export function ProductPicker({ value, products, max, noun = "products", error, 
   );
 
   return (
-    <div className="rounded-lg border border-[#E7E4DC]">
+    <div className="rounded-lg border border-slate-200">
       {value.length > 0 && (
-        <ul className="divide-y divide-[#F3F1EC] border-b border-[#E7E4DC]">
+        <ul className="divide-y divide-slate-100 border-b border-slate-200">
           {value.map((id) => (
             <li key={id} className="flex items-center gap-2 px-3 py-2 text-sm">
               <span className="min-w-0 flex-1 truncate">
@@ -1790,7 +1792,7 @@ export function ProductPicker({ value, products, max, noun = "products", error, 
               <button
                 type="button"
                 onClick={() => onChange(value.filter((v) => v !== id))}
-                className="text-xs text-[#5A5750] hover:text-red-600"
+                className="text-xs text-slate-600 hover:text-red-600"
                 aria-label={`Remove ${byId[id]?.title || "item"}`}
               >
                 Remove
@@ -1803,18 +1805,18 @@ export function ProductPicker({ value, products, max, noun = "products", error, 
       {error ? (
         <p className="px-3 py-2.5 text-xs text-red-600">{error}</p>
       ) : products.length === 0 ? (
-        <p className="px-3 py-2.5 text-xs text-[#5A5750]">
+        <p className="px-3 py-2.5 text-xs text-slate-600">
           Add {noun} first, then choose them here.
         </p>
       ) : value.length >= max ? (
-        <p className="px-3 py-2.5 text-xs text-[#5A5750]">You've chosen the maximum of {max}.</p>
+        <p className="px-3 py-2.5 text-xs text-slate-600">You've chosen the maximum of {max}.</p>
       ) : (
         <div className="p-2">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${noun} to add`}
-            className="h-9 w-full rounded-md border border-[#E7E4DC] px-2.5 text-sm outline-none focus:border-charcoal-navy"
+            className="h-9 w-full rounded-md border border-slate-200 px-2.5 text-sm outline-none focus:border-orange-600"
           />
 
           <ul className="mt-1 max-h-40 overflow-y-auto">
@@ -1823,12 +1825,12 @@ export function ProductPicker({ value, products, max, noun = "products", error, 
                 <button
                   type="button"
                   onClick={() => onChange([...value, p.id])}
-                  className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-[#F3F1EC]"
+                  className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-slate-100"
                 >
                   <span className="min-w-0 truncate">{p.title}</span>
 
                   {p.status !== "active" && (
-                    <span className="shrink-0 text-[10px] uppercase text-[#A29E92]">
+                    <span className="shrink-0 text-[10px] uppercase text-slate-400">
                       {p.status}
                     </span>
                   )}
@@ -1837,14 +1839,14 @@ export function ProductPicker({ value, products, max, noun = "products", error, 
             ))}
 
             {matches.length === 0 && (
-              <li className="px-2 py-1.5 text-xs text-[#5A5750]">No matching {noun}.</li>
+              <li className="px-2 py-1.5 text-xs text-slate-600">No matching {noun}.</li>
             )}
           </ul>
         </div>
       )}
 
       {value.some((id) => byId[id] && byId[id].status !== "active") && (
-        <p className="border-t border-[#E7E4DC] px-3 py-2 text-xs text-[#5A5750]">
+        <p className="border-t border-slate-200 px-3 py-2 text-xs text-slate-600">
           Only active products appear on your store.
         </p>
       )}
@@ -1889,8 +1891,8 @@ export function RichTextEditor({ value, onChange }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[#E7E4DC] focus-within:border-charcoal-navy">
-      <div className="flex flex-wrap gap-1 border-b border-[#E7E4DC] bg-[#F3F1EC] p-1">
+    <div className="overflow-hidden rounded-lg border border-slate-200 focus-within:border-orange-600">
+      <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-100 p-1">
         {RICH_TEXT_TOOLS.map((tool) => (
           <button
             key={tool.title}
@@ -1914,7 +1916,7 @@ export function RichTextEditor({ value, onChange }) {
         aria-multiline="true"
         onFocus={preferParagraphs}
         onInput={(e) => onChange(e.currentTarget.innerHTML)}
-        className="min-h-30 px-3 py-2 text-sm leading-relaxed outline-none [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-[#D4D0C5] [&_blockquote]:pl-3 [&_blockquote]:italic [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+        className="min-h-30 px-3 py-2 text-sm leading-relaxed outline-none [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
       />
     </div>
   );
@@ -1943,7 +1945,7 @@ export const LAYOUT_ROWS = [
 // A labelled group in the sections list (Header / Template / Footer), divided from the one above
 export function GroupHeading({ children }) {
   return (
-    <h3 className="mt-4 px-5 pb-2 pt-4 text-[11px] font-medium uppercase tracking-[0.14em] text-[#78746A]">
+    <h3 className="mt-4 px-5 pb-2 pt-4 text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">
       {children}
     </h3>
   );
@@ -1965,16 +1967,16 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
               type="button"
               onClick={() => onOpen(row.group)}
               className={`flex h-8 min-w-0 flex-1 items-center gap-2 rounded-lg pl-1.5 pr-1 text-left text-[13px] ${
-                active ? "bg-[#F3F1EC] font-medium" : "hover:bg-[#FAF9F6]"
+                active ? "bg-slate-100 font-medium" : "hover:bg-slate-50"
               }`}
             >
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[#78746A]">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-slate-500">
                 <svg {...iconProps} className="h-4 w-4">
                   <path d={row.icon} />
                 </svg>
               </span>
               <span className="min-w-0 flex-1 truncate">
-                {row.name} <span className="text-xs text-[#A29E92]">{row.hint}</span>
+                {row.name} <span className="text-xs text-slate-400">{row.hint}</span>
               </span>
             </button>
             {row.file && (
@@ -1986,7 +1988,7 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
                 target="_blank"
                 rel="noopener noreferrer"
                 title={`Edit code: ${row.file}`}
-                className="shrink-0 rounded px-1.5 text-xs text-[#78746A] hover:bg-[#F3F1EC]"
+                className="shrink-0 rounded px-1.5 text-xs text-slate-500 hover:bg-slate-100"
               >
                 Edit code
               </a>
@@ -2000,7 +2002,7 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
 
 export function CenteredMessage({ children }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F3F1EC] px-6 text-center text-sm text-[#5A5750]">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 text-center text-sm text-slate-600">
       <p>{children}</p>
     </div>
   );

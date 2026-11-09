@@ -42,7 +42,7 @@ export default function NavBar() {
                   <Link
                     key={link.name}
                     to={link.href}
-                    className="text-sm text-slate-600 hover:text-ink"
+                    className="text-sm text-slate-600 hover:text-orange-600"
                   >
                     {link.name}
                   </Link>
@@ -50,7 +50,7 @@ export default function NavBar() {
                   <a
                     key={link.name}
                     href={link.href}
-                    className="text-sm text-slate-600 hover:text-ink"
+                    className="text-sm text-slate-600 hover:text-orange-600"
                   >
                     {link.name}
                   </a>
@@ -96,7 +96,7 @@ export default function NavBar() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 text-slate-600 hover:text-ink hover:bg-slate-50 rounded-full transition-colors"
+                  className="p-2 text-slate-600 hover:text-orange-600 hover:bg-slate-50 rounded-full transition-colors"
                   aria-label="Search"
                   title="Search"
                 >
@@ -118,7 +118,7 @@ export default function NavBar() {
                 to={profileHref}
                 className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-charcoal-navy text-white">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-white">
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -139,14 +139,17 @@ export default function NavBar() {
             ) : (
               <>
                 {/* Login Link */}
-                <Link to="/auth/signin" className="text-sm text-slate-700 hover:text-ink px-2 py-1">
+                <Link
+                  to="/auth/signin"
+                  className="text-sm text-slate-700 hover:text-orange-600 px-2 py-1"
+                >
                   Login
                 </Link>
 
                 {/* Create Store CTA Button */}
                 <Link
                   to={ONBOARDING_PATH}
-                  className="bg-ink hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-md inline-flex items-center justify-center whitespace-nowrap"
+                  className="bg-orange-600 hover:bg-orange-600/90 text-white text-sm font-medium px-4 py-2 rounded-md inline-flex items-center justify-center whitespace-nowrap"
                 >
                   Create Store
                 </Link>
@@ -158,7 +161,7 @@ export default function NavBar() {
           <div className="flex md:hidden items-center space-x-2">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900 rounded-md"
+              className="p-2 text-slate-600 hover:text-orange-600 rounded-md"
               aria-label="Toggle search"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +176,7 @@ export default function NavBar() {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
+              className="p-2 rounded-md text-slate-700 hover:text-orange-600 hover:bg-slate-100 focus:outline-none"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? (
@@ -238,7 +241,7 @@ export default function NavBar() {
                     key={link.name}
                     {...(link.isRoute ? { to: link.href } : { href: link.href })}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-ink hover:bg-slate-50 transition-colors"
+                    className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50 transition-colors"
                   >
                     {link.name}
                   </Tag>
@@ -253,7 +256,7 @@ export default function NavBar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-slate-50"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-charcoal-navy text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-white">
                     <svg
                       className="w-4 h-4"
                       fill="none"
@@ -277,14 +280,14 @@ export default function NavBar() {
                 <Link
                   to="/auth/signin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-ink hover:bg-slate-50 transition-colors"
+                  className="px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-orange-600 hover:bg-slate-50 transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to={ONBOARDING_PATH}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full mt-2 bg-ink hover:bg-slate-800 text-white font-medium py-3 px-4 rounded-md text-center"
+                  className="w-full mt-2 bg-orange-600 hover:bg-orange-600/90 text-white font-medium py-3 px-4 rounded-md text-center"
                 >
                   Create Store
                 </Link>

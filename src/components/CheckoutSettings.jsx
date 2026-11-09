@@ -6,7 +6,7 @@ import { getActiveStore, getSession } from "@/lib/auth";
 // Every change saves straight away.
 
 const card = "rounded-2xl border border-slate-200 bg-white shadow-sm";
-const linkCls = "underline hover:text-[#14130F]";
+const linkCls = "underline hover:text-orange-600";
 
 const FIELD_OPTIONS = [
   { value: "hidden", label: "Don't include" },
@@ -40,7 +40,7 @@ function Select({ value, options, onChange, label, disabled }) {
       value={value}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-[#14130F] hover:bg-slate-200 disabled:opacity-60"
+      className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-ink hover:bg-slate-200 disabled:opacity-60"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -54,7 +54,7 @@ function Select({ value, options, onChange, label, disabled }) {
 function Row({ title, action }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-      <div className="text-sm text-[#14130F]">{title}</div>
+      <div className="text-sm text-ink">{title}</div>
       {action}
     </div>
   );
@@ -127,16 +127,16 @@ export default function CheckoutSettings({ onOpenSection }) {
 
       <div className="flex flex-col gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-[#14130F]">Customer contact method</h2>
+          <h2 className="text-sm font-semibold text-ink">Customer contact method</h2>
           <p className="text-sm text-slate-500">
             Customers enter their email at checkout to receive order and shipping notifications.
           </p>
         </div>
         <section className={`${card} px-5 py-4`}>
-          <label className="flex items-start gap-3 text-sm text-[#14130F]">
+          <label className="flex items-start gap-3 text-sm text-ink">
             <input
               type="checkbox"
-              className="mt-0.5 h-4 w-4 accent-[#14130F]"
+              className="mt-0.5 h-4 w-4 accent-orange-600"
               checked={values.checkoutRequireLogin}
               disabled={saving}
               onChange={(e) => update({ checkoutRequireLogin: e.target.checked })}
@@ -160,7 +160,7 @@ export default function CheckoutSettings({ onOpenSection }) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#14130F]">Customer information</h2>
+        <h2 className="text-sm font-semibold text-ink">Customer information</h2>
         <section className={`${card} divide-y divide-slate-100`}>
           <Row
             title="Full name"
@@ -215,7 +215,7 @@ export default function CheckoutSettings({ onOpenSection }) {
 
       <div className="flex flex-col gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-[#14130F]">Marketing opt-in</h2>
+          <h2 className="text-sm font-semibold text-ink">Marketing opt-in</h2>
           <p className="text-sm text-slate-500">
             Show a checkbox for customers to sign up for marketing
           </p>
@@ -252,7 +252,7 @@ export default function CheckoutSettings({ onOpenSection }) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#14130F]">Checkout language</h2>
+        <h2 className="text-sm font-semibold text-ink">Checkout language</h2>
         <section className={card}>
           <Row
             title="Translate your checkout in each language you sell in"
@@ -260,7 +260,7 @@ export default function CheckoutSettings({ onOpenSection }) {
               <button
                 type="button"
                 onClick={() => onOpenSection?.("Languages")}
-                className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-[#14130F] hover:bg-slate-200"
+                className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-ink hover:bg-slate-200"
               >
                 Manage languages
               </button>

@@ -108,7 +108,7 @@ function BankPayoutSettings() {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-5">
-        <h2 className="text-lg font-semibold text-[#14130F]">Bank account payout</h2>
+        <h2 className="text-lg font-semibold text-ink">Bank account payout</h2>
         <p className="mt-1 text-sm text-slate-500">
           Add your bank details and we'll send your store's earnings straight to your account.
         </p>
@@ -149,7 +149,7 @@ function BankPayoutSettings() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60"
+                className="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-60"
               >
                 {saving ? "Saving…" : "Save bank details"}
               </button>
@@ -206,7 +206,7 @@ function BankPayoutSettings() {
             <button
               type="button"
               onClick={startEdit}
-              className="rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916]"
+              className="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600/90"
             >
               Add bank account
             </button>
@@ -292,7 +292,7 @@ function StripeSettings() {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-5">
-        <h2 className="text-lg font-semibold text-[#14130F]">Stripe</h2>
+        <h2 className="text-lg font-semibold text-ink">Stripe</h2>
         <p className="mt-1 text-sm text-slate-500">
           Accept cards and wallets at checkout. Enter the API keys from your Stripe dashboard
           (Developers → API keys). We check them with Stripe before connecting, and payments go
@@ -331,7 +331,7 @@ function StripeSettings() {
               <button
                 type="submit"
                 disabled={working}
-                className="rounded-lg bg-[#14130F] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1A1916] disabled:opacity-60"
+                className="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-60"
               >
                 {working ? "Verifying with Stripe…" : "Verify and connect"}
               </button>

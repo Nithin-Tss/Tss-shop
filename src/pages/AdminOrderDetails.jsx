@@ -402,7 +402,7 @@ export default function AdminOrderDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+      <div className="min-h-screen bg-slate-100 text-charcoal-navy">
         <AdminHeader />
         <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
           <AdminSidebar />
@@ -412,12 +412,12 @@ export default function AdminOrderDetails() {
               <div className="h-10 w-64 bg-slate-200 rounded" />
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                  <div className="h-64 bg-white rounded-2xl border border-[#E7E4DC]" />
-                  <div className="h-64 bg-white rounded-2xl border border-[#E7E4DC]" />
+                  <div className="h-64 bg-white rounded-2xl border border-slate-200" />
+                  <div className="h-64 bg-white rounded-2xl border border-slate-200" />
                 </div>
                 <div className="space-y-6">
-                  <div className="h-40 bg-white rounded-2xl border border-[#E7E4DC]" />
-                  <div className="h-40 bg-white rounded-2xl border border-[#E7E4DC]" />
+                  <div className="h-40 bg-white rounded-2xl border border-slate-200" />
+                  <div className="h-40 bg-white rounded-2xl border border-slate-200" />
                 </div>
               </div>
             </div>
@@ -429,12 +429,12 @@ export default function AdminOrderDetails() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+      <div className="min-h-screen bg-slate-100 text-charcoal-navy">
         <AdminHeader />
         <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
           <AdminSidebar />
           <main className="flex-1 px-4 sm:px-8 py-16 flex flex-col items-center justify-center">
-            <div className="bg-white p-8 rounded-2xl border border-[#E7E4DC] text-center max-w-md shadow-sm">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center max-w-md shadow-sm">
               <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xl mx-auto mb-4">
                 !
               </div>
@@ -442,7 +442,7 @@ export default function AdminOrderDetails() {
               <p className="text-sm text-slate-600 mb-6">{error || "Could not load this order."}</p>
               <Link
                 to="/admin/online-store/orders"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-charcoal-navy text-white text-sm font-semibold hover:bg-[#1A1916] transition"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-600 text-white text-sm font-semibold hover:bg-orange-600/90 transition"
               >
                 ← Back to Orders
               </Link>
@@ -454,7 +454,7 @@ export default function AdminOrderDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+    <div className="min-h-screen bg-slate-100 text-charcoal-navy">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
@@ -493,7 +493,7 @@ export default function AdminOrderDetails() {
               {/* Back Link */}
               <Link
                 to="/admin/online-store/orders"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition mb-2"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-orange-600 transition mb-2"
               >
                 <span>←</span> Orders
               </Link>
@@ -508,28 +508,28 @@ export default function AdminOrderDetails() {
 
                 {/* Status Badges */}
                 {isCancelled && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFEBE6] text-[#C93B2B] border border-[#F8C4BC]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#C93B2B]" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[rgba(234,88,12,0.08)] text-orange-700 border border-[rgba(234,88,12,0.25)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-700" />
                     Canceled
                   </span>
                 )}
 
                 {isPending && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFF4E5] text-[#B76E00] border border-[#FFE2B8]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#B76E00]" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[rgba(234,88,12,0.08)] text-orange-700 border border-orange-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-700" />
                     Payment pending
                   </span>
                 )}
 
                 {isPartiallyPaid && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEF3E2] text-[#9A4B00] border border-[#FCD399]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#C25E00]" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-700" />
                     Partially paid
                   </span>
                 )}
 
                 {isPaid && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-charcoal-navy">
                     <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                     Paid
                   </span>
@@ -550,14 +550,14 @@ export default function AdminOrderDetails() {
                 )}
 
                 {!isCancelled && isUnfulfilled && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFFBEA] text-[#8C6B00] border border-[#FDE68A]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
                     Unfulfilled
                   </span>
                 )}
 
                 {!isCancelled && isFulfilled && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F3F1EC] text-charcoal-navy">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-charcoal-navy">
                     <span className="w-1.5 h-1.5 rounded-full bg-charcoal-navy" />
                     Fulfilled
                   </span>
@@ -593,7 +593,7 @@ export default function AdminOrderDetails() {
                 <button
                   type="button"
                   onClick={() => setShowRefundModal(true)}
-                  className="rounded-lg bg-white border border-[#E7E4DC] px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                  className="rounded-lg bg-white border border-slate-200 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                 >
                   Refund
                 </button>
@@ -604,7 +604,7 @@ export default function AdminOrderDetails() {
                 <button
                   type="button"
                   onClick={() => showToast("Return workflow initiated.")}
-                  className="rounded-lg bg-white border border-[#E7E4DC] px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                  className="rounded-lg bg-white border border-slate-200 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                 >
                   Return
                 </button>
@@ -614,7 +614,7 @@ export default function AdminOrderDetails() {
               <button
                 type="button"
                 onClick={() => setShowNotesModal(true)}
-                className="rounded-lg bg-white border border-[#E7E4DC] px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                className="rounded-lg bg-white border border-slate-200 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
               >
                 Edit
               </button>
@@ -624,14 +624,14 @@ export default function AdminOrderDetails() {
                 <button
                   type="button"
                   onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-1.5 rounded-lg bg-white border border-[#E7E4DC] px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                 >
                   More actions
                   <span className="text-xs">⌄</span>
                 </button>
 
                 {isMoreMenuOpen && (
-                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#E7E4DC] bg-white py-1.5 shadow-lg z-20 text-xs sm:text-sm">
+                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white py-1.5 shadow-lg z-20 text-xs sm:text-sm">
                     {order.status === "open" && isUnfulfilled && (
                       <button
                         type="button"
@@ -650,7 +650,7 @@ export default function AdminOrderDetails() {
                         setIsMoreMenuOpen(false);
                         setShowEmailModal(true);
                       }}
-                      className="w-full text-left px-4 py-2 text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       View confirmation email
                     </button>
@@ -660,7 +660,7 @@ export default function AdminOrderDetails() {
                         setIsMoreMenuOpen(false);
                         window.print();
                       }}
-                      className="w-full text-left px-4 py-2 text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Print packing slip
                     </button>
@@ -670,7 +670,7 @@ export default function AdminOrderDetails() {
                         setIsMoreMenuOpen(false);
                         showToast("Invoice sent to customer email.");
                       }}
-                      className="w-full text-left px-4 py-2 text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Send invoice
                     </button>
@@ -679,7 +679,7 @@ export default function AdminOrderDetails() {
               </div>
 
               {/* Prev / Next Order Chevrons */}
-              <div className="flex items-center rounded-lg bg-white border border-[#E7E4DC] overflow-hidden ml-1">
+              <div className="flex items-center rounded-lg bg-white border border-slate-200 overflow-hidden ml-1">
                 <button
                   type="button"
                   disabled={!prevOrder}
@@ -687,11 +687,11 @@ export default function AdminOrderDetails() {
                     prevOrder && navigate(`/admin/online-store/orders/${prevOrder.id}`)
                   }
                   title={prevOrder ? `Previous: ${prevOrder.order_number}` : "No previous order"}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-[#F3F1EC] disabled:opacity-30 disabled:cursor-not-allowed transition"
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
                 >
                   ▲
                 </button>
-                <div className="w-px h-5 bg-[#E7E4DC]" />
+                <div className="w-px h-5 bg-slate-200" />
                 <button
                   type="button"
                   disabled={!nextOrder}
@@ -699,7 +699,7 @@ export default function AdminOrderDetails() {
                     nextOrder && navigate(`/admin/online-store/orders/${nextOrder.id}`)
                   }
                   title={nextOrder ? `Next: ${nextOrder.order_number}` : "No next order"}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-[#F3F1EC] disabled:opacity-30 disabled:cursor-not-allowed transition"
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
                 >
                   ▼
                 </button>
@@ -713,7 +713,7 @@ export default function AdminOrderDetails() {
             <div className="lg:col-span-2 space-y-5">
               {/* TEST ORDER BANNER */}
               {isTestOrder && (
-                <div className="rounded-xl border border-[#FDE68A] bg-[#FFFBEA] p-4 text-xs sm:text-sm text-[#8C6B00] shadow-xs">
+                <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-xs sm:text-sm text-orange-700 shadow-xs">
                   <div className="flex items-start gap-2.5">
                     <span className="font-bold text-base leading-none">!</span>
                     <div>
@@ -729,7 +729,7 @@ export default function AdminOrderDetails() {
               {/* FULFILLMENT SECTION */}
               {isCancelled ? (
                 /* CANCELLED / REMOVED SECTION */
-                <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                   <h2 className="text-sm font-semibold text-slate-900 mb-4">Removed</h2>
                   <div className="divide-y divide-slate-100">
                     {(order.items || []).map((item, idx) => (
@@ -745,7 +745,7 @@ export default function AdminOrderDetails() {
                               className="w-12 h-12 object-cover rounded-lg border border-slate-200"
                             />
                           ) : (
-                            <div className="w-12 h-12 rounded-lg bg-[#FAF9F6] border border-[#E7E4DC] flex items-center justify-center text-slate-400 text-lg">
+                            <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 text-lg">
                               📦
                             </div>
                           )}
@@ -780,7 +780,7 @@ export default function AdminOrderDetails() {
                   {(order.fulfillments || []).map((ful, fIdx) => (
                     <div
                       key={ful.id || fIdx}
-                      className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs"
+                      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs"
                     >
                       <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
                         <div className="flex items-center gap-2">
@@ -825,11 +825,11 @@ export default function AdminOrderDetails() {
 
                   {/* UNFULFILLED GROUP (if items still to fulfill) */}
                   {!isFulfilled && (
-                    <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                       {/* Header with Mark as Fulfilled and Create Shipping Label */}
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                         <div className="flex items-center gap-2.5">
-                          <span className="w-5 h-5 rounded-md bg-[#FFFBEA] border border-[#FDE68A] text-[#8C6B00] flex items-center justify-center text-xs font-bold">
+                          <span className="w-5 h-5 rounded-md bg-orange-50 border border-orange-200 text-orange-700 flex items-center justify-center text-xs font-bold">
                             📦
                           </span>
                           <h2 className="text-sm font-bold text-slate-900">Unfulfilled</h2>
@@ -840,7 +840,7 @@ export default function AdminOrderDetails() {
                             <button
                               type="button"
                               onClick={() => setShowFulfillModal(true)}
-                              className="rounded-lg bg-white border border-[#E7E4DC] px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-[#F3F1EC] transition cursor-pointer"
+                              className="rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-100 transition cursor-pointer"
                             >
                               Mark as fulfilled ⌄
                             </button>
@@ -848,7 +848,7 @@ export default function AdminOrderDetails() {
                           <button
                             type="button"
                             onClick={() => showToast("Shipping label created.")}
-                            className="rounded-lg bg-charcoal-navy px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1A1916] transition cursor-pointer"
+                            className="rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-600/90 transition cursor-pointer"
                           >
                             Create shipping label
                           </button>
@@ -856,7 +856,7 @@ export default function AdminOrderDetails() {
                       </div>
 
                       {/* Delivery method bar */}
-                      <div className="mt-3.5 flex items-center justify-between p-2.5 rounded-xl bg-[#FAF9F6] border border-[#E7E4DC] text-xs">
+                      <div className="mt-3.5 flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                         <div className="flex items-center gap-2 text-slate-700">
                           <span>🚚</span>
                           <span className="font-medium">
@@ -883,7 +883,7 @@ export default function AdminOrderDetails() {
                                   className="w-12 h-12 object-cover rounded-lg border border-slate-200"
                                 />
                               ) : (
-                                <div className="w-12 h-12 rounded-lg bg-[#FAF9F6] border border-[#E7E4DC] flex items-center justify-center text-slate-400 text-lg">
+                                <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 text-lg">
                                   📦
                                 </div>
                               )}
@@ -917,7 +917,7 @@ export default function AdminOrderDetails() {
               )}
 
               {/* PAYMENT & FINANCIAL SUMMARY CARD */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                   <div className="flex items-center gap-2.5">
@@ -926,7 +926,7 @@ export default function AdminOrderDetails() {
                     ) : isPaid ? (
                       <span className="text-charcoal-navy font-bold">✓</span>
                     ) : (
-                      <span className="text-[#B76E00] font-bold">⏱</span>
+                      <span className="text-orange-700 font-bold">⏱</span>
                     )}
                     <h2 className="text-sm font-bold text-slate-900">
                       {isRefunded
@@ -946,7 +946,7 @@ export default function AdminOrderDetails() {
                         <button
                           type="button"
                           onClick={() => showToast("Invoice email dispatched to customer.")}
-                          className="rounded-lg bg-white border border-[#E7E4DC] px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-[#F3F1EC] transition cursor-pointer"
+                          className="rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                         >
                           Send invoice
                         </button>
@@ -954,7 +954,7 @@ export default function AdminOrderDetails() {
                           <button
                             type="button"
                             onClick={() => setShowPaymentModal(true)}
-                            className="rounded-lg bg-charcoal-navy px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1A1916] transition cursor-pointer"
+                            className="rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-600/90 transition cursor-pointer"
                           >
                             Collect payment ⌄
                           </button>
@@ -1015,7 +1015,7 @@ export default function AdminOrderDetails() {
                     </div>
 
                     {Number(fin.amount_refunded) > 0 && (
-                      <div className="flex justify-between text-[#C93B2B]">
+                      <div className="flex justify-between text-orange-700">
                         <span>Refunded ({refundReason || "Order canceled"})</span>
                         <span>-{formatCurrency(fin.amount_refunded, order.currency_code)}</span>
                       </div>
@@ -1045,7 +1045,7 @@ export default function AdminOrderDetails() {
                 {/* Staff Comment Card */}
                 <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs">
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#0080FF] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-[#EA580C] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                       {userInitials}
                     </div>
                     <div className="flex-1">
@@ -1091,7 +1091,7 @@ export default function AdminOrderDetails() {
                           type="button"
                           onClick={handlePostComment}
                           disabled={!commentInput.trim() || submittingComment}
-                          className="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed bg-charcoal-navy text-white hover:bg-[#1A1916]"
+                          className="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed bg-orange-600 text-white hover:bg-orange-600/90"
                         >
                           Post
                         </button>
@@ -1118,7 +1118,7 @@ export default function AdminOrderDetails() {
                           {dateEvents.map((ev) => (
                             <div key={ev.id} className="relative flex items-start gap-4 pl-6">
                               {/* Node bullet */}
-                              <div className="absolute left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-[#F3F1EC]" />
+                              <div className="absolute left-1.25 top-1.5 w-2 h-2 rounded-full bg-slate-600 ring-4 ring-slate-100" />
 
                               {/* Event Content */}
                               <div className="flex-1 min-w-0">
@@ -1168,13 +1168,13 @@ export default function AdminOrderDetails() {
             {/* RIGHT COLUMN: NOTES, CUSTOMER, ADDRESSES, CONVERSION, RISK, TAGS */}
             <div className="space-y-5">
               {/* NOTES CARD */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-slate-900">Notes</h3>
                   <button
                     type="button"
                     onClick={() => setShowNotesModal(true)}
-                    className="text-slate-400 hover:text-slate-800 transition text-base font-bold p-1"
+                    className="text-slate-400 hover:text-orange-600 transition text-base font-bold p-1"
                     title="Edit note"
                   >
                     +
@@ -1188,23 +1188,23 @@ export default function AdminOrderDetails() {
               </div>
 
               {/* CUSTOMER CARD */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-slate-900">Customer</h3>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setShowCustomerMenu((prev) => !prev)}
-                      className="text-slate-400 hover:text-slate-800 transition text-sm font-bold p-1"
+                      className="text-slate-400 hover:text-orange-600 transition text-sm font-bold p-1"
                     >
                       •••
                     </button>
                     {showCustomerMenu && (
-                      <div className="absolute right-0 mt-1 w-40 rounded-xl border border-[#E7E4DC] bg-white py-1 shadow-lg z-20 text-xs">
+                      <div className="absolute right-0 mt-1 w-40 rounded-xl border border-slate-200 bg-white py-1 shadow-lg z-20 text-xs">
                         {customerObj.id && (
                           <Link
                             to={`/admin/online-store/customers/${customerObj.id}`}
-                            className="block px-3 py-1.5 text-slate-700 hover:bg-[#F3F1EC]"
+                            className="block px-3 py-1.5 text-slate-700 hover:bg-slate-100"
                           >
                             View customer profile
                           </Link>
@@ -1218,7 +1218,7 @@ export default function AdminOrderDetails() {
                             }
                             setShowCustomerMenu(false);
                           }}
-                          className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-[#F3F1EC]"
+                          className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-slate-100"
                         >
                           Copy email
                         </button>
@@ -1263,26 +1263,26 @@ export default function AdminOrderDetails() {
               </div>
 
               {/* SHIPPING ADDRESS CARD */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-slate-900">Shipping address</h3>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setShowShippingMenu((prev) => !prev)}
-                      className="text-slate-400 hover:text-slate-800 transition text-sm font-bold p-1"
+                      className="text-slate-400 hover:text-orange-600 transition text-sm font-bold p-1"
                     >
                       •••
                     </button>
                     {showShippingMenu && (
-                      <div className="absolute right-0 mt-1 w-36 rounded-xl border border-[#E7E4DC] bg-white py-1 shadow-lg z-20 text-xs">
+                      <div className="absolute right-0 mt-1 w-36 rounded-xl border border-slate-200 bg-white py-1 shadow-lg z-20 text-xs">
                         <button
                           type="button"
                           onClick={() => {
                             setShowShippingMenu(false);
                             showToast("Address edit opened.");
                           }}
-                          className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-[#F3F1EC]"
+                          className="w-full text-left px-3 py-1.5 text-slate-700 hover:bg-slate-100"
                         >
                           Edit address
                         </button>
@@ -1347,7 +1347,7 @@ export default function AdminOrderDetails() {
               </div>
 
               {/* BILLING ADDRESS CARD */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <h3 className="text-sm font-bold text-slate-900 mb-3">Billing address</h3>
                 {billingAddr && JSON.stringify(billingAddr) !== JSON.stringify(shippingAddr) ? (
                   <div className="space-y-0.5 text-xs sm:text-sm text-slate-700">
@@ -1374,7 +1374,7 @@ export default function AdminOrderDetails() {
               </div>
 
               {/* CONVERSION SUMMARY */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <h3 className="text-sm font-bold text-slate-900 mb-2">Conversion summary</h3>
                 <div className="space-y-1.5 text-xs text-slate-600">
                   <p className="flex items-center gap-2">
@@ -1399,7 +1399,7 @@ export default function AdminOrderDetails() {
               </div>
 
               {/* ORDER RISK CARD */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-bold text-slate-900">Order risk</h3>
                   <span className="text-slate-400 text-xs">🛡</span>
@@ -1421,7 +1421,7 @@ export default function AdminOrderDetails() {
               </div>
 
               {/* TAGS CARD */}
-              <div className="rounded-2xl border border-[#E7E4DC] bg-white p-5 shadow-xs">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-slate-900">Tags</h3>
                   <button
@@ -1439,7 +1439,7 @@ export default function AdminOrderDetails() {
                     tags.map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#EEF2F6] text-xs font-mono text-slate-700 border border-slate-200"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[rgba(24,24,27,0.06)] text-xs font-mono text-slate-700 border border-slate-200"
                       >
                         {tag}
                         {isEditingTags && (
@@ -1466,12 +1466,12 @@ export default function AdminOrderDetails() {
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                       placeholder="Add tag..."
-                      className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-[#E7E4DC] outline-none"
+                      className="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 outline-none"
                     />
                     <button
                       type="button"
                       onClick={handleAddTag}
-                      className="px-3 py-1.5 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916]"
+                      className="px-3 py-1.5 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90"
                     >
                       Add
                     </button>
@@ -1488,7 +1488,7 @@ export default function AdminOrderDetails() {
       {/* FULFILL MODAL */}
       {showFulfillModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-[#E7E4DC] p-6 max-w-md w-full shadow-xl">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-md w-full shadow-xl">
             <h3 className="text-base font-bold text-slate-900 mb-2">Fulfill items</h3>
             <p className="text-xs text-slate-500 mb-4">
               Mark items in this order as shipped. Inventory will be updated automatically.
@@ -1504,7 +1504,7 @@ export default function AdminOrderDetails() {
                   value={fulfillMethod}
                   onChange={(e) => setFulfillMethod(e.target.value)}
                   placeholder="e.g. Standard Shipping, Express, In-store Pickup"
-                  className="w-full text-xs sm:text-sm px-3 py-2 rounded-lg border border-[#E7E4DC] outline-none"
+                  className="w-full text-xs sm:text-sm px-3 py-2 rounded-lg border border-slate-200 outline-none"
                 />
               </div>
             </div>
@@ -1513,7 +1513,7 @@ export default function AdminOrderDetails() {
               <button
                 type="button"
                 onClick={() => setShowFulfillModal(false)}
-                className="px-4 py-2 rounded-lg border border-[#E7E4DC] text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -1521,7 +1521,7 @@ export default function AdminOrderDetails() {
                 type="button"
                 disabled={actionLoading}
                 onClick={handleFulfillOrder}
-                className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90 disabled:opacity-50"
               >
                 {actionLoading ? "Fulfilling..." : "Confirm fulfillment"}
               </button>
@@ -1533,7 +1533,7 @@ export default function AdminOrderDetails() {
       {/* COLLECT PAYMENT MODAL */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-[#E7E4DC] p-6 max-w-md w-full shadow-xl">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-md w-full shadow-xl">
             <h3 className="text-base font-bold text-slate-900 mb-2">Collect payment</h3>
             <p className="text-xs text-slate-500 mb-4">
               Record a payment received for order {order.order_number}.
@@ -1549,7 +1549,7 @@ export default function AdminOrderDetails() {
                   step="0.01"
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E7E4DC] outline-none font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none font-mono"
                 />
               </div>
 
@@ -1558,7 +1558,7 @@ export default function AdminOrderDetails() {
                 <select
                   value={paymentProvider}
                   onChange={(e) => setPaymentProvider(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E7E4DC] outline-none bg-white"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none bg-white"
                 >
                   <option value="manual">Manual / Cash on Delivery</option>
                   <option value="card">Credit Card</option>
@@ -1576,7 +1576,7 @@ export default function AdminOrderDetails() {
                   value={paymentReference}
                   onChange={(e) => setPaymentReference(e.target.value)}
                   placeholder="Optional reference code"
-                  className="w-full px-3 py-2 rounded-lg border border-[#E7E4DC] outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none"
                 />
               </div>
             </div>
@@ -1585,7 +1585,7 @@ export default function AdminOrderDetails() {
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
-                className="px-4 py-2 rounded-lg border border-[#E7E4DC] text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -1593,7 +1593,7 @@ export default function AdminOrderDetails() {
                 type="button"
                 disabled={actionLoading}
                 onClick={handleCollectPayment}
-                className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916] disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90 disabled:opacity-50"
               >
                 {actionLoading ? "Recording..." : "Accept payment"}
               </button>
@@ -1605,7 +1605,7 @@ export default function AdminOrderDetails() {
       {/* REFUND MODAL */}
       {showRefundModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-[#E7E4DC] p-6 max-w-md w-full shadow-xl">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-md w-full shadow-xl">
             <h3 className="text-base font-bold text-slate-900 mb-2">Process refund</h3>
             <p className="text-xs text-slate-500 mb-4">Refund an amount back to the customer.</p>
 
@@ -1619,7 +1619,7 @@ export default function AdminOrderDetails() {
                   step="0.01"
                   value={refundAmount}
                   onChange={(e) => setRefundAmount(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E7E4DC] outline-none font-mono"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none font-mono"
                 />
               </div>
 
@@ -1628,7 +1628,7 @@ export default function AdminOrderDetails() {
                 <select
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-[#E7E4DC] outline-none bg-white"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none bg-white"
                 >
                   <option value="Order canceled">Order canceled</option>
                   <option value="Customer request">Customer request</option>
@@ -1643,7 +1643,7 @@ export default function AdminOrderDetails() {
               <button
                 type="button"
                 onClick={() => setShowRefundModal(false)}
-                className="px-4 py-2 rounded-lg border border-[#E7E4DC] text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -1663,7 +1663,7 @@ export default function AdminOrderDetails() {
       {/* CANCEL MODAL */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-[#E7E4DC] p-6 max-w-md w-full shadow-xl">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-md w-full shadow-xl">
             <h3 className="text-base font-bold text-slate-900 mb-2">Cancel this order?</h3>
             <p className="text-xs text-slate-500 mb-4">
               Cancelling this order will release all committed inventory back to available stock.
@@ -1674,7 +1674,7 @@ export default function AdminOrderDetails() {
               <button
                 type="button"
                 onClick={() => setShowCancelModal(false)}
-                className="px-4 py-2 rounded-lg border border-[#E7E4DC] text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
               >
                 Keep Order
               </button>
@@ -1694,27 +1694,27 @@ export default function AdminOrderDetails() {
       {/* EDIT NOTES MODAL */}
       {showNotesModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-[#E7E4DC] p-6 max-w-md w-full shadow-xl">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-md w-full shadow-xl">
             <h3 className="text-base font-bold text-slate-900 mb-2">Order Notes</h3>
             <textarea
               rows={4}
               value={notesInput}
               onChange={(e) => setNotesInput(e.target.value)}
               placeholder="Add internal notes about customer preferences, shipping instructions..."
-              className="w-full text-xs sm:text-sm p-3 rounded-lg border border-[#E7E4DC] outline-none resize-none mb-4"
+              className="w-full text-xs sm:text-sm p-3 rounded-lg border border-slate-200 outline-none resize-none mb-4"
             />
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowNotesModal(false)}
-                className="px-4 py-2 rounded-lg border border-[#E7E4DC] text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveNotes}
-                className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916]"
+                className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90"
               >
                 Save notes
               </button>
@@ -1726,19 +1726,19 @@ export default function AdminOrderDetails() {
       {/* VIEW EMAIL PREVIEW MODAL */}
       {showEmailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-[#E7E4DC] p-6 max-w-lg w-full shadow-xl">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-lg w-full shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <h3 className="text-base font-bold text-slate-900">Order Confirmation Email</h3>
               <button
                 type="button"
                 onClick={() => setShowEmailModal(false)}
-                className="text-slate-400 hover:text-slate-800 text-sm font-bold"
+                className="text-slate-400 hover:text-orange-600 text-sm font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <div className="bg-[#FAF9F6] p-4 rounded-xl border border-[#E7E4DC] space-y-3 text-xs sm:text-sm">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs sm:text-sm">
               <p>
                 <strong className="text-slate-800">To:</strong>{" "}
                 <span className="text-blue-600">{customerObj.email || "customer@example.com"}</span>
@@ -1781,7 +1781,7 @@ export default function AdminOrderDetails() {
               <button
                 type="button"
                 onClick={() => setShowEmailModal(false)}
-                className="px-4 py-2 rounded-lg bg-charcoal-navy text-white text-xs font-semibold hover:bg-[#1A1916]"
+                className="px-4 py-2 rounded-lg bg-orange-600 text-white text-xs font-semibold hover:bg-orange-600/90"
               >
                 Close
               </button>

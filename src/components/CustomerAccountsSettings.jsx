@@ -17,7 +17,7 @@ function Toggle({ checked, onChange, label, disabled }) {
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-60 ${checked ? "bg-[#14130F]" : "bg-slate-300"}`}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-60 ${checked ? "bg-ink" : "bg-slate-300"}`}
     >
       <span
         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${checked ? "left-[22px]" : "left-0.5"}`}
@@ -31,7 +31,7 @@ function Pill({ children, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-[#14130F] hover:bg-slate-200"
+      className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-ink hover:bg-slate-200"
     >
       {children}
     </button>
@@ -42,7 +42,7 @@ function Row({ title, hint, action }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-4">
       <div>
-        <div className="text-sm font-medium text-[#14130F]">{title}</div>
+        <div className="text-sm font-medium text-ink">{title}</div>
         <div className="text-sm text-slate-500">{hint}</div>
       </div>
       {action}
@@ -61,7 +61,7 @@ function Info({ children }) {
   );
 }
 
-const linkCls = "underline hover:text-[#14130F]";
+const linkCls = "underline hover:text-orange-600";
 
 export default function CustomerAccountsSettings({ onOpenSection }) {
   const navigate = useNavigate();
@@ -149,7 +149,7 @@ export default function CustomerAccountsSettings({ onOpenSection }) {
       )}
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#14130F]">Sign-in links</h2>
+        <h2 className="text-sm font-semibold text-ink">Sign-in links</h2>
         <section className={card}>
           <Row
             title="Show sign-in links"
@@ -174,7 +174,7 @@ export default function CustomerAccountsSettings({ onOpenSection }) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-[#14130F]">Customer accounts</h2>
+        <h2 className="text-sm font-semibold text-ink">Customer accounts</h2>
         <section className={`${card} divide-y divide-slate-100`}>
           <Row
             title="Configurations"

@@ -39,12 +39,12 @@ function BarChart({ points, format }) {
       {points.map((p) => (
         <li key={p.label}>
           <div className="flex items-center justify-between gap-3 text-[13px]">
-            <span className="truncate text-[#14130F]">{p.label || "—"}</span>
-            <span className="font-semibold text-[#14130F]">{format(p.value)}</span>
+            <span className="truncate text-ink">{p.label || "—"}</span>
+            <span className="font-semibold text-ink">{format(p.value)}</span>
           </div>
-          <div className="mt-1 h-1.5 rounded-full bg-[#F3F1EC]">
+          <div className="mt-1 h-1.5 rounded-full bg-slate-100">
             <div
-              className="h-1.5 rounded-full bg-[#5B9BD5]"
+              className="h-1.5 rounded-full bg-violet-600"
               style={{ width: `${Math.max((Number(p.value) / max) * 100, 2)}%` }}
             />
           </div>
@@ -158,14 +158,14 @@ export default function AdminReportDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-charcoal-navy">
+    <div className="min-h-screen bg-slate-100 text-charcoal-navy">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 overflow-x-hidden">
-          <header className="border-b border-[#E7E4DC] bg-white">
+          <header className="border-b border-slate-200 bg-white">
             <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
               <div className="flex min-w-0 items-center gap-3">
                 <button
@@ -181,7 +181,7 @@ export default function AdminReportDetail() {
                   <h1 className="truncate text-xl font-semibold text-charcoal-navy">
                     {data?.name || "Report"}
                   </h1>
-                  <p className="mt-0.5 text-[13px] text-[#5A5750]">
+                  <p className="mt-0.5 text-[13px] text-slate-600">
                     {data ? (
                       <>
                         <Link to="/admin/online-store/reports" className="hover:underline">
@@ -201,7 +201,7 @@ export default function AdminReportDetail() {
                 label="⋯"
                 className={`${outlineButton} w-9 justify-center px-0`}
               >
-                <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase text-[#5A5750]">
+                <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase text-slate-600">
                   Export
                 </p>
                 <button type="button" className={menuItem} disabled={!data} onClick={exportCsv}>
@@ -213,7 +213,7 @@ export default function AdminReportDetail() {
 
           <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
             {data?.description && (
-              <p className="mb-4 text-[13px] text-[#5A5750]">{data.description}</p>
+              <p className="mb-4 text-[13px] text-slate-600">{data.description}</p>
             )}
 
             <div className="flex flex-wrap items-center gap-2">
@@ -294,14 +294,14 @@ export default function AdminReportDetail() {
               </p>
             )}
             {notice && (
-              <p className="mt-4 rounded-xl bg-[#f1f3f7] px-4 py-3 text-[13px]">{notice}</p>
+              <p className="mt-4 rounded-xl bg-slate-100 px-4 py-3 text-[13px]">{notice}</p>
             )}
 
             <section className={`${card} mt-4`}>
               <h2 className={cardHeading}>{data?.chart?.value_label || "—"}</h2>
               <div className="mt-3">
                 {!data || empty ? (
-                  <div className="rounded-lg bg-[#F3F1EC]">
+                  <div className="rounded-lg bg-slate-100">
                     <EmptyState>
                       {loading && !data ? "Loading…" : "No data for this date range"}
                     </EmptyState>
@@ -335,7 +335,7 @@ export default function AdminReportDetail() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-160 text-left text-[13px]">
                   <thead>
-                    <tr className="border-b border-[#E7E4DC] bg-[#FAF9F6] text-[#5A5750]">
+                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-600">
                       {(data?.columns || []).map((c) => (
                         <th
                           key={c.key}
@@ -344,7 +344,7 @@ export default function AdminReportDetail() {
                           <button
                             type="button"
                             onClick={() => toggleSort(c.key)}
-                            className="inline-flex items-center gap-1 hover:text-[#14130F]"
+                            className="inline-flex items-center gap-1 hover:text-orange-600"
                           >
                             {c.label}
                             {sortKey === c.key && (
@@ -357,11 +357,11 @@ export default function AdminReportDetail() {
                   </thead>
                   <tbody>
                     {(data?.rows || []).map((row, i) => (
-                      <tr key={i} className="border-b border-[#F3F1EC] hover:bg-[#FAF9F6]">
+                      <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
                         {data.columns.map((c) => (
                           <td
                             key={c.key}
-                            className={`px-4 py-2.5 ${c.type === "text" || c.type === "date" ? "text-[#14130F]" : "text-right tabular-nums"}`}
+                            className={`px-4 py-2.5 ${c.type === "text" || c.type === "date" ? "text-ink" : "text-right tabular-nums"}`}
                           >
                             {cell(c, row[c.key])}
                           </td>
@@ -369,7 +369,7 @@ export default function AdminReportDetail() {
                       </tr>
                     ))}
                     {data && !empty && (
-                      <tr className="bg-[#FAF9F6] font-semibold">
+                      <tr className="bg-slate-50 font-semibold">
                         {data.columns.map((c, i) => (
                           <td
                             key={c.key}
@@ -395,7 +395,7 @@ export default function AdminReportDetail() {
               )}
 
               {data && !empty && (
-                <div className="flex items-center justify-between gap-3 border-t border-[#E7E4DC] px-4 py-3">
+                <div className="flex items-center justify-between gap-3 border-t border-slate-200 px-4 py-3">
                   <span className={smallLabel}>
                     {firstRow}–{lastRow} of {data.row_count}
                   </span>

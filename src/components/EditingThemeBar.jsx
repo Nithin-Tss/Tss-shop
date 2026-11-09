@@ -47,7 +47,7 @@ export default function EditingThemeBar() {
   };
 
   return (
-    <div className="fixed bottom-3 left-3 z-[60] flex max-w-[calc(100vw-24px)] flex-wrap items-center gap-2 rounded-xl bg-[#14130F] px-3.5 py-2 text-[13px] text-white shadow-lg">
+    <div className="fixed bottom-3 left-3 z-[60] flex max-w-[calc(100vw-24px)] flex-wrap items-center gap-2 rounded-xl bg-orange-600 px-3.5 py-2 text-[13px] text-white shadow-lg">
       <span className="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide">
         Draft
       </span>
@@ -57,14 +57,14 @@ export default function EditingThemeBar() {
         type="button"
         onClick={publish}
         disabled={busy}
-        className="rounded-lg bg-white px-2.5 py-1 font-semibold text-[#14130F] disabled:opacity-60"
+        className="rounded-lg bg-white px-2.5 py-1 font-semibold text-ink disabled:opacity-60"
       >
         {busy ? "Publishing…" : "Publish"}
       </button>
       <Link to="/admin/online-store" className="underline underline-offset-2">
         All themes
       </Link>
-      {error && <span className="basis-full text-[#FDA29B]">{error}</span>}
+      {error && <span className="basis-full text-[rgba(234,88,12,0.25)]">{error}</span>}
     </div>
   );
 }

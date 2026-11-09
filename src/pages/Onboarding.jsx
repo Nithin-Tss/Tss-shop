@@ -183,7 +183,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f7f7f8] text-charcoal-navy">
+    <main className="min-h-screen bg-[#FAFAFA] text-charcoal-navy">
       <NavBar />
 
       {/* Skip — on the page, top-right, under the account */}
@@ -192,7 +192,7 @@ export default function OnboardingPage() {
           <button
             type="button"
             onClick={handleNext}
-            className="h-9 rounded-full border border-gray-300 bg-white px-5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-charcoal-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-charcoal-navy"
+            className="h-9 rounded-full border border-gray-300 bg-white px-5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-orange-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
           >
             Skip
           </button>
@@ -226,7 +226,7 @@ export default function OnboardingPage() {
                     aria-pressed={isSelected}
                     className={`relative flex w-full items-start gap-4 rounded-[10px] border bg-white p-[18px] pr-12 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-charcoal-navy ${
                       isSelected
-                        ? "border-charcoal-navy ring-1 ring-charcoal-navy"
+                        ? "border-orange-600 ring-1 ring-orange-600"
                         : "border-gray-200 hover:border-gray-400"
                     }`}
                   >
@@ -256,7 +256,7 @@ export default function OnboardingPage() {
                     <span
                       className={`absolute right-[18px] top-[18px] flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border-[1.5px] transition-colors ${
                         isSelected
-                          ? "border-charcoal-navy bg-charcoal-navy text-white"
+                          ? "border-orange-600 bg-charcoal-navy text-white"
                           : "border-gray-300 bg-white"
                       }`}
                     >
@@ -287,7 +287,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleNext}
                 disabled={selectedGoals.length === 0}
-                className="h-11 w-full rounded-lg bg-charcoal-navy px-6 text-sm font-semibold text-white transition-colors hover:bg-[#2a3246] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-charcoal-navy disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 sm:w-auto sm:min-w-[180px]"
+                className="h-11 w-full rounded-lg bg-orange-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-[rgba(24,24,27,0.88)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 sm:w-auto sm:min-w-[180px]"
               >
                 Continue
               </button>
@@ -316,7 +316,7 @@ export default function OnboardingPage() {
                   onChange={(event) => setStoreName(event.target.value)}
                   placeholder={`${session?.user?.firstName || "My"}'s store`}
                   maxLength={200}
-                  className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-[15px] outline-none focus:border-charcoal-navy"
+                  className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-[15px] outline-none focus:border-orange-600"
                 />
               </label>
             )}
@@ -338,7 +338,7 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={() => chooseTheme(theme.id)}
                   disabled={creating}
-                  className="group flex min-h-[260px] w-full flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-6 py-8 text-center transition-colors hover:border-charcoal-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-charcoal-navy"
+                  className="group flex min-h-[260px] w-full flex-col items-center justify-center rounded-xl border border-gray-200 bg-white px-6 py-8 text-center transition-colors hover:border-orange-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
                 >
                   <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-gray-100 text-charcoal-navy transition-colors group-hover:bg-charcoal-navy group-hover:text-white">
                     {theme.icon}
@@ -352,7 +352,7 @@ export default function OnboardingPage() {
 
                   <span
                     aria-hidden="true"
-                    className="mt-6 text-gray-400 transition-colors group-hover:text-charcoal-navy"
+                    className="mt-6 text-gray-400 transition-colors group-hover:text-orange-600"
                   >
                     →
                   </span>

@@ -8,7 +8,7 @@ import { useCan } from "@/lib/auth";
 const PAGE = 25;
 
 const inputClass =
-  "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#14130F]";
+  "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-orange-600";
 
 const when = (value) => (value ? new Date(value).toLocaleString() : "—");
 
@@ -75,12 +75,12 @@ export default function AuditLogPage() {
   const { loading, error, count, results } = state;
 
   return (
-    <div className="min-h-screen bg-[#F3F1EC] text-[#14130F]">
+    <div className="min-h-screen bg-slate-100 text-ink">
       <AdminHeader />
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
         <AdminSidebar />
         <main className="min-w-0 flex-1">
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#F3F1EC] px-4 py-5 sm:px-6">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-100 px-4 py-5 sm:px-6">
             <div className="flex items-center gap-2.5">
               <PageIcon name="reports" />
               <h1 className="text-xl font-semibold">Audit log</h1>

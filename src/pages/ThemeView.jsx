@@ -73,7 +73,7 @@ export default function ThemeView() {
     return () => window.removeEventListener("message", onMessage);
   }, [navigate]);
 
-  if (error && !html) return <p className="p-8 text-sm text-[#B42318]">{error}</p>;
+  if (error && !html) return <p className="p-8 text-sm text-orange-700">{error}</p>;
   if (!html) return <p className="p-8 text-sm text-neutral-500">Loading theme…</p>;
 
   return (
