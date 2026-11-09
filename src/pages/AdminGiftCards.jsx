@@ -256,13 +256,15 @@ function CreateGiftCardModal({ onClose, onCreated }) {
   );
 }
 
+const tomorrowISO = () => new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
 function GiftCardDetailModal({ card, onClose, onChanged, onUpdated }) {
   const canManage = useCan("gift_cards.manage");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [resendTo, setResendTo] = useState("");
   const [expiryDay, setExpiryDay] = useState(card.expires_at ? card.expires_at.slice(0, 10) : "");
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const [tomorrow] = useState(tomorrowISO);
 
   // Only the expiry can be edited; the balance changes through orders and refunds, never by typing
   const saveExpiry = async (clear) => {

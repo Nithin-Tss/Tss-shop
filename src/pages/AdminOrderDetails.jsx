@@ -4,6 +4,8 @@ import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan, useSession } from "@/lib/auth";
 
+const tomorrowISO = () => new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
 function formatOrderDateTime(dateString) {
   if (!dateString) return "—";
   const date = new Date(dateString);
@@ -1797,7 +1799,7 @@ export default function AdminOrderDetails() {
                               <input
                                 type="date"
                                 value={newExpiry[p.gift_card.id] || ""}
-                                min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
+                                min={tomorrowISO()}
                                 onChange={(e) =>
                                   setNewExpiry({ ...newExpiry, [p.gift_card.id]: e.target.value })
                                 }
