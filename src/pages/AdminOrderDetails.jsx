@@ -1008,7 +1008,9 @@ export default function AdminOrderDetails() {
                   </div>
 
                   {(() => {
-                    const giftCardPayment = (order.payments || []).find((p) => p.provider === "gift_card");
+                    const giftCardPayment = (order.payments || []).find(
+                      (p) => p.provider === "gift_card"
+                    );
                     if (!giftCardPayment) return null;
                     return (
                       <div className="flex justify-between text-emerald-700 font-medium">
