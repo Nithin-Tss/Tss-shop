@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiGet, logout } from "@/lib/api";
-import { useSession } from "@/lib/auth";
+import { apiGet } from "@/lib/api";
+import Icon from "@/components/Icons";
+import AccountSidebar from "@/components/AccountSidebar";
 
 function formatOrderDate(dateString) {
   if (!dateString) return "—";
@@ -66,8 +67,8 @@ function renderFulfillmentBadge(status) {
   const s = String(status || "unfulfilled").toLowerCase();
   if (s.includes("fulfilled") && !s.includes("unfulfilled") && !s.includes("partial")) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-violet-700 border border-blue-200">
-        <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-900/5 text-slate-800 border border-slate-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
         Fulfilled
       </span>
     );
@@ -88,14 +89,22 @@ function renderFulfillmentBadge(status) {
   );
 }
 
+function orderNo(order) {
+  return order.order_number || `#${String(order.id || "").slice(0, 8)}`;
+}
+
+function isOpen(order) {
+  const f = String(order.fulfillment_status || "unfulfilled").toLowerCase();
+  const st = String(order.status || "").toLowerCase();
+  return (
+    !(f.includes("fulfilled") && !f.includes("unfulfilled") && !f.includes("partial")) &&
+    !st.includes("cancel") &&
+    !st.includes("void")
+  );
+}
+
 export default function OrderHistory() {
   const navigate = useNavigate();
-  const session = useSession();
-  const user = session?.user;
-  const userName = user?.firstName
-    ? `${user.firstName} ${user.lastName || ""}`.trim()
-    : session?.name || "Customer";
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -128,313 +137,310 @@ export default function OrderHistory() {
     };
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
+  const handleBack = () => {
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate("/");
   };
 
+  const openCount = orders.filter(isOpen).length;
+  const latest = orders
+    .map((o) => new Date(o.created_at))
+    .filter((d) => !isNaN(d.getTime()))
+    .sort((x, y) => y - x)[0];
+  const stats = [
+    { icon: "package", label: "Total orders", value: orders.length },
+    { icon: "truck", label: "In progress", value: openCount },
+    {
+      icon: "clock",
+      label: "Last order",
+      value: latest ? formatOrderDate(latest.toISOString()) : "—",
+    },
+  ];
+
+  const ghostBtn =
+    "inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer";
+
   return (
-    <main className="min-h-screen bg-slate-50/60 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl">
-        {/* Shopify-style Customer Account Header */}
-        <div className="mb-8 border-b border-slate-200 pb-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
-                <Link to="/" className="hover:text-orange-600 transition flex items-center gap-1">
-                  <span>←</span>
-                  <span>Store</span>
-                </Link>
-                <span>/</span>
-                <span className="text-slate-700">Account</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                Order History
+    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-6 flex items-center gap-2 text-sm text-slate-500"
+        >
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex items-center gap-1.5 transition hover:text-slate-900 cursor-pointer"
+          >
+            <Icon name="arrow-left" className="h-4 w-4" />
+            Back
+          </button>
+          <Icon name="chevron-right" className="h-3.5 w-3.5 text-slate-300" />
+          <Link to="/account" className="transition hover:text-slate-900">
+            Account
+          </Link>
+          <Icon name="chevron-right" className="h-3.5 w-3.5 text-slate-300" />
+          <span className="font-medium text-slate-900">Orders</span>
+        </nav>
+
+        <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <AccountSidebar active="orders" />
+
+          <div className="min-w-0 space-y-6">
+            <header>
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+                Order history
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                Welcome back, <span className="font-semibold text-slate-800">{userName}</span>
-                {user?.email && <span className="text-slate-400"> ({user.email})</span>}
+              <p className="mt-1 text-sm text-slate-500">
+                Track your purchases, payment status and deliveries.
               </p>
-            </div>
+            </header>
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100 hover:text-orange-600 cursor-pointer"
-            >
-              <span>Log out</span>
-              <span className="text-slate-400">→</span>
-            </button>
-          </div>
+            {!loading && orders.length > 0 && (
+              <dl className="grid gap-3 sm:grid-cols-3">
+                {stats.map((s) => (
+                  <div key={s.label} className="rounded-xl border border-slate-200 bg-white p-4">
+                    <dt className="flex items-center gap-2 text-sm text-slate-500">
+                      <Icon name={s.icon} className="h-4 w-4 text-slate-400" />
+                      {s.label}
+                    </dt>
+                    <dd className="mt-2 text-2xl font-semibold text-slate-900">{s.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
 
-          {/* Subnav Tabs */}
-          <div className="mt-6 flex items-center gap-2">
-            <Link
-              to="/account"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200"
-            >
-              <span>👤</span>
-              <span>Account & Addresses</span>
-            </Link>
+            {loading ? (
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-6">
+                <div className="h-5 w-40 animate-pulse rounded bg-slate-200" />
+                <div className="h-12 w-full animate-pulse rounded-lg bg-slate-100" />
+                <div className="h-12 w-full animate-pulse rounded-lg bg-slate-100" />
+                <div className="h-12 w-full animate-pulse rounded-lg bg-slate-100" />
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center">
+                <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                  <Icon name="bag" className="h-6 w-6" />
+                </span>
+                <h2 className="mt-4 text-base font-semibold text-slate-900">No orders yet</h2>
+                <p className="mx-auto mt-1.5 max-w-sm text-sm text-slate-500">
+                  When you place an order, its details, payment status and receipts will appear
+                  here.
+                </p>
+                <Link
+                  to="/"
+                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                >
+                  Start shopping
+                  <Icon name="arrow-right" className="h-4 w-4" />
+                </Link>
+              </div>
+            ) : (
+              <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
+                  <h2 className="text-base font-semibold text-slate-900">All orders</h2>
+                  <span className="text-sm text-slate-500">{orders.length} total</span>
+                </div>
 
-            <Link
-              to="/account/orders"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition cursor-pointer bg-orange-600 text-white shadow-xs"
-            >
-              <span>📦</span>
-              <span>Order History</span>
-            </Link>
+                {/* Desktop table */}
+                <div className="hidden overflow-x-auto sm:block">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-slate-200 text-xs font-medium text-slate-500">
+                      <tr>
+                        <th className="px-6 py-3 font-medium">Order</th>
+                        <th className="px-4 py-3 font-medium">Date</th>
+                        <th className="px-4 py-3 font-medium">Payment</th>
+                        <th className="px-4 py-3 font-medium">Fulfillment</th>
+                        <th className="px-4 py-3 text-right font-medium">Total</th>
+                        <th className="px-6 py-3" />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {orders.map((order) => (
+                        <tr key={order.id} className="transition hover:bg-slate-50">
+                          <td className="px-6 py-4 font-mono font-medium text-slate-900">
+                            {orderNo(order)}
+                          </td>
+                          <td className="px-4 py-4 text-slate-600">
+                            {formatOrderDate(order.created_at)}
+                          </td>
+                          <td className="px-4 py-4">{renderPaymentBadge(order.status)}</td>
+                          <td className="px-4 py-4">
+                            {renderFulfillmentBadge(order.fulfillment_status)}
+                          </td>
+                          <td className="px-4 py-4 text-right font-medium text-slate-900">
+                            {formatCurrency(order.total, order.currency_code)}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedOrder(order)}
+                              className={ghostBtn}
+                            >
+                              View
+                              <Icon name="chevron-right" className="h-3.5 w-3.5 text-slate-400" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile list */}
+                <ul className="divide-y divide-slate-200 sm:hidden">
+                  {orders.map((order) => (
+                    <li key={order.id} className="space-y-3 p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-sm font-medium text-slate-900">
+                          {orderNo(order)}
+                        </span>
+                        <span className="text-sm font-medium text-slate-900">
+                          {formatCurrency(order.total, order.currency_code)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500">{formatOrderDate(order.created_at)}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {renderPaymentBadge(order.status)}
+                        {renderFulfillmentBadge(order.fulfillment_status)}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrder(order)}
+                        className={`${ghostBtn} w-full`}
+                      >
+                        View order
+                        <Icon name="chevron-right" className="h-3.5 w-3.5 text-slate-400" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
         </div>
-
-        {/* Content Section */}
-        {loading ? (
-          /* Loading Skeleton */
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xs space-y-4">
-            <div className="h-6 w-48 bg-slate-200 rounded animate-pulse" />
-            <div className="h-12 w-full bg-slate-100 rounded animate-pulse" />
-            <div className="h-12 w-full bg-slate-100 rounded animate-pulse" />
-            <div className="h-12 w-full bg-slate-100 rounded animate-pulse" />
-          </div>
-        ) : orders.length === 0 ? (
-          /* Clean Shopify Empty State (No Fake Records) */
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-3xl text-slate-500 mb-4">
-              📦
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
-              You haven't placed any orders yet
-            </h2>
-            <p className="mt-1.5 text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-              When you place an order, its details, tracking status, and receipts will appear right
-              here.
-            </p>
-            <Link
-              to="/"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-orange-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-orange-600/90 shadow-xs cursor-pointer"
-            >
-              <span>Start shopping</span>
-              <span>→</span>
-            </Link>
-          </div>
-        ) : (
-          /* Orders Table & Responsive Mobile Cards */
-          <div className="space-y-4">
-            {/* Desktop Table View */}
-            <div className="hidden sm:block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs sm:text-sm">
-                  <thead className="border-b border-slate-200 bg-slate-50/70 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                    <tr>
-                      <th className="py-3.5 px-4 sm:px-6">Order</th>
-                      <th className="py-3.5 px-4">Date</th>
-                      <th className="py-3.5 px-4">Payment Status</th>
-                      <th className="py-3.5 px-4">Fulfillment Status</th>
-                      <th className="py-3.5 px-4 text-right">Total</th>
-                      <th className="py-3.5 px-4 sm:px-6 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {orders.map((order) => (
-                      <tr key={order.id} className="hover:bg-slate-50/70 transition">
-                        <td className="py-4 px-4 sm:px-6 font-semibold text-slate-900 font-mono">
-                          {order.order_number || `#${order.id?.slice(0, 8)}`}
-                        </td>
-                        <td className="py-4 px-4 text-slate-600">
-                          {formatOrderDate(order.created_at)}
-                        </td>
-                        <td className="py-4 px-4">{renderPaymentBadge(order.status)}</td>
-                        <td className="py-4 px-4">
-                          {renderFulfillmentBadge(order.fulfillment_status)}
-                        </td>
-                        <td className="py-4 px-4 text-right font-medium text-slate-900">
-                          {formatCurrency(order.total, order.currency_code)}
-                        </td>
-                        <td className="py-4 px-4 sm:px-6 text-right">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedOrder(order)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-orange-600 transition cursor-pointer"
-                          >
-                            <span>View Order</span>
-                            <span className="text-slate-400">→</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Mobile Stacked Card View */}
-            <div className="space-y-3 sm:hidden">
-              {orders.map((order) => (
-                <div
-                  key={order.id}
-                  className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-slate-900 text-sm">
-                      {order.order_number || `#${order.id?.slice(0, 8)}`}
-                    </span>
-                    <span className="font-bold text-slate-900 text-sm">
-                      {formatCurrency(order.total, order.currency_code)}
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-slate-500">{formatOrderDate(order.created_at)}</div>
-
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    {renderPaymentBadge(order.status)}
-                    {renderFulfillmentBadge(order.fulfillment_status)}
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedOrder(order)}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-800 transition cursor-pointer"
-                    >
-                      <span>View Order Details</span>
-                      <span>→</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* View Order Details Modal */}
+      {/* Order details modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs overflow-y-auto">
-          <div className="relative w-full max-w-xl rounded-2xl bg-white shadow-2xl border border-slate-200 my-8 overflow-hidden">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50/50">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Order ${orderNo(selectedOrder)}`}
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4"
+          onClick={(e) => e.target === e.currentTarget && setSelectedOrder(null)}
+        >
+          <div className="relative my-8 w-full max-w-xl overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-slate-900 font-mono">
-                    {selectedOrder.order_number || `#${selectedOrder.id?.slice(0, 8)}`}
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-mono text-lg font-semibold text-slate-900">
+                    {orderNo(selectedOrder)}
                   </h3>
                   {renderPaymentBadge(selectedOrder.status)}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="mt-0.5 text-sm text-slate-500">
                   Placed on {formatOrderDate(selectedOrder.created_at)}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedOrder(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-                title="Close"
+                aria-label="Close"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
-              {/* Status bar */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <span className="text-slate-600 font-medium">Fulfillment Status</span>
-                <div>{renderFulfillmentBadge(selectedOrder.fulfillment_status)}</div>
+            <div className="max-h-[70vh] space-y-5 overflow-y-auto p-6 text-sm">
+              <div className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3">
+                <span className="flex items-center gap-2 text-slate-600">
+                  <Icon name="truck" className="h-4 w-4 text-slate-400" />
+                  Fulfillment
+                </span>
+                {renderFulfillmentBadge(selectedOrder.fulfillment_status)}
               </div>
 
-              {/* Order Items */}
               <div>
-                <h4 className="font-bold text-slate-900 text-sm mb-3">Items Ordered</h4>
+                <h4 className="mb-3 text-sm font-semibold text-slate-900">Items</h4>
                 {Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 ? (
-                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+                  <ul className="divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200">
                     {selectedOrder.items.map((item, idx) => (
-                      <div
+                      <li
                         key={item.id || idx}
-                        className="p-3.5 flex items-center justify-between gap-3 bg-white"
+                        className="flex items-center justify-between gap-3 p-3.5"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
-                            📦
-                          </div>
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                            <Icon name="package" className="h-5 w-5" />
+                          </span>
                           <div>
-                            <p className="font-semibold text-slate-900 text-xs sm:text-sm">
+                            <p className="font-medium text-slate-900">
                               {item.product_name || "Product"}
                             </p>
-                            <p className="text-[11px] text-slate-400">
-                              Qty: {item.quantity || 1}{" "}
+                            <p className="text-xs text-slate-500">
+                              Qty {item.quantity || 1}
                               {item.unit_price
-                                ? `× ${formatCurrency(
-                                    item.unit_price,
-                                    selectedOrder.currency_code
-                                  )}`
+                                ? ` × ${formatCurrency(item.unit_price, selectedOrder.currency_code)}`
                                 : ""}
                             </p>
                           </div>
                         </div>
-                        <div className="font-semibold text-slate-900 text-xs sm:text-sm">
+                        <span className="font-medium text-slate-900">
                           {formatCurrency(
                             item.total || (item.quantity || 1) * (item.unit_price || 0),
                             selectedOrder.currency_code
                           )}
-                        </div>
-                      </div>
+                        </span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 ) : (
-                  <div className="p-4 rounded-lg bg-slate-50 text-slate-500 text-center">
-                    Order items registered with order
-                  </div>
+                  <p className="rounded-lg border border-slate-200 p-4 text-center text-slate-500">
+                    No item details available for this order.
+                  </p>
                 )}
               </div>
 
-              {/* Order Totals Summary */}
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+              <dl className="space-y-2 rounded-lg border border-slate-200 p-4">
                 {selectedOrder.subtotal != null && (
                   <div className="flex justify-between text-slate-600">
-                    <span>Subtotal</span>
-                    <span>
-                      {formatCurrency(selectedOrder.subtotal, selectedOrder.currency_code)}
-                    </span>
+                    <dt>Subtotal</dt>
+                    <dd>{formatCurrency(selectedOrder.subtotal, selectedOrder.currency_code)}</dd>
                   </div>
                 )}
                 {Number(selectedOrder.discount_amount) > 0 && (
                   <div className="flex justify-between text-emerald-700">
-                    <span>Discount</span>
-                    <span>
+                    <dt>Discount</dt>
+                    <dd>
                       -{formatCurrency(selectedOrder.discount_amount, selectedOrder.currency_code)}
-                    </span>
+                    </dd>
                   </div>
                 )}
                 {Number(selectedOrder.shipping_amount) > 0 && (
                   <div className="flex justify-between text-slate-600">
-                    <span>Shipping</span>
-                    <span>
+                    <dt>Shipping</dt>
+                    <dd>
                       {formatCurrency(selectedOrder.shipping_amount, selectedOrder.currency_code)}
-                    </span>
+                    </dd>
                   </div>
                 )}
                 {Number(selectedOrder.tax_amount) > 0 && (
                   <div className="flex justify-between text-slate-600">
-                    <span>Tax</span>
-                    <span>
-                      {formatCurrency(selectedOrder.tax_amount, selectedOrder.currency_code)}
-                    </span>
+                    <dt>Tax</dt>
+                    <dd>{formatCurrency(selectedOrder.tax_amount, selectedOrder.currency_code)}</dd>
                   </div>
                 )}
-                <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-sm">
-                  <span>Total</span>
-                  <span>{formatCurrency(selectedOrder.total, selectedOrder.currency_code)}</span>
+                <div className="flex justify-between border-t border-slate-200 pt-3 text-base font-semibold text-slate-900">
+                  <dt>Total</dt>
+                  <dd>{formatCurrency(selectedOrder.total, selectedOrder.currency_code)}</dd>
                 </div>
-              </div>
+              </dl>
             </div>
 
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end px-6 py-3.5 border-t border-slate-100 bg-slate-50/50">
-              <button
-                type="button"
-                onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 font-semibold text-slate-600 hover:text-orange-600 hover:bg-slate-100 rounded-lg transition cursor-pointer text-xs"
-              >
+            <div className="flex justify-end border-t border-slate-200 px-6 py-4">
+              <button type="button" onClick={() => setSelectedOrder(null)} className={ghostBtn}>
                 Close
               </button>
             </div>

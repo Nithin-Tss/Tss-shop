@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost } from "@/lib/api";
+import Icon from "@/components/Icons";
 
 const INPUT =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-violet-500 focus:ring-2 focus:ring-blue-100";
+  "w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200";
 
 // Two-factor sign-in with an authenticator app: turn it on, see recovery codes once, turn it off
 export default function MfaSettings() {
@@ -72,64 +73,107 @@ export default function MfaSettings() {
 
   if (!status) return null;
 
-  return (
-    <section
-      className="mt-6 rounded-2xl border border-slate-100 bg-white p-6"
-      aria-labelledby="mfa-heading"
-    >
-      <h2 id="mfa-heading" className="text-sm font-semibold text-slate-800">
-        Two-factor authentication
-      </h2>
-      <p className="mt-1 text-xs text-slate-500">
-        {status.enabled
-          ? `On. ${status.recoveryCodesLeft} recovery code${status.recoveryCodesLeft === 1 ? "" : "s"} left.`
-          : "Ask for a code from an authenticator app each time you sign in."}
-      </p>
+  const PRIMARY =
+    "inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50 cursor-pointer";
+  const GHOST =
+    "inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 cursor-pointer";
 
-      {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
+  return (
+    <div className="p-5 sm:p-6" aria-labelledby="mfa-heading">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <Icon name="smartphone" className="mt-0.5 h-[18px] w-[18px] text-slate-400" />
+          <div>
+            <h4
+              id="mfa-heading"
+              className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-900"
+            >
+              Two-factor authentication
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  status.enabled ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {status.enabled && <Icon name="shield-check" className="h-3 w-3" />}
+                {status.enabled ? "On" : "Off"}
+              </span>
+            </h4>
+            <p className="mt-0.5 text-sm text-slate-500">
+              {status.enabled
+                ? `Protected with an authenticator app. ${status.recoveryCodesLeft} recovery code${status.recoveryCodesLeft === 1 ? "" : "s"} left.`
+                : "Ask for a code from an authenticator app each time you sign in."}
+            </p>
+          </div>
+        </div>
+
+        {!status.enabled && !setup && (
+          <button type="button" onClick={begin} disabled={busy} className={PRIMARY}>
+            Set up
+          </button>
+        )}
+        {status.enabled && !disabling && (
+          <button type="button" onClick={() => setDisabling(true)} className={GHOST}>
+            Turn off
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <p role="alert" className="mt-4 flex items-center gap-2 text-sm text-red-600">
+          <Icon name="alert" className="h-4 w-4" />
+          {error}
+        </p>
+      )}
 
       {recoveryCodes.length > 0 && (
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-xs font-semibold text-amber-800">
+        <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="flex items-start gap-2 text-sm font-medium text-amber-900">
+            <Icon name="alert" className="mt-0.5 h-4 w-4" />
             Save these recovery codes now. Each works once, and they will not be shown again.
           </p>
-          <ul className="mt-2 grid grid-cols-2 gap-1 font-mono text-xs text-slate-800">
+          <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {recoveryCodes.map((item) => (
-              <li key={item}>{item}</li>
+              <li
+                key={item}
+                className="rounded-md border border-amber-200 bg-white px-2.5 py-1.5 text-center font-mono text-xs text-slate-900"
+              >
+                {item}
+              </li>
             ))}
           </ul>
-          <button
-            type="button"
-            onClick={() => setRecoveryCodes([])}
-            className="mt-3 text-xs font-semibold text-violet-600"
-          >
-            I have saved them
-          </button>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => navigator.clipboard?.writeText(recoveryCodes.join("\n"))}
+              className={GHOST}
+            >
+              <Icon name="copy" className="h-4 w-4" />
+              Copy codes
+            </button>
+            <button type="button" onClick={() => setRecoveryCodes([])} className={PRIMARY}>
+              <Icon name="check" className="h-4 w-4" />I have saved them
+            </button>
+          </div>
         </div>
       )}
 
-      {!status.enabled && !setup && (
-        <button
-          type="button"
-          onClick={begin}
-          disabled={busy}
-          className="mt-4 rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
-        >
-          Set up
-        </button>
-      )}
-
       {setup && (
-        <form onSubmit={enable} className="mt-4 max-w-md space-y-3" noValidate>
-          <p className="text-xs text-slate-600">
-            Add this key to your authenticator app (Google Authenticator, 1Password, Authy), then
-            enter the 6-digit code it shows.
-          </p>
-          <code className="block break-all rounded bg-slate-100 px-3 py-2 text-xs">
+        <form onSubmit={enable} className="mt-5 max-w-md space-y-4" noValidate>
+          <ol className="space-y-1 text-sm text-slate-600">
+            <li>
+              1. Add this key to your authenticator app (Google Authenticator, 1Password, Authy).
+            </li>
+            <li>2. Enter the 6-digit code it shows.</li>
+          </ol>
+          <code className="block break-all rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs text-slate-900">
             {setup.secret}
           </code>
-          <a href={setup.otpauthUri} className="block text-xs font-semibold text-violet-600">
+          <a
+            href={setup.otpauthUri}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-orange-700 underline-offset-2 hover:underline"
+          >
             Open in authenticator app
+            <Icon name="arrow-right" className="h-3.5 w-3.5" />
           </a>
           <input
             className={INPUT}
@@ -140,28 +184,14 @@ export default function MfaSettings() {
             value={code}
             onChange={(event) => setCode(event.target.value)}
           />
-          <button
-            type="submit"
-            disabled={busy}
-            className="rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
-          >
+          <button type="submit" disabled={busy} className={PRIMARY}>
             Turn on
           </button>
         </form>
       )}
 
-      {status.enabled && !disabling && (
-        <button
-          type="button"
-          onClick={() => setDisabling(true)}
-          className="mt-4 text-xs font-semibold text-red-600"
-        >
-          Turn off
-        </button>
-      )}
-
       {status.enabled && disabling && (
-        <form onSubmit={disable} className="mt-4 max-w-md space-y-3" noValidate>
+        <form onSubmit={disable} className="mt-5 max-w-md space-y-3" noValidate>
           <input
             className={INPUT}
             type="password"
@@ -180,15 +210,20 @@ export default function MfaSettings() {
             value={code}
             onChange={(event) => setCode(event.target.value)}
           />
-          <button
-            type="submit"
-            disabled={busy}
-            className="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
-          >
-            Turn off two-factor
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={busy}
+              className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+            >
+              Turn off two-factor
+            </button>
+            <button type="button" onClick={() => setDisabling(false)} className={GHOST}>
+              Cancel
+            </button>
+          </div>
         </form>
       )}
-    </section>
+    </div>
   );
 }
