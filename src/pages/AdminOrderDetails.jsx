@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan, useSession } from "@/lib/auth";
 
 function formatOrderDateTime(dateString) {
@@ -50,6 +50,34 @@ function formatCurrency(amount, currencyCode = "INR") {
   }
 }
 
+// Payments that still hold money (gift card ones first: their money goes back on the card before anything else)
+function refundablePayments(order) {
+  const left = (p) =>
+    Number(p.amount) -
+    (p.transactions || [])
+      .filter((t) => t.transaction_type === "refund" && t.status === "success")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+  return (order?.payments || [])
+    .filter((p) => ["captured", "paid", "partially_refunded"].includes(p.status))
+    .map((p) => ({ ...p, left: left(p) }))
+    .filter((p) => p.left > 0)
+    .sort((a, b) => (a.provider === "gift_card" ? 0 : 1) - (b.provider === "gift_card" ? 0 : 1));
+}
+
+function paymentLabel(p) {
+  return p.provider === "gift_card" && p.gift_card
+    ? `Gift card \u2022\u2022\u2022\u2022${p.gift_card.last4}`
+    : (p.provider || "Payment").replace(/_/g, " ");
+}
+
+// Why the card can't take a refund right now (null when it can)
+function giftCardRefundProblem(p) {
+  if (p.provider !== "gift_card" || !p.gift_card) return null;
+  if (p.gift_card.status !== "active") return "This gift card is deactivated and can't receive a refund.";
+  if (p.gift_card.is_expired) return "This gift card has expired. Set a new expiry date before refunding to it.";
+  return null;
+}
+
 export default function AdminOrderDetails() {
   const { id: orderId } = useParams();
   const navigate = useNavigate();
@@ -96,6 +124,9 @@ export default function AdminOrderDetails() {
   const [paymentReference, setPaymentReference] = useState("");
   const [refundAmount, setRefundAmount] = useState("");
   const [refundReason, setRefundReason] = useState("Order canceled");
+  const [refundPaymentId, setRefundPaymentId] = useState("");
+  const [cancelDestinations, setCancelDestinations] = useState({}); // payment id -> "gift_card" | "original" | "later"
+  const [newExpiry, setNewExpiry] = useState({}); // gift card id -> yyyy-mm-dd typed for an expired card
 
   const moreMenuRef = useRef(null);
 
@@ -196,7 +227,12 @@ export default function AdminOrderDetails() {
     if (!order) return;
     setActionLoading(true);
     try {
-      const res = await apiPost(`/api/v1/orders/${order.id}/cancel/`, {});
+      const refund_destinations = {};
+      refundablePayments(order).forEach((p) => {
+        refund_destinations[p.id] =
+          cancelDestinations[p.id] || (p.provider === "gift_card" ? "gift_card" : "original");
+      });
+      const res = await apiPost(`/api/v1/orders/${order.id}/cancel/`, { refund_destinations });
       if (res.ok) {
         showToast("Order cancelled successfully.");
         setShowCancelModal(false);
@@ -208,6 +244,22 @@ export default function AdminOrderDetails() {
       showErrorToast("Network error cancelling order.");
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const saveNewExpiry = async (card) => {
+    const day = newExpiry[card.id];
+    if (!day) return;
+    setActionLoading(true);
+    const res = await apiPatch(`/api/v1/gift-cards/${card.id}/`, {
+      expires_at: new Date(`${day}T23:59:59`).toISOString(),
+    });
+    setActionLoading(false);
+    if (res.ok) {
+      showToast("Expiry date updated.");
+      fetchOrderDetails(true);
+    } else {
+      showErrorToast(res.error || res.formError || "Couldn't update the expiry date.");
     }
   };
 
@@ -259,10 +311,8 @@ export default function AdminOrderDetails() {
 
   const handleRefundPayment = async () => {
     if (!order) return;
-    const paymentsList = order.payments || [];
-    const validPayment = paymentsList.find(
-      (p) => p.status === "captured" || p.status === "paid" || p.status === "partially_refunded"
-    );
+    const refundable = refundablePayments(order);
+    const validPayment = refundable.find((p) => p.id === refundPaymentId) || refundable[0];
     if (!validPayment) {
       showErrorToast("No eligible payment found to refund on this order.");
       return;
@@ -273,6 +323,7 @@ export default function AdminOrderDetails() {
       const res = await apiPost(`/api/v1/payments/${validPayment.id}/refund/`, {
         amount: parseFloat(refundAmount) || 0,
         reason: refundReason,
+        destination: validPayment.provider === "gift_card" ? "gift_card" : "original",
       });
       if (res.ok) {
         showToast("Refund processed successfully.");
@@ -1007,18 +1058,14 @@ export default function AdminOrderDetails() {
                     <span>{formatCurrency(fin.total, order.currency_code)}</span>
                   </div>
 
-                  {(() => {
-                    const giftCardPayment = (order.payments || []).find(
-                      (p) => p.provider === "gift_card"
-                    );
-                    if (!giftCardPayment) return null;
-                    return (
-                      <div className="flex justify-between text-emerald-700 font-medium">
-                        <span>Gift card</span>
-                        <span>-{formatCurrency(giftCardPayment.amount, order.currency_code)}</span>
+                  {(order.payments || [])
+                    .filter((p) => p.provider === "gift_card")
+                    .map((p) => (
+                      <div key={p.id} className="flex justify-between text-emerald-700 font-medium">
+                        <span>{paymentLabel(p)}</span>
+                        <span>-{formatCurrency(p.amount, order.currency_code)}</span>
                       </div>
-                    );
-                  })()}
+                    ))}
 
                   {/* Paid / Refund / Balance Details */}
                   <div className="pt-2 border-t border-slate-100 space-y-1.5">
@@ -1623,6 +1670,33 @@ export default function AdminOrderDetails() {
             <p className="text-xs text-slate-500 mb-4">Refund an amount back to the customer.</p>
 
             <div className="space-y-3 mb-6 text-xs sm:text-sm">
+              {refundablePayments(order).length > 1 && (
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Refund to</label>
+                  <select
+                    value={refundPaymentId || refundablePayments(order)[0]?.id}
+                    onChange={(e) => {
+                      setRefundPaymentId(e.target.value);
+                      const chosen = refundablePayments(order).find((p) => p.id === e.target.value);
+                      if (chosen) setRefundAmount(chosen.left.toFixed(2));
+                    }}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none bg-white"
+                  >
+                    {refundablePayments(order).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {paymentLabel(p)} ({formatCurrency(p.left, order.currency_code)} left)
+                        {p.provider === "gift_card" ? " \u2013 balance goes back on the card" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {(() => {
+                const chosen =
+                  refundablePayments(order).find((p) => p.id === refundPaymentId) || refundablePayments(order)[0];
+                const problem = chosen && giftCardRefundProblem(chosen);
+                return problem ? <p className="text-red-600">{problem}</p> : null;
+              })()}
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
                   Refund Amount ({order.currency_code})
@@ -1682,6 +1756,61 @@ export default function AdminOrderDetails() {
               Cancelling this order will release all committed inventory back to available stock.
               This operation cannot be undone.
             </p>
+
+            {refundablePayments(order).length > 0 && (
+              <div className="space-y-3 mb-5 text-xs sm:text-sm">
+                <div className="font-semibold text-slate-700">Refund the money paid so far</div>
+                {refundablePayments(order).map((p) => {
+                  const isCard = p.provider === "gift_card";
+                  const problem = giftCardRefundProblem(p);
+                  const value = cancelDestinations[p.id] || (isCard ? "gift_card" : "original");
+                  return (
+                    <div key={p.id} className="rounded-lg border border-slate-200 p-3">
+                      <div className="flex justify-between mb-2">
+                        <span className="font-medium text-slate-800">{paymentLabel(p)}</span>
+                        <span className="font-mono">{formatCurrency(p.left, order.currency_code)}</span>
+                      </div>
+                      <select
+                        value={value}
+                        onChange={(e) => setCancelDestinations({ ...cancelDestinations, [p.id]: e.target.value })}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 outline-none bg-white"
+                      >
+                        {isCard ? (
+                          <option value="gift_card">Refund to the gift card</option>
+                        ) : (
+                          <option value="original">Refund to the original payment method</option>
+                        )}
+                        <option value="later">Refund later (no change now)</option>
+                      </select>
+                      {problem && value !== "later" && (
+                        <div className="mt-2 text-red-600">
+                          <p>{problem}</p>
+                          {p.gift_card?.status === "active" && p.gift_card?.is_expired && (
+                            <div className="mt-2 flex gap-2">
+                              <input
+                                type="date"
+                                value={newExpiry[p.gift_card.id] || ""}
+                                min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
+                                onChange={(e) => setNewExpiry({ ...newExpiry, [p.gift_card.id]: e.target.value })}
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-800"
+                              />
+                              <button
+                                type="button"
+                                disabled={actionLoading || !newExpiry[p.gift_card.id]}
+                                onClick={() => saveNewExpiry(p.gift_card)}
+                                className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-800 font-semibold disabled:opacity-50"
+                              >
+                                Save new expiry
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="flex justify-end gap-2">
               <button

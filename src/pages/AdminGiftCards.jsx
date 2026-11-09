@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
-import { apiDownload, apiGet, apiPost } from "@/lib/api";
+import { apiDownload, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
 
 // SVG Illustration for Empty State
@@ -256,14 +256,38 @@ function CreateGiftCardModal({ onClose, onCreated }) {
   );
 }
 
-function GiftCardDetailModal({ card, onClose, onChanged }) {
+function GiftCardDetailModal({ card, onClose, onChanged, onUpdated }) {
+  const canManage = useCan("gift_cards.manage");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const [resendTo, setResendTo] = useState("");
+  const [expiryDay, setExpiryDay] = useState(card.expires_at ? card.expires_at.slice(0, 10) : "");
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
+  // Only the expiry can be edited; the balance changes through orders and refunds, never by typing
+  const saveExpiry = async (clear) => {
+    setBusy(true);
+    setNotice("");
+    const res = await apiPatch(`/api/v1/gift-cards/${card.id}/`, {
+      expires_at: clear || !expiryDay ? null : new Date(`${expiryDay}T23:59:59`).toISOString(),
+    });
+    setBusy(false);
+    if (res.ok) {
+      setNotice("Expiry updated.");
+      if (clear) setExpiryDay("");
+      onUpdated?.(res.data);
+    } else {
+      setNotice(res.formError || res.error || "Couldn't update the expiry.");
+    }
+  };
 
   const resend = async () => {
     setBusy(true);
     setNotice("");
-    const res = await apiPost(`/api/v1/gift-cards/${card.id}/resend/`, {});
+    const res = await apiPost(
+      `/api/v1/gift-cards/${card.id}/resend/`,
+      resendTo.trim() ? { email: resendTo.trim() } : {}
+    );
     setBusy(false);
     setNotice(res.ok ? `Resent to ${res.data.sent_to}.` : res.formError || "Couldn't resend.");
   };
@@ -317,6 +341,7 @@ function GiftCardDetailModal({ card, onClose, onChanged }) {
             <div className="text-xs text-slate-500">Expiry</div>
             <div className="text-charcoal-navy">
               {card.expires_at ? new Date(card.expires_at).toLocaleDateString() : "Never expires"}
+              {card.is_expired && <span className="ml-1.5 font-medium text-red-600">(expired)</span>}
             </div>
           </div>
           <div>
@@ -325,7 +350,51 @@ function GiftCardDetailModal({ card, onClose, onChanged }) {
               {new Date(card.created_at).toLocaleDateString()}
             </div>
           </div>
+          <div>
+            <div className="text-xs text-slate-500">Customer</div>
+            <div className="text-charcoal-navy">{card.customer_email || (card.customer ? "Linked customer" : "None")}</div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-500">Note</div>
+            <div className="text-charcoal-navy">{card.note || "\u2014"}</div>
+          </div>
         </div>
+
+        {canManage && card.status === "active" && (
+          <div className="mb-4 rounded-lg border border-slate-200 p-3">
+            <div className="mb-2 text-xs font-medium text-slate-500">Change expiry date</div>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="date"
+                value={expiryDay}
+                min={tomorrow}
+                onChange={(e) => setExpiryDay(e.target.value)}
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-charcoal-navy"
+              />
+              <button
+                type="button"
+                disabled={busy || !expiryDay}
+                onClick={() => saveExpiry(false)}
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-charcoal-navy hover:bg-slate-50 disabled:opacity-60"
+              >
+                Save expiry
+              </button>
+              {card.expires_at && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => saveExpiry(true)}
+                  className="text-sm text-slate-600 underline disabled:opacity-60"
+                >
+                  Never expires
+                </button>
+              )}
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              An expired card needs a new expiry date before a refund can go back to it.
+            </p>
+          </div>
+        )}
 
         <h3 className="mb-2 text-sm font-semibold text-charcoal-navy">Activity history</h3>
         <div className="mb-4 max-h-56 overflow-y-auto rounded-lg border border-slate-200">
@@ -351,7 +420,7 @@ function GiftCardDetailModal({ card, onClose, onChanged }) {
                 <tr key={t.id} className="border-t border-slate-200">
                   <td className="px-3 py-2">{new Date(t.created_at).toLocaleDateString()}</td>
                   <td className="px-3 py-2 capitalize">{t.transaction_type}</td>
-                  <td className="px-3 py-2">{t.order ? t.order.slice(0, 8) : "—"}</td>
+                  <td className="px-3 py-2">{t.order_number ? `#${t.order_number}` : "—"}</td>
                   <td className="px-3 py-2 text-right">{money(t.amount, card.currency_code)}</td>
                   <td className="px-3 py-2 text-right">
                     {money(t.balance_after, card.currency_code)}
@@ -360,6 +429,20 @@ function GiftCardDetailModal({ card, onClose, onChanged }) {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="mb-3">
+          <label className="mb-1 block text-xs text-slate-500" htmlFor="gc-resend-to">
+            Resend the code to (leave empty to use the customer's email)
+          </label>
+          <input
+            id="gc-resend-to"
+            type="email"
+            value={resendTo}
+            onChange={(e) => setResendTo(e.target.value)}
+            placeholder="name@example.com"
+            className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-charcoal-navy"
+          />
         </div>
 
         {notice && <p className="mb-3 text-xs text-slate-600">{notice}</p>}
@@ -744,6 +827,10 @@ export default function AdminGiftCards() {
         <GiftCardDetailModal
           card={selected}
           onClose={() => setSelected(null)}
+          onUpdated={(updated) => {
+            load();
+            setSelected(updated);
+          }}
           onChanged={() => {
             load();
             setSelected(null);
