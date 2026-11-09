@@ -427,9 +427,13 @@ export default function AdminCustomizePage() {
 
   const [samplePage, setSamplePage] = useState(() => startParams.get("handle") || "");
   // "login" / "register": the preview shows that customer page (templates/login.liquid) instead of the page being edited
-  const [customerPage, setCustomerPage] = useState("");
+  const [customerPage, setCustomerPage] = useState(() =>
+    ["login", "register", "account"].includes(startParams.get("customer"))
+      ? startParams.get("customer")
+      : ""
+  );
   // The customer who just signed in or registered in the preview: the account page shows their details
-  const [customerToken, setCustomerToken] = useState("");
+  const [customerToken, setCustomerToken] = useState(() => startParams.get("ct") || "");
 
   const [products, setProducts] = useState([]);
 
@@ -1639,13 +1643,24 @@ export default function AdminCustomizePage() {
     put("collection", page === "collection" ? sampleCollection : "");
     put("handle", basePage(page) === "page" ? samplePage : "");
     put("section", selected);
+    put("customer", customerPage);
+    put("ct", customerPage === "account" ? customerToken : "");
     const query = params.toString();
     window.history.replaceState(
       window.history.state,
       "",
       `${window.location.pathname}${query ? `?${query}` : ""}`
     );
-  }, [page, sampleProductId, sampleArticle, sampleCollection, samplePage, selected]);
+  }, [
+    page,
+    sampleProductId,
+    sampleArticle,
+    sampleCollection,
+    samplePage,
+    selected,
+    customerPage,
+    customerToken,
+  ]);
 
   // A store link followed in the preview ("/products/<id>", "/collections/all", "/blog/<handle>", "/"):
   // open that page's own template here. In Edit mode its main section (e.g. Product information) is
