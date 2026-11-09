@@ -1625,7 +1625,10 @@ export default function AdminCustomizePage() {
     collection: sampleCollection,
     q: sampleQuery,
     handle: samplePage,
-    customer: customerPage === "account" ? `account|${customerToken}` : customerPage,
+    customer:
+      customerPage === "account"
+        ? `account|${customerToken}`
+        : `${customerPage}|${customerPage ? "" : customerToken}`,
   });
 
   // Full render when the preview first opens, the page (or the product or article it shows) changes or Refresh is pressed

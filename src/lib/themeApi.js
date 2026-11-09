@@ -90,7 +90,8 @@ export function previewTheme(
   if (collection) query.set("collection", collection);
   if (q) query.set("q", q);
   if (customer) query.set("customer", customer);
-  if (customer && customerToken) query.set("ct", customerToken);
+  // Sent on every page, so the signed-in preview customer is known beyond the account page
+  if (customerToken) query.set("ct", customerToken);
   return apiRequest(`${BASE}/preview/?${query}`, {
     method: "POST",
     body: withoutCartTemplate(data),
