@@ -154,20 +154,26 @@ const Chevron = ({ open }) => (
     <path d="M6 3.5l4.5 4.5L6 12.5" strokeWidth="1.3" />
   </svg>
 );
+const fillProps = { width: 16, height: 16, viewBox: "0 0 16 16", fill: "currentColor" };
 const NewFileIcon = () => (
-  <svg {...svgProps}>
-    <path d="M9.5 1.5H4a1 1 0 00-1 1v11a1 1 0 001 1h8a1 1 0 001-1V5L9.5 1.5zM9.5 1.5V5H13M8 7.5v4M6 9.5h4" />
+  <svg {...fillProps}>
+    <path d="M9.5 1.1l3.4 3.5.1.4v2h-1V6H8V2H3v11h4v1H2.5l-.5-.5v-12l.5-.5h6.7l.3.1zM9 2v3h2.9L9 2zm4 14h-1v-3H9v-1h3V9h1v3h3v1h-3v3z" />
   </svg>
 );
 const NewFolderIcon = () => (
-  <svg {...svgProps}>
-    <path d="M1.5 3.5h4l1 1.5h8v8h-13zM8 7.5v4M6 9.5h4" />
+  <svg {...fillProps}>
+    <path d="M14.5 2H7.71l-.85-.85L6.51 1h-5l-.5.5v11l.5.5H7v-1H1.99V6h4.49l.35-.15.86-.86H14v1.5l-.001.51h1.011V2.5L14.5 2zm-.51 2h-6.5l-.35.15-.86.86H2v-3h4.29l.85.85.36.15H14l-.01.99zM13 16h-1v-3H9v-1h3V9h1v3h3v1h-3v3z" />
+  </svg>
+);
+const RefreshIcon = () => (
+  <svg {...fillProps}>
+    <path d="M4.681 3H2V2h3.5l.5.5V6H5V4a5 5 0 1 0 4.53-.761l.302-.954A6 6 0 1 1 4.681 3z" />
   </svg>
 );
 const CollapseIcon = () => (
   <svg {...svgProps}>
-    <rect x="2.5" y="2.5" width="11" height="11" rx="1" />
-    <path d="M5.5 8h5" />
+    <rect x="3.5" y="3.5" width="9" height="9" rx="1.5" strokeWidth="1.1" />
+    <path d="M6 8h4" strokeWidth="1.1" />
   </svg>
 );
 const ExplorerIcon = () => (
@@ -185,6 +191,68 @@ const CloseIcon = () => (
   <svg {...svgProps} width={14} height={14}>
     <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" strokeWidth="1.3" />
   </svg>
+);
+
+/* ---------- file / folder type icons (Material Icon Theme, same as VS Code) ---------- */
+const ICON_URLS = import.meta.glob(
+  [
+    "../../node_modules/material-icon-theme/icons/css.svg",
+    "../../node_modules/material-icon-theme/icons/document.svg",
+    "../../node_modules/material-icon-theme/icons/folder.svg",
+    "../../node_modules/material-icon-theme/icons/folder-components.svg",
+    "../../node_modules/material-icon-theme/icons/folder-components-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-config.svg",
+    "../../node_modules/material-icon-theme/icons/folder-config-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-i18n.svg",
+    "../../node_modules/material-icon-theme/icons/folder-i18n-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-layout.svg",
+    "../../node_modules/material-icon-theme/icons/folder-layout-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-resource.svg",
+    "../../node_modules/material-icon-theme/icons/folder-resource-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-snippet.svg",
+    "../../node_modules/material-icon-theme/icons/folder-snippet-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-src.svg",
+    "../../node_modules/material-icon-theme/icons/folder-src-open.svg",
+    "../../node_modules/material-icon-theme/icons/folder-template.svg",
+    "../../node_modules/material-icon-theme/icons/folder-template-open.svg",
+    "../../node_modules/material-icon-theme/icons/javascript.svg",
+    "../../node_modules/material-icon-theme/icons/json.svg",
+    "../../node_modules/material-icon-theme/icons/liquid.svg",
+  ],
+  { eager: true, query: "?url", import: "default" }
+);
+const iconUrl = (name) => ICON_URLS[`../../node_modules/material-icon-theme/icons/${name}.svg`];
+const FILE_ICONS = { liquid: "liquid", css: "css", js: "javascript", json: "json" };
+const FOLDER_ICONS = {
+  sections: "folder-src",
+  templates: "folder-template",
+  layout: "folder-layout",
+  assets: "folder-resource",
+  config: "folder-config",
+  snippets: "folder-snippet",
+  locales: "folder-i18n",
+  blocks: "folder-components",
+};
+const FileTypeIcon = ({ path }) => (
+  <img
+    src={iconUrl(FILE_ICONS[(path.split(".").pop() || "").toLowerCase()] || "document")}
+    width={16}
+    height={16}
+    className="shrink-0"
+    alt=""
+    draggable={false}
+  />
+);
+const FolderTypeIcon = ({ name, open }) => (
+  <img
+    src={iconUrl((FOLDER_ICONS[name] || "folder") + (open ? "-open" : ""))}
+    width={16}
+    height={16}
+    className="shrink-0"
+    alt=""
+    draggable={false}
+  />
 );
 
 export default function CodeWorkbench({ height = "640px", fullscreen = false }) {
@@ -240,6 +308,23 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
   // The theme this editor loaded: every later read and save names it, so they cannot drift to another one
   const loadedThemeRef = useRef(null);
   const [notice, setNotice] = useState("");
+  const [editorTheme, setEditorTheme] = useState(() => {
+    try {
+      return ["monokai", "material"].includes(localStorage.getItem("codeEditorTheme"))
+        ? localStorage.getItem("codeEditorTheme")
+        : "vs";
+    } catch {
+      return "vs";
+    }
+  });
+  const changeEditorTheme = (value) => {
+    setEditorTheme(value);
+    try {
+      localStorage.setItem("codeEditorTheme", value);
+    } catch {
+      /* storage unavailable */
+    }
+  };
   const [history, setHistory] = useState(null);
 
   async function fetchProject() {
@@ -685,11 +770,18 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
   function renderNode(item, depth) {
     const isSelected = selected.path === item.path && selected.type === item.type;
-    const rowClass = `group flex cursor-pointer items-center gap-1 py-[3px] pr-2 text-[14px] text-slate-700 ${
-      isSelected
-        ? "border border-violet-700 bg-slate-200"
-        : "border border-transparent hover:bg-slate-200"
+    const rowClass = `group relative flex h-[22px] cursor-pointer items-center gap-1 pr-2 text-[13px] leading-none text-slate-700 ${
+      isSelected ? "bg-slate-300/70" : "hover:bg-slate-200/70"
     }`;
+    // thin vertical guide for every level of nesting, like VS Code
+    const guides = Array.from({ length: depth }, (_, g) => (
+      <span
+        key={g}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 w-px bg-slate-300/80"
+        style={{ left: 14 + g * 16 }}
+      />
+    ));
 
     if (item.type === "folder") {
       const open = expanded.has(item.path);
@@ -697,7 +789,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
         <div key={item.path}>
           <div
             className={rowClass}
-            style={{ paddingLeft: 8 + depth * 12 }}
+            style={{ paddingLeft: 8 + depth * 16 }}
             onClick={() => {
               setSelected({ type: "folder", path: item.path });
               setExpanded((e) => {
@@ -707,7 +799,9 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               });
             }}
           >
+            {guides}
             <Chevron open={open} />
+            <FolderTypeIcon name={baseName(item.path)} open={open} />
             <span>{baseName(item.path)}</span>
             <RowActions item={item} onRename={renameItem} onDelete={deleteItem} />
           </div>
@@ -720,9 +814,11 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
       <div
         key={item.path}
         className={rowClass}
-        style={{ paddingLeft: 8 + depth * 12 + 16 }}
+        style={{ paddingLeft: 8 + depth * 16 + 18 }}
         onClick={() => openFile(item.path)}
       >
+        {guides}
+        <FileTypeIcon path={item.path} />
         <span className="truncate">{baseName(item.path)}</span>
         {item.path in drafts && <span className="text-[10px] text-violet-700">●</span>}
         <RowActions item={item} onRename={renameItem} onDelete={deleteItem} />
@@ -801,27 +897,39 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
           <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50">
             {panel === "explorer" ? (
               <>
-                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-slate-700">
-                  Explorer
-                </div>
+                <div className="px-5 py-2.5 text-[12px] text-slate-700">Explorer</div>
 
-                <div className="flex items-center justify-between px-2 py-1">
+                <div className="flex items-center justify-between px-2 py-1.5">
                   <button
-                    className="flex items-center gap-1 text-[11px] font-bold uppercase text-slate-700"
+                    className="flex min-w-0 flex-1 items-center gap-1 text-left text-[12px] font-semibold text-slate-700"
                     onClick={() => {
                       setRootOpen((o) => !o);
                       setSelected({ type: "root", path: "" });
                     }}
                   >
-                    <Chevron open={rootOpen} />
-                    {project.theme?.name || "Theme Files"}
+                    <span className="shrink-0">
+                      <Chevron open={rootOpen} />
+                    </span>
+                    <span className="truncate">{project.theme?.name || "Theme Files"}</span>
                   </button>
-                  <div className="flex gap-1 text-slate-700">
+                  <div className="flex shrink-0 gap-0.5 pl-1 text-slate-700">
                     <IconButton title="New File" onClick={newFile}>
                       <NewFileIcon />
                     </IconButton>
                     <IconButton title="New Folder" onClick={newFolder}>
                       <NewFolderIcon />
+                    </IconButton>
+                    <IconButton
+                      title="Refresh Explorer"
+                      onClick={() => {
+                        if (
+                          Object.keys(drafts).length === 0 ||
+                          window.confirm("Reloading may discard unsaved changes. Continue?")
+                        )
+                          load();
+                      }}
+                    >
+                      <RefreshIcon />
                     </IconButton>
                     <IconButton title="Collapse Folders" onClick={() => setExpanded(new Set())}>
                       <CollapseIcon />
@@ -841,7 +949,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 ].map(([key, label]) => (
                   <div key={key} className="border-t border-slate-200">
                     <button
-                      className="flex w-full items-center gap-1 px-1 py-1 text-[11px] font-bold uppercase text-slate-700"
+                      className="flex w-full items-center gap-1 px-1 py-1 text-[12px] font-semibold text-slate-700"
                       onClick={() => toggleSection(key)}
                     >
                       <Chevron open={sections[key]} />
@@ -859,9 +967,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               </>
             ) : (
               <>
-                <div className="px-5 py-2.5 text-[11px] uppercase tracking-wide text-slate-700">
-                  Search
-                </div>
+                <div className="px-5 py-2.5 text-[12px] text-slate-700">Search</div>
                 <div className="px-3 pb-2">
                   <input
                     value={query}
@@ -929,6 +1035,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                           : "border-t-2 border-t-transparent text-slate-500"
                       }`}
                     >
+                      <FileTypeIcon path={path} />
                       <span className="whitespace-nowrap">{baseName(path)}</span>
                       {path in drafts ? (
                         <span className="text-violet-700">●</span>
@@ -949,6 +1056,16 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
               </div>
 
               <div className="flex shrink-0 items-center gap-2 px-3 text-[12px]">
+                <select
+                  aria-label="Editor theme"
+                  value={editorTheme}
+                  onChange={(e) => changeEditorTheme(e.target.value)}
+                  className="rounded border border-slate-300 bg-transparent px-1.5 py-1"
+                >
+                  <option value="vs">Light</option>
+                  <option value="monokai">Monokai</option>
+                  <option value="material">Material</option>
+                </select>
                 <button
                   onClick={saveActive}
                   disabled={busy || !activePath || !(activePath in drafts)}
@@ -1033,7 +1150,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
 
             {history && history.name === activeSynced?.name && (
               <div className="max-h-56 overflow-y-auto border-b border-slate-200 bg-slate-50 px-3 py-2 text-[12px]">
-                <p className="mb-1 font-bold uppercase text-slate-700">History (latest first)</p>
+                <p className="mb-1 font-bold text-slate-700">History (latest first)</p>
                 {history.history.length === 0 && (
                   <p className="text-slate-500">No earlier versions yet.</p>
                 )}
@@ -1095,7 +1212,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 <CodeEditor
                   path={activePath}
                   language={languageOf(activePath)}
-                  theme="vs"
+                  theme={editorTheme}
                   value={contentOf(activePath)}
                   onChange={(v) =>
                     setDrafts((d) => {
@@ -1121,7 +1238,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
           {previewOpen && (
             <aside className="flex w-[40%] shrink-0 flex-col border-l border-slate-200">
               <div className="flex items-center justify-between bg-slate-50 px-3 py-2 text-[12px]">
-                <span className="font-bold uppercase text-slate-700">Theme preview</span>
+                <span className="font-bold text-slate-700">Theme preview</span>
                 <span className="flex gap-3">
                   <button
                     className="hover:text-violet-700"
