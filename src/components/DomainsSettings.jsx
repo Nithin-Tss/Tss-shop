@@ -46,7 +46,7 @@ function StatusBadge({ status }) {
   );
 }
 
-function Modal({ title, onClose, children }) {
+function Modal({ title, onClose, children, wide }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
@@ -55,12 +55,164 @@ function Modal({ title, onClose, children }) {
       <div
         role="dialog"
         aria-label={title}
-        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+        className={`max-h-[90vh] w-full overflow-y-auto rounded-2xl bg-white p-5 shadow-xl ${wide ? "max-w-xl" : "max-w-md"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-lg font-semibold text-ink">{title}</h3>
         <div className="mt-3 text-sm text-slate-600">{children}</div>
       </div>
+    </div>
+  );
+}
+
+const SECOND_LEVEL = new Set([
+  "com.au",
+  "net.au",
+  "org.au",
+  "id.au",
+  "co.nz",
+  "net.nz",
+  "org.nz",
+  "co.uk",
+  "org.uk",
+  "me.uk",
+  "co.in",
+  "co.za",
+  "com.sg",
+  "com.br",
+]);
+
+// Splits "shop.example.com.au" into { root: "example.com.au", sub: "shop" }.
+function splitHost(host) {
+  const parts = (host || "").toLowerCase().split(".").filter(Boolean);
+  const tail = parts.slice(-2).join(".");
+  const rootLen = SECOND_LEVEL.has(tail) ? 3 : 2;
+  return {
+    root: parts.slice(-rootLen).join("."),
+    sub: parts.slice(0, Math.max(parts.length - rootLen, 0)).join("."),
+  };
+}
+
+const PROVIDERS = {
+  godaddy: {
+    label: "GoDaddy",
+    steps: [
+      "Sign in to GoDaddy and open My Products → your domain → DNS (Manage DNS).",
+      "Click Add New Record and choose the type shown below.",
+      "Enter the Name and Value exactly as shown, set TTL to 1 Hour (or default), then Save.",
+      "Delete any existing A or CNAME record with the same Name (e.g. GoDaddy's “Parked” A record).",
+    ],
+    root: "In the Name field use @ for the root domain.",
+  },
+  ventraip: {
+    label: "VentraIP",
+    steps: [
+      "Sign in to the VentraIP client area → Services → your domain → Manage → DNS Management.",
+      "Click Add Record under DNS Records.",
+      "Pick the type, then enter the Hostname and Content/Value exactly as shown. Leave TTL at the default.",
+      "Remove any existing A or CNAME record with the same hostname, then Save.",
+    ],
+    root: "Leave the Hostname blank (or use @) for the root domain.",
+  },
+  namecheap: {
+    label: "Namecheap",
+    steps: [
+      "Sign in to Namecheap → Domain List → Manage → Advanced DNS.",
+      "Click Add New Record and choose the type shown below.",
+      "Enter Host and Value exactly as shown, keep TTL on Automatic, and save with the ✓.",
+      "Remove conflicting URL Redirect, A or CNAME records for the same host.",
+    ],
+    root: "Use @ in the Host field for the root domain.",
+  },
+  cloudflare: {
+    label: "Cloudflare",
+    steps: [
+      "Open Cloudflare → your domain → DNS → Records → Add record.",
+      "Choose the type shown below and enter Name and Target/Content exactly as shown.",
+      "Set the proxy status to DNS only (grey cloud) so we can issue the SSL certificate, then Save.",
+    ],
+    root: "Use @ as the Name for the root domain. Cloudflare flattens a root CNAME automatically.",
+  },
+  other: {
+    label: "Other provider",
+    steps: [
+      "Open the DNS management page at the company where you registered the domain.",
+      "Add a new record with the type, name and value shown below.",
+      "Remove any existing record with the same name, save, and allow time for DNS to update.",
+    ],
+    root: "For the root domain, use @ (or leave blank) as the name.",
+  },
+};
+
+function dnsRecords(host, target) {
+  const { sub } = splitHost(host);
+  const value = target || "your platform host";
+  if (sub) return [{ type: "CNAME", name: sub, value }];
+  return [
+    {
+      type: "CNAME / ALIAS / ANAME",
+      name: "@",
+      value,
+      note:
+        "Use CNAME if your provider supports root flattening (Cloudflare), otherwise ALIAS/ANAME. If neither exists, add an A record pointing to the IP address of " +
+        value +
+        ".",
+    },
+    { type: "CNAME", name: "www", value },
+  ];
+}
+
+function DnsInstructions({ host, target }) {
+  const [provider, setProvider] = useState("godaddy");
+  const info = PROVIDERS[provider];
+  const records = dnsRecords(host || "shop.example.com", target);
+  const isRoot = !splitHost(host || "shop.example.com").sub;
+  return (
+    <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <label className="block text-xs font-medium text-slate-600">
+        Where is your domain registered?
+        <select
+          value={provider}
+          onChange={(e) => setProvider(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+        >
+          {Object.entries(PROVIDERS).map(([k, v]) => (
+            <option key={k} value={k}>
+              {v.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead className="text-slate-500">
+            <tr>
+              <th className="pr-2">Type</th>
+              <th className="pr-2">Name / Host</th>
+              <th>Value / Points to</th>
+            </tr>
+          </thead>
+          <tbody className="text-ink">
+            {records.map((r) => (
+              <tr key={r.name} className="border-t border-slate-200 align-top">
+                <td className="py-1.5 pr-2 font-medium">{r.type}</td>
+                <td className="py-1.5 pr-2 font-mono">{r.name}</td>
+                <td className="py-1.5 font-mono break-all">{r.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {isRoot && <p className="mt-2 text-xs text-slate-600">{info.root}</p>}
+      <ol className="mt-3 list-decimal space-y-1 pl-4 text-xs text-slate-600">
+        {info.steps.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ol>
+      <p className="mt-3 text-xs text-slate-500">
+        DNS changes usually apply within minutes but can take up to 48 hours. The status turns to
+        Connected automatically once the records resolve.
+      </p>
     </div>
   );
 }
@@ -77,6 +229,7 @@ export default function DomainsSettings() {
   const [host, setHost] = useState("");
   const [kind, setKind] = useState("storefront");
   const [busy, setBusy] = useState(false);
+  const [dnsFor, setDnsFor] = useState(null);
 
   const storeId = store?.storeId;
 
@@ -186,6 +339,12 @@ export default function DomainsSettings() {
                   </div>
                   <div className="flex items-center gap-1">
                     <StatusBadge status={d.status} />
+                    {d.status !== "connected" && (
+                      <IconButton title="DNS setup" onClick={() => setDnsFor(d)}>
+                        <path d="M12 16v-4M12 8h.01" />
+                        <circle cx="12" cy="12" r="10" />
+                      </IconButton>
+                    )}
                     <IconButton
                       title="Visit"
                       onClick={() => window.open(`${scheme}://${d.host}`, "_blank", "noopener")}
@@ -216,7 +375,7 @@ export default function DomainsSettings() {
       </section>
 
       {modal === "connect" && (
-        <Modal title="Connect existing domain" onClose={() => setModal(null)}>
+        <Modal wide title="Connect existing domain" onClose={() => setModal(null)}>
           <form onSubmit={connect}>
             <label className="block">
               Domain
@@ -236,10 +395,10 @@ export default function DomainsSettings() {
               </select>
             </label>
             <p className="mt-3">
-              At your DNS provider, point this domain to{" "}
-              <strong>{data.target || "your platform host"}</strong> with a CNAME record. It shows
-              as Connected once DNS resolves.
+              Add these DNS records at your domain provider. It shows as Connected once DNS
+              resolves.
             </p>
+            <DnsInstructions host={host.trim()} target={data.target} />
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
@@ -257,6 +416,22 @@ export default function DomainsSettings() {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {dnsFor && (
+        <Modal wide title={`DNS setup for ${dnsFor.host}`} onClose={() => setDnsFor(null)}>
+          <p>Add these records at your domain provider to connect this domain.</p>
+          <DnsInstructions host={dnsFor.host} target={data.target} />
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setDnsFor(null)}
+              className="rounded-lg border border-slate-200 px-3 py-1.5"
+            >
+              Close
+            </button>
+          </div>
         </Modal>
       )}
 
