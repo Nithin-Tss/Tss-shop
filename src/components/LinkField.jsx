@@ -8,18 +8,42 @@ import { createPortal } from "react-dom";
 // The store's policies (Settings > Policies) each have one stable address, whatever Pages exist.
 // Keep in step with POLICY_PAGES / POLICY_ALIASES in Tss-backend/apps/themes/services.py.
 const POLICY_LINKS = [
-  { name: "Privacy policy", handle: "privacy-policy", aliases: ["privacy", "privacy-policies", "privacy-notice"] },
+  {
+    name: "Privacy policy",
+    handle: "privacy-policy",
+    aliases: ["privacy", "privacy-policies", "privacy-notice"],
+  },
   {
     name: "Return and refund policy",
     handle: "refund-policy",
-    aliases: ["refund", "refunds", "refund-policies", "returns", "return-policy", "returns-policy", "return-and-refund-policy", "returns-and-refunds"],
+    aliases: [
+      "refund",
+      "refunds",
+      "refund-policies",
+      "returns",
+      "return-policy",
+      "returns-policy",
+      "return-and-refund-policy",
+      "returns-and-refunds",
+    ],
   },
   {
     name: "Terms of service",
     handle: "terms-of-service",
-    aliases: ["terms", "terms-of-services", "terms-and-conditions", "terms-conditions", "terms-of-use", "tos"],
+    aliases: [
+      "terms",
+      "terms-of-services",
+      "terms-and-conditions",
+      "terms-conditions",
+      "terms-of-use",
+      "tos",
+    ],
   },
-  { name: "Shipping policy", handle: "shipping-policy", aliases: ["shipping", "shipping-policies", "delivery-policy", "shipping-and-delivery"] },
+  {
+    name: "Shipping policy",
+    handle: "shipping-policy",
+    aliases: ["shipping", "shipping-policies", "delivery-policy", "shipping-and-delivery"],
+  },
   { name: "Contact information", handle: "contact-information", aliases: ["contact-info"] },
   { name: "Legal notice", handle: "legal-notice", aliases: ["legal"] },
 ];
