@@ -248,7 +248,10 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
   const byId = useMemo(() => Object.fromEntries(collections.map((c) => [c.id, c])), [collections]);
   const shown = matchingCollections(collections, query);
   const reasons = useMemo(
-    () => Object.fromEntries(collections.map((c) => [c.id, blockedReason(c, selected, byId, currentId)])),
+    () =>
+      Object.fromEntries(
+        collections.map((c) => [c.id, blockedReason(c, selected, byId, currentId)])
+      ),
     [collections, selected, byId, currentId]
   );
   const selectable = (c) => !reasons[c.id];
@@ -402,7 +405,9 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate">{c.name}</span>
-                            {reason && <span className="block text-[12px] text-slate-500">{reason}</span>}
+                            {reason && (
+                              <span className="block text-[12px] text-slate-500">{reason}</span>
+                            )}
                           </span>
                           <span className="shrink-0 text-[12px] text-slate-500">
                             {productsLabel(c.products_count)}
