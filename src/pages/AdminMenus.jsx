@@ -14,6 +14,126 @@ import {
   uploadThemeImage,
 } from "@/lib/themeApi";
 
+// ------------------------------------------------- editor UI helpers (view only)
+// Items carry a UI-only `_k` key (never saved: handleSaveMenu builds its payload
+// field by field) so expand/collapse and "Unsaved" tracking survive reordering.
+let keyCounter = 0;
+const nextKey = () => `k${++keyCounter}`;
+
+const tagNode = (n) => ({
+  ...n,
+  _k: nextKey(),
+  ...(n.children ? { children: n.children.map(tagNode) } : {}),
+});
+const stripNode = (n) => {
+  const rest = { ...n };
+  delete rest._k;
+  if (rest.children) rest.children = rest.children.map(stripNode);
+  return rest;
+};
+const recordNode = (n, pos, map) => {
+  map.set(n._k, `${pos}|${JSON.stringify(stripNode(n))}`);
+  (n.children || []).forEach((c, i) => recordNode(c, i, map));
+};
+const collectKeys = (n, out) => {
+  out.push(n._k);
+  if (n.promo_url !== undefined) out.push(`${n._k}:banner`);
+  (n.children || []).forEach((c) => collectKeys(c, out));
+};
+
+function Chevron({ open, small }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={`${small ? "h-3 w-3" : "h-4 w-4"} shrink-0 text-slate-500 transition-transform duration-200 motion-reduce:transition-none ${
+        open ? "rotate-90" : ""
+      }`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m9 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+function UnsavedDot() {
+  return (
+    <span className="ml-auto inline-flex shrink-0 items-center" title="Unsaved changes">
+      <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden="true" />
+      <span className="sr-only">Unsaved changes</span>
+    </span>
+  );
+}
+
+function TrashIcon({ small }) {
+  return small ? (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  ) : (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </svg>
+  );
+}
+
+function MoveButtons({ index, count, label, onMove, small }) {
+  const cls = `text-slate-400 hover:text-slate-700 disabled:opacity-20 p-0.5 ${
+    small ? "text-[9px] leading-2.5" : "text-[10px] leading-3"
+  }`;
+  return (
+    <div className="flex flex-col gap-0.5">
+      <button
+        type="button"
+        title={`Move ${label} up`}
+        aria-label={`Move ${label} up`}
+        disabled={index === 0}
+        onClick={() => onMove(-1)}
+        className={cls}
+      >
+        ▲
+      </button>
+      <button
+        type="button"
+        title={`Move ${label} down`}
+        aria-label={`Move ${label} down`}
+        disabled={index === count - 1}
+        onClick={() => onMove(1)}
+        className={cls}
+      >
+        ▼
+      </button>
+    </div>
+  );
+}
+
+// Smooth height open/close. Collapsed content is `invisible`, so it is removed
+// from the tab order and the accessibility tree. Overflow is only clipped while
+// animating/closed so dropdowns inside the fields are not cut off when open.
+function Collapse({ open, id, children }) {
+  // `settled` flips only after the animation time, so we clip until then.
+  const [settled, setSettled] = useState(open);
+  useEffect(() => {
+    const t = setTimeout(() => setSettled(open), 220);
+    return () => clearTimeout(t);
+  }, [open]);
+  const clip = !(open && settled);
+  return (
+    <div
+      id={id}
+      className={`grid transition-[grid-template-rows,visibility] duration-200 ease-out motion-reduce:transition-none ${
+        open ? "grid-rows-[1fr] visible" : "grid-rows-[0fr] invisible"
+      }`}
+    >
+      <div className={`min-h-0 ${clip ? "overflow-hidden" : ""}`}>{children}</div>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------- AdminMenus
 // Displays the Menus table matching the VENDRA admin UI, with dynamic backend
 // integration for Menus, Menu Items, URL Redirects, and Mega Menus.
@@ -49,6 +169,42 @@ export default function AdminMenus() {
   const [menuForm, setMenuForm] = useState({ name: "", handle: "", items: [] });
   const [savingMenu, setSavingMenu] = useState(false);
   const [uploadingBannerIdx, setUploadingBannerIdx] = useState(null);
+
+  // UI-only: which rows are expanded, and the as-loaded snapshot for "Unsaved" dots
+  const [openKeys, setOpenKeys] = useState(() => new Set());
+  const [baseline, setBaseline] = useState(() => new Map());
+  const isOpen = (key) => openKeys.has(key);
+  const toggleOpen = (key) =>
+    setOpenKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  const openKey = (...keys) =>
+    setOpenKeys((prev) => {
+      const next = new Set(prev);
+      keys.forEach((k) => next.add(k));
+      return next;
+    });
+  const expandAll = () => {
+    const keys = [];
+    menuForm.items.forEach((it) => collectKeys(it, keys));
+    setOpenKeys(new Set(keys));
+  };
+  const collapseAll = () => setOpenKeys(new Set());
+  const isDirty = (node, pos) =>
+    baseline.get(node._k) !== `${pos}|${JSON.stringify(stripNode(node))}`;
+
+  // Load a form into the editor: everything collapsed, snapshot taken as "saved"
+  const loadForm = (form, isNew = false) => {
+    const items = form.items.map(tagNode);
+    const map = new Map();
+    if (!isNew) items.forEach((it, i) => recordNode(it, i, map));
+    setBaseline(map);
+    setOpenKeys(new Set());
+    setMenuForm({ ...form, items });
+  };
 
   // URL Redirects Modal mode: boolean
   const [showRedirectsModal, setShowRedirectsModal] = useState(false);
@@ -94,7 +250,7 @@ export default function AdminMenus() {
   // Open Create Menu form
   const handleOpenCreate = () => {
     setEditingMenu({ isNew: true });
-    setMenuForm({
+    loadForm({
       name: "",
       handle: "",
       items: [
@@ -154,7 +310,7 @@ export default function AdminMenus() {
       })),
     }));
 
-    setMenuForm({
+    loadForm({
       name: menu.name || "",
       handle: menu.handle || "",
       items: itemsCopy.length
@@ -185,11 +341,22 @@ export default function AdminMenus() {
 
   // Menu Form: Add Item across Level 1, Level 2 (Column), or Level 3 (Link)
   const handleAddItem = (parentIdx = null, childIdx = null) => {
+    // New rows open automatically (UI state only, set outside the updater)
+    const _k = nextKey();
+    if (parentIdx === null) openKey(_k);
+    else if (childIdx === null) openKey(menuForm.items[parentIdx]?._k, _k);
+    else
+      openKey(
+        menuForm.items[parentIdx]?._k,
+        menuForm.items[parentIdx]?.children?.[childIdx]?._k,
+        _k
+      );
     setMenuForm((prev) => {
       const newItems = [...prev.items];
       if (parentIdx === null) {
         // Level 1 item
         newItems.push({
+          _k,
           title: "",
           url: "",
           is_mega: false,
@@ -205,7 +372,7 @@ export default function AdminMenus() {
         const parent = { ...newItems[parentIdx] };
         parent.children = [
           ...(parent.children || []),
-          { title: "", url: "", badge: "", children: [] },
+          { _k, title: "", url: "", badge: "", children: [] },
         ];
         newItems[parentIdx] = parent;
       } else {
@@ -213,7 +380,7 @@ export default function AdminMenus() {
         const parent = { ...newItems[parentIdx] };
         parent.children = [...parent.children];
         const child = { ...parent.children[childIdx] };
-        child.children = [...(child.children || []), { title: "", url: "", badge: "" }];
+        child.children = [...(child.children || []), { _k, title: "", url: "", badge: "" }];
         parent.children[childIdx] = child;
         newItems[parentIdx] = parent;
       }
@@ -644,13 +811,33 @@ export default function AdminMenus() {
                       Organize standard links, dropdowns, and multi-column Mega Menus.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleAddItem()}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                  >
-                    + Add menu item
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {menuForm.items.length > 0 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={expandAll}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 transition"
+                        >
+                          Expand all
+                        </button>
+                        <button
+                          type="button"
+                          onClick={collapseAll}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 transition"
+                        >
+                          Collapse all
+                        </button>
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleAddItem()}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      + Add menu item
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -666,469 +853,584 @@ export default function AdminMenus() {
                       </button>
                     </div>
                   ) : (
-                    menuForm.items.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className={`rounded-xl border p-4 space-y-3 transition-colors ${
-                          item.is_mega
-                            ? "border-violet-300 bg-slate-50 shadow-xs"
-                            : "border-slate-200 bg-[rgba(24,24,27,0.06)]"
-                        }`}
-                      >
-                        {/* Level 1 Item Row */}
-                        <div className="flex flex-wrap items-center gap-2">
-                          {/* Reorder Buttons */}
-                          <div className="flex flex-col gap-0.5">
+                    menuForm.items.map((item, idx) => {
+                      const k = item._k;
+                      const open = isOpen(k);
+                      const dirty = isDirty(item, idx);
+                      const cols = item.children || [];
+                      const linkCount = cols.reduce((n, c) => n + (c.children?.length || 0), 0);
+                      const bannerSet = Boolean(
+                        item.promo_image || item.promo_title || item.promo_subtitle || item.promo_url
+                      );
+                      const bannerOpen = isOpen(`${k}:banner`);
+                      return (
+                        <div
+                          key={k}
+                          className="rounded-xl border border-slate-200 bg-white transition-colors"
+                        >
+                          {/* Level 1 compact row */}
+                          <div className="flex items-center gap-1.5 px-2 py-1.5">
+                            <MoveButtons
+                              index={idx}
+                              count={menuForm.items.length}
+                              label="item"
+                              onMove={(d) => handleMoveItem(idx, d)}
+                            />
                             <button
                               type="button"
-                              title="Move up"
-                              disabled={idx === 0}
-                              onClick={() => handleMoveItem(idx, -1)}
-                              className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[10px] leading-3 p-0.5"
+                              aria-expanded={open}
+                              aria-controls={`mi-${k}`}
+                              onClick={() => toggleOpen(k)}
+                              className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1.5 py-1.5 text-left hover:bg-white/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
                             >
-                              ▲
+                              <Chevron open={open} />
+                              <span className="truncate text-sm font-medium text-slate-900">
+                                {item.title || (
+                                  <span className="italic text-slate-400">Untitled item</span>
+                                )}
+                              </span>
+                              <span className="hidden min-w-0 items-center gap-1.5 text-[11px] text-slate-500 sm:flex">
+                                {item.url && (
+                                  <span className="max-w-[160px] truncate font-mono">{item.url}</span>
+                                )}
+                                {item.is_mega && (
+                                  <span className="rounded-md bg-purple-50 px-1.5 py-0.5 font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                                    Mega menu
+                                  </span>
+                                )}
+                                {cols.length > 0 && (
+                                  <span className="whitespace-nowrap">
+                                    {item.is_mega
+                                      ? `${cols.length} column${cols.length === 1 ? "" : "s"}`
+                                      : `${cols.length} sub-link${cols.length === 1 ? "" : "s"}`}
+                                    {linkCount > 0 &&
+                                      ` · ${linkCount} link${linkCount === 1 ? "" : "s"}`}
+                                  </span>
+                                )}
+                                {item.badge && (
+                                  <span className="rounded-md bg-orange-50 px-1.5 py-0.5 font-medium text-orange-700">
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </span>
+                              {dirty && <UnsavedDot />}
                             </button>
                             <button
                               type="button"
-                              title="Move down"
-                              disabled={idx === menuForm.items.length - 1}
-                              onClick={() => handleMoveItem(idx, 1)}
-                              className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[10px] leading-3 p-0.5"
+                              title="Remove menu item"
+                              aria-label={`Remove menu item ${item.title || ""}`.trim()}
+                              onClick={() => handleRemoveItem(idx)}
+                              className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
                             >
-                              ▼
+                              <TrashIcon />
                             </button>
                           </div>
 
-                          {/* Item Name */}
-                          <div className="flex-1 min-w-[140px]">
-                            <input
-                              type="text"
-                              value={item.title}
-                              onChange={(e) => handleChangeItem(idx, "title", e.target.value)}
-                              placeholder="Link name (e.g. Products, Shop)"
-                              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-900 outline-none focus:border-orange-600"
-                            />
-                          </div>
-
-                          {/* Item Link */}
-                          <div className="flex-1 min-w-[160px]">
-                            <LinkField
-                              value={item.url}
-                              onChange={(url) => handleChangeItem(idx, "url", url)}
-                              {...linkData}
-                              label="Link"
-                              compact
-                            />
-                          </div>
-
-                          {/* Badge (Optional) */}
-                          <div className="w-24">
-                            <input
-                              type="text"
-                              maxLength={30}
-                              value={item.badge}
-                              onChange={(e) => handleChangeItem(idx, "badge", e.target.value)}
-                              placeholder="Badge"
-                              title="Optional badge (e.g. New, Sale)"
-                              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-orange-600"
-                            />
-                          </div>
-
-                          {/* Mega Menu Toggle */}
-                          <button
-                            type="button"
-                            onClick={() => handleChangeItem(idx, "is_mega", !item.is_mega)}
-                            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
-                              item.is_mega
-                                ? "bg-violet-600 text-white shadow-xs"
-                                : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
-                            }`}
-                            title="Toggle multi-column Mega Menu layout for this navigation item"
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                item.is_mega ? "bg-white" : "bg-slate-400"
-                              }`}
-                            />
-                            {item.is_mega ? "Mega Menu ON" : "Mega Menu"}
-                          </button>
-
-                          {/* Add Sub / Add Column Button */}
-                          <button
-                            type="button"
-                            title={item.is_mega ? "Add column grouping" : "Add sub-link"}
-                            onClick={() => handleAddItem(idx)}
-                            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 whitespace-nowrap"
-                          >
-                            {item.is_mega ? "+ Column" : "+ Sub"}
-                          </button>
-
-                          {/* Remove Item */}
-                          <button
-                            type="button"
-                            title="Remove menu item"
-                            onClick={() => handleRemoveItem(idx)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            >
-                              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-
-                        {/* Promotional Banner Box (Shown only when is_mega is enabled) */}
-                        {item.is_mega && (
-                          <div className="rounded-xl border border-purple-200 bg-white/80 p-3.5 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold uppercase tracking-wider text-purple-900">
-                                  Promotional Banner
-                                </span>
-                                <span className="text-[11px] text-slate-500">
-                                  (Optional card displayed on the side of the mega menu)
-                                </span>
-                              </div>
-                              {(item.promo_image ||
-                                item.promo_title ||
-                                item.promo_subtitle ||
-                                item.promo_url) && (
+                          <Collapse open={open} id={`mi-${k}`}>
+                            <div className="space-y-3 border-t border-slate-200/80 p-3">
+                              <div className="flex flex-wrap items-end gap-2">
+                                <div className="min-w-[140px] flex-1">
+                                  <label
+                                    htmlFor={`${k}-title`}
+                                    className="mb-0.5 block text-[11px] font-medium text-slate-600"
+                                  >
+                                    Label
+                                  </label>
+                                  <input
+                                    id={`${k}-title`}
+                                    type="text"
+                                    value={item.title}
+                                    onChange={(e) => handleChangeItem(idx, "title", e.target.value)}
+                                    placeholder="Link name (e.g. Products, Shop)"
+                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-900 outline-none focus:border-orange-600"
+                                  />
+                                </div>
+                                <div className="min-w-[160px] flex-1">
+                                  <LinkField
+                                    value={item.url}
+                                    onChange={(url) => handleChangeItem(idx, "url", url)}
+                                    {...linkData}
+                                    label="Link"
+                                    compact
+                                  />
+                                </div>
+                                <div className="w-24">
+                                  <label
+                                    htmlFor={`${k}-badge`}
+                                    className="mb-0.5 block text-[11px] font-medium text-slate-600"
+                                  >
+                                    Badge
+                                  </label>
+                                  <input
+                                    id={`${k}-badge`}
+                                    type="text"
+                                    maxLength={30}
+                                    value={item.badge}
+                                    onChange={(e) => handleChangeItem(idx, "badge", e.target.value)}
+                                    placeholder="Badge"
+                                    title="Optional badge (e.g. New, Sale)"
+                                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none focus:border-orange-600"
+                                  />
+                                </div>
                                 <button
                                   type="button"
-                                  onClick={() => {
-                                    handleChangeItem(idx, "promo_image", "");
-                                    handleChangeItem(idx, "promo_title", "");
-                                    handleChangeItem(idx, "promo_subtitle", "");
-                                    handleChangeItem(idx, "promo_url", "");
-                                  }}
-                                  className="text-xs text-rose-600 hover:underline"
+                                  aria-pressed={Boolean(item.is_mega)}
+                                  onClick={() => handleChangeItem(idx, "is_mega", !item.is_mega)}
+                                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${
+                                    item.is_mega
+                                      ? "bg-violet-600 text-white shadow-xs"
+                                      : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                                  }`}
+                                  title="Toggle multi-column Mega Menu layout for this navigation item"
                                 >
-                                  Clear banner
+                                  <span
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                      item.is_mega ? "bg-white" : "bg-slate-400"
+                                    }`}
+                                  />
+                                  {item.is_mega ? "Mega Menu ON" : "Mega Menu"}
                                 </button>
-                              )}
-                            </div>
+                                <button
+                                  type="button"
+                                  title={item.is_mega ? "Add column grouping" : "Add sub-link"}
+                                  onClick={() => handleAddItem(idx)}
+                                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 whitespace-nowrap"
+                                >
+                                  {item.is_mega ? "+ Column" : "+ Sub"}
+                                </button>
+                              </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                              {/* Image Upload / Preview */}
-                              <div>
-                                <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                                  Banner Image
-                                </label>
-                                <div className="flex items-center gap-2">
-                                  {item.promo_image ? (
-                                    <div className="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0">
-                                      <img
-                                        src={item.promo_image}
-                                        alt=""
-                                        className="w-full h-full object-cover"
-                                      />
+                              {/* Promotional banner (collapsed by default) */}
+                              {item.is_mega && (
+                                <div className="rounded-xl border border-purple-200 bg-white/80">
+                                  <div className="flex items-center gap-2 px-3 py-2">
+                                    <button
+                                      type="button"
+                                      aria-expanded={bannerOpen}
+                                      aria-controls={`mi-${k}-banner`}
+                                      onClick={() => toggleOpen(`${k}:banner`)}
+                                      className="flex flex-1 items-center gap-2 rounded-lg text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+                                    >
+                                      <Chevron open={bannerOpen} />
+                                      <span className="text-xs font-bold uppercase tracking-wider text-purple-900">
+                                        Promotional Banner
+                                      </span>
+                                      <span className="text-[11px] text-slate-500">
+                                        Banner: {bannerSet ? "set" : "not set"}
+                                      </span>
+                                    </button>
+                                    {bannerSet && (
                                       <button
                                         type="button"
-                                        onClick={() => handleChangeItem(idx, "promo_image", "")}
-                                        className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs transition"
-                                        title="Remove image"
+                                        onClick={() => {
+                                          handleChangeItem(idx, "promo_image", "");
+                                          handleChangeItem(idx, "promo_title", "");
+                                          handleChangeItem(idx, "promo_subtitle", "");
+                                          handleChangeItem(idx, "promo_url", "");
+                                        }}
+                                        className="text-xs text-rose-600 hover:underline"
                                       >
-                                        ✕
+                                        Clear banner
                                       </button>
-                                    </div>
-                                  ) : null}
-                                  <label className="flex-1 cursor-pointer">
-                                    <span className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
-                                      {uploadingBannerIdx === idx
-                                        ? "Uploading..."
-                                        : item.promo_image
-                                          ? "Change image"
-                                          : "Upload image"}
-                                    </span>
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      disabled={uploadingBannerIdx === idx}
-                                      onChange={(e) => handlePromoImageUpload(e, idx)}
-                                      className="sr-only"
-                                    />
-                                  </label>
-                                </div>
-                              </div>
-
-                              {/* Titles */}
-                              <div className="space-y-1.5">
-                                <div>
-                                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
-                                    Headline
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={item.promo_title}
-                                    onChange={(e) =>
-                                      handleChangeItem(idx, "promo_title", e.target.value)
-                                    }
-                                    placeholder="e.g. Summer Collection"
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
-                                    Subtitle
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={item.promo_subtitle}
-                                    onChange={(e) =>
-                                      handleChangeItem(idx, "promo_subtitle", e.target.value)
-                                    }
-                                    placeholder="e.g. Up to 40% Off"
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Banner Destination Link */}
-                              <div>
-                                <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                                  Banner Link
-                                </label>
-                                <LinkField
-                                  value={item.promo_url}
-                                  onChange={(url) => handleChangeItem(idx, "promo_url", url)}
-                                  {...linkData}
-                                  label="Banner destination"
-                                  compact
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Level 2 items (Columns / Sub-links) */}
-                        {item.children && item.children.length > 0 && (
-                          <div className="ml-6 pl-3 border-l-2 border-violet-200 space-y-3 pt-1">
-                            {item.children.map((child, cIdx) => (
-                              <div
-                                key={cIdx}
-                                className="rounded-lg bg-white p-2.5 border border-slate-200 space-y-2 shadow-2xs"
-                              >
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {/* Level 2 Reorder Buttons */}
-                                  <div className="flex flex-col gap-0.5">
-                                    <button
-                                      type="button"
-                                      title="Move column up"
-                                      disabled={cIdx === 0}
-                                      onClick={() => handleMoveItem(idx, -1, cIdx)}
-                                      className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2.5 p-0.5"
-                                    >
-                                      ▲
-                                    </button>
-                                    <button
-                                      type="button"
-                                      title="Move column down"
-                                      disabled={cIdx === item.children.length - 1}
-                                      onClick={() => handleMoveItem(idx, 1, cIdx)}
-                                      className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2.5 p-0.5"
-                                    >
-                                      ▼
-                                    </button>
+                                    )}
                                   </div>
-
-                                  <span className="text-violet-600 font-bold text-xs select-none">
-                                    {item.is_mega ? "↳ Column:" : "↳ Sub:"}
-                                  </span>
-
-                                  {/* Column Name */}
-                                  <input
-                                    type="text"
-                                    value={child.title}
-                                    onChange={(e) =>
-                                      handleChangeItem(idx, "title", e.target.value, cIdx)
-                                    }
-                                    placeholder={
-                                      item.is_mega
-                                        ? "Column heading (e.g. Clothing, Shoes)"
-                                        : "Sub-link label"
-                                    }
-                                    className="flex-1 min-w-[130px] rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-900 outline-none focus:border-orange-600"
-                                  />
-
-                                  {/* Column Link */}
-                                  <div className="flex-1 min-w-[150px]">
-                                    <LinkField
-                                      value={child.url}
-                                      onChange={(url) => handleChangeItem(idx, "url", url, cIdx)}
-                                      {...linkData}
-                                      label="Column link"
-                                      compact
-                                    />
-                                  </div>
-
-                                  {/* Column Badge */}
-                                  <div className="w-20">
-                                    <input
-                                      type="text"
-                                      maxLength={30}
-                                      value={child.badge}
-                                      onChange={(e) =>
-                                        handleChangeItem(idx, "badge", e.target.value, cIdx)
-                                      }
-                                      placeholder="Badge"
-                                      title="Optional column badge"
-                                      className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
-                                    />
-                                  </div>
-
-                                  {/* Add Level 3 Link under this Column */}
-                                  <button
-                                    type="button"
-                                    title="Add nested link under this column"
-                                    onClick={() => handleAddItem(idx, cIdx)}
-                                    className="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700 hover:bg-violet-100 whitespace-nowrap"
-                                  >
-                                    + Link
-                                  </button>
-
-                                  {/* Remove Level 2 Column */}
-                                  <button
-                                    type="button"
-                                    title="Remove column"
-                                    onClick={() => handleRemoveItem(idx, cIdx)}
-                                    className="p-1 text-slate-400 hover:text-rose-600 transition"
-                                  >
-                                    <svg
-                                      className="w-3.5 h-3.5"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                    >
-                                      <path d="M18 6 6 18M6 6l12 12" />
-                                    </svg>
-                                  </button>
-                                </div>
-
-                                {item.is_mega && (
-                                  <p className="pl-6 text-[11px] text-slate-500">
-                                    The column link becomes the column's "Shop All" link, shown at
-                                    the end of the column. Leave it empty for no Shop All.
-                                  </p>
-                                )}
-
-                                {/* Level 3 items (Links under Column) */}
-                                {child.children && child.children.length > 0 && (
-                                  <div className="ml-6 pl-3 border-l-2 border-violet-300 space-y-2 pt-1">
-                                    {child.children.map((sub, sIdx) => (
-                                      <div
-                                        key={sIdx}
-                                        className="flex items-center gap-2 bg-slate-50/70 p-1.5 rounded-md border border-slate-200"
-                                      >
-                                        {/* Level 3 Reorder Buttons */}
-                                        <div className="flex flex-col gap-0.5">
-                                          <button
-                                            type="button"
-                                            title="Move link up"
-                                            disabled={sIdx === 0}
-                                            onClick={() => handleMoveItem(idx, -1, cIdx, sIdx)}
-                                            className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2 p-0.5"
-                                          >
-                                            ▲
-                                          </button>
-                                          <button
-                                            type="button"
-                                            title="Move link down"
-                                            disabled={sIdx === child.children.length - 1}
-                                            onClick={() => handleMoveItem(idx, 1, cIdx, sIdx)}
-                                            className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-[9px] leading-2 p-0.5"
-                                          >
-                                            ▼
-                                          </button>
+                                  <Collapse open={bannerOpen} id={`mi-${k}-banner`}>
+                                    <div className="space-y-3 border-t border-purple-100 p-3.5">
+                                      <p className="text-[11px] text-slate-500">
+                                        Optional card displayed on the side of the mega menu.
+                                      </p>
+                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                          <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                                            Banner Image
+                                          </label>
+                                          <div className="flex items-center gap-2">
+                                            {item.promo_image ? (
+                                              <div className="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex-shrink-0">
+                                                <img
+                                                  src={item.promo_image}
+                                                  alt=""
+                                                  className="w-full h-full object-cover"
+                                                />
+                                                <button
+                                                  type="button"
+                                                  onClick={() =>
+                                                    handleChangeItem(idx, "promo_image", "")
+                                                  }
+                                                  className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100 flex items-center justify-center text-xs transition"
+                                                  title="Remove image"
+                                                  aria-label="Remove banner image"
+                                                >
+                                                  ✕
+                                                </button>
+                                              </div>
+                                            ) : null}
+                                            <label className="flex-1 cursor-pointer">
+                                              <span className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                                                {uploadingBannerIdx === idx
+                                                  ? "Uploading..."
+                                                  : item.promo_image
+                                                    ? "Change image"
+                                                    : "Upload image"}
+                                              </span>
+                                              <input
+                                                type="file"
+                                                accept="image/*"
+                                                disabled={uploadingBannerIdx === idx}
+                                                onChange={(e) => handlePromoImageUpload(e, idx)}
+                                                className="sr-only"
+                                              />
+                                            </label>
+                                          </div>
                                         </div>
 
-                                        <span className="text-slate-400 text-xs select-none">
-                                          ↳↳
-                                        </span>
+                                        <div className="space-y-1.5">
+                                          <div>
+                                            <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                                              Headline
+                                            </label>
+                                            <input
+                                              type="text"
+                                              value={item.promo_title}
+                                              onChange={(e) =>
+                                                handleChangeItem(idx, "promo_title", e.target.value)
+                                              }
+                                              placeholder="e.g. Summer Collection"
+                                              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="block text-[11px] font-medium text-slate-600 mb-0.5">
+                                              Subtitle
+                                            </label>
+                                            <input
+                                              type="text"
+                                              value={item.promo_subtitle}
+                                              onChange={(e) =>
+                                                handleChangeItem(
+                                                  idx,
+                                                  "promo_subtitle",
+                                                  e.target.value
+                                                )
+                                              }
+                                              placeholder="e.g. Up to 40% Off"
+                                              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
+                                            />
+                                          </div>
+                                        </div>
 
-                                        {/* Link Title */}
-                                        <input
-                                          type="text"
-                                          value={sub.title}
-                                          onChange={(e) =>
-                                            handleChangeItem(
-                                              idx,
-                                              "title",
-                                              e.target.value,
-                                              cIdx,
-                                              sIdx
-                                            )
-                                          }
-                                          placeholder="Column link (e.g. Dresses, T-Shirts)"
-                                          className="flex-1 min-w-[120px] rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
-                                        />
-
-                                        {/* Link URL */}
-                                        <div className="flex-1 min-w-[140px]">
+                                        <div>
+                                          <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                                            Banner Link
+                                          </label>
                                           <LinkField
-                                            value={sub.url}
+                                            value={item.promo_url}
                                             onChange={(url) =>
-                                              handleChangeItem(idx, "url", url, cIdx, sIdx)
+                                              handleChangeItem(idx, "promo_url", url)
                                             }
                                             {...linkData}
-                                            label="Link destination"
+                                            label="Banner destination"
                                             compact
                                           />
                                         </div>
+                                      </div>
+                                    </div>
+                                  </Collapse>
+                                </div>
+                              )}
 
-                                        {/* Link Badge */}
-                                        <div className="w-18">
-                                          <input
-                                            type="text"
-                                            maxLength={30}
-                                            value={sub.badge}
-                                            onChange={(e) =>
-                                              handleChangeItem(
-                                                idx,
-                                                "badge",
-                                                e.target.value,
-                                                cIdx,
-                                                sIdx
-                                              )
-                                            }
-                                            placeholder="Badge"
-                                            title="Optional link badge"
-                                            className="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
+                              {/* Level 2 rows (Columns / Sub-links) */}
+                              {cols.length > 0 && (
+                                <div className="ml-4 space-y-2 border-l-2 border-slate-200 pl-3">
+                                  {cols.map((child, cIdx) => {
+                                    const ck = child._k;
+                                    const cOpen = isOpen(ck);
+                                    const cDirty = isDirty(child, cIdx);
+                                    const subs = child.children || [];
+                                    return (
+                                      <div
+                                        key={ck}
+                                        className="rounded-lg border border-slate-200 bg-white"
+                                      >
+                                        <div className="flex items-center gap-1.5 px-1.5 py-1">
+                                          <MoveButtons
+                                            index={cIdx}
+                                            count={cols.length}
+                                            label="column"
+                                            small
+                                            onMove={(d) => handleMoveItem(idx, d, cIdx)}
                                           />
+                                          <button
+                                            type="button"
+                                            aria-expanded={cOpen}
+                                            aria-controls={`mi-${ck}`}
+                                            onClick={() => toggleOpen(ck)}
+                                            className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-1 text-left hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+                                          >
+                                            <Chevron open={cOpen} small />
+                                            <span className="text-xs font-bold text-violet-600 select-none">
+                                              {item.is_mega ? "Column:" : "Sub:"}
+                                            </span>
+                                            <span className="truncate text-xs font-medium text-slate-900">
+                                              {child.title || (
+                                                <span className="italic text-slate-400">
+                                                  Untitled
+                                                </span>
+                                              )}
+                                            </span>
+                                            <span className="hidden min-w-0 items-center gap-1.5 text-[11px] text-slate-500 sm:flex">
+                                              {child.url && (
+                                                <span className="max-w-[140px] truncate font-mono">
+                                                  {child.url}
+                                                </span>
+                                              )}
+                                              {subs.length > 0 && (
+                                                <span className="whitespace-nowrap">
+                                                  {subs.length} link{subs.length === 1 ? "" : "s"}
+                                                </span>
+                                              )}
+                                              {child.badge && (
+                                                <span className="rounded-md bg-orange-50 px-1.5 py-0.5 font-medium text-orange-700">
+                                                  {child.badge}
+                                                </span>
+                                              )}
+                                            </span>
+                                            {cDirty && <UnsavedDot />}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            title="Remove column"
+                                            aria-label={`Remove ${item.is_mega ? "column" : "sub-link"} ${child.title || ""}`.trim()}
+                                            onClick={() => handleRemoveItem(idx, cIdx)}
+                                            className="p-1 text-slate-400 hover:text-rose-600 transition"
+                                          >
+                                            <TrashIcon small />
+                                          </button>
                                         </div>
 
-                                        {/* Remove Level 3 Link */}
-                                        <button
-                                          type="button"
-                                          title="Remove link"
-                                          onClick={() => handleRemoveItem(idx, cIdx, sIdx)}
-                                          className="p-1 text-slate-400 hover:text-rose-600 transition"
-                                        >
-                                          <svg
-                                            className="w-3.5 h-3.5"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                          >
-                                            <path d="M18 6 6 18M6 6l12 12" />
-                                          </svg>
-                                        </button>
+                                        <Collapse open={cOpen} id={`mi-${ck}`}>
+                                          <div className="space-y-2 border-t border-slate-100 p-2.5">
+                                            <div className="flex flex-wrap items-end gap-2">
+                                              <div className="min-w-[130px] flex-1">
+                                                <label
+                                                  htmlFor={`${ck}-title`}
+                                                  className="mb-0.5 block text-[11px] font-medium text-slate-600"
+                                                >
+                                                  {item.is_mega ? "Column heading" : "Label"}
+                                                </label>
+                                                <input
+                                                  id={`${ck}-title`}
+                                                  type="text"
+                                                  value={child.title}
+                                                  onChange={(e) =>
+                                                    handleChangeItem(idx, "title", e.target.value, cIdx)
+                                                  }
+                                                  placeholder={
+                                                    item.is_mega
+                                                      ? "Column heading (e.g. Clothing, Shoes)"
+                                                      : "Sub-link label"
+                                                  }
+                                                  className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-900 outline-none focus:border-orange-600"
+                                                />
+                                              </div>
+                                              <div className="min-w-[150px] flex-1">
+                                                <LinkField
+                                                  value={child.url}
+                                                  onChange={(url) =>
+                                                    handleChangeItem(idx, "url", url, cIdx)
+                                                  }
+                                                  {...linkData}
+                                                  label="Column link"
+                                                  compact
+                                                />
+                                              </div>
+                                              <div className="w-20">
+                                                <label
+                                                  htmlFor={`${ck}-badge`}
+                                                  className="mb-0.5 block text-[11px] font-medium text-slate-600"
+                                                >
+                                                  Badge
+                                                </label>
+                                                <input
+                                                  id={`${ck}-badge`}
+                                                  type="text"
+                                                  maxLength={30}
+                                                  value={child.badge}
+                                                  onChange={(e) =>
+                                                    handleChangeItem(idx, "badge", e.target.value, cIdx)
+                                                  }
+                                                  placeholder="Badge"
+                                                  title="Optional column badge"
+                                                  className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
+                                                />
+                                              </div>
+                                              <button
+                                                type="button"
+                                                title="Add nested link under this column"
+                                                onClick={() => handleAddItem(idx, cIdx)}
+                                                className="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700 hover:bg-violet-100 whitespace-nowrap"
+                                              >
+                                                + Link
+                                              </button>
+                                            </div>
+
+                                            {item.is_mega && (
+                                              <p className="text-[11px] text-slate-500">
+                                                The column link becomes the column's "Shop All" link,
+                                                shown at the end of the column. Leave it empty for no
+                                                Shop All.
+                                              </p>
+                                            )}
+
+                                            {/* Level 3 rows (Links under Column) */}
+                                            {subs.length > 0 && (
+                                              <div className="ml-4 space-y-1.5 border-l-2 border-slate-200 pl-3">
+                                                {subs.map((sub, sIdx) => {
+                                                  const sk = sub._k;
+                                                  const sOpen = isOpen(sk);
+                                                  const sDirty = isDirty(sub, sIdx);
+                                                  return (
+                                                    <div
+                                                      key={sk}
+                                                      className="rounded-md border border-slate-200 bg-white"
+                                                    >
+                                                      <div className="flex items-center gap-1.5 px-1.5 py-1">
+                                                        <MoveButtons
+                                                          index={sIdx}
+                                                          count={subs.length}
+                                                          label="link"
+                                                          small
+                                                          onMove={(d) =>
+                                                            handleMoveItem(idx, d, cIdx, sIdx)
+                                                          }
+                                                        />
+                                                        <button
+                                                          type="button"
+                                                          aria-expanded={sOpen}
+                                                          aria-controls={`mi-${sk}`}
+                                                          onClick={() => toggleOpen(sk)}
+                                                          className="flex min-w-0 flex-1 items-center gap-2 rounded px-1.5 py-1 text-left hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+                                                        >
+                                                          <Chevron open={sOpen} small />
+                                                          <span className="truncate text-xs text-slate-900">
+                                                            {sub.title || (
+                                                              <span className="italic text-slate-400">
+                                                                Untitled link
+                                                              </span>
+                                                            )}
+                                                          </span>
+                                                          <span className="hidden min-w-0 items-center gap-1.5 text-[11px] text-slate-500 sm:flex">
+                                                            {sub.url && (
+                                                              <span className="max-w-[140px] truncate font-mono">
+                                                                {sub.url}
+                                                              </span>
+                                                            )}
+                                                            {sub.badge && (
+                                                              <span className="rounded-md bg-orange-50 px-1.5 py-0.5 font-medium text-orange-700">
+                                                                {sub.badge}
+                                                              </span>
+                                                            )}
+                                                          </span>
+                                                          {sDirty && <UnsavedDot />}
+                                                        </button>
+                                                        <button
+                                                          type="button"
+                                                          title="Remove link"
+                                                          aria-label={`Remove link ${sub.title || ""}`.trim()}
+                                                          onClick={() => handleRemoveItem(idx, cIdx, sIdx)}
+                                                          className="p-1 text-slate-400 hover:text-rose-600 transition"
+                                                        >
+                                                          <TrashIcon small />
+                                                        </button>
+                                                      </div>
+                                                      <Collapse open={sOpen} id={`mi-${sk}`}>
+                                                        <div className="flex flex-wrap items-end gap-2 border-t border-slate-200 p-2">
+                                                          <div className="min-w-[120px] flex-1">
+                                                            <label
+                                                              htmlFor={`${sk}-title`}
+                                                              className="mb-0.5 block text-[11px] font-medium text-slate-600"
+                                                            >
+                                                              Label
+                                                            </label>
+                                                            <input
+                                                              id={`${sk}-title`}
+                                                              type="text"
+                                                              value={sub.title}
+                                                              onChange={(e) =>
+                                                                handleChangeItem(
+                                                                  idx,
+                                                                  "title",
+                                                                  e.target.value,
+                                                                  cIdx,
+                                                                  sIdx
+                                                                )
+                                                              }
+                                                              placeholder="Column link (e.g. Dresses, T-Shirts)"
+                                                              className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
+                                                            />
+                                                          </div>
+                                                          <div className="min-w-[140px] flex-1">
+                                                            <LinkField
+                                                              value={sub.url}
+                                                              onChange={(url) =>
+                                                                handleChangeItem(
+                                                                  idx,
+                                                                  "url",
+                                                                  url,
+                                                                  cIdx,
+                                                                  sIdx
+                                                                )
+                                                              }
+                                                              {...linkData}
+                                                              label="Link destination"
+                                                              compact
+                                                            />
+                                                          </div>
+                                                          <div className="w-20">
+                                                            <label
+                                                              htmlFor={`${sk}-badge`}
+                                                              className="mb-0.5 block text-[11px] font-medium text-slate-600"
+                                                            >
+                                                              Badge
+                                                            </label>
+                                                            <input
+                                                              id={`${sk}-badge`}
+                                                              type="text"
+                                                              maxLength={30}
+                                                              value={sub.badge}
+                                                              onChange={(e) =>
+                                                                handleChangeItem(
+                                                                  idx,
+                                                                  "badge",
+                                                                  e.target.value,
+                                                                  cIdx,
+                                                                  sIdx
+                                                                )
+                                                              }
+                                                              placeholder="Badge"
+                                                              title="Optional link badge"
+                                                              className="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-900 outline-none focus:border-orange-600"
+                                                            />
+                                                          </div>
+                                                        </div>
+                                                      </Collapse>
+                                                    </div>
+                                                  );
+                                                })}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </Collapse>
                                       </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </Collapse>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
