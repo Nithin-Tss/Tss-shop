@@ -20,7 +20,6 @@ import {
 } from "@/lib/auth";
 
 const BASE = "/admin/online-store";
-const PLATFORM_PATH = "/admin/platform";
 
 // Line icons (shapes from the Lucide set, ISC licence), all drawn at one size, stroke and colour.
 // Exported so page titles, breadcrumbs and empty states use the exact same icon as the sidebar item.
@@ -318,13 +317,6 @@ const menuGroups = [
         href: `${BASE}/discounts`,
         permission: "discounts.view",
       },
-    ],
-  },
-  {
-    label: "Developers & compliance",
-    items: [
-      { icon: "apps", label: "Webhooks", href: `${BASE}/webhooks`, permission: "webhooks.manage" },
-      { icon: "reports", label: "Audit log", href: `${BASE}/audit-log`, permission: "audit.view" },
     ],
   },
 ];
@@ -844,18 +836,6 @@ export default function AdminSidebar() {
 
       {/* SETTINGS + ACCOUNT */}
       <div className="space-y-2 px-3 pb-3 pt-2">
-        {/* Platform administrators only; the API refuses everyone else */}
-        {session?.user?.isPlatformAdmin && (
-          <Link
-            to={PLATFORM_PATH}
-            title="Platform administration"
-            aria-current={isUnder(path, PLATFORM_PATH) ? "page" : undefined}
-            className={rowClass(isUnder(path, PLATFORM_PATH))}
-          >
-            <NavIcon name="platform" />
-            <Label>Platform</Label>
-          </Link>
-        )}
         <Link
           to={`${BASE}/settings`}
           title="Settings"
