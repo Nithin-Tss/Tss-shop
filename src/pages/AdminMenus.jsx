@@ -71,7 +71,13 @@ function UnsavedDot() {
 
 function TrashIcon({ small }) {
   return small ? (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className="w-3.5 h-3.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M18 6 6 18M6 6l12 12" />
     </svg>
   ) : (
@@ -860,7 +866,10 @@ export default function AdminMenus() {
                       const cols = item.children || [];
                       const linkCount = cols.reduce((n, c) => n + (c.children?.length || 0), 0);
                       const bannerSet = Boolean(
-                        item.promo_image || item.promo_title || item.promo_subtitle || item.promo_url
+                        item.promo_image ||
+                        item.promo_title ||
+                        item.promo_subtitle ||
+                        item.promo_url
                       );
                       const bannerOpen = isOpen(`${k}:banner`);
                       return (
@@ -891,7 +900,9 @@ export default function AdminMenus() {
                               </span>
                               <span className="hidden min-w-0 items-center gap-1.5 text-[11px] text-slate-500 sm:flex">
                                 {item.url && (
-                                  <span className="max-w-[160px] truncate font-mono">{item.url}</span>
+                                  <span className="max-w-[160px] truncate font-mono">
+                                    {item.url}
+                                  </span>
                                 )}
                                 {item.is_mega && (
                                   <span className="rounded-md bg-purple-50 px-1.5 py-0.5 font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
@@ -1223,7 +1234,12 @@ export default function AdminMenus() {
                                                   type="text"
                                                   value={child.title}
                                                   onChange={(e) =>
-                                                    handleChangeItem(idx, "title", e.target.value, cIdx)
+                                                    handleChangeItem(
+                                                      idx,
+                                                      "title",
+                                                      e.target.value,
+                                                      cIdx
+                                                    )
                                                   }
                                                   placeholder={
                                                     item.is_mega
@@ -1257,7 +1273,12 @@ export default function AdminMenus() {
                                                   maxLength={30}
                                                   value={child.badge}
                                                   onChange={(e) =>
-                                                    handleChangeItem(idx, "badge", e.target.value, cIdx)
+                                                    handleChangeItem(
+                                                      idx,
+                                                      "badge",
+                                                      e.target.value,
+                                                      cIdx
+                                                    )
                                                   }
                                                   placeholder="Badge"
                                                   title="Optional column badge"
@@ -1276,9 +1297,9 @@ export default function AdminMenus() {
 
                                             {item.is_mega && (
                                               <p className="text-[11px] text-slate-500">
-                                                The column link becomes the column's "Shop All" link,
-                                                shown at the end of the column. Leave it empty for no
-                                                Shop All.
+                                                The column link becomes the column's "Shop All"
+                                                link, shown at the end of the column. Leave it empty
+                                                for no Shop All.
                                               </p>
                                             )}
 
@@ -1337,7 +1358,9 @@ export default function AdminMenus() {
                                                           type="button"
                                                           title="Remove link"
                                                           aria-label={`Remove link ${sub.title || ""}`.trim()}
-                                                          onClick={() => handleRemoveItem(idx, cIdx, sIdx)}
+                                                          onClick={() =>
+                                                            handleRemoveItem(idx, cIdx, sIdx)
+                                                          }
                                                           className="p-1 text-slate-400 hover:text-rose-600 transition"
                                                         >
                                                           <TrashIcon small />
