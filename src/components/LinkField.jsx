@@ -84,6 +84,9 @@ function Icon({ name, className = "h-4 w-4" }) {
 }
 
 // What a stored link points at: its icon and a readable name
+// Titles can repeat, so a collection is named with its address: "Whisky (/whisky-1)"
+export const collectionLabel = (c) => (c.handle ? `${c.name} (/${c.handle})` : c.name);
+
 export function describeLink(value, { collections = [], products = [], pages = [], posts = [] }) {
   const v = (value || "").trim();
   if (!v) return null;
@@ -96,7 +99,7 @@ export function describeLink(value, { collections = [], products = [], pages = [
   let m = v.match(/^\/collections\/([^/?#]+)/);
   if (m) {
     const found = collections.find((c) => c.id === m[1]);
-    if (found) return { icon: "collection", name: found.name };
+    if (found) return { icon: "collection", name: collectionLabel(found) };
   }
   m = v.match(/^\/products\/([^/?#]+)/);
   if (m) {
@@ -208,7 +211,7 @@ export default function LinkField({
       items: [
         { name: "All products", url: "/collections/all" },
         ...collections.map((c) => ({
-          name: c.name + (c.status === "draft" ? " (Draft)" : ""),
+          name: collectionLabel(c) + (c.status === "draft" ? " (Draft)" : ""),
           url: `/collections/${c.id}`,
         })),
       ],

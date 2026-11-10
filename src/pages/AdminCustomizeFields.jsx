@@ -1,6 +1,6 @@
 import { createContext, memo, useContext, useEffect, useRef, useState } from "react";
 
-import LinkField from "@/components/LinkField";
+import LinkField, { collectionLabel } from "@/components/LinkField";
 import { getEditingThemeId } from "@/lib/editingTheme";
 
 import { listMenus, uploadThemeImage } from "@/lib/themeApi";
@@ -987,7 +987,7 @@ export const Field = memo(function Field({
 
             {collections.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {collectionLabel(c)}
                 {c.status === "draft" ? " (Draft, hidden on store)" : ""}
               </option>
             ))}
@@ -1039,7 +1039,7 @@ export const Field = memo(function Field({
             value={value || []}
             products={collections.map((c) => ({
               id: c.id,
-              title: c.name,
+              title: collectionLabel(c),
               status: c.status || "active",
             }))}
             max={spec.max || 12}

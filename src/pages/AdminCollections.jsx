@@ -836,6 +836,11 @@ export default function AdminCollections() {
                               >
                                 {col.name}
                               </Link>
+                              {col.handle && (
+                                <span className="shrink-0 truncate text-[12px] text-slate-500">
+                                  /{col.handle}
+                                </span>
+                              )}
                               {col.status === "draft" && (
                                 <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[12px] text-slate-600">
                                   Draft

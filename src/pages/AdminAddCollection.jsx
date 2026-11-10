@@ -405,6 +405,11 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate">{c.name}</span>
+                            {c.handle && (
+                              <span className="block truncate text-[12px] text-slate-500">
+                                /{c.handle}
+                              </span>
+                            )}
                             {reason && (
                               <span className="block text-[12px] text-slate-500">{reason}</span>
                             )}
@@ -444,8 +449,7 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
               <span className="min-w-0 flex-1 truncate font-medium text-ink">
                 {c.name}
                 <span className="font-normal text-slate-500">
-                  {" "}
-                  · {productsLabel(c.products_count)}
+                  {c.handle ? ` · /${c.handle}` : ""} · {productsLabel(c.products_count)}
                 </span>
               </span>
               <button
@@ -907,7 +911,9 @@ export default function AdminAddCollection() {
     const body = {
       ...form,
       name: form.name.trim(),
-      handle: slugify(form.handle),
+      // A new collection whose address wasn't typed by hand: the server picks the next free one
+      // (whisky, whisky-1, ...) since titles may repeat
+      handle: !editing && !handleTouched ? "" : slugify(form.handle),
       rules:
         form.type === "automated"
           ? completeRules
@@ -1423,6 +1429,13 @@ export default function AdminAddCollection() {
                         </div>
                         {errors.handle && (
                           <p className="mt-1.5 text-[12px] text-red-600">{errors.handle}</p>
+                        )}
+                        {!editing && !handleTouched && !errors.handle && (
+                          <p className="mt-1.5 text-[12px] text-slate-500">
+                            Titles can repeat. If this address is taken, the next free one (for
+                            example {slugify(form.name) || "title"}-1) is used when you save, and
+                            you can change it.
+                          </p>
                         )}
                       </div>
                     </div>

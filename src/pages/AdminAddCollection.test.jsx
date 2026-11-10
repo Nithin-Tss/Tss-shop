@@ -145,6 +145,25 @@ describe("IncludeCollectionsPicker", () => {
     expect(screen.getByRole("button", { name: "Add" }).disabled).toBe(true);
   });
 
+  it("tells same-titled collections apart by their handle", () => {
+    const twins = [
+      { id: "w1", name: "Whisky", handle: "whisky", products_count: 2 },
+      { id: "w2", name: "Whisky", handle: "whisky-1", products_count: 5 },
+    ];
+    render(<Harness collections={twins} initial={["w2"]} />);
+    expect(screen.getByText("/whisky-1")).toBeTruthy(); // on its chip
+    openList();
+    const rows = within(screen.getByRole("list", { name: "Collections to add" })).getAllByRole(
+      "listitem"
+    );
+    expect(rows.map((r) => r.textContent)).toEqual([
+      "Whisky/whisky2 products",
+      "Whisky/whisky-1Already added5 products",
+    ]);
+    fireEvent.click(screen.getAllByRole("checkbox")[0]); // the first Whisky, /whisky
+    expect(screen.getByRole("button", { name: "Add (1)" })).toBeTruthy();
+  });
+
   it("shows added collections ticked and disabled", () => {
     render(<Harness initial={["c1"]} />);
     openList();
