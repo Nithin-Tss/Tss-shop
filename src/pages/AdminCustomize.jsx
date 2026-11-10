@@ -2657,12 +2657,13 @@ export default function AdminCustomizePage() {
                         // New tab, with the "Back to admin" bar; the store path of the page being edited
                         e.preventDefault();
                         openStorefront(
-                          new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/"
+                          new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/",
+                          startParams.get("theme") || getEditingThemeId() || ""
                         );
                       }}
                       className="h-9 whitespace-nowrap rounded-md border border-slate-300 px-3 text-sm inline-flex items-center hover:border-orange-600"
                     >
-                      View store
+                      Open theme
                     </a>
                   )}
 
