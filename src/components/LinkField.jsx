@@ -5,7 +5,26 @@ import { createPortal } from "react-dom";
 // Home page, Collections, Products, Pages, Blogs, Blog posts and Policies to pick from,
 // and anything typed that looks like an address (/path, https://, mailto:, tel:) is used as is.
 
-const POLICY_RE = /policy|policies|terms|privacy|refund|shipping/i;
+// The store's policies (Settings > Policies) each have one stable address, whatever Pages exist.
+// Keep in step with POLICY_PAGES / POLICY_ALIASES in Tss-backend/apps/themes/services.py.
+const POLICY_LINKS = [
+  { name: "Privacy policy", handle: "privacy-policy", aliases: ["privacy", "privacy-policies", "privacy-notice"] },
+  {
+    name: "Return and refund policy",
+    handle: "refund-policy",
+    aliases: ["refund", "refunds", "refund-policies", "returns", "return-policy", "returns-policy", "return-and-refund-policy", "returns-and-refunds"],
+  },
+  {
+    name: "Terms of service",
+    handle: "terms-of-service",
+    aliases: ["terms", "terms-of-services", "terms-and-conditions", "terms-conditions", "terms-of-use", "tos"],
+  },
+  { name: "Shipping policy", handle: "shipping-policy", aliases: ["shipping", "shipping-policies", "delivery-policy", "shipping-and-delivery"] },
+  { name: "Contact information", handle: "contact-information", aliases: ["contact-info"] },
+  { name: "Legal notice", handle: "legal-notice", aliases: ["legal"] },
+];
+const policyForHandle = (handle) =>
+  POLICY_LINKS.find((p) => p.handle === handle || p.aliases.includes(handle));
 
 const ICONS = {
   home: "M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10",
@@ -62,8 +81,10 @@ export function describeLink(value, { collections = [], products = [], pages = [
   }
   m = v.match(/^\/pages\/([^/?#]+)/);
   if (m) {
+    const policy = policyForHandle(m[1]);
+    if (policy) return { icon: "policy", name: policy.name };
     const found = pages.find((p) => p.handle === m[1]);
-    if (found) return { icon: POLICY_RE.test(found.handle) ? "policy" : "page", name: found.title };
+    if (found) return { icon: "page", name: found.title };
   }
   m = v.match(/^\/blog\/([^/?#]+)/);
   if (m) {
@@ -152,8 +173,9 @@ export default function LinkField({
     close();
   }
 
-  const policies = pages.filter((p) => POLICY_RE.test(p.handle || ""));
-  const plainPages = pages.filter((p) => !POLICY_RE.test(p.handle || ""));
+  const policies = POLICY_LINKS;
+  // Pages with a policy's address (or another spelling of it) are never listed: the policy owns it
+  const plainPages = pages.filter((p) => !policyForHandle(p.handle || ""));
 
   const GROUPS = {
     collections: {
@@ -185,7 +207,7 @@ export default function LinkField({
     policies: {
       title: "Policies",
       icon: "policy",
-      items: policies.map((p) => ({ name: p.title, url: `/pages/${p.handle}` })),
+      items: policies.map((p) => ({ name: p.name, url: `/pages/${p.handle}` })),
     },
   };
 
