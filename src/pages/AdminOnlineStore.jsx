@@ -128,13 +128,27 @@ function LivePreview({ theme, swatches, ratio = 0.62, className = "" }) {
 const smallButton =
   "inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-ink transition hover:border-orange-600 disabled:opacity-50";
 // The theme as a working store in a new tab: real pages, cart and links (a draft is shown to you only)
-function OpenThemeLink({ theme, className }) {
+function OpenThemeLink({ theme, className, icon }) {
   return (
     <button
       type="button"
       onClick={() => openStorefront("/", theme.published ? "" : theme.id)}
       className={className}
     >
+      {icon && (
+        <svg
+          viewBox="0 0 20 20"
+          className="mr-1.5 h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M11 4h5v5M16 4l-7 7M14 11v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4" />
+        </svg>
+      )}
       Open theme
     </button>
   );
@@ -465,15 +479,29 @@ export default function OnlineStorePage() {
                     <div className="flex items-center gap-2">
                       <OpenThemeLink
                         theme={live}
-                        className="inline-flex h-8 items-center rounded-lg border border-white/40 px-3 text-[13px] font-semibold text-white transition hover:bg-white/10"
+                        icon
+                        className="inline-flex h-9 items-center rounded-full border border-[#f5f0e6]/60 bg-[#f5f0e6]/10 px-4 text-[13px] font-semibold text-[#f5f0e6] backdrop-blur-sm transition hover:bg-[#f5f0e6]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                       />
                       {canEditTheme && (
                         <>
                           <button
                             type="button"
-                            className="inline-flex h-8 items-center rounded-lg bg-white px-3 text-[13px] font-semibold text-ink transition hover:bg-violet-100"
+                            className="inline-flex h-9 items-center rounded-full px-4 text-[13px] font-semibold shadow-md transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                            style={{ backgroundColor: "#b08d57", color: "#111827", opacity: 1 }}
                             onClick={() => open(live, "/admin/online-store/customize")}
                           >
+                            <svg
+                              viewBox="0 0 20 20"
+                              className="mr-1.5 h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M4 16l1-4 8.5-8.5a1.4 1.4 0 0 1 2 2L7 14l-3 2z" />
+                            </svg>
                             Edit theme
                           </button>
                           <ThemeMenu
