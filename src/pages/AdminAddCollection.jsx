@@ -203,31 +203,60 @@ export function RichTextEditor({ id, value, onChange, placeholder }) {
 
 // ---------------------------------------------------------------- include products from collections
 
-// "Include products from collections": a searchable dropdown of the store's other collections with an Add
-// button; the added ones are listed as rows ("Pinot Noir · 6 products") with a × to remove. Collections already
-// added are not offered again. `collections` is the store's current list (the collection being edited left out).
+// "Include products from collections": a searchable multi-select dropdown of the store's other collections. Every
+// row has a checkbox; the list stays open while ticking, and "Add (n)" adds all ticked ones at once as rows
+// ("Pinot Noir · 6 products") with a × to remove. Collections already added show ticked and disabled, and so do
+// ones that would create a loop. `collections` is the store's current list (the collection being edited left out).
 
 export const productsLabel = (count) => `${count ?? 0} product${count === 1 ? "" : "s"}`;
 
-// The collections still on offer: not added yet, and matching what was typed
-export function availableCollections(collections, selected, query) {
+// The collections matching what was typed (added ones included, they show ticked and disabled)
+export function matchingCollections(collections, query) {
   const q = (query || "").trim().toLowerCase();
-  return collections.filter(
-    (c) => !selected.includes(c.id) && (!q || c.name.toLowerCase().includes(q))
-  );
+  return collections.filter((c) => !q || c.name.toLowerCase().includes(q));
 }
 
-export function IncludeCollectionsPicker({ collections, selected, error, onChange }) {
+// Why a collection can't be added, or "" when it can. The server still has the last word (its message is shown
+// in the alert); this only warns early. `currentId` is the collection being edited. A loop is found when the
+// collection already includes the current one, directly or through others (needs `include_collections` on the
+// list items; without it nothing is flagged here).
+export function blockedReason(collection, selected, byId, currentId) {
+  if (selected.includes(collection.id)) return "Already added";
+  if (!currentId) return "";
+  const seen = new Set();
+  const stack = [collection.id];
+  while (stack.length) {
+    const id = stack.pop();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    for (const next of byId[id]?.include_collections || []) {
+      if (next === currentId) return "Includes this collection, so adding it would create a loop";
+      stack.push(next);
+    }
+  }
+  return "";
+}
+
+export function IncludeCollectionsPicker({ collections, selected, error, onChange, currentId }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [chosen, setChosen] = useState(null); // the collection picked in the dropdown, not added yet
+  const [ticked, setTicked] = useState([]); // ids ticked in the dropdown, not added yet
   const box = useRef(null);
+  const searchRef = useRef(null);
   const listId = useId();
 
   const byId = useMemo(() => Object.fromEntries(collections.map((c) => [c.id, c])), [collections]);
-  const offered = availableCollections(collections, selected, query);
+  const shown = matchingCollections(collections, query);
+  const reasons = useMemo(
+    () => Object.fromEntries(collections.map((c) => [c.id, blockedReason(c, selected, byId, currentId)])),
+    [collections, selected, byId, currentId]
+  );
+  const selectable = (c) => !reasons[c.id];
+  const shownSelectable = shown.filter(selectable);
   // An added id whose collection no longer exists is not shown
   const added = selected.map((id) => byId[id]).filter(Boolean);
+  // Ticks that are still valid (the selection may have changed under them)
+  const validTicks = ticked.filter((id) => byId[id] && !reasons[id]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -238,17 +267,47 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
     return () => document.removeEventListener("mousedown", close);
   }, [open]);
 
-  const pick = (c) => {
-    setChosen(c);
-    setQuery(c.name);
+  const toggle = (id) =>
+    setTicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const selectAllShown = () =>
+    setTicked((prev) => [...new Set([...prev, ...shownSelectable.map((c) => c.id)])]);
+
+  const add = () => {
+    if (validTicks.length === 0) return;
+    // In the list's order, not the order they were ticked
+    const toAdd = collections.map((c) => c.id).filter((id) => validTicks.includes(id));
+    onChange([...selected, ...toAdd.filter((id) => !selected.includes(id))]);
+    setTicked([]);
+    setQuery("");
     setOpen(false);
   };
 
-  const add = () => {
-    if (!chosen || selected.includes(chosen.id)) return;
-    onChange([...selected, chosen.id]);
-    setChosen(null);
-    setQuery("");
+  // Arrow keys move between the checkboxes; Space ticks the focused one (native); Enter adds; Esc closes
+  const focusRow = (from, step) => {
+    const boxes = [...box.current.querySelectorAll('input[type="checkbox"]:not(:disabled)')];
+    if (boxes.length === 0) return;
+    const i = boxes.indexOf(from);
+    const next = i === -1 ? (step > 0 ? 0 : boxes.length - 1) : i + step;
+    if (next < 0) searchRef.current?.focus();
+    else boxes[Math.min(next, boxes.length - 1)].focus();
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === "Escape") {
+      if (open) {
+        e.stopPropagation();
+        setOpen(false);
+        searchRef.current?.focus();
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      add();
+    } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      setOpen(true);
+      focusRow(e.target.type === "checkbox" ? e.target : null, e.key === "ArrowDown" ? 1 : -1);
+    }
   };
 
   return (
@@ -264,8 +323,9 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
         <p className="text-[13px] text-slate-500">There are no other collections yet.</p>
       ) : (
         <div className="flex items-start gap-2">
-          <div ref={box} className="relative min-w-0 flex-1">
+          <div ref={box} className="relative min-w-0 flex-1" onKeyDown={onKeyDown}>
             <input
+              ref={searchRef}
               type="text"
               role="combobox"
               aria-expanded={open}
@@ -277,16 +337,7 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
               onFocus={() => setOpen(true)}
               onChange={(e) => {
                 setQuery(e.target.value);
-                setChosen(null);
                 setOpen(true);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setOpen(false);
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  if (chosen) add();
-                  else if (offered.length === 1) pick(offered[0]);
-                }
               }}
               className={`${inputClass} pr-9`}
             />
@@ -295,7 +346,7 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
               tabIndex={-1}
               aria-label="Show collections"
               onClick={() => setOpen((o) => !o)}
-              className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-slate-500"
+              className="absolute right-0 top-0 flex h-full w-9 items-center justify-center text-slate-500"
             >
               <svg
                 className="h-4 w-4"
@@ -311,41 +362,69 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
               </svg>
             </button>
             {open && (
-              <ul
+              <div
                 id={listId}
-                role="listbox"
-                aria-label="Collections to add"
-                className="absolute z-20 mt-1.5 max-h-60 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-[0_8px_24px_rgba(24,24,27,0.10)]"
+                className="absolute z-20 mt-1.5 w-full rounded-lg border border-slate-200 bg-white shadow-[0_8px_24px_rgba(24,24,27,0.10)]"
               >
-                {offered.map((c) => (
-                  <li key={c.id} role="option" aria-selected={chosen?.id === c.id}>
-                    <button
-                      type="button"
-                      onClick={() => pick(c)}
-                      className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-[14px] text-ink transition hover:bg-slate-100 ${chosen?.id === c.id ? "bg-slate-100" : ""}`}
-                    >
-                      <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                      <span className="shrink-0 text-[12px] text-slate-500">
-                        {productsLabel(c.products_count)}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-                {offered.length === 0 && (
-                  <li className="px-3 py-2 text-[13px] text-slate-500">
-                    {query.trim() ? "No collections match." : "All collections are added."}
-                  </li>
-                )}
-              </ul>
+                <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-3 py-1.5 text-[12px]">
+                  <button
+                    type="button"
+                    onClick={selectAllShown}
+                    disabled={shownSelectable.length === 0}
+                    className="text-slate-600 underline hover:text-orange-600 disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
+                  >
+                    Select all (shown)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTicked([])}
+                    disabled={validTicks.length === 0}
+                    className="text-slate-600 underline hover:text-orange-600 disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
+                  >
+                    Clear
+                  </button>
+                </div>
+                <ul aria-label="Collections to add" className="max-h-60 overflow-y-auto py-1">
+                  {shown.map((c) => {
+                    const reason = reasons[c.id];
+                    const checked = selected.includes(c.id) || ticked.includes(c.id);
+                    return (
+                      <li key={c.id}>
+                        <label
+                          className={`flex w-full items-start gap-3 px-3 py-2 text-[14px] transition ${reason ? "cursor-not-allowed text-slate-400" : "cursor-pointer text-ink hover:bg-slate-100"}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={Boolean(reason)}
+                            onChange={() => toggle(c.id)}
+                            className="mt-0.5 h-4 w-4 shrink-0 accent-orange-600"
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate">{c.name}</span>
+                            {reason && <span className="block text-[12px] text-slate-500">{reason}</span>}
+                          </span>
+                          <span className="shrink-0 text-[12px] text-slate-500">
+                            {productsLabel(c.products_count)}
+                          </span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                  {shown.length === 0 && (
+                    <li className="px-3 py-2 text-[13px] text-slate-500">No collections match.</li>
+                  )}
+                </ul>
+              </div>
             )}
           </div>
           <button
             type="button"
             onClick={add}
-            disabled={!chosen}
+            disabled={validTicks.length === 0}
             className="inline-flex shrink-0 items-center justify-center rounded-lg bg-orange-600 px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-orange-600/90 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
-            Add
+            {validTicks.length > 0 ? `Add (${validTicks.length})` : "Add"}
           </button>
         </div>
       )}
@@ -1543,6 +1622,7 @@ export default function AdminAddCollection() {
                 <IncludeCollectionsPicker
                   collections={allCollections}
                   selected={form.include_collections}
+                  currentId={collectionId}
                   error={errors.include_collections}
                   onChange={(ids) => set("include_collections", ids)}
                 />

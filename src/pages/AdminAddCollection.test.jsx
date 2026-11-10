@@ -4,7 +4,8 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 
 import {
   IncludeCollectionsPicker,
-  availableCollections,
+  blockedReason,
+  matchingCollections,
   productsLabel,
 } from "@/pages/AdminAddCollection";
 
@@ -43,17 +44,30 @@ function Harness({ initial = [], onChange = () => {}, collections = COLLECTIONS 
 }
 
 const openList = () => fireEvent.focus(screen.getByRole("combobox"));
-const addCollection = (name) => {
-  openList();
-  fireEvent.click(within(screen.getByRole("listbox")).getByText(name));
-  fireEvent.click(screen.getByRole("button", { name: "Add" }));
-};
+const box = (name) => screen.getByRole("checkbox", { name: new RegExp(name) });
+const chipTexts = () =>
+  within(screen.getByRole("list", { name: "Added collections" }))
+    .getAllByRole("listitem")
+    .map((c) => c.textContent);
 
-describe("availableCollections / productsLabel", () => {
-  it("leaves out the added ones and filters by what was typed, ignoring case", () => {
-    expect(availableCollections(COLLECTIONS, ["c1"], "").map((c) => c.id)).toEqual(["c2", "c3"]);
-    expect(availableCollections(COLLECTIONS, [], "  PINOT ").map((c) => c.id)).toEqual(["c2"]);
-    expect(availableCollections(COLLECTIONS, ["c2"], "pinot")).toEqual([]);
+describe("matchingCollections / blockedReason / productsLabel", () => {
+  it("filters by what was typed, ignoring case, and keeps added ones", () => {
+    expect(matchingCollections(COLLECTIONS, "").map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
+    expect(matchingCollections(COLLECTIONS, "  PINOT ").map((c) => c.id)).toEqual(["c2"]);
+  });
+
+  it("blocks added collections and ones that lead back to the current one", () => {
+    const list = [
+      { id: "a", include_collections: ["b"] },
+      { id: "b", include_collections: ["cur"] },
+      { id: "c", include_collections: [] },
+    ];
+    const byId = Object.fromEntries(list.map((c) => [c.id, c]));
+    expect(blockedReason(list[2], ["c"], byId, "cur")).toBe("Already added");
+    expect(blockedReason(list[0], [], byId, "cur")).toMatch(/loop/); // a -> b -> cur
+    expect(blockedReason(list[1], [], byId, "cur")).toMatch(/loop/);
+    expect(blockedReason(list[2], [], byId, "cur")).toBe("");
+    expect(blockedReason(list[0], [], byId, undefined)).toBe("");
   });
 
   it("says product or products", () => {
@@ -67,43 +81,112 @@ describe("availableCollections / productsLabel", () => {
 });
 
 describe("IncludeCollectionsPicker", () => {
-  it("lists every collection with its product count in a searchable dropdown", () => {
+  it("shows a checkbox, name and product count on every row", () => {
     render(<Harness />);
     openList();
-    const options = within(screen.getByRole("listbox")).getAllByRole("option");
-    expect(options.map((o) => o.textContent)).toEqual([
+    const rows = within(screen.getByRole("list", { name: "Collections to add" })).getAllByRole(
+      "listitem"
+    );
+    expect(rows.map((o) => o.textContent)).toEqual([
       "Shiraz4 products",
       "Pinot Noir6 products",
       "Rose1 product",
     ]);
-
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "noir" } });
-    expect(within(screen.getByRole("listbox")).getAllByRole("option")).toHaveLength(1);
+    expect(screen.getAllByRole("checkbox")).toHaveLength(3);
   });
 
-  it("adds the chosen collection with the Add button and shows it as a chip", () => {
+  it("ticks several, keeps the list open, and adds them all at once with a count", () => {
     const onChange = vi.fn();
     render(<Harness onChange={onChange} />);
-    expect(screen.getByRole("button", { name: "Add" }).disabled).toBe(true); // nothing chosen yet
+    expect(screen.getByRole("button", { name: "Add" }).disabled).toBe(true); // nothing ticked yet
 
-    addCollection("Pinot Noir");
+    openList();
+    fireEvent.click(box("Rose"));
+    fireEvent.click(screen.getByText("Shiraz")); // clicking the row ticks it too
+    expect(screen.getByRole("list", { name: "Collections to add" })).toBeTruthy(); // still open
+    expect(screen.getByRole("button", { name: "Add (2)" }).disabled).toBe(false);
 
-    expect(onChange).toHaveBeenLastCalledWith(["c2"]);
-    const chips = within(screen.getByRole("list", { name: "Added collections" })).getAllByRole(
-      "listitem"
-    );
-    expect(chips.map((c) => c.textContent)).toEqual(["Pinot Noir · 6 products"]);
-    expect(screen.getByRole("combobox").value).toBe(""); // ready for the next one
+    fireEvent.click(screen.getByRole("button", { name: "Add (2)" }));
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenLastCalledWith(["c1", "c3"]);
+    expect(chipTexts()).toEqual(["Shiraz · 4 products", "Rose · 1 product"]);
+    expect(screen.getByRole("button", { name: "Add" }).disabled).toBe(true); // ticks cleared
+    expect(screen.getByRole("combobox").value).toBe("");
   });
 
-  it("does not offer a collection that is already added", () => {
+  it("unticks on a second click", () => {
+    render(<Harness />);
+    openList();
+    fireEvent.click(box("Rose"));
+    fireEvent.click(box("Rose"));
+    expect(screen.getByRole("button", { name: "Add" }).disabled).toBe(true);
+  });
+
+  it("keeps ticks while searching", () => {
+    render(<Harness />);
+    openList();
+    fireEvent.click(box("Shiraz"));
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "noir" } });
+    expect(screen.getAllByRole("checkbox")).toHaveLength(1);
+    fireEvent.click(box("Pinot Noir"));
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "" } });
+    expect(box("Shiraz").checked).toBe(true);
+    expect(screen.getByRole("button", { name: "Add (2)" })).toBeTruthy();
+  });
+
+  it("has Select all (shown) and Clear", () => {
+    render(<Harness initial={["c3"]} />);
+    openList();
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "i" } }); // Shiraz, Pinot Noir
+    fireEvent.click(screen.getByRole("button", { name: "Select all (shown)" }));
+    expect(screen.getByRole("button", { name: "Add (2)" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.getByRole("button", { name: "Add" }).disabled).toBe(true);
+  });
+
+  it("shows added collections ticked and disabled", () => {
     render(<Harness initial={["c1"]} />);
     openList();
-    const names = within(screen.getByRole("listbox"))
-      .getAllByRole("option")
-      .map((o) => o.textContent);
-    expect(names.join()).not.toContain("Shiraz");
-    expect(names).toHaveLength(2);
+    expect(box("Shiraz").checked).toBe(true);
+    expect(box("Shiraz").disabled).toBe(true);
+    expect(screen.getByText("Already added")).toBeTruthy();
+    expect(box("Rose").disabled).toBe(false);
+  });
+
+  it("disables a collection that would create a loop and says why", () => {
+    const collections = [
+      { id: "c1", name: "Shiraz", products_count: 4, include_collections: ["cur"] },
+      { id: "c2", name: "Pinot Noir", products_count: 6, include_collections: [] },
+    ];
+    render(
+      <IncludeCollectionsPicker
+        collections={collections}
+        selected={[]}
+        currentId="cur"
+        onChange={() => {}}
+      />
+    );
+    openList();
+    expect(box("Shiraz").disabled).toBe(true);
+    expect(screen.getByText(/would create a loop/)).toBeTruthy();
+    expect(box("Pinot Noir").disabled).toBe(false);
+  });
+
+  it("works from the keyboard: arrows, Space, Enter to add, Esc to close", () => {
+    const onChange = vi.fn();
+    render(<Harness onChange={onChange} />);
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" });
+    expect(document.activeElement).toBe(box("Shiraz"));
+    fireEvent.keyDown(document.activeElement, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(box("Pinot Noir"));
+    fireEvent.click(document.activeElement); // Space on a checkbox is a click
+    fireEvent.keyDown(document.activeElement, { key: "Enter" });
+    expect(onChange).toHaveBeenLastCalledWith(["c2"]);
+
+    openList();
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Escape" });
+    expect(screen.queryByRole("list", { name: "Collections to add" })).toBeNull();
   });
 
   it("removes an added collection with its ×", () => {
@@ -114,23 +197,20 @@ describe("IncludeCollectionsPicker", () => {
 
     expect(onChange).toHaveBeenLastCalledWith(["c2"]);
     expect(screen.queryByRole("button", { name: "Remove Shiraz" })).toBeNull();
-    // and it is offered again
     openList();
-    expect(within(screen.getByRole("listbox")).getByText("Shiraz")).toBeTruthy();
+    expect(box("Shiraz").disabled).toBe(false); // selectable again
   });
 
   it("does not show an added id whose collection no longer exists", () => {
     render(<Harness initial={["deleted", "c3"]} />);
-    const chips = within(screen.getByRole("list", { name: "Added collections" })).getAllByRole(
-      "listitem"
-    );
-    expect(chips.map((c) => c.textContent)).toEqual(["Rose · 1 product"]);
+    expect(chipTexts()).toEqual(["Rose · 1 product"]);
   });
 
-  it("says so when all collections are added or there are none", () => {
-    const { unmount } = render(<Harness initial={["c1", "c2", "c3"]} />);
+  it("says so when nothing matches or there are no collections", () => {
+    const { unmount } = render(<Harness />);
     openList();
-    expect(screen.getByText("All collections are added.")).toBeTruthy();
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "zzz" } });
+    expect(screen.getByText("No collections match.")).toBeTruthy();
     unmount();
 
     render(<Harness collections={[]} />);
