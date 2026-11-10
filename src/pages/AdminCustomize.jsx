@@ -1768,6 +1768,18 @@ export default function AdminCustomizePage() {
 
   useLayoutEffect(() => {
     engineRef.current.openStorePage = openStorePage;
+    // The product page's "< Back" inside the preview: step back through the pages opened here,
+    // or open the link's own target when the product was the first page shown
+    engineRef.current.previewBack = (fallback) => {
+      if (backStack.length) goBack();
+      else if (
+        typeof fallback === "string" &&
+        fallback.startsWith("/") &&
+        !fallback.startsWith("//")
+      )
+        openStorePage(fallback);
+      else openStorePage("/collections/all");
+    };
   });
 
   // Each change: patch the preview (next frame) and schedule a background save
@@ -1885,6 +1897,8 @@ export default function AdminCustomizePage() {
       } else if (message.type === "navigate" && typeof message.path === "string") {
         // A product, collection, blog or post link was clicked: open that page's template here
         engineRef.current.openStorePage(message.path);
+      } else if (message.type === "back") {
+        engineRef.current.previewBack(message.fallback);
       } else if (message.type === "leaving") {
         // Edit mode off and a link was followed: the editor page is gone until the preview reloads
         syncRef.current.ready = false;
