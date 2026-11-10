@@ -46,7 +46,10 @@ const fieldClass =
 const labelClass = "mb-1 block text-sm font-medium text-ink";
 
 function wordCount(html) {
-  const text = (html || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").trim();
+  const text = (html || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .trim();
   return text ? text.split(/\s+/).length : 0;
 }
 
