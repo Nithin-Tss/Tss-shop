@@ -45,6 +45,18 @@ const fieldClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-orange-600 disabled:bg-slate-50 disabled:text-slate-400";
 const labelClass = "mb-1 block text-sm font-medium text-ink";
 
+function wordCount(html) {
+  const text = (html || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").trim();
+  return text ? text.split(/\s+/).length : 0;
+}
+
+function formatDate(value) {
+  const d = value ? new Date(value) : null;
+  return d && !Number.isNaN(d.getTime())
+    ? d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })
+    : "";
+}
+
 function Toggle({ checked, onChange, label }) {
   return (
     <button
@@ -83,6 +95,8 @@ export default function PoliciesSettings() {
   const [rules, setRules] = useState(DEFAULT_RULES);
   const [policies, setPolicies] = useState({}); // key -> html being edited
   const [saved, setSaved] = useState({}); // key -> { handle, url, visible } as stored
+  const [openKey, setOpenKey] = useState(null); // one policy open at a time; all collapsed on load
+  const [savedAt, setSavedAt] = useState({}); // key -> ISO time of a save made on this screen
   const [loading, setLoading] = useState(Boolean(storeId));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null); // { type: "ok" | "error", text }
@@ -135,6 +149,14 @@ export default function PoliciesSettings() {
     setSaving(false);
 
     if (ruleRes.ok && policyRes?.ok) {
+      const now = new Date().toISOString();
+      setSavedAt((prev) => {
+        const next = { ...prev };
+        POLICIES.forEach(([k]) => {
+          if ((saved[k]?.body ?? "") !== (policyRes.data[k]?.body ?? "")) next[k] = now;
+        });
+        return next;
+      });
       setSaved(policyRes.data);
       announceThemeChange("pages"); // an open Customize / Pages screen shows the new pages
       setMessage({ type: "ok", text: "Policies saved." });
@@ -291,40 +313,101 @@ export default function PoliciesSettings() {
             the page.
           </p>
         </div>
-        <div className="grid gap-6 p-5">
+        <ul className="divide-y divide-slate-200">
           {POLICIES.map(([key, title]) => {
             const info = saved[key];
+            const isOpen = openKey === key;
+            const body = policies[key] ?? "";
+            const unsaved = body !== (info?.body ?? "");
+            const words = wordCount(body);
+            const updated = formatDate(info?.updatedAt || savedAt[key]);
+            const status = [
+              info?.visible ? "Published" : "Not published",
+              updated && `Updated ${updated}`,
+              `${words} ${words === 1 ? "word" : "words"}`,
+            ].filter(Boolean);
             return (
-              <div key={key}>
-                <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                  <label htmlFor={`policy-${key}`} className="text-sm font-medium text-ink">
-                    {title}
-                  </label>
-                  {info?.visible ? (
-                    <a
-                      href={info.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-slate-500 underline hover:text-orange-600"
-                    >
-                      View page ↗
-                    </a>
-                  ) : (
-                    <span className="text-xs text-slate-400">
-                      Not published · /pages/{info?.handle}
+              <li key={key}>
+                <h3>
+                  <button
+                    type="button"
+                    id={`policy-${key}-trigger`}
+                    aria-expanded={isOpen}
+                    aria-controls={`policy-${key}-panel`}
+                    onClick={() => setOpenKey(isOpen ? null : key)}
+                    className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-600"
+                  >
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium text-ink">{title}</span>
+                        {unsaved && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                            Unsaved
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        {status.join(" · ")}
+                      </span>
                     </span>
-                  )}
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    >
+                      <path d="M5 8l5 5 5-5" />
+                    </svg>
+                  </button>
+                </h3>
+                <div
+                  id={`policy-${key}-panel`}
+                  role="region"
+                  aria-labelledby={`policy-${key}-trigger`}
+                  className={`grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                >
+                  <div
+                    className={`min-h-0 overflow-hidden transition-[visibility] duration-200 ${isOpen ? "visible" : "invisible"}`}
+                  >
+                    <div className="px-5 pb-5 pt-1">
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <label htmlFor={`policy-${key}`} className="text-sm font-medium text-ink">
+                          {title}
+                        </label>
+                        {info?.visible ? (
+                          <a
+                            href={info.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-slate-500 underline hover:text-orange-600"
+                          >
+                            View page ↗
+                          </a>
+                        ) : (
+                          <span className="text-xs text-slate-400">
+                            Not published · /pages/{info?.handle}
+                          </span>
+                        )}
+                      </div>
+                      <div className="[&_[role=textbox]]:max-h-72 [&_[role=textbox]]:overflow-y-auto">
+                        <RichTextEditor
+                          id={`policy-${key}`}
+                          value={body}
+                          onChange={(html) => setPolicies((p) => ({ ...p, [key]: html }))}
+                          placeholder={`Write your ${title.toLowerCase()}…`}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <RichTextEditor
-                  id={`policy-${key}`}
-                  value={policies[key] ?? ""}
-                  onChange={(html) => setPolicies((p) => ({ ...p, [key]: html }))}
-                  placeholder={`Write your ${title.toLowerCase()}…`}
-                />
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </section>
 
       <div className="flex justify-end">
