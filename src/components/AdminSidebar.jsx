@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
-import { STAFF_SUPPORT_PATH } from "@/lib/supportTickets";
-import { useSupportBadge } from "@/lib/useSupportBadge";
+import HelpWidget from "@/components/HelpWidget";
+import { TICKETS_PATH } from "@/lib/helpCenter";
 import {
   apiDelete,
   apiGet,
@@ -18,7 +18,6 @@ import {
   setActiveStore,
   setStores,
   storeCan,
-  useIsSupportStaff,
   useSession,
 } from "@/lib/auth";
 
@@ -606,10 +605,8 @@ export default function AdminSidebar() {
   const searchRef = useRef(null);
   const session = useSession();
   const allowed = (item) => !item.permission || can(session, item.permission);
-  // Support Tickets: only for platform support staff; the badge counts tickets that are open and unassigned
-  const supportStaff = useIsSupportStaff();
-  const supportBadge = useSupportBadge();
-  const supportActive = isUnder(path, STAFF_SUPPORT_PATH);
+  // Support Tickets: the member's own tickets (staff answer them in the separate Tss-helpdesk app)
+  const supportActive = isUnder(path, TICKETS_PATH);
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [query, setQuery] = useState("");
@@ -851,25 +848,15 @@ export default function AdminSidebar() {
 
       {/* SETTINGS + ACCOUNT */}
       <div className="space-y-2 px-3 pb-3 pt-2">
-        {supportStaff && (
-          <Link
-            to={STAFF_SUPPORT_PATH}
-            title="Support Tickets"
-            aria-current={supportActive ? "page" : undefined}
-            className={rowClass(supportActive)}
-          >
-            <NavIcon name="support" />
-            <Label>Support Tickets</Label>
-            {supportBadge > 0 && (
-              <span
-                aria-label={`${supportBadge} open unassigned ticket${supportBadge === 1 ? "" : "s"}`}
-                className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold leading-4 group-data-[collapsed=true]/nav:absolute group-data-[collapsed=true]/nav:right-1 group-data-[collapsed=true]/nav:top-1 group-data-[collapsed=true]/nav:ml-0 group-data-[collapsed=true]/nav:px-1.5 ${supportActive ? "bg-white text-orange-700" : "bg-orange-600 text-white"}`}
-              >
-                {supportBadge > 99 ? "99+" : supportBadge}
-              </span>
-            )}
-          </Link>
-        )}
+        <Link
+          to={TICKETS_PATH}
+          title="Support Tickets"
+          aria-current={supportActive ? "page" : undefined}
+          className={rowClass(supportActive)}
+        >
+          <NavIcon name="support" />
+          <Label>Support Tickets</Label>
+        </Link>
         <Link
           to={`${BASE}/settings`}
           title="Settings"
@@ -927,6 +914,8 @@ export default function AdminSidebar() {
       )}
       {/* The assistant (dev only, and only for members who may read some data): one panel per page */}
       <AssistantPanel />
+      {/* The Help chat (flag help_assistant): replaces the assistant above, which hides itself while it is on */}
+      <HelpWidget />
     </>
   );
 }

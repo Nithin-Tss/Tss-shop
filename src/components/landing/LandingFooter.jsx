@@ -82,6 +82,7 @@ const COLUMNS = [
   [
     "Support",
     [
+      ["Help center", "/contact"],
       ["Community", "#"],
       ["Hire a partner", "#"],
       ["Service status", "#"],

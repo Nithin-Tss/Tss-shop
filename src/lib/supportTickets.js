@@ -5,16 +5,11 @@ import { useEffect, useRef } from "react";
 
 export const TICKETS_API = "/api/v1/support/tickets/";
 export const ATTACHMENTS_API = "/api/v1/support/attachments/";
-export const STAFF_TICKETS_API = "/api/v1/platform/support/tickets/";
 
 export const POLL_MS = 5000; // an open conversation refreshes this often
 export const MAX_ATTACHMENTS = 3; // images per message (the server enforces the same limit)
 export const MAX_REPLY = 2000;
 
-export const STAFF_SUPPORT_PATH = "/admin/support-tickets";
-export const staffTicketPath = (id) => `${STAFF_SUPPORT_PATH}/${id}`;
-export const SUPPORT_SUMMARY_API = "/api/v1/platform/support/summary/";
-export const SUPPORT_AGENTS_API = "/api/v1/platform/support/agents/";
 
 // Keep in step with Ticket.STATUSES in the backend (apps/helpdesk/models.py)
 export const STATUSES = ["open", "in_progress", "waiting_on_customer", "resolved", "closed"];

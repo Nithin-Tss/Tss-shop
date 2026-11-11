@@ -14,6 +14,7 @@ const AdminOnlineStore = lazy(() => import("@/pages/AdminOnlineStore"));
 const ThemeView = lazy(() => import("@/pages/ThemeView"));
 const AdminCustomize = lazy(() => import("@/pages/AdminCustomize"));
 const AdminSettings = lazy(() => import("@/pages/AdminSettings"));
+const AdminHelp = lazy(() => import("@/pages/AdminHelp"));
 const AdminHome = lazy(() => import("@/pages/AdminHome"));
 const AdminProducts = lazy(() => import("@/pages/AdminProducts"));
 const AdminAddProduct = lazy(() => import("@/pages/AdminAddProduct"));
@@ -49,12 +50,11 @@ const AdminLiveView = lazy(() => import("@/pages/AdminLiveView"));
 const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
 const AdminCreateDiscount = lazy(() => import("@/pages/AdminCreateDiscount"));
 const AdminPlatform = lazy(() => import("@/pages/AdminPlatform"));
-const AdminSupportTickets = lazy(() => import("@/pages/AdminSupportTickets"));
-const AdminSupportTicket = lazy(() => import("@/pages/AdminSupportTicket"));
 const AdminWebhooks = lazy(() => import("@/pages/AdminWebhooks"));
 const AdminAuditLog = lazy(() => import("@/pages/AdminAuditLog"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
+const Contact = lazy(() => import("@/pages/Contact"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
@@ -91,6 +91,11 @@ export default function App() {
           <Route path="/orders" element={<OrderHistory />} />
           <Route path="/admin" element={<Navigate to="/admin/online-store/home" replace />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/help" element={<AdminHelp />} />
+          <Route path="/admin/help/tickets" element={<AdminHelp />} />
+          <Route path="/admin/help/tickets/:ticketId" element={<AdminHelp />} />
+          <Route path="/admin/help/articles/:articleSlug" element={<AdminHelp />} />
+          <Route path="/admin/help/:topic" element={<AdminHelp />} />
           <Route path="/admin/online-store/home" element={<AdminHome />} />
           <Route path="/admin/online-store/settings" element={<AdminSettings />} />
           <Route
@@ -236,13 +241,9 @@ export default function App() {
           </Route>
           {/* Platform administration: the API refuses anyone who isn't a platform administrator */}
           <Route path="/admin/platform" element={<AdminPlatform />} />
-          {/* Support Tickets (platform support staff; the API refuses everyone else). It replaces the old Support tab. */}
-          <Route path="/admin/support-tickets" element={<AdminSupportTickets />} />
-          <Route path="/admin/support-tickets/:ticketId" element={<AdminSupportTicket />} />
-          <Route
-            path="/admin/platform/support"
-            element={<Navigate to="/admin/support-tickets" replace />}
-          />
+          {/* Support staff work tickets in the separate Tss-helpdesk app; old staff links land on the member's own tickets */}
+          <Route path="/admin/support-tickets" element={<Navigate to="/admin/help/tickets" replace />} />
+          <Route path="/admin/platform/support" element={<Navigate to="/admin/help/tickets" replace />} />
           <Route element={<RequirePermission permission="shipping.view" />}>
             <Route
               path="/admin/online-store/shipping"
@@ -262,6 +263,7 @@ export default function App() {
         </Route>
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/contact" element={<Contact />} />
         {flagsOn("blog") && <Route path="/blog" element={<Blog />} />}
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         {/* Links sent by email (see the backend's apps/identity/email_links.py) */}
