@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import AssistantMarkdown from "@/components/AssistantMarkdown";
+import { applyProposal } from "@/lib/assistantApi";
 import { createChatStore, useChatStore } from "@/lib/assistantChatStore";
 
 export const EXAMPLE_QUESTIONS = [
@@ -95,7 +96,56 @@ const stopSquare = (
   </svg>
 );
 
-function Bubble({ message, onAction }) {
+// A proposed code change: what is there now (red) and what it becomes (green). Nothing is saved until Apply.
+function Proposal({ proposal, onApply, onDiscard }) {
+  const { status } = proposal;
+  const line = "whitespace-pre-wrap break-words px-2 py-0.5 font-mono text-[11px] leading-4";
+  return (
+    <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <p className="border-b border-slate-100 px-2.5 py-1.5 text-[11px] font-medium text-slate-600">
+        {proposal.path}, lines {proposal.start_line}
+        {proposal.end_line !== proposal.start_line ? `-${proposal.end_line}` : ""}
+      </p>
+      <pre className={`${line} bg-red-50 text-red-800`}>{proposal.old_text || " "}</pre>
+      <pre className={`${line} bg-green-50 text-green-800`}>
+        {proposal.new_text || "(lines removed)"}
+      </pre>
+      {status === "applied" && (
+        <p className="px-2.5 py-2 text-[12px] text-green-700">
+          Applied. Check the preview. Undo is in Edit code history.
+        </p>
+      )}
+      {status === "discarded" && (
+        <p className="px-2.5 py-2 text-[12px] text-slate-500">Discarded.</p>
+      )}
+      {(status === "pending" || status === "applying" || status === "failed") && (
+        <div className="px-2.5 py-2">
+          {status === "failed" && <p className="mb-2 text-[12px] text-red-700">{proposal.error}</p>}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={status === "applying"}
+              onClick={onApply}
+              className={`${actionButton} disabled:opacity-50`}
+            >
+              {status === "applying" ? "Applying..." : "Apply"}
+            </button>
+            <button
+              type="button"
+              disabled={status === "applying"}
+              onClick={onDiscard}
+              className={`inline-flex h-8 items-center rounded-md border border-slate-200 px-3 text-[12px] font-medium text-ink hover:bg-slate-50 disabled:opacity-50 ${focusRing}`}
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Bubble({ message, onAction, store }) {
   if (message.role === "note") {
     // "Stopped.": a muted line, not a bubble
     return <p className="text-center text-[12px] leading-4 text-slate-400">{message.text}</p>;
@@ -127,6 +177,18 @@ function Bubble({ message, onAction }) {
           <div className="rounded-xl rounded-tl-sm bg-brand-cream-100 px-3.5 py-2.5 text-[13px] leading-5 text-ink">
             <AssistantMarkdown text={message.text} />
           </div>
+        )}
+        {message.proposal && (
+          <Proposal
+            proposal={message.proposal}
+            onDiscard={() => store.setProposalStatus(message.id, "discarded")}
+            onApply={async () => {
+              store.setProposalStatus(message.id, "applying");
+              const { status: _s, error: _e, ...proposal } = message.proposal;
+              const result = await applyProposal(proposal);
+              store.setProposalStatus(message.id, result.ok ? "applied" : "failed", result.error);
+            }}
+          />
         )}
         {message.actions?.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -265,7 +327,7 @@ export default function AssistantChat({ chat, ask, onAction }) {
           </div>
         )}
         {messages.map((message) => (
-          <Bubble key={message.id} message={message} onAction={onAction} />
+          <Bubble key={message.id} message={message} onAction={onAction} store={store} />
         ))}
         {pending && <Thinking seconds={seconds} />}
       </div>

@@ -177,6 +177,7 @@ export function createChatStore(ask, options = {}) {
               text: result.answer || "I don't have that data.",
               tools: result.tools,
               actions: result.actions,
+              proposal: result.proposal ? { ...result.proposal, status: "pending" } : undefined,
             }
           : { role: "error", text: result.error };
       } catch (error) {
@@ -187,6 +188,15 @@ export function createChatStore(ask, options = {}) {
       if (mine !== generation) return; // cleared or stopped while waiting
       controller = null;
       set({ messages: add(reply), pending: false });
+    },
+
+    // The state of a proposed change on one message: "pending" | "applying" | "applied" | "discarded" | "failed"
+    setProposalStatus(id, status, error) {
+      set({
+        messages: state.messages.map((m) =>
+          m.id === id && m.proposal ? { ...m, proposal: { ...m.proposal, status, error } } : m
+        ),
+      });
     },
 
     // Stop waiting for the answer. The question stays, a muted "Stopped." follows it, and an answer that still

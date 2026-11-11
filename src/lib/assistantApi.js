@@ -39,7 +39,44 @@ export async function askAssistant(message, signal, history = []) {
     answer: String(res.data?.answer ?? ""),
     tools: Array.isArray(res.data?.tools) ? res.data.tools : [],
     actions: cleanActions(res.data?.actions),
+    proposal: cleanProposal(res.data?.proposal),
   };
+}
+
+// A change the assistant proposed. Only this exact shape is kept; it is shown as text and sent back unchanged
+// when the person clicks Apply (the server checks it again against the current file).
+export function cleanProposal(p) {
+  if (!p || typeof p !== "object") return null;
+  const { path, start_line: start, end_line: end, old_text: oldText, new_text: newText } = p;
+  const ok =
+    typeof path === "string" &&
+    /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}(\/[A-Za-z0-9][A-Za-z0-9._-]{0,99})*$/.test(path) &&
+    Number.isInteger(start) &&
+    Number.isInteger(end) &&
+    typeof oldText === "string" &&
+    typeof newText === "string";
+  return ok
+    ? {
+        path,
+        start_line: start,
+        end_line: end,
+        old_text: oldText,
+        new_text: newText,
+        theme_id: p.theme_id || null,
+      }
+    : null;
+}
+
+// Save a proposed change (after the person clicked Apply). Resolves { ok: true } or { ok: false, error }.
+export async function applyProposal(proposal) {
+  const { theme_id: themeId, ...body } = proposal;
+  const res = await apiPost(
+    "/api/v1/assistant/apply/",
+    body,
+    themeId ? { "X-Theme-Id": themeId } : {}
+  );
+  if (res.ok) return { ok: true };
+  return { ok: false, error: res.formError || "The change could not be saved. Ask again." };
 }
 
 // Who the conversation belongs to: one person in one store (a token refresh is not a change)
