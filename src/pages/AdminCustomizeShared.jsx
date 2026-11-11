@@ -7,6 +7,14 @@ export const smallButton =
 export const iconButton =
   "flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-orange-600";
 
+// Customizer top bar: a dark editor bar with ghost buttons and one gold call to action
+const tbBase =
+  "inline-flex h-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed";
+export const tbButton = `${tbBase} rounded-lg px-3 text-white/75 hover:bg-white/10 hover:text-white`;
+export const tbPrimary = `${tbBase} rounded-full bg-brand-gold-400 px-5 font-semibold text-charcoal-navy hover:bg-brand-gold-300 disabled:bg-white/10 disabled:text-white/35`;
+export const tbSegment =
+  "flex h-8 w-9 items-center justify-center rounded-md text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:text-white/25 disabled:hover:bg-transparent";
+
 export const iconProps = {
   fill: "none",
   stroke: "currentColor",

@@ -28,24 +28,8 @@ export function useAiPageBuilderAccess() {
   return flagOn && canManage;
 }
 
-const sparkle = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.8}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-    className="h-5 w-5"
-  >
-    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
-    <path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z" />
-  </svg>
-);
-
 // A button for the customizer's top bar that opens the page builder (a separate panel from the dev-only assistant)
-export function AiPageBuilderButton() {
+export function AiPageBuilderButton({ tone = "light" }) {
   const access = useAiPageBuilderAccess();
   const [open, setOpen] = useState(false);
   if (!access) return null;
@@ -57,9 +41,21 @@ export function AiPageBuilderButton() {
         title="Build pages with AI"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className={`flex h-9 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-100 ${focusRing} ${open ? "bg-slate-100" : ""}`}
+        className={`flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition ${focusRing} ${tone === "dark" ? (open ? "bg-white/20 text-white ring-1 ring-white/40" : "bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/15 hover:ring-white/35") : open ? "bg-charcoal-navy text-white" : "bg-slate-900/[0.06] text-slate-800 hover:bg-slate-900/[0.1]"}`}
       >
-        {sparkle}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          className="h-4 w-4"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2.5" />
+          <path d="M3 9h18M9 21V9" />
+        </svg>
         <span className="hidden lg:inline">AI pages</span>
       </button>
       {open && <AiPageBuilderPanel onClose={() => setOpen(false)} />}

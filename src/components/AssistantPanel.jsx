@@ -83,21 +83,27 @@ export function AssistantButton({ tone = "rail" }) {
       title="Assistant"
       aria-expanded={open}
       onClick={() => assistantStore.toggle()}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
-        tone === "light"
-          ? // For the white top bars of the customizer and the code editor
-            `text-slate-600 hover:bg-slate-100 hover:text-ink ${open ? "bg-violet-100 text-ink" : ""}`
-          : `${
-              tone === "rail"
-                ? "text-slate-300 hover:bg-white/[0.08] hover:text-white"
-                : "text-white hover:bg-white/10"
-            } ${open ? "bg-white/10 text-white" : ""}`
+      className={`flex h-9 shrink-0 items-center justify-center transition ${
+        tone === "dark" ? "gap-2 px-3.5 text-sm font-medium" : "w-9"
+      } ${
+        tone === "dark"
+          ? // For the dark customizer bar
+            `rounded-lg ring-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${open ? "bg-white/20 text-white ring-white/40" : "bg-white/10 text-white ring-white/20 hover:bg-white/15 hover:ring-white/35"}`
+          : tone === "light"
+            ? // For the white top bars of the customizer and the code editor
+              `rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/40 focus-visible:ring-offset-2 ${open ? "bg-charcoal-navy text-white" : "bg-slate-900/[0.06] text-slate-800 hover:bg-slate-900/[0.1]"}`
+            : `rounded-full ${
+                tone === "rail"
+                  ? "text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                  : "text-white hover:bg-white/10"
+              } ${open ? "bg-white/10 text-white" : ""}`
       }`}
     >
-      <svg {...icon} className="h-5 w-5">
-        <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
-        <path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z" />
+      <svg {...icon} className="h-[18px] w-[18px]">
+        <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z" />
+        <path d="M8.5 11.5h7M8.5 14.5h4" />
       </svg>
+      {tone === "dark" && "Assistant"}
     </button>
   );
 }

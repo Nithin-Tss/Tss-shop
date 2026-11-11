@@ -31,7 +31,16 @@ import {
 
 import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
 
-import { iconButton, iconProps, defaultsOf, DropLine, DragHandle } from "./AdminCustomizeShared";
+import {
+  iconButton,
+  iconProps,
+  tbButton,
+  tbPrimary,
+  tbSegment,
+  defaultsOf,
+  DropLine,
+  DragHandle,
+} from "./AdminCustomizeShared";
 import {
   FontsContext,
   StorePagesContext,
@@ -2477,7 +2486,7 @@ export default function AdminCustomizePage() {
               className={`flex h-screen flex-col bg-[rgba(234,88,12,0.08)] text-charcoal-navy ${drag ? "cursor-grabbing select-none" : ""}`}
             >
               {/* Top bar */}
-              <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-slate-200 bg-slate-50 px-5 py-2.5">
+              <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-white/10 bg-charcoal-navy px-5 py-2.5">
                 <div className="flex min-w-0 items-center gap-3">
                   <Link
                     to="/admin/online-store"
@@ -2488,16 +2497,16 @@ export default function AdminCustomizePage() {
                       )
                         e.preventDefault();
                     }}
-                    className="whitespace-nowrap text-sm text-slate-600 hover:text-orange-600"
+                    className="whitespace-nowrap text-sm text-white/70 transition hover:text-white"
                   >
                     ← Online store
                   </Link>
 
                   <span className="flex min-w-0 items-baseline gap-2.5">
-                    <span className="hidden text-xs uppercase tracking-[0.14em] text-slate-500 sm:inline">
+                    <span className="hidden text-xs uppercase tracking-[0.14em] text-white/45 sm:inline">
                       Customize
                     </span>
-                    <span className="display truncate text-2xl text-ink">{store.storeName}</span>
+                    <span className="display truncate text-2xl text-white">{store.storeName}</span>
                   </span>
                 </div>
 
@@ -2505,7 +2514,7 @@ export default function AdminCustomizePage() {
                   <button
                     type="button"
                     onClick={() => setPanelOpen((v) => !v)}
-                    className="h-9 whitespace-nowrap rounded-md border border-slate-300 px-3 text-sm hover:border-orange-600 lg:hidden"
+                    className={`${tbButton} lg:hidden`}
                     aria-expanded={panelOpen}
                   >
                     {panelOpen ? "Hide panel" : "Sections"}
@@ -2515,10 +2524,13 @@ export default function AdminCustomizePage() {
                     <button
                       type="button"
                       onClick={goBack}
-                      className="h-9 whitespace-nowrap rounded-md border border-slate-300 px-3 text-sm hover:border-orange-600"
+                      className={tbButton}
                       title="Back to the page you came from"
                     >
-                      &larr; {pageLabel(backStack[backStack.length - 1].page) || "Back"}
+                      <svg {...iconProps} className="h-4 w-4 text-slate-500">
+                        <path d="m15 18-6-6 6-6" />
+                      </svg>
+                      {pageLabel(backStack[backStack.length - 1].page) || "Back"}
                     </button>
                   )}
 
@@ -2565,7 +2577,7 @@ export default function AdminCustomizePage() {
                       setAdding(false);
                       setBackStack([]);
                     }}
-                    className="h-9 whitespace-nowrap rounded-md border border-slate-300 bg-white px-2 text-sm"
+                    className="h-9 whitespace-nowrap rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900 [&_optgroup]:text-slate-900"
                     aria-label="Page to edit"
                   >
                     {schema.pages.map((p) => (
@@ -2592,7 +2604,7 @@ export default function AdminCustomizePage() {
                     <button
                       type="button"
                       onClick={() => deletePageTemplate(page)}
-                      className="h-9 whitespace-nowrap rounded-md border border-slate-300 px-3 text-sm text-slate-600 hover:border-orange-600 hover:text-orange-600"
+                      className={`${tbButton} hover:!bg-red-500/20 hover:!text-red-200`}
                       title="Delete this template; its pages go back to Page"
                     >
                       Delete template
@@ -2604,7 +2616,7 @@ export default function AdminCustomizePage() {
                     <select
                       value={sampleArticle}
                       onChange={(e) => setSampleArticle(e.target.value)}
-                      className="h-9 whitespace-nowrap max-w-50 rounded-md border border-slate-300 bg-white px-2 text-sm"
+                      className="h-9 whitespace-nowrap max-w-50 rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900"
                       aria-label="Post to preview"
                     >
                       {blogPosts.map((p) => (
@@ -2620,7 +2632,7 @@ export default function AdminCustomizePage() {
                     <select
                       value={samplePage}
                       onChange={(e) => setSamplePage(e.target.value)}
-                      className="h-9 whitespace-nowrap max-w-50 rounded-md border border-slate-300 bg-white px-2 text-sm"
+                      className="h-9 whitespace-nowrap max-w-50 rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900"
                       aria-label="Page to preview"
                     >
                       {storePages.map((p) => (
@@ -2631,8 +2643,8 @@ export default function AdminCustomizePage() {
                     </select>
                   )}
 
-                  <AssistantButton tone="light" />
-                  <AiPageBuilderButton />
+                  <AssistantButton tone="dark" />
+                  <AiPageBuilderButton tone="dark" />
 
                   <a
                     id="edit-code-btn"
@@ -2651,8 +2663,12 @@ export default function AdminCustomizePage() {
                       return query.toString() ? `?${query.toString()}` : "";
                     })()}`}
                     title="Open the theme code in the editor"
-                    className="h-9 justify-center rounded-md border border-slate-300 px-3 text-sm inline-flex items-center text-charcoal-navy hover:border-orange-600"
+                    className={tbButton}
                   >
+                    <svg {...iconProps} className="h-4 w-4 text-slate-500">
+                      <path d="m8 7-5 5 5 5" />
+                      <path d="m16 7 5 5-5 5" />
+                    </svg>
                     Edit code
                   </a>
 
@@ -2667,18 +2683,22 @@ export default function AdminCustomizePage() {
                           startParams.get("theme") || getEditingThemeId() || ""
                         );
                       }}
-                      className="h-9 whitespace-nowrap rounded-md border border-slate-300 px-3 text-sm inline-flex items-center hover:border-orange-600"
+                      className={tbButton}
                     >
                       Open theme
+                      <svg {...iconProps} className="-mr-0.5 h-3.5 w-3.5 text-slate-500">
+                        <path d="M7 17 17 7" />
+                        <path d="M8 7h9v9" />
+                      </svg>
                     </a>
                   )}
 
-                  <div className="flex items-center rounded-md border border-slate-300">
+                  <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.07] p-0.5">
                     <button
                       type="button"
                       onClick={undo}
                       disabled={!historyRef.current.past.length}
-                      className="flex h-9 w-9 items-center justify-center text-slate-600 hover:text-orange-600 disabled:opacity-30"
+                      className={tbSegment}
                       aria-label="Undo"
                       title="Undo (Ctrl+Z)"
                     >
@@ -2687,12 +2707,12 @@ export default function AdminCustomizePage() {
                         <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
                       </svg>
                     </button>
-                    <span className="h-5 w-px bg-slate-200" />
+                    <span className="h-4 w-px bg-white/15" />
                     <button
                       type="button"
                       onClick={redo}
                       disabled={!historyRef.current.future.length}
-                      className="flex h-9 w-9 items-center justify-center text-slate-600 hover:text-orange-600 disabled:opacity-30"
+                      className={tbSegment}
                       aria-label="Redo"
                       title="Redo (Ctrl+Shift+Z)"
                     >
@@ -2709,11 +2729,11 @@ export default function AdminCustomizePage() {
                     className="hidden min-w-0 items-center gap-1.5 text-xs sm:flex"
                   >
                     {saveState === "saved" && (
-                      <span className="flex items-center gap-1 text-slate-600">
+                      <span className="flex items-center gap-1 text-white/70">
                         <svg
                           {...iconProps}
                           strokeWidth="2.2"
-                          className="h-3.5 w-3.5 text-emerald-600"
+                          className="h-3.5 w-3.5 text-emerald-400"
                         >
                           <path d="m5 12.5 4.5 4.5L19 7.5" />
                         </svg>
@@ -2721,19 +2741,19 @@ export default function AdminCustomizePage() {
                       </span>
                     )}
                     {saveState === "pending" && (
-                      <span className="flex items-center gap-1.5 text-slate-600">
+                      <span className="flex items-center gap-1.5 text-white/70">
                         <span className="h-2 w-2 rounded-full bg-amber-500" />
                         Unsaved changes
                       </span>
                     )}
                     {saveState === "saving" && (
-                      <span className="flex items-center gap-1.5 text-slate-600">
+                      <span className="flex items-center gap-1.5 text-white/70">
                         <span className="h-2 w-2 animate-pulse rounded-full bg-slate-400" />
                         Saving...
                       </span>
                     )}
                     {saveState === "error" && (
-                      <span className="flex items-center gap-1.5 text-red-600" title={saveError}>
+                      <span className="flex items-center gap-1.5 text-red-300" title={saveError}>
                         Couldn't save
                         <button
                           type="button"
@@ -2746,7 +2766,7 @@ export default function AdminCustomizePage() {
                     )}
                     {saveState === "invalid" && (
                       <span
-                        className="flex max-w-65 items-center gap-1.5 text-red-600"
+                        className="flex max-w-65 items-center gap-1.5 text-red-300"
                         title={saveError}
                       >
                         <span className="truncate">Couldn't save: {saveError}</span>
@@ -2765,7 +2785,7 @@ export default function AdminCustomizePage() {
                     <button
                       type="button"
                       onClick={discardSession}
-                      className="h-9 whitespace-nowrap rounded-md border border-slate-300 px-3 text-sm hover:border-orange-600"
+                      className={tbButton}
                       title="Go back to the theme as it was when you opened the editor"
                     >
                       Discard changes
@@ -2776,9 +2796,13 @@ export default function AdminCustomizePage() {
                     type="button"
                     onClick={() => engineRef.current.flushSave()}
                     disabled={!dirty || saveState === "saving"}
-                    className="h-9 whitespace-nowrap rounded-md bg-orange-600 px-5 text-sm font-medium text-white hover:bg-orange-600/90 disabled:bg-slate-300 disabled:text-slate-500 disabled:opacity-100"
+                    className={tbPrimary}
                     title="Save your changes to the storefront"
                   >
+                    <svg {...iconProps} className="h-4 w-4">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                      <path d="M17 21v-8H7v8M7 3v5h8" />
+                    </svg>
                     Save
                   </button>
                 </div>
@@ -3545,21 +3569,29 @@ export default function AdminCustomizePage() {
                         aria-pressed={editMode}
                         onClick={() => setEditMode((on) => !on)}
                         title="Click sections in the preview to edit them"
-                        className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-ink/40 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 ${
+                        className={`flex h-11 items-center gap-2.5 rounded-full pl-4 pr-3 text-sm font-medium shadow-sm outline-none ring-1 transition focus-visible:ring-2 focus-visible:ring-charcoal-navy ${
                           editMode
-                            ? "border-orange-600 bg-charcoal-navy text-white"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-orange-600 hover:text-orange-600"
+                            ? "bg-charcoal-navy text-white ring-charcoal-navy"
+                            : "bg-white text-slate-700 ring-slate-900/10 hover:ring-slate-900/25"
                         }`}
                       >
-                        <svg {...iconProps} className="h-3.5 w-3.5">
+                        <svg {...iconProps} className="h-4 w-4">
                           <path d="M4 3l7 17 2.5-7.5L21 10z" />
                         </svg>
                         Edit mode
-                        <span className="font-semibold">{editMode ? "On" : "Off"}</span>
+                        <span
+                          aria-hidden="true"
+                          className={`relative h-6 w-10 rounded-full transition ${editMode ? "bg-brand-gold-400" : "bg-slate-300"}`}
+                        >
+                          <span
+                            className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${editMode ? "left-5" : "left-1"}`}
+                          />
+                        </span>
+                        <span className="sr-only">{editMode ? "On" : "Off"}</span>
                       </button>
 
                       <div
-                        className="flex rounded-md border border-slate-300 bg-white p-0.5"
+                        className="flex gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-900/10"
                         role="radiogroup"
                         aria-label="Preview size"
                       >
@@ -3573,13 +3605,13 @@ export default function AdminCustomizePage() {
                             role="radio"
                             aria-checked={device === id}
                             onClick={() => setDevice(id)}
-                            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${
+                            className={`flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-charcoal-navy ${
                               device === id
                                 ? "bg-charcoal-navy text-white"
-                                : "text-slate-600 hover:text-orange-600"
+                                : "text-slate-600 hover:text-ink"
                             }`}
                           >
-                            <svg {...iconProps} className="h-3.5 w-3.5">
+                            <svg {...iconProps} className="h-4 w-4">
                               <path d={path} />
                             </svg>
                             {name}
@@ -3589,9 +3621,13 @@ export default function AdminCustomizePage() {
 
                       <button
                         type="button"
-                        className="hover:text-orange-600"
+                        className="flex h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-slate-900/10 transition hover:ring-slate-900/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-charcoal-navy"
                         onClick={() => setPreviewKey((k) => k + 1)}
                       >
+                        <svg {...iconProps} className="h-4 w-4">
+                          <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+                          <path d="M20 4v7h-7" />
+                        </svg>
                         Refresh
                       </button>
                     </div>
