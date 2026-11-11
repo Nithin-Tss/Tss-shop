@@ -45,10 +45,19 @@ afterEach(() => {
 
 describe("AdminHelpTicket", () => {
   it("shows the conversation and refreshes it every 5 seconds", async () => {
-    apiGet.mockResolvedValueOnce({ ok: true, data: ticket([message("m1", "owner", "It does not save.")]) });
+    apiGet.mockResolvedValueOnce({
+      ok: true,
+      data: ticket([message("m1", "owner", "It does not save.")]),
+    });
     apiGet.mockResolvedValue({
       ok: true,
-      data: ticket([message("m1", "owner", "It does not save."), message("m2", "staff", "Fixed, please check.")], "pending"),
+      data: ticket(
+        [
+          message("m1", "owner", "It does not save."),
+          message("m2", "staff", "Fixed, please check."),
+        ],
+        "pending"
+      ),
     });
 
     renderPage();
@@ -67,7 +76,10 @@ describe("AdminHelpTicket", () => {
   });
 
   it("stops refreshing once the page is left", async () => {
-    apiGet.mockResolvedValue({ ok: true, data: ticket([message("m1", "owner", "Hello there friend")]) });
+    apiGet.mockResolvedValue({
+      ok: true,
+      data: ticket([message("m1", "owner", "Hello there friend")]),
+    });
     const { unmount } = renderPage();
     await act(async () => {});
     unmount();
@@ -78,7 +90,10 @@ describe("AdminHelpTicket", () => {
   });
 
   it("keeps what is shown when a refresh fails", async () => {
-    apiGet.mockResolvedValueOnce({ ok: true, data: ticket([message("m1", "owner", "Still here")]) });
+    apiGet.mockResolvedValueOnce({
+      ok: true,
+      data: ticket([message("m1", "owner", "Still here")]),
+    });
     apiGet.mockResolvedValue({ ok: false, error: "Unable to reach the server." });
     renderPage();
     await act(async () => {});
@@ -90,11 +105,20 @@ describe("AdminHelpTicket", () => {
   });
 
   it("sends a reply with the attached image ids and shows the new state", async () => {
-    apiGet.mockResolvedValue({ ok: true, data: ticket([message("m1", "owner", "First message here")], "pending") });
-    apiUpload.mockResolvedValue({ ok: true, data: { id: "img-1", url: "http://x/s/_img/img-1", name: "shot.png" } });
+    apiGet.mockResolvedValue({
+      ok: true,
+      data: ticket([message("m1", "owner", "First message here")], "pending"),
+    });
+    apiUpload.mockResolvedValue({
+      ok: true,
+      data: { id: "img-1", url: "http://x/s/_img/img-1", name: "shot.png" },
+    });
     apiPost.mockResolvedValue({
       ok: true,
-      data: ticket([message("m1", "owner", "First message here"), message("m2", "owner", "More info")], "open"),
+      data: ticket(
+        [message("m1", "owner", "First message here"), message("m2", "owner", "More info")],
+        "open"
+      ),
     });
 
     const { container } = renderPage();
@@ -102,7 +126,9 @@ describe("AdminHelpTicket", () => {
 
     const file = new File([new Uint8Array([1, 2, 3])], "shot.png", { type: "image/png" });
     await act(async () => {
-      fireEvent.change(container.querySelector('input[type="file"]'), { target: { files: [file] } });
+      fireEvent.change(container.querySelector('input[type="file"]'), {
+        target: { files: [file] },
+      });
     });
     expect(apiUpload).toHaveBeenCalledWith("/api/v1/support/attachments/", "image", file);
 
@@ -120,7 +146,10 @@ describe("AdminHelpTicket", () => {
   });
 
   it("does not send an empty reply", async () => {
-    apiGet.mockResolvedValue({ ok: true, data: ticket([message("m1", "owner", "First message here")]) });
+    apiGet.mockResolvedValue({
+      ok: true,
+      data: ticket([message("m1", "owner", "First message here")]),
+    });
     renderPage();
     await act(async () => {});
     await act(async () => {

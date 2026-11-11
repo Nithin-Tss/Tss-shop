@@ -56,7 +56,10 @@ export default function AdminHelpTicket({ ticketId }) {
   usePoll(load);
 
   const send = async ({ message, attachments }) => {
-    const result = await apiPost(`${TICKETS_API}${ticketId}/messages/`, buildReplyPayload({ message, attachments }));
+    const result = await apiPost(
+      `${TICKETS_API}${ticketId}/messages/`,
+      buildReplyPayload({ message, attachments })
+    );
     if (!result.ok) return { ok: false, error: sendErrorMessage(result) };
     if (alive.current) setTicket(result.data);
     return { ok: true };
@@ -75,11 +78,17 @@ export default function AdminHelpTicket({ ticketId }) {
   return (
     <section className="mx-auto w-full max-w-[720px] px-5 pt-12 sm:px-8 sm:pt-20">
       <nav aria-label="Breadcrumb" className="text-[13px] text-slate-500">
-        <Link to="/admin/help" className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}>
+        <Link
+          to="/admin/help"
+          className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}
+        >
           Help
         </Link>{" "}
         <span aria-hidden="true">&gt;</span>{" "}
-        <Link to={TICKETS_PATH} className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}>
+        <Link
+          to={TICKETS_PATH}
+          className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}
+        >
           My tickets
         </Link>{" "}
         <span aria-hidden="true">&gt;</span> <span className="text-slate-700">Ticket</span>

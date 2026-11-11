@@ -19,7 +19,9 @@ const TONE = {
 
 export function StatusChip({ status, label }) {
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${TONE[status] || TONE.closed}`}>
+    <span
+      className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${TONE[status] || TONE.closed}`}
+    >
       {label || statusLabel(status)}
     </span>
   );
@@ -50,7 +52,10 @@ export default function AdminHelpTickets() {
   return (
     <section className="mx-auto w-full max-w-[720px] px-5 pt-12 sm:px-8 sm:pt-20">
       <nav aria-label="Breadcrumb" className="text-[13px] text-slate-500">
-        <Link to="/admin/help" className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}>
+        <Link
+          to="/admin/help"
+          className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}
+        >
           Help
         </Link>{" "}
         <span aria-hidden="true">&gt;</span> <span className="text-slate-700">My tickets</span>
@@ -88,7 +93,9 @@ export default function AdminHelpTickets() {
                 className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl px-5 py-4 transition hover:bg-slate-50 ${FOCUS}`}
               >
                 <span className="min-w-0">
-                  <span className="block truncate text-[15px] font-semibold text-[#111827]">{ticket.subject}</span>
+                  <span className="block truncate text-[15px] font-semibold text-[#111827]">
+                    {ticket.subject}
+                  </span>
                   <span className="mt-0.5 block text-[13px] text-slate-500">
                     {STATUS_HELP[ticket.status]} · Updated {when(ticket.updatedAt)}
                   </span>
@@ -106,7 +113,12 @@ export default function AdminHelpTickets() {
             {offset + 1}-{Math.min(offset + PAGE, count)} of {count}
           </span>
           <div className="flex gap-2">
-            <button type="button" disabled={offset === 0} onClick={() => setOffset(offset - PAGE)} className={LIGHT_BTN}>
+            <button
+              type="button"
+              disabled={offset === 0}
+              onClick={() => setOffset(offset - PAGE)}
+              className={LIGHT_BTN}
+            >
               Previous
             </button>
             <button

@@ -20,7 +20,14 @@ const DARK_BTN = `rounded-full bg-[#111827] px-6 py-2.5 text-[14px] font-semibol
 // Up to 3 screenshots. `items` are the uploaded pictures ({ id, url, name }); the parent keeps them and sends
 // their ids with the message. Each file is checked (type, size) by apiUpload and again by the server.
 // `actions` (buttons) and `aside` (e.g. a counter, pushed to the right) share one row with "Attach image".
-export function ImageAttach({ items, onChange, uploadUrl, disabled = false, actions = null, aside = null }) {
+export function ImageAttach({
+  items,
+  onChange,
+  uploadUrl,
+  disabled = false,
+  actions = null,
+  aside = null,
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const input = useRef(null);
@@ -145,7 +152,12 @@ export function Thread({ messages, staff = false }) {
                 <ul className="mt-2 flex flex-wrap gap-2">
                   {message.attachments.map((url) => (
                     <li key={url}>
-                      <a href={url} target="_blank" rel="noopener noreferrer" className={`block rounded-lg ${FOCUS}`}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`block rounded-lg ${FOCUS}`}
+                      >
                         <img
                           src={url}
                           alt="Screenshot"
@@ -224,7 +236,9 @@ export function ReplyBox({ onSend, uploadUrl, disabled = false, children }) {
           </>
         }
         aside={
-          <p className={`text-[13px] ${text.length > MAX_REPLY ? "text-red-700" : "text-slate-500"}`}>
+          <p
+            className={`text-[13px] ${text.length > MAX_REPLY ? "text-red-700" : "text-slate-500"}`}
+          >
             {text.length}/{MAX_REPLY}
           </p>
         }

@@ -125,7 +125,9 @@ function Footer() {
   const { pathname } = useLocation();
   return (
     <footer className="mt-32 border-t border-slate-200 bg-white">
-      <div className={`${COLUMN} flex flex-col items-start gap-4 py-16 sm:items-center sm:text-center`}>
+      <div
+        className={`${COLUMN} flex flex-col items-start gap-4 py-16 sm:items-center sm:text-center`}
+      >
         <h2 className="text-[22px] font-semibold tracking-tight text-[#111827]">Need more help?</h2>
         <p className="text-[15px] text-slate-600">
           Can't find what you need? Our support team will get back to you.
@@ -162,7 +164,10 @@ function Breadcrumb({ items }) {
           <li key={item.label} className="flex items-center gap-2">
             {index > 0 && <span aria-hidden="true">&gt;</span>}
             {item.to ? (
-              <Link to={item.to} className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}>
+              <Link
+                to={item.to}
+                className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}
+              >
                 {item.label}
               </Link>
             ) : (
@@ -259,7 +264,11 @@ function SearchBox() {
             <p className="text-[14px] font-semibold text-[#111827]">No results</p>
             <p className="mt-1 text-[13px] text-slate-600">
               Try other words, or ask us directly.{" "}
-              <Link to={CONTACT_PATH} state={{ from: pathname }} className={`font-medium underline ${FOCUS}`}>
+              <Link
+                to={CONTACT_PATH}
+                state={{ from: pathname }}
+                className={`font-medium underline ${FOCUS}`}
+              >
                 Contact support
               </Link>
             </p>
@@ -344,7 +353,11 @@ function Feedback() {
         {answer === "no" && (
           <>
             You can{" "}
-            <Link to={CONTACT_PATH} state={{ from: pathname }} className={`font-medium underline ${FOCUS}`}>
+            <Link
+              to={CONTACT_PATH}
+              state={{ from: pathname }}
+              className={`font-medium underline ${FOCUS}`}
+            >
               contact support
             </Link>{" "}
             if you are still stuck.
@@ -410,10 +423,7 @@ function ArticleView({ article }) {
         )}
 
         {canOpen && (
-          <Link
-            to={page.path}
-            className={`mt-10 inline-flex ${DARK_BTN}`}
-          >
+          <Link to={page.path} className={`mt-10 inline-flex ${DARK_BTN}`}>
             {page.label}
           </Link>
         )}
@@ -424,7 +434,10 @@ function ArticleView({ article }) {
 
         {related.length > 0 && (
           <section className="mt-14" aria-labelledby="related-heading">
-            <h2 id="related-heading" className="text-[18px] font-semibold tracking-tight text-[#111827]">
+            <h2
+              id="related-heading"
+              className="text-[18px] font-semibold tracking-tight text-[#111827]"
+            >
               Related articles
             </h2>
             <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
@@ -442,12 +455,13 @@ function ArticleView({ article }) {
 function NotFound() {
   return (
     <section className={`${NARROW} pt-20 text-center`}>
-      <h1 className="text-[32px] font-semibold tracking-tight text-[#111827]">We couldn't find that article</h1>
-      <p className="mt-3 text-[15px] text-slate-600">It may have moved. Try searching the Help Center.</p>
-      <Link
-        to={HELP_HOME}
-        className={`mt-8 inline-flex ${DARK_BTN}`}
-      >
+      <h1 className="text-[32px] font-semibold tracking-tight text-[#111827]">
+        We couldn't find that article
+      </h1>
+      <p className="mt-3 text-[15px] text-slate-600">
+        It may have moved. Try searching the Help Center.
+      </p>
+      <Link to={HELP_HOME} className={`mt-8 inline-flex ${DARK_BTN}`}>
         Back to Help
       </Link>
     </section>
