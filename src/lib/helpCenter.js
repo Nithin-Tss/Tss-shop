@@ -21,13 +21,21 @@ export const ticketPath = (id) => `${TICKETS_PATH}/${id}`;
 // (label, path, and the permission the page itself needs, see RequirePermission in App.jsx). An article names a
 // key from here, never a path of its own, and the button is shown only to a member who holds `permission`.
 export const OPEN_PAGES = {
-  online_store: { label: "Open Online Store", path: "/admin/online-store", permission: "themes.view" },
+  online_store: {
+    label: "Open Online Store",
+    path: "/admin/online-store",
+    permission: "themes.view",
+  },
   customize: {
     label: "Open Customize",
     path: "/admin/online-store/customize",
     permission: "themes.manage",
   },
-  code: { label: "Open Code editor", path: "/admin/online-store/code", permission: "themes.manage" },
+  code: {
+    label: "Open Code editor",
+    path: "/admin/online-store/code",
+    permission: "themes.manage",
+  },
   add_product: {
     label: "Add product",
     path: "/admin/online-store/products/new",
@@ -609,7 +617,11 @@ export const topArticles = (categorySlug, count = 3) => articlesIn(categorySlug)
 
 // Other articles of the same category
 export const relatedArticles = (article, count = 4) =>
-  article ? articlesIn(article.category).filter((a) => a.slug !== article.slug).slice(0, count) : [];
+  article
+    ? articlesIn(article.category)
+        .filter((a) => a.slug !== article.slug)
+        .slice(0, count)
+    : [];
 
 // The first line of the first step: what a result or list row shows under its title
 export const firstLine = (article) => article?.steps?.[0] || "";

@@ -6,7 +6,14 @@ import { assistantStore } from "@/lib/assistantApi";
 import { useChatStore } from "@/lib/assistantChatStore";
 import { apiPost } from "@/lib/api";
 import { getActiveStore, useSession } from "@/lib/auth";
-import { TICKETS_PATH, firstLine, getArticle, helpPath, searchArticles, ticketPath } from "@/lib/helpCenter";
+import {
+  TICKETS_PATH,
+  firstLine,
+  getArticle,
+  helpPath,
+  searchArticles,
+  ticketPath,
+} from "@/lib/helpCenter";
 import {
   MAX_MESSAGE,
   MAX_SUBJECT,
@@ -108,14 +115,20 @@ export default function AdminHelpContact() {
     }
     // The server's own message; the form keeps what was typed
     const { subject: subjectError, message: messageError } = result.fieldErrors || {};
-    setErrors({ ...(subjectError && { subject: subjectError }), ...(messageError && { message: messageError }) });
+    setErrors({
+      ...(subjectError && { subject: subjectError }),
+      ...(messageError && { message: messageError }),
+    });
     setFormError(subjectError || messageError ? "" : sendErrorMessage(result));
   };
 
   return (
     <section className="mx-auto w-full max-w-[720px] px-5 pt-12 sm:px-8 sm:pt-20">
       <nav aria-label="Breadcrumb" className="text-[13px] text-slate-500">
-        <Link to="/admin/help" className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}>
+        <Link
+          to="/admin/help"
+          className={`rounded-md hover:text-[#111827] hover:underline ${FOCUS}`}
+        >
           Help
         </Link>{" "}
         <span aria-hidden="true">&gt;</span> <span className="text-slate-700">Contact support</span>
@@ -164,8 +177,12 @@ export default function AdminHelpContact() {
                     to={helpPath(article.slug)}
                     className={`block rounded-lg px-2 py-3 transition hover:bg-slate-50 ${FOCUS}`}
                   >
-                    <span className="block text-[14px] font-semibold text-[#111827]">{article.title}</span>
-                    <span className="mt-0.5 block truncate text-[13px] text-slate-600">{firstLine(article)}</span>
+                    <span className="block text-[14px] font-semibold text-[#111827]">
+                      {article.title}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[13px] text-slate-600">
+                      {firstLine(article)}
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -214,7 +231,9 @@ export default function AdminHelpContact() {
             />
             <span>
               Include my chat with the assistant
-              {!chatExists && <span className="block text-[13px] text-slate-500">You have no chat yet.</span>}
+              {!chatExists && (
+                <span className="block text-[13px] text-slate-500">You have no chat yet.</span>
+              )}
             </span>
           </label>
         )}

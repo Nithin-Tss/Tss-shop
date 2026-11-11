@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ContactSupportLink from "@/components/ContactSupportLink";
 import { apiGet } from "@/lib/api";
-import { CONTACT_PATH, ticketPath } from "@/lib/helpCenter";
+import { TICKETS_PATH, ticketPath } from "@/lib/helpCenter";
 import { STATUS_HELP, STATUS_TONE, TICKETS_API, statusLabel, when } from "@/lib/supportTickets";
 
 // /admin/help/tickets ("My support tickets"): the signed-in member's own support tickets in this store, newest activity first.
@@ -58,9 +59,9 @@ export default function AdminHelpTickets() {
         <h1 className="text-[32px] font-semibold leading-tight tracking-[-0.02em] text-[#111827] sm:text-[44px]">
           My tickets
         </h1>
-        <Link to={CONTACT_PATH} className={DARK_BTN}>
+        <ContactSupportLink from={TICKETS_PATH} className={DARK_BTN}>
           New ticket
-        </Link>
+        </ContactSupportLink>
       </div>
 
       {loading && <p className="mt-10 text-[15px] text-slate-600">Loading...</p>}

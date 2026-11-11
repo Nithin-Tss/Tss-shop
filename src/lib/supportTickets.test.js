@@ -30,20 +30,34 @@ describe("buildReplyPayload", () => {
   });
 
   it("carries attachment ids and a status when given", () => {
-    expect(buildReplyPayload({ message: "hi", attachments: ["a", "b"], status: "closed" })).toEqual({
-      message: "hi",
-      attachments: ["a", "b"],
-      status: "closed",
-    });
+    expect(buildReplyPayload({ message: "hi", attachments: ["a", "b"], status: "closed" })).toEqual(
+      {
+        message: "hi",
+        attachments: ["a", "b"],
+        status: "closed",
+      }
+    );
   });
 });
 
 describe("buildSupportPayload (ticket options)", () => {
   it("adds the consent flag and attachment ids only when set", () => {
     expect(
-      buildSupportPayload({ subject: "S", message: "M", includeStoreDetails: true, attachments: ["a"] })
+      buildSupportPayload({
+        subject: "S",
+        message: "M",
+        includeStoreDetails: true,
+        attachments: ["a"],
+      })
     ).toEqual({ subject: "S", message: "M", includeStoreDetails: true, attachments: ["a"] });
-    expect(buildSupportPayload({ subject: "S", message: "M", includeStoreDetails: false, attachments: [] })).toEqual({
+    expect(
+      buildSupportPayload({
+        subject: "S",
+        message: "M",
+        includeStoreDetails: false,
+        attachments: [],
+      })
+    ).toEqual({
       subject: "S",
       message: "M",
     });

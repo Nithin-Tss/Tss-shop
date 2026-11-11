@@ -1,11 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 
+vi.mock("@/lib/api", async (orig) => ({
+  ...(await orig()),
+  apiGet: vi.fn(async () => ({ ok: true, data: { messages: [] } })),
+  apiPost: vi.fn(async () => ({ ok: true, data: { messages: [] } })),
+}));
 const flag = vi.hoisted(() => ({ on: true }));
 vi.mock("@/lib/featureFlags", () => ({ useFlag: () => flag.on }));
 
 import HelpWidget, { Widget } from "@/components/HelpWidget";
+import { openHelpChat } from "@/lib/helpChat";
 
 function signIn() {
   window.localStorage.setItem(
@@ -20,6 +26,10 @@ function signIn() {
 }
 
 const ticket = { id: "t1", ticketNumber: "TSS-000007", subject: "S", status: "open" };
+
+function Where() {
+  return <p data-testid="where">{useLocation().pathname}</p>;
+}
 
 function mount(props = {}) {
   const send =
@@ -39,6 +49,7 @@ function mount(props = {}) {
   render(
     <MemoryRouter>
       <Widget send={send} escalate={escalate} load={load} />
+      <Where />
     </MemoryRouter>
   );
   fireEvent.click(screen.getByRole("button", { name: "Help" }));
@@ -77,9 +88,9 @@ describe("HelpWidget", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("shows a Help button; the panel has 'Talk to a human' at all times", async () => {
+  it("offers 'Talk to a human' only after the assistant has had a go", async () => {
     const { send } = mount();
-    expect(screen.getByRole("button", { name: "Talk to a human" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Talk to a human" })).toBeNull();
     ask("How do I add a domain?");
     expect(await screen.findByText("Open Settings > Domains.")).toBeTruthy();
     expect(send).toHaveBeenCalledWith("How do I add a domain?", null);
@@ -110,39 +121,34 @@ describe("HelpWidget", () => {
     expect(link.getAttribute("href")).toBe("/admin/help/articles/domains");
   });
 
-  it("'Talk to a human' raises a ticket without sending a chat message, then the chat is closed to the AI", async () => {
+  it("'Talk to a human' raises a ticket without sending a chat message, then continues in the same chat", async () => {
     const { send, escalate } = mount();
     ask("my payouts are missing");
     await screen.findByText("Open Settings > Domains.");
     fireEvent.click(screen.getByRole("button", { name: "Talk to a human" }));
     await waitFor(() => expect(escalate).toHaveBeenCalledWith("c1", ""));
     expect(send).toHaveBeenCalledTimes(1);
-    expect((await screen.findAllByText(/A support agent will reply here/)).length).toBeGreaterThan(
-      0
-    );
-    expect(screen.getAllByText(/TSS-000007/).length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("link", { name: /View it in My support tickets/ }).getAttribute("href")
-    ).toBe("/admin/help/tickets/t1");
-    expect(screen.getByLabelText("Your question").disabled).toBe(true);
-    expect(screen.getByRole("button", { name: "Talk to a human" })).toBeTruthy();
+    expect(await screen.findByLabelText("Message to support")).toBeTruthy();
+    expect(screen.getByTestId("where").textContent).toBe("/");
+    expect(screen.getByLabelText("Help assistant")).toBeTruthy();
   });
 
-  it("can be used before the first message (the typed text becomes the note)", async () => {
-    const { escalate } = mount();
-    fireEvent.change(screen.getByLabelText("Your question"), {
-      target: { value: "I need a person" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Talk to a human" }));
+  it("is available when the assistant fails (the last question becomes the note)", async () => {
+    const { escalate } = mount({ send: vi.fn(async () => ({ ok: false, error: "Busy." })) });
+    ask("I need a person");
+    fireEvent.click(await screen.findByRole("button", { name: "Talk to a human" }));
     await waitFor(() => expect(escalate).toHaveBeenCalledWith(null, "I need a person"));
   });
 
-  it("tells the merchant when the ticket already existed", async () => {
+  it("continues in the chat when a ticket already exists", async () => {
     mount({
       escalate: vi.fn(async () => ({ ok: true, conversationId: "c1", ticket, created: false })),
     });
+    ask("help");
+    await screen.findByText("Open Settings > Domains.");
     fireEvent.click(screen.getByRole("button", { name: "Talk to a human" }));
-    expect(await screen.findByText(/You already have ticket TSS-000007/)).toBeTruthy();
+    expect(await screen.findByLabelText("Message to support")).toBeTruthy();
+    expect(screen.getByTestId("where").textContent).toBe("/");
   });
 
   it("shows an error and lets the merchant try again when raising a ticket fails", async () => {
@@ -151,11 +157,22 @@ describe("HelpWidget", () => {
       .mockResolvedValueOnce({ ok: false, error: "Couldn't reach support." })
       .mockResolvedValueOnce({ ok: true, conversationId: "c1", ticket, created: true });
     mount({ escalate });
+    ask("help");
+    await screen.findByText("Open Settings > Domains.");
     fireEvent.click(screen.getByRole("button", { name: "Talk to a human" }));
     expect((await screen.findByRole("alert")).textContent).toMatch(/Couldn't reach support/);
     expect(screen.getByLabelText("Your question").disabled).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "Talk to a human" }));
-    expect((await screen.findAllByText(/TSS-000007/)).length).toBeGreaterThan(0);
+    expect(await screen.findByLabelText("Message to support")).toBeTruthy();
+    expect(screen.getByTestId("where").textContent).toBe("/");
+  });
+
+  it("opens when another page asks for the chat (Contact support)", async () => {
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "Help" })); // close it
+    expect(screen.queryByLabelText("Help assistant")).toBeNull();
+    openHelpChat();
+    expect(await screen.findByLabelText("Help assistant")).toBeTruthy();
   });
 
   it("shows a failed answer as an error without losing the question", async () => {
@@ -175,6 +192,6 @@ describe("HelpWidget", () => {
     }));
     mount({ load });
     expect(await screen.findByText("A support agent will reply here.")).toBeTruthy();
-    expect(screen.getByLabelText("Your question").disabled).toBe(true);
+    expect(screen.getByLabelText("Message to support").disabled).toBe(false);
   });
 });

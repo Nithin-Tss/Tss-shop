@@ -23,7 +23,9 @@ const details = {
 
 describe("validateSupport", () => {
   it("accepts a subject and a description", () => {
-    expect(validateSupport({ subject: "Price problem", message: "The price does not save." })).toEqual({});
+    expect(
+      validateSupport({ subject: "Price problem", message: "The price does not save." })
+    ).toEqual({});
   });
 
   it("requires both fields", () => {
@@ -37,17 +39,30 @@ describe("validateSupport", () => {
   });
 
   it("enforces the length caps", () => {
-    expect(validateSupport({ subject: "a".repeat(MAX_SUBJECT), message: "x".repeat(20) }).subject).toBeUndefined();
-    expect(validateSupport({ subject: "a".repeat(MAX_SUBJECT + 1), message: "x".repeat(20) }).subject).toBeTruthy();
-    expect(validateSupport({ subject: "ok", message: "x".repeat(MAX_MESSAGE) }).message).toBeUndefined();
-    expect(validateSupport({ subject: "ok", message: "x".repeat(MAX_MESSAGE + 1) }).message).toBeTruthy();
+    expect(
+      validateSupport({ subject: "a".repeat(MAX_SUBJECT), message: "x".repeat(20) }).subject
+    ).toBeUndefined();
+    expect(
+      validateSupport({ subject: "a".repeat(MAX_SUBJECT + 1), message: "x".repeat(20) }).subject
+    ).toBeTruthy();
+    expect(
+      validateSupport({ subject: "ok", message: "x".repeat(MAX_MESSAGE) }).message
+    ).toBeUndefined();
+    expect(
+      validateSupport({ subject: "ok", message: "x".repeat(MAX_MESSAGE + 1) }).message
+    ).toBeTruthy();
   });
 });
 
 describe("transcript", () => {
   const chat = [
     { role: "user", text: "How many orders today?" },
-    { role: "assistant", text: "You had 4 orders.", tools: ["orders"], actions: [{ label: "Open" }] },
+    {
+      role: "assistant",
+      text: "You had 4 orders.",
+      tools: ["orders"],
+      actions: [{ label: "Open" }],
+    },
     { role: "error", text: "Something went wrong." },
     { role: "note", text: "Stopped." },
     { role: "user", text: "   " },
@@ -92,7 +107,11 @@ describe("transcript", () => {
 
 describe("mailto", () => {
   it("builds the body with the problem, the details and the chat", () => {
-    const body = buildSupportBody({ details, message: "The price does not save.", transcript: "Me: hi" });
+    const body = buildSupportBody({
+      details,
+      message: "The price does not save.",
+      transcript: "Me: hi",
+    });
     expect(body.startsWith("The price does not save.")).toBe(true);
     expect(body).toContain("Store: Test Store");
     expect(body).toContain("Store ID: st_123");
@@ -103,22 +122,36 @@ describe("mailto", () => {
   });
 
   it("leaves the chat section out when there is no transcript", () => {
-    expect(buildSupportBody({ details, message: "Something is wrong", transcript: "" })).not.toContain("Chat");
+    expect(
+      buildSupportBody({ details, message: "Something is wrong", transcript: "" })
+    ).not.toContain("Chat");
   });
 
   it("encodes the subject and body into a mailto: link", () => {
-    const { href, tooLong, prefilled } = buildMailto("mailto:support@example.com", "Price & stock?", "Line 1\nLine 2");
+    const { href, tooLong, prefilled } = buildMailto(
+      "mailto:support@example.com",
+      "Price & stock?",
+      "Line 1\nLine 2"
+    );
     expect(prefilled).toBe(true);
     expect(tooLong).toBe(false);
-    expect(href).toBe("mailto:support@example.com?subject=Price%20%26%20stock%3F&body=Line%201%0D%0ALine%202");
+    expect(href).toBe(
+      "mailto:support@example.com?subject=Price%20%26%20stock%3F&body=Line%201%0D%0ALine%202"
+    );
   });
 
   it("uses & when the address already has a query", () => {
-    expect(buildMailto("mailto:a@b.co?cc=c@d.co", "S", "B").href).toContain("?cc=c@d.co&subject=S&body=B");
+    expect(buildMailto("mailto:a@b.co?cc=c@d.co", "S", "B").href).toContain(
+      "?cc=c@d.co&subject=S&body=B"
+    );
   });
 
   it("flags a link that is too long", () => {
-    const { href, tooLong } = buildMailto("mailto:support@example.com", "S", "x".repeat(MAX_MAILTO_LENGTH));
+    const { href, tooLong } = buildMailto(
+      "mailto:support@example.com",
+      "S",
+      "x".repeat(MAX_MAILTO_LENGTH)
+    );
     expect(tooLong).toBe(true);
     expect(href.length).toBeGreaterThan(MAX_MAILTO_LENGTH);
   });

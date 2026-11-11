@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { useAssistantAccess } from "@/components/AssistantPanel";
+import ContactSupportLink from "@/components/ContactSupportLink";
 import AdminHelpContact from "@/pages/AdminHelpContact";
 import HelpArticleView from "@/components/HelpArticleView";
 import AdminHelpTicket from "@/pages/AdminHelpTicket";
@@ -103,9 +104,8 @@ function ContactPill() {
   if (pathname === CONTACT_PATH) return null;
   const panelOpen = access && open;
   return (
-    <Link
-      to={CONTACT_PATH}
-      state={{ from: pathname }}
+    <ContactSupportLink
+      from={pathname}
       className={`fixed bottom-5 ${helpChat ? "right-36" : "right-5"} z-30 items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-[14px] font-semibold text-[#111827] shadow-[0_4px_16px_rgba(17,24,39,0.16)] transition-[right,background-color] hover:bg-slate-50 motion-reduce:transition-none ${FOCUS} ${
         panelOpen ? "hidden xl:inline-flex xl:right-[420px]" : "inline-flex"
       }`}
@@ -115,7 +115,7 @@ function ContactPill() {
         <path d="M8.5 11.5h7M8.5 14.5h4" />
       </svg>
       Contact support
-    </Link>
+    </ContactSupportLink>
   );
 }
 
@@ -131,9 +131,8 @@ function Footer() {
           Can't find what you need? Our support team will get back to you.
         </p>
         <div className="mt-2 flex w-full flex-col items-stretch gap-4 sm:w-auto sm:flex-row sm:items-center sm:justify-center">
-          <Link
-            to={CONTACT_PATH}
-            state={{ from: pathname }}
+          <ContactSupportLink
+            from={pathname}
             className={`inline-flex items-center justify-center gap-2 ${DARK_BTN}`}
           >
             <svg {...icon} className="h-4 w-4">
@@ -141,7 +140,7 @@ function Footer() {
               <path d="M8.5 11.5h7M8.5 14.5h4" />
             </svg>
             Contact support
-          </Link>
+          </ContactSupportLink>
           <Link
             to={TICKETS_PATH}
             className={`inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-2.5 text-[14px] font-semibold text-[#111827] transition hover:bg-slate-100 ${FOCUS}`}
@@ -262,13 +261,9 @@ function SearchBox() {
             <p className="text-[14px] font-semibold text-[#111827]">No results</p>
             <p className="mt-1 text-[13px] text-slate-600">
               Try other words, or ask us directly.{" "}
-              <Link
-                to={CONTACT_PATH}
-                state={{ from: pathname }}
-                className={`font-medium underline ${FOCUS}`}
-              >
+              <ContactSupportLink from={pathname} className={`font-medium underline ${FOCUS}`}>
                 Contact support
-              </Link>
+              </ContactSupportLink>
             </p>
           </div>
         )}
@@ -351,13 +346,9 @@ function Feedback() {
         {answer === "no" && (
           <>
             You can{" "}
-            <Link
-              to={CONTACT_PATH}
-              state={{ from: pathname }}
-              className={`font-medium underline ${FOCUS}`}
-            >
+            <ContactSupportLink from={pathname} className={`font-medium underline ${FOCUS}`}>
               contact support
-            </Link>{" "}
+            </ContactSupportLink>{" "}
             if you are still stuck.
           </>
         )}

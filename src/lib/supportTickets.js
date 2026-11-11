@@ -10,7 +10,6 @@ export const POLL_MS = 5000; // an open conversation refreshes this often
 export const MAX_ATTACHMENTS = 3; // images per message (the server enforces the same limit)
 export const MAX_REPLY = 2000;
 
-
 // Keep in step with Ticket.STATUSES in the backend (apps/helpdesk/models.py)
 export const STATUSES = ["open", "in_progress", "waiting_on_customer", "resolved", "closed"];
 export const STATUS_LABEL = {

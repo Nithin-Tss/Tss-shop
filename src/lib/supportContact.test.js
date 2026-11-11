@@ -10,8 +10,18 @@ import {
 describe("buildSupportPayload", () => {
   it("sends only what the server needs, trimmed", () => {
     expect(
-      buildSupportPayload({ subject: "  Price problem ", message: " It does not save. ", transcript: "Me: hi", page: "/admin/help" })
-    ).toEqual({ subject: "Price problem", message: "It does not save.", transcript: "Me: hi", page: "/admin/help" });
+      buildSupportPayload({
+        subject: "  Price problem ",
+        message: " It does not save. ",
+        transcript: "Me: hi",
+        page: "/admin/help",
+      })
+    ).toEqual({
+      subject: "Price problem",
+      message: "It does not save.",
+      transcript: "Me: hi",
+      page: "/admin/help",
+    });
   });
 
   it("leaves out an empty transcript and page", () => {
@@ -51,16 +61,27 @@ describe("needsMailtoFallback", () => {
 
 describe("sendErrorMessage", () => {
   it("shows the server's message", () => {
-    expect(sendErrorMessage({ ok: false, status: 429, formError: "Request was throttled.", fieldErrors: {} })).toBe(
-      "Request was throttled."
-    );
+    expect(
+      sendErrorMessage({
+        ok: false,
+        status: 429,
+        formError: "Request was throttled.",
+        fieldErrors: {},
+      })
+    ).toBe("Request was throttled.");
   });
 
   it("falls back to the first field error, then a generic line", () => {
-    expect(sendErrorMessage({ ok: false, formError: "", fieldErrors: { transcript: "Keep it under 4001 characters." } })).toBe(
-      "Keep it under 4001 characters."
+    expect(
+      sendErrorMessage({
+        ok: false,
+        formError: "",
+        fieldErrors: { transcript: "Keep it under 4001 characters." },
+      })
+    ).toBe("Keep it under 4001 characters.");
+    expect(sendErrorMessage({ ok: false, formError: "", fieldErrors: {} })).toBe(
+      "Something went wrong. Please try again."
     );
-    expect(sendErrorMessage({ ok: false, formError: "", fieldErrors: {} })).toBe("Something went wrong. Please try again.");
     expect(sendErrorMessage(undefined)).toBe("Something went wrong. Please try again.");
   });
 });

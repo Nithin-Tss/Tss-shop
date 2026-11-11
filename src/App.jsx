@@ -242,8 +242,14 @@ export default function App() {
           {/* Platform administration: the API refuses anyone who isn't a platform administrator */}
           <Route path="/admin/platform" element={<AdminPlatform />} />
           {/* Support staff work tickets in the separate Tss-helpdesk app; old staff links land on the member's own tickets */}
-          <Route path="/admin/support-tickets" element={<Navigate to="/admin/help/tickets" replace />} />
-          <Route path="/admin/platform/support" element={<Navigate to="/admin/help/tickets" replace />} />
+          <Route
+            path="/admin/support-tickets"
+            element={<Navigate to="/admin/help/tickets" replace />}
+          />
+          <Route
+            path="/admin/platform/support"
+            element={<Navigate to="/admin/help/tickets" replace />}
+          />
           <Route element={<RequirePermission permission="shipping.view" />}>
             <Route
               path="/admin/online-store/shipping"

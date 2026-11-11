@@ -21,17 +21,26 @@ export function validateSupport({ subject, message }) {
   const s = String(subject ?? "").trim();
   const m = String(message ?? "").trim();
   if (!s) errors.subject = "Enter a subject.";
-  else if (s.length > MAX_SUBJECT) errors.subject = `Keep the subject under ${MAX_SUBJECT + 1} characters.`;
+  else if (s.length > MAX_SUBJECT)
+    errors.subject = `Keep the subject under ${MAX_SUBJECT + 1} characters.`;
   if (!m) errors.message = "Describe the problem.";
   else if (m.length < MIN_MESSAGE) errors.message = `Write at least ${MIN_MESSAGE} characters.`;
-  else if (m.length > MAX_MESSAGE) errors.message = `Keep the description under ${MAX_MESSAGE + 1} characters.`;
+  else if (m.length > MAX_MESSAGE)
+    errors.message = `Keep the description under ${MAX_MESSAGE + 1} characters.`;
   return errors;
 }
 
 // The JSON body for POST /support/tickets/ (and the older /support/contact/). Store and user details are not sent:
 // the server knows them. `includeStoreDetails` only says the owner agrees to share them in the first message, and
 // `attachments` are the ids of screenshots uploaded to /support/attachments/.
-export function buildSupportPayload({ subject, message, transcript, page, includeStoreDetails, attachments }) {
+export function buildSupportPayload({
+  subject,
+  message,
+  transcript,
+  page,
+  includeStoreDetails,
+  attachments,
+}) {
   const payload = { subject: String(subject ?? "").trim(), message: String(message ?? "").trim() };
   if (transcript) payload.transcript = String(transcript);
   if (page) payload.page = String(page);
@@ -41,11 +50,14 @@ export function buildSupportPayload({ subject, message, transcript, page, includ
 }
 
 // Should a failed send fall back to the mailto: link? Only when the server says support email is not set up.
-export const needsMailtoFallback = (result) => Boolean(result) && !result.ok && result.status === NOT_CONFIGURED_STATUS;
+export const needsMailtoFallback = (result) =>
+  Boolean(result) && !result.ok && result.status === NOT_CONFIGURED_STATUS;
 
 // What to show under the form for a failed send: the server's message, else a generic one
 export const sendErrorMessage = (result) =>
-  result?.formError || Object.values(result?.fieldErrors || {})[0] || "Something went wrong. Please try again.";
+  result?.formError ||
+  Object.values(result?.fieldErrors || {})[0] ||
+  "Something went wrong. Please try again.";
 
 // Is there a conversation worth including? (at least one question from the member)
 export const hasChat = (messages) =>
@@ -75,7 +87,10 @@ function fit(lines, max) {
 export function buildTranscript(messages, maxChars = MAX_TRANSCRIPT_CHARS) {
   const lines = (Array.isArray(messages) ? messages : [])
     .filter(
-      (m) => (m?.role === "user" || m?.role === "assistant") && typeof m.text === "string" && m.text.trim()
+      (m) =>
+        (m?.role === "user" || m?.role === "assistant") &&
+        typeof m.text === "string" &&
+        m.text.trim()
     )
     .map((m) => {
       const text = clip(m.text.replace(/\s+/g, " ").trim(), MAX_TRANSCRIPT_ITEM_CHARS);
