@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import PlatformSupportInbox from "@/components/PlatformSupportInbox";
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "@/lib/api";
 import { useSession } from "@/lib/auth";
 
@@ -25,6 +26,7 @@ const dangerButton =
 const TABS = [
   ["overview", "Overview"],
   ["stores", "Stores"],
+  ["support", "Support"],
   ["users", "Users"],
   ["keys", "API keys"],
   ["flags", "Feature flags"],
@@ -806,6 +808,7 @@ export default function AdminPlatform() {
 
               {tab === "overview" && <Overview />}
               {tab === "stores" && <Stores />}
+              {tab === "support" && <PlatformSupportInbox />}
               {tab === "users" && <Users me={session.user.id} />}
               {tab === "keys" && <ApiKeys />}
               {tab === "flags" && <Flags />}

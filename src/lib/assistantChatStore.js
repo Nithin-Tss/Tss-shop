@@ -76,6 +76,9 @@ export function buildHistory(messages) {
         m.text.trim()
     )
     .map((m) => ({ role: m.role, content: m.text.trim().slice(0, MAX_HISTORY_ITEM_CHARS) }))
+    // A question with no answer after it (stopped or failed) is not part of the conversation: the model would
+    // answer it again together with the new one. Errors and "Stopped." notes are not turns, so they are not here.
+    .filter((turn, i, all) => turn.role !== "user" || all[i + 1]?.role === "assistant")
     .slice(-HISTORY_EXCHANGES * 2);
   // Over the total: drop the oldest turns first, so the latest answer is kept
   let total = turns.reduce((sum, turn) => sum + turn.content.length, 0);

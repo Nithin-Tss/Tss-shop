@@ -235,9 +235,43 @@ describe("conversation history", () => {
     ]);
   });
 
+  it("drops a question that has no answer after it (stopped or failed), and the Stopped. note", () => {
+    const history = buildHistory([
+      msg("user", "q1"),
+      msg("assistant", "a1"),
+      msg("user", "How were sales in the last 7 days?"),
+      msg("note", "Stopped."),
+      msg("user", "failed one"),
+      msg("error", "Something went wrong."),
+      msg("user", "q2"),
+      msg("assistant", "a2"),
+      msg("user", "still waiting"),
+    ]);
+    expect(history).toEqual([
+      { role: "user", content: "q1" },
+      { role: "assistant", content: "a1" },
+      { role: "user", content: "q2" },
+      { role: "assistant", content: "a2" },
+    ]);
+  });
+
+  it("sends no history for a new question after a stopped first question", async () => {
+    const finishers = [];
+    const ask = vi.fn(() => new Promise((resolve) => finishers.push(resolve)));
+    const store = createChatStore(ask);
+    store.send("How were sales in the last 7 days?");
+    store.stop();
+    store.send("can you create a block for another new slide");
+
+    expect(ask.mock.calls[1][0]).toBe("can you create a block for another new slide");
+    expect(ask.mock.calls[1][2]).toEqual([]);
+  });
+
   it("caps each text and the total, dropping the oldest turns first", () => {
     const long = "x".repeat(MAX_HISTORY_ITEM_CHARS + 500);
-    expect(buildHistory([msg("user", long)])[0].content).toHaveLength(MAX_HISTORY_ITEM_CHARS);
+    expect(buildHistory([msg("user", long), msg("assistant", "a")])[0].content).toHaveLength(
+      MAX_HISTORY_ITEM_CHARS
+    );
 
     const turns = Array.from({ length: 6 }, (_, i) =>
       msg(i % 2 ? "assistant" : "user", `${i}`.repeat(MAX_HISTORY_ITEM_CHARS))

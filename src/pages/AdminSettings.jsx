@@ -956,7 +956,7 @@ export default function AdminSettings() {
 
               <button
                 type="button"
-                onClick={() => alert("Help Center clicked")}
+                onClick={() => navigate("/admin/help")}
                 className="flex w-full items-center justify-between border-b border-slate-200 p-4 text-left hover:bg-slate-50"
               >
                 <span className="text-sm text-slate-700">? Help Center</span>

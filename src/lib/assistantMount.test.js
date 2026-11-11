@@ -18,12 +18,12 @@ describe("where the assistant is mounted", () => {
   });
 
   it.each([
-    ["the customizer", "../pages/AdminCustomize.jsx"],
-    ["the code editor", "../components/CodeWorkbench.jsx"],
-  ])("%s mounts one panel and one light button, and has no AdminSidebar", (_name, file) => {
+    ["the customizer", "../pages/AdminCustomize.jsx", "dark"],
+    ["the code editor", "../components/CodeWorkbench.jsx", "light"],
+  ])("%s mounts one panel and one button of its own tone, and has no AdminSidebar", (_name, file, tone) => {
     const text = code(source(file));
     expect(count(text, "<AssistantPanel")).toBe(1);
-    expect(count(text, '<AssistantButton tone="light"')).toBe(1);
+    expect(count(text, `<AssistantButton tone="${tone}"`)).toBe(1);
     expect(count(text, "<AssistantButton")).toBe(1);
     expect(text).not.toMatch(/AdminSidebar|AdminHeader/);
   });

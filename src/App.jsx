@@ -14,6 +14,7 @@ const AdminOnlineStore = lazy(() => import("@/pages/AdminOnlineStore"));
 const ThemeView = lazy(() => import("@/pages/ThemeView"));
 const AdminCustomize = lazy(() => import("@/pages/AdminCustomize"));
 const AdminSettings = lazy(() => import("@/pages/AdminSettings"));
+const AdminHelp = lazy(() => import("@/pages/AdminHelp"));
 const AdminHome = lazy(() => import("@/pages/AdminHome"));
 const AdminProducts = lazy(() => import("@/pages/AdminProducts"));
 const AdminAddProduct = lazy(() => import("@/pages/AdminAddProduct"));
@@ -90,6 +91,10 @@ export default function App() {
           <Route path="/orders" element={<OrderHistory />} />
           <Route path="/admin" element={<Navigate to="/admin/online-store/home" replace />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/help" element={<AdminHelp />} />
+          <Route path="/admin/help/tickets" element={<AdminHelp />} />
+          <Route path="/admin/help/tickets/:ticketId" element={<AdminHelp />} />
+          <Route path="/admin/help/:topic" element={<AdminHelp />} />
           <Route path="/admin/online-store/home" element={<AdminHome />} />
           <Route path="/admin/online-store/settings" element={<AdminSettings />} />
           <Route

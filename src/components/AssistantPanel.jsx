@@ -13,7 +13,7 @@ const TOOL_PERMISSIONS = ["reports.view", "inventory.view", "orders.view"];
 const ASSISTANT_ENABLED =
   import.meta.env.DEV || String(import.meta.env.VITE_ENABLE_ASSISTANT).toLowerCase() === "true";
 
-function useAssistantAccess() {
+export function useAssistantAccess() {
   const session = useSession();
   return (
     ASSISTANT_ENABLED &&
