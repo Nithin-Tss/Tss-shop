@@ -2639,7 +2639,11 @@ export default function AdminCustomizePage() {
                     href={`/editor-demo${(() => {
                       const themeId = startParams.get("theme") || getEditingThemeId();
                       const query = new URLSearchParams();
-                      const targetFile = getTemplateFileForPage(page, customerPage);
+                      // A selected section or block opens its own file, otherwise the page template
+                      const targetFile =
+                        selected && shownSection
+                          ? getCodeFileFor(shownSection, blockOpen ? selectedBlock : null, page)
+                          : getTemplateFileForPage(page, customerPage);
                       if (targetFile) query.set("file", targetFile);
                       if (themeId) query.set("theme", themeId);
                       return query.toString() ? `?${query.toString()}` : "";
