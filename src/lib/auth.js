@@ -198,6 +198,15 @@ export function useCan(permission) {
   return can(useSession(), permission);
 }
 
+// Platform support staff: platform administrators and support agents. The backend decides (IsSupportAgent);
+// this only hides what it would refuse.
+export const isSupportStaff = (session) =>
+  Boolean(session?.user?.isSupportAgent || session?.user?.isPlatformAdmin);
+
+export function useIsSupportStaff() {
+  return isSupportStaff(useSession());
+}
+
 // Returns the signed-in session object, or null when signed out.
 export function useSession() {
   const raw = useSyncExternalStore(subscribe, readSession, () => null);

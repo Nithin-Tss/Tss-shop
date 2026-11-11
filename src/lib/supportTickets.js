@@ -11,14 +11,78 @@ export const POLL_MS = 5000; // an open conversation refreshes this often
 export const MAX_ATTACHMENTS = 3; // images per message (the server enforces the same limit)
 export const MAX_REPLY = 2000;
 
-export const STATUS_LABEL = { open: "Open", pending: "Pending", closed: "Closed" };
+export const STAFF_SUPPORT_PATH = "/admin/support-tickets";
+export const staffTicketPath = (id) => `${STAFF_SUPPORT_PATH}/${id}`;
+export const SUPPORT_SUMMARY_API = "/api/v1/platform/support/summary/";
+export const SUPPORT_AGENTS_API = "/api/v1/platform/support/agents/";
+
+// Keep in step with Ticket.STATUSES in the backend (apps/helpdesk/models.py)
+export const STATUSES = ["open", "in_progress", "waiting_on_customer", "resolved", "closed"];
+export const STATUS_LABEL = {
+  open: "Open",
+  in_progress: "In progress",
+  waiting_on_customer: "Waiting on customer",
+  resolved: "Resolved",
+  closed: "Closed",
+};
+// What the merchant is told about each status
 export const STATUS_HELP = {
   open: "Waiting for our team",
-  pending: "Waiting for your reply",
+  in_progress: "Our team is working on it",
+  waiting_on_customer: "Waiting for your reply",
+  resolved: "Resolved",
   closed: "Closed",
+};
+export const STATUS_TONE = {
+  open: "bg-emerald-50 text-emerald-700",
+  in_progress: "bg-sky-50 text-sky-700",
+  waiting_on_customer: "bg-amber-50 text-amber-700",
+  resolved: "bg-slate-100 text-slate-600",
+  closed: "bg-slate-100 text-slate-600",
+};
+// Done: a reply from the merchant reopens it
+export const isFinished = (status) => status === "resolved" || status === "closed";
+
+export const PRIORITIES = ["low", "normal", "high", "urgent"];
+export const PRIORITY_LABEL = { low: "Low", normal: "Normal", high: "High", urgent: "Urgent" };
+export const PRIORITY_TONE = {
+  low: "bg-slate-100 text-slate-600",
+  normal: "bg-slate-100 text-slate-700",
+  high: "bg-amber-50 text-amber-700",
+  urgent: "bg-red-50 text-red-700",
+};
+export const CATEGORIES = ["payments", "shipping", "domains", "themes", "account", "other"];
+export const CATEGORY_LABEL = {
+  payments: "Payments",
+  shipping: "Shipping",
+  domains: "Domains",
+  themes: "Themes",
+  account: "Account",
+  other: "Other",
+};
+export const SOURCE_LABEL = {
+  ai_escalation: "AI",
+  customer_request: "Customer",
+  help_center: "Help Center",
 };
 
 export const statusLabel = (status) => STATUS_LABEL[status] || String(status || "");
+export const priorityLabel = (value) => PRIORITY_LABEL[value] || String(value || "");
+export const categoryLabel = (value) => CATEGORY_LABEL[value] || String(value || "");
+export const sourceLabel = (value) => SOURCE_LABEL[value] || String(value || "");
+
+// Query string for the staff list. `filters` = { status, priority, category, assigned, q }. Default view: active
+// tickets (open, in progress, waiting), most urgent first (the server sorts).
+export function buildStaffQuery(filters = {}, { limit, offset } = {}) {
+  const params = new URLSearchParams();
+  for (const key of ["status", "priority", "category", "assigned"]) {
+    if (filters[key]) params.set(key, filters[key]);
+  }
+  if (String(filters.q ?? "").trim()) params.set("q", String(filters.q).trim());
+  if (limit != null) params.set("limit", limit);
+  if (offset != null) params.set("offset", offset);
+  return params.toString();
+}
 
 // -> "" when the reply can be sent, else the reason it can't
 export function validateReply(message) {

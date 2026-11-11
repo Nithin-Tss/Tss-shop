@@ -56,7 +56,7 @@ describe("AdminHelpTicket", () => {
           message("m1", "owner", "It does not save."),
           message("m2", "staff", "Fixed, please check."),
         ],
-        "pending"
+        "waiting_on_customer"
       ),
     });
 
@@ -107,7 +107,7 @@ describe("AdminHelpTicket", () => {
   it("sends a reply with the attached image ids and shows the new state", async () => {
     apiGet.mockResolvedValue({
       ok: true,
-      data: ticket([message("m1", "owner", "First message here")], "pending"),
+      data: ticket([message("m1", "owner", "First message here")], "waiting_on_customer"),
     });
     apiUpload.mockResolvedValue({
       ok: true,

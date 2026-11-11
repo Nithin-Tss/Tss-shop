@@ -2,25 +2,19 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiGet } from "@/lib/api";
 import { CONTACT_PATH, ticketPath } from "@/lib/helpCenter";
-import { STATUS_HELP, TICKETS_API, statusLabel, when } from "@/lib/supportTickets";
+import { STATUS_HELP, STATUS_TONE, TICKETS_API, statusLabel, when } from "@/lib/supportTickets";
 
-// /admin/help/tickets: the signed-in member's own support tickets in this store, newest activity first.
+// /admin/help/tickets ("My support tickets"): the signed-in member's own support tickets in this store, newest activity first.
 
 const PAGE = 20;
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2";
 const DARK_BTN = `rounded-full bg-[#111827] px-6 py-2.5 text-[14px] font-semibold text-white transition hover:bg-black ${FOCUS}`;
 const LIGHT_BTN = `rounded-full border border-slate-200 bg-white px-5 py-2 text-[14px] font-medium text-[#111827] transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60 ${FOCUS}`;
-const TONE = {
-  open: "bg-emerald-50 text-emerald-700",
-  pending: "bg-amber-50 text-amber-700",
-  closed: "bg-slate-100 text-slate-600",
-};
-
 export function StatusChip({ status, label }) {
   return (
     <span
-      className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${TONE[status] || TONE.closed}`}
+      className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${STATUS_TONE[status] || STATUS_TONE.closed}`}
     >
       {label || statusLabel(status)}
     </span>
@@ -95,6 +89,9 @@ export default function AdminHelpTickets() {
                 <span className="min-w-0">
                   <span className="block truncate text-[15px] font-semibold text-[#111827]">
                     {ticket.subject}
+                  </span>
+                  <span className="mt-0.5 block text-[12px] font-medium text-slate-500">
+                    {ticket.ticketNumber}
                   </span>
                   <span className="mt-0.5 block text-[13px] text-slate-500">
                     {STATUS_HELP[ticket.status]} · Updated {when(ticket.updatedAt)}

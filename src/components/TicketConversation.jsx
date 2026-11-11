@@ -138,13 +138,18 @@ export function Thread({ messages, staff = false }) {
     <ol className="space-y-4" aria-label="Conversation">
       {messages.map((message) => {
         const mine = staff ? !isOwnMessage(message) : isOwnMessage(message);
+        const note = staff && message.isInternal === true; // an internal note: staff only
         // Member view: "You" / "Support team". Staff inbox: "You" for staff, the member's name for the other side.
         const sender = mine ? "You" : staff ? message.senderName : "Support team";
         return (
           <li key={message.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[15px] leading-6 text-slate-900 ${
-                mine ? "bg-slate-100" : "border border-slate-200 bg-white"
+                note
+                  ? "border border-dashed border-amber-300 bg-amber-50"
+                  : mine
+                    ? "bg-slate-100"
+                    : "border border-slate-200 bg-white"
               }`}
             >
               <p className="whitespace-pre-wrap break-words">{String(message.body ?? "").trim()}</p>
@@ -170,7 +175,8 @@ export function Thread({ messages, staff = false }) {
               )}
             </div>
             <p className="mt-1 px-1 text-[12px] text-slate-500">
-              {sender} · {clock(message.createdAt)}
+              {note ? `Internal note, staff only · ${message.senderName}` : sender} ·{" "}
+              {clock(message.createdAt)}
             </p>
           </li>
         );

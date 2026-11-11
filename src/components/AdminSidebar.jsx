@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
+import HelpWidget from "@/components/HelpWidget";
+import { STAFF_SUPPORT_PATH } from "@/lib/supportTickets";
+import { useSupportBadge } from "@/lib/useSupportBadge";
 import {
   apiDelete,
   apiGet,
@@ -16,6 +19,7 @@ import {
   setActiveStore,
   setStores,
   storeCan,
+  useIsSupportStaff,
   useSession,
 } from "@/lib/auth";
 
@@ -197,6 +201,14 @@ export const navIcons = {
       <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
       <path d="M12 8v5" />
       <path d="M12 16h.01" />
+    </>
+  ),
+  support: (
+    <>
+      <path d="M3 14v-2a9 9 0 0 1 18 0v2" />
+      <path d="M21 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2Z" />
+      <path d="M3 15a2 2 0 0 0 2 2h1v-5H5a2 2 0 0 0-2 2Z" />
+      <path d="M18 17v1a3 3 0 0 1-3 3h-2" />
     </>
   ),
   chevron: <path d="m6 9 6 6 6-6" />,
@@ -595,6 +607,10 @@ export default function AdminSidebar() {
   const searchRef = useRef(null);
   const session = useSession();
   const allowed = (item) => !item.permission || can(session, item.permission);
+  // Support Tickets: only for platform support staff; the badge counts tickets that are open and unassigned
+  const supportStaff = useIsSupportStaff();
+  const supportBadge = useSupportBadge();
+  const supportActive = isUnder(path, STAFF_SUPPORT_PATH);
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [query, setQuery] = useState("");
@@ -836,6 +852,25 @@ export default function AdminSidebar() {
 
       {/* SETTINGS + ACCOUNT */}
       <div className="space-y-2 px-3 pb-3 pt-2">
+        {supportStaff && (
+          <Link
+            to={STAFF_SUPPORT_PATH}
+            title="Support Tickets"
+            aria-current={supportActive ? "page" : undefined}
+            className={rowClass(supportActive)}
+          >
+            <NavIcon name="support" />
+            <Label>Support Tickets</Label>
+            {supportBadge > 0 && (
+              <span
+                aria-label={`${supportBadge} open unassigned ticket${supportBadge === 1 ? "" : "s"}`}
+                className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold leading-4 group-data-[collapsed=true]/nav:absolute group-data-[collapsed=true]/nav:right-1 group-data-[collapsed=true]/nav:top-1 group-data-[collapsed=true]/nav:ml-0 group-data-[collapsed=true]/nav:px-1.5 ${supportActive ? "bg-white text-orange-700" : "bg-orange-600 text-white"}`}
+              >
+                {supportBadge > 99 ? "99+" : supportBadge}
+              </span>
+            )}
+          </Link>
+        )}
         <Link
           to={`${BASE}/settings`}
           title="Settings"
@@ -893,6 +928,8 @@ export default function AdminSidebar() {
       )}
       {/* The assistant (dev only, and only for members who may read some data): one panel per page */}
       <AssistantPanel />
+      {/* The Help chat (flag help_assistant): replaces the assistant above, which hides itself while it is on */}
+      <HelpWidget />
     </>
   );
 }

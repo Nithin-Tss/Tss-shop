@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
-import PlatformSupportInbox from "@/components/PlatformSupportInbox";
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "@/lib/api";
 import { useSession } from "@/lib/auth";
 
@@ -26,7 +25,6 @@ const dangerButton =
 const TABS = [
   ["overview", "Overview"],
   ["stores", "Stores"],
-  ["support", "Support"],
   ["users", "Users"],
   ["keys", "API keys"],
   ["flags", "Feature flags"],
@@ -427,6 +425,18 @@ function Users({ me }) {
     list.reload();
   };
 
+  const toggleAgent = async (user) => {
+    const next = !user.isSupportAgent;
+    const text = next
+      ? `Make ${user.email} a support agent? They will be able to read and answer every store's support tickets.`
+      : `Remove support agent access from ${user.email}?`;
+    if (!window.confirm(text)) return;
+    const res = await apiPost(`${P}/users/${user.id}/support-agent/`, { isSupportAgent: next });
+    if (!res.ok) return setError(res.formError);
+    setError("");
+    list.reload();
+  };
+
   return (
     <Card>
       <Search value={q} onChange={setQ} placeholder="Search by name or email">
@@ -448,22 +458,32 @@ function Users({ me }) {
             <div className="min-w-0 text-sm">
               <p className="font-semibold">
                 {u.firstName} {u.lastName}{" "}
-                {u.isPlatformAdmin && <Chip tone="active">platform admin</Chip>}
+                {u.isPlatformAdmin && <Chip tone="active">platform admin</Chip>}{" "}
+                {u.isSupportAgent && <Chip tone="active">support agent</Chip>}
               </p>
               <p className="text-xs text-slate-500">
                 {u.email} · {u.storeCount} store{u.storeCount === 1 ? "" : "s"} · joined{" "}
                 {when(u.createdAt)} · last sign-in {when(u.lastLogin)}
               </p>
             </div>
-            {u.id !== me && (
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => toggle(u)}
-                className={u.isPlatformAdmin ? dangerButton : secondaryButton}
+                onClick={() => toggleAgent(u)}
+                className={u.isSupportAgent ? dangerButton : secondaryButton}
               >
-                {u.isPlatformAdmin ? "Remove admin" : "Make admin"}
+                {u.isSupportAgent ? "Remove support agent" : "Make support agent"}
               </button>
-            )}
+              {u.id !== me && (
+                <button
+                  type="button"
+                  onClick={() => toggle(u)}
+                  className={u.isPlatformAdmin ? dangerButton : secondaryButton}
+                >
+                  {u.isPlatformAdmin ? "Remove admin" : "Make admin"}
+                </button>
+              )}
+            </div>
           </li>
         ))}
         {!list.loading && list.results.length === 0 && (
@@ -760,6 +780,9 @@ function Audit() {
 export default function AdminPlatform() {
   const session = useSession();
   const [tab, setTab] = useState("overview");
+  // The Support tab moved to its own section: old links (/admin/platform?tab=support) go there
+  const [params] = useSearchParams();
+  if (params.get("tab") === "support") return <Navigate to="/admin/support-tickets" replace />;
 
   return (
     <div className="min-h-screen bg-slate-100 text-ink">
@@ -808,7 +831,6 @@ export default function AdminPlatform() {
 
               {tab === "overview" && <Overview />}
               {tab === "stores" && <Stores />}
-              {tab === "support" && <PlatformSupportInbox />}
               {tab === "users" && <Users me={session.user.id} />}
               {tab === "keys" && <ApiKeys />}
               {tab === "flags" && <Flags />}

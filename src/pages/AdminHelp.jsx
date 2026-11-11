@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AssistantPanel, useAssistantAccess } from "@/components/AssistantPanel";
 import AdminHelpContact from "@/pages/AdminHelpContact";
+import HelpArticleView from "@/components/HelpArticleView";
+import HelpWidget from "@/components/HelpWidget";
 import AdminHelpTicket from "@/pages/AdminHelpTicket";
 import AdminHelpTickets from "@/pages/AdminHelpTickets";
 import { assistantStore } from "@/lib/assistantApi";
@@ -469,21 +471,22 @@ function NotFound() {
 }
 
 export default function AdminHelp() {
-  const { topic, ticketId } = useParams();
+  const { topic, ticketId, articleSlug } = useParams();
   const { pathname } = useLocation();
   const isTickets = pathname.replace(/\/+$/, "") === TICKETS_PATH;
 
   // A new page starts at the top, not where the last one was scrolled to
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [topic, ticketId, isTickets]);
+  }, [topic, ticketId, articleSlug, isTickets]);
 
   const isContact = topic === CONTACT_SLUG;
   const category = topic && !isContact ? getCategory(topic) : null;
   const article = topic && !isContact && !category ? getArticle(topic) : null;
 
   let body;
-  if (ticketId) body = <AdminHelpTicket key={ticketId} ticketId={ticketId} />;
+  if (articleSlug) body = <HelpArticleView key={articleSlug} slug={articleSlug} />;
+  else if (ticketId) body = <AdminHelpTicket key={ticketId} ticketId={ticketId} />;
   else if (isTickets) body = <AdminHelpTickets />;
   else if (!topic) body = <Home />;
   else if (isContact) body = <AdminHelpContact />;
@@ -498,6 +501,7 @@ export default function AdminHelp() {
       <Footer />
       <ContactPill />
       <AssistantPanel />
+      <HelpWidget />
     </div>
   );
 }

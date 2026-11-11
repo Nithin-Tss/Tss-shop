@@ -50,6 +50,8 @@ const AdminLiveView = lazy(() => import("@/pages/AdminLiveView"));
 const AdminDiscounts = lazy(() => import("@/pages/AdminDiscounts"));
 const AdminCreateDiscount = lazy(() => import("@/pages/AdminCreateDiscount"));
 const AdminPlatform = lazy(() => import("@/pages/AdminPlatform"));
+const AdminSupportTickets = lazy(() => import("@/pages/AdminSupportTickets"));
+const AdminSupportTicket = lazy(() => import("@/pages/AdminSupportTicket"));
 const AdminWebhooks = lazy(() => import("@/pages/AdminWebhooks"));
 const AdminAuditLog = lazy(() => import("@/pages/AdminAuditLog"));
 const Terms = lazy(() => import("@/pages/Terms"));
@@ -94,6 +96,7 @@ export default function App() {
           <Route path="/admin/help" element={<AdminHelp />} />
           <Route path="/admin/help/tickets" element={<AdminHelp />} />
           <Route path="/admin/help/tickets/:ticketId" element={<AdminHelp />} />
+          <Route path="/admin/help/articles/:articleSlug" element={<AdminHelp />} />
           <Route path="/admin/help/:topic" element={<AdminHelp />} />
           <Route path="/admin/online-store/home" element={<AdminHome />} />
           <Route path="/admin/online-store/settings" element={<AdminSettings />} />
@@ -240,6 +243,13 @@ export default function App() {
           </Route>
           {/* Platform administration: the API refuses anyone who isn't a platform administrator */}
           <Route path="/admin/platform" element={<AdminPlatform />} />
+          {/* Support Tickets (platform support staff; the API refuses everyone else). It replaces the old Support tab. */}
+          <Route path="/admin/support-tickets" element={<AdminSupportTickets />} />
+          <Route path="/admin/support-tickets/:ticketId" element={<AdminSupportTicket />} />
+          <Route
+            path="/admin/platform/support"
+            element={<Navigate to="/admin/support-tickets" replace />}
+          />
           <Route element={<RequirePermission permission="shipping.view" />}>
             <Route
               path="/admin/online-store/shipping"

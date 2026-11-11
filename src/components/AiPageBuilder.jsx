@@ -1,4 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import {
+  ChatBubble,
+  ChatComposer,
+  ChatError,
+  ChatThinking,
+  chatFocusRing as focusRing,
+  darkButton,
+  smallButton,
+  useScrollToEnd,
+} from "@/components/ChatParts";
 import {
   AI_FLAG,
   discardDraft,
@@ -9,11 +19,6 @@ import {
 } from "@/lib/aiAssistantApi";
 import { useFlag } from "@/lib/featureFlags";
 import { useCan } from "@/lib/auth";
-
-const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2";
-const smallButton = `inline-flex h-8 items-center rounded-md border border-slate-300 bg-white px-3 text-[12px] font-medium text-ink hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
-const darkButton = `inline-flex h-8 items-center rounded-md bg-ink px-3 text-[12px] font-medium text-white hover:bg-[rgba(24,24,27,0.88)] disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
 
 export const EXAMPLES = [
   "Create an About Us page with a hero banner and testimonials",
@@ -71,11 +76,7 @@ export default function AiPageBuilderPanel({ onClose, send = sendAiMessage }) {
   const [error, setError] = useState("");
   const [pageState, setPageState] = useState({}); // pageId -> { status: "published" | "discarded", busy, error }
   const [preview, setPreview] = useState(null); // { title, html } | { title, error } | { title, loading }
-  const endRef = useRef(null);
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView?.({ block: "end" });
-  }, [messages, busy]);
+  const endRef = useScrollToEnd([messages, busy]);
 
   async function submit(text) {
     const message = text.trim();
@@ -163,75 +164,34 @@ export default function AiPageBuilderPanel({ onClose, send = sendAiMessage }) {
         )}
 
         {messages.map((m, i) => (
-          <div key={i} className={m.role === "user" ? "flex justify-end" : ""}>
-            <div
-              className={`max-w-[90%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm ${
-                m.role === "user" ? "bg-ink text-white" : "bg-slate-100 text-ink"
-              }`}
-            >
-              {m.text}
-              {(m.pages || []).map((page) => (
-                <PageCard
-                  key={page.pageId}
-                  page={page}
-                  state={pageState[page.pageId] || {}}
-                  onPreview={() => showPreview(page)}
-                  onPublish={() => act(page, "publish")}
-                  onDiscard={() => act(page, "discard")}
-                />
-              ))}
-            </div>
-          </div>
+          <ChatBubble key={i} role={m.role} text={m.text}>
+            {(m.pages || []).map((page) => (
+              <PageCard
+                key={page.pageId}
+                page={page}
+                state={pageState[page.pageId] || {}}
+                onPreview={() => showPreview(page)}
+                onPublish={() => act(page, "publish")}
+                onDiscard={() => act(page, "discard")}
+              />
+            ))}
+          </ChatBubble>
         ))}
 
-        {busy && <p className="text-sm text-slate-500">Thinking…</p>}
-        {error && (
-          <p
-            role="alert"
-            className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-          >
-            {error}
-          </p>
-        )}
+        {busy && <ChatThinking />}
+        <ChatError>{error}</ChatError>
         <div ref={endRef} />
       </div>
 
-      <form
-        className="border-t border-slate-200 p-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit(draft);
-        }}
-      >
-        <label htmlFor="ai-page-message" className="sr-only">
-          Your request
-        </label>
-        <div className="flex gap-2">
-          <textarea
-            id="ai-page-message"
-            rows={2}
-            maxLength={2000}
-            value={draft}
-            disabled={busy}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                submit(draft);
-              }
-            }}
-            placeholder="Create an About Us page with a hero banner…"
-            className="min-h-10 flex-1 resize-none rounded-md border border-slate-300 px-3 py-2 text-sm"
-          />
-          <button
-            type="submit"
-            disabled={busy || !draft.trim()}
-            className={`${darkButton} h-10 self-end`}
-          >
-            Send
-          </button>
-        </div>
-      </form>
+      <ChatComposer
+        id="ai-page-message"
+        label="Your request"
+        value={draft}
+        onChange={setDraft}
+        onSubmit={submit}
+        busy={busy}
+        placeholder="Create an About Us page with a hero banner…"
+      />
 
       {preview && (
         <div

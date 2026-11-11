@@ -8,6 +8,7 @@ import {
   ATTACHMENTS_API,
   STATUS_HELP,
   TICKETS_API,
+  isFinished,
   buildReplyPayload,
   splitDetails,
   usePoll,
@@ -109,13 +110,39 @@ export default function AdminHelpTicket({ ticketId }) {
             </h1>
             <StatusChip
               status={ticket.status}
-              label={ticket.status === "pending" ? "Waiting for you" : undefined}
+              label={ticket.status === "waiting_on_customer" ? "Waiting for you" : undefined}
             />
-            {/* The chip already says it for "Waiting for you" and "Closed"; only "Open" needs the line */}
-            {ticket.status === "open" && (
-              <span className="text-[14px] text-slate-600">{STATUS_HELP.open}</span>
+            {/* The chip already says it for the other states; only these two need the line */}
+            {(ticket.status === "open" || ticket.status === "in_progress") && (
+              <span className="text-[14px] text-slate-600">{STATUS_HELP[ticket.status]}</span>
             )}
           </div>
+          <p className="mt-1 text-[13px] font-medium text-slate-500">{ticket.ticketNumber}</p>
+
+          {ticket.transcript?.length > 0 && (
+            <details className="group mt-5 rounded-2xl border border-slate-200 bg-white">
+              <summary
+                className={`flex cursor-pointer list-none items-center justify-between rounded-2xl px-4 py-3 text-[14px] font-medium text-[#111827] [&::-webkit-details-marker]:hidden ${FOCUS}`}
+              >
+                Your chat with the help assistant
+              </summary>
+              <ol
+                aria-label="Chat with the help assistant"
+                className="space-y-2 border-t border-slate-200 px-4 py-3 text-[14px]"
+              >
+                {ticket.transcript.map((turn, i) => (
+                  <li key={i}>
+                    <span className="font-medium text-slate-500">
+                      {turn.role === "user" ? "You" : "Assistant"}:{" "}
+                    </span>
+                    <span className="whitespace-pre-wrap break-words text-slate-900">
+                      {turn.content}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
 
           {details && (
             <details className="group mt-5 rounded-2xl border border-slate-200 bg-white">
@@ -152,9 +179,14 @@ export default function AdminHelpTicket({ ticketId }) {
           </div>
 
           <div className="mt-10 border-t border-slate-200 pt-8">
-            {ticket.status === "closed" && (
+            {isFinished(ticket.status) && (
               <p className="mb-4 text-[14px] text-slate-600">
-                This ticket is closed. Send a message to reopen it.
+                This ticket is {ticket.status}. Send a message to reopen it.
+              </p>
+            )}
+            {!ticket.messages?.length && !isFinished(ticket.status) && (
+              <p className="mb-4 text-[14px] text-slate-600">
+                A support agent will reply here. You will also get an email.
               </p>
             )}
             <ReplyBox onSend={send} uploadUrl={ATTACHMENTS_API} />

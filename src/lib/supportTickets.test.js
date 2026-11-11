@@ -62,7 +62,8 @@ describe("fitFiles", () => {
 
 describe("small helpers", () => {
   it("labels statuses and tells whose message it is", () => {
-    expect(statusLabel("pending")).toBe("Pending");
+    expect(statusLabel("waiting_on_customer")).toBe("Waiting on customer");
+    expect(statusLabel("pending")).toBe("pending"); // the old status no longer exists
     expect(isOwnMessage({ senderType: "owner" })).toBe(true);
     expect(isOwnMessage({ senderType: "staff" })).toBe(false);
   });
