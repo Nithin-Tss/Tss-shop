@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { Link } from "react-router-dom";
 
+import { AiPageBuilderButton } from "@/components/AiPageBuilder";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
 
 import { getEditingThemeId, setEditingThemeId } from "@/lib/editingTheme";
@@ -2631,6 +2632,7 @@ export default function AdminCustomizePage() {
                   )}
 
                   <AssistantButton tone="light" />
+                  <AiPageBuilderButton />
 
                   <a
                     id="edit-code-btn"

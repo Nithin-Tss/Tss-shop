@@ -20,6 +20,7 @@ import { apiGet } from "@/lib/api";
 const defaults = {
   blog: true,
   api_keys: true,
+  ai_page_builder: false, // AI page builder: off unless the platform enables it for the store
 };
 
 function fromEnv(name, fallback) {
