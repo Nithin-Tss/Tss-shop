@@ -7,13 +7,16 @@ import { useChatStore } from "@/lib/assistantChatStore";
 import { can, useSession } from "@/lib/auth";
 
 // The assistant has no permission of its own: each tool checks its own on the server. So it is worth
-// showing to anyone who holds at least one of these. Only in `npm run dev`.
+// showing to anyone who holds at least one of these. Shown in `npm run dev`, or in a build made with VITE_ENABLE_ASSISTANT=true.
 const TOOL_PERMISSIONS = ["reports.view", "inventory.view", "orders.view"];
+
+const ASSISTANT_ENABLED =
+  import.meta.env.DEV || String(import.meta.env.VITE_ENABLE_ASSISTANT).toLowerCase() === "true";
 
 function useAssistantAccess() {
   const session = useSession();
   return (
-    import.meta.env.DEV &&
+    ASSISTANT_ENABLED &&
     Boolean(session?.token) &&
     TOOL_PERMISSIONS.some((permission) => can(session, permission))
   );
