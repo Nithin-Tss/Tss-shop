@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { AssistantPanel, useAssistantAccess } from "@/components/AssistantPanel";
+import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import { useAssistantAccess } from "@/components/AssistantPanel";
 import AdminHelpContact from "@/pages/AdminHelpContact";
 import HelpArticleView from "@/components/HelpArticleView";
-import HelpWidget from "@/components/HelpWidget";
 import AdminHelpTicket from "@/pages/AdminHelpTicket";
 import AdminHelpTickets from "@/pages/AdminHelpTickets";
 import { assistantStore } from "@/lib/assistantApi";
 import { useChatStore } from "@/lib/assistantChatStore";
 import { can, useSession } from "@/lib/auth";
+import { useFlag } from "@/lib/featureFlags";
 import {
   CATEGORIES,
   CONTACT_PATH,
@@ -86,12 +87,6 @@ function TopBar() {
         >
           My tickets
         </Link>
-        <Link
-          to="/admin"
-          className={`rounded-md px-1 text-[14px] font-medium text-slate-600 transition hover:text-[#111827] ${FOCUS}`}
-        >
-          Back to admin
-        </Link>
       </div>
     </header>
   );
@@ -104,13 +99,14 @@ function ContactPill() {
   const { pathname } = useLocation();
   const access = useAssistantAccess();
   const { open } = useChatStore(assistantStore);
+  const helpChat = useFlag("help_assistant"); // the orange Help chat button sits bottom right: stay left of it
   if (pathname === CONTACT_PATH) return null;
   const panelOpen = access && open;
   return (
     <Link
       to={CONTACT_PATH}
       state={{ from: pathname }}
-      className={`fixed bottom-5 right-5 z-30 items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-[14px] font-semibold text-[#111827] shadow-[0_4px_16px_rgba(17,24,39,0.16)] transition-[right,background-color] hover:bg-slate-50 motion-reduce:transition-none ${FOCUS} ${
+      className={`fixed bottom-5 ${helpChat ? "right-36" : "right-5"} z-30 items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-[14px] font-semibold text-[#111827] shadow-[0_4px_16px_rgba(17,24,39,0.16)] transition-[right,background-color] hover:bg-slate-50 motion-reduce:transition-none ${FOCUS} ${
         panelOpen ? "hidden xl:inline-flex xl:right-[420px]" : "inline-flex"
       }`}
     >
@@ -494,14 +490,19 @@ export default function AdminHelp() {
   else if (article) body = <ArticleView key={article.slug} article={article} />;
   else body = <NotFound />;
 
+  // The admin sidebar (it also mounts the assistant panel and the Help chat) stays beside every Help page
   return (
-    <div className="min-h-screen bg-white text-[#111827]">
-      <TopBar />
-      <main>{body}</main>
-      <Footer />
+    <div className="min-h-screen bg-slate-100 text-[#111827]">
+      <AdminHeader />
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
+        <AdminSidebar />
+        <div className="min-w-0 flex-1 bg-white">
+          <TopBar />
+          <main>{body}</main>
+          <Footer />
+        </div>
+      </div>
       <ContactPill />
-      <AssistantPanel />
-      <HelpWidget />
     </div>
   );
 }
