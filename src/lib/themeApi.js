@@ -50,8 +50,8 @@ export function getThemeCustomizer() {
 // The cart is a shared snippet, not a saved template; the customizer only holds a temporary
 // templates.cart entry while it is the preview page, so it is never sent to the API.
 function withoutCartTemplate(data) {
-  if (!data?.templates || !("cart" in data.templates)) return data;
-  const { cart: _cart, ...templates } = data.templates;
+  if (!data?.templates || !("cart" in data.templates || "wishlist" in data.templates)) return data;
+  const { cart: _cart, wishlist: _wishlist, ...templates } = data.templates;
   return { ...data, templates };
 }
 
@@ -131,6 +131,8 @@ export async function renderThemePage(themeId, path = "/") {
     query.set("page", "checkout");
   } else if (first === "cart") {
     query.set("page", "cart");
+  } else if (first === "wishlist") {
+    query.set("page", "wishlist");
   }
   // The page's own query (?q=, ?sort=, ?page=, ?back=) is kept; it never overrides what the path chose
   given.forEach((value, key) => {

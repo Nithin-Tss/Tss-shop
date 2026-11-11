@@ -64,6 +64,7 @@ const PAGE_LABELS = {
   page: "Page",
   checkout: "Checkout",
   cart: "Cart page",
+  wishlist: "Wishlist page",
 };
 
 export function getTemplateFileForPage(page, customerPage) {
@@ -73,6 +74,8 @@ export function getTemplateFileForPage(page, customerPage) {
   if (page === "checkout") return "sections/main-checkout.liquid";
   // The cart is not a template: it is drawn by the cart snippet
   if (page === "cart") return "snippets/cart.liquid";
+  // The wishlist page is drawn by the wishlist snippet too
+  if (page === "wishlist") return "snippets/wishlist.liquid";
   return `templates/${page}.liquid`;
 }
 
@@ -730,6 +733,16 @@ export default function AdminCustomizePage() {
           syncedState(name).version = info.version;
         }
         settingsData = { ...settingsData };
+        // The cart and wishlist pages are drawn by snippets: they have no saved template, only an empty one
+        // here, so the editor can open straight on them (?page=wishlist)
+        for (const key of ["cart", "wishlist"]) {
+          if (!settingsData.templates?.[key]) {
+            settingsData.templates = {
+              ...settingsData.templates,
+              [key]: { order: [], sections: {} },
+            };
+          }
+        }
         if (Object.keys(sections).length) settingsData.sections = sections;
         else delete settingsData.sections;
         lastSavedRef.current = { data: settingsData, customizer: customizerData };
@@ -1707,9 +1720,15 @@ export default function AdminCustomizePage() {
     else if (first === "pages" && second) next = "page";
     else if (first === "checkout") next = "checkout";
     else if (first === "cart") next = "cart";
+    else if (first === "wishlist") next = "wishlist";
     if (next === "cart" && !dataRef.current?.templates?.cart) {
       if (dataRef.current?.templates) {
         dataRef.current.templates.cart = { order: [], sections: {} };
+      }
+    }
+    if (next === "wishlist" && !dataRef.current?.templates?.wishlist) {
+      if (dataRef.current?.templates) {
+        dataRef.current.templates.wishlist = { order: [], sections: {} };
       }
     }
     if (next === "checkout" && !dataRef.current?.templates?.checkout) {
@@ -1920,6 +1939,19 @@ export default function AdminCustomizePage() {
       ) {
         // Edit mode: right-click selects the section or block and offers "Edit code"
         const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
+        if (!message.id || message.id === "page-snippet") {
+          // Nothing under the pointer: the cart and wishlist pages have no sections, only their snippet
+          setSelected(null);
+          if (pageRef.current === "cart" || pageRef.current === "wishlist") {
+            const frame = iframeRef.current.getBoundingClientRect();
+            setContextMenu({
+              x: frame.left + (Number(message.x) || 0),
+              y: frame.top + (Number(message.y) || 0),
+              file: getTemplateFileForPage(pageRef.current),
+            });
+          }
+          return;
+        }
         if (!section) {
           if (message.id) engineRef.current.selectUnknownSection(message.id, message.block);
           return;
@@ -1946,6 +1978,7 @@ export default function AdminCustomizePage() {
         editModeRef.current
       ) {
         // Edit mode: a click in the preview selects a section or one of its blocks; empty space unselects
+        if (message.id === "page-snippet") return; // the cart / wishlist snippet: no settings to show
         const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
         const block =
           Number.isInteger(message.block) && section?.blocks?.[message.block]
