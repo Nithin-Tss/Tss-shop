@@ -59,7 +59,7 @@ describe("createChatStore", () => {
   it("shows errors as messages, and can be asked again", async () => {
     const ask = vi
       .fn()
-      .mockResolvedValueOnce({ ok: false, error: "Is Ollama running?" })
+      .mockResolvedValueOnce({ ok: false, error: "Model unavailable" })
       .mockRejectedValueOnce(new Error("boom"))
       .mockResolvedValueOnce(answer("fine"));
     const store = createChatStore(ask);
@@ -70,7 +70,7 @@ describe("createChatStore", () => {
 
     const roles = store.getState().messages.map((m) => m.role);
     expect(roles).toEqual(["user", "error", "user", "error", "user", "assistant"]);
-    expect(store.getState().messages[1].text).toBe("Is Ollama running?");
+    expect(store.getState().messages[1].text).toBe("Model unavailable");
   });
 
   it("drops an answer that arrives after the chat was cleared", async () => {
