@@ -14,7 +14,6 @@ const AdminOnlineStore = lazy(() => import("@/pages/AdminOnlineStore"));
 const ThemeView = lazy(() => import("@/pages/ThemeView"));
 const AdminCustomize = lazy(() => import("@/pages/AdminCustomize"));
 const AdminSettings = lazy(() => import("@/pages/AdminSettings"));
-const AdminHelp = lazy(() => import("@/pages/AdminHelp"));
 const AdminHome = lazy(() => import("@/pages/AdminHome"));
 const AdminProducts = lazy(() => import("@/pages/AdminProducts"));
 const AdminAddProduct = lazy(() => import("@/pages/AdminAddProduct"));
@@ -56,7 +55,6 @@ const AdminWebhooks = lazy(() => import("@/pages/AdminWebhooks"));
 const AdminAuditLog = lazy(() => import("@/pages/AdminAuditLog"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
-const Contact = lazy(() => import("@/pages/Contact"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
@@ -93,11 +91,6 @@ export default function App() {
           <Route path="/orders" element={<OrderHistory />} />
           <Route path="/admin" element={<Navigate to="/admin/online-store/home" replace />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
-          <Route path="/admin/help" element={<AdminHelp />} />
-          <Route path="/admin/help/tickets" element={<AdminHelp />} />
-          <Route path="/admin/help/tickets/:ticketId" element={<AdminHelp />} />
-          <Route path="/admin/help/articles/:articleSlug" element={<AdminHelp />} />
-          <Route path="/admin/help/:topic" element={<AdminHelp />} />
           <Route path="/admin/online-store/home" element={<AdminHome />} />
           <Route path="/admin/online-store/settings" element={<AdminSettings />} />
           <Route
@@ -269,7 +262,6 @@ export default function App() {
         </Route>
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
-        <Route path="/contact" element={<Contact />} />
         {flagsOn("blog") && <Route path="/blog" element={<Blog />} />}
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         {/* Links sent by email (see the backend's apps/identity/email_links.py) */}

@@ -30,7 +30,6 @@ const columns = [
   {
     title: "Support",
     links: [
-      ["Help center", "/contact"],
       ["Community", "#"],
       ["Hire a partner", "#"],
       ["Service status", "#"],

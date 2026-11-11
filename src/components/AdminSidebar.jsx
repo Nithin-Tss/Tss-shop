@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
-import HelpWidget from "@/components/HelpWidget";
 import { STAFF_SUPPORT_PATH } from "@/lib/supportTickets";
 import { useSupportBadge } from "@/lib/useSupportBadge";
 import {
@@ -928,8 +927,6 @@ export default function AdminSidebar() {
       )}
       {/* The assistant (dev only, and only for members who may read some data): one panel per page */}
       <AssistantPanel />
-      {/* The Help chat (flag help_assistant): replaces the assistant above, which hides itself while it is on */}
-      <HelpWidget />
     </>
   );
 }

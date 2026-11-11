@@ -12,7 +12,6 @@ import {
   usePoll,
   validateReply,
 } from "@/lib/supportTickets";
-import { TICKETS_PATH, ticketPath } from "@/lib/helpCenter";
 
 describe("validateReply", () => {
   it("accepts a normal message and refuses empty or too long ones", () => {
@@ -68,10 +67,6 @@ describe("small helpers", () => {
     expect(isOwnMessage({ senderType: "staff" })).toBe(false);
   });
 
-  it("builds the ticket paths", () => {
-    expect(TICKETS_PATH).toBe("/admin/help/tickets");
-    expect(ticketPath("abc")).toBe("/admin/help/tickets/abc");
-  });
 });
 
 describe("usePoll", () => {

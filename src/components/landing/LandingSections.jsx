@@ -488,12 +488,6 @@ export function Faq() {
           <h2 className="serif">
             Questions, <em>answered.</em>
           </h2>
-          <p>Still unsure? Our help center is a message away.</p>
-          <div>
-            <Link to="/contact" className="btn btn-ghost">
-              Contact us <Icon name="arrow" size={16} stroke={2} className="arrow" />
-            </Link>
-          </div>
         </Reveal>
         <div>
           {FAQS.map(([q, a], i) => {

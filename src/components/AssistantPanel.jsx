@@ -5,7 +5,6 @@ import AssistantRecents from "@/components/AssistantRecents";
 import { assistantStore, syncAssistantOwner } from "@/lib/assistantApi";
 import { useChatStore } from "@/lib/assistantChatStore";
 import { can, useSession } from "@/lib/auth";
-import { useFlag } from "@/lib/featureFlags";
 
 // The assistant has no permission of its own: each tool checks its own on the server. So it is worth
 // showing to anyone who holds at least one of these. Shown in `npm run dev`, or in a build made with VITE_ENABLE_ASSISTANT=true.
@@ -16,11 +15,8 @@ const ASSISTANT_ENABLED =
 
 export function useAssistantAccess() {
   const session = useSession();
-  // The help assistant replaces this bot for merchants: never show both help widgets at once
-  const helpAssistantOn = useFlag("help_assistant");
   return (
     ASSISTANT_ENABLED &&
-    !helpAssistantOn &&
     Boolean(session?.token) &&
     TOOL_PERMISSIONS.some((permission) => can(session, permission))
   );
