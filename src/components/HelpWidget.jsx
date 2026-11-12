@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import AssistantMarkdown from "@/components/AssistantMarkdown";
-import {
-  ChatComposer,
-  ChatError,
-  ChatThinking,
-  chatFocusRing,
-  useScrollToEnd,
-} from "@/components/ChatParts";
+import Icon from "@/components/Icons";
+import { ChatComposer, ChatError, chatFocusRing, useScrollToEnd } from "@/components/ChatParts";
 import { apiGet, apiPost } from "@/lib/api";
 import { useSession } from "@/lib/auth";
 import { useFlag } from "@/lib/featureFlags";
@@ -264,35 +259,38 @@ export function Widget({
     setError("");
   }
 
+  const firstName = session?.name ? String(session.name).split(" ")[0] : "";
   const card = (
     <aside
       aria-label="Help assistant"
       className={
         inline
-          ? "relative flex h-[calc(100vh-9rem)] min-h-[480px] w-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200"
-          : "relative flex h-[min(820px,calc(100vh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_80px_rgba(15,23,42,0.45)] ring-1 ring-slate-900/10"
+          ? "relative flex h-[calc(100vh-9rem)] min-h-[480px] w-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_16px_48px_-16px_rgba(17,24,39,0.14)] ring-1 ring-stone-200/80"
+          : "relative flex h-[min(820px,calc(100vh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-[0_32px_96px_-24px_rgba(17,24,39,0.45)] ring-1 ring-stone-900/10"
       }
     >
-      <header className="flex items-center justify-between gap-3 bg-[#111827] px-6 py-5 text-white">
+      <header className="flex items-center justify-between gap-3 border-b border-stone-100 px-6 py-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-600">
-            <ChatIcon className="h-6 w-6" />
-          </span>
+          <Monogram className="h-10 w-10 text-xl" />
           <div>
-            <h2 className="text-lg font-semibold leading-tight">Support assistant</h2>
-            <p className="flex items-center gap-1.5 text-sm text-slate-300">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
-              Online · replies instantly
+            <h2 className="text-[15px] font-semibold leading-tight text-ink">Support assistant</h2>
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-stone-500">
+              <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              </span>
+              Online · replies in seconds
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {messages.length > 0 && (
             <button
               type="button"
               onClick={startNewChat}
-              className="rounded-full border border-white/25 px-4 py-1.5 text-sm font-medium text-white hover:bg-white/10"
+              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-ink ring-1 ring-stone-200 transition hover:bg-stone-50 ${chatFocusRing}`}
             >
+              <Icon name="plus" className="h-3.5 w-3.5" />
               New chat
             </button>
           )}
@@ -301,102 +299,140 @@ export function Widget({
               type="button"
               aria-label="Close help"
               onClick={() => setOpen(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-white hover:bg-white/10"
+              className={`flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition hover:bg-stone-100 hover:text-ink ${chatFocusRing}`}
             >
-              ✕
+              <Icon name="x" className="h-4 w-4" />
             </button>
           )}
         </div>
       </header>
 
-      <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50 px-6 py-6" aria-live="polite">
-        <Bubble role="assistant">
-          Hi{session?.name ? ` ${String(session.name).split(" ")[0]}` : ""}! I can answer questions
-          about running your store. If I can't solve it, one of our executives will contact you.
-        </Bubble>
-
-        {messages.length === 0 && (
-          <div className="space-y-2 pl-11">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Try asking
+      <div className="flex-1 overflow-y-auto px-6 py-8 sm:px-10" aria-live="polite">
+        <div className="mx-auto flex max-w-2xl flex-col gap-6">
+          <div className={messages.length === 0 ? "pb-2 pt-6 sm:pt-12" : ""}>
+            <p className={`display text-ink ${messages.length === 0 ? "text-4xl" : "text-2xl"}`}>
+              {firstName ? `Hi ${firstName}.` : "Hi there."}
             </p>
-            {EXAMPLES.map((example) => (
-              <button
-                key={example}
-                type="button"
-                disabled={busy}
-                onClick={() => submit(example)}
-                className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-[15px] text-ink shadow-sm transition hover:border-orange-600 hover:shadow disabled:opacity-50"
-              >
-                {example}
-              </button>
-            ))}
+            <p className="mt-2 max-w-md text-[15px] leading-relaxed text-stone-500">
+              I can answer questions about running your store. If I can't solve it, one of our
+              executives will contact you.
+            </p>
           </div>
-        )}
 
-        {messages.map((m, i) => (
-          <Bubble key={i} role={m.role} text={m.text}>
-            {m.sources?.length > 0 && (
-              <div className="mt-3 border-t border-slate-200 pt-2 text-sm">
-                <p className="font-medium text-slate-600">Related articles</p>
-                <ul className="mt-1 space-y-0.5">
-                  {m.sources.map((source) => (
-                    <li key={source.slug}>
-                      <Link
-                        to={source.url}
-                        onClick={() => setOpen(false)}
-                        className="text-orange-700 underline"
-                      >
-                        {source.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+          {messages.length === 0 && (
+            <div>
+              <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-400">
+                Try asking
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {EXAMPLES.map((example) => (
+                  <button
+                    key={example}
+                    type="button"
+                    disabled={busy}
+                    onClick={() => submit(example)}
+                    className={`group flex items-start justify-between gap-3 rounded-2xl bg-stone-50 px-4 py-3.5 text-left text-[14.5px] leading-snug text-ink ring-1 ring-stone-200/70 transition hover:bg-white hover:ring-stone-300 hover:shadow-sm disabled:opacity-50 ${chatFocusRing}`}
+                  >
+                    {example}
+                    <Icon
+                      name="arrow-right"
+                      className="mt-0.5 h-4 w-4 text-stone-300 transition group-hover:translate-x-0.5 group-hover:text-orange-600"
+                    />
+                  </button>
+                ))}
               </div>
-            )}
-          </Bubble>
-        ))}
+            </div>
+          )}
 
-        {ticketMessages.map((m) => (
-          <Bubble key={m.id} role={m.senderType === "owner" ? "user" : "assistant"} text={m.body} />
-        ))}
+          {messages.map((m, i) => (
+            <Bubble key={i} role={m.role} text={m.text}>
+              {m.sources?.length > 0 && (
+                <div className="mt-4 border-t border-stone-100 pt-3 text-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-400">
+                    Related articles
+                  </p>
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {m.sources.map((source) => (
+                      <li key={source.slug}>
+                        <Link
+                          to={source.url}
+                          onClick={() => setOpen(false)}
+                          className="inline-flex rounded-full bg-stone-100 px-3 py-1 text-[13px] font-medium text-ink transition hover:bg-orange-100"
+                        >
+                          {source.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Bubble>
+          ))}
 
-        {busy && !escalated && <ChatThinking />}
-        <ChatError>{error}</ChatError>
-        {escalated && (
-          <div
-            role="status"
-            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-          >
-            <p className="font-medium">{ESCALATED_NOTICE}</p>
-          </div>
-        )}
-        <div ref={endRef} />
+          {ticketMessages.map((m) => (
+            <Bubble
+              key={m.id}
+              role={m.senderType === "owner" ? "user" : "assistant"}
+              text={m.body}
+            />
+          ))}
+
+          {busy && !escalated && (
+            <div className="flex items-center gap-3" role="status">
+              <Monogram className="h-7 w-7 text-sm" />
+              <span className="sr-only">Thinking…</span>
+              <span className="flex gap-1" aria-hidden="true">
+                {[0, 150, 300].map((d) => (
+                  <span
+                    key={d}
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-stone-300"
+                    style={{ animationDelay: `${d}ms` }}
+                  />
+                ))}
+              </span>
+            </div>
+          )}
+          <ChatError>{error}</ChatError>
+          {escalated && (
+            <div
+              role="status"
+              className="flex items-start gap-3 rounded-2xl bg-emerald-50/70 px-4 py-3.5 text-sm text-emerald-900 ring-1 ring-emerald-200/70"
+            >
+              <span
+                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white"
+                aria-hidden="true"
+              >
+                <Icon name="check" className="h-3 w-3" strokeWidth="2.5" />
+              </span>
+              <p className="font-medium">{ESCALATED_NOTICE}</p>
+            </div>
+          )}
+          <div ref={endRef} />
+        </div>
       </div>
 
       {!escalated && (triedAssistant || error) && (
-        <>
-          {/* Always visible, also while the assistant is answering or after a ticket exists */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-white px-6 py-3">
-            <div>
-              <p className="text-sm font-semibold text-ink">Need a person?</p>
-              <p className="text-xs text-slate-500">
-                An executive will contact you. We'll pass on this chat.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={humanPlease}
-              disabled={busy}
-              className="rounded-full bg-orange-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600/90 disabled:opacity-50"
-            >
-              Talk to a human
-            </button>
+        /* Always visible, also while the assistant is answering or after a ticket exists */
+        <div className="mx-5 mb-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl bg-stone-50 px-4 py-2.5 ring-1 ring-stone-200/60">
+          <div className="min-w-0">
+            <p className="text-[13px] font-semibold text-ink">Need a person?</p>
+            <p className="text-xs text-stone-500">
+              An executive will contact you. We'll pass on this chat.
+            </p>
           </div>
-        </>
+          <button
+            type="button"
+            onClick={humanPlease}
+            disabled={busy}
+            className={`rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-black disabled:opacity-50 ${chatFocusRing}`}
+          >
+            Talk to a human
+          </button>
+        </div>
       )}
 
       <ChatComposer
+        variant="soft"
         id="help-assistant-message"
         value={draft}
         onChange={setDraft}
@@ -404,40 +440,53 @@ export function Widget({
         busy={busy}
         disabled={escalated && !ticketId}
         label={escalated ? "Message to support" : "Your question"}
-        placeholder={escalated ? "Write to our support team…" : "Type your question…"}
+        placeholder={escalated ? "Write to our support team…" : "Ask anything about your store…"}
       />
     </aside>
   );
 
   if (inline) {
     return (
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-6 md:flex-row">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:flex-row md:gap-8">
         <nav aria-label="Your earlier questions" className="md:w-64 md:shrink-0">
-          <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-400">
             Your questions
           </h2>
           {history.length === 0 ? (
-            <p className="mt-2 px-1 text-sm text-slate-500">Nothing yet.</p>
+            <p className="mt-3 px-3 text-sm text-stone-500">Nothing yet.</p>
           ) : (
-            <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto md:max-h-[calc(100vh-12rem)]">
-              {history.map((c) => (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    onClick={() => openConversation(c.id)}
-                    aria-current={c.id === conversationId ? "true" : undefined}
-                    className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition hover:bg-slate-100 ${
-                      c.id === conversationId ? "bg-slate-100 font-medium" : ""
-                    }`}
-                  >
-                    <span className="block truncate text-ink">{c.title}</span>
-                    <span className="block text-xs text-slate-500">
-                      {c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : ""}
-                      {c.escalated ? " · with our team" : ""}
-                    </span>
-                  </button>
-                </li>
-              ))}
+            <ul className="mt-3 max-h-40 space-y-0.5 overflow-y-auto md:max-h-[calc(100vh-12rem)]">
+              {history.map((c) => {
+                const active = c.id === conversationId;
+                return (
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      onClick={() => openConversation(c.id)}
+                      aria-current={active ? "true" : undefined}
+                      className={`relative block w-full rounded-xl px-3 py-2.5 text-left text-sm transition ${chatFocusRing} ${
+                        active ? "bg-stone-100" : "hover:bg-stone-50"
+                      }`}
+                    >
+                      {active && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full bg-orange-600"
+                        />
+                      )}
+                      <span
+                        className={`block truncate text-ink ${active ? "font-semibold" : "font-medium"}`}
+                      >
+                        {c.title}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-stone-500">
+                        {c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : ""}
+                        {c.escalated ? " · with our team" : ""}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </nav>
@@ -453,14 +502,14 @@ export function Widget({
         aria-label="Help"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className={`fixed bottom-5 right-5 z-40 flex h-12 items-center gap-2 rounded-full bg-orange-600 px-5 text-sm font-semibold text-white shadow-lg hover:bg-orange-600/90 ${chatFocusRing}`}
+        className={`fixed bottom-5 right-5 z-40 flex h-12 items-center gap-2 rounded-full bg-ink px-5 text-sm font-semibold text-white shadow-[0_12px_32px_-8px_rgba(17,24,39,0.55)] transition hover:-translate-y-0.5 hover:bg-black ${chatFocusRing}`}
       >
-        <ChatIcon className="h-5 w-5" />
+        <Icon name="chat" className="h-5 w-5" />
         Help
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-3 backdrop-blur-[2px] sm:items-center sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-stone-900/40 p-3 backdrop-blur-sm sm:items-center sm:p-6">
           <button
             type="button"
             aria-label="Dismiss help"
@@ -475,40 +524,34 @@ export function Widget({
   );
 }
 
-function ChatIcon({ className }) {
+function Monogram({ className = "" }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <span
       aria-hidden="true"
-      className={className}
+      className={`display flex shrink-0 items-center justify-center rounded-xl bg-ink text-white ${className}`}
     >
-      <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />
-    </svg>
+      S
+    </span>
   );
 }
 
 function Bubble({ role, text, children }) {
   const mine = role === "user";
+  if (mine) {
+    return (
+      <div className="flex justify-end">
+        <div className="max-w-[80%] whitespace-pre-wrap rounded-3xl rounded-br-lg bg-stone-100 px-4 py-2.5 text-[15px] leading-relaxed text-ink">
+          {text}
+          {children}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className={`flex items-end gap-2.5 ${mine ? "justify-end" : ""}`}>
-      {!mine && (
-        <span className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-600 text-white">
-          <ChatIcon className="h-4 w-4" />
-        </span>
-      )}
-      <div
-        className={`max-w-[80%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed shadow-sm ${
-          mine
-            ? "whitespace-pre-wrap rounded-br-sm bg-[#111827] text-white"
-            : "rounded-bl-sm border border-slate-200 bg-white text-ink"
-        }`}
-      >
-        {mine ? text : text ? <AssistantMarkdown text={text} /> : null}
+    <div className="flex items-start gap-3">
+      <Monogram className="mt-0.5 h-7 w-7 text-sm" />
+      <div className="min-w-0 max-w-[88%] pt-0.5 text-[15px] leading-relaxed text-ink">
+        {text ? <AssistantMarkdown text={text} /> : null}
         {children}
       </div>
     </div>

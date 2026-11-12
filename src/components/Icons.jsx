@@ -111,6 +111,9 @@ const PATHS = {
     </>
   ),
   "chevron-right": <path d="m9 6 6 6-6 6" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  "arrow-up": <path d="M12 19V5m-6 6 6-6 6 6" />,
+  chat: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />,
 };
 
 export default function Icon({ name, className = "h-4 w-4", ...props }) {
