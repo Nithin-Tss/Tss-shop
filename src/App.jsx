@@ -92,8 +92,6 @@ export default function App() {
           <Route path="/admin" element={<Navigate to="/admin/online-store/home" replace />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/help" element={<AdminHelp />} />
-          <Route path="/admin/help/tickets" element={<AdminHelp />} />
-          <Route path="/admin/help/tickets/:ticketId" element={<AdminHelp />} />
           <Route path="/admin/help/articles/:articleSlug" element={<AdminHelp />} />
           <Route path="/admin/help/:topic" element={<AdminHelp />} />
           <Route path="/admin/online-store/home" element={<AdminHome />} />
@@ -241,15 +239,9 @@ export default function App() {
           </Route>
           {/* Platform administration: the API refuses anyone who isn't a platform administrator */}
           <Route path="/admin/platform" element={<AdminPlatform />} />
-          {/* Support staff work tickets in the separate Tss-helpdesk app; old staff links land on the member's own tickets */}
-          <Route
-            path="/admin/support-tickets"
-            element={<Navigate to="/admin/help/tickets" replace />}
-          />
-          <Route
-            path="/admin/platform/support"
-            element={<Navigate to="/admin/help/tickets" replace />}
-          />
+          {/* Support staff work tickets in the separate Tss-helpdesk app; old links land on the Help chat */}
+          <Route path="/admin/support-tickets" element={<Navigate to="/admin/help" replace />} />
+          <Route path="/admin/platform/support" element={<Navigate to="/admin/help" replace />} />
           <Route element={<RequirePermission permission="shipping.view" />}>
             <Route
               path="/admin/online-store/shipping"

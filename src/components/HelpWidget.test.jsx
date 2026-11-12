@@ -191,7 +191,7 @@ describe("HelpWidget", () => {
       escalated: true,
     }));
     mount({ load });
-    expect(await screen.findByText("A support agent will reply here.")).toBeTruthy();
+    expect(await screen.findByText("One of our executives will contact you.")).toBeTruthy();
     expect(screen.getByLabelText("Message to support").disabled).toBe(false);
   });
 });

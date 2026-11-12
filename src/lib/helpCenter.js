@@ -8,15 +8,6 @@
 // email app; an https:// address opens that page instead.
 export const SUPPORT_URL = "mailto:support@example.com";
 
-// The Contact support page: /admin/help/contact. Its slug must never be a category or article slug.
-export const CONTACT_SLUG = "contact";
-export const CONTACT_PATH = `/admin/help/${CONTACT_SLUG}`;
-
-// My support tickets: /admin/help/tickets (the list) and /admin/help/tickets/<id> (one conversation).
-// "tickets" must never be a category or article slug either.
-export const TICKETS_PATH = "/admin/help/tickets";
-export const ticketPath = (id) => `${TICKETS_PATH}/${id}`;
-
 // The pages an article may offer a button for. This mirrors ACTIONS in Tss-backend/apps/assistant/actions.py
 // (label, path, and the permission the page itself needs, see RequirePermission in App.jsx). An article names a
 // key from here, never a path of its own, and the button is shown only to a member who holds `permission`.

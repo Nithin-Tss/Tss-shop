@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
 import HelpWidget from "@/components/HelpWidget";
-import { TICKETS_PATH } from "@/lib/helpCenter";
 import {
   apiDelete,
   apiGet,
@@ -605,8 +604,6 @@ export default function AdminSidebar() {
   const searchRef = useRef(null);
   const session = useSession();
   const allowed = (item) => !item.permission || can(session, item.permission);
-  // Support Tickets: the member's own tickets (staff answer them in the separate Tss-helpdesk app)
-  const supportActive = isUnder(path, TICKETS_PATH);
 
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [query, setQuery] = useState("");
@@ -849,13 +846,13 @@ export default function AdminSidebar() {
       {/* SETTINGS + ACCOUNT */}
       <div className="space-y-2 px-3 pb-3 pt-2">
         <Link
-          to={TICKETS_PATH}
-          title="Support Tickets"
-          aria-current={supportActive ? "page" : undefined}
-          className={rowClass(supportActive)}
+          to="/admin/help"
+          title="Help"
+          aria-current={isUnder(path, "/admin/help") ? "page" : undefined}
+          className={rowClass(isUnder(path, "/admin/help"))}
         >
           <NavIcon name="support" />
-          <Label>Support Tickets</Label>
+          <Label>Help</Label>
         </Link>
         <Link
           to={`${BASE}/settings`}

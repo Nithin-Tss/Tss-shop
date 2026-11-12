@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import AssistantMarkdown from "@/components/AssistantMarkdown";
 import {
   ChatComposer,
@@ -14,11 +14,11 @@ import { useFlag } from "@/lib/featureFlags";
 import {
   ESCALATED_NOTICE,
   HELP_FLAG,
+  listConversations,
   loadConversation,
   sendHelpMessage,
   talkToAHuman,
 } from "@/lib/helpAssistantApi";
-import { ticketPath } from "@/lib/helpCenter";
 import { onOpenHelpChat } from "@/lib/helpChat";
 import { sendErrorMessage } from "@/lib/supportRequest";
 import { TICKETS_API, buildReplyPayload, usePoll, validateReply } from "@/lib/supportTickets";
@@ -59,19 +59,33 @@ function writeSaved(storeId, id) {
   }
 }
 
+// The floating button + popup, on every admin page except the Help Center, which is the chat itself
 export default function HelpWidget() {
   const access = useHelpAssistantAccess();
-  return access ? <Widget /> : null;
+  const { pathname } = useLocation();
+  if (!access || pathname.replace(/\/+$/, "") === HELP_HOME) return null;
+  return <Widget />;
+}
+
+export const HELP_HOME = "/admin/help";
+
+// The Help Center page: the same chat, filling the page
+export function HelpChatPage() {
+  const access = useHelpAssistantAccess();
+  return access ? <Widget inline /> : <p className="p-8 text-slate-600">Chat is unavailable.</p>;
 }
 
 export function Widget({
   send = sendHelpMessage,
   escalate = talkToAHuman,
   load = loadConversation,
+  list = listConversations,
+  inline = false,
 }) {
   const session = useSession();
   const storeId = session?.storeId;
-  const [open, setOpen] = useState(false);
+  const [openState, setOpen] = useState(false);
+  const open = inline || openState;
   const [messages, setMessages] = useState([]); // { role: "user" | "assistant", text, sources? }
   const [conversationId, setConversationId] = useState(() => readSaved(storeId));
   const [ticket, setTicket] = useState(null);
@@ -81,6 +95,11 @@ export function Widget({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const restored = useRef(false);
+  const [history, setHistory] = useState([]); // earlier chats, shown beside the chat on the Help page
+  const refreshHistory = useCallback(() => {
+    if (inline) list().then((res) => res.ok && setHistory(res.conversations));
+  }, [inline, list]);
+  useEffect(refreshHistory, [refreshHistory]);
   // The assistant gets the first go: "Talk to a human" appears once it has answered (or something went wrong)
   const triedAssistant = messages.some((m) => m.role === "assistant");
   const endRef = useScrollToEnd([messages, busy, open]);
@@ -184,6 +203,7 @@ export function Widget({
       return;
     }
     remember(res.conversationId);
+    refreshHistory();
     setMessages((m) => [...m, { role: "assistant", text: res.reply, sources: res.sources }]);
     if (res.ticket) setTicket(res.ticket);
     if (res.escalated) setEscalated(true);
@@ -205,17 +225,31 @@ export function Widget({
     setTicket(res.ticket);
     setEscalated(true);
     setDraft("");
-    const number = res.ticket?.ticketNumber;
     setMessages((m) => [
       ...m,
       {
         role: "assistant",
-        text: `${res.created ? "I've raised" : "You already have"} ticket ${number || ""}. ${ESCALATED_NOTICE}`.replace(
-          "  ",
-          " "
-        ),
+        text: "I've passed this chat to our team. One of our executives will contact you.",
       },
     ]);
+  }
+
+  async function openConversation(id) {
+    if (busy || id === conversationId) return;
+    setError("");
+    setBusy(true);
+    const res = await load(id);
+    setBusy(false);
+    if (!res.ok) {
+      setError("Couldn't open that chat.");
+      return;
+    }
+    restored.current = true;
+    remember(id);
+    setMessages(res.messages);
+    setTicket(res.ticket);
+    setEscalated(res.escalated);
+    setTicketMessages([]);
   }
 
   function startNewChat() {
@@ -228,6 +262,188 @@ export function Widget({
     setEscalated(false);
     setTicketMessages([]);
     setError("");
+  }
+
+  const card = (
+    <aside
+      aria-label="Help assistant"
+      className={
+        inline
+          ? "relative flex h-[calc(100vh-9rem)] min-h-[480px] w-full flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200"
+          : "relative flex h-[min(820px,calc(100vh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_80px_rgba(15,23,42,0.45)] ring-1 ring-slate-900/10"
+      }
+    >
+      <header className="flex items-center justify-between gap-3 bg-[#111827] px-6 py-5 text-white">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-600">
+            <ChatIcon className="h-6 w-6" />
+          </span>
+          <div>
+            <h2 className="text-lg font-semibold leading-tight">Support assistant</h2>
+            <p className="flex items-center gap-1.5 text-sm text-slate-300">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
+              Online · replies instantly
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {messages.length > 0 && (
+            <button
+              type="button"
+              onClick={startNewChat}
+              className="rounded-full border border-white/25 px-4 py-1.5 text-sm font-medium text-white hover:bg-white/10"
+            >
+              New chat
+            </button>
+          )}
+          {!inline && (
+            <button
+              type="button"
+              aria-label="Close help"
+              onClick={() => setOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-white hover:bg-white/10"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </header>
+
+      <div className="flex-1 space-y-4 overflow-y-auto bg-slate-50 px-6 py-6" aria-live="polite">
+        <Bubble role="assistant">
+          Hi{session?.name ? ` ${String(session.name).split(" ")[0]}` : ""}! I can answer questions
+          about running your store. If I can't solve it, one of our executives will contact you.
+        </Bubble>
+
+        {messages.length === 0 && (
+          <div className="space-y-2 pl-11">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Try asking
+            </p>
+            {EXAMPLES.map((example) => (
+              <button
+                key={example}
+                type="button"
+                disabled={busy}
+                onClick={() => submit(example)}
+                className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-[15px] text-ink shadow-sm transition hover:border-orange-600 hover:shadow disabled:opacity-50"
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {messages.map((m, i) => (
+          <Bubble key={i} role={m.role} text={m.text}>
+            {m.sources?.length > 0 && (
+              <div className="mt-3 border-t border-slate-200 pt-2 text-sm">
+                <p className="font-medium text-slate-600">Related articles</p>
+                <ul className="mt-1 space-y-0.5">
+                  {m.sources.map((source) => (
+                    <li key={source.slug}>
+                      <Link
+                        to={source.url}
+                        onClick={() => setOpen(false)}
+                        className="text-orange-700 underline"
+                      >
+                        {source.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </Bubble>
+        ))}
+
+        {ticketMessages.map((m) => (
+          <Bubble key={m.id} role={m.senderType === "owner" ? "user" : "assistant"} text={m.body} />
+        ))}
+
+        {busy && !escalated && <ChatThinking />}
+        <ChatError>{error}</ChatError>
+        {escalated && (
+          <div
+            role="status"
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+          >
+            <p className="font-medium">{ESCALATED_NOTICE}</p>
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      {!escalated && (triedAssistant || error) && (
+        <>
+          {/* Always visible, also while the assistant is answering or after a ticket exists */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-white px-6 py-3">
+            <div>
+              <p className="text-sm font-semibold text-ink">Need a person?</p>
+              <p className="text-xs text-slate-500">
+                An executive will contact you. We'll pass on this chat.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={humanPlease}
+              disabled={busy}
+              className="rounded-full bg-orange-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600/90 disabled:opacity-50"
+            >
+              Talk to a human
+            </button>
+          </div>
+        </>
+      )}
+
+      <ChatComposer
+        id="help-assistant-message"
+        value={draft}
+        onChange={setDraft}
+        onSubmit={submit}
+        busy={busy}
+        disabled={escalated && !ticketId}
+        label={escalated ? "Message to support" : "Your question"}
+        placeholder={escalated ? "Write to our support team…" : "Type your question…"}
+      />
+    </aside>
+  );
+
+  if (inline) {
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-6 md:flex-row">
+        <nav aria-label="Your earlier questions" className="md:w-64 md:shrink-0">
+          <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Your questions
+          </h2>
+          {history.length === 0 ? (
+            <p className="mt-2 px-1 text-sm text-slate-500">Nothing yet.</p>
+          ) : (
+            <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto md:max-h-[calc(100vh-12rem)]">
+              {history.map((c) => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => openConversation(c.id)}
+                    aria-current={c.id === conversationId ? "true" : undefined}
+                    className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition hover:bg-slate-100 ${
+                      c.id === conversationId ? "bg-slate-100 font-medium" : ""
+                    }`}
+                  >
+                    <span className="block truncate text-ink">{c.title}</span>
+                    <span className="block text-xs text-slate-500">
+                      {c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : ""}
+                      {c.escalated ? " · with our team" : ""}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </nav>
+        <div className="min-w-0 flex-1">{card}</div>
+      </div>
+    );
   }
 
   return (
@@ -252,158 +468,7 @@ export function Widget({
             onClick={() => setOpen(false)}
             className="absolute inset-0 cursor-default"
           />
-          <aside
-            aria-label="Help assistant"
-            className="relative flex h-[min(820px,calc(100vh-3rem))] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_80px_rgba(15,23,42,0.45)] ring-1 ring-slate-900/10"
-          >
-            <header className="flex items-center justify-between gap-3 bg-[#111827] px-6 py-5 text-white">
-              <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-600">
-                  <ChatIcon className="h-6 w-6" />
-                </span>
-                <div>
-                  <h2 className="text-lg font-semibold leading-tight">Support assistant</h2>
-                  <p className="flex items-center gap-1.5 text-sm text-slate-300">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
-                    Online · replies instantly
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {messages.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={startNewChat}
-                    className="rounded-full border border-white/25 px-4 py-1.5 text-sm font-medium text-white hover:bg-white/10"
-                  >
-                    New chat
-                  </button>
-                )}
-                <button
-                  type="button"
-                  aria-label="Close help"
-                  onClick={() => setOpen(false)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-lg text-white hover:bg-white/10"
-                >
-                  ✕
-                </button>
-              </div>
-            </header>
-
-            <div
-              className="flex-1 space-y-4 overflow-y-auto bg-slate-50 px-6 py-6"
-              aria-live="polite"
-            >
-              <Bubble role="assistant">
-                Hi{session?.name ? ` ${String(session.name).split(" ")[0]}` : ""}! I can answer
-                questions about running your store. If I can't solve it, you can talk to a person at
-                any time.
-              </Bubble>
-
-              {messages.length === 0 && (
-                <div className="space-y-2 pl-11">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Try asking
-                  </p>
-                  {EXAMPLES.map((example) => (
-                    <button
-                      key={example}
-                      type="button"
-                      disabled={busy}
-                      onClick={() => submit(example)}
-                      className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-[15px] text-ink shadow-sm transition hover:border-orange-600 hover:shadow disabled:opacity-50"
-                    >
-                      {example}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {messages.map((m, i) => (
-                <Bubble key={i} role={m.role} text={m.text}>
-                  {m.sources?.length > 0 && (
-                    <div className="mt-3 border-t border-slate-200 pt-2 text-sm">
-                      <p className="font-medium text-slate-600">Related articles</p>
-                      <ul className="mt-1 space-y-0.5">
-                        {m.sources.map((source) => (
-                          <li key={source.slug}>
-                            <Link
-                              to={source.url}
-                              onClick={() => setOpen(false)}
-                              className="text-orange-700 underline"
-                            >
-                              {source.title}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </Bubble>
-              ))}
-
-              {ticketMessages.map((m) => (
-                <Bubble
-                  key={m.id}
-                  role={m.senderType === "owner" ? "user" : "assistant"}
-                  text={m.body}
-                />
-              ))}
-
-              {busy && !escalated && <ChatThinking />}
-              <ChatError>{error}</ChatError>
-              {escalated && (
-                <div
-                  role="status"
-                  className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-                >
-                  <p className="font-medium">{ESCALATED_NOTICE}</p>
-                  {ticket && (
-                    <p className="mt-0.5">
-                      Ticket {ticket.ticketNumber}.{" "}
-                      <Link to={ticketPath(ticket.id)} className="underline">
-                        View it in My support tickets
-                      </Link>
-                    </p>
-                  )}
-                </div>
-              )}
-              <div ref={endRef} />
-            </div>
-
-            {!escalated && (triedAssistant || error) && (
-              <>
-                {/* Always visible, also while the assistant is answering or after a ticket exists */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-white px-6 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-ink">Prefer a real person?</p>
-                    <p className="text-xs text-slate-500">
-                      We'll pass on this chat so you don't repeat yourself.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={humanPlease}
-                    disabled={busy}
-                    className="rounded-full bg-orange-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-600/90 disabled:opacity-50"
-                  >
-                    Talk to a human
-                  </button>
-                </div>
-              </>
-            )}
-
-            <ChatComposer
-              id="help-assistant-message"
-              value={draft}
-              onChange={setDraft}
-              onSubmit={submit}
-              busy={busy}
-              disabled={escalated && !ticketId}
-              label={escalated ? "Message to support" : "Your question"}
-              placeholder={escalated ? "Write to our support team…" : "Type your question…"}
-            />
-          </aside>
+          {card}
         </div>
       )}
     </>

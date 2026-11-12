@@ -4,7 +4,7 @@ import { apiGet, apiPost } from "@/lib/api";
 const BASE = "/api/v1/help-assistant";
 
 export const HELP_FLAG = "help_assistant";
-export const ESCALATED_NOTICE = "A support agent will reply here.";
+export const ESCALATED_NOTICE = "One of our executives will contact you.";
 
 const failure = (res, fallback) => {
   if (res.status === 429) {
@@ -80,6 +80,21 @@ export async function loadConversation(conversationId) {
     })),
     ticket: cleanTicket(res.data?.ticket),
     escalated: Boolean(res.data?.escalated),
+  };
+}
+
+// The member's earlier chats, newest first -> { ok, conversations: [{ id, title, updatedAt, escalated }] }
+export async function listConversations() {
+  const res = await apiGet(`${BASE}/conversations/`);
+  if (!res.ok) return { ok: false, conversations: [] };
+  return {
+    ok: true,
+    conversations: (res.data?.conversations || []).map((c) => ({
+      id: String(c.id),
+      title: String(c.title ?? ""),
+      updatedAt: c.updatedAt || null,
+      escalated: Boolean(c.escalated),
+    })),
   };
 }
 
