@@ -94,6 +94,7 @@ export function Widget({
   const [escalated, setEscalated] = useState(false);
   const [ticketMessages, setTicketMessages] = useState([]); // the live conversation with support, once escalated
   const [executiveJoined, setExecutiveJoined] = useState(false);
+  const [executiveName, setExecutiveName] = useState("");
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -139,6 +140,7 @@ export function Widget({
     if (res.ok && Array.isArray(res.data?.messages)) {
       setTicketMessages(res.data.messages);
       setExecutiveJoined(Boolean(res.data.executiveJoined));
+      setExecutiveName(res.data.executiveName || "");
     }
   }, [ticketId]);
 
@@ -150,6 +152,7 @@ export function Widget({
       if (alive && res.ok && Array.isArray(res.data?.messages)) {
         setTicketMessages(res.data.messages);
         setExecutiveJoined(Boolean(res.data.executiveJoined));
+        setExecutiveName(res.data.executiveName || "");
       }
     });
     return () => {
@@ -261,6 +264,7 @@ export function Widget({
     setEscalated(res.escalated);
     setTicketMessages([]);
     setExecutiveJoined(false);
+    setExecutiveName("");
   }
 
   function startNewChat() {
@@ -273,6 +277,7 @@ export function Widget({
     setEscalated(false);
     setTicketMessages([]);
     setExecutiveJoined(false);
+    setExecutiveName("");
     setError("");
   }
 
@@ -422,7 +427,9 @@ export function Widget({
                 <Icon name="check" className="h-3 w-3" strokeWidth="2.5" />
               </span>
               <p className="font-medium">
-                {executiveJoined ? "An executive has joined the chat." : ESCALATED_NOTICE}
+                {executiveJoined
+                  ? `${executiveName || "An executive"} has joined the chat.`
+                  : ESCALATED_NOTICE}
               </p>
             </div>
           )}
