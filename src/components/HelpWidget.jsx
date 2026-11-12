@@ -16,7 +16,14 @@ import {
 } from "@/lib/helpAssistantApi";
 import { onOpenHelpChat } from "@/lib/helpChat";
 import { sendErrorMessage } from "@/lib/supportRequest";
-import { TICKETS_API, buildReplyPayload, usePoll, validateReply } from "@/lib/supportTickets";
+import {
+  SLOW_POLL_MS,
+  TICKETS_API,
+  buildReplyPayload,
+  usePoll,
+  useTicketLive,
+  validateReply,
+} from "@/lib/supportTickets";
 
 /*
  * The floating Help chat. Shown across the admin to any signed-in member while the help_assistant feature flag is on
@@ -129,8 +136,7 @@ export function Widget({
     if (!ticketId) return;
     const res = await apiGet(`${TICKETS_API}${ticketId}/`);
     if (res.ok && Array.isArray(res.data?.messages)) {
-      // the first message is the summary made from this chat, which is already on screen
-      setTicketMessages(res.data.messages.slice(1));
+      setTicketMessages(res.data.messages);
     }
   }, [ticketId]);
 
@@ -140,7 +146,7 @@ export function Widget({
     let alive = true;
     apiGet(`${TICKETS_API}${ticketId}/`).then((res) => {
       if (alive && res.ok && Array.isArray(res.data?.messages)) {
-        setTicketMessages(res.data.messages.slice(1));
+        setTicketMessages(res.data.messages);
       }
     });
     return () => {
@@ -148,7 +154,13 @@ export function Widget({
     };
   }, [open, ticketId]);
 
-  usePoll(loadTicket, undefined, open && Boolean(ticketId));
+  // New replies arrive the moment support sends them; the slow poll is only a safety net
+  useTicketLive(
+    ticketId ? `${TICKETS_API}${ticketId}/events/` : "",
+    loadTicket,
+    open && Boolean(ticketId)
+  );
+  usePoll(loadTicket, SLOW_POLL_MS, open && Boolean(ticketId));
 
   async function sendToSupport(message) {
     const problem = validateReply(message);
@@ -168,7 +180,7 @@ export function Widget({
       return;
     }
     setDraft("");
-    if (Array.isArray(res.data?.messages)) setTicketMessages(res.data.messages.slice(1));
+    if (Array.isArray(res.data?.messages)) setTicketMessages(res.data.messages);
   }
 
   const remember = useCallback(

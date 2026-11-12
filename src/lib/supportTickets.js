@@ -2,11 +2,14 @@
 // do the network calls. Server side: Tss-backend/apps/helpdesk.
 
 import { useEffect, useRef } from "react";
+import { API_URL } from "@/lib/api";
+import { getSession } from "@/lib/auth";
 
 export const TICKETS_API = "/api/v1/support/tickets/";
 export const ATTACHMENTS_API = "/api/v1/support/attachments/";
 
-export const POLL_MS = 5000; // an open conversation refreshes this often
+export const POLL_MS = 5000; // without the live stream, an open conversation refreshes this often
+export const SLOW_POLL_MS = 30000; // safety net while the live stream is working
 export const MAX_ATTACHMENTS = 3; // images per message (the server enforces the same limit)
 export const MAX_REPLY = 2000;
 
@@ -177,4 +180,83 @@ export function usePoll(callback, ms = POLL_MS, enabled = true) {
       document.removeEventListener("visibilitychange", tick);
     };
   }, [ms, enabled]);
+}
+
+function streamHeaders() {
+  const session = getSession();
+  const headers = { Accept: "text/event-stream" };
+  if (session?.token) headers.Authorization = `Bearer ${session.token}`;
+  let storeId = session?.storeId;
+  try {
+    storeId ||= localStorage.getItem("tss-store-id");
+  } catch {
+    /* storage unavailable */
+  }
+  if (storeId) headers["X-Store-Id"] = storeId;
+  return headers;
+}
+
+// Live updates: keeps a Server-Sent Events stream open for one ticket (over fetch, which can send the sign-in
+// headers) and calls `onChange` the moment the server says the ticket changed, and once after every (re)connect so
+// nothing sent in between is missed. Reconnects by itself. Polling stays on as a slow safety net.
+export function useTicketLive(eventsPath, onChange, enabled = true) {
+  const latest = useRef(onChange);
+  useEffect(() => {
+    latest.current = onChange;
+  });
+
+  useEffect(() => {
+    if (!enabled || !eventsPath || typeof fetch === "undefined") return undefined;
+    let stopped = false;
+    let controller = null;
+    let after = "";
+    let failures = 0;
+
+    async function connect() {
+      while (!stopped) {
+        controller = new AbortController();
+        try {
+          const response = await fetch(`${API_URL}${eventsPath}${after ? `?after=${after}` : ""}`, {
+            headers: streamHeaders(),
+            signal: controller.signal,
+          });
+          if (response.status === 401) {
+            await latest.current(); // an ordinary request refreshes the sign-in; then reconnect
+            throw new Error("sign-in expired");
+          }
+          if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+          failures = 0;
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            let cut;
+            while ((cut = buffer.indexOf("\n\n")) >= 0) {
+              const chunk = buffer.slice(0, cut);
+              buffer = buffer.slice(cut + 2);
+              let event = "message";
+              for (const line of chunk.split("\n")) {
+                if (line.startsWith("id:")) after = line.slice(3).trim();
+                else if (line.startsWith("event:")) event = line.slice(6).trim();
+              }
+              if (event === "hello" || event === "ticket") latest.current();
+            }
+          }
+        } catch {
+          if (stopped) return;
+          failures += 1;
+        }
+        if (!stopped) await new Promise((r) => setTimeout(r, Math.min(500 * 2 ** failures, 15000)));
+      }
+    }
+
+    connect();
+    return () => {
+      stopped = true;
+      controller?.abort();
+    };
+  }, [eventsPath, enabled]);
 }
