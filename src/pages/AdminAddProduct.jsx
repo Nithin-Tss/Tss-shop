@@ -4,6 +4,7 @@ import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
+import { formatAmount, useStoreCurrency } from "@/lib/formatPrice";
 
 const NAVY = "#111827";
 const PRODUCTS_URL = "/admin/online-store/products";
@@ -158,21 +159,44 @@ function FieldError({ message }) {
 
 const withError = (error) => (error ? "border-red-400" : "");
 
-function MoneyInput({ value, onChange, placeholder = "0.00", error }) {
+export function MoneyInput({ value, onChange, placeholder = "0.00", error, ...rest }) {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+
+    const handleWheel = (e) => {
+      // Prevent browser's native number input stepping on mouse wheel
+      e.preventDefault();
+      if (document.activeElement === el) {
+        el.blur();
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
+
   return (
     <div className="relative">
       <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">
         $
       </span>
       <input
+        ref={inputRef}
         type="number"
         min="0"
         step="0.01"
         inputMode="decimal"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onWheel={(e) => e.target.blur()}
         placeholder={placeholder}
         className={`${inputClass} pl-7 ${withError(error)}`}
+        {...rest}
       />
     </div>
   );
@@ -577,10 +601,10 @@ const firstFields = (v) => ({
 const isMoney = (s) => /^\d+(\.\d{1,2})?$/.test(String(s).trim());
 const isWhole = (s) => /^\d+$/.test(String(s).trim());
 const isWeight = (s) => /^\d+(\.\d{1,3})?$/.test(String(s).trim());
-const formatAud = (value) =>
+const formatStorePrice = (value, currency) =>
   value === "" || value == null || Number.isNaN(Number(value))
     ? ""
-    : `$${Number(value).toFixed(2)}`;
+    : formatAmount(String(value), currency);
 
 // "Single / 375ML", else the SKU, else "Default variant"
 const variantName = (v, options) => {
@@ -695,6 +719,7 @@ const blankOption = () => ({
 });
 
 function OptionsEditor({ productId, options, variants, startWithNew, onClose, onApplied }) {
+  const storeCurrency = useStoreCurrency();
   const [opts, setOpts] = useState(() => [
     ...options.map((o) => ({
       id: draftId(),
@@ -1049,8 +1074,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
                 created
               </p>
               <p className="text-xs text-slate-500">
-                Each gets the first variant's price ({formatAud(basePrice)}) and the SKU shown,
-                which you can change later. They start as Not tracked.
+                Each gets the first variant's price ({formatStorePrice(basePrice, storeCurrency)})
+                and the SKU shown, which you can change later. They start as Not tracked.
               </p>
               <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5 text-slate-700">
                 {preview.created.map((c) => (
@@ -3113,6 +3138,14 @@ function VariantsSection({
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : "-");
 
 // The "Add product" page
+const currencyName = (code) => {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "currency" }).of(code) || code;
+  } catch {
+    return code;
+  }
+};
+
 export default function AdminAddProduct() {
   return <ProductForm />;
 }
@@ -3155,6 +3188,20 @@ export function ProductForm({ productId }) {
   };
   const session = useSession();
   const activeStore = getActiveStore(session);
+
+  // The store's own currency, for the Pricing hint (INR until the store loads)
+  const [storeCurrency, setStoreCurrency] = useState("INR");
+  useEffect(() => {
+    if (!session?.storeId) return;
+    let cancelled = false;
+    apiGet(`/api/v1/stores/${session.storeId}/`).then((res) => {
+      const code = res?.ok && (res.data?.currency || res.data?.data?.currency);
+      if (!cancelled && code) setStoreCurrency(String(code).toUpperCase());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.storeId]);
 
   // What the user's roles allow (the backend checks each of these too)
   const canEdit = can(session, "products.manage");
@@ -4730,7 +4777,10 @@ export function ProductForm({ productId }) {
                   </Card>
 
                   {/* 3 PRICING */}
-                  <Card title="Pricing" hint="What customers pay, in Australian dollars (AUD).">
+                  <Card
+                    title="Pricing"
+                    hint={`What customers pay, in ${currencyName(storeCurrency)} (${storeCurrency}).`}
+                  >
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                       <Field label="Selling price (AUD)" error={fieldErrors.price}>
                         <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
@@ -5062,7 +5112,7 @@ export function ProductForm({ productId }) {
                       <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
                       {price !== "" && !isNaN(Number(price)) && (
                         <p className="mt-1 text-xs text-slate-500">
-                          ${Number(price).toFixed(2)} AUD
+                          {formatStorePrice(price, storeCurrency)}
                         </p>
                       )}
                     </div>
