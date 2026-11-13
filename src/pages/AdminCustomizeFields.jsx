@@ -15,6 +15,7 @@ import {
   defaultsOf,
   DropLine,
   DragHandle,
+  CARD_EXTRA_BLOCKS,
 } from "./AdminCustomizeShared";
 
 // The fonts the theme can use (from the schema), shared with every font picker
@@ -28,6 +29,31 @@ export const BlogPostsContext = createContext([]);
 
 // Image fields: show a picked image in the preview at once, and hold autosave until uploads finish
 export const UploadsContext = createContext(null);
+
+// Opens a group of the theme settings (e.g. "typography") from a link under a field
+export const ThemeLinkContext = createContext(null);
+
+// A link to a group of the theme settings: { label, group }
+export function ThemeLink({ link }) {
+  const open = useContext(ThemeLinkContext);
+  if (!link || !open) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => open(link.group)}
+      className="mt-1 block text-left text-[11px] font-medium text-ink underline"
+    >
+      {link.label}
+    </button>
+  );
+}
+
+// Alignment buttons: three lines, flush left, centred, flush right
+const ALIGN_ICONS = {
+  left: "M4 6h16M4 12h10M4 18h14",
+  center: "M4 6h16M7 12h10M5 18h14",
+  right: "M4 6h16M10 12h10M6 18h14",
+};
 
 // One stable change handler per option, so unchanged options don't re-render
 export function useOptionHandlers(onChange) {
@@ -720,9 +746,14 @@ export function GroupedFields({
 }
 
 export function Help({ spec }) {
-  return spec.help ? (
-    <span className="mt-1 block text-[11px] leading-snug text-slate-400">{spec.help}</span>
-  ) : null;
+  return (
+    <>
+      {spec.help ? (
+        <span className="mt-1 block text-[11px] leading-snug text-slate-400">{spec.help}</span>
+      ) : null}
+      <ThemeLink link={spec.link} />
+    </>
+  );
 }
 
 export const Field = memo(function Field({
@@ -761,6 +792,50 @@ export const Field = memo(function Field({
       );
 
     case "range":
+      if (spec.box) {
+        const clamp = (n) => Math.min(spec.max, Math.max(spec.min, Math.round(n)));
+        return (
+          <div>
+            {label}
+
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={spec.min}
+                max={spec.max}
+                step={spec.step || 1}
+                value={value}
+                onChange={(e) => onChange(Number(e.target.value))}
+                aria-label={spec.label}
+                className="min-w-0 flex-1 accent-orange-600"
+              />
+
+              <div className="flex h-8 w-20 shrink-0 items-center overflow-hidden rounded-lg border border-slate-200 bg-white focus-within:border-orange-600">
+                <input
+                  type="number"
+                  min={spec.min}
+                  max={spec.max}
+                  value={value}
+                  aria-label={`${spec.label} (${spec.unit || "number"})`}
+                  onChange={(e) => {
+                    const n = Number(e.target.value);
+                    if (e.target.value !== "" && !Number.isNaN(n)) onChange(clamp(n));
+                  }}
+                  className="h-full min-w-0 flex-1 px-2 text-sm outline-none"
+                />
+                {spec.unit && (
+                  <span className="border-l border-slate-200 bg-slate-100 px-1.5 text-xs leading-8 text-slate-600">
+                    {spec.unit}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <Help spec={spec} />
+          </div>
+        );
+      }
+
       return (
         <label className="block">
           <span className="mb-1 flex items-center justify-between text-xs font-medium text-violet-600">
@@ -822,6 +897,45 @@ export const Field = memo(function Field({
       );
 
     case "select":
+      if (spec.ui === "icons") {
+        return (
+          <div>
+            {label}
+
+            <div
+              className="flex w-fit rounded-lg border border-slate-200 bg-slate-100 p-0.5"
+              role="radiogroup"
+              aria-label={spec.label}
+            >
+              {spec.options
+                .filter((o) => ALIGN_ICONS[o])
+                .map((o) => (
+                  <button
+                    key={o}
+                    type="button"
+                    role="radio"
+                    aria-checked={value === o}
+                    aria-label={`${spec.label}: ${o}`}
+                    title={o.charAt(0).toUpperCase() + o.slice(1)}
+                    onClick={() => onChange(o)}
+                    className={`flex h-8 w-10 items-center justify-center rounded-md transition-colors ${
+                      value === o
+                        ? "bg-white text-charcoal-navy shadow-sm"
+                        : "text-slate-500 hover:text-orange-600"
+                    }`}
+                  >
+                    <svg {...iconProps} className="h-4 w-4">
+                      <path d={ALIGN_ICONS[o]} />
+                    </svg>
+                  </button>
+                ))}
+            </div>
+
+            <Help spec={spec} />
+          </div>
+        );
+      }
+
       if (spec.ui === "segmented") {
         return (
           <div>
@@ -1230,7 +1344,13 @@ export function SectionBlocks({
   onToggle,
   onRemove,
 }) {
-  const types = Object.entries(spec.blocks);
+  // A section's Product card is built in (it can't be added twice, hidden or deleted) and holds the cart icon and
+  // heart itself: none of those three is offered
+  const hasCard = blocks.some((b) => b.type === "card_layout");
+
+  const types = Object.entries(spec.blocks).filter(
+    ([type, blockSpec]) => !blockSpec.child_blocks && !(hasCard && CARD_EXTRA_BLOCKS.includes(type))
+  );
 
   const [menu, setMenu] = useState(false);
 
@@ -1303,6 +1423,15 @@ export function SectionBlocks({
         </div>
       )}
 
+      {hasCard && (
+        <p className="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          Every card of this section is drawn from the Product card block below: open it to change
+          the image, title, price and the other parts of every card. The card options above (vendor,
+          rating, price, image shape and so on) are used only if you edited this section's code in
+          Edit code.
+        </p>
+      )}
+
       {blocks.length === 0 ? (
         <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-xs text-slate-600">
           No blocks yet. Use "+ Add block" to add text, images, buttons, lists and more.
@@ -1357,30 +1486,36 @@ export function SectionBlocks({
                     {title}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => onToggle(i)}
-                    className={iconButton}
-                    aria-label={block.hidden ? `Show ${blockSpec.name}` : `Hide ${blockSpec.name}`}
-                    aria-pressed={!block.hidden}
-                    title={block.hidden ? "Hidden: click to show" : "Visible: click to hide"}
-                  >
-                    <EyeIcon hidden={block.hidden} />
-                  </button>
+                  {!blockSpec.child_blocks && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => onToggle(i)}
+                        className={iconButton}
+                        aria-label={
+                          block.hidden ? `Show ${blockSpec.name}` : `Hide ${blockSpec.name}`
+                        }
+                        aria-pressed={!block.hidden}
+                        title={block.hidden ? "Hidden: click to show" : "Visible: click to hide"}
+                      >
+                        <EyeIcon hidden={block.hidden} />
+                      </button>
 
-                  <button
-                    type="button"
-                    onClick={() => onDuplicate(i)}
-                    disabled={full || atLimit(block.type)}
-                    className={`${iconButton} disabled:opacity-30`}
-                    aria-label={`Duplicate ${blockSpec.name}`}
-                    title="Duplicate"
-                  >
-                    <svg {...iconProps} className="h-3.5 w-3.5">
-                      <rect x="8" y="8" width="13" height="13" rx="2" />
-                      <path d="M4 16V5a2 2 0 0 1 2-2h11" />
-                    </svg>
-                  </button>
+                      <button
+                        type="button"
+                        onClick={() => onDuplicate(i)}
+                        disabled={full || atLimit(block.type)}
+                        className={`${iconButton} disabled:opacity-30`}
+                        aria-label={`Duplicate ${blockSpec.name}`}
+                        title="Duplicate"
+                      >
+                        <svg {...iconProps} className="h-3.5 w-3.5">
+                          <rect x="8" y="8" width="13" height="13" rx="2" />
+                          <path d="M4 16V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
 
                   {!spec.required_blocks?.includes(block.type) && (
                     <button
@@ -1406,6 +1541,217 @@ export function SectionBlocks({
         <p className="mt-2 text-[11px] text-slate-400">
           Click a block to edit it. Drag by the handle to reorder, or onto another section that
           appears below.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// The parts of a Product card block (image, title, price, ...): add, drag to reorder, hide, delete. A part opens in
+// its own panel (onOpen), and every card of the section follows what is set there.
+export function CardChildren({
+  blockSpec,
+  items,
+  selected,
+  insertAfter = null,
+  onInsertDone,
+  onChange,
+  onOpen,
+}) {
+  const parts = blockSpec.child_blocks;
+
+  const [menu, setMenu] = useState(false);
+
+  // The "+" under a part in the preview: open the menu, and the new part goes right after that part
+  useEffect(() => {
+    if (insertAfter !== null) setMenu(true);
+  }, [insertAfter]);
+  const [drag, setDrag] = useState(null); // { from, over } while a part is being dragged
+  const listRef = useRef(null);
+
+  const used = new Set(items.map((c) => c.type));
+  const full = items.length >= 12;
+
+  function move(from, to) {
+    if (to < 0 || to >= items.length || to === from) return;
+    onChange((list) => {
+      const [item] = list.splice(from, 1);
+      list.splice(to, 0, item);
+    });
+  }
+
+  function startDrag(e, from) {
+    e.preventDefault();
+    let over = from;
+    setDrag({ from, over });
+
+    const onMove = (ev) => {
+      const rows = listRef.current ? [...listRef.current.querySelectorAll("[data-card-part]")] : [];
+      for (const row of rows) {
+        const box = row.getBoundingClientRect();
+        if (ev.clientY >= box.top && ev.clientY <= box.bottom) {
+          over = Number(row.dataset.cardPart);
+          setDrag({ from, over });
+          break;
+        }
+      }
+    };
+
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      setDrag(null);
+      move(from, over);
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  }
+
+  return (
+    <div className="border-t border-slate-100 py-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-semibold">
+          Card parts <span className="font-normal text-slate-400">({items.length}/12)</span>
+        </h3>
+        <button
+          type="button"
+          className={smallButton}
+          disabled={full}
+          onClick={() => setMenu((v) => !v)}
+          aria-expanded={menu}
+        >
+          + Add block
+        </button>
+      </div>
+
+      {menu && insertAfter !== null && items[insertAfter] && (
+        <p className="mb-1.5 text-[11px] text-slate-500">
+          Adding after {parts[items[insertAfter].type]?.name}
+        </p>
+      )}
+
+      {menu && (
+        <div
+          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-slate-200 bg-slate-100 p-2"
+          role="menu"
+        >
+          {Object.entries(parts).map(([type, partSpec]) => (
+            <button
+              key={type}
+              type="button"
+              role="menuitem"
+              disabled={used.has(type)}
+              title={used.has(type) ? "The card already has this part" : undefined}
+              onClick={() => {
+                const at =
+                  insertAfter !== null ? Math.min(insertAfter + 1, items.length) : items.length;
+                onChange((list) =>
+                  list.splice(at, 0, {
+                    type,
+                    hidden: false,
+                    settings: defaultsOf(partSpec.settings),
+                  })
+                );
+                setMenu(false);
+                onInsertDone?.();
+                onOpen(at);
+              }}
+              className="truncate rounded-md border border-slate-200 bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200"
+            >
+              {partSpec.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {items.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-xs text-slate-600">
+          The card is empty. Use "+ Add block" to add an image, title, price and more.
+        </p>
+      ) : (
+        <ul ref={listRef} className="grid gap-1.5">
+          {items.map((child, i) => {
+            const partSpec = parts[child.type];
+            if (!partSpec) return null;
+
+            const dragging = drag?.from === i;
+            const lineHere = drag && drag.over === i && drag.from !== i;
+
+            return (
+              <li
+                key={`${child.type}-${i}`}
+                data-card-part={i}
+                className={`relative rounded-lg border bg-white ${
+                  selected === i ? "border-orange-600" : "border-slate-200"
+                } ${dragging ? "opacity-40" : ""}`}
+              >
+                {lineHere && <DropLine after={drag.over > drag.from} />}
+
+                <div className="flex items-center gap-1 px-1.5 py-1.5 text-sm">
+                  <DragHandle
+                    label={`Move ${partSpec.name}`}
+                    onPointerDown={(e) => startDrag(e, i)}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowUp") {
+                        e.preventDefault();
+                        move(i, i - 1);
+                      }
+                      if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        move(i, i + 1);
+                      }
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    className={`min-w-0 flex-1 truncate text-left ${child.hidden ? "text-slate-400" : ""}`}
+                    onClick={() => onOpen(i)}
+                  >
+                    {partSpec.name}
+                    {child.hidden ? " · Hidden" : ""}
+                  </button>
+
+                  <button
+                    type="button"
+                    className={iconButton}
+                    onClick={() =>
+                      onChange((list) => {
+                        list[i].hidden = !list[i].hidden;
+                      })
+                    }
+                    aria-label={child.hidden ? `Show ${partSpec.name}` : `Hide ${partSpec.name}`}
+                    aria-pressed={!child.hidden}
+                    title={child.hidden ? "Hidden: click to show" : "Visible: click to hide"}
+                  >
+                    <EyeIcon hidden={child.hidden} />
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`${iconButton} hover:bg-red-50 hover:text-red-600`}
+                    onClick={() => onChange((list) => list.splice(i, 1))}
+                    aria-label={`Delete ${partSpec.name}`}
+                    title="Delete"
+                  >
+                    <svg {...iconProps} className="h-3.5 w-3.5">
+                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                    </svg>
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {items.length > 0 && (
+        <p className="mt-2 text-[11px] text-slate-400">
+          Click a part to edit it on every card. Drag by the handle to reorder. The badge sits on
+          the image; the cart icon and heart sit over it, so their place on the card stays.
         </p>
       )}
     </div>

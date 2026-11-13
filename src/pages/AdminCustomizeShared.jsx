@@ -35,6 +35,19 @@ export function defaultsOf(fields) {
   );
 }
 
+// The "Cart icon" and "Wishlist heart" blocks of a section with product cards: the Product card block holds them itself
+export const CARD_EXTRA_BLOCKS = ["cart_icon", "wishlist_heart"];
+
+// A ref to a block from the preview: 2 (the block) or "2.1" (its part 1) -> { block, child }
+export function parseBlockRef(value) {
+  if (Number.isInteger(value)) return { block: value, child: null };
+  if (typeof value === "string" && /^\d+\.\d+$/.test(value)) {
+    const [block, child] = value.split(".").map(Number);
+    return { block, child };
+  }
+  return { block: null, child: null };
+}
+
 // The thin line that shows where a dragged item will land
 export function DropLine({ after }) {
   return (
