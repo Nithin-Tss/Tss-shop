@@ -158,21 +158,44 @@ function FieldError({ message }) {
 
 const withError = (error) => (error ? "border-red-400" : "");
 
-function MoneyInput({ value, onChange, placeholder = "0.00", error }) {
+export function MoneyInput({ value, onChange, placeholder = "0.00", error, ...rest }) {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+
+    const handleWheel = (e) => {
+      // Prevent browser's native number input stepping on mouse wheel
+      e.preventDefault();
+      if (document.activeElement === el) {
+        el.blur();
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
+
   return (
     <div className="relative">
       <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">
         $
       </span>
       <input
+        ref={inputRef}
         type="number"
         min="0"
         step="0.01"
         inputMode="decimal"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onWheel={(e) => e.target.blur()}
         placeholder={placeholder}
         className={`${inputClass} pl-7 ${withError(error)}`}
+        {...rest}
       />
     </div>
   );
