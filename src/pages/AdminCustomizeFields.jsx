@@ -1565,9 +1565,12 @@ export function CardChildren({
   const [menu, setMenu] = useState(false);
 
   // The "+" under a part in the preview: open the menu, and the new part goes right after that part
-  useEffect(() => {
+  // (adjusted during render, keyed on the previous value, instead of in an effect)
+  const [prevInsertAfter, setPrevInsertAfter] = useState(insertAfter);
+  if (prevInsertAfter !== insertAfter) {
+    setPrevInsertAfter(insertAfter);
     if (insertAfter !== null) setMenu(true);
-  }, [insertAfter]);
+  }
   const [drag, setDrag] = useState(null); // { from, over } while a part is being dragged
   const listRef = useRef(null);
 
