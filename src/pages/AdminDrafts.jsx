@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import ExportDraftOrdersModal from "@/components/ExportDraftOrdersModal";
 import { apiGet } from "@/lib/api";
+import { formatAmount } from "@/lib/formatPrice";
 import { useCan } from "@/lib/auth";
 
 function formatDraftDate(dateString) {
@@ -322,7 +323,7 @@ export default function AdminDrafts() {
 
                           {/* Total */}
                           <td className="py-3.5 pl-3 pr-6 text-right font-medium text-ink">
-                            ${parseFloat(d.total || 0).toFixed(2)} {curr}
+                            {formatAmount(d.total || 0, curr)}
                           </td>
                         </tr>
                       );

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { formatAmount, useStoreCurrency } from "@/lib/formatPrice";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -12,6 +13,7 @@ export default function AdminCustomers() {
   const currentStoreId = session?.storeId;
   const canManage = useCan("customers.manage");
   const canDelete = useCan("customers.delete") || canManage;
+  const storeCurrency = useStoreCurrency();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -907,7 +909,7 @@ export default function AdminCustomers() {
 
                           {/* Amount spent */}
                           <td className="py-3.5 px-3 font-medium text-slate-900">
-                            ${parseFloat(c.amount_spent || 0).toFixed(2)}
+                            {formatAmount(c.amount_spent || 0, storeCurrency)}
                           </td>
 
                           {/* Addresses Action */}
@@ -1147,7 +1149,7 @@ export default function AdminCustomers() {
                 <div>
                   <span className="text-slate-400 font-medium block">Total Spent</span>
                   <span className="font-semibold text-slate-800 mt-0.5 inline-block">
-                    ${parseFloat(selectedCustomer.amount_spent || 0).toFixed(2)}
+                    {formatAmount(selectedCustomer.amount_spent || 0, storeCurrency)}
                   </span>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
+import { formatAmount } from "@/lib/formatPrice";
 
 const RECOVERY_STYLES = {
   pending: "bg-orange-50 text-orange-700 border border-orange-200",
@@ -147,7 +148,7 @@ export default function AdminAbandonedCheckouts() {
                             <RecoveryBadge status={c.recovery_status} />
                           </td>
                           <td className="py-3.5 pl-3 pr-6 text-right font-medium">
-                            {Number(c.total_amount || 0).toFixed(2)} {c.currency}
+                            {formatAmount(c.total_amount || 0, c.currency)}
                           </td>
                         </tr>
                       );

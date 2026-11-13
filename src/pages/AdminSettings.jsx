@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { currencyOptions } from "@/lib/formatPrice";
 import { useNavigate } from "react-router-dom";
 import { apiDelete, apiGet, apiPatch, syncAccess } from "@/lib/api";
 import { STORES_PATH, getActiveStore, getSession, storeCan } from "@/lib/auth";
@@ -17,6 +18,7 @@ import PoliciesSettings from "@/components/PoliciesSettings";
 import CustomerPrivacySettings from "@/components/CustomerPrivacySettings";
 import CheckoutSettings from "@/components/CheckoutSettings";
 import CustomerAccountsSettings from "@/components/CustomerAccountsSettings";
+import CurrencySettings from "@/components/CurrencySettings";
 
 // [IANA name, label]; the backend validates the name
 const TIME_ZONES = [
@@ -260,6 +262,9 @@ export default function AdminSettings() {
   const [address, setAddress] = useState("");
 
   const [currency, setCurrency] = useState("INR");
+
+  // Every ISO 4217 currency (code, name, symbol); the short list is the fallback
+  const currencyList = useMemo(() => currencyOptions(), []);
 
   const [backupRegion, setBackupRegion] = useState("");
 
@@ -634,12 +639,23 @@ export default function AdminSettings() {
                 onChange={(e) => setCurrency(e.target.value)}
                 className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm outline-none focus:border-slate-500"
               >
-                {CURRENCIES.map(([code, label]) => (
+                {(currencyList.length
+                  ? currencyList.map((c) => [c.code, `${c.name} (${c.code} ${c.symbol})`])
+                  : CURRENCIES
+                ).map(([code, label]) => (
                   <option key={code} value={code}>
                     {label}
                   </option>
                 ))}
               </select>
+
+              <div className="mt-4">
+                <CurrencySettings
+                  storeId={storeId}
+                  baseCurrency={currency}
+                  currencies={currencyList}
+                />
+              </div>
             </div>
 
             {/* BACKUP REGION */}

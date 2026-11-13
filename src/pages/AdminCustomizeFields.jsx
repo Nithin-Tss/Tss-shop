@@ -1283,8 +1283,10 @@ export const Field = memo(function Field({
           {label}
 
           <input
-            className={inputClass}
-            value={value}
+            className={`${inputClass}${spec.readonly ? " cursor-not-allowed bg-slate-50 text-slate-500" : ""}`}
+            value={spec.readonly && value === spec.default ? "Automatic (store currency)" : value}
+            readOnly={spec.readonly}
+            disabled={spec.readonly}
             placeholder={
               spec.type === "url"
                 ? "/collections/all"
