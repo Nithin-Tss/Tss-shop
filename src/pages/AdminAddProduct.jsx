@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
-import RichTextEditor, { plainText, sanitizeHtml } from "@/components/RichTextEditor";
 
 const NAVY = "#111827";
 const PRODUCTS_URL = "/admin/online-store/products";
@@ -424,8 +423,7 @@ function OptionPicker({ label, usedNames, onPick }) {
   };
 
   const rowClass = (i) =>
-    `flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-100 ${
-      i === current ? "bg-slate-100" : ""
+    `flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-100 ${i === current ? "bg-slate-100" : ""
     }`;
   const footerIndex = items.length - 1;
 
@@ -602,10 +600,10 @@ const firstFields = (v) => ({
 const isMoney = (s) => /^\d+(\.\d{1,2})?$/.test(String(s).trim());
 const isWhole = (s) => /^\d+$/.test(String(s).trim());
 const isWeight = (s) => /^\d+(\.\d{1,3})?$/.test(String(s).trim());
-const formatAud = (value) =>
+const formatStorePrice = (value, currency) =>
   value === "" || value == null || Number.isNaN(Number(value))
     ? ""
-    : `$${Number(value).toFixed(2)}`;
+    : formatAmount(String(value), currency);
 
 // "Single / 375ML", else the SKU, else "Default variant"
 const variantName = (v, options) => {
@@ -720,6 +718,7 @@ const blankOption = () => ({
 });
 
 function OptionsEditor({ productId, options, variants, startWithNew, onClose, onApplied }) {
+  const storeCurrency = useStoreCurrency();
   const [opts, setOpts] = useState(() => [
     ...options.map((o) => ({
       id: draftId(),
@@ -851,9 +850,9 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
     if (!res.ok) {
       setError(
         res.formError ||
-          Object.values(res.fieldErrors || {})[0] ||
-          res.error ||
-          "The options couldn't be saved."
+        Object.values(res.fieldErrors || {})[0] ||
+        res.error ||
+        "The options couldn't be saved."
       );
       return;
     }
@@ -1074,8 +1073,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
                 created
               </p>
               <p className="text-xs text-slate-500">
-                Each gets the first variant's price ({formatAud(basePrice)}) and the SKU shown,
-                which you can change later. They start as Not tracked.
+                Each gets the first variant's price ({formatStorePrice(basePrice, storeCurrency)})
+                and the SKU shown, which you can change later. They start as Not tracked.
               </p>
               <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5 text-slate-700">
                 {preview.created.map((c) => (
@@ -1226,9 +1225,9 @@ function VariantEditor({
         setSaving(false);
         setError(
           res.formError ||
-            Object.values(res.fieldErrors || {})[0] ||
-            res.error ||
-            "The variant couldn't be saved."
+          Object.values(res.fieldErrors || {})[0] ||
+          res.error ||
+          "The variant couldn't be saved."
         );
         return;
       }
@@ -1484,20 +1483,20 @@ function BulkEditor({
 }) {
   const stockColumns = canSetStock
     ? locations.flatMap((l) => [
-        {
-          key: `avail-${l.id}`,
-          label: `${l.name} - Available`,
-          locationId: l.id,
-          group: "Quantities by location",
-        },
-        {
-          key: `onhand-${l.id}`,
-          label: `${l.name} - On hand`,
-          locationId: l.id,
-          group: "Quantities by location",
-          readOnly: true,
-        },
-      ])
+      {
+        key: `avail-${l.id}`,
+        label: `${l.name} - Available`,
+        locationId: l.id,
+        group: "Quantities by location",
+      },
+      {
+        key: `onhand-${l.id}`,
+        label: `${l.name} - On hand`,
+        locationId: l.id,
+        group: "Quantities by location",
+        readOnly: true,
+      },
+    ])
     : [];
   const allColumns = [...BULK_FIELD_COLUMNS, ...stockColumns];
   const isAvailCol = (key) => key.startsWith("avail-");
@@ -2385,10 +2384,10 @@ function VariantsSection({
     setNotice(
       failed.length
         ? {
-            kind: "error",
-            text: `${savedCount} saved, ${failed.length} failed. The failed edits are kept.`,
-            failed,
-          }
+          kind: "error",
+          text: `${savedCount} saved, ${failed.length} failed. The failed edits are kept.`,
+          failed,
+        }
         : { kind: "success", text: `Saved ${savedCount} change${savedCount === 1 ? "" : "s"}.` }
     );
   };
@@ -2406,14 +2405,14 @@ function VariantsSection({
     setNotice(
       failed.length
         ? {
-            kind: "error",
-            text: `${targets.length - failed.length} deleted, ${failed.length} not deleted.`,
-            failed,
-          }
+          kind: "error",
+          text: `${targets.length - failed.length} deleted, ${failed.length} not deleted.`,
+          failed,
+        }
         : {
-            kind: "success",
-            text: `Deleted ${targets.length} variant${targets.length === 1 ? "" : "s"}.`,
-          }
+          kind: "success",
+          text: `Deleted ${targets.length} variant${targets.length === 1 ? "" : "s"}.`,
+        }
     );
   };
 
@@ -2567,8 +2566,8 @@ function VariantsSection({
   const groups =
     groupBy && options.length > 1
       ? (options.find((o) => o.name === groupBy)?.values || [])
-          .map((value) => ({ value, rows: shown.filter((v) => v.options?.[groupBy] === value) }))
-          .filter((g) => g.rows.length)
+        .map((value) => ({ value, rows: shown.filter((v) => v.options?.[groupBy] === value) }))
+        .filter((g) => g.rows.length)
       : null;
 
   const groupRow = (g) => {
@@ -2915,9 +2914,9 @@ function VariantsSection({
           <tbody>
             {groups
               ? groups.flatMap((g) => [
-                  groupRow(g),
-                  ...(expanded[g.value] ? g.rows.map((v) => row(v, true)) : []),
-                ])
+                groupRow(g),
+                ...(expanded[g.value] ? g.rows.map((v) => row(v, true)) : []),
+              ])
               : shown.map((v) => row(v, false))}
           </tbody>
         </table>
@@ -3138,6 +3137,14 @@ function VariantsSection({
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : "-");
 
 // The "Add product" page
+const currencyName = (code) => {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "currency" }).of(code) || code;
+  } catch {
+    return code;
+  }
+};
+
 export default function AdminAddProduct() {
   return <ProductForm />;
 }
@@ -3146,9 +3153,54 @@ export default function AdminAddProduct() {
 export function ProductForm({ productId }) {
   const fieldLabels = useFieldLabels();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const editing = Boolean(productId);
+
+  // Opened by "Edit product" in the customizer: where to go back to (same page, section, block, part, mode, scroll)
+  const customizerBackUrl = (() => {
+    if (searchParams.get("return") !== "customizer") return "";
+    const path = searchParams.get("cpath") || "";
+    // Only an admin page of this site, never another address
+    if (!path.startsWith("/admin/") || path.startsWith("//")) return "";
+    const back = new URLSearchParams(searchParams);
+    back.delete("return");
+    back.delete("cpath");
+    const query = back.toString();
+    return `${path}${query ? `?${query}` : ""}`;
+  })();
+
+  const backToCustomizer = () => {
+    if (dirty && !window.confirm("Leave without saving? Your changes will be lost.")) return;
+    // Opened in a new tab: focus the customizer tab and close this one
+    try {
+      if (window.opener && !window.opener.closed) {
+        window.opener.focus();
+        window.close();
+      }
+    } catch {
+      // fall through to the navigation below
+    }
+    // Could not close (not opened by the customizer, or the browser refused): go to the same place here
+    window.setTimeout(() => {
+      window.location.assign(customizerBackUrl);
+    }, 150);
+  };
   const session = useSession();
   const activeStore = getActiveStore(session);
+
+  // The store's own currency, for the Pricing hint (INR until the store loads)
+  const [storeCurrency, setStoreCurrency] = useState("INR");
+  useEffect(() => {
+    if (!session?.storeId) return;
+    let cancelled = false;
+    apiGet(`/api/v1/stores/${session.storeId}/`).then((res) => {
+      const code = res?.ok && (res.data?.currency || res.data?.data?.currency);
+      if (!cancelled && code) setStoreCurrency(String(code).toUpperCase());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.storeId]);
 
   // What the user's roles allow (the backend checks each of these too)
   const canEdit = can(session, "products.manage");
@@ -4216,6 +4268,17 @@ export function ProductForm({ productId }) {
         <main className="flex-1 min-w-0 overflow-x-clip bg-slate-50">
           {/* STICKY ACTION BAR */}
           <div className="sticky top-14 z-30 border-b border-slate-200 bg-slate-50 md:top-0">
+            {customizerBackUrl && (
+              <div className="border-b border-slate-200 bg-white px-3 py-2 sm:px-6">
+                <button
+                  type="button"
+                  onClick={backToCustomizer}
+                  className="inline-flex h-9 items-center gap-2 rounded-full bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-700"
+                >
+                  <span aria-hidden="true">←</span> Back to customizer
+                </button>
+              </div>
+            )}
             <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-6">
               <div className="flex min-w-0 items-center gap-2.5">
                 <button
@@ -4439,11 +4502,10 @@ export function ProductForm({ productId }) {
                           setDragging(false);
                           if (!saving) addPhotos(e.dataTransfer.files);
                         }}
-                        className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
-                          dragging
+                        className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${dragging
                             ? "border-orange-600 bg-slate-100"
                             : "border-slate-200 bg-slate-50 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
                           <svg
@@ -4501,11 +4563,10 @@ export function ProductForm({ productId }) {
                           return (
                             <div
                               key={photo.id}
-                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-slate-50 transition ${
-                                isCover
+                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-slate-50 transition ${isCover
                                   ? "border-orange-600 ring-2 ring-ink/15 col-span-2 row-span-2"
                                   : "border-slate-200 hover:border-slate-400"
-                              }`}
+                                }`}
                             >
                               {/* Image or Broken fallback */}
                               {isBroken ? (
@@ -4650,11 +4711,10 @@ export function ProductForm({ productId }) {
                           onClick={() => {
                             if (!saving) mainFileInputRef.current?.click();
                           }}
-                          className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
-                            dragging
+                          className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${dragging
                               ? "border-orange-600 bg-slate-100"
                               : "border-slate-200 bg-slate-50 hover:border-slate-400 hover:bg-slate-50"
-                          } ${saving ? "pointer-events-none opacity-50" : ""}`}
+                            } ${saving ? "pointer-events-none opacity-50" : ""}`}
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-charcoal-navy">
                             <svg
@@ -4714,7 +4774,10 @@ export function ProductForm({ productId }) {
                   </Card>
 
                   {/* 3 PRICING */}
-                  <Card title="Pricing" hint="What customers pay, in Australian dollars (AUD).">
+                  <Card
+                    title="Pricing"
+                    hint={`What customers pay, in ${currencyName(storeCurrency)} (${storeCurrency}).`}
+                  >
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                       <Field label="Selling price (AUD)" error={fieldErrors.price}>
                         <MoneyInput value={price} onChange={setPrice} error={fieldErrors.price} />
@@ -5046,7 +5109,7 @@ export function ProductForm({ productId }) {
                       <p className="line-clamp-2 text-sm text-slate-600">{shownSeoDescription}</p>
                       {price !== "" && !isNaN(Number(price)) && (
                         <p className="mt-1 text-xs text-slate-500">
-                          ${Number(price).toFixed(2)} AUD
+                          {formatStorePrice(price, storeCurrency)}
                         </p>
                       )}
                     </div>
@@ -5055,52 +5118,52 @@ export function ProductForm({ productId }) {
                       fieldErrors.seo_title ||
                       fieldErrors.seo_description ||
                       fieldErrors.handle) && (
-                      <div className="mt-4 space-y-4">
-                        <Field
-                          label="SEO title"
-                          help={`${seoTitle.length} of 70 characters`}
-                          error={fieldErrors.seo_title}
-                        >
-                          <input
-                            value={seoTitle}
-                            maxLength={70}
-                            onChange={(e) => setSeoTitle(e.target.value)}
-                            placeholder={name}
-                            className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
-                          />
-                        </Field>
-                        <Field
-                          label="SEO description"
-                          help={`${seoDescription.length} of 160 characters`}
-                          error={fieldErrors.seo_description}
-                        >
-                          <textarea
-                            value={seoDescription}
-                            maxLength={160}
-                            rows={3}
-                            onChange={(e) => setSeoDescription(e.target.value)}
-                            className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
-                          />
-                        </Field>
-                        <Field
-                          label="URL handle"
-                          help={`${storeDomain}/products/${currentHandle}`}
-                          error={fieldErrors.handle}
-                        >
-                          <div
-                            className={`flex h-11 items-center rounded-lg border border-slate-200 bg-slate-50 px-3.5 transition focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-900/10 ${withError(fieldErrors.handle)}`}
+                        <div className="mt-4 space-y-4">
+                          <Field
+                            label="SEO title"
+                            help={`${seoTitle.length} of 70 characters`}
+                            error={fieldErrors.seo_title}
                           >
-                            <span className="select-none text-sm text-slate-500">products/</span>
                             <input
-                              value={handle}
-                              onChange={(e) => setHandle(cleanHandle(e.target.value))}
-                              placeholder={slugify(name)}
-                              className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                              value={seoTitle}
+                              maxLength={70}
+                              onChange={(e) => setSeoTitle(e.target.value)}
+                              placeholder={name}
+                              className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
                             />
-                          </div>
-                        </Field>
-                      </div>
-                    )}
+                          </Field>
+                          <Field
+                            label="SEO description"
+                            help={`${seoDescription.length} of 160 characters`}
+                            error={fieldErrors.seo_description}
+                          >
+                            <textarea
+                              value={seoDescription}
+                              maxLength={160}
+                              rows={3}
+                              onChange={(e) => setSeoDescription(e.target.value)}
+                              className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
+                            />
+                          </Field>
+                          <Field
+                            label="URL handle"
+                            help={`${storeDomain}/products/${currentHandle}`}
+                            error={fieldErrors.handle}
+                          >
+                            <div
+                              className={`flex h-11 items-center rounded-lg border border-slate-200 bg-slate-50 px-3.5 transition focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-900/10 ${withError(fieldErrors.handle)}`}
+                            >
+                              <span className="select-none text-sm text-slate-500">products/</span>
+                              <input
+                                value={handle}
+                                onChange={(e) => setHandle(cleanHandle(e.target.value))}
+                                placeholder={slugify(name)}
+                                className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                              />
+                            </div>
+                          </Field>
+                        </div>
+                      )}
                   </Card>
                 </div>
 

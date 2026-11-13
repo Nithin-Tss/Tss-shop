@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import AddressModal from "@/components/AddressModal";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
+import { formatAmount, formatPrice, toMinor, useStoreCurrency } from "@/lib/formatPrice";
 import { useCan, useSession } from "@/lib/auth";
 
 function formatDateTime(dateString) {
@@ -45,6 +46,7 @@ function formatElapsedDays(dateString) {
 }
 
 export default function AdminCustomerDetails() {
+  const storeCurrency = useStoreCurrency();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -475,10 +477,13 @@ export default function AdminCustomerDetails() {
 
   // Summary Metrics
   const ordersCount = orders.filter((o) => o.status !== "cancelled").length;
-  const amountSpent = orders
-    .filter((o) => o.status !== "cancelled")
-    .reduce((sum, o) => sum + parseFloat(o.total || 0), 0)
-    .toFixed(2);
+  const amountSpent = formatPrice(
+    orders
+      .filter((o) => o.status !== "cancelled")
+      .reduce((sum, o) => sum + (toMinor(o.total || 0, storeCurrency) ?? 0n), 0n),
+    storeCurrency,
+    storeCurrency
+  );
   const rfmGroup = ordersCount === 0 ? "Prospects" : "Dormant";
   const customerSince = formatElapsedDays(customer?.created_at);
 
@@ -713,7 +718,7 @@ export default function AdminCustomerDetails() {
                     Amount spent
                   </div>
                   <div className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                    ${amountSpent}
+                    {amountSpent}
                   </div>
                 </div>
 
@@ -914,7 +919,7 @@ export default function AdminCustomerDetails() {
                               )}
                             </div>
                             <div className="text-sm font-bold text-slate-900">
-                              ${parseFloat(latestOrder.total || 0).toFixed(2)}
+                              {formatAmount(latestOrder.total || 0, storeCurrency)}
                             </div>
                           </div>
 
@@ -968,7 +973,7 @@ export default function AdminCustomerDetails() {
                                   <div className="flex items-center gap-6 text-xs text-slate-700 shrink-0">
                                     <span className="text-slate-500">x {item.quantity}</span>
                                     <span className="font-semibold text-slate-900 w-16 text-right">
-                                      ${parseFloat(item.unit_price || 0).toFixed(2)}
+                                      {formatAmount(item.unit_price || 0, storeCurrency)}
                                     </span>
                                   </div>
                                 </div>
@@ -1514,7 +1519,7 @@ export default function AdminCustomerDetails() {
                                 <span className="text-slate-400">× {it.quantity}</span>
                               </span>
                               <span className="font-semibold text-slate-900">
-                                ${parseFloat(it.total || it.unit_price || 0).toFixed(2)}
+                                {formatAmount(it.total || it.unit_price || 0, storeCurrency)}
                               </span>
                             </div>
                           ))
@@ -1524,7 +1529,7 @@ export default function AdminCustomerDetails() {
                       </div>
                       <div className="pt-2 border-t border-slate-200 flex justify-between items-center font-bold text-sm text-slate-900">
                         <span>Total:</span>
-                        <span>${parseFloat(activeEmailOrder.total || 0).toFixed(2)}</span>
+                        <span>{formatAmount(activeEmailOrder.total || 0, storeCurrency)}</span>
                       </div>
                     </div>
                   </div>

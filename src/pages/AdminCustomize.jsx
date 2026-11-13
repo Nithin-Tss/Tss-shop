@@ -98,6 +98,9 @@ export function getCodeFileFor(section, blockIndex, page) {
 // Alternate page templates are "page.<name>" (templates/page.<name>.liquid), edited like Page
 const PAGE_TEMPLATE_KEY = /^page\.[a-z0-9]+(-[a-z0-9]+)*$/;
 const isPageKey = (key) => key in PAGE_LABELS || PAGE_TEMPLATE_KEY.test(key || "");
+
+// A block / part index from the address (?block=2), or null when absent or not a number
+const indexParam = (value) => (/^\d+$/.test(value || "") ? Number(value) : null);
 const basePage = (key) => String(key || "").split(".")[0];
 const pageLabel = (key) =>
   PAGE_LABELS[key] ||
@@ -548,15 +551,20 @@ export default function AdminCustomizePage() {
 
   // Edit mode (Home preview): Off = the preview behaves like the real store; On = clicks select sections.
   // Kept while the customizer stays open.
-  const [editMode, setEditMode] = useState(false);
+  // (Coming back from "Edit product", the address says whether it was on: ?edit=1)
+  const [editMode, setEditMode] = useState(() => startParams.get("edit") === "1");
 
   const editModeRef = useRef(false);
+
+  // "Edit product" opened a product tab: when this tab gets focus again, redraw the preview
+  const productTabOpenRef = useRef(false);
 
   // A selection that came from a click in the preview (no need to scroll the preview to it)
   const fromPreviewRef = useRef(false);
 
   // The block to open once a section picked in the preview is selected
-  const pendingBlockRef = useRef(null);
+  // (Also the block and part from ?block= / ?part= when coming back from "Edit product")
+  const pendingBlockRef = useRef(indexParam(startParams.get("block")));
 
   const editScrollRef = useRef(null);
 
@@ -569,7 +577,7 @@ export default function AdminCustomizePage() {
   const [selectedChild, setSelectedChild] = useState(null);
 
   // The part picked in the preview along with its block: applied once the block is open
-  const pendingChildRef = useRef(null);
+  const pendingChildRef = useRef(indexParam(startParams.get("part")));
 
   // The "+" under a card part in the preview: the new part goes after this part (index in the card's children)
   const [cardInsertAfter, setCardInsertAfter] = useState(null);
@@ -583,7 +591,7 @@ export default function AdminCustomizePage() {
 
   const blockScrollRef = useRef(null);
 
-  const scrollRef = useRef(0);
+  const scrollRef = useRef(Math.max(0, Number(startParams.get("scroll")) || 0));
 
   const dataRef = useRef(null);
 
@@ -1517,6 +1525,11 @@ export default function AdminCustomizePage() {
     if (status !== "ready") return undefined;
     const onFocus = () => {
       if (document.visibilityState !== "visible") return;
+      // Back from the product tab: redraw the preview (same selection and scroll) to show its changes
+      if (productTabOpenRef.current) {
+        productTabOpenRef.current = false;
+        engineRef.current.renderFull();
+      }
       getSyncedSections()
         .then((found) => engineRef.current.addSyncedSections(found))
         .catch(() => {});
@@ -1690,6 +1703,8 @@ export default function AdminCustomizePage() {
     put("collection", page === "collection" ? sampleCollection : "");
     put("handle", basePage(page) === "page" ? samplePage : "");
     put("section", selected);
+    // Only used once, when coming back from "Edit product"
+    ["block", "part", "edit", "scroll"].forEach((key) => params.delete(key));
     put("customer", customerPage);
     // Kept on every page, so the signed-in preview customer survives going elsewhere and a refresh
     put("ct", customerToken);
@@ -3664,8 +3679,29 @@ export default function AdminCustomizePage() {
                                   <Link
                                     to={`/admin/online-store/products/${encodeURIComponent(previewProduct.id)}`}
                                     target="_blank"
-                                    rel="noreferrer"
                                     className="text-sm font-medium text-ink underline"
+                                    onClick={(e) => {
+                                      // Carry the exact place in the address so the product page can come back to it
+                                      e.preventDefault();
+                                      const place = new URLSearchParams(window.location.search);
+                                      place.set("section", selectedRef.current || "");
+                                      place.set("block", String(selectedBlockRef.current ?? ""));
+                                      place.set("part", String(selectedChildRef.current ?? ""));
+                                      place.set("edit", editModeRef.current ? "1" : "");
+                                      place.set("scroll", String(Math.round(scrollRef.current)));
+                                      const back = new URLSearchParams();
+                                      back.set("return", "customizer");
+                                      back.set("cpath", window.location.pathname);
+                                      place.forEach((v, k) => {
+                                        if (v) back.set(k, v);
+                                      });
+                                      productTabOpenRef.current = true;
+                                      // No "noopener": the product tab needs to find this one to focus it
+                                      window.open(
+                                        `/admin/online-store/products/${encodeURIComponent(previewProduct.id)}?${back}`,
+                                        "_blank"
+                                      );
+                                    }}
                                   >
                                     Edit product
                                   </Link>
