@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
@@ -3121,7 +3121,38 @@ export default function AdminAddProduct() {
 export function ProductForm({ productId }) {
   const fieldLabels = useFieldLabels();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const editing = Boolean(productId);
+
+  // Opened by "Edit product" in the customizer: where to go back to (same page, section, block, part, mode, scroll)
+  const customizerBackUrl = (() => {
+    if (searchParams.get("return") !== "customizer") return "";
+    const path = searchParams.get("cpath") || "";
+    // Only an admin page of this site, never another address
+    if (!path.startsWith("/admin/") || path.startsWith("//")) return "";
+    const back = new URLSearchParams(searchParams);
+    back.delete("return");
+    back.delete("cpath");
+    const query = back.toString();
+    return `${path}${query ? `?${query}` : ""}`;
+  })();
+
+  const backToCustomizer = () => {
+    if (dirty && !window.confirm("Leave without saving? Your changes will be lost.")) return;
+    // Opened in a new tab: focus the customizer tab and close this one
+    try {
+      if (window.opener && !window.opener.closed) {
+        window.opener.focus();
+        window.close();
+      }
+    } catch {
+      // fall through to the navigation below
+    }
+    // Could not close (not opened by the customizer, or the browser refused): go to the same place here
+    window.setTimeout(() => {
+      window.location.assign(customizerBackUrl);
+    }, 150);
+  };
   const session = useSession();
   const activeStore = getActiveStore(session);
 
@@ -4191,6 +4222,17 @@ export function ProductForm({ productId }) {
         <main className="flex-1 min-w-0 overflow-x-clip bg-slate-50">
           {/* STICKY ACTION BAR */}
           <div className="sticky top-14 z-30 border-b border-slate-200 bg-slate-50 md:top-0">
+            {customizerBackUrl && (
+              <div className="border-b border-slate-200 bg-white px-3 py-2 sm:px-6">
+                <button
+                  type="button"
+                  onClick={backToCustomizer}
+                  className="inline-flex h-9 items-center gap-2 rounded-full bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-700"
+                >
+                  <span aria-hidden="true">←</span> Back to customizer
+                </button>
+              </div>
+            )}
             <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-6">
               <div className="flex min-w-0 items-center gap-2.5">
                 <button
