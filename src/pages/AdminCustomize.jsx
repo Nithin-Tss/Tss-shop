@@ -40,15 +40,19 @@ import {
   defaultsOf,
   DropLine,
   DragHandle,
+  parseBlockRef,
 } from "./AdminCustomizeShared";
 import {
   FontsContext,
   StorePagesContext,
   BlogPostsContext,
   UploadsContext,
+  ThemeLinkContext,
+  ThemeLink,
   GroupedFields,
   SectionBlocks,
   GroupChildren,
+  CardChildren,
   EyeIcon,
   GroupHeading,
   LayoutRows,
@@ -561,6 +565,20 @@ export default function AdminCustomizePage() {
   // The block (index in the selected section) whose settings are open, if any
   const [selectedBlock, setSelectedBlock] = useState(null);
 
+  // A part of the open Product card block (index in its children) whose settings are open, if any
+  const [selectedChild, setSelectedChild] = useState(null);
+
+  // The part picked in the preview along with its block: applied once the block is open
+  const pendingChildRef = useRef(null);
+
+  // The "+" under a card part in the preview: the new part goes after this part (index in the card's children)
+  const [cardInsertAfter, setCardInsertAfter] = useState(null);
+
+  const pendingInsertRef = useRef(null);
+
+  // The product of the card clicked in the preview, for "Edit product" under the part's settings
+  const [previewProduct, setPreviewProduct] = useState(null);
+
   const lastBlockRef = useRef(null);
 
   const blockScrollRef = useRef(null);
@@ -574,6 +592,8 @@ export default function AdminCustomizePage() {
   const selectedRef = useRef(null);
 
   const selectedBlockRef = useRef(null);
+
+  const selectedChildRef = useRef(null);
 
   const pageRef = useRef("index");
 
@@ -601,6 +621,7 @@ export default function AdminCustomizePage() {
     customizerRef.current = customizer;
     selectedRef.current = selected;
     selectedBlockRef.current = selectedBlock;
+    selectedChildRef.current = selectedChild;
     pageRef.current = page;
     sampleProductRef.current = sampleProductId;
     sampleArticleRef.current = sampleArticle;
@@ -1827,10 +1848,13 @@ export default function AdminCustomizePage() {
     engineRef.current.postToPreview({
       type: "select",
       id: selected || "",
-      block: selectedBlock,
+      block:
+        selectedBlock !== null && selectedChild !== null
+          ? `${selectedBlock}.${selectedChild}`
+          : selectedBlock,
       scroll,
     });
-  }, [selected, selectedBlock]);
+  }, [selected, selectedBlock, selectedChild]);
 
   // Edit mode on/off: just a message, the preview is not reloaded
   useEffect(() => {
@@ -1956,13 +1980,18 @@ export default function AdminCustomizePage() {
           if (message.id) engineRef.current.selectUnknownSection(message.id, message.block);
           return;
         }
-        const block =
-          Number.isInteger(message.block) && section.blocks?.[message.block] ? message.block : null;
+        const ref = parseBlockRef(message.block);
+        const block = ref.block !== null && section.blocks?.[ref.block] ? ref.block : null;
+        const child =
+          block !== null && ref.child !== null && section.blocks[block].children?.[ref.child]
+            ? ref.child
+            : null;
         fromPreviewRef.current = true;
         if (message.id === selectedRef.current) {
-          setSelectedBlock(block);
+          chooseBlock(block, child);
         } else {
           pendingBlockRef.current = block;
+          pendingChildRef.current = child;
           setSelected(message.id);
         }
         const frame = iframeRef.current.getBoundingClientRect();
@@ -1980,24 +2009,53 @@ export default function AdminCustomizePage() {
         // Edit mode: a click in the preview selects a section or one of its blocks; empty space unselects
         if (message.id === "page-snippet") return; // the cart / wishlist snippet: no settings to show
         const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
-        const block =
-          Number.isInteger(message.block) && section?.blocks?.[message.block]
-            ? message.block
+        const ref = parseBlockRef(message.block);
+        const block = ref.block !== null && section?.blocks?.[ref.block] ? ref.block : null;
+        const child =
+          block !== null && ref.child !== null && section.blocks[block].children?.[ref.child]
+            ? ref.child
             : null;
         fromPreviewRef.current = true;
+        setPreviewProduct(
+          block !== null && child !== null && message.product
+            ? { section: message.id, block, child, id: String(message.product) }
+            : null
+        );
         if (!message.id) {
           setSelected(null);
         } else if (section && message.id === selectedRef.current) {
-          setSelectedBlock(block);
+          chooseBlock(block, child);
         } else if (section) {
           pendingBlockRef.current = block;
+          pendingChildRef.current = child;
           setSelected(message.id);
         } else {
           // Not in this customizer yet (e.g. a synced section added after it opened)
           engineRef.current.selectUnknownSection(message.id, message.block);
         }
+      } else if (
+        message.type === "add-part" &&
+        typeof message.id === "string" &&
+        Number.isInteger(message.block) &&
+        Number.isInteger(message.after) &&
+        editModeRef.current
+      ) {
+        // Edit mode: the "+" under a card part opens that card's parts with "Add block" ready
+        const section = dataRef.current && sectionIn(dataRef.current, pageRef.current, message.id);
+        if (section?.blocks?.[message.block]?.children) {
+          fromPreviewRef.current = true;
+          if (message.id === selectedRef.current) {
+            addPartAfter(message.block, message.after);
+          } else {
+            pendingBlockRef.current = message.block;
+            pendingChildRef.current = null;
+            pendingInsertRef.current = message.after;
+            setSelected(message.id);
+          }
+        }
       } else if (message.type === "escape" && editModeRef.current) {
         setSelectedBlock(null);
+        setSelectedChild(null);
         setSelected(null);
       } else if (
         message.type === "move-section" &&
@@ -2042,22 +2100,59 @@ export default function AdminCustomizePage() {
 
   useEffect(() => {
     if (selectedBlock !== null && blockScrollRef.current) blockScrollRef.current.scrollTop = 0;
-  }, [selectedBlock]);
+  }, [selectedBlock, selectedChild]);
 
-  // Escape steps back: block -> section -> sections list
+  // A block opened (from the list, or by a click in the preview) starts with no part open, or with the part clicked
+  useEffect(() => {
+    setSelectedChild(pendingChildRef.current);
+    pendingChildRef.current = null;
+    setCardInsertAfter(pendingInsertRef.current);
+    pendingInsertRef.current = null;
+  }, [selected, selectedBlock]);
+
+  // Escape steps back: part -> block -> section -> sections list
   useEffect(() => {
     if (!selected) return undefined;
 
     const onKey = (e) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      if (selectedBlock !== null) setSelectedBlock(null);
+      if (selectedChild !== null) setSelectedChild(null);
+      else if (selectedBlock !== null) setSelectedBlock(null);
       else setSelected(null);
     };
 
     window.addEventListener("keydown", onKey);
 
     return () => window.removeEventListener("keydown", onKey);
-  }, [selected, selectedBlock]);
+  }, [selected, selectedBlock, selectedChild]);
+
+  // "Edit ... in theme settings" links under a card part's settings
+  function openThemeGroup(group) {
+    setThemeGroup(group);
+    setSelected("theme");
+  }
+
+  // The "+" under a part: that card's parts open with the "Add block" menu ready to insert after it
+  function addPartAfter(block, after) {
+    if (block === selectedBlockRef.current) {
+      setSelectedChild(null);
+      setCardInsertAfter(after);
+    } else {
+      pendingChildRef.current = null;
+      pendingInsertRef.current = after;
+      setSelectedBlock(block);
+    }
+  }
+
+  // Open a block of the selected section, and one of its parts: the same block just switches part
+  function chooseBlock(block, child) {
+    if (block === selectedBlockRef.current) {
+      setSelectedChild(child);
+    } else {
+      pendingChildRef.current = child;
+      setSelectedBlock(block);
+    }
+  }
 
   const template = data?.templates[page];
 
@@ -2491,6 +2586,22 @@ export default function AdminCustomizePage() {
 
   const panelView = !editing ? 0 : blockOpen ? 2 : 1;
 
+  // A Product card block lists its parts; one part can be open (its own settings)
+  const isCardBlock = Boolean(shownBlock && shownBlockSpec?.child_blocks);
+
+  const cardPart =
+    blockOpen && isCardBlock && selectedChild !== null
+      ? shownBlock.children?.[selectedChild]
+      : null;
+
+  const cardPartSpec = cardPart ? shownBlockSpec.child_blocks[cardPart.type] : null;
+
+  const atTypeLimit =
+    shownBlock && shownSpec?.type_limits?.[shownBlock.type] !== undefined
+      ? (shownSection.blocks || []).filter((b) => b.type === shownBlock.type).length >=
+        shownSpec.type_limits[shownBlock.type]
+      : false;
+
   const editSubtitle =
     shown === "theme"
       ? "Colours, fonts, buttons, header and footer"
@@ -2515,924 +2626,1150 @@ export default function AdminCustomizePage() {
       <StorePagesContext.Provider value={storePages}>
         <BlogPostsContext.Provider value={blogPosts}>
           <UploadsContext.Provider value={uploads}>
-            <div
-              className={`flex h-screen flex-col bg-[rgba(234,88,12,0.08)] text-charcoal-navy ${drag ? "cursor-grabbing select-none" : ""}`}
-            >
-              {/* Top bar */}
-              <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-white/10 bg-charcoal-navy px-5 py-2.5">
-                <div className="flex min-w-0 items-center gap-3">
-                  <Link
-                    to="/admin/online-store"
-                    onClick={(e) => {
-                      if (
-                        dirty &&
-                        !window.confirm("Leave without saving? Your changes will be lost.")
-                      )
-                        e.preventDefault();
-                    }}
-                    className="whitespace-nowrap text-sm text-white/70 transition hover:text-white"
-                  >
-                    ← Online store
-                  </Link>
+            <ThemeLinkContext.Provider value={openThemeGroup}>
+              <div
+                className={`flex h-screen flex-col bg-[rgba(234,88,12,0.08)] text-charcoal-navy ${drag ? "cursor-grabbing select-none" : ""}`}
+              >
+                {/* Top bar */}
+                <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-white/10 bg-charcoal-navy px-5 py-2.5">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Link
+                      to="/admin/online-store"
+                      onClick={(e) => {
+                        if (
+                          dirty &&
+                          !window.confirm("Leave without saving? Your changes will be lost.")
+                        )
+                          e.preventDefault();
+                      }}
+                      className="whitespace-nowrap text-sm text-white/70 transition hover:text-white"
+                    >
+                      ← Online store
+                    </Link>
 
-                  <span className="flex min-w-0 items-baseline gap-2.5">
-                    <span className="hidden text-xs uppercase tracking-[0.14em] text-white/45 sm:inline">
-                      Customize
+                    <span className="flex min-w-0 items-baseline gap-2.5">
+                      <span className="hidden text-xs uppercase tracking-[0.14em] text-white/45 sm:inline">
+                        Customize
+                      </span>
+                      <span className="display truncate text-2xl text-white">
+                        {store.storeName}
+                      </span>
                     </span>
-                    <span className="display truncate text-2xl text-white">{store.storeName}</span>
-                  </span>
-                </div>
+                  </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPanelOpen((v) => !v)}
-                    className={`${tbButton} lg:hidden`}
-                    aria-expanded={panelOpen}
-                  >
-                    {panelOpen ? "Hide panel" : "Sections"}
-                  </button>
-
-                  {backStack.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
-                      onClick={goBack}
-                      className={tbButton}
-                      title="Back to the page you came from"
+                      onClick={() => setPanelOpen((v) => !v)}
+                      className={`${tbButton} lg:hidden`}
+                      aria-expanded={panelOpen}
                     >
-                      <svg {...iconProps} className="h-4 w-4 text-slate-500">
-                        <path d="m15 18-6-6 6-6" />
-                      </svg>
-                      {pageLabel(backStack[backStack.length - 1].page) || "Back"}
+                      {panelOpen ? "Hide panel" : "Sections"}
                     </button>
-                  )}
 
-                  <select
-                    value={
-                      customerPage === "login"
-                        ? LOGIN_PAGE
-                        : customerPage === "register"
-                          ? REGISTER_PAGE
-                          : customerPage === "account"
-                            ? ACCOUNT_PAGE
-                            : page
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === NEW_TEMPLATE) {
-                        addPageTemplate();
-                        return;
+                    {backStack.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={goBack}
+                        className={tbButton}
+                        title="Back to the page you came from"
+                      >
+                        <svg {...iconProps} className="h-4 w-4 text-slate-500">
+                          <path d="m15 18-6-6 6-6" />
+                        </svg>
+                        {pageLabel(backStack[backStack.length - 1].page) || "Back"}
+                      </button>
+                    )}
+
+                    <select
+                      value={
+                        customerPage === "login"
+                          ? LOGIN_PAGE
+                          : customerPage === "register"
+                            ? REGISTER_PAGE
+                            : customerPage === "account"
+                              ? ACCOUNT_PAGE
+                              : page
                       }
-                      if (
-                        value === LOGIN_PAGE ||
-                        value === REGISTER_PAGE ||
-                        value === ACCOUNT_PAGE
-                      ) {
-                        // Login / register / account page: shown in the preview; its code is templates/<page>.liquid
-                        setCustomerPage(
-                          value === LOGIN_PAGE
-                            ? "login"
-                            : value === REGISTER_PAGE
-                              ? "register"
-                              : "account"
-                        );
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === NEW_TEMPLATE) {
+                          addPageTemplate();
+                          return;
+                        }
+                        if (
+                          value === LOGIN_PAGE ||
+                          value === REGISTER_PAGE ||
+                          value === ACCOUNT_PAGE
+                        ) {
+                          // Login / register / account page: shown in the preview; its code is templates/<page>.liquid
+                          setCustomerPage(
+                            value === LOGIN_PAGE
+                              ? "login"
+                              : value === REGISTER_PAGE
+                                ? "register"
+                                : "account"
+                          );
+                          setSelected(null);
+                          setAdding(false);
+                          setBackStack([]);
+                          return;
+                        }
+                        setCustomerPage("");
+                        // A page template previews a page that uses it, when there is one
+                        const own = storePages.find((p) => (p.template || "page") === value);
+                        if (own) setSamplePage(own.handle);
+                        setPage(value);
                         setSelected(null);
                         setAdding(false);
                         setBackStack([]);
-                        return;
-                      }
-                      setCustomerPage("");
-                      // A page template previews a page that uses it, when there is one
-                      const own = storePages.find((p) => (p.template || "page") === value);
-                      if (own) setSamplePage(own.handle);
-                      setPage(value);
-                      setSelected(null);
-                      setAdding(false);
-                      setBackStack([]);
-                    }}
-                    className="h-9 whitespace-nowrap rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900 [&_optgroup]:text-slate-900"
-                    aria-label="Page to edit"
-                  >
-                    {schema.pages.map((p) => (
-                      <option key={p} value={p}>
-                        {pageLabel(p)}
-                      </option>
-                    ))}
-                    <optgroup label="Account pages">
-                      <option value={LOGIN_PAGE}>Login page</option>
-                      <option value={REGISTER_PAGE}>Register page</option>
-                      <option value={ACCOUNT_PAGE}>Account page (sample customer)</option>
-                    </optgroup>
-                    <optgroup label="Page templates">
-                      {pageTemplateKeys.map((key) => (
-                        <option key={key} value={key}>
-                          {pageLabel(key)}
-                        </option>
-                      ))}
-                      <option value={NEW_TEMPLATE}>+ Add page template...</option>
-                    </optgroup>
-                  </select>
-
-                  {PAGE_TEMPLATE_KEY.test(page) && (
-                    <button
-                      type="button"
-                      onClick={() => deletePageTemplate(page)}
-                      className={`${tbButton} hover:!bg-red-500/20 hover:!text-red-200`}
-                      title="Delete this template; its pages go back to Page"
-                    >
-                      Delete template
-                    </button>
-                  )}
-
-                  {/* The Article page previews one post at a time: pick which */}
-                  {page === "article" && blogPosts.length > 0 && (
-                    <select
-                      value={sampleArticle}
-                      onChange={(e) => setSampleArticle(e.target.value)}
-                      className="h-9 whitespace-nowrap max-w-50 rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900"
-                      aria-label="Post to preview"
-                    >
-                      {blogPosts.map((p) => (
-                        <option key={p.id} value={p.handle}>
-                          {p.title}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  {/* The Page page previews one store page at a time: pick which */}
-                  {basePage(page) === "page" && storePages.length > 0 && (
-                    <select
-                      value={samplePage}
-                      onChange={(e) => setSamplePage(e.target.value)}
-                      className="h-9 whitespace-nowrap max-w-50 rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900"
-                      aria-label="Page to preview"
-                    >
-                      {storePages.map((p) => (
-                        <option key={p.id} value={p.handle}>
-                          {p.title}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  <AssistantButton tone="dark" />
-                  <AiPageBuilderButton tone="dark" />
-
-                  <a
-                    id="edit-code-btn"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={`/editor-demo${(() => {
-                      const themeId = startParams.get("theme") || getEditingThemeId();
-                      const query = new URLSearchParams();
-                      // A selected section or block opens its own file, otherwise the page template
-                      const targetFile =
-                        selected && shownSection
-                          ? getCodeFileFor(shownSection, blockOpen ? selectedBlock : null, page)
-                          : getTemplateFileForPage(page, customerPage);
-                      if (targetFile) query.set("file", targetFile);
-                      if (themeId) query.set("theme", themeId);
-                      return query.toString() ? `?${query.toString()}` : "";
-                    })()}`}
-                    title="Open the theme code in the editor"
-                    className={tbButton}
-                  >
-                    <svg {...iconProps} className="h-4 w-4 text-slate-500">
-                      <path d="m8 7-5 5 5 5" />
-                      <path d="m16 7 5 5-5 5" />
-                    </svg>
-                    Edit code
-                  </a>
-
-                  {previewUrl && (
-                    <a
-                      href={previewUrl}
-                      onClick={(e) => {
-                        // New tab, with the "Back to admin" bar; the store path of the page being edited
-                        e.preventDefault();
-                        openStorefront(
-                          new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/",
-                          startParams.get("theme") || getEditingThemeId() || ""
-                        );
                       }}
+                      className="h-9 whitespace-nowrap rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900 [&_optgroup]:text-slate-900"
+                      aria-label="Page to edit"
+                    >
+                      {schema.pages.map((p) => (
+                        <option key={p} value={p}>
+                          {pageLabel(p)}
+                        </option>
+                      ))}
+                      <optgroup label="Account pages">
+                        <option value={LOGIN_PAGE}>Login page</option>
+                        <option value={REGISTER_PAGE}>Register page</option>
+                        <option value={ACCOUNT_PAGE}>Account page (sample customer)</option>
+                      </optgroup>
+                      <optgroup label="Page templates">
+                        {pageTemplateKeys.map((key) => (
+                          <option key={key} value={key}>
+                            {pageLabel(key)}
+                          </option>
+                        ))}
+                        <option value={NEW_TEMPLATE}>+ Add page template...</option>
+                      </optgroup>
+                    </select>
+
+                    {PAGE_TEMPLATE_KEY.test(page) && (
+                      <button
+                        type="button"
+                        onClick={() => deletePageTemplate(page)}
+                        className={`${tbButton} hover:!bg-red-500/20 hover:!text-red-200`}
+                        title="Delete this template; its pages go back to Page"
+                      >
+                        Delete template
+                      </button>
+                    )}
+
+                    {/* The Article page previews one post at a time: pick which */}
+                    {page === "article" && blogPosts.length > 0 && (
+                      <select
+                        value={sampleArticle}
+                        onChange={(e) => setSampleArticle(e.target.value)}
+                        className="h-9 whitespace-nowrap max-w-50 rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900"
+                        aria-label="Post to preview"
+                      >
+                        {blogPosts.map((p) => (
+                          <option key={p.id} value={p.handle}>
+                            {p.title}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {/* The Page page previews one store page at a time: pick which */}
+                    {basePage(page) === "page" && storePages.length > 0 && (
+                      <select
+                        value={samplePage}
+                        onChange={(e) => setSamplePage(e.target.value)}
+                        className="h-9 whitespace-nowrap max-w-50 rounded-lg border-0 bg-white/10 px-3 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/70 [&_option]:text-slate-900"
+                        aria-label="Page to preview"
+                      >
+                        {storePages.map((p) => (
+                          <option key={p.id} value={p.handle}>
+                            {p.title}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    <AssistantButton tone="dark" />
+                    <AiPageBuilderButton tone="dark" />
+
+                    <a
+                      id="edit-code-btn"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={`/editor-demo${(() => {
+                        const themeId = startParams.get("theme") || getEditingThemeId();
+                        const query = new URLSearchParams();
+                        // A selected section or block opens its own file, otherwise the page template
+                        const targetFile =
+                          selected && shownSection
+                            ? getCodeFileFor(shownSection, blockOpen ? selectedBlock : null, page)
+                            : getTemplateFileForPage(page, customerPage);
+                        if (targetFile) query.set("file", targetFile);
+                        if (themeId) query.set("theme", themeId);
+                        return query.toString() ? `?${query.toString()}` : "";
+                      })()}`}
+                      title="Open the theme code in the editor"
                       className={tbButton}
                     >
-                      Open theme
-                      <svg {...iconProps} className="-mr-0.5 h-3.5 w-3.5 text-slate-500">
-                        <path d="M7 17 17 7" />
-                        <path d="M8 7h9v9" />
+                      <svg {...iconProps} className="h-4 w-4 text-slate-500">
+                        <path d="m8 7-5 5 5 5" />
+                        <path d="m16 7 5 5-5 5" />
                       </svg>
+                      Edit code
                     </a>
-                  )}
 
-                  <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.07] p-0.5">
+                    {previewUrl && (
+                      <a
+                        href={previewUrl}
+                        onClick={(e) => {
+                          // New tab, with the "Back to admin" bar; the store path of the page being edited
+                          e.preventDefault();
+                          openStorefront(
+                            new URL(previewUrl).pathname.replace(/^\/s\/[^/]+/, "") || "/",
+                            startParams.get("theme") || getEditingThemeId() || ""
+                          );
+                        }}
+                        className={tbButton}
+                      >
+                        Open theme
+                        <svg {...iconProps} className="-mr-0.5 h-3.5 w-3.5 text-slate-500">
+                          <path d="M7 17 17 7" />
+                          <path d="M8 7h9v9" />
+                        </svg>
+                      </a>
+                    )}
+
+                    <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.07] p-0.5">
+                      <button
+                        type="button"
+                        onClick={undo}
+                        disabled={!historyRef.current.past.length}
+                        className={tbSegment}
+                        aria-label="Undo"
+                        title="Undo (Ctrl+Z)"
+                      >
+                        <svg {...iconProps} className="h-4 w-4">
+                          <path d="M9 14 4 9l5-5" />
+                          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+                        </svg>
+                      </button>
+                      <span className="h-4 w-px bg-white/15" />
+                      <button
+                        type="button"
+                        onClick={redo}
+                        disabled={!historyRef.current.future.length}
+                        className={tbSegment}
+                        aria-label="Redo"
+                        title="Redo (Ctrl+Shift+Z)"
+                      >
+                        <svg {...iconProps} className="h-4 w-4">
+                          <path d="m15 14 5-5-5-5" />
+                          <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <span
+                      role="status"
+                      aria-live="polite"
+                      className="hidden min-w-0 items-center gap-1.5 text-xs sm:flex"
+                    >
+                      {saveState === "saved" && (
+                        <span className="flex items-center gap-1 text-white/70">
+                          <svg
+                            {...iconProps}
+                            strokeWidth="2.2"
+                            className="h-3.5 w-3.5 text-emerald-400"
+                          >
+                            <path d="m5 12.5 4.5 4.5L19 7.5" />
+                          </svg>
+                          All changes saved
+                        </span>
+                      )}
+                      {saveState === "pending" && (
+                        <span className="flex items-center gap-1.5 text-white/70">
+                          <span className="h-2 w-2 rounded-full bg-amber-500" />
+                          Unsaved changes
+                        </span>
+                      )}
+                      {saveState === "saving" && (
+                        <span className="flex items-center gap-1.5 text-white/70">
+                          <span className="h-2 w-2 animate-pulse rounded-full bg-slate-400" />
+                          Saving...
+                        </span>
+                      )}
+                      {saveState === "error" && (
+                        <span className="flex items-center gap-1.5 text-red-300" title={saveError}>
+                          Couldn't save
+                          <button
+                            type="button"
+                            className="font-medium underline"
+                            onClick={() => engineRef.current.flushSave()}
+                          >
+                            Retry now
+                          </button>
+                        </span>
+                      )}
+                      {saveState === "invalid" && (
+                        <span
+                          className="flex max-w-65 items-center gap-1.5 text-red-300"
+                          title={saveError}
+                        >
+                          <span className="truncate">Couldn't save: {saveError}</span>
+                          <button
+                            type="button"
+                            className="shrink-0 font-medium underline"
+                            onClick={undo}
+                          >
+                            Undo
+                          </button>
+                        </span>
+                      )}
+                    </span>
+
+                    {historyRef.current.past.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={discardSession}
+                        className={tbButton}
+                        title="Go back to the theme as it was when you opened the editor"
+                      >
+                        Discard changes
+                      </button>
+                    )}
+
                     <button
                       type="button"
-                      onClick={undo}
-                      disabled={!historyRef.current.past.length}
-                      className={tbSegment}
-                      aria-label="Undo"
-                      title="Undo (Ctrl+Z)"
+                      onClick={() => engineRef.current.flushSave()}
+                      disabled={!dirty || saveState === "saving"}
+                      className={tbPrimary}
+                      title="Save your changes to the storefront"
                     >
                       <svg {...iconProps} className="h-4 w-4">
-                        <path d="M9 14 4 9l5-5" />
-                        <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+                        <path d="M17 21v-8H7v8M7 3v5h8" />
                       </svg>
-                    </button>
-                    <span className="h-4 w-px bg-white/15" />
-                    <button
-                      type="button"
-                      onClick={redo}
-                      disabled={!historyRef.current.future.length}
-                      className={tbSegment}
-                      aria-label="Redo"
-                      title="Redo (Ctrl+Shift+Z)"
-                    >
-                      <svg {...iconProps} className="h-4 w-4">
-                        <path d="m15 14 5-5-5-5" />
-                        <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
-                      </svg>
+                      Save
                     </button>
                   </div>
+                </header>
 
-                  <span
-                    role="status"
-                    aria-live="polite"
-                    className="hidden min-w-0 items-center gap-1.5 text-xs sm:flex"
+                {error && (
+                  <p
+                    role="alert"
+                    className="flex items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
                   >
-                    {saveState === "saved" && (
-                      <span className="flex items-center gap-1 text-white/70">
-                        <svg
-                          {...iconProps}
-                          strokeWidth="2.2"
-                          className="h-3.5 w-3.5 text-emerald-400"
-                        >
-                          <path d="m5 12.5 4.5 4.5L19 7.5" />
-                        </svg>
-                        All changes saved
-                      </span>
-                    )}
-                    {saveState === "pending" && (
-                      <span className="flex items-center gap-1.5 text-white/70">
-                        <span className="h-2 w-2 rounded-full bg-amber-500" />
-                        Unsaved changes
-                      </span>
-                    )}
-                    {saveState === "saving" && (
-                      <span className="flex items-center gap-1.5 text-white/70">
-                        <span className="h-2 w-2 animate-pulse rounded-full bg-slate-400" />
-                        Saving...
-                      </span>
-                    )}
-                    {saveState === "error" && (
-                      <span className="flex items-center gap-1.5 text-red-300" title={saveError}>
-                        Couldn't save
-                        <button
-                          type="button"
-                          className="font-medium underline"
-                          onClick={() => engineRef.current.flushSave()}
-                        >
-                          Retry now
-                        </button>
-                      </span>
-                    )}
-                    {saveState === "invalid" && (
-                      <span
-                        className="flex max-w-65 items-center gap-1.5 text-red-300"
-                        title={saveError}
-                      >
-                        <span className="truncate">Couldn't save: {saveError}</span>
-                        <button
-                          type="button"
-                          className="shrink-0 font-medium underline"
-                          onClick={undo}
-                        >
-                          Undo
-                        </button>
-                      </span>
-                    )}
-                  </span>
-
-                  {historyRef.current.past.length > 0 && (
+                    {error}
                     <button
                       type="button"
-                      onClick={discardSession}
-                      className={tbButton}
-                      title="Go back to the theme as it was when you opened the editor"
+                      className="text-xs underline"
+                      onClick={() => setError("")}
                     >
-                      Discard changes
+                      Dismiss
                     </button>
-                  )}
+                  </p>
+                )}
 
-                  <button
-                    type="button"
-                    onClick={() => engineRef.current.flushSave()}
-                    disabled={!dirty || saveState === "saving"}
-                    className={tbPrimary}
-                    title="Save your changes to the storefront"
+                {notice && (
+                  <p
+                    role="status"
+                    className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800"
                   >
-                    <svg {...iconProps} className="h-4 w-4">
-                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
-                      <path d="M17 21v-8H7v8M7 3v5h8" />
-                    </svg>
-                    Save
-                  </button>
-                </div>
-              </header>
+                    {notice}
+                  </p>
+                )}
 
-              {error && (
-                <p
-                  role="alert"
-                  className="flex items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
-                >
-                  {error}
-                  <button type="button" className="text-xs underline" onClick={() => setError("")}>
-                    Dismiss
-                  </button>
-                </p>
-              )}
-
-              {notice && (
-                <p
-                  role="status"
-                  className="border-b border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800"
-                >
-                  {notice}
-                </p>
-              )}
-
-              <div className="relative flex min-h-0 flex-1">
-                {/* Side panel: list view and edit view slide inside the same panel */}
-                {/* On desktop the panel is a thin rail while nothing is selected (it peeks open over the preview on hover/focus) */}
-                {/* and stays open, beside the preview, for as long as a section or the theme is selected */}
-                <div
-                  className={`group/side transition-[width] duration-200 ease-out motion-reduce:transition-none lg:relative lg:z-30 lg:shrink-0 ${
-                    editing ? "lg:w-85" : "lg:w-14"
-                  }`}
-                >
-                  <aside
-                    className={`absolute inset-y-0 left-0 z-30 w-85 max-w-[90vw] shrink-0 overflow-hidden border-r border-slate-200 bg-slate-50 shadow-xl transition-[transform,width] duration-200 ease-out motion-reduce:transition-none lg:max-w-none lg:translate-x-0 ${
-                      editing
-                        ? "lg:w-85 lg:shadow-none"
-                        : "lg:w-14 lg:shadow-none lg:group-focus-within/side:w-85 lg:group-focus-within/side:shadow-xl lg:group-hover/side:w-85 lg:group-hover/side:shadow-xl"
-                    } ${panelOpen ? "translate-x-0" : "-translate-x-full"}`}
+                <div className="relative flex min-h-0 flex-1">
+                  {/* Side panel: list view and edit view slide inside the same panel */}
+                  {/* On desktop the panel is a thin rail while nothing is selected (it peeks open over the preview on hover/focus) */}
+                  {/* and stays open, beside the preview, for as long as a section or the theme is selected */}
+                  <div
+                    className={`group/side transition-[width] duration-200 ease-out motion-reduce:transition-none lg:relative lg:z-30 lg:shrink-0 ${
+                      editing ? "lg:w-85" : "lg:w-14"
+                    }`}
                   >
-                    <div
-                      aria-hidden="true"
-                      className={`pointer-events-none absolute inset-x-0 top-0 hidden justify-center pt-4 text-slate-600 transition-opacity duration-150 ${
+                    <aside
+                      className={`absolute inset-y-0 left-0 z-30 w-85 max-w-[90vw] shrink-0 overflow-hidden border-r border-slate-200 bg-slate-50 shadow-xl transition-[transform,width] duration-200 ease-out motion-reduce:transition-none lg:max-w-none lg:translate-x-0 ${
                         editing
-                          ? "lg:hidden"
-                          : "lg:flex lg:group-focus-within/side:opacity-0 lg:group-hover/side:opacity-0"
-                      }`}
+                          ? "lg:w-85 lg:shadow-none"
+                          : "lg:w-14 lg:shadow-none lg:group-focus-within/side:w-85 lg:group-focus-within/side:shadow-xl lg:group-hover/side:w-85 lg:group-hover/side:shadow-xl"
+                      } ${panelOpen ? "translate-x-0" : "-translate-x-full"}`}
                     >
-                      <svg {...iconProps} className="h-5 w-5">
-                        <path d="M3 5h18M3 12h18M3 19h18" />
-                      </svg>
-                    </div>
-                    <div
-                      className={`flex h-full w-255 transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
-                        editing
-                          ? "lg:opacity-100"
-                          : "lg:opacity-0 lg:group-focus-within/side:opacity-100 lg:group-hover/side:opacity-100"
-                      } ${
-                        panelView === 2
-                          ? "-translate-x-2/3"
-                          : panelView === 1
-                            ? "-translate-x-1/3"
-                            : "translate-x-0"
-                      }`}
-                    >
-                      {/* List view (keeps its scroll position while editing) */}
                       <div
-                        className="flex h-full w-1/3 flex-col overflow-y-auto"
-                        inert={panelView !== 0}
-                        aria-hidden={panelView !== 0}
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute inset-x-0 top-0 hidden justify-center pt-4 text-slate-600 transition-opacity duration-150 ${
+                          editing
+                            ? "lg:hidden"
+                            : "lg:flex lg:group-focus-within/side:opacity-0 lg:group-hover/side:opacity-0"
+                        }`}
                       >
-                        <h2 className="display px-5 pb-4 pt-6 text-3xl text-ink">
-                          {pageLabel(page)}
-                        </h2>
+                        <svg {...iconProps} className="h-5 w-5">
+                          <path d="M3 5h18M3 12h18M3 19h18" />
+                        </svg>
+                      </div>
+                      <div
+                        className={`flex h-full w-255 transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
+                          editing
+                            ? "lg:opacity-100"
+                            : "lg:opacity-0 lg:group-focus-within/side:opacity-100 lg:group-hover/side:opacity-100"
+                        } ${
+                          panelView === 2
+                            ? "-translate-x-2/3"
+                            : panelView === 1
+                              ? "-translate-x-1/3"
+                              : "translate-x-0"
+                        }`}
+                      >
+                        {/* List view (keeps its scroll position while editing) */}
+                        <div
+                          className="flex h-full w-1/3 flex-col overflow-y-auto"
+                          inert={panelView !== 0}
+                          aria-hidden={panelView !== 0}
+                        >
+                          <h2 className="display px-5 pb-4 pt-6 text-3xl text-ink">
+                            {pageLabel(page)}
+                          </h2>
 
-                        <GroupHeading>Header</GroupHeading>
+                          <GroupHeading>Header</GroupHeading>
 
-                        <LayoutRows
-                          part="top"
-                          selected={selected}
-                          themeGroup={themeGroup}
-                          synced={data.sections}
-                          onOpen={(group) => {
-                            // A synced section (the header) has its own panel: its options come from its file
-                            if (isSynced(data, group)) {
-                              setSelected(group);
-                              return;
-                            }
-                            setThemeGroup(group);
-                            setSelected("theme");
-                          }}
-                        />
+                          <LayoutRows
+                            part="top"
+                            selected={selected}
+                            themeGroup={themeGroup}
+                            synced={data.sections}
+                            onOpen={(group) => {
+                              // A synced section (the header) has its own panel: its options come from its file
+                              if (isSynced(data, group)) {
+                                setSelected(group);
+                                return;
+                              }
+                              setThemeGroup(group);
+                              setSelected("theme");
+                            }}
+                          />
 
-                        <GroupHeading>Template</GroupHeading>
+                          <GroupHeading>Template</GroupHeading>
 
-                        <ul className="px-2">
-                          {template.order.map((id, i) => {
-                            const s = template.sections[id];
+                          <ul className="px-2">
+                            {template.order.map((id, i) => {
+                              const s = template.sections[id];
 
-                            const spec = schema.sections[s.type];
+                              const spec = schema.sections[s.type];
 
-                            const name = s.settings.heading || spec.name;
+                              const name = s.settings.heading || spec.name;
 
-                            const canRename = "heading" in spec.settings;
+                              const canRename = "heading" in spec.settings;
 
-                            const lineHere = dropTarget?.kind === "section" && dropTarget.id === id;
+                              const lineHere =
+                                dropTarget?.kind === "section" && dropTarget.id === id;
 
-                            const blockInto = dropTarget?.kind === "into" && dropTarget.id === id;
+                              const blockInto = dropTarget?.kind === "into" && dropTarget.id === id;
 
-                            const isSelected = selected === id;
+                              const isSelected = selected === id;
 
-                            const showType =
-                              s.type !== "custom" &&
-                              name.trim().toLowerCase() !== spec.name.toLowerCase();
+                              const showType =
+                                s.type !== "custom" &&
+                                name.trim().toLowerCase() !== spec.name.toLowerCase();
 
-                            const menuOpen = rowMenu === id;
+                              const menuOpen = rowMenu === id;
 
-                            // Actions appear on hover/focus (always on touch screens); stay visible while the menu is open
-                            const reveal = menuOpen
-                              ? "opacity-100"
-                              : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100";
+                              // Actions appear on hover/focus (always on touch screens); stay visible while the menu is open
+                              const reveal = menuOpen
+                                ? "opacity-100"
+                                : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100";
 
-                            return (
-                              <li
-                                key={id}
-                                data-drop-section={id}
-                                className={`relative ${drag?.kind === "section" && drag.id === id ? "opacity-40" : ""}`}
-                              >
-                                {lineHere && <DropLine after={dropTarget.after} />}
-
-                                <div
-                                  className={`group flex h-8 items-center gap-2 rounded-lg pl-1.5 pr-1 text-[13px] ${
-                                    blockInto
-                                      ? "bg-slate-100 ring-1 ring-violet-600/50"
-                                      : isSelected
-                                        ? "bg-slate-100"
-                                        : "hover:bg-slate-50"
-                                  }`}
+                              return (
+                                <li
+                                  key={id}
+                                  data-drop-section={id}
+                                  className={`relative ${drag?.kind === "section" && drag.id === id ? "opacity-40" : ""}`}
                                 >
-                                  {/* The type icon turns into the drag handle on hover */}
-                                  <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
-                                    <svg
-                                      {...iconProps}
-                                      className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
-                                        s.hidden ? "text-slate-400" : "text-slate-400"
-                                      }`}
-                                    >
-                                      {SECTION_ICONS[s.type] || SECTION_ICONS.custom}
-                                    </svg>
-                                    <span className="invisible absolute inset-0 flex items-center justify-center group-hover:visible group-focus-within:visible [@media(hover:none)]:visible">
-                                      <DragHandle
-                                        label={`Move ${name}`}
-                                        onPointerDown={(e) => startDrag(e, { kind: "section", id })}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "ArrowUp" && i > 0) {
-                                            e.preventDefault();
-                                            moveSection(id, -1);
+                                  {lineHere && <DropLine after={dropTarget.after} />}
+
+                                  <div
+                                    className={`group flex h-8 items-center gap-2 rounded-lg pl-1.5 pr-1 text-[13px] ${
+                                      blockInto
+                                        ? "bg-slate-100 ring-1 ring-violet-600/50"
+                                        : isSelected
+                                          ? "bg-slate-100"
+                                          : "hover:bg-slate-50"
+                                    }`}
+                                  >
+                                    {/* The type icon turns into the drag handle on hover */}
+                                    <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
+                                      <svg
+                                        {...iconProps}
+                                        className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
+                                          s.hidden ? "text-slate-400" : "text-slate-400"
+                                        }`}
+                                      >
+                                        {SECTION_ICONS[s.type] || SECTION_ICONS.custom}
+                                      </svg>
+                                      <span className="invisible absolute inset-0 flex items-center justify-center group-hover:visible group-focus-within:visible [@media(hover:none)]:visible">
+                                        <DragHandle
+                                          label={`Move ${name}`}
+                                          onPointerDown={(e) =>
+                                            startDrag(e, { kind: "section", id })
                                           }
-                                          if (
-                                            e.key === "ArrowDown" &&
-                                            i < template.order.length - 1
-                                          ) {
+                                          onKeyDown={(e) => {
+                                            if (e.key === "ArrowUp" && i > 0) {
+                                              e.preventDefault();
+                                              moveSection(id, -1);
+                                            }
+                                            if (
+                                              e.key === "ArrowDown" &&
+                                              i < template.order.length - 1
+                                            ) {
+                                              e.preventDefault();
+                                              moveSection(id, 1);
+                                            }
+                                          }}
+                                        />
+                                      </span>
+                                    </span>
+
+                                    {renaming === id ? (
+                                      <input
+                                        autoFocus
+                                        value={renameValue}
+                                        maxLength={200}
+                                        aria-label="Section name"
+                                        onChange={(e) => setRenameValue(e.target.value)}
+                                        onBlur={finishRename}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter") finishRename();
+                                          if (e.key === "Escape") {
                                             e.preventDefault();
-                                            moveSection(id, 1);
+                                            setRenaming(null);
                                           }
                                         }}
+                                        className="h-7 min-w-0 flex-1 rounded border border-orange-600 bg-white px-2 text-sm outline-none"
                                       />
-                                    </span>
-                                  </span>
-
-                                  {renaming === id ? (
-                                    <input
-                                      autoFocus
-                                      value={renameValue}
-                                      maxLength={200}
-                                      aria-label="Section name"
-                                      onChange={(e) => setRenameValue(e.target.value)}
-                                      onBlur={finishRename}
-                                      onKeyDown={(e) => {
-                                        if (e.key === "Enter") finishRename();
-                                        if (e.key === "Escape") {
-                                          e.preventDefault();
-                                          setRenaming(null);
-                                        }
-                                      }}
-                                      className="h-7 min-w-0 flex-1 rounded border border-orange-600 bg-white px-2 text-sm outline-none"
-                                    />
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      className="flex min-w-0 flex-1 items-baseline gap-1.5 text-left"
-                                      onClick={() => setSelected(id)}
-                                      onDoubleClick={() => canRename && startRename(id)}
-                                      title={showType ? `${name} (${spec.name})` : name}
-                                    >
-                                      <span
-                                        className={`truncate ${s.hidden ? "text-slate-400" : "text-charcoal-navy"} ${isSelected ? "font-medium" : ""}`}
-                                      >
-                                        {name}
-                                      </span>
-                                      {showType && (
-                                        <span className="shrink-0 truncate text-xs text-slate-400">
-                                          {spec.name}
-                                        </span>
-                                      )}
-                                    </button>
-                                  )}
-
-                                  {renaming !== id && !spec.required && (
-                                    <div className="flex shrink-0 items-center">
-                                      {/* Hidden sections keep the crossed-out eye visible */}
+                                    ) : (
                                       <button
                                         type="button"
-                                        onClick={() => toggleHidden(id)}
-                                        className={`${iconButton} ${s.hidden ? "opacity-100" : reveal}`}
-                                        aria-label={s.hidden ? `Show ${name}` : `Hide ${name}`}
-                                        aria-pressed={!s.hidden}
-                                        title={s.hidden ? "Hidden. Click to show" : "Hide"}
+                                        className="flex min-w-0 flex-1 items-baseline gap-1.5 text-left"
+                                        onClick={() => setSelected(id)}
+                                        onDoubleClick={() => canRename && startRename(id)}
+                                        title={showType ? `${name} (${spec.name})` : name}
                                       >
-                                        <EyeIcon hidden={s.hidden} />
+                                        <span
+                                          className={`truncate ${s.hidden ? "text-slate-400" : "text-charcoal-navy"} ${isSelected ? "font-medium" : ""}`}
+                                        >
+                                          {name}
+                                        </span>
+                                        {showType && (
+                                          <span className="shrink-0 truncate text-xs text-slate-400">
+                                            {spec.name}
+                                          </span>
+                                        )}
                                       </button>
+                                    )}
 
-                                      <div className={`relative ${reveal}`}>
+                                    {renaming !== id && !spec.required && (
+                                      <div className="flex shrink-0 items-center">
+                                        {/* Hidden sections keep the crossed-out eye visible */}
                                         <button
                                           type="button"
-                                          onClick={() => setRowMenu(menuOpen ? null : id)}
-                                          className={iconButton}
-                                          aria-label={`More actions for ${name}`}
-                                          aria-haspopup="menu"
-                                          aria-expanded={menuOpen}
+                                          onClick={() => toggleHidden(id)}
+                                          className={`${iconButton} ${s.hidden ? "opacity-100" : reveal}`}
+                                          aria-label={s.hidden ? `Show ${name}` : `Hide ${name}`}
+                                          aria-pressed={!s.hidden}
+                                          title={s.hidden ? "Hidden. Click to show" : "Hide"}
                                         >
-                                          <svg
-                                            viewBox="0 0 24 24"
-                                            fill="currentColor"
-                                            className="h-4 w-4"
-                                            aria-hidden="true"
-                                          >
-                                            <circle cx="5" cy="12" r="1.6" />
-                                            <circle cx="12" cy="12" r="1.6" />
-                                            <circle cx="19" cy="12" r="1.6" />
-                                          </svg>
+                                          <EyeIcon hidden={s.hidden} />
                                         </button>
 
-                                        {menuOpen && (
-                                          <div
-                                            role="menu"
-                                            data-row-menu
-                                            className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg"
+                                        <div className={`relative ${reveal}`}>
+                                          <button
+                                            type="button"
+                                            onClick={() => setRowMenu(menuOpen ? null : id)}
+                                            className={iconButton}
+                                            aria-label={`More actions for ${name}`}
+                                            aria-haspopup="menu"
+                                            aria-expanded={menuOpen}
                                           >
-                                            {canRename && (
+                                            <svg
+                                              viewBox="0 0 24 24"
+                                              fill="currentColor"
+                                              className="h-4 w-4"
+                                              aria-hidden="true"
+                                            >
+                                              <circle cx="5" cy="12" r="1.6" />
+                                              <circle cx="12" cy="12" r="1.6" />
+                                              <circle cx="19" cy="12" r="1.6" />
+                                            </svg>
+                                          </button>
+
+                                          {menuOpen && (
+                                            <div
+                                              role="menu"
+                                              data-row-menu
+                                              className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg"
+                                            >
+                                              {canRename && (
+                                                <button
+                                                  type="button"
+                                                  role="menuitem"
+                                                  onClick={() => {
+                                                    setRowMenu(null);
+                                                    startRename(id);
+                                                  }}
+                                                  className="block w-full px-3 py-1.5 text-left hover:bg-slate-100"
+                                                >
+                                                  Rename
+                                                </button>
+                                              )}
                                               <button
                                                 type="button"
                                                 role="menuitem"
                                                 onClick={() => {
                                                   setRowMenu(null);
-                                                  startRename(id);
+                                                  duplicateSection(id);
                                                 }}
                                                 className="block w-full px-3 py-1.5 text-left hover:bg-slate-100"
                                               >
-                                                Rename
+                                                Duplicate
                                               </button>
-                                            )}
-                                            <button
-                                              type="button"
-                                              role="menuitem"
-                                              onClick={() => {
-                                                setRowMenu(null);
-                                                duplicateSection(id);
-                                              }}
-                                              className="block w-full px-3 py-1.5 text-left hover:bg-slate-100"
-                                            >
-                                              Duplicate
-                                            </button>
-                                            <div className="my-1 h-px bg-slate-100" />
-                                            <button
-                                              type="button"
-                                              role="menuitem"
-                                              onClick={() => {
-                                                setRowMenu(null);
-                                                removeSection(id);
-                                              }}
-                                              className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-red-50"
-                                            >
-                                              Delete
-                                            </button>
-                                          </div>
-                                        )}
+                                              <div className="my-1 h-px bg-slate-100" />
+                                              <button
+                                                type="button"
+                                                role="menuitem"
+                                                onClick={() => {
+                                                  setRowMenu(null);
+                                                  removeSection(id);
+                                                }}
+                                                className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-red-50"
+                                              >
+                                                Delete
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
+                                    )}
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
 
-                        {template.order.length === 0 && (
-                          <p className="px-4 py-2 text-xs text-slate-600">
-                            No sections yet. Your store shows a simple default layout until you add
-                            one.
-                          </p>
-                        )}
+                          {template.order.length === 0 && (
+                            <p className="px-4 py-2 text-xs text-slate-600">
+                              No sections yet. Your store shows a simple default layout until you
+                              add one.
+                            </p>
+                          )}
 
-                        {/* Add section */}
-                        <div className="px-2 pb-3 pt-1">
-                          {adding ? (
-                            <div className="rounded-xl border border-slate-200 bg-slate-100 p-3">
-                              <label
-                                className="block text-xs font-medium text-violet-600"
-                                htmlFor="new-section-name"
-                              >
-                                Section name
-                              </label>
+                          {/* Add section */}
+                          <div className="px-2 pb-3 pt-1">
+                            {adding ? (
+                              <div className="rounded-xl border border-slate-200 bg-slate-100 p-3">
+                                <label
+                                  className="block text-xs font-medium text-violet-600"
+                                  htmlFor="new-section-name"
+                                >
+                                  Section name
+                                </label>
 
-                              <div className="mt-1.5 flex items-center gap-1.5">
-                                <input
-                                  id="new-section-name"
-                                  autoFocus
-                                  value={newName}
-                                  maxLength={200}
-                                  placeholder="e.g. Our story"
-                                  onChange={(e) => setNewName(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      e.preventDefault();
-                                      addCustomSection();
-                                    }
-                                    if (e.key === "Escape") {
+                                <div className="mt-1.5 flex items-center gap-1.5">
+                                  <input
+                                    id="new-section-name"
+                                    autoFocus
+                                    value={newName}
+                                    maxLength={200}
+                                    placeholder="e.g. Our story"
+                                    onChange={(e) => setNewName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        addCustomSection();
+                                      }
+                                      if (e.key === "Escape") {
+                                        setAdding(false);
+                                        setNewName("");
+                                      }
+                                    }}
+                                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2.5 text-sm outline-none focus:border-orange-600"
+                                  />
+
+                                  <button
+                                    type="button"
+                                    onClick={addCustomSection}
+                                    disabled={!newName.trim()}
+                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-600 text-white hover:bg-orange-600/90 disabled:opacity-30"
+                                    aria-label="Add section"
+                                    title="Add section"
+                                  >
+                                    <svg {...iconProps} strokeWidth="2.2" className="h-4 w-4">
+                                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                                    </svg>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
                                       setAdding(false);
                                       setNewName("");
-                                    }
-                                  }}
-                                  className="h-9 min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2.5 text-sm outline-none focus:border-orange-600"
-                                />
+                                    }}
+                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 hover:border-orange-600 hover:text-orange-600"
+                                    aria-label="Cancel"
+                                    title="Cancel"
+                                  >
+                                    <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
+                                      <path d="M6 6l12 12M18 6L6 18" />
+                                    </svg>
+                                  </button>
+                                </div>
 
-                                <button
-                                  type="button"
-                                  onClick={addCustomSection}
-                                  disabled={!newName.trim()}
-                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-600 text-white hover:bg-orange-600/90 disabled:opacity-30"
-                                  aria-label="Add section"
-                                  title="Add section"
-                                >
-                                  <svg {...iconProps} strokeWidth="2.2" className="h-4 w-4">
-                                    <path d="m5 12.5 4.5 4.5L19 7.5" />
-                                  </svg>
-                                </button>
+                                {templateTypes.length > 0 && (
+                                  <>
+                                    <p className="mt-3 text-[11px] text-slate-600">
+                                      Or start from a template:
+                                    </p>
 
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setAdding(false);
-                                    setNewName("");
-                                  }}
-                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 hover:border-orange-600 hover:text-orange-600"
-                                  aria-label="Cancel"
-                                  title="Cancel"
+                                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                      {templateTypes.map(([type, spec]) => (
+                                        <button
+                                          key={type}
+                                          type="button"
+                                          onClick={() => addTemplateSection(type)}
+                                          className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-violet-600 hover:border-orange-600 hover:text-orange-600"
+                                        >
+                                          {spec.name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setAdding(true)}
+                                className="flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-[13px] font-medium text-violet-600 hover:bg-slate-50 hover:text-[#B08D57]"
+                              >
+                                <span
+                                  className="flex h-5 w-5 items-center justify-center"
+                                  aria-hidden="true"
                                 >
                                   <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                                    <path d="M6 6l12 12M18 6L6 18" />
+                                    <path d="M12 5v14M5 12h14" />
                                   </svg>
-                                </button>
-                              </div>
+                                </span>
+                                Add section
+                              </button>
+                            )}
+                          </div>
 
-                              {templateTypes.length > 0 && (
-                                <>
-                                  <p className="mt-3 text-[11px] text-slate-600">
-                                    Or start from a template:
-                                  </p>
+                          <GroupHeading>Footer</GroupHeading>
 
-                                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                    {templateTypes.map(([type, spec]) => (
-                                      <button
-                                        key={type}
-                                        type="button"
-                                        onClick={() => addTemplateSection(type)}
-                                        className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-violet-600 hover:border-orange-600 hover:text-orange-600"
-                                      >
-                                        {spec.name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => setAdding(true)}
-                              className="flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-[13px] font-medium text-violet-600 hover:bg-slate-50 hover:text-[#B08D57]"
-                            >
-                              <span
-                                className="flex h-5 w-5 items-center justify-center"
-                                aria-hidden="true"
-                              >
-                                <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                                  <path d="M12 5v14M5 12h14" />
-                                </svg>
-                              </span>
-                              Add section
-                            </button>
-                          )}
-                        </div>
-
-                        <GroupHeading>Footer</GroupHeading>
-
-                        <LayoutRows
-                          part="bottom"
-                          selected={selected}
-                          themeGroup={themeGroup}
-                          synced={data.sections}
-                          onOpen={(group) => {
-                            // A synced section (the footer) has its own panel: its options come from its file
-                            if (isSynced(data, group)) {
-                              setSelected(group);
-                              return;
-                            }
-                            setThemeGroup(group);
-                            setSelected("theme");
-                          }}
-                        />
-
-                        <div className="mt-auto border-t border-slate-200 p-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setThemeGroup(null);
+                          <LayoutRows
+                            part="bottom"
+                            selected={selected}
+                            themeGroup={themeGroup}
+                            synced={data.sections}
+                            onOpen={(group) => {
+                              // A synced section (the footer) has its own panel: its options come from its file
+                              if (isSynced(data, group)) {
+                                setSelected(group);
+                                return;
+                              }
+                              setThemeGroup(group);
                               setSelected("theme");
                             }}
-                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left ${
-                              selected === "theme"
-                                ? "bg-[rgba(234,88,12,0.08)]"
-                                : "hover:bg-slate-100"
-                            }`}
-                          >
-                            <span>
-                              <span className="block text-sm font-medium text-ink">
-                                Theme settings
-                              </span>
-                              <span className="block text-xs text-slate-500">
-                                Colors, fonts, buttons
-                              </span>
-                            </span>
-                            <span aria-hidden="true" className="text-slate-500">
-                              &rarr;
-                            </span>
-                          </button>
-                        </div>
-                      </div>
+                          />
 
-                      {/* Edit view */}
-                      <div
-                        className="flex h-full w-1/3 flex-col"
-                        inert={panelView !== 1}
-                        aria-hidden={panelView !== 1}
-                      >
-                        <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-3">
-                          <button
-                            type="button"
-                            onClick={() => setSelected(null)}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-orange-600"
-                            aria-label="Back to sections"
-                            title="Back (Esc)"
-                          >
-                            <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                              <path d="M19 12H5M11 6l-6 6 6 6" />
-                            </svg>
-                          </button>
-
-                          <div className="min-w-0">
-                            <h2 className="truncate font-semibold leading-tight">{editTitle}</h2>
-                            <p className="truncate text-xs text-slate-400">{editSubtitle}</p>
+                          <div className="mt-auto border-t border-slate-200 p-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setThemeGroup(null);
+                                setSelected("theme");
+                              }}
+                              className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left ${
+                                selected === "theme"
+                                  ? "bg-[rgba(234,88,12,0.08)]"
+                                  : "hover:bg-slate-100"
+                              }`}
+                            >
+                              <span>
+                                <span className="block text-sm font-medium text-ink">
+                                  Theme settings
+                                </span>
+                                <span className="block text-xs text-slate-500">
+                                  Colors, fonts, buttons
+                                </span>
+                              </span>
+                              <span aria-hidden="true" className="text-slate-500">
+                                &rarr;
+                              </span>
+                            </button>
                           </div>
                         </div>
 
-                        <div ref={editScrollRef} className={`min-h-0 flex-1 overflow-y-auto px-4`}>
-                          {shown === "theme" ? (
-                            <GroupedFields
-                              key={`theme-${themeGroup}`}
-                              fields={schema.settings}
-                              values={data.settings}
-                              groups={(
-                                schema.theme_groups || [{ id: "store", label: "Store" }]
-                              ).filter(
-                                // Synced sections (header, footer) are edited in their own panels (in the sections list)
-                                (group) => !isSynced(data, group.id)
-                              )}
-                              initialOpen={themeGroup}
-                              exclusive
-                              resetAny
-                              collections={collections}
-                              onChange={(key, value) =>
-                                update((d) => {
-                                  d.settings[key] = value;
-                                }, `t:${key}`)
-                              }
-                            />
-                          ) : shownSection ? (
-                            <GroupedFields
-                              key={shown}
-                              fields={shownSpec.settings}
-                              values={shownSection.settings}
-                              groups={schema.groups || [{ id: "content", label: "Content" }]}
-                              collections={collections}
-                              products={products}
-                              catalogErrors={catalogErrors}
-                              onChange={(key, value) =>
-                                update((d) => {
-                                  sectionIn(d, page, shown).settings[key] = value;
-                                }, `s:${shown}:${key}`)
-                              }
-                              extra={
-                                <>
-                                  {shown === "header" && (
-                                    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-                                      <p>
-                                        The mega menu's columns and links are edited in Admin &gt;
-                                        Menus. The look is set by the Mega menu options above.
-                                      </p>
-                                      <Link
-                                        className="mt-1 inline-block font-medium text-ink underline"
-                                        to="/admin/online-store/content/menus"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                      >
-                                        Edit menu columns
-                                      </Link>
-                                    </div>
-                                  )}
-
-                                  {shownSpec.blocks && (
-                                    <SectionBlocks
-                                      key={`blocks-${shown}`}
-                                      sectionId={shown}
-                                      spec={shownSpec}
-                                      blocks={shownSection.blocks || []}
-                                      drag={drag}
-                                      dropTarget={dropTarget}
-                                      startDrag={startDrag}
-                                      onChange={(mutate) => updateBlocks(shown, mutate)}
-                                      onOpen={(index) => setSelectedBlock(index)}
-                                      onDuplicate={(index) => duplicateBlock(shown, index)}
-                                      onToggle={(index) => toggleBlockHidden(shown, index)}
-                                      onRemove={(index) => removeBlock(shown, index)}
-                                    />
-                                  )}
-
-                                  {blockTargets.length > 0 && (
-                                    <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-100 p-2">
-                                      <p className="px-1 pb-1.5 text-[11px] font-medium text-slate-600">
-                                        Drop on a section to move the block there
-                                      </p>
-
-                                      <ul className="grid gap-1">
-                                        {blockTargets.map((id) => (
-                                          <li
-                                            key={id}
-                                            data-drop-section={id}
-                                            className={`truncate rounded-md border bg-white px-2.5 py-2 text-sm ${
-                                              dropTarget?.kind === "into" && dropTarget.id === id
-                                                ? "border-orange-600 ring-2 ring-ink/20"
-                                                : "border-slate-200"
-                                            }`}
-                                          >
-                                            {template.sections[id].settings.heading ||
-                                              schema.sections[template.sections[id].type].name}
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                </>
-                              }
-                            />
-                          ) : null}
-                        </div>
-
-                        {shownSection && (
-                          <div className="flex shrink-0 items-center gap-1 border-t border-slate-200 bg-white px-3 py-2">
+                        {/* Edit view */}
+                        <div
+                          className="flex h-full w-1/3 flex-col"
+                          inert={panelView !== 1}
+                          aria-hidden={panelView !== 1}
+                        >
+                          <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-3">
                             <button
                               type="button"
-                              onClick={() => resetSection(shown)}
-                              className="rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
+                              onClick={() => setSelected(null)}
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-orange-600"
+                              aria-label="Back to sections"
+                              title="Back (Esc)"
                             >
-                              Reset to default
+                              <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
+                                <path d="M19 12H5M11 6l-6 6 6 6" />
+                              </svg>
                             </button>
 
-                            <span className="flex-1" />
+                            <div className="min-w-0">
+                              <h2 className="truncate font-semibold leading-tight">{editTitle}</h2>
+                              <p className="truncate text-xs text-slate-400">{editSubtitle}</p>
+                            </div>
+                          </div>
 
-                            {!shownSpec.required && (
-                              <>
+                          <div
+                            ref={editScrollRef}
+                            className={`min-h-0 flex-1 overflow-y-auto px-4`}
+                          >
+                            {shown === "theme" ? (
+                              <GroupedFields
+                                key={`theme-${themeGroup}`}
+                                fields={schema.settings}
+                                values={data.settings}
+                                groups={(
+                                  schema.theme_groups || [{ id: "store", label: "Store" }]
+                                ).filter(
+                                  // Synced sections (header, footer) are edited in their own panels (in the sections list)
+                                  (group) => !isSynced(data, group.id)
+                                )}
+                                initialOpen={themeGroup}
+                                exclusive
+                                resetAny
+                                collections={collections}
+                                onChange={(key, value) =>
+                                  update((d) => {
+                                    d.settings[key] = value;
+                                  }, `t:${key}`)
+                                }
+                              />
+                            ) : shownSection ? (
+                              <GroupedFields
+                                key={shown}
+                                fields={shownSpec.settings}
+                                values={shownSection.settings}
+                                groups={schema.groups || [{ id: "content", label: "Content" }]}
+                                collections={collections}
+                                products={products}
+                                catalogErrors={catalogErrors}
+                                onChange={(key, value) =>
+                                  update((d) => {
+                                    sectionIn(d, page, shown).settings[key] = value;
+                                  }, `s:${shown}:${key}`)
+                                }
+                                extra={
+                                  <>
+                                    {shown === "header" && (
+                                      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                                        <p>
+                                          The mega menu's columns and links are edited in Admin &gt;
+                                          Menus. The look is set by the Mega menu options above.
+                                        </p>
+                                        <Link
+                                          className="mt-1 inline-block font-medium text-ink underline"
+                                          to="/admin/online-store/content/menus"
+                                          target="_blank"
+                                          rel="noreferrer"
+                                        >
+                                          Edit menu columns
+                                        </Link>
+                                      </div>
+                                    )}
+
+                                    {shownSpec.blocks && (
+                                      <SectionBlocks
+                                        key={`blocks-${shown}`}
+                                        sectionId={shown}
+                                        spec={shownSpec}
+                                        blocks={shownSection.blocks || []}
+                                        drag={drag}
+                                        dropTarget={dropTarget}
+                                        startDrag={startDrag}
+                                        onChange={(mutate) => updateBlocks(shown, mutate)}
+                                        onOpen={(index) => setSelectedBlock(index)}
+                                        onDuplicate={(index) => duplicateBlock(shown, index)}
+                                        onToggle={(index) => toggleBlockHidden(shown, index)}
+                                        onRemove={(index) => removeBlock(shown, index)}
+                                      />
+                                    )}
+
+                                    {blockTargets.length > 0 && (
+                                      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-100 p-2">
+                                        <p className="px-1 pb-1.5 text-[11px] font-medium text-slate-600">
+                                          Drop on a section to move the block there
+                                        </p>
+
+                                        <ul className="grid gap-1">
+                                          {blockTargets.map((id) => (
+                                            <li
+                                              key={id}
+                                              data-drop-section={id}
+                                              className={`truncate rounded-md border bg-white px-2.5 py-2 text-sm ${
+                                                dropTarget?.kind === "into" && dropTarget.id === id
+                                                  ? "border-orange-600 ring-2 ring-ink/20"
+                                                  : "border-slate-200"
+                                              }`}
+                                            >
+                                              {template.sections[id].settings.heading ||
+                                                schema.sections[template.sections[id].type].name}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </>
+                                }
+                              />
+                            ) : null}
+                          </div>
+
+                          {shownSection && (
+                            <div className="flex shrink-0 items-center gap-1 border-t border-slate-200 bg-white px-3 py-2">
+                              <button
+                                type="button"
+                                onClick={() => resetSection(shown)}
+                                className="rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
+                              >
+                                Reset to default
+                              </button>
+
+                              <span className="flex-1" />
+
+                              {!shownSpec.required && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => duplicateSection(shown)}
+                                    className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
+                                  >
+                                    <svg {...iconProps} className="h-3.5 w-3.5">
+                                      <rect x="8" y="8" width="13" height="13" rx="2" />
+                                      <path d="M4 16V5a2 2 0 0 1 2-2h11" />
+                                    </svg>
+                                    Duplicate
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => removeSection(shown)}
+                                    className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                                  >
+                                    <svg {...iconProps} className="h-3.5 w-3.5">
+                                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
+                                    </svg>
+                                    Delete
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Block view */}
+                        <div
+                          className="flex h-full w-1/3 flex-col"
+                          inert={panelView !== 2}
+                          aria-hidden={panelView !== 2}
+                        >
+                          <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-3">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                cardPart ? setSelectedChild(null) : setSelectedBlock(null)
+                              }
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-orange-600"
+                              aria-label={
+                                cardPart ? `Back to ${shownBlockSpec.name}` : "Back to section"
+                              }
+                              title="Back (Esc)"
+                            >
+                              <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
+                                <path d="M19 12H5M11 6l-6 6 6 6" />
+                              </svg>
+                            </button>
+
+                            <div className="min-w-0">
+                              <h2 className="truncate font-semibold leading-tight">
+                                {cardPartSpec?.name || shownBlockSpec?.name || "Block"}
+                              </h2>
+                              <p className="truncate text-xs text-slate-400">
+                                in{" "}
+                                {cardPart
+                                  ? shownBlockSpec.name
+                                  : shownSection
+                                    ? shownSection.settings.heading || shownSpec.name
+                                    : ""}
+                                {(cardPart ? cardPart.hidden : shownBlock?.hidden)
+                                  ? " · Hidden"
+                                  : ""}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div ref={blockScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4">
+                            {cardPart && cardPartSpec?.description && (
+                              <div className="border-b border-slate-100 py-3">
+                                <p className="text-xs text-slate-600">{cardPartSpec.description}</p>
+                                {(cardPartSpec.links || []).map((link) => (
+                                  <ThemeLink key={link.group} link={link} />
+                                ))}
+                              </div>
+                            )}
+                            {cardPart && cardPartSpec && (
+                              <GroupedFields
+                                key={`${shown}-${shownBlockIndex}-${selectedChild}-${cardPart.type}`}
+                                initialOpen={
+                                  Object.values(cardPartSpec.settings)[0]?.group || "content"
+                                }
+                                fields={cardPartSpec.settings}
+                                values={cardPart.settings}
+                                groups={schema.groups || [{ id: "content", label: "Content" }]}
+                                collections={collections}
+                                products={products}
+                                catalogErrors={catalogErrors}
+                                onChange={(key, value) =>
+                                  updateBlocks(
+                                    shown,
+                                    (list) => {
+                                      list[shownBlockIndex].children[selectedChild].settings[key] =
+                                        value;
+                                    },
+                                    `bp:${shown}:${shownBlockIndex}:${selectedChild}:${key}`
+                                  )
+                                }
+                              />
+                            )}
+                            {cardPart &&
+                              previewProduct?.id &&
+                              previewProduct.section === shown &&
+                              previewProduct.block === selectedBlock &&
+                              previewProduct.child === selectedChild && (
+                                <div className="border-t border-slate-100 py-4">
+                                  <Link
+                                    to={`/admin/online-store/products/${encodeURIComponent(previewProduct.id)}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm font-medium text-ink underline"
+                                  >
+                                    Edit product
+                                  </Link>
+                                  <p className="mt-1 text-xs text-slate-500">
+                                    Opens the product you clicked. Its real price, title and images
+                                    are changed there, not in the customizer.
+                                  </p>
+                                </div>
+                              )}
+                            {shownBlock && shownBlockSpec && !cardPart && !isCardBlock && (
+                              <GroupedFields
+                                key={`${shown}-${shownBlockIndex}-${shownBlock.type}`}
+                                fields={shownBlockSpec.settings}
+                                values={shownBlock.settings}
+                                groups={schema.groups || [{ id: "content", label: "Content" }]}
+                                collections={collections}
+                                products={products}
+                                catalogErrors={catalogErrors}
+                                onChange={(key, value) =>
+                                  updateBlocks(
+                                    shown,
+                                    (list) => {
+                                      list[shownBlockIndex].settings[key] = value;
+                                    },
+                                    `b:${shown}:${shownBlockIndex}:${key}`
+                                  )
+                                }
+                              />
+                            )}
+                            {isCardBlock && !cardPart && (
+                              <CardChildren
+                                key={`card-${shown}-${shownBlockIndex}`}
+                                blockSpec={shownBlockSpec}
+                                items={shownBlock.children || []}
+                                selected={selectedChild}
+                                insertAfter={cardInsertAfter}
+                                onInsertDone={() => setCardInsertAfter(null)}
+                                onOpen={(i) => setSelectedChild(i)}
+                                onChange={(mutate) =>
+                                  updateBlocks(
+                                    shown,
+                                    (list) => {
+                                      list[shownBlockIndex].children =
+                                        list[shownBlockIndex].children || [];
+                                      mutate(list[shownBlockIndex].children);
+                                    },
+                                    `bc:${shown}:${shownBlockIndex}`
+                                  )
+                                }
+                              />
+                            )}
+                            {shownBlock && shownBlockSpec?.nests && !isCardBlock && (
+                              <GroupChildren
+                                key={`children-${shown}-${shownBlockIndex}`}
+                                spec={shownSpec}
+                                items={shownBlock.children || []}
+                                groups={schema.groups || [{ id: "content", label: "Content" }]}
+                                collections={collections}
+                                products={products}
+                                catalogErrors={catalogErrors}
+                                onChange={(mutate) =>
+                                  updateBlocks(
+                                    shown,
+                                    (list) => {
+                                      list[shownBlockIndex].children =
+                                        list[shownBlockIndex].children || [];
+                                      mutate(list[shownBlockIndex].children);
+                                    },
+                                    `bc:${shown}:${shownBlockIndex}`
+                                  )
+                                }
+                              />
+                            )}
+                          </div>
+
+                          {shownBlock && !(isCardBlock && !cardPart) && (
+                            <div className="flex shrink-0 items-center gap-1 border-t border-slate-200 bg-white px-3 py-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  cardPart
+                                    ? updateBlocks(shown, (list) => {
+                                        const part = list[shownBlockIndex].children[selectedChild];
+                                        part.hidden = !part.hidden;
+                                      })
+                                    : toggleBlockHidden(shown, shownBlockIndex)
+                                }
+                                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
+                              >
+                                <EyeIcon hidden={!(cardPart || shownBlock).hidden} />
+                                {(cardPart || shownBlock).hidden ? "Show" : "Hide"}
+                              </button>
+
+                              <span className="flex-1" />
+
+                              {!cardPart && (
                                 <button
                                   type="button"
-                                  onClick={() => duplicateSection(shown)}
-                                  className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
+                                  disabled={atTypeLimit}
+                                  title={
+                                    atTypeLimit ? "A section can have only one of these" : undefined
+                                  }
+                                  onClick={() => duplicateBlock(shown, shownBlockIndex)}
+                                  className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600 disabled:opacity-30"
                                 >
                                   <svg {...iconProps} className="h-3.5 w-3.5">
                                     <rect x="8" y="8" width="13" height="13" rx="2" />
@@ -3440,287 +3777,183 @@ export default function AdminCustomizePage() {
                                   </svg>
                                   Duplicate
                                 </button>
+                              )}
 
+                              {/* A section's required blocks (e.g. Product information) can be hidden, not deleted */}
+                              {!shownSpec.required_blocks?.includes(shownBlock.type) && (
                                 <button
                                   type="button"
-                                  onClick={() => removeSection(shown)}
+                                  onClick={() => {
+                                    if (!cardPart) {
+                                      removeBlock(shown, shownBlockIndex);
+                                    } else if (
+                                      window.confirm("Remove this block from every card?")
+                                    ) {
+                                      updateBlocks(shown, (list) =>
+                                        list[shownBlockIndex].children.splice(selectedChild, 1)
+                                      );
+                                      setSelectedChild(null);
+                                    }
+                                  }}
                                   className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
                                 >
                                   <svg {...iconProps} className="h-3.5 w-3.5">
                                     <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
                                   </svg>
-                                  Delete
+                                  {cardPart ? "Remove block" : "Delete"}
                                 </button>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Block view */}
-                      <div
-                        className="flex h-full w-1/3 flex-col"
-                        inert={panelView !== 2}
-                        aria-hidden={panelView !== 2}
-                      >
-                        <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-3">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedBlock(null)}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-orange-600"
-                            aria-label="Back to section"
-                            title="Back (Esc)"
-                          >
-                            <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                              <path d="M19 12H5M11 6l-6 6 6 6" />
-                            </svg>
-                          </button>
-
-                          <div className="min-w-0">
-                            <h2 className="truncate font-semibold leading-tight">
-                              {shownBlockSpec?.name || "Block"}
-                            </h2>
-                            <p className="truncate text-xs text-slate-400">
-                              in{" "}
-                              {shownSection ? shownSection.settings.heading || shownSpec.name : ""}
-                              {shownBlock?.hidden ? " · Hidden" : ""}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div ref={blockScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4">
-                          {shownBlock && shownBlockSpec && (
-                            <GroupedFields
-                              key={`${shown}-${shownBlockIndex}-${shownBlock.type}`}
-                              fields={shownBlockSpec.settings}
-                              values={shownBlock.settings}
-                              groups={schema.groups || [{ id: "content", label: "Content" }]}
-                              collections={collections}
-                              products={products}
-                              catalogErrors={catalogErrors}
-                              onChange={(key, value) =>
-                                updateBlocks(
-                                  shown,
-                                  (list) => {
-                                    list[shownBlockIndex].settings[key] = value;
-                                  },
-                                  `b:${shown}:${shownBlockIndex}:${key}`
-                                )
-                              }
-                            />
-                          )}
-                          {shownBlock && shownBlockSpec?.nests && (
-                            <GroupChildren
-                              key={`children-${shown}-${shownBlockIndex}`}
-                              spec={shownSpec}
-                              items={shownBlock.children || []}
-                              groups={schema.groups || [{ id: "content", label: "Content" }]}
-                              collections={collections}
-                              products={products}
-                              catalogErrors={catalogErrors}
-                              onChange={(mutate) =>
-                                updateBlocks(
-                                  shown,
-                                  (list) => {
-                                    list[shownBlockIndex].children =
-                                      list[shownBlockIndex].children || [];
-                                    mutate(list[shownBlockIndex].children);
-                                  },
-                                  `bc:${shown}:${shownBlockIndex}`
-                                )
-                              }
-                            />
+                              )}
+                            </div>
                           )}
                         </div>
-
-                        {shownBlock && (
-                          <div className="flex shrink-0 items-center gap-1 border-t border-slate-200 bg-white px-3 py-2">
-                            <button
-                              type="button"
-                              onClick={() => toggleBlockHidden(shown, shownBlockIndex)}
-                              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
-                            >
-                              <EyeIcon hidden={!shownBlock.hidden} />
-                              {shownBlock.hidden ? "Show" : "Hide"}
-                            </button>
-
-                            <span className="flex-1" />
-
-                            <button
-                              type="button"
-                              onClick={() => duplicateBlock(shown, shownBlockIndex)}
-                              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
-                            >
-                              <svg {...iconProps} className="h-3.5 w-3.5">
-                                <rect x="8" y="8" width="13" height="13" rx="2" />
-                                <path d="M4 16V5a2 2 0 0 1 2-2h11" />
-                              </svg>
-                              Duplicate
-                            </button>
-
-                            {/* A section's required blocks (e.g. Product information) can be hidden, not deleted */}
-                            {!shownSpec.required_blocks?.includes(shownBlock.type) && (
-                              <button
-                                type="button"
-                                onClick={() => removeBlock(shown, shownBlockIndex)}
-                                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
-                              >
-                                <svg {...iconProps} className="h-3.5 w-3.5">
-                                  <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                                </svg>
-                                Delete
-                              </button>
-                            )}
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  </aside>
-                </div>
-
-                {/* Preview */}
-                <main className="flex min-w-0 flex-1 flex-col p-4">
-                  <div className="mb-2 flex items-center justify-between text-xs text-slate-600">
-                    <span>
-                      {previewError
-                        ? `Preview not updated: ${previewError}`
-                        : `${(page === "blog" || page === "article") && !blogPosts.length ? "Sample posts until you publish one. " : ""}${basePage(page) === "page" && !storePages.length ? "A sample page until you add one in Pages. " : ""}${
-                            dirty
-                              ? editMode
-                                ? "Live preview. Changes save automatically. Click or drag sections here to edit them."
-                                : "Live preview. Changes save automatically. Turn on Edit mode to pick sections here."
-                              : editMode
-                                ? "Live preview. Click or drag sections here to edit them."
-                                : "Live preview. Turn on Edit mode to pick sections here."
-                          }`}
-                    </span>
-
-                    <div className="flex items-center gap-3">
-                      {/* Edit mode: On = clicking the preview selects sections; Off = the preview works like the store */}
-                      <button
-                        type="button"
-                        aria-pressed={editMode}
-                        onClick={() => setEditMode((on) => !on)}
-                        title="Click sections in the preview to edit them"
-                        className={`flex h-11 items-center gap-2.5 rounded-full pl-4 pr-3 text-sm font-medium shadow-sm outline-none ring-1 transition focus-visible:ring-2 focus-visible:ring-charcoal-navy ${
-                          editMode
-                            ? "bg-charcoal-navy text-white ring-charcoal-navy"
-                            : "bg-white text-slate-700 ring-slate-900/10 hover:ring-slate-900/25"
-                        }`}
-                      >
-                        <svg {...iconProps} className="h-4 w-4">
-                          <path d="M4 3l7 17 2.5-7.5L21 10z" />
-                        </svg>
-                        Edit mode
-                        <span
-                          aria-hidden="true"
-                          className={`relative h-6 w-10 rounded-full transition ${editMode ? "bg-brand-gold-400" : "bg-slate-300"}`}
-                        >
-                          <span
-                            className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${editMode ? "left-5" : "left-1"}`}
-                          />
-                        </span>
-                        <span className="sr-only">{editMode ? "On" : "Off"}</span>
-                      </button>
-
-                      <div
-                        className="flex gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-900/10"
-                        role="radiogroup"
-                        aria-label="Preview size"
-                      >
-                        {[
-                          ["desktop", "Desktop", "M3 4h18v12H3zM8 20h8M12 16v4"],
-                          ["mobile", "Mobile", "M7 2h10v20H7zM11 18h2"],
-                        ].map(([id, name, path]) => (
-                          <button
-                            key={id}
-                            type="button"
-                            role="radio"
-                            aria-checked={device === id}
-                            onClick={() => setDevice(id)}
-                            className={`flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-charcoal-navy ${
-                              device === id
-                                ? "bg-charcoal-navy text-white"
-                                : "text-slate-600 hover:text-ink"
-                            }`}
-                          >
-                            <svg {...iconProps} className="h-4 w-4">
-                              <path d={path} />
-                            </svg>
-                            {name}
-                          </button>
-                        ))}
-                      </div>
-
-                      <button
-                        type="button"
-                        className="flex h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-slate-900/10 transition hover:ring-slate-900/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-charcoal-navy"
-                        onClick={() => setPreviewKey((k) => k + 1)}
-                      >
-                        <svg {...iconProps} className="h-4 w-4">
-                          <path d="M20 11a8 8 0 1 0-2.3 5.7" />
-                          <path d="M20 4v7h-7" />
-                        </svg>
-                        Refresh
-                      </button>
-                    </div>
+                    </aside>
                   </div>
 
-                  {/* Every page: rendered from the unsaved layout, patched section by section as it changes */}
-                  {previewHtml ? (
-                    <iframe
-                      key={previewKey}
-                      ref={iframeRef}
-                      title="Store preview"
-                      srcDoc={previewHtml}
-                      // Theme code is written by store owners: keep it off this origin
-                      // Popups escape it so the real store (account actions) opens as a normal tab, like the store's own sandbox
-                      sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-                      className={`mx-auto min-h-0 flex-1 rounded-xl bg-white shadow-lg ring-1 ring-ink/5 transition-[width] duration-200 ${
-                        device === "mobile" ? "w-97.5 max-w-full" : "w-full"
-                      } ${drag ? "pointer-events-none" : ""}`}
-                    />
-                  ) : (
-                    <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-600">
-                      Loading preview...
-                    </div>
-                  )}
-                </main>
-              </div>
-              {contextMenu && (
-                <div
-                  role="menu"
-                  style={{
-                    left: Math.min(contextMenu.x, window.innerWidth - 168),
-                    top: Math.min(contextMenu.y, window.innerHeight - 56),
-                  }}
-                  className="fixed z-50 w-40 rounded-md border border-slate-300 bg-white p-1 shadow-lg"
-                  onContextMenu={(e) => e.preventDefault()}
-                >
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      const themeId = startParams.get("theme") || getEditingThemeId();
-                      const query = new URLSearchParams({ file: contextMenu.file });
-                      if (themeId) query.set("theme", themeId);
-                      window.open(
-                        `/editor-demo?${query.toString()}`,
-                        "_blank",
-                        "noopener,noreferrer"
-                      );
-                      setContextMenu(null);
-                    }}
-                    className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-slate-100"
-                  >
-                    Edit code
-                  </button>
-                </div>
-              )}
+                  {/* Preview */}
+                  <main className="flex min-w-0 flex-1 flex-col p-4">
+                    <div className="mb-2 flex items-center justify-between text-xs text-slate-600">
+                      <span>
+                        {previewError
+                          ? `Preview not updated: ${previewError}`
+                          : `${(page === "blog" || page === "article") && !blogPosts.length ? "Sample posts until you publish one. " : ""}${basePage(page) === "page" && !storePages.length ? "A sample page until you add one in Pages. " : ""}${
+                              dirty
+                                ? editMode
+                                  ? "Live preview. Changes save automatically. Click or drag sections here to edit them."
+                                  : "Live preview. Changes save automatically. Turn on Edit mode to pick sections here."
+                                : editMode
+                                  ? "Live preview. Click or drag sections here to edit them."
+                                  : "Live preview. Turn on Edit mode to pick sections here."
+                            }`}
+                      </span>
 
-              {/* This page has no AdminSidebar, so it mounts the assistant panel itself (once) */}
-              <AssistantPanel />
-            </div>
+                      <div className="flex items-center gap-3">
+                        {/* Edit mode: On = clicking the preview selects sections; Off = the preview works like the store */}
+                        <button
+                          type="button"
+                          aria-pressed={editMode}
+                          onClick={() => setEditMode((on) => !on)}
+                          title="Click sections in the preview to edit them"
+                          className={`flex h-11 items-center gap-2.5 rounded-full pl-4 pr-3 text-sm font-medium shadow-sm outline-none ring-1 transition focus-visible:ring-2 focus-visible:ring-charcoal-navy ${
+                            editMode
+                              ? "bg-charcoal-navy text-white ring-charcoal-navy"
+                              : "bg-white text-slate-700 ring-slate-900/10 hover:ring-slate-900/25"
+                          }`}
+                        >
+                          <svg {...iconProps} className="h-4 w-4">
+                            <path d="M4 3l7 17 2.5-7.5L21 10z" />
+                          </svg>
+                          Edit mode
+                          <span
+                            aria-hidden="true"
+                            className={`relative h-6 w-10 rounded-full transition ${editMode ? "bg-brand-gold-400" : "bg-slate-300"}`}
+                          >
+                            <span
+                              className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all ${editMode ? "left-5" : "left-1"}`}
+                            />
+                          </span>
+                          <span className="sr-only">{editMode ? "On" : "Off"}</span>
+                        </button>
+
+                        <div
+                          className="flex gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-900/10"
+                          role="radiogroup"
+                          aria-label="Preview size"
+                        >
+                          {[
+                            ["desktop", "Desktop", "M3 4h18v12H3zM8 20h8M12 16v4"],
+                            ["mobile", "Mobile", "M7 2h10v20H7zM11 18h2"],
+                          ].map(([id, name, path]) => (
+                            <button
+                              key={id}
+                              type="button"
+                              role="radio"
+                              aria-checked={device === id}
+                              onClick={() => setDevice(id)}
+                              className={`flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-charcoal-navy ${
+                                device === id
+                                  ? "bg-charcoal-navy text-white"
+                                  : "text-slate-600 hover:text-ink"
+                              }`}
+                            >
+                              <svg {...iconProps} className="h-4 w-4">
+                                <path d={path} />
+                              </svg>
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="flex h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-slate-900/10 transition hover:ring-slate-900/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-charcoal-navy"
+                          onClick={() => setPreviewKey((k) => k + 1)}
+                        >
+                          <svg {...iconProps} className="h-4 w-4">
+                            <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+                            <path d="M20 4v7h-7" />
+                          </svg>
+                          Refresh
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Every page: rendered from the unsaved layout, patched section by section as it changes */}
+                    {previewHtml ? (
+                      <iframe
+                        key={previewKey}
+                        ref={iframeRef}
+                        title="Store preview"
+                        srcDoc={previewHtml}
+                        // Theme code is written by store owners: keep it off this origin
+                        // Popups escape it so the real store (account actions) opens as a normal tab, like the store's own sandbox
+                        sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                        className={`mx-auto min-h-0 flex-1 rounded-xl bg-white shadow-lg ring-1 ring-ink/5 transition-[width] duration-200 ${
+                          device === "mobile" ? "w-97.5 max-w-full" : "w-full"
+                        } ${drag ? "pointer-events-none" : ""}`}
+                      />
+                    ) : (
+                      <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-600">
+                        Loading preview...
+                      </div>
+                    )}
+                  </main>
+                </div>
+                {contextMenu && (
+                  <div
+                    role="menu"
+                    style={{
+                      left: Math.min(contextMenu.x, window.innerWidth - 168),
+                      top: Math.min(contextMenu.y, window.innerHeight - 56),
+                    }}
+                    className="fixed z-50 w-40 rounded-md border border-slate-300 bg-white p-1 shadow-lg"
+                    onContextMenu={(e) => e.preventDefault()}
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        const themeId = startParams.get("theme") || getEditingThemeId();
+                        const query = new URLSearchParams({ file: contextMenu.file });
+                        if (themeId) query.set("theme", themeId);
+                        window.open(
+                          `/editor-demo?${query.toString()}`,
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
+                        setContextMenu(null);
+                      }}
+                      className="flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-slate-100"
+                    >
+                      Edit code
+                    </button>
+                  </div>
+                )}
+
+                {/* This page has no AdminSidebar, so it mounts the assistant panel itself (once) */}
+                <AssistantPanel />
+              </div>
+            </ThemeLinkContext.Provider>
           </UploadsContext.Provider>
         </BlogPostsContext.Provider>
       </StorePagesContext.Provider>
