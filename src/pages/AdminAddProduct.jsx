@@ -4,6 +4,8 @@ import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
+import RichTextEditor, { plainText, sanitizeHtml } from "@/components/RichTextEditor";
+import { formatAmount, useStoreCurrency } from "@/lib/formatPrice";
 
 const NAVY = "#111827";
 const PRODUCTS_URL = "/admin/online-store/products";
@@ -423,7 +425,8 @@ function OptionPicker({ label, usedNames, onPick }) {
   };
 
   const rowClass = (i) =>
-    `flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-100 ${i === current ? "bg-slate-100" : ""
+    `flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-100 ${
+      i === current ? "bg-slate-100" : ""
     }`;
   const footerIndex = items.length - 1;
 
@@ -850,9 +853,9 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
     if (!res.ok) {
       setError(
         res.formError ||
-        Object.values(res.fieldErrors || {})[0] ||
-        res.error ||
-        "The options couldn't be saved."
+          Object.values(res.fieldErrors || {})[0] ||
+          res.error ||
+          "The options couldn't be saved."
       );
       return;
     }
@@ -1225,9 +1228,9 @@ function VariantEditor({
         setSaving(false);
         setError(
           res.formError ||
-          Object.values(res.fieldErrors || {})[0] ||
-          res.error ||
-          "The variant couldn't be saved."
+            Object.values(res.fieldErrors || {})[0] ||
+            res.error ||
+            "The variant couldn't be saved."
         );
         return;
       }
@@ -1483,20 +1486,20 @@ function BulkEditor({
 }) {
   const stockColumns = canSetStock
     ? locations.flatMap((l) => [
-      {
-        key: `avail-${l.id}`,
-        label: `${l.name} - Available`,
-        locationId: l.id,
-        group: "Quantities by location",
-      },
-      {
-        key: `onhand-${l.id}`,
-        label: `${l.name} - On hand`,
-        locationId: l.id,
-        group: "Quantities by location",
-        readOnly: true,
-      },
-    ])
+        {
+          key: `avail-${l.id}`,
+          label: `${l.name} - Available`,
+          locationId: l.id,
+          group: "Quantities by location",
+        },
+        {
+          key: `onhand-${l.id}`,
+          label: `${l.name} - On hand`,
+          locationId: l.id,
+          group: "Quantities by location",
+          readOnly: true,
+        },
+      ])
     : [];
   const allColumns = [...BULK_FIELD_COLUMNS, ...stockColumns];
   const isAvailCol = (key) => key.startsWith("avail-");
@@ -2384,10 +2387,10 @@ function VariantsSection({
     setNotice(
       failed.length
         ? {
-          kind: "error",
-          text: `${savedCount} saved, ${failed.length} failed. The failed edits are kept.`,
-          failed,
-        }
+            kind: "error",
+            text: `${savedCount} saved, ${failed.length} failed. The failed edits are kept.`,
+            failed,
+          }
         : { kind: "success", text: `Saved ${savedCount} change${savedCount === 1 ? "" : "s"}.` }
     );
   };
@@ -2405,14 +2408,14 @@ function VariantsSection({
     setNotice(
       failed.length
         ? {
-          kind: "error",
-          text: `${targets.length - failed.length} deleted, ${failed.length} not deleted.`,
-          failed,
-        }
+            kind: "error",
+            text: `${targets.length - failed.length} deleted, ${failed.length} not deleted.`,
+            failed,
+          }
         : {
-          kind: "success",
-          text: `Deleted ${targets.length} variant${targets.length === 1 ? "" : "s"}.`,
-        }
+            kind: "success",
+            text: `Deleted ${targets.length} variant${targets.length === 1 ? "" : "s"}.`,
+          }
     );
   };
 
@@ -2566,8 +2569,8 @@ function VariantsSection({
   const groups =
     groupBy && options.length > 1
       ? (options.find((o) => o.name === groupBy)?.values || [])
-        .map((value) => ({ value, rows: shown.filter((v) => v.options?.[groupBy] === value) }))
-        .filter((g) => g.rows.length)
+          .map((value) => ({ value, rows: shown.filter((v) => v.options?.[groupBy] === value) }))
+          .filter((g) => g.rows.length)
       : null;
 
   const groupRow = (g) => {
@@ -2914,9 +2917,9 @@ function VariantsSection({
           <tbody>
             {groups
               ? groups.flatMap((g) => [
-                groupRow(g),
-                ...(expanded[g.value] ? g.rows.map((v) => row(v, true)) : []),
-              ])
+                  groupRow(g),
+                  ...(expanded[g.value] ? g.rows.map((v) => row(v, true)) : []),
+                ])
               : shown.map((v) => row(v, false))}
           </tbody>
         </table>
@@ -4502,10 +4505,11 @@ export function ProductForm({ productId }) {
                           setDragging(false);
                           if (!saving) addPhotos(e.dataTransfer.files);
                         }}
-                        className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${dragging
+                        className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition ${
+                          dragging
                             ? "border-orange-600 bg-slate-100"
                             : "border-slate-200 bg-slate-50 hover:bg-slate-50"
-                          }`}
+                        }`}
                       >
                         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
                           <svg
@@ -4563,10 +4567,11 @@ export function ProductForm({ productId }) {
                           return (
                             <div
                               key={photo.id}
-                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-slate-50 transition ${isCover
+                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-slate-50 transition ${
+                                isCover
                                   ? "border-orange-600 ring-2 ring-ink/15 col-span-2 row-span-2"
                                   : "border-slate-200 hover:border-slate-400"
-                                }`}
+                              }`}
                             >
                               {/* Image or Broken fallback */}
                               {isBroken ? (
@@ -4711,10 +4716,11 @@ export function ProductForm({ productId }) {
                           onClick={() => {
                             if (!saving) mainFileInputRef.current?.click();
                           }}
-                          className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${dragging
+                          className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition ${
+                            dragging
                               ? "border-orange-600 bg-slate-100"
                               : "border-slate-200 bg-slate-50 hover:border-slate-400 hover:bg-slate-50"
-                            } ${saving ? "pointer-events-none opacity-50" : ""}`}
+                          } ${saving ? "pointer-events-none opacity-50" : ""}`}
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-charcoal-navy">
                             <svg
@@ -5118,52 +5124,52 @@ export function ProductForm({ productId }) {
                       fieldErrors.seo_title ||
                       fieldErrors.seo_description ||
                       fieldErrors.handle) && (
-                        <div className="mt-4 space-y-4">
-                          <Field
-                            label="SEO title"
-                            help={`${seoTitle.length} of 70 characters`}
-                            error={fieldErrors.seo_title}
+                      <div className="mt-4 space-y-4">
+                        <Field
+                          label="SEO title"
+                          help={`${seoTitle.length} of 70 characters`}
+                          error={fieldErrors.seo_title}
+                        >
+                          <input
+                            value={seoTitle}
+                            maxLength={70}
+                            onChange={(e) => setSeoTitle(e.target.value)}
+                            placeholder={name}
+                            className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
+                          />
+                        </Field>
+                        <Field
+                          label="SEO description"
+                          help={`${seoDescription.length} of 160 characters`}
+                          error={fieldErrors.seo_description}
+                        >
+                          <textarea
+                            value={seoDescription}
+                            maxLength={160}
+                            rows={3}
+                            onChange={(e) => setSeoDescription(e.target.value)}
+                            className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
+                          />
+                        </Field>
+                        <Field
+                          label="URL handle"
+                          help={`${storeDomain}/products/${currentHandle}`}
+                          error={fieldErrors.handle}
+                        >
+                          <div
+                            className={`flex h-11 items-center rounded-lg border border-slate-200 bg-slate-50 px-3.5 transition focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-900/10 ${withError(fieldErrors.handle)}`}
                           >
+                            <span className="select-none text-sm text-slate-500">products/</span>
                             <input
-                              value={seoTitle}
-                              maxLength={70}
-                              onChange={(e) => setSeoTitle(e.target.value)}
-                              placeholder={name}
-                              className={`${inputClass} ${withError(fieldErrors.seo_title)}`}
+                              value={handle}
+                              onChange={(e) => setHandle(cleanHandle(e.target.value))}
+                              placeholder={slugify(name)}
+                              className="w-full bg-transparent text-sm text-slate-900 outline-none"
                             />
-                          </Field>
-                          <Field
-                            label="SEO description"
-                            help={`${seoDescription.length} of 160 characters`}
-                            error={fieldErrors.seo_description}
-                          >
-                            <textarea
-                              value={seoDescription}
-                              maxLength={160}
-                              rows={3}
-                              onChange={(e) => setSeoDescription(e.target.value)}
-                              className={`${inputClass} h-auto resize-none py-2.5 ${withError(fieldErrors.seo_description)}`}
-                            />
-                          </Field>
-                          <Field
-                            label="URL handle"
-                            help={`${storeDomain}/products/${currentHandle}`}
-                            error={fieldErrors.handle}
-                          >
-                            <div
-                              className={`flex h-11 items-center rounded-lg border border-slate-200 bg-slate-50 px-3.5 transition focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-900/10 ${withError(fieldErrors.handle)}`}
-                            >
-                              <span className="select-none text-sm text-slate-500">products/</span>
-                              <input
-                                value={handle}
-                                onChange={(e) => setHandle(cleanHandle(e.target.value))}
-                                placeholder={slugify(name)}
-                                className="w-full bg-transparent text-sm text-slate-900 outline-none"
-                              />
-                            </div>
-                          </Field>
-                        </div>
-                      )}
+                          </div>
+                        </Field>
+                      </div>
+                    )}
                   </Card>
                 </div>
 
