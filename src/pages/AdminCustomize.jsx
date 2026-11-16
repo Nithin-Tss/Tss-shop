@@ -3711,6 +3711,21 @@ export default function AdminCustomizePage() {
                                   </p>
                                 </div>
                               )}
+                            {cardPart &&
+                              !(
+                                previewProduct?.id &&
+                                previewProduct.section === shown &&
+                                previewProduct.block === selectedBlock &&
+                                previewProduct.child === selectedChild
+                              ) && (
+                                <div className="border-t border-slate-100 py-4">
+                                  <p className="text-xs text-slate-500">
+                                    Click a card in the preview to get an "Edit product" link here.
+                                    Price, title and images are changed on the product page, not in
+                                    the customizer.
+                                  </p>
+                                </div>
+                              )}
                             {shownBlock && shownBlockSpec && !cardPart && !isCardBlock && (
                               <GroupedFields
                                 key={`${shown}-${shownBlockIndex}-${shownBlock.type}`}
