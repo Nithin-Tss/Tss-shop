@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { storeBaseUrl, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
 import { getActiveStore, getSession } from "@/lib/auth";
+import SharedRichTextEditor from "@/components/RichTextEditor";
 
 // Add collection (/admin/online-store/collections/new) and Edit collection (/collections/:collectionId).
 // A manual collection holds the products picked for it; an automated one every product matching its
@@ -128,78 +129,8 @@ const ICONS = {
 
 // ---------------------------------------------------------------- rich text
 
-const RICH_TEXT_TOOLS = [
-  { label: "Bold", text: <b>B</b>, command: "bold" },
-  { label: "Italic", text: <i>I</i>, command: "italic" },
-  { label: "Underline", text: <u>U</u>, command: "underline" },
-  { label: "Bulleted list", text: "• List", command: "insertUnorderedList" },
-  { label: "Numbered list", text: "1. List", command: "insertOrderedList" },
-  { label: "Link", text: "Link", command: "createLink" },
-  { label: "Clear formatting", text: "Clear", command: "removeFormat" },
-];
-
-// A small editor for the description: bold, italic, underline, lists and links. The store cleans the HTML.
-// Also used for blog posts (AdminContent).
-export function RichTextEditor({ id, value, onChange, placeholder }) {
-  const ref = useRef(null);
-
-  // Only write the HTML in when it changes from outside (loading, Discard), never while typing
-  useEffect(() => {
-    if (ref.current && ref.current.innerHTML !== (value || "")) ref.current.innerHTML = value || "";
-  }, [value]);
-
-  const emit = () => {
-    const html = ref.current.innerHTML;
-    onChange(plainText(html) ? html : "");
-  };
-
-  const run = (command, arg) => {
-    ref.current.focus();
-    document.execCommand(command, false, arg);
-    emit();
-  };
-
-  const apply = (tool) => {
-    if (tool.command !== "createLink") return run(tool.command);
-    const url = window.prompt("Link address (https://...)");
-    if (url) run("createLink", url);
-  };
-
-  return (
-    <div className="overflow-hidden rounded-lg border border-slate-300 focus-within:border-orange-600 focus-within:ring-2 focus-within:ring-ink/10">
-      <div
-        className="flex flex-wrap gap-0.5 border-b border-slate-200 bg-slate-50 px-1.5 py-1"
-        role="toolbar"
-        aria-label="Text formatting"
-      >
-        {RICH_TEXT_TOOLS.map((tool) => (
-          <button
-            key={tool.label}
-            type="button"
-            title={tool.label}
-            aria-label={tool.label}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => apply(tool)}
-            className="rounded-md px-2 py-1 text-[12px] text-slate-600 hover:bg-[rgba(24,24,27,0.06)] hover:text-orange-600"
-          >
-            {tool.text}
-          </button>
-        ))}
-      </div>
-      <div
-        id={id}
-        ref={ref}
-        role="textbox"
-        aria-multiline="true"
-        contentEditable
-        suppressContentEditableWarning
-        data-placeholder={placeholder}
-        onInput={emit}
-        className="min-h-30 px-3 py-2.5 text-[14px] leading-relaxed text-charcoal-navy outline-none empty:before:pointer-events-none empty:before:text-slate-400 empty:before:content-[attr(data-placeholder)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
-      />
-    </div>
-  );
-}
+// Professional Shopify-style editor for collections, blog posts, pages and policies.
+export const RichTextEditor = SharedRichTextEditor;
 
 // ---------------------------------------------------------------- include products from collections
 

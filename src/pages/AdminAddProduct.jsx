@@ -5,6 +5,7 @@ import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/li
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
 import { formatAmount, useStoreCurrency } from "@/lib/formatPrice";
+import RichTextEditor, { plainText, sanitizeHtml } from "@/components/RichTextEditor";
 
 const NAVY = "#111827";
 const PRODUCTS_URL = "/admin/online-store/products";
@@ -139,9 +140,10 @@ function Card({ title, hint, action, children }) {
   );
 }
 
-function Field({ label, help, error, children, className = "" }) {
+function Field({ label, help, error, children, className = "", as = "label" }) {
+  const Component = as;
   return (
-    <label className={`block ${className}`}>
+    <Component className={`block ${className}`}>
       <span className="mb-1.5 block text-[13px] font-medium text-slate-900">{label}</span>
       {children}
       {error ? (
@@ -149,7 +151,7 @@ function Field({ label, help, error, children, className = "" }) {
       ) : (
         help && <span className="mt-1 block text-xs text-slate-500">{help}</span>
       )}
-    </label>
+    </Component>
   );
 }
 
@@ -3745,7 +3747,7 @@ export function ProductForm({ productId }) {
     // Sent for the active store: lib/api adds its id to every request (X-Store-Id)
     const payload = {
       title: name.trim(),
-      description: about.trim(),
+      description: sanitizeHtml(about).trim(),
       images: uploaded.urls,
       location: stockChanged ? locationId || null : null,
       quantity: stockChanged ? Number(quantity) : null,
@@ -3863,7 +3865,7 @@ export function ProductForm({ productId }) {
   const shownSeoTitle = seoTitle || name || "Your product name";
   const shownSeoDescription =
     seoDescription ||
-    about ||
+    plainText(about) ||
     "Add a short description so shoppers know what makes this product special.";
 
   if (loading || loadError) {
@@ -4418,16 +4420,17 @@ export function ProductForm({ productId }) {
                       </Field>
 
                       <Field
+                        as="div"
                         label="Description"
-                        help={`${about.length} characters`}
+                        help={`${plainText(about).length} characters`}
                         error={fieldErrors.description}
                       >
-                        <textarea
+                        <RichTextEditor
+                          id="product-description"
                           value={about}
-                          onChange={(e) => setAbout(e.target.value)}
-                          rows={6}
+                          onChange={setAbout}
                           placeholder="Tell shoppers what it is, what it's made of and why they'll love it."
-                          className={`${inputClass} h-auto resize-y py-2.5 leading-relaxed ${withError(fieldErrors.description)}`}
+                          error={fieldErrors.description}
                         />
                       </Field>
                     </div>
