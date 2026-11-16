@@ -206,15 +206,20 @@ export default function AdminOrders() {
     fetchOrders({ silent: false });
 
     // Lightweight automatic polling to fetch newly placed storefront orders in real time
-    const intervalId = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        fetchOrders({ silent: true });
+    // Skips a tick while the previous request is still running or the tab is hidden.
+    let inFlight = false;
+    const refresh = async () => {
+      if (inFlight || document.visibilityState !== "visible") return;
+      inFlight = true;
+      try {
+        await fetchOrders({ silent: true });
+      } finally {
+        inFlight = false;
       }
-    }, 4000);
-
-    const handleRefresh = () => {
-      fetchOrders({ silent: true });
     };
+    const intervalId = setInterval(refresh, 15000);
+
+    const handleRefresh = refresh;
 
     window.addEventListener("focus", handleRefresh);
     document.addEventListener("visibilitychange", handleRefresh);
