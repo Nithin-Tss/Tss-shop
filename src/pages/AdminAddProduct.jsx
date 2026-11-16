@@ -4,6 +4,8 @@ import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
+import { formatAmount, useStoreCurrency } from "@/lib/formatPrice";
+import RichTextEditor, { plainText, sanitizeHtml } from "@/components/RichTextEditor";
 
 const NAVY = "#111827";
 const PRODUCTS_URL = "/admin/online-store/products";
