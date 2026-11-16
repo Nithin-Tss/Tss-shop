@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 // Every currency the browser knows, A to Z by name: { code, symbol, label }
 const FALLBACK_CURRENCIES = [
@@ -409,7 +410,7 @@ export default function AdminCreateOrder() {
                 onClick={() => setError("")}
                 className="text-red-400 hover:text-red-700 font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -501,7 +502,7 @@ export default function AdminCreateOrder() {
                               onClick={() => handleRemoveItem(it.id)}
                               className="text-slate-400 hover:text-red-600 p-1 transition"
                             >
-                              ✕
+                              <Icon name="x" className="h-4 w-4" />
                             </button>
                           </div>
                         </div>
@@ -628,7 +629,7 @@ export default function AdminCreateOrder() {
                     onClick={() => setIsEditingNotes((prev) => !prev)}
                     className="text-slate-400 hover:text-slate-700 text-sm transition"
                   >
-                    ✎
+                    <Icon name="pencil-line" className="h-4 w-4" />
                   </button>
                 </div>
 
@@ -667,7 +668,7 @@ export default function AdminCreateOrder() {
                       onClick={() => setSelectedCustomer(null)}
                       className="text-slate-400 hover:text-red-600 text-sm p-1"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
@@ -721,7 +722,7 @@ export default function AdminCreateOrder() {
               <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-slate-900">Markets</span>
-                  <span className="text-slate-400 text-xs">☍</span>
+                  <Icon name="user-circle" className="h-3.5 w-3.5" />
                 </div>
 
                 <div className="space-y-1.5 pt-1">
@@ -734,7 +735,7 @@ export default function AdminCreateOrder() {
               <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-slate-900">Tags</span>
-                  <span className="text-slate-400 text-sm">✎</span>
+                  <Icon name="pencil-line" className="h-3.5 w-3.5" />
                 </div>
 
                 <div className="min-h-[42px] p-1.5 rounded-lg border border-slate-300 bg-white flex flex-wrap items-center gap-1.5 focus-within:border-slate-500">
@@ -749,7 +750,7 @@ export default function AdminCreateOrder() {
                         onClick={() => handleRemoveTag(tag)}
                         className="text-slate-400 hover:text-slate-700"
                       >
-                        ✕
+                        <Icon name="x" className="h-4 w-4" />
                       </button>
                     </span>
                   ))}
@@ -779,7 +780,7 @@ export default function AdminCreateOrder() {
                 onClick={() => setShowProductModal(false)}
                 className="text-slate-400 hover:text-slate-700 font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
@@ -861,7 +862,7 @@ export default function AdminCreateOrder() {
                 onClick={() => setShowCustomItemModal(false)}
                 className="text-slate-400 hover:text-slate-700 font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 

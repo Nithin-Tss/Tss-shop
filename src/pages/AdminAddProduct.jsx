@@ -6,6 +6,7 @@ import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@
 import { can, getActiveStore, useSession } from "@/lib/auth";
 import { formatAmount, useStoreCurrency } from "@/lib/formatPrice";
 import RichTextEditor, { plainText, sanitizeHtml } from "@/components/RichTextEditor";
+import Icon from "@/components/Icons";
 
 const NAVY = "#111827";
 const PRODUCTS_URL = "/admin/online-store/products";
@@ -1092,8 +1093,8 @@ function OptionsEditor({ productId, options, variants, startWithNew, onClose, on
           {preview.removed.length > 0 && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">
               <p className="font-semibold text-red-800">
-                ⚠ {preview.removed.length} variant{preview.removed.length === 1 ? "" : "s"} will be
-                deleted
+                <Icon name="alert" className="inline h-4 w-4" /> {preview.removed.length} variant
+                {preview.removed.length === 1 ? "" : "s"} will be deleted
               </p>
               <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5 text-red-800">
                 {preview.removed.map((r) => (
@@ -3913,7 +3914,10 @@ export function ProductForm({ productId }) {
           role="alert"
           className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900"
         >
-          <p className="font-semibold">⚠ Before this product can be Active, add:</p>
+          <p className="font-semibold">
+            <Icon name="alert" className="mr-1 inline h-4 w-4" />
+            Before this product can be Active, add:
+          </p>
           <ul className="mt-1 list-disc space-y-0.5 pl-4">
             {missingForActive.map((item) => (
               <li key={item}>{item}</li>
@@ -4636,7 +4640,7 @@ export function ProductForm({ productId }) {
                               <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
                                 {isCover && (
                                   <span className="rounded-md bg-orange-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
-                                    ★ Primary
+                                    <Icon name="star" className="inline h-3 w-3" /> Primary
                                   </span>
                                 )}
                                 {photo.isSaved ? (
@@ -4772,7 +4776,7 @@ export function ProductForm({ productId }) {
                           className="ml-3 inline-flex h-5 w-5 items-center justify-center rounded text-red-500 hover:bg-red-100 hover:text-red-700"
                           aria-label="Dismiss errors"
                         >
-                          ✕
+                          <Icon name="x" className="h-4 w-4" />
                         </button>
                       </div>
                     )}
@@ -5023,10 +5027,10 @@ export function ProductForm({ productId }) {
                                 const a = levels[locationId].available;
                                 const [label, cls] =
                                   a < 0
-                                    ? ["⚠ Oversold", "bg-red-100 text-red-800"]
+                                    ? ["Oversold", "bg-red-100 text-red-800"]
                                     : a === 0
-                                      ? ["✕ Out of stock", "bg-red-50 text-red-700"]
-                                      : ["✓ In stock", "bg-emerald-100 text-emerald-800"];
+                                      ? ["Out of stock", "bg-red-50 text-red-700"]
+                                      : ["In stock", "bg-emerald-100 text-emerald-800"];
                                 return (
                                   <span
                                     className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}`}

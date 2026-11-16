@@ -6,6 +6,7 @@ import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan, useSession } from "@/lib/auth";
 import AddressModal from "@/components/AddressModal";
 import DeleteAddressModal from "@/components/DeleteAddressModal";
+import Icon from "@/components/Icons";
 
 export default function AdminCustomers() {
   const navigate = useNavigate();
@@ -499,7 +500,7 @@ export default function AdminCustomers() {
                     onClick={() => setSearchQuery("")}
                     className="text-xs text-slate-400 hover:text-slate-600"
                   >
-                    ✕
+                    <Icon name="x" className="h-4 w-4" />
                   </button>
                 )}
               </div>
@@ -975,7 +976,7 @@ export default function AdminCustomers() {
                 onClick={() => setShowAddModal(false)}
                 className="text-slate-400 hover:text-slate-700 font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
@@ -1124,7 +1125,7 @@ export default function AdminCustomers() {
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition"
                 title="Close drawer"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
@@ -1157,13 +1158,16 @@ export default function AdminCustomers() {
               {/* Feedback Notifications */}
               {addressSuccessMsg && (
                 <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
-                  <span>✓ {addressSuccessMsg}</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Icon name="check" className="h-3.5 w-3.5" />
+                    {addressSuccessMsg}
+                  </span>
                   <button
                     type="button"
                     onClick={() => setAddressSuccessMsg("")}
                     className="text-emerald-600 hover:text-emerald-900 font-bold"
                   >
-                    ✕
+                    <Icon name="x" className="h-4 w-4" />
                   </button>
                 </div>
               )}
@@ -1176,7 +1180,7 @@ export default function AdminCustomers() {
                     onClick={() => setAddressErrorMsg("")}
                     className="text-red-500 hover:text-red-800 font-bold"
                   >
-                    ✕
+                    <Icon name="x" className="h-4 w-4" />
                   </button>
                 </div>
               )}
@@ -1248,7 +1252,7 @@ export default function AdminCustomers() {
 
                           {addr.is_default && (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              <span>✓</span> Default
+                              <Icon name="check" className="h-3.5 w-3.5" /> Default
                             </span>
                           )}
                         </div>
@@ -1273,7 +1277,7 @@ export default function AdminCustomers() {
 
                         {addr.phone && (
                           <div className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
-                            <span>📞</span>
+                            <Icon name="phone" className="h-4 w-4" />
                             <span>{addr.phone}</span>
                           </div>
                         )}
@@ -1323,7 +1327,7 @@ export default function AdminCustomers() {
                 /* Empty Addresses State */
                 <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center bg-slate-50/50">
                   <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-400 mb-2">
-                    📍
+                    <Icon name="map-pin" className="h-5 w-5" />
                   </div>
                   <h4 className="text-xs font-bold text-slate-800">No addresses saved</h4>
                   <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
@@ -1379,7 +1383,7 @@ export default function AdminCustomers() {
       {/* TOAST FEEDBACK NOTIFICATION */}
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-sm text-white shadow-xl animate-in slide-in-from-bottom duration-200">
-          <span>✓</span>
+          <Icon name="check" className="h-3.5 w-3.5" />
           <span>{toastMsg}</span>
         </div>
       )}
@@ -1426,7 +1430,7 @@ export default function AdminCustomers() {
                 }}
                 className="text-slate-400 hover:text-slate-700 font-bold p-1 rounded-lg"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 

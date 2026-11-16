@@ -10,6 +10,7 @@ import {
   saveFieldLabels,
   withLabels,
 } from "@/lib/productFields";
+import Icon from "@/components/Icons";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -1008,7 +1009,7 @@ export default function ProductsPage() {
                       aria-label="Clear search"
                       className="text-xs text-slate-400 hover:text-slate-600"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   )}
                 </div>

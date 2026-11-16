@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiDelete, apiGet, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 // Shopify Polaris CatalogIcon (20x20 viewBox)
 function CatalogHeaderIcon({ className = "h-5 w-5 text-ink shrink-0" }) {
@@ -438,7 +439,7 @@ export default function CataloguesPage() {
                 className="text-slate-500 hover:text-orange-600 text-lg font-bold"
                 aria-label="Close"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 

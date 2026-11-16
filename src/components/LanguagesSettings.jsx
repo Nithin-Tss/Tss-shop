@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { LANGUAGES, getLanguage, setLanguage } from "@/lib/language";
+import Icon from "@/components/Icons";
 
 export default function LanguagesSettings() {
   const [current, setCurrent] = useState(getLanguage);
@@ -79,7 +80,7 @@ export default function LanguagesSettings() {
                     {native}
                   </span>
                 </span>
-                {active && <span aria-hidden="true">✓</span>}
+                {active && <Icon name="check" className="h-3.5 w-3.5" />}
               </button>
             </li>
           );

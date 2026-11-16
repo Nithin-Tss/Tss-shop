@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { useCan, useSession } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 function formatOrderDate(dateString) {
   if (!dateString) return "—";
@@ -455,7 +456,7 @@ export default function AdminOrders() {
                       onClick={() => setSearchQuery("")}
                       className="text-xs text-slate-400 hover:text-slate-600"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -775,7 +776,7 @@ export default function AdminOrders() {
                   }}
                   className="rounded-lg p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                 >
-                  ✕
+                  <Icon name="x" className="h-4 w-4" />
                 </button>
               </div>
 
@@ -825,7 +826,7 @@ export default function AdminOrders() {
                         >
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 text-sm">
-                              📦
+                              <Icon name="package" className="h-5 w-5" />
                             </div>
                             <div>
                               <p className="text-sm font-medium text-slate-800">

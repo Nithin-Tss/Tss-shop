@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { apiUpload } from "@/lib/api";
+import Icon from "@/components/Icons";
 
 // Strip HTML tags for character counting and plain text preview
 export const plainText = (html) =>
@@ -853,7 +854,7 @@ export default function RichTextEditor({
                 }`}
               >
                 Paragraph
-                {activeFormats.blockFormat === "p" && <span>✓</span>}
+                {activeFormats.blockFormat === "p" && <Icon name="check" className="h-3.5 w-3.5" />}
               </button>
               <button
                 type="button"
@@ -871,7 +872,10 @@ export default function RichTextEditor({
                     : "text-slate-800"
                 }`}
               >
-                Heading 1{activeFormats.blockFormat === "h1" && <span>✓</span>}
+                Heading 1
+                {activeFormats.blockFormat === "h1" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
               <button
                 type="button"
@@ -889,7 +893,10 @@ export default function RichTextEditor({
                     : "text-slate-800"
                 }`}
               >
-                Heading 2{activeFormats.blockFormat === "h2" && <span>✓</span>}
+                Heading 2
+                {activeFormats.blockFormat === "h2" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
               <button
                 type="button"
@@ -907,7 +914,10 @@ export default function RichTextEditor({
                     : "text-slate-800"
                 }`}
               >
-                Heading 3{activeFormats.blockFormat === "h3" && <span>✓</span>}
+                Heading 3
+                {activeFormats.blockFormat === "h3" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
               <button
                 type="button"
@@ -925,7 +935,10 @@ export default function RichTextEditor({
                     : "text-slate-800"
                 }`}
               >
-                Heading 4{activeFormats.blockFormat === "h4" && <span>✓</span>}
+                Heading 4
+                {activeFormats.blockFormat === "h4" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
               <button
                 type="button"
@@ -944,7 +957,9 @@ export default function RichTextEditor({
                 }`}
               >
                 Blockquote
-                {activeFormats.blockFormat === "blockquote" && <span>✓</span>}
+                {activeFormats.blockFormat === "blockquote" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
             </div>
           )}
@@ -1194,7 +1209,9 @@ export default function RichTextEditor({
                 }`}
               >
                 <span>Left align</span>
-                {activeFormats.alignment === "left" && <span>✓</span>}
+                {activeFormats.alignment === "left" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
               <button
                 type="button"
@@ -1213,7 +1230,9 @@ export default function RichTextEditor({
                 }`}
               >
                 <span>Center align</span>
-                {activeFormats.alignment === "center" && <span>✓</span>}
+                {activeFormats.alignment === "center" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
               <button
                 type="button"
@@ -1232,7 +1251,9 @@ export default function RichTextEditor({
                 }`}
               >
                 <span>Right align</span>
-                {activeFormats.alignment === "right" && <span>✓</span>}
+                {activeFormats.alignment === "right" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
               <button
                 type="button"
@@ -1251,7 +1272,9 @@ export default function RichTextEditor({
                 }`}
               >
                 <span>Justify</span>
-                {activeFormats.alignment === "justify" && <span>✓</span>}
+                {activeFormats.alignment === "justify" && (
+                  <Icon name="check" className="h-3.5 w-3.5" />
+                )}
               </button>
             </div>
           )}
@@ -1496,7 +1519,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
               >
-                <span>➕</span> Insert row above
+                <Icon name="plus" className="h-3.5 w-3.5" /> Insert row above
               </button>
               <button
                 type="button"
@@ -1510,7 +1533,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
               >
-                <span>➕</span> Insert row below
+                <Icon name="plus" className="h-3.5 w-3.5" /> Insert row below
               </button>
               <button
                 type="button"
@@ -1524,7 +1547,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
               >
-                <span>➕</span> Insert column left
+                <Icon name="plus" className="h-3.5 w-3.5" /> Insert column left
               </button>
               <button
                 type="button"
@@ -1538,7 +1561,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
               >
-                <span>➕</span> Insert column right
+                <Icon name="plus" className="h-3.5 w-3.5" /> Insert column right
               </button>
               <div className="my-1 border-t border-slate-100" />
               <button
@@ -1553,7 +1576,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-red-600 hover:bg-red-50"
               >
-                <span>🗑️</span> Delete row
+                <Icon name="trash" className="h-3.5 w-3.5" /> Delete row
               </button>
               <button
                 type="button"
@@ -1567,7 +1590,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-red-600 hover:bg-red-50"
               >
-                <span>🗑️</span> Delete column
+                <Icon name="trash" className="h-3.5 w-3.5" /> Delete column
               </button>
               <button
                 type="button"
@@ -1581,7 +1604,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs font-semibold text-red-700 hover:bg-red-50"
               >
-                <span>❌</span> Delete table
+                <Icon name="trash" className="h-3.5 w-3.5" /> Delete table
               </button>
               <div className="my-1 border-t border-slate-100" />
               <button
@@ -1597,7 +1620,7 @@ export default function RichTextEditor({
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
               >
-                <span>📊</span> Insert new table...
+                <Icon name="table" className="h-3.5 w-3.5" /> Insert new table...
               </button>
             </div>
           )}
@@ -1788,7 +1811,7 @@ export default function RichTextEditor({
                 onClick={() => setShowLinkModal(false)}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
@@ -1882,7 +1905,7 @@ export default function RichTextEditor({
                 onClick={() => setShowImageModal(false)}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
@@ -2004,7 +2027,7 @@ export default function RichTextEditor({
                 onClick={() => setShowVideoModal(false)}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
@@ -2064,7 +2087,7 @@ export default function RichTextEditor({
                 onClick={() => setShowInsertTableModal(false)}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 

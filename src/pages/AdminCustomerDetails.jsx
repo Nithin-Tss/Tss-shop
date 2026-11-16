@@ -5,6 +5,7 @@ import AddressModal from "@/components/AddressModal";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { formatAmount, formatPrice, toMinor, useStoreCurrency } from "@/lib/formatPrice";
 import { useCan, useSession } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 function formatDateTime(dateString) {
   if (!dateString) return "—";
@@ -1041,7 +1042,7 @@ export default function AdminCustomerDetails() {
                                 className="hover:text-slate-600 transition"
                                 title="Add emoji"
                               >
-                                😊
+                                <Icon name="smile" className="h-5 w-5" />
                               </button>
                               <button
                                 type="button"
@@ -1062,7 +1063,7 @@ export default function AdminCustomerDetails() {
                                 className="hover:text-slate-600 transition"
                                 title="Attach file"
                               >
-                                📎
+                                <Icon name="paperclip" className="h-5 w-5" />
                               </button>
                             </div>
                             <button
@@ -1212,7 +1213,7 @@ export default function AdminCustomerDetails() {
                             title="Copy email"
                           >
                             {copiedEmail ? (
-                              <span className="text-[10px] text-emerald-600 font-bold">✓</span>
+                              <Icon name="check" className="h-3.5 w-3.5" />
                             ) : (
                               <svg
                                 className="w-3.5 h-3.5"
@@ -1474,7 +1475,7 @@ export default function AdminCustomerDetails() {
                     onClick={() => setActiveEmailOrder(null)}
                     className="text-slate-400 hover:text-slate-700 text-lg font-bold p-1"
                   >
-                    ✕
+                    <Icon name="x" className="h-4 w-4" />
                   </button>
                 </div>
 
@@ -1589,7 +1590,7 @@ export default function AdminCustomerDetails() {
                     onClick={() => setShowEditCustomerModal(false)}
                     className="text-slate-400 hover:text-slate-700 text-lg font-bold"
                   >
-                    ✕
+                    <Icon name="x" className="h-4 w-4" />
                   </button>
                 </div>
 

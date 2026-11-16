@@ -5,6 +5,7 @@ import ExportDraftOrdersModal from "@/components/ExportDraftOrdersModal";
 import { apiGet } from "@/lib/api";
 import { formatAmount } from "@/lib/formatPrice";
 import { useCan } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 function formatDraftDate(dateString) {
   if (!dateString) return "—";
@@ -199,7 +200,7 @@ export default function AdminDrafts() {
                       onClick={() => setSearchQuery("")}
                       className="text-xs text-slate-400 hover:text-slate-600"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   )}
                 </div>

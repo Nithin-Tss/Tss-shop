@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan, useSession } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 const tomorrowISO = () => new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 
@@ -525,7 +526,7 @@ export default function AdminOrderDetails() {
                 onClick={() => setActionMsg("")}
                 className="text-emerald-600 hover:text-emerald-900 font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -537,7 +538,7 @@ export default function AdminOrderDetails() {
                 onClick={() => setActionError("")}
                 className="text-red-600 hover:text-red-900 font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -801,7 +802,7 @@ export default function AdminOrderDetails() {
                             />
                           ) : (
                             <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 text-lg">
-                              📦
+                              <Icon name="package" className="h-5 w-5" />
                             </div>
                           )}
                           <div>
@@ -839,7 +840,7 @@ export default function AdminOrderDetails() {
                     >
                       <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-charcoal-navy text-sm font-bold">✓</span>
+                          <Icon name="check" className="h-3.5 w-3.5" />
                           <h2 className="text-sm font-bold text-slate-900">
                             Fulfilled #{order.order_number}-F{fIdx + 1}
                           </h2>
@@ -885,7 +886,7 @@ export default function AdminOrderDetails() {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                         <div className="flex items-center gap-2.5">
                           <span className="w-5 h-5 rounded-md bg-orange-50 border border-orange-200 text-orange-700 flex items-center justify-center text-xs font-bold">
-                            📦
+                            <Icon name="package" className="h-5 w-5" />
                           </span>
                           <h2 className="text-sm font-bold text-slate-900">Unfulfilled</h2>
                         </div>
@@ -913,7 +914,7 @@ export default function AdminOrderDetails() {
                       {/* Delivery method bar */}
                       <div className="mt-3.5 flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                         <div className="flex items-center gap-2 text-slate-700">
-                          <span>🚚</span>
+                          <Icon name="truck" className="h-4 w-4" />
                           <span className="font-medium">
                             {order.delivery_method || "Standard Delivery"}
                           </span>
@@ -939,7 +940,7 @@ export default function AdminOrderDetails() {
                                 />
                               ) : (
                                 <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 text-lg">
-                                  📦
+                                  <Icon name="package" className="h-5 w-5" />
                                 </div>
                               )}
                               <div>
@@ -977,9 +978,9 @@ export default function AdminOrderDetails() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                   <div className="flex items-center gap-2.5">
                     {isRefunded ? (
-                      <span className="text-slate-600 font-bold">📄</span>
+                      <Icon name="file" className="h-4 w-4" />
                     ) : isPaid ? (
-                      <span className="text-charcoal-navy font-bold">✓</span>
+                      <Icon name="check" className="h-3.5 w-3.5" />
                     ) : (
                       <span className="text-orange-700 font-bold">⏱</span>
                     )}
@@ -1127,7 +1128,7 @@ export default function AdminOrderDetails() {
                             className="hover:text-slate-600 transition"
                             title="Add emoji"
                           >
-                            😊
+                            <Icon name="smile" className="h-5 w-5" />
                           </button>
                           <button
                             type="button"
@@ -1148,7 +1149,7 @@ export default function AdminOrderDetails() {
                             className="hover:text-slate-600 transition"
                             title="Attach file"
                           >
-                            📎
+                            <Icon name="paperclip" className="h-5 w-5" />
                           </button>
                         </div>
                         <button
@@ -1442,7 +1443,7 @@ export default function AdminOrderDetails() {
                 <h3 className="text-sm font-bold text-slate-900 mb-2">Conversion summary</h3>
                 <div className="space-y-1.5 text-xs text-slate-600">
                   <p className="flex items-center gap-2">
-                    <span>🛍</span>
+                    <Icon name="bag" className="h-4 w-4" />
                     <span>
                       This is their {customerObj.orders_count || 1}
                       {customerObj.orders_count === 1
@@ -1456,7 +1457,7 @@ export default function AdminOrderDetails() {
                     </span>
                   </p>
                   <p className="flex items-center gap-2">
-                    <span>🌐</span>
+                    <Icon name="globe" className="h-4 w-4" />
                     <span>1st session from {order.channel || "Online Store"}</span>
                   </p>
                 </div>
@@ -1466,7 +1467,7 @@ export default function AdminOrderDetails() {
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-bold text-slate-900">Order risk</h3>
-                  <span className="text-slate-400 text-xs">🛡</span>
+                  <Icon name="shield" className="h-3.5 w-3.5" />
                 </div>
                 <div className="space-y-2">
                   <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
@@ -1494,7 +1495,7 @@ export default function AdminOrderDetails() {
                     className="text-slate-400 hover:text-slate-700 text-xs font-semibold p-1"
                     title="Edit tags"
                   >
-                    ✎
+                    <Icon name="pencil-line" className="h-4 w-4" />
                   </button>
                 </div>
 
@@ -1512,7 +1513,7 @@ export default function AdminOrderDetails() {
                             onClick={() => handleRemoveTag(tag)}
                             className="text-slate-400 hover:text-red-600 font-bold ml-1"
                           >
-                            ✕
+                            <Icon name="x" className="h-4 w-4" />
                           </button>
                         )}
                       </span>
@@ -1887,7 +1888,7 @@ export default function AdminOrderDetails() {
                 onClick={() => setShowEmailModal(false)}
                 className="text-slate-400 hover:text-orange-600 text-sm font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 

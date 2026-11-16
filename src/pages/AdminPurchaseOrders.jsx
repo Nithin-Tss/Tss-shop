@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
+import Icon from "@/components/Icons";
 
 const asList = (data) => (Array.isArray(data) ? data : data?.results || []);
 
@@ -35,7 +36,7 @@ function ModalShell({ title, onClose, children, wide = false }) {
             aria-label="Close"
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-orange-600 cursor-pointer"
           >
-            ✕
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
         {children}
@@ -214,7 +215,7 @@ function CreatePurchaseOrderModal({ variants, onClose, onCreated }) {
                             }
                             className="text-slate-400 hover:text-orange-700 cursor-pointer"
                           >
-                            ✕
+                            <Icon name="x" className="h-4 w-4" />
                           </button>
                         </td>
                       </tr>
@@ -584,7 +585,7 @@ export default function AdminPurchaseOrders() {
                       aria-label="Clear search"
                       className="absolute right-2.5 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   )}
                 </div>

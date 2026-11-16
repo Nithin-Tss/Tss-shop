@@ -19,6 +19,7 @@ import CustomerPrivacySettings from "@/components/CustomerPrivacySettings";
 import CheckoutSettings from "@/components/CheckoutSettings";
 import CustomerAccountsSettings from "@/components/CustomerAccountsSettings";
 import CurrencySettings from "@/components/CurrencySettings";
+import Icon from "@/components/Icons";
 
 // [IANA name, label]; the backend validates the name
 const TIME_ZONES = [
@@ -571,7 +572,7 @@ export default function AdminSettings() {
 
             <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
               <div className="flex items-center gap-4">
-                <span className="text-xl text-slate-500">☎</span>
+                <Icon name="phone" className="h-5 w-5" />
 
                 <div>
                   <p className="text-sm font-medium text-slate-800">Phone number</p>

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from "reac
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { ALL_COUNTRIES } from "@/lib/countries";
+import Icon from "@/components/Icons";
 
 const TYPE_CONFIG = {
   "amount-off-products": {
@@ -543,7 +544,10 @@ export default function AdminCreateDiscount({ initialType }) {
                     : "bg-red-50 text-red-800 border border-red-200"
                 }`}
               >
-                <span>{serverMessage.type === "success" ? "✓" : "⚠️"}</span>
+                <Icon
+                  name={serverMessage.type === "success" ? "check" : "alert"}
+                  className="h-4 w-4"
+                />
                 {serverMessage.text}
               </div>
             </div>
@@ -771,7 +775,7 @@ export default function AdminCreateDiscount({ initialType }) {
                             >
                               <div className="flex items-center gap-3 truncate pr-2">
                                 <span className="h-8 w-8 shrink-0 rounded bg-slate-200 flex items-center justify-center text-xs text-slate-600 font-medium">
-                                  📦
+                                  <Icon name="package" className="h-5 w-5" />
                                 </span>
                                 <span className="font-medium text-slate-900 truncate">
                                   {p.title || p.name}
@@ -784,7 +788,7 @@ export default function AdminCreateDiscount({ initialType }) {
                                 }
                                 className="text-slate-400 hover:text-red-600 p-1 transition"
                               >
-                                ✕
+                                <Icon name="x" className="h-4 w-4" />
                               </button>
                             </div>
                           ))}
@@ -799,7 +803,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               className="flex items-center justify-between p-3 text-sm bg-slate-50/50"
                             >
                               <div className="flex items-center gap-2 truncate pr-2">
-                                <span>📁</span>
+                                <Icon name="folder" className="h-4 w-4" />
                                 <span className="font-medium text-slate-900 truncate">
                                   {c.title || c.name}
                                 </span>
@@ -813,7 +817,7 @@ export default function AdminCreateDiscount({ initialType }) {
                                 }
                                 className="text-slate-400 hover:text-red-600 p-1 transition"
                               >
-                                ✕
+                                <Icon name="x" className="h-4 w-4" />
                               </button>
                             </div>
                           ))}
@@ -1222,7 +1226,7 @@ export default function AdminCreateDiscount({ initialType }) {
                                   }
                                   className="text-slate-400 hover:text-slate-700 ml-1"
                                 >
-                                  ✕
+                                  <Icon name="x" className="h-4 w-4" />
                                 </button>
                               </span>
                             ))}
@@ -1685,7 +1689,7 @@ export default function AdminCreateDiscount({ initialType }) {
                               onClick={() => handleRemoveTag(t)}
                               className="text-slate-400 hover:text-slate-700 ml-0.5"
                             >
-                              ✕
+                              <Icon name="x" className="h-4 w-4" />
                             </button>
                           </span>
                         ))}
@@ -1812,7 +1816,7 @@ function ItemPickerModal({
             onClick={onClose}
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
           >
-            ✕
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
 
@@ -1865,7 +1869,16 @@ function ItemPickerModal({
                       className="h-4 w-4 rounded border-slate-300 text-charcoal-navy focus:ring-orange-600"
                     />
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-slate-100 text-sm text-slate-600">
-                      {mode === "products" ? "📦" : mode === "collections" ? "📁" : "👤"}
+                      <Icon
+                        name={
+                          mode === "products"
+                            ? "package"
+                            : mode === "collections"
+                              ? "folder"
+                              : "user"
+                        }
+                        className="h-4 w-4"
+                      />
                     </div>
                     <div className="truncate">
                       <div className="font-medium text-sm text-slate-900 truncate">{title}</div>

@@ -17,6 +17,7 @@ import {
   DragHandle,
   CARD_EXTRA_BLOCKS,
 } from "./AdminCustomizeShared";
+import Icon from "@/components/Icons";
 
 // The fonts the theme can use (from the schema), shared with every font picker
 export const FontsContext = createContext([]);
@@ -513,7 +514,7 @@ export function SocialLinksEditor({ value, onChange, label }) {
               className="rounded p-1 text-slate-600 hover:text-red-600"
               aria-label="Delete link"
             >
-              ✕
+              <Icon name="x" className="h-4 w-4" />
             </button>
           </div>
 
@@ -2211,7 +2212,7 @@ export const RICH_TEXT_TOOLS = [
   { label: "I", title: "Italic", className: "italic", command: "italic" },
   { label: "U", title: "Underline", className: "underline", command: "underline" },
   { label: "H", title: "Heading", className: "font-bold", command: "formatBlock", arg: "<h3>" },
-  { label: "❝", title: "Quote", command: "formatBlock", arg: "<blockquote>" },
+  { label: "“", title: "Quote", command: "formatBlock", arg: "<blockquote>" },
   { label: "¶", title: "Normal text", command: "formatBlock", arg: "<p>" },
   { label: "• List", title: "Bulleted list", command: "insertUnorderedList" },
   { label: "1. List", title: "Numbered list", command: "insertOrderedList" },

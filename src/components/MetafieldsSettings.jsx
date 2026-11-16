@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getStoreId } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 const TYPES = [
   ["single_line_text", "Single line text"],
@@ -375,7 +376,7 @@ function ObjectTypeForm({ initial, existing, onCancel, onSave }) {
                 className="px-2 text-slate-400 hover:text-red-600 disabled:opacity-30"
                 aria-label="Remove field"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
           ))}

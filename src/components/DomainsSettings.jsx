@@ -119,7 +119,7 @@ const PROVIDERS = {
     steps: [
       "Sign in to Namecheap → Domain List → Manage → Advanced DNS.",
       "Click Add New Record and choose the type shown below.",
-      "Enter Host and Value exactly as shown, keep TTL on Automatic, and save with the ✓.",
+      "Enter Host and Value exactly as shown, keep TTL on Automatic, and save with the checkmark.",
       "Remove conflicting URL Redirect, A or CNAME records for the same host.",
     ],
     root: "Use @ in the Host field for the root domain.",

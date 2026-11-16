@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
+import Icon from "@/components/Icons";
 
 export default function AdminReportExploration() {
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ export default function AdminReportExploration() {
             onClick={() => setNotice(null)}
             className="ml-2 text-slate-400 hover:text-white"
           >
-            ✕
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -356,7 +357,7 @@ export default function AdminReportExploration() {
                         }`}
                       >
                         <span>{preset}</span>
-                        {dateRange === preset && <span>✓</span>}
+                        {dateRange === preset && <Icon name="check" className="h-3.5 w-3.5" />}
                       </button>
                     ))}
                   </div>
@@ -392,7 +393,7 @@ export default function AdminReportExploration() {
                         }`}
                       >
                         <span>{curr}</span>
-                        {currency === curr && <span>✓</span>}
+                        {currency === curr && <Icon name="check" className="h-3.5 w-3.5" />}
                       </button>
                     ))}
                   </div>
@@ -483,7 +484,7 @@ export default function AdminReportExploration() {
                         }}
                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] text-ink hover:bg-slate-100 transition-colors"
                       >
-                        <span className="text-slate-400">✦</span>
+                        <Icon name="sparkle" className="h-4 w-4" />
                         <span>{sug}</span>
                       </button>
                     ))}
@@ -665,7 +666,7 @@ export default function AdminReportExploration() {
                               }`}
                             >
                               <span>{metric}</span>
-                              {isSelected && <span>✓</span>}
+                              {isSelected && <Icon name="check" className="h-3.5 w-3.5" />}
                             </button>
                           );
                         })}
@@ -705,7 +706,7 @@ export default function AdminReportExploration() {
                               }`}
                             >
                               <span>{dim}</span>
-                              {isSelected && <span>✓</span>}
+                              {isSelected && <Icon name="check" className="h-3.5 w-3.5" />}
                             </button>
                           );
                         })}
@@ -744,7 +745,9 @@ export default function AdminReportExploration() {
                             }`}
                           >
                             <span>{type}</span>
-                            {visualizationType === type && <span>✓</span>}
+                            {visualizationType === type && (
+                              <Icon name="check" className="h-3.5 w-3.5" />
+                            )}
                           </button>
                         ))}
                       </div>
@@ -793,7 +796,7 @@ export default function AdminReportExploration() {
                               }`}
                             >
                               <span>{filter}</span>
-                              {isSelected && <span>✓</span>}
+                              {isSelected && <Icon name="check" className="h-3.5 w-3.5" />}
                             </button>
                           );
                         })}

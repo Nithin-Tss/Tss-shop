@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
+import Icon from "@/components/Icons";
 
 function ShopifyBagIcon({ className = "h-4 w-4 shrink-0" }) {
   return (
@@ -186,7 +187,7 @@ export default function AdminReports() {
             onClick={() => setNotice(null)}
             className="ml-2 text-slate-400 hover:text-white"
           >
-            ✕
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -262,7 +263,7 @@ export default function AdminReports() {
                       aria-label="Clear search"
                       className="absolute right-2.5 flex h-5 w-5 items-center justify-center rounded text-[12px] text-slate-400 hover:text-slate-600"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -331,7 +332,7 @@ export default function AdminReports() {
                         }`}
                       >
                         <span>All creators</span>
-                        {selectedCreator === "all" && <span>✓</span>}
+                        {selectedCreator === "all" && <Icon name="check" className="h-3.5 w-3.5" />}
                       </button>
                       {availableCreators.map((creator) => (
                         <button
@@ -348,7 +349,9 @@ export default function AdminReports() {
                           }`}
                         >
                           <span>{creator}</span>
-                          {selectedCreator === creator && <span>✓</span>}
+                          {selectedCreator === creator && (
+                            <Icon name="check" className="h-3.5 w-3.5" />
+                          )}
                         </button>
                       ))}
                     </div>
@@ -398,7 +401,9 @@ export default function AdminReports() {
                         }`}
                       >
                         <span>All categories</span>
-                        {selectedCategory === "all" && <span>✓</span>}
+                        {selectedCategory === "all" && (
+                          <Icon name="check" className="h-3.5 w-3.5" />
+                        )}
                       </button>
                       {availableCategories.map((cat) => (
                         <button
@@ -415,7 +420,9 @@ export default function AdminReports() {
                           }`}
                         >
                           <span>{cat}</span>
-                          {selectedCategory === cat && <span>✓</span>}
+                          {selectedCategory === cat && (
+                            <Icon name="check" className="h-3.5 w-3.5" />
+                          )}
                         </button>
                       ))}
                     </div>

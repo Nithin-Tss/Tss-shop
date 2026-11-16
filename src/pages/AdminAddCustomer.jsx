@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiPost } from "@/lib/api";
+import Icon from "@/components/Icons";
 
 const COUNTRIES = [
   { code: "AU", name: "Australia", prefix: "+61", flag: "🇦🇺" },
@@ -183,7 +184,7 @@ export default function AdminAddCustomer() {
                 onClick={() => setError("")}
                 className="text-red-400 hover:text-red-700 font-bold"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -446,7 +447,7 @@ export default function AdminAddCustomer() {
                     onClick={() => setIsEditingNotes((prev) => !prev)}
                     className="text-slate-400 hover:text-slate-700 text-sm transition"
                   >
-                    ✎
+                    <Icon name="pencil-line" className="h-4 w-4" />
                   </button>
                 </div>
 
@@ -484,7 +485,7 @@ export default function AdminAddCustomer() {
                         onClick={() => handleRemoveTag(tag)}
                         className="text-slate-400 hover:text-slate-700 font-bold"
                       >
-                        ✕
+                        <Icon name="x" className="h-4 w-4" />
                       </button>
                     </span>
                   ))}

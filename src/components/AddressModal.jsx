@@ -6,6 +6,7 @@ import {
   formatPhoneForSave,
   parseStoredPhone,
 } from "@/lib/countries";
+import Icon from "@/components/Icons";
 
 const INITIAL_FORM = {
   address_type: "shipping",
@@ -309,7 +310,7 @@ export default function AddressModal({
             title="Close"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
           >
-            <span aria-hidden="true">✕</span>
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
 
@@ -645,7 +646,7 @@ export default function AddressModal({
                               <span className="text-[11px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                                 {c.callingCode}
                               </span>
-                              {isSelected && <span className="text-slate-900 font-bold">✓</span>}
+                              {isSelected && <Icon name="check" className="h-3.5 w-3.5" />}
                             </div>
                           </button>
                         );

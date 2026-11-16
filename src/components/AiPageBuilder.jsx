@@ -19,6 +19,7 @@ import {
 } from "@/lib/aiAssistantApi";
 import { useFlag } from "@/lib/featureFlags";
 import { useCan } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 export const EXAMPLES = [
   "Create an About Us page with a hero banner and testimonials",
@@ -137,7 +138,7 @@ export default function AiPageBuilderPanel({ onClose, send = sendAiMessage }) {
           onClick={onClose}
           className={`${smallButton} w-8 justify-center px-0`}
         >
-          ✕
+          <Icon name="x" className="h-4 w-4" />
         </button>
       </header>
 

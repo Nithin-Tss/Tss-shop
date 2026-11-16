@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiDelete } from "@/lib/api";
 import { useCan } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 export default function AdminCollections() {
   const canManage = useCan("products.manage");
@@ -313,7 +314,7 @@ export default function AdminCollections() {
             className="ml-2 text-slate-400 hover:text-white"
             aria-label="Dismiss message"
           >
-            ✕
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
       )}
@@ -405,7 +406,7 @@ export default function AdminCollections() {
                       aria-label="Clear search"
                       className="absolute right-2 flex h-5 w-5 items-center justify-center rounded text-[12px] text-slate-400 hover:text-slate-600"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   )}
                 </div>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { getSession, useCan } from "@/lib/auth";
+import Icon from "@/components/Icons";
 
 const ALLOWED_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
@@ -803,7 +804,7 @@ function ImportModal({ onClose, onImportSuccess }) {
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
           >
-            ✕
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
 
@@ -860,7 +861,7 @@ function ImportModal({ onClose, onImportSuccess }) {
           ) : file ? (
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-700 border border-slate-200">
-                📄
+                <Icon name="file" className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-charcoal-navy">{file.name}</p>
@@ -1037,7 +1038,7 @@ function StockCountsModal({ items, locations, onClose, onStartCount }) {
             aria-label="Close"
             className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-orange-600 transition cursor-pointer"
           >
-            ✕
+            <Icon name="x" className="h-4 w-4" />
           </button>
         </div>
 
@@ -1550,7 +1551,7 @@ export default function InventoryPage() {
                       aria-label="Clear search"
                       className="absolute right-2.5 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
                     >
-                      ✕
+                      <Icon name="x" className="h-4 w-4" />
                     </button>
                   )}
                 </div>

@@ -13,6 +13,7 @@ import {
   saveUrlRedirect,
   uploadThemeImage,
 } from "@/lib/themeApi";
+import Icon from "@/components/Icons";
 
 // ------------------------------------------------- editor UI helpers (view only)
 // Items carry a UI-only `_k` key (never saved: handleSaveMenu builds its payload
@@ -679,7 +680,7 @@ export default function AdminMenus() {
                 onClick={() => setNotice("")}
                 className="text-emerald-700 hover:text-emerald-900 font-bold ml-4"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -692,7 +693,7 @@ export default function AdminMenus() {
                 onClick={() => setError("")}
                 className="text-rose-700 hover:text-rose-900 font-bold ml-4"
               >
-                ✕
+                <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -1072,7 +1073,7 @@ export default function AdminMenus() {
                                                   title="Remove image"
                                                   aria-label="Remove banner image"
                                                 >
-                                                  ✕
+                                                  <Icon name="x" className="h-4 w-4" />
                                                 </button>
                                               </div>
                                             ) : null}

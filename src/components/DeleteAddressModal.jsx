@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import Icon from "@/components/Icons";
 
 export default function DeleteAddressModal({
   isOpen,
@@ -82,7 +83,7 @@ export default function DeleteAddressModal({
             aria-hidden="true"
             className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 text-lg"
           >
-            ⚠
+            <Icon name="alert" className="h-5 w-5" />
           </div>
           <div>
             <h2 id="delete-address-title" className="text-base font-bold text-slate-900">

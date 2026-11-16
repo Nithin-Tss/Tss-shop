@@ -4,6 +4,7 @@ import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { storeBaseUrl, apiGet, apiPatch, apiPost, apiUpload } from "@/lib/api";
 import { getActiveStore, getSession } from "@/lib/auth";
 import SharedRichTextEditor from "@/components/RichTextEditor";
+import LineIcon from "@/components/Icons";
 
 // Add collection (/admin/online-store/collections/new) and Edit collection (/collections/:collectionId).
 // A manual collection holds the products picked for it; an automated one every product matching its
@@ -951,7 +952,10 @@ export default function AdminAddCollection() {
           <div aria-live="polite">
             {notice && (
               <div className="mb-5 flex items-center justify-between rounded-xl border border-slate-300 bg-white px-4 py-3 text-[14px] shadow-[0_1px_2px_rgba(24,24,27,0.04)]">
-                <span>✓ {notice}</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <LineIcon name="check" className="h-3.5 w-3.5" />
+                  {notice}
+                </span>
                 <button
                   type="button"
                   onClick={() => setNotice("")}
