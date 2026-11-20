@@ -868,7 +868,12 @@ export default function ProductsPage() {
     setNotice("");
     const ids = [...selected];
     let deleted = 0;
-    const blocked = [];
+    let stockRows = 0;
+    let confirmStock = false;
+    let cancelled = false;
+    let failed = false;
+    const inUse = [];
+    const other = [];
 
     // "All N selected" is one request by filter; a plain selection goes in batches of ids
     const batches = allMatching
@@ -878,7 +883,17 @@ export default function ProductsPage() {
         }));
 
     for (const batch of batches) {
-      const res = await apiPost("/api/v1/catalog/products/bulk-delete/", batch);
+      const url = "/api/v1/catalog/products/bulk-delete/";
+      let res = await apiPost(url, { ...batch, confirm_stock: confirmStock });
+      // Products with stock are only deleted after an explicit yes: the server refuses until then
+      if (!res.ok && res.fieldErrors?.confirm_stock) {
+        if (!window.confirm(`${res.fieldErrors.confirm_stock}\n\nDelete them anyway?`)) {
+          cancelled = true;
+          break;
+        }
+        confirmStock = true;
+        res = await apiPost(url, { ...batch, confirm_stock: true });
+      }
       if (!res.ok) {
         setNotice(
           `${deleted} deleted. ${
@@ -887,21 +902,32 @@ export default function ProductsPage() {
               : res.formError || "Something went wrong."
           }`
         );
+        failed = true;
         break;
       }
       deleted += res.data.deleted;
-      blocked.push(...res.data.blocked);
+      stockRows += res.data.stock_rows || 0;
+      inUse.push(...(res.data.blocked_in_use || []));
+      other.push(...(res.data.blocked_other || []));
     }
 
-    if (blocked.length) {
+    const names = (list) => `${list.slice(0, 3).join(", ")}${list.length > 3 ? ", ..." : ""}`;
+    if (cancelled) {
+      setNotice(`${deleted} deleted. The rest were not deleted because you didn't confirm removing their stock.`);
+    } else if (!failed && (inUse.length || other.length || stockRows)) {
       setNotice(
-        `${deleted} deleted. ${blocked.length} couldn't be deleted because orders or inventory use them (set them to Draft instead): ${blocked
-          .slice(0, 3)
-          .join(", ")}${blocked.length > 3 ? ", ..." : ""}.`
+        [
+          `${deleted} deleted${stockRows ? ` (${stockRows.toLocaleString()} stock records removed with them)` : ""}.`,
+          inUse.length &&
+            `${inUse.length} kept because orders, carts, wishlists or discounts use them (set them to Draft instead): ${names(inUse)}.`,
+          other.length && `${other.length} kept because other records still use them: ${names(other)}.`,
+        ]
+          .filter(Boolean)
+          .join(" ")
       );
     }
 
-    clearSelection();
+    if (!cancelled) clearSelection();
     setDeleting(false);
     await loadProducts();
   };

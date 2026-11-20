@@ -17,5 +17,4 @@ RUN sed "s|__API_ORIGIN__|$(echo "$VITE_API_URL" | sed -E 's|^(https?://[^/]+).*
 FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/security-headers.inc /etc/nginx/conf.d/security-headers.inc
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
+COPY --from=build /app/dist /usr/share/ngin
