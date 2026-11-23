@@ -913,14 +913,17 @@ export default function ProductsPage() {
 
     const names = (list) => `${list.slice(0, 3).join(", ")}${list.length > 3 ? ", ..." : ""}`;
     if (cancelled) {
-      setNotice(`${deleted} deleted. The rest were not deleted because you didn't confirm removing their stock.`);
+      setNotice(
+        `${deleted} deleted. The rest were not deleted because you didn't confirm removing their stock.`
+      );
     } else if (!failed && (inUse.length || other.length || stockRows)) {
       setNotice(
         [
           `${deleted} deleted${stockRows ? ` (${stockRows.toLocaleString()} stock records removed with them)` : ""}.`,
           inUse.length &&
             `${inUse.length} kept because orders, carts, wishlists or discounts use them (set them to Draft instead): ${names(inUse)}.`,
-          other.length && `${other.length} kept because other records still use them: ${names(other)}.`,
+          other.length &&
+            `${other.length} kept because other records still use them: ${names(other)}.`,
         ]
           .filter(Boolean)
           .join(" ")
