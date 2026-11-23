@@ -1103,26 +1103,26 @@ export default function AdminSettings() {
      ========================================================= */
 
   return (
-    <div className="min-h-screen bg-slate-100 text-ink">
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-100 text-ink">
       <AdminHeader />
 
       {/* =====================================================
           SETTINGS BODY
           ===================================================== */}
 
-      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         <AdminSidebar />
 
-        <div className="min-w-0 flex-1">
-          <div className="mx-auto flex max-w-[1500px] flex-col gap-5 px-4 py-5 sm:px-6 sm:py-7 lg:flex-row lg:gap-7">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="mx-auto flex w-full max-w-[1500px] flex-1 min-h-0 flex-col gap-5 px-4 py-5 sm:px-6 sm:py-7 lg:flex-row lg:gap-7">
             {/* =================================================
             LEFT SETTINGS SIDEBAR
             ================================================= */}
 
-            <aside className="w-full shrink-0 self-start overflow-hidden lg:w-[300px] rounded-xl border border-slate-200 bg-white">
+            <aside className="flex h-auto max-h-[40vh] min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white lg:h-full lg:max-h-none lg:w-[300px]">
               {/* STORE HEADER */}
 
-              <div className="border-b border-slate-200 p-5">
+              <div className="shrink-0 border-b border-slate-200 p-5">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-fuchsia-600 text-xs font-semibold text-white">
                     Sto
@@ -1138,7 +1138,7 @@ export default function AdminSettings() {
 
               {/* SETTINGS SEARCH */}
 
-              <div className="p-4">
+              <div className="shrink-0 p-4">
                 <div className="flex h-10 items-center rounded-lg border border-slate-300 px-3">
                   <span className="mr-2 text-lg text-slate-500">⌕</span>
 
@@ -1154,7 +1154,7 @@ export default function AdminSettings() {
 
               {/* SETTINGS MENU */}
 
-              <nav className="px-3 pb-5">
+              <nav className="flex-1 min-h-0 overflow-y-auto px-3 pb-5">
                 {filteredSettings.map((item) => (
                   <button
                     key={item.label}
@@ -1180,7 +1180,7 @@ export default function AdminSettings() {
             RIGHT CONTENT
             ================================================= */}
 
-            <main className="min-w-0 flex-1">
+            <main className="min-w-0 flex-1 h-full min-h-0 overflow-y-auto pb-8">
               {/* PAGE HEADER */}
 
               <div className="mb-5 flex items-center justify-between">
