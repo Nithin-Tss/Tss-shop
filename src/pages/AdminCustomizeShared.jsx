@@ -88,17 +88,28 @@ export function DragHandle({ label, onPointerDown, onKeyDown }) {
 // Only an option that is a style (colours, sizes, spacing, borders, radius, fonts) is copied: never text, images,
 // links, products, collections or menus, and never the "Advanced" options (anchor, CSS class, visibility).
 // ---------------------------------------------------------------------------------------------------------
-const STYLE_TYPES = ["color", "color_optional", "range", "number", "select", "font", "font_size", "checkbox"];
+const STYLE_TYPES = [
+  "color",
+  "color_optional",
+  "range",
+  "number",
+  "select",
+  "font",
+  "font_size",
+  "checkbox",
+];
 const STYLE_GROUPS = ["style", "text", "padding", "button", "layout"];
 // "Layout" mixes sizes and structure: only its sizes, spacing, alignment and shape count as style
-const LAYOUT_STYLE_KEY = /align|width|ratio|fit|size|gap|spacing|padding|radius|height|columns|position/i;
+const LAYOUT_STYLE_KEY =
+  /align|width|ratio|fit|size|gap|spacing|padding|radius|height|columns|position/i;
 
 export function isStyleField(key, spec) {
   if (!spec || !STYLE_TYPES.includes(spec.type)) return false;
   const group = spec.group || "content";
   if (!STYLE_GROUPS.includes(group)) return false;
   if (spec.type === "checkbox" && /^(show|hide)_/.test(key)) return false;
-  if (group === "layout") return spec.type === "range" || spec.type === "number" || LAYOUT_STYLE_KEY.test(key);
+  if (group === "layout")
+    return spec.type === "range" || spec.type === "number" || LAYOUT_STYLE_KEY.test(key);
   return true;
 }
 
@@ -106,7 +117,8 @@ export function isStyleField(key, spec) {
 export function pickStyles(fields, values) {
   const picked = {};
   for (const [key, spec] of Object.entries(fields || {})) {
-    if (isStyleField(key, spec) && key in (values || {})) picked[key] = structuredClone(values[key]);
+    if (isStyleField(key, spec) && key in (values || {}))
+      picked[key] = structuredClone(values[key]);
   }
   return picked;
 }

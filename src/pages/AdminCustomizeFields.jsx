@@ -813,14 +813,20 @@ function CardElementsField({ spec, value, onChange }) {
               dragFrom === i ? "opacity-40" : ""
             } ${own && !row.on ? "text-slate-400" : ""}`}
           >
-            <span aria-hidden="true" className="cursor-grab select-none text-slate-400" title="Drag to reorder">
+            <span
+              aria-hidden="true"
+              className="cursor-grab select-none text-slate-400"
+              title="Drag to reorder"
+            >
               &#8942;&#8942;
             </span>
             <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
                 checked={row.on}
-                onChange={(e) => write(rows.map((r, j) => (j === i ? { ...r, on: e.target.checked } : r)))}
+                onChange={(e) =>
+                  write(rows.map((r, j) => (j === i ? { ...r, on: e.target.checked } : r)))
+                }
                 className="accent-orange-600"
               />
               <span className="truncate">{CARD_ELEMENT_LABELS[row.id] || row.id}</span>
@@ -1567,7 +1573,9 @@ export function SectionBlocks({
                 key={i}
                 data-drop-block={`${sectionId}|${i}`}
                 className={`relative rounded-lg border bg-white ${
-                  multi.includes(i) ? "border-orange-600 ring-1 ring-orange-600" : "border-slate-200"
+                  multi.includes(i)
+                    ? "border-orange-600 ring-1 ring-orange-600"
+                    : "border-slate-200"
                 } ${dragging ? "opacity-40" : ""}`}
               >
                 {lineHere && <DropLine after={dropTarget.after} />}
@@ -1659,9 +1667,9 @@ export function SectionBlocks({
 
       {blocks.length > 0 && (
         <p className="mt-2 text-[11px] text-slate-400">
-          Click a block to edit it. Shift + click selects several blocks, then paste styles onto them
-          from the "..." menu. Drag by the handle to reorder, or onto another section that appears
-          below.
+          Click a block to edit it. Shift + click selects several blocks, then paste styles onto
+          them from the "..." menu. Drag by the handle to reorder, or onto another section that
+          appears below.
         </p>
       )}
     </div>
