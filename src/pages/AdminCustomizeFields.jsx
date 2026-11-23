@@ -16,6 +16,7 @@ import {
   DropLine,
   DragHandle,
   CARD_EXTRA_BLOCKS,
+  StyleMenu,
 } from "./AdminCustomizeShared";
 import Icon from "@/components/Icons";
 
@@ -757,6 +758,104 @@ export function Help({ spec }) {
   );
 }
 
+// The product card's elements (Theme settings > Product cards): on/off and order. Saved as "image,-vendor,title,...":
+// "-" marks an element that is off. Empty keeps each section's own card.
+const CARD_ELEMENT_LABELS = {
+  image: "Image",
+  vendor: "Vendor",
+  title: "Title",
+  rating: "Rating",
+  price: "Price",
+  stock: "Stock status",
+  button: "Button (Add to cart / View)",
+  wishlist: "Wishlist heart",
+};
+const CARD_ELEMENTS_START = "image,-vendor,title,-rating,price,-stock,-button,-wishlist";
+
+function CardElementsField({ spec, value, onChange }) {
+  const [dragFrom, setDragFrom] = useState(null);
+  const own = Boolean(value);
+  const rows = (value || CARD_ELEMENTS_START)
+    .split(",")
+    .filter(Boolean)
+    .map((part) => ({ id: part.replace(/^-/, ""), on: !part.startsWith("-") }));
+  const write = (list) => onChange(list.map((r) => (r.on ? "" : "-") + r.id).join(","));
+  const move = (from, to) => {
+    if (from === null || to < 0 || to >= rows.length || from === to) return;
+    const next = rows.slice();
+    next.splice(to, 0, next.splice(from, 1)[0]);
+    write(next);
+  };
+
+  return (
+    <div>
+      <span className="mb-1 block text-xs font-medium text-violet-600">{spec.label}</span>
+      {!own && (
+        <p className="mb-2 rounded-md bg-slate-50 px-2 py-1.5 text-[11px] text-slate-500">
+          Each section shows its own card now. Change anything below to use one card for the whole
+          store.
+        </p>
+      )}
+      <ul className="grid gap-1">
+        {rows.map((row, i) => (
+          <li
+            key={row.id}
+            draggable
+            onDragStart={() => setDragFrom(i)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              move(dragFrom, i);
+              setDragFrom(null);
+            }}
+            onDragEnd={() => setDragFrom(null)}
+            className={`flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm ${
+              dragFrom === i ? "opacity-40" : ""
+            } ${own && !row.on ? "text-slate-400" : ""}`}
+          >
+            <span aria-hidden="true" className="cursor-grab select-none text-slate-400" title="Drag to reorder">
+              &#8942;&#8942;
+            </span>
+            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={row.on}
+                onChange={(e) => write(rows.map((r, j) => (j === i ? { ...r, on: e.target.checked } : r)))}
+                className="accent-orange-600"
+              />
+              <span className="truncate">{CARD_ELEMENT_LABELS[row.id] || row.id}</span>
+            </label>
+            <button
+              type="button"
+              className={iconButton}
+              disabled={i === 0}
+              onClick={() => move(i, i - 1)}
+              aria-label={`Move ${CARD_ELEMENT_LABELS[row.id]} up`}
+            >
+              &uarr;
+            </button>
+            <button
+              type="button"
+              className={iconButton}
+              disabled={i === rows.length - 1}
+              onClick={() => move(i, i + 1)}
+              aria-label={`Move ${CARD_ELEMENT_LABELS[row.id]} down`}
+            >
+              &darr;
+            </button>
+          </li>
+        ))}
+      </ul>
+      {own && (
+        <button type="button" className={`${smallButton} mt-2`} onClick={() => onChange("")}>
+          Use each section's own card
+        </button>
+      )}
+      <Help spec={spec} />
+    </div>
+  );
+}
+
 export const Field = memo(function Field({
   spec,
   value,
@@ -1260,6 +1359,9 @@ export const Field = memo(function Field({
         </label>
       );
 
+    case "card_elements":
+      return <CardElementsField spec={spec} value={value} onChange={onChange} />;
+
     case "textarea":
       return (
         <label className="block">
@@ -1346,6 +1448,10 @@ export function SectionBlocks({
   onDuplicate,
   onToggle,
   onRemove,
+  multi = [],
+  onMultiSelect,
+  onCopyStyles,
+  onPasteStyles,
 }) {
   // A section's Product card is built in (it can't be added twice, hidden or deleted) and holds the cart icon and
   // heart itself: none of those three is offered
@@ -1460,7 +1566,9 @@ export function SectionBlocks({
               <li
                 key={i}
                 data-drop-block={`${sectionId}|${i}`}
-                className={`relative rounded-lg border border-slate-200 bg-white ${dragging ? "opacity-40" : ""}`}
+                className={`relative rounded-lg border bg-white ${
+                  multi.includes(i) ? "border-orange-600 ring-1 ring-orange-600" : "border-slate-200"
+                } ${dragging ? "opacity-40" : ""}`}
               >
                 {lineHere && <DropLine after={dropTarget.after} />}
 
@@ -1483,11 +1591,20 @@ export function SectionBlocks({
                   <button
                     type="button"
                     className={`min-w-0 flex-1 truncate text-left ${block.hidden ? "text-slate-400" : ""}`}
-                    onClick={() => onOpen(i)}
-                    title={title}
+                    onClick={(e) => (e.shiftKey && onMultiSelect ? onMultiSelect(i) : onOpen(i))}
+                    title={onMultiSelect ? `${title} (Shift + click to select several)` : title}
                   >
                     {title}
                   </button>
+
+                  {onCopyStyles && !blockSpec.child_blocks && (
+                    <StyleMenu
+                      name={blockSpec.name}
+                      count={multi.includes(i) ? multi.length : 1}
+                      onCopy={() => onCopyStyles(i)}
+                      onPaste={() => onPasteStyles(i)}
+                    />
+                  )}
 
                   {!blockSpec.child_blocks && (
                     <>
@@ -1542,8 +1659,9 @@ export function SectionBlocks({
 
       {blocks.length > 0 && (
         <p className="mt-2 text-[11px] text-slate-400">
-          Click a block to edit it. Drag by the handle to reorder, or onto another section that
-          appears below.
+          Click a block to edit it. Shift + click selects several blocks, then paste styles onto them
+          from the "..." menu. Drag by the handle to reorder, or onto another section that appears
+          below.
         </p>
       )}
     </div>

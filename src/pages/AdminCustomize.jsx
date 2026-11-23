@@ -41,6 +41,8 @@ import {
   DropLine,
   DragHandle,
   parseBlockRef,
+  StyleMenu,
+  pickStyles,
 } from "./AdminCustomizeShared";
 import {
   FontsContext,
@@ -490,6 +492,15 @@ export default function AdminCustomizePage() {
   // Which group of the Theme settings panel opens first (Header, Footer, ...)
   // The Theme settings group to open (null: all closed); header/footer rows open their own group
   const [themeGroup, setThemeGroup] = useState(null);
+
+  // A card element (image, title, price, ...) clicked in the preview: the theme's card settings open for it
+  const [cardPick, setCardPick] = useState(null);
+
+  // Copy styles: what was copied ({ kind, type, name, values }). Several sections / blocks picked with Shift + click:
+  // { kind: "section" | "block", page, section, keys } (it only counts on the page and section it was picked on)
+  const [styleClip, setStyleClip] = useState(null);
+
+  const [multi, setMulti] = useState({ kind: "", page: "", section: "", keys: [] });
 
   const [previewKey, setPreviewKey] = useState(0);
 
@@ -2049,6 +2060,20 @@ export default function AdminCustomizePage() {
           engineRef.current.selectUnknownSection(message.id, message.block);
         }
       } else if (
+        message.type === "card-element" &&
+        typeof message.element === "string" &&
+        editModeRef.current
+      ) {
+        // Edit mode: a click on a part of a card that has no Product card block opens the theme's card settings
+        fromPreviewRef.current = true;
+        const group =
+          message.element === "price" ? "prices" : message.element === "badge" ? "badges" : "cards";
+        setSelectedBlock(null);
+        setSelectedChild(null);
+        setCardPick({ element: message.element, product: String(message.product || ""), group });
+        setThemeGroup(group);
+        setSelected("theme");
+      } else if (
         message.type === "add-part" &&
         typeof message.id === "string" &&
         Number.isInteger(message.block) &&
@@ -2168,6 +2193,99 @@ export default function AdminCustomizePage() {
       setSelectedBlock(block);
     }
   }
+
+  // ---- Copy styles / Paste styles ----
+  // A target is { kind: "section", id } | { kind: "block", section, index } | { kind: "part", section, block, child }
+  function styleTargetOf(d, t) {
+    const sec = sectionIn(d, page, t.kind === "section" ? t.id : t.section);
+    const sectionSpec = sec && schema.sections[sec.type];
+    if (!sectionSpec) return null;
+    if (t.kind === "section") {
+      return { node: sec, fields: sectionSpec.settings, type: sec.type, name: sectionSpec.name };
+    }
+    const block = sec.blocks?.[t.kind === "block" ? t.index : t.block];
+    const blockSpec = block && sectionSpec.blocks?.[block.type];
+    if (!blockSpec) return null;
+    if (t.kind === "block") {
+      return { node: block, fields: blockSpec.settings, type: block.type, name: blockSpec.name };
+    }
+    const part = block.children?.[t.child];
+    const partSpec = part && blockSpec.child_blocks?.[part.type];
+    if (!partSpec) return null;
+    return { node: part, fields: partSpec.settings, type: part.type, name: partSpec.name };
+  }
+
+  function copyStyles(target) {
+    const found = styleTargetOf(dataRef.current, target);
+    if (!found) return;
+    const values = pickStyles(found.fields, found.node.settings);
+    const count = Object.keys(values).length;
+    if (!count) {
+      setNotice(`${found.name} has no style settings to copy.`);
+      return;
+    }
+    setStyleClip({ kind: target.kind, type: found.type, name: found.name, values });
+    setNotice(`Copied ${count} style settings from ${found.name}.`);
+  }
+
+  // One undo step for the whole paste, whatever the number of targets. Only the same type of section or block:
+  // with any other in the picked group nothing is changed.
+  function pasteStyles(targets) {
+    if (!styleClip) {
+      setNotice('Nothing copied yet. Use "Copy styles" on a section or block first.');
+      return;
+    }
+    const found = targets.map((t) => styleTargetOf(dataRef.current, t));
+    const wrong = targets
+      .map((t, i) => ({ t, f: found[i] }))
+      .filter(({ t, f }) => !f || t.kind !== styleClip.kind || f.type !== styleClip.type);
+    if (wrong.length) {
+      const names = [...new Set(wrong.map(({ f }) => f?.name).filter(Boolean))].join(", ");
+      setNotice(
+        `Can't paste ${styleClip.name} styles onto ${names || "that item"}: styles only paste between the same type. Nothing was changed.`
+      );
+      return;
+    }
+    update((d) => {
+      for (const t of targets) {
+        const f = styleTargetOf(d, t);
+        for (const [key, value] of Object.entries(styleClip.values)) {
+          if (key in f.fields) f.node.settings[key] = structuredClone(value);
+        }
+      }
+    });
+    const noun = styleClip.kind === "section" ? "section" : "block";
+    setNotice(`Pasted styles to ${targets.length} ${noun}${targets.length === 1 ? "" : "s"}.`);
+  }
+
+  // Shift + click: add / remove one section or block in the picked group (the open one counts as picked)
+  function toggleMulti(kind, section, key, openKey) {
+    setMulti((m) => {
+      const same = m.kind === kind && m.page === page && m.section === section;
+      const base = same ? m.keys : openKey !== null && openKey !== key ? [openKey] : [];
+      const keys = base.includes(key) ? base.filter((k) => k !== key) : [...base, key];
+      return { kind, page, section, keys };
+    });
+  }
+
+  // The picked group counts only for the page and section it was picked on
+  const pickedSections = multi.kind === "section" && multi.page === page ? multi.keys : [];
+
+  const pickedBlocks =
+    multi.kind === "block" && multi.page === page && multi.section === selected ? multi.keys : [];
+
+  const sectionTargets = (id) =>
+    (pickedSections.includes(id) ? pickedSections : [id]).map((key) => ({
+      kind: "section",
+      id: key,
+    }));
+
+  const blockStyleTargets = (section, index) =>
+    (pickedBlocks.includes(index) ? pickedBlocks : [index]).map((i) => ({
+      kind: "block",
+      section,
+      index: i,
+    }));
 
   const template = data?.templates[page];
 
@@ -3059,6 +3177,7 @@ export default function AdminCustomizePage() {
                                 setSelected(group);
                                 return;
                               }
+                              setCardPick(null);
                               setThemeGroup(group);
                               setSelected("theme");
                             }}
@@ -3106,9 +3225,11 @@ export default function AdminCustomizePage() {
                                     className={`group flex h-8 items-center gap-2 rounded-lg pl-1.5 pr-1 text-[13px] ${
                                       blockInto
                                         ? "bg-slate-100 ring-1 ring-violet-600/50"
-                                        : isSelected
-                                          ? "bg-slate-100"
-                                          : "hover:bg-slate-50"
+                                        : pickedSections.includes(id)
+                                          ? "bg-orange-50 ring-1 ring-orange-600"
+                                          : isSelected
+                                            ? "bg-slate-100"
+                                            : "hover:bg-slate-50"
                                     }`}
                                   >
                                     {/* The type icon turns into the drag handle on hover */}
@@ -3165,9 +3286,26 @@ export default function AdminCustomizePage() {
                                       <button
                                         type="button"
                                         className="flex min-w-0 flex-1 items-baseline gap-1.5 text-left"
-                                        onClick={() => setSelected(id)}
+                                        onClick={(e) => {
+                                          if (e.shiftKey) {
+                                            e.preventDefault();
+                                            toggleMulti(
+                                              "section",
+                                              "",
+                                              id,
+                                              selected && selected !== "theme" ? selected : null
+                                            );
+                                            return;
+                                          }
+                                          setMulti({ kind: "", page: "", section: "", keys: [] });
+                                          setSelected(id);
+                                        }}
                                         onDoubleClick={() => canRename && startRename(id)}
-                                        title={showType ? `${name} (${spec.name})` : name}
+                                        title={
+                                          showType
+                                            ? `${name} (${spec.name}). Shift + click to select several`
+                                            : `${name}. Shift + click to select several`
+                                        }
                                       >
                                         <span
                                           className={`truncate ${s.hidden ? "text-slate-400" : "text-charcoal-navy"} ${isSelected ? "font-medium" : ""}`}
@@ -3221,7 +3359,7 @@ export default function AdminCustomizePage() {
                                             <div
                                               role="menu"
                                               data-row-menu
-                                              className="absolute right-0 top-full z-20 mt-1 w-36 rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg"
+                                              className="absolute right-0 top-full z-20 mt-1 w-40 rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg"
                                             >
                                               {canRename && (
                                                 <button
@@ -3246,6 +3384,32 @@ export default function AdminCustomizePage() {
                                                 className="block w-full px-3 py-1.5 text-left hover:bg-slate-100"
                                               >
                                                 Duplicate
+                                              </button>
+                                              <button
+                                                type="button"
+                                                role="menuitem"
+                                                onClick={() => {
+                                                  setRowMenu(null);
+                                                  copyStyles({ kind: "section", id });
+                                                }}
+                                                className="block w-full px-3 py-1.5 text-left hover:bg-slate-100"
+                                              >
+                                                Copy styles
+                                              </button>
+                                              <button
+                                                type="button"
+                                                role="menuitem"
+                                                onClick={() => {
+                                                  setRowMenu(null);
+                                                  pasteStyles(sectionTargets(id));
+                                                }}
+                                                className="block w-full px-3 py-1.5 text-left hover:bg-slate-100"
+                                              >
+                                                Paste styles
+                                                {pickedSections.includes(id) &&
+                                                pickedSections.length > 1
+                                                  ? ` (${pickedSections.length})`
+                                                  : ""}
                                               </button>
                                               <div className="my-1 h-px bg-slate-100" />
                                               <button
@@ -3391,6 +3555,7 @@ export default function AdminCustomizePage() {
                                 setSelected(group);
                                 return;
                               }
+                              setCardPick(null);
                               setThemeGroup(group);
                               setSelected("theme");
                             }}
@@ -3433,7 +3598,10 @@ export default function AdminCustomizePage() {
                           <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-3 py-3">
                             <button
                               type="button"
-                              onClick={() => setSelected(null)}
+                              onClick={() => {
+                                setCardPick(null);
+                                setSelected(null);
+                              }}
                               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-orange-600"
                               aria-label="Back to sections"
                               title="Back (Esc)"
@@ -3443,16 +3611,45 @@ export default function AdminCustomizePage() {
                               </svg>
                             </button>
 
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <h2 className="truncate font-semibold leading-tight">{editTitle}</h2>
                               <p className="truncate text-xs text-slate-400">{editSubtitle}</p>
                             </div>
+
+                            {shownSection && (
+                              <StyleMenu
+                                name={editTitle}
+                                count={pickedSections.includes(shown) ? pickedSections.length : 1}
+                                onCopy={() => copyStyles({ kind: "section", id: shown })}
+                                onPaste={() => pasteStyles(sectionTargets(shown))}
+                              />
+                            )}
                           </div>
 
                           <div
                             ref={editScrollRef}
                             className={`min-h-0 flex-1 overflow-y-auto px-4`}
                           >
+                            {shown === "theme" && cardPick && cardPick.group === themeGroup && (
+                              <div className="border-b border-slate-100 py-3">
+                                <p className="text-xs font-medium text-charcoal-navy">
+                                  Product card
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                  Name, price and images are edited in Products.
+                                </p>
+                                {cardPick.product && (
+                                  <Link
+                                    to={`/admin/online-store/products/${encodeURIComponent(cardPick.product)}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mt-1 inline-block text-sm font-medium text-ink underline"
+                                  >
+                                    Edit this product
+                                  </Link>
+                                )}
+                              </div>
+                            )}
                             {shown === "theme" ? (
                               <GroupedFields
                                 key={`theme-${themeGroup}`}
@@ -3521,6 +3718,16 @@ export default function AdminCustomizePage() {
                                         onDuplicate={(index) => duplicateBlock(shown, index)}
                                         onToggle={(index) => toggleBlockHidden(shown, index)}
                                         onRemove={(index) => removeBlock(shown, index)}
+                                        multi={pickedBlocks}
+                                        onMultiSelect={(index) =>
+                                          toggleMulti("block", shown, index, selectedBlock)
+                                        }
+                                        onCopyStyles={(index) =>
+                                          copyStyles({ kind: "block", section: shown, index })
+                                        }
+                                        onPasteStyles={(index) =>
+                                          pasteStyles(blockStyleTargets(shown, index))
+                                        }
                                       />
                                     )}
 
@@ -3619,7 +3826,7 @@ export default function AdminCustomizePage() {
                               </svg>
                             </button>
 
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <h2 className="truncate font-semibold leading-tight">
                                 {cardPartSpec?.name || shownBlockSpec?.name || "Block"}
                               </h2>
@@ -3635,6 +3842,43 @@ export default function AdminCustomizePage() {
                                   : ""}
                               </p>
                             </div>
+
+                            {(cardPart || (shownBlock && !isCardBlock)) && (
+                              <StyleMenu
+                                name={cardPartSpec?.name || shownBlockSpec?.name || "Block"}
+                                count={
+                                  !cardPart && pickedBlocks.includes(shownBlockIndex)
+                                    ? pickedBlocks.length
+                                    : 1
+                                }
+                                onCopy={() =>
+                                  copyStyles(
+                                    cardPart
+                                      ? {
+                                          kind: "part",
+                                          section: shown,
+                                          block: shownBlockIndex,
+                                          child: selectedChild,
+                                        }
+                                      : { kind: "block", section: shown, index: shownBlockIndex }
+                                  )
+                                }
+                                onPaste={() =>
+                                  pasteStyles(
+                                    cardPart
+                                      ? [
+                                          {
+                                            kind: "part",
+                                            section: shown,
+                                            block: shownBlockIndex,
+                                            child: selectedChild,
+                                          },
+                                        ]
+                                      : blockStyleTargets(shown, shownBlockIndex)
+                                  )
+                                }
+                              />
+                            )}
                           </div>
 
                           <div ref={blockScrollRef} className="min-h-0 flex-1 overflow-y-auto px-4">
