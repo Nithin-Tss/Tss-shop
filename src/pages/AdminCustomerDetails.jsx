@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import AddressModal from "@/components/AddressModal";
@@ -6,6 +6,13 @@ import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { formatAmount, formatPrice, toMinor, useStoreCurrency } from "@/lib/formatPrice";
 import { useCan, useSession } from "@/lib/auth";
 import Icon from "@/components/Icons";
+import {
+  ALL_COUNTRIES,
+  DEFAULT_COUNTRY,
+  validatePhone,
+  formatPhoneForSave,
+  parseStoredPhone,
+} from "@/lib/countries";
 
 function formatDateTime(dateString) {
   if (!dateString) return "—";
@@ -84,8 +91,78 @@ export default function AdminCustomerDetails() {
     email: "",
     email_subscription_status: "not_subscribed",
   });
+  const [editSelectedCountry, setEditSelectedCountry] = useState(DEFAULT_COUNTRY);
+  const [editPhoneNumber, setEditPhoneNumber] = useState("");
+  const [editPhoneError, setEditPhoneError] = useState("");
+  const [isEditCountryDropdownOpen, setIsEditCountryDropdownOpen] = useState(false);
+  const [editCountrySearch, setEditCountrySearch] = useState("");
+  const editDropdownRef = useRef(null);
+  const editSearchInputRef = useRef(null);
+
   const [savingCustomer, setSavingCustomer] = useState(false);
   const [editCustomerError, setEditCustomerError] = useState("");
+
+  // Close edit country dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (editDropdownRef.current && !editDropdownRef.current.contains(event.target)) {
+        setIsEditCountryDropdownOpen(false);
+      }
+    }
+    if (isEditCountryDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isEditCountryDropdownOpen]);
+
+  // Focus search input when edit country dropdown opens
+  useEffect(() => {
+    if (isEditCountryDropdownOpen && editSearchInputRef.current) {
+      editSearchInputRef.current.focus();
+    }
+  }, [isEditCountryDropdownOpen]);
+
+  // Filter countries for edit modal search
+  const filteredEditCountries = useMemo(() => {
+    if (!editCountrySearch.trim()) return ALL_COUNTRIES;
+    const q = editCountrySearch.trim().toLowerCase();
+    const cleanQ = q.startsWith("+") ? q : `+${q}`;
+    return ALL_COUNTRIES.filter((c) => {
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.code.toLowerCase() === q ||
+        c.callingCode === cleanQ ||
+        c.callingCode.includes(q) ||
+        (q === "usa" && c.code === "US") ||
+        (q === "uk" && c.code === "GB")
+      );
+    }).sort((a, b) => {
+      const isUAlias = (c) => (q === "usa" && c.code === "US") || (q === "uk" && c.code === "GB");
+      if (isUAlias(a) && !isUAlias(b)) return -1;
+      if (!isUAlias(a) && isUAlias(b)) return 1;
+      if (a.code.toLowerCase() === q && b.code.toLowerCase() !== q) return -1;
+      if (b.code.toLowerCase() === q && a.code.toLowerCase() !== q) return 1;
+      if (a.callingCode === cleanQ && b.callingCode !== cleanQ) return -1;
+      if (b.callingCode === cleanQ && a.callingCode !== cleanQ) return 1;
+      if (a.name.toLowerCase() === q) return -1;
+      if (b.name.toLowerCase() === q) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [editCountrySearch]);
+
+  const handleSelectEditCountry = (country) => {
+    setEditSelectedCountry(country);
+    setIsEditCountryDropdownOpen(false);
+    setEditCountrySearch("");
+    if (editPhoneNumber.trim()) {
+      const check = validatePhone(editPhoneNumber, country.code);
+      setEditPhoneError(check.valid ? "" : check.error);
+    } else {
+      setEditPhoneError("");
+    }
+  };
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -317,9 +394,16 @@ export default function AdminCustomerDetails() {
     setSavingAddress(false);
   };
 
-  // Handle Save Customer Edit (Name, email, subscription)
+  // Handle Save Customer Edit (Name, email, subscription, phone)
   const handleOpenEditCustomer = () => {
     if (!customer) return;
+    const existingPhone = customer.phone || defaultAddress?.phone || "";
+    const parsed = parseStoredPhone(existingPhone);
+    setEditSelectedCountry(parsed.country || DEFAULT_COUNTRY);
+    setEditPhoneNumber(parsed.nationalNumber || "");
+    setEditPhoneError("");
+    setIsEditCountryDropdownOpen(false);
+    setEditCountrySearch("");
     setEditFormData({
       first_name: customer.first_name || "",
       last_name: customer.last_name || "",
@@ -335,6 +419,15 @@ export default function AdminCustomerDetails() {
   const handleSaveCustomerEdit = async (e) => {
     e.preventDefault();
     if (!customer) return;
+
+    if (editPhoneNumber.trim()) {
+      const check = validatePhone(editPhoneNumber, editSelectedCountry.code);
+      if (!check.valid) {
+        setEditPhoneError(check.error);
+        return;
+      }
+    }
+
     setSavingCustomer(true);
     setEditCustomerError("");
 
@@ -346,13 +439,42 @@ export default function AdminCustomerDetails() {
     };
 
     const res = await apiPatch(`/api/v1/customers/${customer.id}/`, payload);
-    setSavingCustomer(false);
 
     if (res.ok) {
+      const formattedPhone = editPhoneNumber.trim()
+        ? formatPhoneForSave(editPhoneNumber.trim(), editSelectedCountry.code)
+        : "";
+
+      // If customer has a default address, update its phone number
+      if (defaultAddress) {
+        await apiPatch(`/api/v1/customers/addresses/${defaultAddress.id}/`, {
+          phone: formattedPhone,
+        });
+      } else if (formattedPhone) {
+        // If no address exists yet, create default address with phone
+        await apiPost("/api/v1/customers/addresses/", {
+          customer: customer.id,
+          address_type: "shipping",
+          first_name: editFormData.first_name.trim() || customer.first_name || "—",
+          last_name: editFormData.last_name.trim() || customer.last_name || "—",
+          company: "",
+          address_line_1: "—",
+          address_line_2: "",
+          city: customer.city || "—",
+          state: customer.state || "—",
+          postal_code: "—",
+          country: customer.country || editSelectedCountry.name,
+          phone: formattedPhone,
+          is_default: true,
+        });
+      }
+
+      setSavingCustomer(false);
       setShowEditCustomerModal(false);
       showToast("Customer details updated successfully.");
       fetchCustomerData();
     } else {
+      setSavingCustomer(false);
       setEditCustomerError(
         res.formError ||
           res.fieldErrors?.email ||
@@ -1273,16 +1395,24 @@ export default function AdminCustomerDetails() {
                             .join(" ") || customerName}
                         </div>
                         {defaultAddress.company && <div>{defaultAddress.company}</div>}
-                        <div>{defaultAddress.address_line_1}</div>
+                        {defaultAddress.address_line_1 && defaultAddress.address_line_1 !== "—" && (
+                          <div>{defaultAddress.address_line_1}</div>
+                        )}
                         {defaultAddress.address_line_2 && (
                           <div>{defaultAddress.address_line_2}</div>
                         )}
-                        <div>
-                          {[defaultAddress.city, defaultAddress.state, defaultAddress.postal_code]
-                            .filter(Boolean)
-                            .join(" ")}
-                        </div>
-                        <div>{defaultAddress.country}</div>
+                        {([defaultAddress.city, defaultAddress.state, defaultAddress.postal_code]
+                          .filter((p) => p && p !== "—")
+                          .join(" ") || null) && (
+                          <div>
+                            {[defaultAddress.city, defaultAddress.state, defaultAddress.postal_code]
+                              .filter((p) => p && p !== "—")
+                              .join(" ")}
+                          </div>
+                        )}
+                        {defaultAddress.country && defaultAddress.country !== "—" && (
+                          <div>{defaultAddress.country}</div>
+                        )}
                         {defaultAddress.phone && (
                           <div className="text-slate-500 mt-1">{defaultAddress.phone}</div>
                         )}
@@ -1633,6 +1763,140 @@ export default function AdminCustomerDetails() {
                       onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
                       className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 text-slate-900 outline-none focus:border-slate-500 bg-white"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block font-medium text-slate-700 mb-1">Phone number</label>
+                    <div className="flex items-center gap-2">
+                      <div className="relative" ref={editDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditCountryDropdownOpen((prev) => !prev)}
+                          className={`flex items-center gap-1.5 h-9.5 px-3 border rounded-lg bg-white text-sm hover:border-slate-400 focus:outline-none transition cursor-pointer select-none ${
+                            isEditCountryDropdownOpen
+                              ? "border-orange-600 ring-1 ring-orange-600"
+                              : "border-slate-300"
+                          }`}
+                          title={`${editSelectedCountry.name} (${editSelectedCountry.callingCode})`}
+                          aria-haspopup="listbox"
+                          aria-expanded={isEditCountryDropdownOpen}
+                        >
+                          <span className="text-base leading-none">{editSelectedCountry.flag}</span>
+                          <span className="font-mono text-xs font-semibold text-slate-700">
+                            {editSelectedCountry.callingCode}
+                          </span>
+                          <span className="text-xs text-slate-400">▾</span>
+                        </button>
+
+                        {isEditCountryDropdownOpen && (
+                          <div className="absolute left-0 top-full mt-1.5 w-72 max-h-72 bg-white border border-slate-200 rounded-xl shadow-xl z-50 flex flex-col overflow-hidden text-xs">
+                            <div className="p-2 border-b border-slate-100 bg-slate-50 sticky top-0 z-10">
+                              <div className="relative flex items-center">
+                                <span className="absolute left-2.5 text-slate-400 pointer-events-none">
+                                  <Icon name="search" className="h-3.5 w-3.5" />
+                                </span>
+                                <input
+                                  ref={editSearchInputRef}
+                                  type="text"
+                                  value={editCountrySearch}
+                                  onChange={(e) => setEditCountrySearch(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      if (filteredEditCountries.length > 0) {
+                                        handleSelectEditCountry(filteredEditCountries[0]);
+                                      }
+                                    } else if (e.key === "Escape") {
+                                      setIsEditCountryDropdownOpen(false);
+                                    }
+                                  }}
+                                  placeholder="Search country or code..."
+                                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 text-slate-800"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="overflow-y-auto max-h-56 py-1 divide-y divide-slate-50">
+                              {filteredEditCountries.length === 0 ? (
+                                <div className="py-4 text-center text-slate-400">
+                                  No countries found
+                                </div>
+                              ) : (
+                                filteredEditCountries.map((c) => {
+                                  const isSelected = c.code === editSelectedCountry.code;
+                                  return (
+                                    <button
+                                      key={c.code}
+                                      type="button"
+                                      onClick={() => handleSelectEditCountry(c)}
+                                      className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-slate-50 transition cursor-pointer ${
+                                        isSelected
+                                          ? "bg-amber-50/70 font-semibold text-slate-900"
+                                          : "text-slate-700"
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-2 min-w-0 pr-2">
+                                        <span className="text-base leading-none shrink-0">
+                                          {c.flag}
+                                        </span>
+                                        <span className="truncate">{c.name}</span>
+                                        <span className="text-[10px] text-slate-400 shrink-0 uppercase">
+                                          ({c.code})
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        <span className="font-mono text-[11px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                                          {c.callingCode}
+                                        </span>
+                                        {isSelected && (
+                                          <Icon
+                                            name="check"
+                                            className="h-3.5 w-3.5 text-orange-600"
+                                          />
+                                        )}
+                                      </div>
+                                    </button>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <input
+                        type="tel"
+                        value={editPhoneNumber}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditPhoneNumber(val);
+                          if (editPhoneError) {
+                            const check = validatePhone(val, editSelectedCountry.code);
+                            if (check.valid || !val.trim()) {
+                              setEditPhoneError("");
+                            }
+                          }
+                        }}
+                        onBlur={() => {
+                          if (editPhoneNumber.trim()) {
+                            const check = validatePhone(
+                              editPhoneNumber,
+                              editSelectedCountry.code
+                            );
+                            setEditPhoneError(check.valid ? "" : check.error);
+                          }
+                        }}
+                        placeholder={editSelectedCountry.placeholder || "412 345 678"}
+                        className={`flex-1 px-3 py-2 text-sm rounded-lg border bg-white transition outline-none ${
+                          editPhoneError
+                            ? "border-red-400 bg-red-50/20 focus:border-red-500"
+                            : "border-slate-300 text-slate-900 focus:border-orange-600 focus:ring-1 focus:ring-orange-600"
+                        }`}
+                      />
+                    </div>
+                    {editPhoneError ? (
+                      <p className="mt-1 text-xs text-red-500">{editPhoneError}</p>
+                    ) : null}
                   </div>
 
                   <div className="pt-2">

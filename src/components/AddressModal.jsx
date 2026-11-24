@@ -669,13 +669,21 @@ export default function AddressModal({
                     : "border-slate-300 focus-within:border-orange-600 focus-within:ring-1 focus-within:ring-orange-600"
                 }`}
               >
-                <div
-                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border-r border-slate-200 text-xs font-semibold text-slate-700 select-none shrink-0"
-                  title={`${selectedCountry.name} (${selectedCountry.callingCode})`}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCountryDropdownOpen(true);
+                    if (dropdownRef.current) {
+                      dropdownRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border-r border-slate-200 text-xs font-semibold text-slate-700 select-none shrink-0 hover:bg-slate-100 transition cursor-pointer"
+                  title={`${selectedCountry.name} (${selectedCountry.callingCode}) - Click to change country`}
                 >
                   <span className="text-sm leading-none">{selectedCountry.flag}</span>
                   <span className="font-mono text-xs">{selectedCountry.callingCode}</span>
-                </div>
+                  <span className="text-[10px] text-slate-400">▾</span>
+                </button>
                 <input
                   id="phone"
                   type="tel"

@@ -1,17 +1,14 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiPost } from "@/lib/api";
 import Icon from "@/components/Icons";
-
-const COUNTRIES = [
-  { code: "AU", name: "Australia", prefix: "+61", flag: "🇦🇺" },
-  { code: "US", name: "United States", prefix: "+1", flag: "🇺🇸" },
-  { code: "IN", name: "India", prefix: "+91", flag: "🇮🇳" },
-  { code: "GB", name: "United Kingdom", prefix: "+44", flag: "🇬🇧" },
-  { code: "CA", name: "Canada", prefix: "+1", flag: "🇨🇦" },
-  { code: "NZ", name: "New Zealand", prefix: "+64", flag: "🇳🇿" },
-];
+import {
+  ALL_COUNTRIES,
+  DEFAULT_COUNTRY,
+  validatePhone,
+  formatPhoneForSave,
+} from "@/lib/countries";
 
 const LANGUAGES = [
   "English [Default]",
@@ -30,9 +27,88 @@ export default function AdminAddCustomer() {
   const [lastName, setLastName] = useState("");
   const [language, setLanguage] = useState("English [Default]");
   const [email, setEmail] = useState("");
-  const [selectedCountry] = useState(COUNTRIES[0]);
+  const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
   const [marketingEmail, setMarketingEmail] = useState(false);
+
+  const countryDropdownRef = useRef(null);
+  const countrySearchInputRef = useRef(null);
+
+  // Close country dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
+        setIsCountryDropdownOpen(false);
+      }
+    }
+    if (isCountryDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isCountryDropdownOpen]);
+
+  // Focus search input when country dropdown opens
+  useEffect(() => {
+    if (isCountryDropdownOpen && countrySearchInputRef.current) {
+      countrySearchInputRef.current.focus();
+    }
+  }, [isCountryDropdownOpen]);
+
+  // Filter countries for search
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch.trim()) return ALL_COUNTRIES;
+    const q = countrySearch.trim().toLowerCase();
+    const cleanQ = q.startsWith("+") ? q : `+${q}`;
+    return ALL_COUNTRIES.filter((c) => {
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.code.toLowerCase() === q ||
+        c.callingCode === cleanQ ||
+        c.callingCode.includes(q) ||
+        (q === "usa" && c.code === "US") ||
+        (q === "uk" && c.code === "GB")
+      );
+    }).sort((a, b) => {
+      const isUAlias = (c) => (q === "usa" && c.code === "US") || (q === "uk" && c.code === "GB");
+      if (isUAlias(a) && !isUAlias(b)) return -1;
+      if (!isUAlias(a) && isUAlias(b)) return 1;
+      if (a.code.toLowerCase() === q && b.code.toLowerCase() !== q) return -1;
+      if (b.code.toLowerCase() === q && a.code.toLowerCase() !== q) return 1;
+      if (a.callingCode === cleanQ && b.callingCode !== cleanQ) return -1;
+      if (b.callingCode === cleanQ && a.callingCode !== cleanQ) return 1;
+      if (a.name.toLowerCase() === q) return -1;
+      if (b.name.toLowerCase() === q) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [countrySearch]);
+
+  const handleSelectCountry = (country) => {
+    setSelectedCountry(country);
+    setIsCountryDropdownOpen(false);
+    setCountrySearch("");
+    if (phone.trim()) {
+      const check = validatePhone(phone, country.code);
+      setPhoneError(check.valid ? "" : check.error);
+    } else {
+      setPhoneError("");
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const val = e.target.value;
+    setPhone(val);
+    if (phoneError) {
+      const check = validatePhone(val, selectedCountry.code);
+      if (check.valid || !val.trim()) {
+        setPhoneError("");
+      }
+    }
+  };
 
   // Address fields
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -78,11 +154,21 @@ export default function AdminAddCustomer() {
       return;
     }
 
+    if (phone.trim()) {
+      const check = validatePhone(phone, selectedCountry.code);
+      if (!check.valid) {
+        setPhoneError(check.error);
+        return;
+      }
+    }
+
     setSaving(true);
     setError("");
 
     const subscriptionStatus = marketingEmail ? "subscribed" : "not_subscribed";
-    const fullPhone = phone.trim() ? `${selectedCountry.prefix} ${phone.trim()}` : "";
+    const formattedPhone = phone.trim()
+      ? formatPhoneForSave(phone.trim(), selectedCountry.code)
+      : "";
 
     const customerPayload = {
       first_name: firstName.trim(),
@@ -100,30 +186,31 @@ export default function AdminAddCustomer() {
       setSaving(false);
       setError(
         res.formError ||
-          res.fieldErrors?.email ||
-          res.fieldErrors?.first_name ||
-          "Failed to save customer."
+        res.fieldErrors?.email ||
+        res.fieldErrors?.first_name ||
+        "Failed to save customer."
       );
       return;
     }
 
     const createdCustomer = res.data;
 
-    // If an address was specified, save customer address
-    if (addressLine1.trim() && createdCustomer?.id) {
+    // If an address or phone was specified, save customer address so phone is persisted
+    const shouldSaveAddress = Boolean(addressLine1.trim() || formattedPhone);
+    if (shouldSaveAddress && createdCustomer?.id) {
       await apiPost("/api/v1/customers/addresses/", {
         customer: createdCustomer.id,
         address_type: "shipping",
-        first_name: firstName.trim() || "",
-        last_name: lastName.trim() || "",
+        first_name: firstName.trim() || createdCustomer.first_name || "—",
+        last_name: lastName.trim() || createdCustomer.last_name || "—",
         company: company.trim() || "",
-        address_line_1: addressLine1.trim(),
+        address_line_1: addressLine1.trim() || "—",
         address_line_2: addressLine2.trim() || "",
-        city: city.trim(),
-        state: state.trim(),
-        postal_code: postalCode.trim(),
-        country: addressCountry.trim(),
-        phone: fullPhone,
+        city: city.trim() || "—",
+        state: state.trim() || "—",
+        postal_code: postalCode.trim() || "—",
+        country: addressCountry.trim() || selectedCountry.name,
+        phone: formattedPhone,
         is_default: true,
       });
     }
@@ -268,23 +355,113 @@ export default function AdminAddCustomer() {
                     Phone number
                   </label>
                   <div className="flex items-center gap-2">
-                    <div className="relative">
+                    <div className="relative" ref={countryDropdownRef}>
                       <button
                         type="button"
-                        className="flex items-center gap-1.5 h-9.5 px-3 border border-slate-300 rounded-lg bg-white text-sm"
+                        onClick={() => setIsCountryDropdownOpen((prev) => !prev)}
+                        className={`flex items-center gap-1.5 h-9.5 px-3 border rounded-lg bg-white text-sm hover:border-slate-400 focus:outline-none transition cursor-pointer select-none ${isCountryDropdownOpen
+                            ? "border-orange-600 ring-1 ring-orange-600"
+                            : "border-slate-300"
+                          }`}
+                        title={`${selectedCountry.name} (${selectedCountry.callingCode})`}
+                        aria-haspopup="listbox"
+                        aria-expanded={isCountryDropdownOpen}
                       >
-                        <span className="text-base">{selectedCountry.flag}</span>
-                        <span className="text-xs text-slate-400">↕</span>
+                        <span className="text-base leading-none">{selectedCountry.flag}</span>
+                        <span className="font-mono text-xs font-semibold text-slate-700">
+                          {selectedCountry.callingCode}
+                        </span>
+                        <span className="text-xs text-slate-400">▾</span>
                       </button>
+
+                      {isCountryDropdownOpen && (
+                        <div className="absolute left-0 top-full mt-1.5 w-72 max-h-80 bg-white border border-slate-200 rounded-xl shadow-xl z-50 flex flex-col overflow-hidden text-xs">
+                          <div className="p-2 border-b border-slate-100 bg-slate-50 sticky top-0 z-10">
+                            <div className="relative flex items-center">
+                              <span className="absolute left-2.5 text-slate-400 pointer-events-none">
+                                <Icon name="search" className="h-3.5 w-3.5" />
+                              </span>
+                              <input
+                                ref={countrySearchInputRef}
+                                type="text"
+                                value={countrySearch}
+                                onChange={(e) => setCountrySearch(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    if (filteredCountries.length > 0) {
+                                      handleSelectCountry(filteredCountries[0]);
+                                    }
+                                  } else if (e.key === "Escape") {
+                                    setIsCountryDropdownOpen(false);
+                                  }
+                                }}
+                                placeholder="Search country or code..."
+                                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-orange-600 focus:ring-1 focus:ring-orange-600 text-slate-800"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="overflow-y-auto max-h-64 py-1 divide-y divide-slate-50">
+                            {filteredCountries.length === 0 ? (
+                              <div className="py-4 text-center text-slate-400">No countries found</div>
+                            ) : (
+                              filteredCountries.map((c) => {
+                                const isSelected = c.code === selectedCountry.code;
+                                return (
+                                  <button
+                                    key={c.code}
+                                    type="button"
+                                    onClick={() => handleSelectCountry(c)}
+                                    className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-slate-50 transition cursor-pointer ${isSelected
+                                        ? "bg-amber-50/70 font-semibold text-slate-900"
+                                        : "text-slate-700"
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0 pr-2">
+                                      <span className="text-base leading-none shrink-0">{c.flag}</span>
+                                      <span className="truncate">{c.name}</span>
+                                      <span className="text-[10px] text-slate-400 shrink-0 uppercase">
+                                        ({c.code})
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className="font-mono text-[11px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                                        {c.callingCode}
+                                      </span>
+                                      {isSelected && (
+                                        <Icon name="check" className="h-3.5 w-3.5 text-orange-600" />
+                                      )}
+                                    </div>
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
+
                     <input
                       type="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="e.g. 412 345 678"
-                      className="flex-1 px-3.5 py-2 text-sm rounded-lg border border-slate-300 text-slate-900 outline-none focus:border-slate-500 bg-white"
+                      onChange={handlePhoneChange}
+                      onBlur={() => {
+                        if (phone.trim()) {
+                          const check = validatePhone(phone, selectedCountry.code);
+                          setPhoneError(check.valid ? "" : check.error);
+                        }
+                      }}
+                      placeholder={selectedCountry.placeholder || "412 345 678"}
+                      className={`flex-1 px-3.5 py-2 text-sm rounded-lg border bg-white transition outline-none ${phoneError
+                          ? "border-red-400 bg-red-50/20 focus:border-red-500"
+                          : "border-slate-300 text-slate-900 focus:border-orange-600 focus:ring-1 focus:ring-orange-600"
+                        }`}
                     />
                   </div>
+                  {phoneError ? (
+                    <p className="mt-1 text-xs text-red-500">{phoneError}</p>
+                  ) : null}
                 </div>
 
                 {/* Checkboxes */}
