@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
@@ -35,6 +35,47 @@ function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function calculateAspectRatio(width, height) {
+  if (!width || !height) return "";
+  const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+  const d = gcd(width, height);
+  const w = width / d;
+  const h = height / d;
+  const ratio = width / height;
+
+  const standards = [
+    { label: "1:1", val: 1 },
+    { label: "4:5", val: 4 / 5 },
+    { label: "5:4", val: 5 / 4 },
+    { label: "3:4", val: 3 / 4 },
+    { label: "4:3", val: 4 / 3 },
+    { label: "2:3", val: 2 / 3 },
+    { label: "3:2", val: 3 / 2 },
+    { label: "16:9", val: 16 / 9 },
+    { label: "9:16", val: 9 / 16 },
+    { label: "2:1", val: 2 / 1 },
+  ];
+  const standard = standards.find((s) => Math.abs(s.val - ratio) < 0.02);
+  if (standard) return standard.label;
+
+  if (w <= 20 && h <= 20) return `${w}:${h}`;
+  return `${ratio.toFixed(2)}:1`;
+}
+
+function getImageFormat(file, url, name) {
+  if (file?.type) {
+    const subtype = file.type.split("/")[1];
+    if (subtype) return subtype.toUpperCase().replace("JPEG", "JPG");
+  }
+  const target = name || url || "";
+  const extMatch = target.split("?")[0].split("#")[0].match(/\.([a-zA-Z0-9]+)$/);
+  if (extMatch && extMatch[1]) {
+    const ext = extMatch[1].toUpperCase();
+    return ext === "JPEG" ? "JPG" : ext;
+  }
+  return "IMAGE";
 }
 
 function getFilenameFromUrl(url) {
@@ -3227,6 +3268,105 @@ export function ProductForm({ productId }) {
   const replaceFileInputRef = useRef(null);
   const [replacingPhotoId, setReplacingPhotoId] = useState(null);
 
+  // 2.1 Photo metadata & inspection
+  const [imageMetadata, setImageMetadata] = useState({});
+  const [inspectingPhotoId, setInspectingPhotoId] = useState(null);
+  const inspectingPhoto = photos.find((p) => p.id === inspectingPhotoId);
+
+  const loadImageMetadata = useCallback((photo) => {
+    if (!photo?.url) return;
+    const photoId = photo.id;
+
+    setImageMetadata((prev) => {
+      if (prev[photoId]?.width) return prev;
+      return {
+        ...prev,
+        [photoId]: {
+          ...(prev[photoId] || {}),
+          loading: true,
+        },
+      };
+    });
+
+    if (!photo.size && photo.uploadedUrl) {
+      try {
+        fetch(photo.uploadedUrl, { method: "HEAD" })
+          .then((res) => {
+            const cl = res.headers.get("content-length");
+            if (cl) {
+              const bytes = parseInt(cl, 10);
+              if (bytes > 0) {
+                setImageMetadata((prev) => ({
+                  ...prev,
+                  [photoId]: {
+                    ...(prev[photoId] || {}),
+                    size: bytes,
+                  },
+                }));
+              }
+            }
+          })
+          .catch(() => {});
+      } catch {
+        // Ignore CORS/fetch errors silently
+      }
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      const format = getImageFormat(photo.file, photo.url, photo.name);
+      const aspectRatio = calculateAspectRatio(width, height);
+      const size = photo.size || photo.file?.size || null;
+
+      setImageMetadata((prev) => ({
+        ...prev,
+        [photoId]: {
+          ...(prev[photoId] || {}),
+          width,
+          height,
+          format,
+          aspectRatio,
+          size: size || prev[photoId]?.size || null,
+          loading: false,
+        },
+      }));
+    };
+
+    img.onerror = () => {
+      setImageMetadata((prev) => ({
+        ...prev,
+        [photoId]: {
+          ...(prev[photoId] || {}),
+          loading: false,
+          error: "Could not load image dimensions",
+        },
+      }));
+    };
+
+    img.src = photo.url;
+  }, []);
+
+  useEffect(() => {
+    photos.forEach((photo) => {
+      if (!imageMetadata[photo.id] || imageMetadata[photo.id].loading === undefined) {
+        loadImageMetadata(photo);
+      }
+    });
+  }, [photos, loadImageMetadata, imageMetadata]);
+
+  // Clean up object URLs on unmount
+  useEffect(() => {
+    return () => {
+      photos.forEach((p) => {
+        if (p.file && p.url) {
+          URL.revokeObjectURL(p.url);
+        }
+      });
+    };
+  }, [photos]);
+
   // 3 Pricing
   const [price, setPrice] = useState("");
   const [compareAt, setCompareAt] = useState("");
@@ -3587,6 +3727,12 @@ export function ProductForm({ productId }) {
       const photo = prev.find((p) => p.id === id);
       if (photo?.file) URL.revokeObjectURL(photo.url);
       setBrokenImages((b) => b.filter((item) => item !== id));
+      setImageMetadata((m) => {
+        const copy = { ...m };
+        delete copy[id];
+        return copy;
+      });
+      setInspectingPhotoId((curr) => (curr === id ? null : curr));
       return prev.filter((p) => p.id !== id);
     });
 
@@ -3611,9 +3757,14 @@ export function ProductForm({ productId }) {
       const oldPhoto = prev[index];
       if (oldPhoto?.file) URL.revokeObjectURL(oldPhoto.url);
       setBrokenImages((b) => b.filter((item) => item !== id));
+      setImageMetadata((m) => {
+        const copy = { ...m };
+        delete copy[id];
+        return copy;
+      });
 
       const updated = [...prev];
-      updated[index] = {
+      const newPhoto = {
         id: `${file.name}-${file.lastModified}-${Math.random()}`,
         file,
         url: URL.createObjectURL(file),
@@ -3621,6 +3772,8 @@ export function ProductForm({ productId }) {
         name: file.name,
         size: file.size,
       };
+      updated[index] = newPhoto;
+      setInspectingPhotoId((curr) => (curr === id ? newPhoto.id : curr));
       return updated;
     });
   };
@@ -4447,7 +4600,7 @@ export function ProductForm({ productId }) {
                   {/* 2 MEDIA */}
                   <Card
                     title="Media"
-                    hint="Add clear photos of your product. The first photo is the primary cover shoppers see."
+                    hint="Add clear photos of your product (recommended: 1024 × 1280 px, up to 1 MB). The first photo is the primary cover shoppers see."
                     action={
                       <button
                         type="button"
@@ -4537,7 +4690,7 @@ export function ProductForm({ productId }) {
                           Drag and drop images here, or browse files from your computer
                         </p>
                         <p className="mt-0.5 text-[11px] text-slate-400">
-                          Accepted formats: JPG, PNG, WEBP (up to 1MB each)
+                          Accepted formats: JPG, PNG, WEBP • Recommended: 1024 × 1280 px (4:5 ratio, up to 1 MB)
                         </p>
                         <button
                           type="button"
@@ -4571,11 +4724,13 @@ export function ProductForm({ productId }) {
                           return (
                             <div
                               key={photo.id}
-                              className={`group relative aspect-square overflow-hidden rounded-xl border bg-slate-50 transition ${
+                              onClick={() => !isUploading && setInspectingPhotoId(photo.id)}
+                              className={`group relative aspect-square cursor-pointer overflow-hidden rounded-xl border bg-slate-50 transition ${
                                 isCover
                                   ? "border-orange-600 ring-2 ring-ink/15 col-span-2 row-span-2"
                                   : "border-slate-200 hover:border-slate-400"
                               }`}
+                              title="Click to view image information & preview"
                             >
                               {/* Image or Broken fallback */}
                               {isBroken ? (
@@ -4654,52 +4809,71 @@ export function ProductForm({ productId }) {
                                 )}
                               </div>
 
-                              {/* Bottom info banner & action buttons */}
-                              <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end bg-linear-to-t from-brand-navy-500/85 via-brand-navy-500/50 to-transparent p-2.5 text-white">
-                                {/* File information */}
-                                <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium leading-tight text-slate-100">
-                                  <span className="truncate max-w-35" title={photo.name}>
-                                    {photo.name || "image"}
-                                  </span>
-                                  {photo.size && (
-                                    <span className="ml-1 shrink-0 text-[10px] text-slate-300">
-                                      {formatFileSize(photo.size)}
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex flex-wrap items-center justify-end gap-1.5">
-                                  {!isCover && (
-                                    <button
-                                      type="button"
-                                      onClick={() => makeCover(photo.id)}
-                                      disabled={saving}
-                                      className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-charcoal-navy shadow-sm transition disabled:opacity-50"
-                                      title="Set as primary product image"
-                                    >
-                                      Make primary
-                                    </button>
-                                  )}
+                              {/* Hover Action Buttons */}
+                              <div className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-end gap-1.5 p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-linear-to-t from-black/60 to-transparent">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setInspectingPhotoId(photo.id);
+                                  }}
+                                  disabled={saving}
+                                  className="rounded-md bg-white/95 hover:bg-white px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm transition disabled:opacity-50 inline-flex items-center gap-1"
+                                  title="View image details and metadata"
+                                >
+                                  <svg
+                                    className="h-3 w-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  Info
+                                </button>
+                                {!isCover && (
                                   <button
                                     type="button"
-                                    onClick={() => handleStartReplace(photo.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      makeCover(photo.id);
+                                    }}
                                     disabled={saving}
-                                    className="rounded-md bg-white/90 hover:bg-white px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm transition disabled:opacity-50"
-                                    title="Replace with another image"
+                                    className="rounded-md bg-white/95 hover:bg-white px-2 py-1 text-[10px] font-semibold text-charcoal-navy shadow-sm transition disabled:opacity-50"
+                                    title="Set as primary product image"
                                   >
-                                    Replace
+                                    Make primary
                                   </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => removePhoto(photo.id)}
-                                    disabled={saving}
-                                    className="rounded-md bg-red-600/90 hover:bg-red-600 px-2 py-1 text-[10px] font-semibold text-white shadow-sm transition disabled:opacity-50"
-                                    title="Remove this image"
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStartReplace(photo.id);
+                                  }}
+                                  disabled={saving}
+                                  className="rounded-md bg-white/95 hover:bg-white px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm transition disabled:opacity-50"
+                                  title="Replace with another image"
+                                >
+                                  Replace
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removePhoto(photo.id);
+                                  }}
+                                  disabled={saving}
+                                  className="rounded-md bg-red-600/95 hover:bg-red-600 px-2 py-1 text-[10px] font-semibold text-white shadow-sm transition disabled:opacity-50"
+                                  title="Remove this image"
+                                >
+                                  Remove
+                                </button>
                               </div>
                             </div>
                           );
@@ -4782,6 +4956,180 @@ export function ProductForm({ productId }) {
                     )}
                     <FieldError message={fieldErrors.images} />
                   </Card>
+
+                  {/* Image Information / Metadata Modal */}
+                  {inspectingPhoto && (
+                    <Modal
+                      title="Image Information"
+                      onClose={() => setInspectingPhotoId(null)}
+                      wide
+                      footer={
+                        <div className="flex w-full flex-wrap items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {photos[0]?.id !== inspectingPhoto.id && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  makeCover(inspectingPhoto.id);
+                                  setInspectingPhotoId(null);
+                                }}
+                                className={outlineButton}
+                              >
+                                Make primary
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const idToReplace = inspectingPhoto.id;
+                                setInspectingPhotoId(null);
+                                handleStartReplace(idToReplace);
+                              }}
+                              className={outlineButton}
+                            >
+                              Replace image
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const idToRemove = inspectingPhoto.id;
+                                setInspectingPhotoId(null);
+                                removePhoto(idToRemove);
+                              }}
+                              className="h-8 rounded-full border border-red-200 bg-white px-3.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setInspectingPhotoId(null)}
+                            className={primaryButton}
+                          >
+                            Close
+                          </button>
+                        </div>
+                      }
+                    >
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+                        {/* Left Column: Image Preview */}
+                        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-900/5 p-4 md:col-span-6">
+                          <div className="relative flex max-h-[360px] w-full items-center justify-center overflow-hidden rounded-lg">
+                            <img
+                              src={inspectingPhoto.url}
+                              alt={inspectingPhoto.name || "Product image"}
+                              className="max-h-[340px] max-w-full rounded-md object-contain shadow-xs"
+                            />
+                          </div>
+                          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                            {photos[0]?.id === inspectingPhoto.id && (
+                              <span className="rounded-md bg-orange-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
+                                ★ Primary Cover
+                              </span>
+                            )}
+                            {inspectingPhoto.isSaved ? (
+                              <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                                Saved on server
+                              </span>
+                            ) : (
+                              <span className="rounded-md bg-violet-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-xs">
+                                New Upload
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Right Column: Metadata Details */}
+                        <div className="flex flex-col justify-between space-y-4 md:col-span-6">
+                          <div>
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                              File Metadata
+                            </h3>
+                            <div className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-slate-50/60 text-xs">
+                              {/* File Name */}
+                              <div className="flex items-center justify-between px-3.5 py-2.5">
+                                <span className="font-medium text-slate-500">File Name</span>
+                                <span
+                                  className="max-w-[200px] truncate font-semibold text-slate-900"
+                                  title={inspectingPhoto.name}
+                                >
+                                  {inspectingPhoto.name || "image"}
+                                </span>
+                              </div>
+
+                              {/* File Size */}
+                              <div className="flex items-center justify-between px-3.5 py-2.5">
+                                <span className="font-medium text-slate-500">File Size</span>
+                                <div className="text-right">
+                                  <span className="font-semibold text-slate-900">
+                                    {inspectingPhoto.size || imageMetadata[inspectingPhoto.id]?.size
+                                      ? formatFileSize(
+                                          inspectingPhoto.size || imageMetadata[inspectingPhoto.id]?.size
+                                        )
+                                      : inspectingPhoto.isSaved
+                                        ? "Stored on server"
+                                        : "Unknown"}
+                                  </span>
+                                  <span className="block text-[10px] text-slate-400">
+                                    Max recommended: 1 MB
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Dimensions */}
+                              <div className="flex items-center justify-between px-3.5 py-2.5">
+                                <span className="font-medium text-slate-500">Dimensions</span>
+                                <div className="text-right">
+                                  <span className="font-semibold text-slate-900">
+                                    {imageMetadata[inspectingPhoto.id]?.loading ? (
+                                      <span className="text-slate-400">Loading dimensions…</span>
+                                    ) : imageMetadata[inspectingPhoto.id]?.width &&
+                                      imageMetadata[inspectingPhoto.id]?.height ? (
+                                      `${imageMetadata[inspectingPhoto.id].width} × ${imageMetadata[inspectingPhoto.id].height} px`
+                                    ) : (
+                                      <span className="text-slate-400">Unavailable</span>
+                                    )}
+                                  </span>
+                                  <span className="block text-[10px] text-slate-400">
+                                    Recommended: 1024 × 1280 px
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Format */}
+                              <div className="flex items-center justify-between px-3.5 py-2.5">
+                                <span className="font-medium text-slate-500">Format</span>
+                                <span className="inline-flex items-center rounded-md bg-slate-200/80 px-2 py-0.5 font-bold uppercase text-slate-800">
+                                  {imageMetadata[inspectingPhoto.id]?.format ||
+                                    getImageFormat(
+                                      inspectingPhoto.file,
+                                      inspectingPhoto.url,
+                                      inspectingPhoto.name
+                                    )}
+                                </span>
+                              </div>
+
+                              {/* Aspect Ratio */}
+                              <div className="flex items-center justify-between px-3.5 py-2.5">
+                                <span className="font-medium text-slate-500">Aspect Ratio</span>
+                                <div className="text-right">
+                                  <span className="font-semibold text-slate-900">
+                                    {imageMetadata[inspectingPhoto.id]?.aspectRatio ||
+                                      (imageMetadata[inspectingPhoto.id]?.loading
+                                        ? "Calculating…"
+                                        : "—")}
+                                  </span>
+                                  <span className="block text-[10px] text-slate-400">
+                                    Recommended: 4:5
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Modal>
+                  )}
 
                   {/* 3 PRICING */}
                   <Card
