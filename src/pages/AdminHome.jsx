@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, navIcons } from "@/components/AdminSidebar";
 import { apiGet, openStorefront } from "@/lib/api";
@@ -262,7 +262,7 @@ export default function AdminHomePage() {
             {/* GREETING + QUICK ACTIONS */}
             <section>
               <p className="text-sm text-slate-500">{storeName}</p>
-              <h1 className="display mt-3 text-5xl text-ink sm:text-6xl">
+              <h1 className="display mt-3 text-4xl leading-tight text-ink sm:text-6xl">
                 {greeting()}, {firstName}.
                 <span className="block italic text-violet-600">
                   {steps.length ? "Let's get ready to sell." : "Let's keep growing."}
@@ -276,29 +276,36 @@ export default function AdminHomePage() {
               )}
 
               {actions.length > 0 && (
-                <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
-                  {actions.map((action) => (
-                    <Link
-                      key={action.label}
-                      to={action.to || "#"}
-                      state={action.state}
-                      // "View store" opens the store in a new tab (with its "Back to admin" bar)
-                      onClick={
-                        action.storefront
-                          ? (e) => {
-                              e.preventDefault();
-                              openStorefront(action.storefront);
-                            }
-                          : undefined
-                      }
-                      className="group inline-flex items-center gap-2 text-sm font-medium text-ink underline decoration-slate-300 underline-offset-[6px] hover:decoration-ink"
-                    >
-                      <Icon
-                        name={action.icon}
-                        className="h-4 w-4 text-slate-500 group-hover:text-orange-600"
-                      />
-                      {action.label}
-                    </Link>
+                <div className="mt-8 inline-flex w-fit max-w-full flex-wrap items-center rounded-[28px] border border-slate-200 bg-white p-[6px] shadow-sm sm:rounded-full sm:px-[10px]">
+                  {actions.map((action, idx) => (
+                    <Fragment key={action.label}>
+                      {idx > 0 && (
+                        <span
+                          aria-hidden="true"
+                          className="hidden h-5 w-px shrink-0 bg-slate-300 sm:block"
+                        />
+                      )}
+                      <Link
+                        to={action.to || "#"}
+                        state={action.state}
+                        // "View store" opens the store in a new tab (with its "Back to admin" bar)
+                        onClick={
+                          action.storefront
+                            ? (e) => {
+                                e.preventDefault();
+                                openStorefront(action.storefront);
+                              }
+                            : undefined
+                        }
+                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-[18px] py-[12px] text-sm font-medium text-ink hover:bg-slate-50"
+                      >
+                        <Icon
+                          name={action.icon}
+                          className="h-4 w-4 shrink-0 text-slate-500 group-hover:text-orange-600"
+                        />
+                        {action.label}
+                      </Link>
+                    </Fragment>
                   ))}
                 </div>
               )}
@@ -306,47 +313,51 @@ export default function AdminHomePage() {
 
             {/* SETUP LIST */}
             {steps.length > 0 && (
-              <section className="mt-16">
-                <div className="flex items-end justify-between gap-4 border-b border-orange-600 pb-3">
-                  <h2 className="text-lg font-medium">Get your store ready</h2>
+              <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:p-8">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pb-5">
+                  <h2 className="display text-[28px] text-ink sm:text-[32px]">
+                    Get your store ready
+                  </h2>
                   <div className="flex items-center gap-3 text-sm tabular-nums text-slate-600">
                     <span>
                       {doneCount} of {steps.length}
                     </span>
-                    <div className="h-px w-24 bg-slate-300">
+                    <div className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
                       <div
-                        className="h-[3px] -translate-y-px bg-violet-600 transition-[width] duration-500"
+                        className="h-full rounded-full bg-violet-600 transition-[width] duration-500"
                         style={{ width: `${Math.max(progress, 3)}%` }}
                       />
                     </div>
                   </div>
                 </div>
 
-                <ol>
+                <ol className="border-t border-slate-200">
                   {steps.map((step, i) => {
                     const isNext = i === nextIndex;
                     return (
-                      <li key={step.title} className="border-b border-slate-200">
+                      <li
+                        key={step.title}
+                        className="border-b border-slate-200 py-1 last:border-b-0"
+                      >
                         <Link
                           to={step.to}
-                          className="group -mx-3 flex items-center gap-5 rounded-md px-3 py-5 hover:bg-white"
+                          className="group flex items-center gap-3 rounded-2xl px-3 py-4 hover:bg-slate-50 sm:gap-5 sm:px-5"
                         >
                           <span
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs tabular-nums ${
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm tabular-nums ${
                               step.done
                                 ? "bg-violet-600 text-white"
-                                : isNext
-                                  ? "bg-ink text-white"
-                                  : "border border-slate-300 text-slate-500"
+                                : "border border-slate-300 text-slate-500"
                             }`}
                           >
-                            {step.done ? <Icon name="check" className="h-3.5 w-3.5" /> : i + 1}
+                            {step.done ? <Icon name="check" className="h-4 w-4" /> : i + 1}
                           </span>
+                          <span className="hidden h-8 w-px shrink-0 bg-slate-200 sm:block" />
                           <span className={`min-w-0 flex-1 ${step.done ? "opacity-50" : ""}`}>
-                            <span className="block text-[15px] font-medium">{step.title}</span>
+                            <span className="block text-[15px] font-semibold">{step.title}</span>
                             <span className="mt-0.5 block text-sm text-slate-600">{step.help}</span>
                           </span>
-                          <span className="inline-flex items-center gap-1 text-sm text-slate-600 group-hover:text-orange-600">
+                          <span className="inline-flex shrink-0 items-center gap-1 text-sm text-slate-500 group-hover:text-orange-600">
                             {step.done ? "Review" : isNext ? "Start" : ""}
                             <Icon
                               name="arrow"
@@ -362,10 +373,14 @@ export default function AdminHomePage() {
             )}
 
             {/* TIP */}
-            <p className="mt-12 max-w-lg text-sm leading-relaxed text-slate-500">
-              <span className="font-medium text-ink">Tip. </span>
-              {tip}
-            </p>
+            <div className="mt-8 flex items-center gap-4 rounded-2xl border border-violet-100 bg-violet-50/60 px-5 py-4">
+              <Icon name="bulb" className="h-5 w-5 shrink-0 text-violet-600" />
+              <span className="h-8 w-px shrink-0 bg-violet-200" />
+              <p className="text-sm leading-relaxed text-slate-600">
+                <span className="font-semibold text-violet-700">Tip. </span>
+                {tip}
+              </p>
+            </div>
           </div>
         </main>
       </div>
