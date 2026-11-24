@@ -115,9 +115,31 @@ export default function AdminCreateOrder() {
 
   // Form states
   const [items, setItems] = useState([]);
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [shippingAmount, setShippingAmount] = useState(0);
+  const [discountAmount, setDiscountAmount] = useState("");
+  const [shippingAmount, setShippingAmount] = useState("");
   const [deliveryMethod] = useState("");
+
+  // Refs for numeric inputs to prevent scroll stepping
+  const discountInputRef = useRef(null);
+  const shippingInputRef = useRef(null);
+
+  useEffect(() => {
+    const handleWheel = (e) => {
+      // Prevent browser's native number input stepping on mouse wheel or trackpad scroll
+      e.preventDefault();
+    };
+
+    const dEl = discountInputRef.current;
+    const sEl = shippingInputRef.current;
+
+    if (dEl) dEl.addEventListener("wheel", handleWheel, { passive: false });
+    if (sEl) sEl.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      if (dEl) dEl.removeEventListener("wheel", handleWheel);
+      if (sEl) sEl.removeEventListener("wheel", handleWheel);
+    };
+  }, [isDraftMode]);
   const [currency, setCurrency] = useState("AUD");
   const [notes, setNotes] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -552,13 +574,20 @@ export default function AdminCreateOrder() {
                         <div className="flex items-center gap-2">
                           <span>Add discount</span>
                           <input
+                            ref={discountInputRef}
                             type="number"
                             min="0"
                             step="0.01"
-                            value={discountAmount || ""}
-                            onChange={(e) => setDiscountAmount(e.target.value)}
+                            inputMode="decimal"
+                            value={discountAmount}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "" || val === "." || parseFloat(val) >= 0) {
+                                setDiscountAmount(val);
+                              }
+                            }}
                             placeholder="0.00"
-                            className="w-20 px-2 py-0.5 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500"
+                            className="w-28 px-2.5 py-1 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500 transition-colors"
                           />
                         </div>
                         <span>
@@ -572,13 +601,20 @@ export default function AdminCreateOrder() {
                         <div className="flex items-center gap-2">
                           <span>Add shipping or delivery</span>
                           <input
+                            ref={shippingInputRef}
                             type="number"
                             min="0"
                             step="0.01"
-                            value={shippingAmount || ""}
-                            onChange={(e) => setShippingAmount(e.target.value)}
+                            inputMode="decimal"
+                            value={shippingAmount}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "" || val === "." || parseFloat(val) >= 0) {
+                                setShippingAmount(val);
+                              }
+                            }}
                             placeholder="0.00"
-                            className="w-20 px-2 py-0.5 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500"
+                            className="w-28 px-2.5 py-1 text-xs border border-slate-200 rounded text-right outline-none focus:border-slate-500 transition-colors"
                           />
                         </div>
                         <span>
