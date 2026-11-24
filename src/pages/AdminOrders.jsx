@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
-import { useCan, useSession } from "@/lib/auth";
+import { useSession } from "@/lib/auth";
 import Icon from "@/components/Icons";
 
 function formatOrderDate(dateString) {
@@ -127,7 +127,6 @@ function renderFulfillmentStatusBadge(status) {
 export default function AdminOrders() {
   const { id: routeOrderId } = useParams();
   const navigate = useNavigate();
-  const canCreate = useCan("orders.manage");
   const session = useSession();
   const storeId = session?.storeId;
 
@@ -364,55 +363,67 @@ export default function AdminOrders() {
         <AdminSidebar />
 
         {/* MAIN CONTENT AREA */}
-        <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-full overflow-x-hidden">
+        <main className="min-w-0 flex-1 px-4 sm:px-8 py-6 max-w-full">
           {/* TITLE & ACTION BAR */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 mb-6">
             <h1 className="flex items-center gap-2.5 text-[22px] font-bold text-charcoal-navy">
               <PageIcon name="orders" />
               Orders
             </h1>
 
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={handleExport}
-                className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-slate-100 transition cursor-pointer"
-              >
-                Export
-              </button>
-
+            <div className="flex items-center justify-end gap-2.5 flex-wrap sm:flex-nowrap shrink-0 ml-auto sm:ml-0">
               <div className="relative" ref={moreMenuRef}>
                 <button
                   type="button"
                   onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-sm font-medium text-charcoal-navy hover:bg-slate-100 transition cursor-pointer"
+                  className={`inline-flex items-center gap-2 rounded-lg border bg-white px-3.5 py-2 text-sm font-medium transition cursor-pointer shrink-0 whitespace-nowrap shadow-2xs ${
+                    isMoreMenuOpen
+                      ? "border-slate-300 bg-slate-50 text-slate-900"
+                      : "border-slate-300 text-charcoal-navy hover:bg-slate-50 hover:border-slate-400"
+                  }`}
+                  aria-expanded={isMoreMenuOpen}
+                  aria-haspopup="true"
                 >
-                  More actions
-                  <span className="text-xs">⌄</span>
+                  <span>More actions</span>
+                  <svg
+                    className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${
+                      isMoreMenuOpen ? "rotate-180 text-slate-700" : ""
+                    }`}
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </button>
                 {isMoreMenuOpen && (
-                  <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white py-1.5 shadow-lg z-20">
+                  <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg z-50">
                     <Link
                       to="/admin/online-store/orders/drafts"
-                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 transition"
+                      className="flex w-full items-center rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
                       onClick={() => setIsMoreMenuOpen(false)}
                     >
                       Draft orders
                     </Link>
                     <Link
                       to="/admin/online-store/orders/abandoned-checkouts"
-                      className="block px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 transition"
+                      className="flex w-full items-center rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
                       onClick={() => setIsMoreMenuOpen(false)}
                     >
                       Abandoned checkouts
                     </Link>
+                    <div className="my-1 border-t border-slate-100" />
                     <button
                       type="button"
                       onClick={() => {
                         setIsMoreMenuOpen(false);
                         handleExport();
                       }}
-                      className="w-full text-left px-4 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                      className="flex w-full items-center rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
                     >
                       Export CSV
                     </button>
@@ -420,33 +431,31 @@ export default function AdminOrders() {
                 )}
               </div>
 
-              {canCreate && (
-                <Link
-                  to="/admin/online-store/orders/create"
-                  className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 transition"
-                >
-                  Create order
-                </Link>
-              )}
+              <Link
+                to="/admin/online-store/orders/create"
+                className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 transition shrink-0 whitespace-nowrap"
+              >
+                Create order
+              </Link>
             </div>
           </div>
 
           {/* ORDERS TABLE CARD */}
           <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            {/* TABS & SEARCH / FILTER HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 px-4 py-2.5">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg bg-violet-100 px-3.5 py-1.5 text-sm font-medium text-charcoal-navy"
-                >
-                  All
-                </button>
+            {/* SEARCH / FILTER HEADER */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 px-5 py-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-sm font-semibold text-charcoal-navy">Orders</span>
+                {selectedIds.size > 0 && (
+                  <span className="text-xs font-medium text-slate-500">
+                    {selectedIds.size} selected
+                  </span>
+                )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 w-full sm:w-auto min-w-0">
                 {/* Search & Filter Input */}
-                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm">
+                <div className="flex items-center gap-2 w-full sm:w-64 md:w-80 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm min-w-0">
                   <span className="text-slate-400">⌕</span>
                   <input
                     type="text"
@@ -470,21 +479,11 @@ export default function AdminOrders() {
                 <button
                   type="button"
                   title="Table columns"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition"
                 >
                   ▥
                 </button>
               </div>
-            </div>
-
-            {/* SECONDARY HEADER */}
-            <div className="px-5 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
-              <span className="text-sm font-semibold text-charcoal-navy">Orders</span>
-              {selectedIds.size > 0 && (
-                <span className="text-xs font-medium text-slate-500">
-                  {selectedIds.size} selected
-                </span>
-              )}
             </div>
 
             {/* RESPONSIVE TABLE WITH HORIZONTAL SCROLL */}
