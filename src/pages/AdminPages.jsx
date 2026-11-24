@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { RichTextEditor } from "@/pages/AdminAddCollection";
-import { deleteStorePage, listPageTemplates, listStorePages, saveStorePage } from "@/lib/themeApi";
+import {
+  bulkStorePages,
+  deleteStorePage,
+  listPageTemplates,
+  listStorePages,
+  saveStorePage,
+} from "@/lib/themeApi";
 import { announceThemeChange } from "@/lib/themeSync";
 
 // ---------------------------------------------------------------- pages
@@ -101,6 +107,8 @@ export default function AdminPages() {
   const [templates, setTemplates] = useState([]);
   // The search engine listing starts as a summary; the pencil opens its fields
   const [seoOpen, setSeoOpen] = useState(false);
+  // Ids ticked in the list, for the bulk bar
+  const [selected, setSelected] = useState(() => new Set());
 
   useEffect(() => {
     listStorePages()
@@ -119,6 +127,7 @@ export default function AdminPages() {
     setNotice("");
     setForm(page.id ? { ...EMPTY_PAGE, ...page } : EMPTY_PAGE);
     setSeoOpen(false);
+    setSelected(new Set());
   }
 
   async function save(event) {
@@ -156,6 +165,51 @@ export default function AdminPages() {
       setEditing(null);
       setNotice("Page deleted.");
       announceThemeChange("pages");
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const allSelected = !!pages && pages.length > 0 && pages.every((p) => selected.has(p.id));
+
+  function toggleOne(id) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected(allSelected ? new Set() : new Set(pages.map((p) => p.id)));
+  }
+
+  // Set the ticked pages visible / hidden, or delete them, then reload the list
+  async function bulk(action) {
+    const ids = [...selected];
+    if (!ids.length || busy) return;
+    const n = ids.length;
+    const noun = `${n} page${n === 1 ? "" : "s"}`;
+    if (action === "delete" && !window.confirm(`Delete ${noun}? This can't be undone.`)) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const result = await bulkStorePages(ids, action);
+      const done = `${result.count} page${result.count === 1 ? "" : "s"}`;
+      setNotice(
+        action === "delete"
+          ? `${done} deleted.`
+          : `${done} set as ${action === "visible" ? "visible" : "hidden"}.`
+      );
+      setSelected(new Set());
+      setPages(await listStorePages());
+      // An open Customize editor shows the pages in its preview
+      announceThemeChange("pages");
+      if (action === "delete") announceThemeChange("settings");
     } catch (e) {
       setError(e.message);
     } finally {
@@ -234,9 +288,58 @@ export default function AdminPages() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
+                  {selected.size > 0 && (
+                    <div
+                      role="status"
+                      className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-100 px-4 py-2.5"
+                    >
+                      <span className="mr-2 text-sm font-medium">{selected.size} selected</span>
+                      <button
+                        type="button"
+                        onClick={() => bulk("visible")}
+                        disabled={busy}
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium hover:border-orange-600 disabled:opacity-50"
+                      >
+                        Set as visible
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => bulk("hidden")}
+                        disabled={busy}
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium hover:border-orange-600 disabled:opacity-50"
+                      >
+                        Set as hidden
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => bulk("delete")}
+                        disabled={busy}
+                        className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelected(new Set())}
+                        disabled={busy}
+                        className="ml-auto text-sm text-slate-600 underline disabled:opacity-50"
+                      >
+                        Clear selection
+                      </button>
+                    </div>
+                  )}
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead className="border-b border-slate-200 text-[13px] text-slate-600">
                       <tr>
+                        <th className="w-10 py-3 pl-4">
+                          <input
+                            type="checkbox"
+                            aria-label="Select all pages"
+                            checked={allSelected}
+                            onChange={toggleAll}
+                            className="h-4 w-4 accent-orange-600"
+                          />
+                        </th>
                         <th className="px-4 py-3 font-medium">Title</th>
                         <th className="px-4 py-3 font-medium">Visibility</th>
                         <th className="hidden px-4 py-3 font-medium sm:table-cell">Address</th>
@@ -248,8 +351,17 @@ export default function AdminPages() {
                         <tr
                           key={page.id}
                           onClick={() => open(page)}
-                          className="cursor-pointer border-b border-[rgba(24,24,27,0.06)] last:border-0 hover:bg-slate-100"
+                          className={`cursor-pointer border-b border-[rgba(24,24,27,0.06)] last:border-0 hover:bg-slate-100 ${selected.has(page.id) ? "bg-slate-100" : ""}`}
                         >
+                          <td className="w-10 py-3 pl-4" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              aria-label={`Select ${page.title}`}
+                              checked={selected.has(page.id)}
+                              onChange={() => toggleOne(page.id)}
+                              className="h-4 w-4 accent-orange-600"
+                            />
+                          </td>
                           <td className="px-4 py-3 font-medium">{page.title}</td>
                           <td className="px-4 py-3">
                             <span

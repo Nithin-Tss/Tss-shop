@@ -220,6 +220,11 @@ export function deleteStorePage(id) {
   return apiRequest(`${BASE}/pages/${id}/`, { method: "DELETE" });
 }
 
+// Change many pages at once: action "visible" | "hidden" | "delete" -> { action, count, skipped }
+export function bulkStorePages(ids, action) {
+  return apiRequest(`${BASE}/pages/bulk/`, { method: "POST", body: { ids, action } });
+}
+
 // Menus -> [{ id, name, handle, items: [...], items_summary, items_count }]
 export function listMenus() {
   return apiRequest(`${BASE}/menus/`);
