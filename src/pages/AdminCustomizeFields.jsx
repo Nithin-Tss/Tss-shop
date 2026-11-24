@@ -1,4 +1,4 @@
-import { createContext, memo, useContext, useEffect, useRef, useState } from "react";
+import { createContext, memo, useContext, useEffect, useId, useRef, useState } from "react";
 
 import LinkField, { collectionLabel } from "@/components/LinkField";
 import { getEditingThemeId } from "@/lib/editingTheme";
@@ -1441,6 +1441,123 @@ export function blockTitle(block, blockSpec, i) {
   return text ? `${blockSpec.name}: ${text}` : `${blockSpec.name} ${i + 1}`;
 }
 
+// A search box over a short list (Add section, Add block). Typing filters, Arrow keys move,
+// Enter picks, Escape closes. items: [{ key, name, disabled?, title? }]. It takes focus when it opens (autoFocus).
+export function SearchPicker({
+  label,
+  items,
+  onPick,
+  onClose,
+  autoFocus = true,
+  emptyText = "Nothing matches.",
+}) {
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
+  const inputRef = useRef(null);
+  const listId = useId();
+
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
+
+  const q = query.trim().toLowerCase();
+  const shown = q
+    ? items.filter((i) => i.name.toLowerCase().includes(q) || i.key.toLowerCase().includes(q))
+    : items;
+  const current = Math.min(active, Math.max(shown.length - 1, 0));
+  const optionId = (i) => `${listId}-${i}`;
+
+  useEffect(() => {
+    document.getElementById(`${listId}-${current}`)?.scrollIntoView?.({ block: "nearest" });
+  }, [current, listId, q]);
+
+  // The next enabled row in a direction (wrapping), so disabled rows are skipped
+  function step(delta) {
+    if (!shown.length) return;
+    for (let n = 1; n <= shown.length; n++) {
+      const i = (current + delta * n + shown.length * n) % shown.length;
+      if (!shown[i].disabled) {
+        setActive(i);
+        return;
+      }
+    }
+  }
+
+  function onKeyDown(e) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      step(1);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      step(-1);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const item = shown[current];
+      if (item && !item.disabled) onPick(item.key);
+    } else if (e.key === "Escape") {
+      // Closes only the picker: the customizer's own Escape (back one level) is skipped
+      e.preventDefault();
+      onClose?.();
+    }
+  }
+
+  return (
+    <div>
+      <input
+        ref={inputRef}
+        type="text"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls={listId}
+        aria-autocomplete="list"
+        aria-activedescendant={shown.length ? optionId(current) : undefined}
+        aria-label={label}
+        placeholder={label}
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setActive(0);
+        }}
+        onKeyDown={onKeyDown}
+        className="mb-1.5 h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-sm outline-none focus:border-orange-600"
+      />
+
+      <div
+        id={listId}
+        role="listbox"
+        aria-label={label}
+        className="grid max-h-60 grid-cols-2 gap-1.5 overflow-y-auto"
+      >
+        {shown.map((item, i) => (
+          <div
+            key={item.key}
+            id={optionId(i)}
+            role="option"
+            aria-selected={i === current}
+            aria-disabled={item.disabled || undefined}
+            title={item.title}
+            // The click must not take focus from the search box
+            onMouseDown={(e) => e.preventDefault()}
+            onMouseEnter={() => !item.disabled && setActive(i)}
+            onClick={() => !item.disabled && onPick(item.key)}
+            className={`cursor-pointer truncate rounded-md border bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy ${
+              i === current && !item.disabled
+                ? "border-orange-600 ring-1 ring-orange-600"
+                : "border-slate-200"
+            } ${item.disabled ? "cursor-not-allowed opacity-40" : ""}`}
+          >
+            {item.name}
+          </div>
+        ))}
+      </div>
+
+      <p role="status" className={shown.length ? "sr-only" : "px-1 pt-1 text-xs text-slate-600"}>
+        {shown.length ? `${shown.length} result${shown.length === 1 ? "" : "s"}` : emptyText}
+      </p>
+    </div>
+  );
+}
+
 // The blocks of a section: add any type, open one to edit it, drag to reorder or onto another section
 export function SectionBlocks({
   sectionId,
@@ -1469,6 +1586,8 @@ export function SectionBlocks({
 
   const [menu, setMenu] = useState(false);
 
+  const [at, setAt] = useState(null);
+
   const full = blocks.length >= spec.max_blocks;
 
   // Some types have their own limit (e.g. at most 8 slides)
@@ -1476,12 +1595,15 @@ export function SectionBlocks({
     spec.type_limits?.[type] !== undefined &&
     blocks.filter((b) => b.type === type).length >= spec.type_limits[type];
 
-  function add(type, blockSpec) {
+  function add(type) {
+    const blockSpec = spec.blocks[type];
+    const index = at !== null && at < blocks.length ? at + 1 : blocks.length;
     onChange((list) =>
-      list.push({ type, hidden: false, settings: defaultsOf(blockSpec.settings) })
+      list.splice(index, 0, { type, hidden: false, settings: defaultsOf(blockSpec.settings) })
     );
     setMenu(false);
-    onOpen(blocks.length);
+    setAt(null);
+    onOpen(index);
   }
 
   function move(i, delta) {
@@ -1506,7 +1628,10 @@ export function SectionBlocks({
           type="button"
           className={smallButton}
           disabled={full}
-          onClick={() => setMenu((v) => !v)}
+          onClick={() => {
+            setAt(null);
+            setMenu((v) => !v);
+          }}
           aria-expanded={menu}
         >
           + Add block
@@ -1514,27 +1639,31 @@ export function SectionBlocks({
       </div>
 
       {menu && (
-        <div
-          className="mb-3 grid grid-cols-2 gap-1.5 rounded-lg border border-slate-200 bg-slate-100 p-2"
-          role="menu"
-        >
-          {types.map(([type, blockSpec]) => (
-            <button
-              key={type}
-              type="button"
-              role="menuitem"
-              disabled={atLimit(type)}
-              title={
-                atLimit(type)
-                  ? `Up to ${spec.type_limits[type]} ${blockSpec.name.toLowerCase()}s`
-                  : undefined
-              }
-              onClick={() => add(type, blockSpec)}
-              className="truncate rounded-md border border-slate-200 bg-white px-2 py-1.5 text-left text-xs text-charcoal-navy hover:border-orange-600 disabled:opacity-40 disabled:hover:border-slate-200"
-            >
-              {blockSpec.name}
-            </button>
-          ))}
+        <div className="mb-3 rounded-lg border border-slate-200 bg-slate-100 p-2">
+          {at !== null && blocks[at] && (
+            <p className="mb-1.5 text-[11px] text-slate-500">
+              Adding after {spec.blocks[blocks[at].type]?.name}
+            </p>
+          )}
+          {full && (
+            <p className="mb-1.5 text-[11px] text-slate-600">
+              This section has the most blocks it can hold ({spec.max_blocks}).
+            </p>
+          )}
+          <SearchPicker
+            label="Search blocks"
+            emptyText="No block matches."
+            items={types.map(([type, blockSpec]) => ({
+              key: type,
+              name: blockSpec.name,
+              disabled: full || atLimit(type),
+              title: atLimit(type)
+                ? `Up to ${spec.type_limits[type]} ${blockSpec.name.toLowerCase()}s`
+                : undefined,
+            }))}
+            onPick={add}
+            onClose={() => setMenu(false)}
+          />
         </div>
       )}
 

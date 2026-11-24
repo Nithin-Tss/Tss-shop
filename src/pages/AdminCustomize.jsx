@@ -53,6 +53,7 @@ import {
   ThemeLink,
   GroupedFields,
   SectionBlocks,
+  SearchPicker,
   GroupChildren,
   CardChildren,
   EyeIcon,
@@ -2369,7 +2370,7 @@ export default function AdminCustomizePage() {
     });
   }
 
-  function insertSection(section) {
+  function insertSection(section, afterId = null) {
     if (template.order.length >= MAX_SECTIONS) {
       setError(`A page can have up to ${MAX_SECTIONS} sections.`);
       return null;
@@ -2378,8 +2379,11 @@ export default function AdminCustomizePage() {
     const id = newSectionId(section.type);
 
     update((d) => {
-      d.templates[page].sections[id] = section;
-      d.templates[page].order.push(id);
+      const t = d.templates[page];
+      t.sections[id] = section;
+      const at = afterId ? t.order.indexOf(afterId) : -1;
+      if (at === -1) t.order.push(id);
+      else t.order.splice(at + 1, 0, id);
     });
 
     setSelected(id);
@@ -3504,22 +3508,24 @@ export default function AdminCustomizePage() {
 
                                 {templateTypes.length > 0 && (
                                   <>
-                                    <p className="mt-3 text-[11px] text-slate-600">
+                                    <p className="mt-3 mb-1.5 text-[11px] text-slate-600">
                                       Or start from a template:
                                     </p>
 
-                                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                      {templateTypes.map(([type, spec]) => (
-                                        <button
-                                          key={type}
-                                          type="button"
-                                          onClick={() => addTemplateSection(type)}
-                                          className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-violet-600 hover:border-orange-600 hover:text-orange-600"
-                                        >
-                                          {spec.name}
-                                        </button>
-                                      ))}
-                                    </div>
+                                    <SearchPicker
+                                      label="Search sections"
+                                      autoFocus={false}
+                                      emptyText="No section matches."
+                                      items={templateTypes.map(([type, spec]) => ({
+                                        key: type,
+                                        name: spec.name,
+                                      }))}
+                                      onPick={addTemplateSection}
+                                      onClose={() => {
+                                        setAdding(false);
+                                        setNewName("");
+                                      }}
+                                    />
                                   </>
                                 )}
                               </div>

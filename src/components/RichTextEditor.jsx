@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { apiUpload } from "@/lib/api";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { apiRequest, apiUpload } from "@/lib/api";
+import { listBlogPosts, listStorePages } from "@/lib/themeApi";
 import Icon from "@/components/Icons";
+import LinkField from "@/components/LinkField";
 
 // Strip HTML tags for character counting and plain text preview
 export const plainText = (html) =>
@@ -110,9 +113,11 @@ function formatVideoEmbed(url) {
   const ytMatch = trimmed.match(
     /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i
   );
+  // YouTube / Vimeo: only the tag and attributes the storefront keeps (src, title, width, height), because it
+  // removes style and class. The page's own CSS sizes the frame, so the editor and the storefront match.
   if (ytMatch && ytMatch[1]) {
     const videoId = ytMatch[1];
-    return `<div class="responsive-video my-3" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;border-radius:8px;"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:8px;"></iframe></div>`;
+    return `<p><iframe src="https://www.youtube.com/embed/${videoId}" width="560" height="315" title="YouTube video" allowfullscreen></iframe></p>`;
   }
 
   const vimeoMatch = trimmed.match(
@@ -120,7 +125,7 @@ function formatVideoEmbed(url) {
   );
   if (vimeoMatch && vimeoMatch[3]) {
     const videoId = vimeoMatch[3];
-    return `<div class="responsive-video my-3" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;border-radius:8px;"><iframe src="https://player.vimeo.com/video/${videoId}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:8px;"></iframe></div>`;
+    return `<p><iframe src="https://player.vimeo.com/video/${videoId}" width="560" height="315" title="Vimeo video" allowfullscreen></iframe></p>`;
   }
 
   if (/\.(mp4|webm|ogg)($|\?)/i.test(trimmed)) {
@@ -153,6 +158,37 @@ function generateTableHtml(rows = 3, cols = 3, hasHeader = true) {
   return html;
 }
 
+// Give an existing table another size, keeping what is already typed in the cells that stay
+function resizeTable(table, rows, cols) {
+  const sample = table.querySelector("td") || table.rows[0]?.cells[0];
+  const cellStyle = sample ? sample.style.cssText : "";
+
+  Array.from(table.rows).forEach((tr) => {
+    while (tr.cells.length > cols) tr.deleteCell(tr.cells.length - 1);
+    while (tr.cells.length < cols) {
+      const model = tr.cells[tr.cells.length - 1];
+      const isHead = model?.nodeName === "TH";
+      const cell = document.createElement(isHead ? "th" : "td");
+      cell.style.cssText = model ? model.style.cssText : cellStyle;
+      cell.innerHTML = isHead ? `Header ${tr.cells.length + 1}` : "<br>";
+      tr.appendChild(cell);
+    }
+  });
+
+  while (table.rows.length > rows && table.rows.length > 1) {
+    table.deleteRow(table.rows.length - 1);
+  }
+  while (table.rows.length < rows) {
+    const tbody = table.tBodies[0] || table.appendChild(document.createElement("tbody"));
+    const tr = tbody.insertRow();
+    for (let c = 0; c < cols; c++) {
+      const td = tr.insertCell();
+      td.style.cssText = cellStyle;
+      td.innerHTML = "<br>";
+    }
+  }
+}
+
 // Helper to inspect current table context around cursor
 function getTableContext(node) {
   let curr = node;
@@ -167,6 +203,222 @@ function getTableContext(node) {
   }
   return null;
 }
+
+// ---- "/" slash menu ----
+// id is what runs; keys are extra words the typed text can match ("/h2", "/ul", "/youtube").
+const SLASH_ITEMS = [
+  { id: "h2", name: "Heading 2", hint: "Large section heading", keys: "heading h2 title" },
+  { id: "h3", name: "Heading 3", hint: "Smaller heading", keys: "heading h3 subtitle" },
+  { id: "p", name: "Paragraph", hint: "Plain text", keys: "text p body" },
+  { id: "image", name: "Image", hint: "Upload or link a picture", keys: "image img picture photo" },
+  { id: "button", name: "Button", hint: "Text with a link", keys: "button cta link" },
+  { id: "ul", name: "Bulleted list", hint: "List with bullets", keys: "bullets ul list unordered" },
+  { id: "ol", name: "Numbered list", hint: "List with numbers", keys: "ol list ordered numbers" },
+  { id: "quote", name: "Quote", hint: "Highlighted quotation", keys: "quote blockquote citation" },
+  {
+    id: "divider",
+    name: "Divider",
+    hint: "A horizontal line",
+    keys: "divider hr line rule separator",
+  },
+  { id: "table", name: "Table", hint: "Rows and columns", keys: "table grid" },
+  { id: "video", name: "Video", hint: "YouTube or Vimeo link", keys: "video youtube vimeo embed" },
+  { id: "spacer", name: "Spacer", hint: "Empty space", keys: "spacer space gap blank" },
+];
+
+function filterSlashItems(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return SLASH_ITEMS;
+  return SLASH_ITEMS.filter(
+    (item) =>
+      item.name.toLowerCase().includes(q) || item.keys.split(" ").some((k) => k.startsWith(q))
+  );
+}
+
+const BLOCK_TAGS = new Set([
+  "P",
+  "DIV",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "LI",
+  "BLOCKQUOTE",
+  "TD",
+  "TH",
+  "PRE",
+]);
+
+// The line (block element) a node is in, or the editor itself when text sits straight in it
+function blockOf(node, editor) {
+  let n = node;
+  while (n && n !== editor) {
+    if (n.nodeType === 1 && BLOCK_TAGS.has(n.tagName)) return n;
+    n = n.parentNode;
+  }
+  return editor;
+}
+
+// ---- Form controls in the content ----
+// Inputs, textareas, selects and buttons that are part of the page content (a contact form) sit inside the page
+// editor's own <form>, so the browser would check their `required` and submit them with Save. While they are in
+// the editor they are cut loose from every form (form="..." pointing at nothing); the saved HTML gets its own
+// markup back, byte for byte.
+const CONTROL_SELECTOR = "input,textarea,select,button,fieldset,output";
+const DETACHED = "data-tss-detached";
+
+function detachControls(root) {
+  if (!root) return;
+  root.querySelectorAll(CONTROL_SELECTOR).forEach((el) => {
+    if (el.hasAttribute(DETACHED)) return;
+    el.setAttribute(DETACHED, el.hasAttribute("form") ? `=${el.getAttribute("form")}` : "-");
+    el.setAttribute("form", "tss-content-controls-detached");
+  });
+}
+
+// The editor's content as it is saved: controls back to their original markup
+function readHtml(root) {
+  if (!root) return "";
+  if (!root.querySelector(`[${DETACHED}]`)) return root.innerHTML;
+  const clone = root.cloneNode(true);
+  clone.querySelectorAll(`[${DETACHED}]`).forEach((el) => {
+    const original = el.getAttribute(DETACHED);
+    if (original.startsWith("=")) el.setAttribute("form", original.slice(1));
+    else el.removeAttribute("form");
+    el.removeAttribute(DETACHED);
+  });
+  return clone.innerHTML;
+}
+
+// ---- Positions and inserted blocks ----
+const nodeLength = (n) => (n.nodeType === 3 ? n.data.length : n.childNodes.length);
+
+// Child indexes from root down to node (survives the editor's HTML being rewritten into the same shape)
+function pathTo(node, root) {
+  const path = [];
+  let n = node;
+  while (n && n !== root) {
+    const p = n.parentNode;
+    if (!p) return null;
+    path.unshift(Array.prototype.indexOf.call(p.childNodes, n));
+    n = p;
+  }
+  return n === root ? path : null;
+}
+
+function nodeAtPath(root, path) {
+  let n = root;
+  for (const i of path || []) {
+    n = n?.childNodes[i];
+    if (!n) return null;
+  }
+  return n;
+}
+
+const isBlank = (n) =>
+  n.nodeType === 3 ? !n.data.replace(/[\s\u200b]/g, "") : n.nodeName === "BR";
+const onlyChild = (parent, el) =>
+  Array.from(parent.childNodes).every((n) => n === el || isBlank(n));
+// A layout box (column, card): blocks inside it can be moved like blocks in the editor itself
+const isLayoutBox = (n) => n.nodeName === "DIV" && !n.classList.contains("responsive-video");
+
+function blockKind(el) {
+  switch (el.nodeName) {
+    case "A":
+      return el.classList.contains("button") ? "button" : null;
+    case "IMG":
+      return "image";
+    case "IFRAME":
+    case "VIDEO":
+      return "video";
+    case "TABLE":
+      return "table";
+    case "HR":
+      return "divider";
+    default:
+      return null;
+  }
+}
+
+// What moves with a block: its own line when it is alone on it (<p><a class="button"></p>), else the element
+function unitFor(el) {
+  const p = el.parentNode;
+  if (
+    p &&
+    (p.nodeName === "P" || (p.nodeName === "DIV" && p.classList.contains("responsive-video"))) &&
+    onlyChild(p, el)
+  ) {
+    return p;
+  }
+  return el;
+}
+
+// The inserted block (button, image, video, table, divider) a node is in, if it sits on a line of its own
+// in the editor or in a layout box
+function findBlock(node, editor) {
+  let n = node && node.nodeType === 3 ? node.parentNode : node;
+  while (n && n !== editor && editor.contains(n)) {
+    if (blockKind(n)) {
+      const c = unitFor(n).parentNode;
+      if (c === editor || (c && isLayoutBox(c) && editor.contains(c))) return n;
+    }
+    n = n.parentNode;
+  }
+  return null;
+}
+
+// The line (child of the editor or of a layout box) a node is in: where a dragged block can land beside
+function lineAt(el, editor) {
+  let n = el;
+  while (n && n !== editor) {
+    const p = n.parentNode;
+    if (p === editor || (p && isLayoutBox(p) && editor.contains(p))) return n;
+    n = p;
+  }
+  return null;
+}
+
+const isLineEdge = (n) => !n || n.nodeName === "BR" || BLOCK_TAGS.has(n.nodeName);
+
+// "/" opens the menu only at the start of an empty line, or after a space, with nothing after the cursor
+function slashAllowed(editor) {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount || !sel.isCollapsed) return false;
+  const { startContainer: node, startOffset: offset } = sel.getRangeAt(0);
+  if (!editor.contains(node)) return false;
+
+  const block = blockOf(node, editor);
+  if (block === editor) {
+    // Text typed straight into the editor (no paragraph yet): judge by its own text node
+    if (node === editor) return editor.textContent.trim() === "";
+    if (node.nodeType !== 3) return false;
+    const before = node.data.slice(0, offset);
+    const startOk = before === "" ? isLineEdge(node.previousSibling) : /\s$/.test(before);
+    return startOk && node.data.slice(offset) === "" && isLineEdge(node.nextSibling);
+  }
+
+  const head = document.createRange();
+  head.setStart(block, 0);
+  head.setEnd(node, offset);
+  const tail = document.createRange();
+  tail.setStart(node, offset);
+  tail.setEnd(block, block.childNodes.length);
+  const before = head.toString();
+  return (before === "" || /\s$/.test(before)) && tail.toString() === "";
+}
+
+const escapeHtml = (text) =>
+  String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+// The storefront keeps only class="button" on a link (its theme styles it); the inline style is for this editor
+const BUTTON_STYLE =
+  "display:inline-block;padding:10px 20px;background:#111827;color:#ffffff;border-radius:6px;font-weight:600;text-decoration:none;";
 
 const PRESET_COLORS = [
   { name: "Default (Black)", color: "#111827" },
@@ -283,18 +535,95 @@ export default function RichTextEditor({
   // Video form state
   const [videoUrl, setVideoUrl] = useState("");
 
+  // "/" slash menu: { query, left, top | bottom } while open (slashRef holds the typed "/text" node and offset)
+  const [slashMenu, setSlashMenu] = useState(null);
+  const [slashActive, setSlashActive] = useState(0);
+  const slashRef = useRef(null);
+  const pendingSlashRef = useRef(false);
+  const slashListId = useId();
+
+  // Button form state (the "/" Button block)
+  const [showButtonModal, setShowButtonModal] = useState(false);
+  const [buttonText, setButtonText] = useState("");
+  const [buttonUrl, setButtonUrl] = useState("");
+  const [buttonError, setButtonError] = useState("");
+  const [linkData, setLinkData] = useState({ collections: [], products: [], pages: [], posts: [] });
+  const linkDataLoadedRef = useRef(false);
+
+  // The link being edited in the link dialog, so Update keeps it (and a button's look) instead of nesting a new one
+  const linkAnchorRef = useRef(null);
+
   // Table form state
   const [tableRows, setTableRows] = useState(3);
   const [tableCols, setTableCols] = useState(3);
   const [tableHasHeader, setTableHasHeader] = useState(true);
 
+  // Where an inserted block goes while a dialog is open: the cursor (or selection) as it was when the dialog
+  // opened, kept as nodes + child-index paths so it is not a live Range the browser can move to the top
+  const insertPointRef = useRef(null);
+
+  // Inserted blocks (button, image, video, table, divider): hover / caret shows a small toolbar on them
+  const canvasRef = useRef(null);
+  const blockBarRef = useRef(null);
+  const hideTimerRef = useRef(null);
+  const [hoverBlock, setHoverBlock] = useState(null);
+  const [selectedBlock, setSelectedBlock] = useState(null);
+  const [blockTick, setBlockTick] = useState(0);
+  const [barPos, setBarPos] = useState(null);
+  const [dropLine, setDropLine] = useState(null);
+
+  // Whether a dialog edits an existing block (Edit on the block toolbar) or inserts a new one; the block itself is in
+  // editingElRef, so no state value is ever mutated
+  const [editing, setEditing] = useState(false);
+  const editingElRef = useRef(null);
+  const clearEditing = () => {
+    editingElRef.current = null;
+    setEditing(false);
+  };
+  // Closing a dialog by any route puts the dialogs back to "insert" mode
+  const closeLinkModal = () => {
+    closeLinkModal();
+    clearEditing();
+  };
+  const closeImageModal = () => {
+    closeImageModal();
+    clearEditing();
+  };
+  const closeVideoModal = () => {
+    closeVideoModal();
+    clearEditing();
+  };
+  const closeButtonModal = () => {
+    closeButtonModal();
+    clearEditing();
+  };
+  const closeTableModal = () => {
+    closeTableModal();
+    clearEditing();
+  };
+
+  // Undo history of the editor's HTML (typing is grouped); block moves, alignment and deletes are DOM changes the
+  // browser's own undo does not track, so Ctrl+Z / Ctrl+Y use this instead
+  const historyRef = useRef({ stack: [], index: -1, time: 0 });
+
+  const resetHistory = () => {
+    const ed = editorRef.current;
+    historyRef.current = {
+      stack: ed ? [{ html: readHtml(ed), caret: null, typing: false }] : [],
+      index: ed ? 0 : -1,
+      time: 0,
+    };
+  };
+
   // Synchronize incoming value into editor (only when value differs from what we emitted)
   useEffect(() => {
     if (editorRef.current && value !== lastEmittedRef.current) {
-      if (editorRef.current.innerHTML !== (value || "")) {
+      if (readHtml(editorRef.current) !== (value || "")) {
         editorRef.current.innerHTML = value || "";
       }
+      detachControls(editorRef.current);
       lastEmittedRef.current = value;
+      resetHistory();
     }
   }, [value]);
 
@@ -307,15 +636,100 @@ export default function RichTextEditor({
     };
   }, [imagePreview]);
 
+  // Push the current HTML on the undo history (consecutive typing within a second is one step)
+  const recordHistory = (typing) => {
+    const ed = editorRef.current;
+    if (!ed) return;
+    const h = historyRef.current;
+    const html = readHtml(ed);
+    const current = h.stack[h.index];
+    if (current && current.html === html) return;
+
+    const sel = window.getSelection();
+    const caret =
+      sel && sel.anchorNode && ed.contains(sel.anchorNode)
+        ? { path: pathTo(sel.anchorNode, ed), offset: sel.anchorOffset }
+        : null;
+    const entry = { html, caret, typing };
+    const now = Date.now();
+
+    if (typing && current?.typing && h.index === h.stack.length - 1 && now - h.time < 1000) {
+      h.stack[h.index] = entry;
+    } else {
+      h.stack = h.stack.slice(0, h.index + 1);
+      h.stack.push(entry);
+      if (h.stack.length > 100) h.stack.shift();
+      h.index = h.stack.length - 1;
+    }
+    h.time = now;
+  };
+
   // Emit changes to parent
-  const emit = useCallback(() => {
-    if (!editorRef.current) return;
-    const html = editorRef.current.innerHTML;
-    // Don't emit placeholder breaks
-    const normalized = html === "<p><br></p>" || html === "<br>" ? "" : html;
+  const emit = useCallback(
+    (typing = false) => {
+      if (!editorRef.current) return;
+      // Controls typed, pasted or inserted into the content are cut loose from the page form too
+      detachControls(editorRef.current);
+      const html = readHtml(editorRef.current);
+      // Don't emit placeholder breaks
+      const normalized = html === "<p><br></p>" || html === "<br>" ? "" : html;
+      lastEmittedRef.current = normalized;
+      recordHistory(typing === true);
+      setBlockTick((t) => t + 1);
+      onChange(normalized);
+    },
+    [onChange]
+  );
+
+  const stepHistory = (dir) => {
+    const ed = editorRef.current;
+    const h = historyRef.current;
+    const next = h.index + dir;
+    if (!ed || next < 0 || next >= h.stack.length) return;
+    const entry = h.stack[next];
+    h.index = next;
+    ed.innerHTML = entry.html;
+    detachControls(ed);
+
+    const sel = window.getSelection();
+    const range = document.createRange();
+    const node = entry.caret ? nodeAtPath(ed, entry.caret.path) : null;
+    if (node) {
+      range.setStart(node, Math.min(entry.caret.offset, nodeLength(node)));
+      range.collapse(true);
+    } else {
+      range.selectNodeContents(ed);
+      range.collapse(false);
+    }
+    ed.focus();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const normalized = entry.html === "<p><br></p>" || entry.html === "<br>" ? "" : entry.html;
     lastEmittedRef.current = normalized;
+    setHoverBlock(null);
+    setSelectedBlock(null);
+    setBlockTick((t) => t + 1);
     onChange(normalized);
-  }, [onChange]);
+  };
+
+  // Right-click / menu / browser Undo and Redo go through the same history
+  useEffect(() => {
+    const ed = editorRef.current;
+    if (!ed) return undefined;
+    const onBeforeInput = (e) => {
+      if (e.inputType === "historyUndo") {
+        e.preventDefault();
+        stepHistory(-1);
+      } else if (e.inputType === "historyRedo") {
+        e.preventDefault();
+        stepHistory(1);
+      }
+    };
+    ed.addEventListener("beforeinput", onBeforeInput);
+    return () => ed.removeEventListener("beforeinput", onBeforeInput);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSourceView, onChange]);
 
   // Save selection before opening any dialog or clicking buttons
   const saveSelection = useCallback(() => {
@@ -394,6 +808,18 @@ export default function RichTextEditor({
   const handleSelectionChange = useCallback(() => {
     saveSelection();
     updateActiveStates();
+
+    // The block the caret is in (or the one selected) gets the block toolbar; focus elsewhere keeps it
+    const ed = editorRef.current;
+    const sel = window.getSelection();
+    if (ed && sel && sel.anchorNode && ed.contains(sel.anchorNode)) {
+      let target = sel.anchorNode;
+      if (!sel.isCollapsed && target.nodeType === 1) {
+        const child = target.childNodes[sel.anchorOffset];
+        if (child && child.nodeType === 1) target = child;
+      }
+      setSelectedBlock(findBlock(target, ed));
+    }
   }, [saveSelection, updateActiveStates]);
 
   useEffect(() => {
@@ -407,6 +833,11 @@ export default function RichTextEditor({
   const exec = (command, arg = null) => {
     if (isSourceView) return;
     closeAllDropdowns();
+
+    if (command === "undo" || command === "redo") {
+      stepHistory(command === "undo" ? -1 : 1);
+      return;
+    }
 
     const sel = window.getSelection();
     const hasFocusInEditor =
@@ -426,26 +857,106 @@ export default function RichTextEditor({
     updateActiveStates();
   };
 
-  // Insert arbitrary HTML at the saved or current selection
+  // Remember where a dialog's content goes: the current cursor / selection in the editor (or the last saved
+  // one). Nodes and paths, not a live Range, so the browser cannot move it to the top meanwhile.
+  const captureInsertPoint = () => {
+    const ed = editorRef.current;
+    if (!ed) return;
+    const sel = window.getSelection();
+    let range = null;
+    if (sel && sel.rangeCount > 0 && ed.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+      range = sel.getRangeAt(0);
+    } else if (
+      savedRangeRef.current &&
+      ed.contains(savedRangeRef.current.commonAncestorContainer)
+    ) {
+      range = savedRangeRef.current;
+    }
+    insertPointRef.current = range
+      ? {
+          node: range.startContainer,
+          offset: range.startOffset,
+          path: pathTo(range.startContainer, ed),
+          endNode: range.endContainer,
+          endOffset: range.endOffset,
+          endPath: pathTo(range.endContainer, ed),
+        }
+      : null;
+  };
+
+  // The saved position as a Range. If its nodes are gone and the same place cannot be found, the end of the
+  // content (never the top).
+  const resolveInsertRange = () => {
+    const ed = editorRef.current;
+    const p = insertPointRef.current;
+    const range = document.createRange();
+    const place = (node, path, offset) => {
+      const n = node && node.isConnected && ed.contains(node) ? node : nodeAtPath(ed, path);
+      return n ? { n, o: Math.min(offset, nodeLength(n)) } : null;
+    };
+    const start = p ? place(p.node, p.path, p.offset) : null;
+    if (!start) {
+      range.selectNodeContents(ed);
+      range.collapse(false);
+      return range;
+    }
+    range.setStart(start.n, start.o);
+    const end = place(p.endNode, p.endPath, p.endOffset);
+    if (end) {
+      try {
+        range.setEnd(end.n, end.o);
+      } catch {
+        range.collapse(true);
+      }
+    } else {
+      range.collapse(true);
+    }
+    return range;
+  };
+
+  // Insert arbitrary HTML at the current selection, or, while a dialog is open, at the position saved when
+  // the dialog opened
   const insertHtml = (html) => {
     if (isSourceView) return;
     closeAllDropdowns();
 
+    const ed = editorRef.current;
     const sel = window.getSelection();
-    const hasFocusInEditor =
-      sel &&
-      sel.rangeCount > 0 &&
-      editorRef.current?.contains(sel.getRangeAt(0).commonAncestorContainer);
+    const dialogOpen =
+      showLinkModal || showImageModal || showVideoModal || showButtonModal || showInsertTableModal;
 
-    if (!hasFocusInEditor && savedRangeRef.current) {
-      editorRef.current?.focus();
+    if (dialogOpen && ed) {
+      ed.focus();
       sel.removeAllRanges();
-      sel.addRange(savedRangeRef.current);
+      sel.addRange(resolveInsertRange());
+    } else {
+      const hasFocusInEditor =
+        sel && sel.rangeCount > 0 && ed?.contains(sel.getRangeAt(0).commonAncestorContainer);
+
+      if (
+        !hasFocusInEditor &&
+        savedRangeRef.current &&
+        ed?.contains(savedRangeRef.current.commonAncestorContainer)
+      ) {
+        ed.focus();
+        sel.removeAllRanges();
+        sel.addRange(savedRangeRef.current);
+      } else if (!hasFocusInEditor && ed) {
+        // No usable position: the end of the content
+        ed.focus();
+        const range = document.createRange();
+        range.selectNodeContents(ed);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
     }
 
+    let done = false;
     if (document.queryCommandSupported("insertHTML")) {
-      document.execCommand("insertHTML", false, html);
-    } else {
+      done = document.execCommand("insertHTML", false, html);
+    }
+    if (!done) {
       const currentSel = window.getSelection();
       if (currentSel && currentSel.rangeCount > 0) {
         const range = currentSel.getRangeAt(0);
@@ -465,8 +976,318 @@ export default function RichTextEditor({
     updateActiveStates();
   };
 
+  const closeSlash = useCallback(() => {
+    slashRef.current = null;
+    pendingSlashRef.current = false;
+    setSlashMenu(null);
+    setSlashActive(0);
+  }, []);
+
+  // The menu sits at the cursor; it opens upward when there is no room below
+  const slashPosition = () => {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return null;
+    const range = sel.getRangeAt(0).cloneRange();
+    let rect = range.getClientRects()[0];
+    if (!rect || (!rect.width && !rect.height && !rect.top)) {
+      const el =
+        range.startContainer.nodeType === 1
+          ? range.startContainer
+          : range.startContainer.parentElement;
+      rect = el?.getBoundingClientRect();
+    }
+    if (!rect) return null;
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - 256));
+    return rect.bottom + 280 > window.innerHeight && rect.top > 280
+      ? { left, bottom: window.innerHeight - rect.top + 4 }
+      : { left, top: rect.bottom + 4 };
+  };
+
+  // After each input: open the menu on a fresh "/", then follow what is typed after it
+  const syncSlash = () => {
+    const sel = window.getSelection();
+
+    if (pendingSlashRef.current) {
+      pendingSlashRef.current = false;
+      const node = sel?.anchorNode;
+      if (
+        sel.isCollapsed &&
+        node?.nodeType === 3 &&
+        sel.anchorOffset > 0 &&
+        node.data[sel.anchorOffset - 1] === "/"
+      ) {
+        const pos = slashPosition();
+        if (pos) {
+          slashRef.current = {
+            node,
+            start: sel.anchorOffset - 1,
+            path: pathTo(node, editorRef.current),
+          };
+          setSlashActive(0);
+          setSlashMenu({ query: "", ...pos });
+        }
+      }
+      return;
+    }
+
+    const info = slashRef.current;
+    if (!info) return;
+    const node = sel?.anchorNode;
+    if (
+      !info.node.isConnected ||
+      node !== info.node ||
+      sel.anchorOffset <= info.start ||
+      info.node.data[info.start] !== "/"
+    ) {
+      closeSlash();
+      return;
+    }
+    const typed = info.node.data.slice(info.start + 1, sel.anchorOffset);
+    if (/\s/.test(typed)) {
+      closeSlash();
+      return;
+    }
+    setSlashActive(0);
+    setSlashMenu((m) => (m ? { ...m, query: typed } : m));
+  };
+
+  const handleInput = (e) => {
+    const type = e?.nativeEvent?.inputType || "";
+    emit(
+      type === "insertText" || type === "deleteContentBackward" || type === "deleteContentForward"
+    );
+    syncSlash();
+  };
+
+  // An empty line to put the block on: the line the "/" was on if it is now empty, else a new one after it
+  const prepareEmptyLine = () => {
+    const editor = editorRef.current;
+    const sel = window.getSelection();
+    if (!editor || !sel || !sel.rangeCount) return;
+
+    let block = blockOf(sel.anchorNode, editor);
+    if (block === editor) {
+      if (editor.textContent.trim() === "" && !editor.querySelector("img,iframe,hr,table")) {
+        editor.innerHTML = "<p><br></p>";
+        const range = document.createRange();
+        range.setStart(editor.firstChild, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        return;
+      }
+      document.execCommand("formatBlock", false, "p");
+      block = blockOf(window.getSelection().anchorNode, editor);
+    }
+    const empty =
+      block !== editor &&
+      block.textContent.replace(/[\s\u200b]/g, "") === "" &&
+      !block.querySelector("img,iframe,hr,table");
+    if (!empty) document.execCommand("insertParagraph");
+  };
+
+  // Load what the button's link picker lists (once, when first needed)
+  const loadLinkData = () => {
+    if (linkDataLoadedRef.current) return;
+    linkDataLoadedRef.current = true;
+    const safe = (promise) => promise.catch(() => []);
+    Promise.all([
+      safe(apiRequest("/api/v1/catalog/collections/")),
+      safe(apiRequest("/api/v1/catalog/products/")),
+      safe(listStorePages()),
+      safe(listBlogPosts()),
+    ]).then(([collections, products, pages, posts]) =>
+      setLinkData({
+        collections: Array.isArray(collections) ? collections : [],
+        products: Array.isArray(products) ? products : [],
+        pages: (Array.isArray(pages) ? pages : []).filter((p) => p.status === "visible"),
+        posts: (Array.isArray(posts) ? posts : []).filter((p) => p.status === "published"),
+      })
+    );
+  };
+
+  const openButtonDialog = () => {
+    closeAllDropdowns();
+    saveSelection();
+    captureInsertPoint();
+    clearEditing();
+    setButtonText("Shop now");
+    setButtonUrl("");
+    setButtonError("");
+    loadLinkData();
+    setShowButtonModal(true);
+  };
+
+  const applyButton = (e) => {
+    e?.preventDefault();
+    const text = buttonText.trim();
+    const url = buttonUrl.trim();
+    if (!text) {
+      setButtonError("Enter the button text.");
+      return;
+    }
+    // The storefront only keeps links that start like this
+    if (!/^(https?:\/\/|mailto:|\/(?!\/))/i.test(url)) {
+      setButtonError(
+        "Pick a page, product or collection, or paste a link starting with https://, / or mailto:"
+      );
+      return;
+    }
+    const editedEl = editingElRef.current;
+    if (editing && editedEl && editedEl.isConnected) {
+      editedEl.setAttribute("href", url);
+      editedEl.textContent = text;
+      closeButtonModal();
+      commitBlock();
+      return;
+    }
+    insertHtml(
+      `<p><a href="${escapeHtml(url)}" class="button" style="${BUTTON_STYLE}">${escapeHtml(text)}</a></p><p><br></p>`
+    );
+    closeButtonModal();
+  };
+
+  const openInsertTableDialog = () => {
+    closeAllDropdowns();
+    saveSelection();
+    captureInsertPoint();
+    clearEditing();
+    setShowInsertTableModal(true);
+  };
+
+  // Insert the chosen block: remove the typed "/text", then put the block on that line
+  const runSlash = (item) => {
+    const info = slashRef.current;
+    closeSlash();
+    const editor = editorRef.current;
+    if (!editor || isSourceView) return;
+    editor.focus();
+
+    const sel = window.getSelection();
+    if (info?.node?.isConnected && sel) {
+      const length = info.node.data.length;
+      const end = sel.anchorNode === info.node ? sel.anchorOffset : length;
+      const range = document.createRange();
+      range.setStart(info.node, info.start);
+      range.setEnd(info.node, Math.min(Math.max(end, info.start + 1), length));
+      sel.removeAllRanges();
+      sel.addRange(range);
+      document.execCommand("delete");
+    } else if (sel) {
+      // The typed "/text" node was replaced (e.g. the editor's HTML was rewritten): go back to where the "/" was,
+      // by path; if that place is gone too, the end of the content (never the top)
+      const range = document.createRange();
+      const n = info?.path ? nodeAtPath(editor, info.path) : null;
+      if (n) {
+        range.setStart(n, Math.min(info.start, nodeLength(n)));
+        range.collapse(true);
+      } else {
+        range.selectNodeContents(editor);
+        range.collapse(false);
+      }
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    prepareEmptyLine();
+
+    switch (item.id) {
+      case "h2":
+        exec("formatBlock", "<h2>");
+        break;
+      case "h3":
+        exec("formatBlock", "<h3>");
+        break;
+      case "p":
+        exec("formatBlock", "<p>");
+        break;
+      case "ul":
+        exec("insertUnorderedList");
+        break;
+      case "ol":
+        exec("insertOrderedList");
+        break;
+      case "quote":
+        exec("formatBlock", "<blockquote>");
+        break;
+      case "divider":
+        insertHtml("<hr><p><br></p>");
+        break;
+      case "spacer":
+        insertHtml("<p>&nbsp;</p><p><br></p>");
+        break;
+      case "image":
+        openImageDialog();
+        break;
+      case "button":
+        openButtonDialog();
+        break;
+      case "table":
+        openInsertTableDialog();
+        break;
+      case "video":
+        openVideoDialog();
+        break;
+      default:
+        break;
+    }
+  };
+
   // Keyboard shortcut handler
   const handleKeyDown = (e) => {
+    if (slashMenu) {
+      const list = filterSlashItems(slashMenu.query);
+      const current = Math.min(slashActive, Math.max(list.length - 1, 0));
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (list.length) {
+          const delta = e.key === "ArrowDown" ? 1 : -1;
+          setSlashActive((current + delta + list.length) % list.length);
+        }
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        if (list[current]) runSlash(list[current]);
+        else closeSlash();
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        closeSlash();
+        return;
+      }
+      // Backspace on the "/" itself deletes it as usual, and the menu goes with it
+      if (e.key === "Backspace" && slashMenu.query === "") closeSlash();
+      else if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(e.key))
+        closeSlash();
+    } else if (
+      e.key === "/" &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      !e.nativeEvent?.isComposing &&
+      !isSourceView
+    ) {
+      pendingSlashRef.current = Boolean(editorRef.current && slashAllowed(editorRef.current));
+    }
+
+    // Alt+Up / Alt+Down move the block the caret is in (a button, picture, video, table or divider)
+    if (e.altKey && !e.ctrlKey && !e.metaKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+      if (selectedBlock?.isConnected) {
+        e.preventDefault();
+        moveBlock(e.key === "ArrowUp" ? -1 : 1, selectedBlock);
+      }
+      return;
+    }
+    // Tab on a selected block goes to its toolbar (anywhere else it indents, as before)
+    if (e.key === "Tab" && !e.shiftKey && !e.altKey && selectedBlock?.isConnected && barPos) {
+      e.preventDefault();
+      blockBarRef.current?.querySelector("button")?.focus();
+      return;
+    }
+
     const isMeta = e.ctrlKey || e.metaKey;
     if (isMeta && !e.shiftKey && e.key.toLowerCase() === "b") {
       e.preventDefault();
@@ -499,6 +1320,7 @@ export default function RichTextEditor({
   // Clean pasted content so it doesn't break editor layout
   const handlePaste = (e) => {
     e.preventDefault();
+    closeSlash();
     const clipboardData = e.clipboardData || window.clipboardData;
     const html = clipboardData?.getData("text/html");
     const text = clipboardData?.getData("text/plain");
@@ -543,16 +1365,20 @@ export default function RichTextEditor({
   const openLinkDialog = () => {
     closeAllDropdowns();
     saveSelection();
+    captureInsertPoint();
+    clearEditing();
     const sel = window.getSelection();
     let selectedText = "";
     let existingUrl = "";
     let existingTarget = true;
+    linkAnchorRef.current = null;
 
     if (sel && sel.rangeCount > 0) {
       selectedText = sel.toString();
       let parent = sel.anchorNode;
       while (parent && parent !== editorRef.current && parent !== document.body) {
         if (parent.nodeName === "A") {
+          linkAnchorRef.current = parent;
           existingUrl = parent.getAttribute("href") || "";
           existingTarget = parent.getAttribute("target") === "_blank";
           if (!selectedText) selectedText = parent.textContent || "";
@@ -568,10 +1394,39 @@ export default function RichTextEditor({
     setShowLinkModal(true);
   };
 
+  // The dialogs below sit inside the page editor's own <form>, so they are plain divs (never a nested <form>):
+  // a submit there would also submit the outer page form. Enter in a text field runs the dialog's action.
+  const submitOnEnter = (action, e) => {
+    if (e.key !== "Enter" || e.defaultPrevented || e.nativeEvent?.isComposing) return;
+    const t = e.target;
+    if (t.tagName !== "INPUT" || ["checkbox", "file", "button", "radio"].includes(t.type)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    action();
+  };
+
   // Apply or update link
   const applyLink = (e) => {
     e?.preventDefault();
     if (!linkUrl.trim()) return;
+
+    // Editing a link that is already there: change it in place (a button keeps its look)
+    const anchor = linkAnchorRef.current;
+    if (anchor && anchor.isConnected && editorRef.current?.contains(anchor)) {
+      anchor.setAttribute("href", linkUrl.trim());
+      if (linkNewTab) {
+        anchor.setAttribute("target", "_blank");
+        anchor.setAttribute("rel", "noopener noreferrer");
+      } else {
+        anchor.removeAttribute("target");
+      }
+      const newText = linkText.trim();
+      if (newText && newText !== anchor.textContent) anchor.textContent = newText;
+      linkAnchorRef.current = null;
+      emit();
+      closeLinkModal();
+      return;
+    }
 
     restoreSelection();
     const targetAttr = linkNewTab ? ' target="_blank" rel="noopener noreferrer"' : "";
@@ -580,7 +1435,7 @@ export default function RichTextEditor({
 
     const linkHtml = `<a href="${cleanUrl}"${targetAttr} class="text-blue-600 underline hover:text-blue-800">${textToShow}</a>`;
     insertHtml(linkHtml);
-    setShowLinkModal(false);
+    closeLinkModal();
   };
 
   // Remove existing link
@@ -590,13 +1445,16 @@ export default function RichTextEditor({
     emit();
     saveSelection();
     updateActiveStates();
-    setShowLinkModal(false);
+    closeLinkModal();
   };
 
   // Open image modal
   const openImageDialog = () => {
     closeAllDropdowns();
     saveSelection();
+    captureInsertPoint();
+    clearEditing();
+    setImageTab("url");
     setImageUrl("");
     setImageAlt("");
     setImageFile(null);
@@ -634,17 +1492,11 @@ export default function RichTextEditor({
         const res = await apiUpload("/api/v1/catalog/products/images/", "image", imageFile);
         setImageUploading(false);
         if (res?.ok && res?.data?.url) {
-          const imgHtml = `<img src="${res.data.url}" alt="${imageAlt.trim()}" style="max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0;" />`;
-          insertHtml(imgHtml);
-          setShowImageModal(false);
+          placeImage(res.data.url);
         } else {
           // Fallback to Data URL if upload endpoint is unavailable
           const reader = new FileReader();
-          reader.onload = () => {
-            const imgHtml = `<img src="${reader.result}" alt="${imageAlt.trim()}" style="max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0;" />`;
-            insertHtml(imgHtml);
-            setShowImageModal(false);
-          };
+          reader.onload = () => placeImage(reader.result);
           reader.readAsDataURL(imageFile);
         }
       } catch {
@@ -656,16 +1508,32 @@ export default function RichTextEditor({
         setImageError("Please enter an image URL.");
         return;
       }
-      const imgHtml = `<img src="${imageUrl.trim()}" alt="${imageAlt.trim()}" style="max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0;" />`;
-      insertHtml(imgHtml);
-      setShowImageModal(false);
+      placeImage(imageUrl.trim());
     }
+  };
+
+  // Put the picked picture in: change the image being edited, or insert a new one at the saved position
+  const placeImage = (src) => {
+    const editedEl = editingElRef.current;
+    if (editing && editedEl && editedEl.isConnected) {
+      editedEl.setAttribute("src", src);
+      editedEl.setAttribute("alt", imageAlt.trim());
+      closeImageModal();
+      commitBlock();
+      return;
+    }
+    insertHtml(
+      `<img src="${escapeHtml(src)}" alt="${escapeHtml(imageAlt.trim())}" style="max-width: 100%; height: auto; border-radius: 6px; margin: 8px 0;" />`
+    );
+    closeImageModal();
   };
 
   // Open video modal
   const openVideoDialog = () => {
     closeAllDropdowns();
     saveSelection();
+    captureInsertPoint();
+    clearEditing();
     setVideoUrl("");
     setShowVideoModal(true);
   };
@@ -676,21 +1544,43 @@ export default function RichTextEditor({
     if (!videoUrl.trim()) return;
 
     const embedHtml = formatVideoEmbed(videoUrl);
+    const editedEl = editingElRef.current;
+    if (embedHtml && editing && editedEl && editedEl.isConnected) {
+      // Swap the old video (and its wrapping line) for the new one, in the same place
+      const unit = unitFor(editedEl);
+      const tmp = document.createElement("div");
+      tmp.innerHTML = embedHtml;
+      unit.replaceWith(...Array.from(tmp.childNodes));
+      closeVideoModal();
+      commitBlock();
+      return;
+    }
     if (embedHtml) {
       insertHtml(embedHtml);
     }
-    setShowVideoModal(false);
+    closeVideoModal();
   };
 
   // Table actions
   const applyInsertTable = () => {
+    const editedEl = editingElRef.current;
+    if (editing && editedEl && editedEl.isConnected) {
+      resizeTable(
+        editedEl,
+        Math.max(1, Number(tableRows) || 1),
+        Math.max(1, Number(tableCols) || 1)
+      );
+      closeTableModal();
+      commitBlock();
+      return;
+    }
     const tableHtml = generateTableHtml(
       Number(tableRows) || 3,
       Number(tableCols) || 3,
       tableHasHeader
     );
     insertHtml(tableHtml);
-    setShowInsertTableModal(false);
+    closeTableModal();
   };
 
   const handleTableOperation = (operation) => {
@@ -753,14 +1643,250 @@ export default function RichTextEditor({
     updateActiveStates();
   };
 
+  // ---- Block toolbar (button, image, video, table, divider) ----
+  const toolbarBlock = hoverBlock?.isConnected
+    ? hoverBlock
+    : selectedBlock?.isConnected
+      ? selectedBlock
+      : null;
+  const toolbarKind = toolbarBlock ? blockKind(toolbarBlock) : null;
+  const toolbarAlign = toolbarBlock
+    ? unitFor(toolbarBlock).getAttribute("align") || "left"
+    : "left";
+
+  const cancelHide = () => clearTimeout(hideTimerRef.current);
+  const scheduleHide = () => {
+    clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setHoverBlock(null), 300);
+  };
+  useEffect(() => () => clearTimeout(hideTimerRef.current), []);
+
+  // A change made straight on the DOM (move, align, edit, delete): save it, undo step included
+  function commitBlock() {
+    emit();
+    setBlockTick((t) => t + 1);
+  }
+
+  // Select a block (a caret inside a button, the picture / table itself) so keys and the toolbar keep working on it
+  const selectBlock = (el) => {
+    const sel = window.getSelection();
+    if (!sel || !el.isConnected) return;
+    const range = document.createRange();
+    if (blockKind(el) === "button") {
+      range.selectNodeContents(el);
+      range.collapse(false);
+    } else {
+      range.selectNode(el);
+    }
+    sel.removeAllRanges();
+    sel.addRange(range);
+    setSelectedBlock(el);
+  };
+
+  const moveBlock = (dir, block = toolbarBlock) => {
+    if (!block || !block.isConnected) return;
+    const unit = unitFor(block);
+    const sibling = dir < 0 ? unit.previousElementSibling : unit.nextElementSibling;
+    if (!sibling) return;
+    unit.parentNode.insertBefore(unit, dir < 0 ? sibling : sibling.nextSibling);
+    commitBlock();
+    selectBlock(block);
+  };
+
+  const alignBlock = (value) => {
+    const block = toolbarBlock;
+    if (!block || (toolbarKind !== "button" && toolbarKind !== "image")) return;
+    // The storefront keeps only a few attributes, and `align` on the line's <p> is one of them (not style)
+    let unit = unitFor(block);
+    if (unit.nodeName !== "P") {
+      const p = document.createElement("p");
+      unit.parentNode.insertBefore(p, unit);
+      p.appendChild(unit);
+      unit = p;
+    }
+    if (value === "left") unit.removeAttribute("align");
+    else unit.setAttribute("align", value);
+    unit.style.textAlign = "";
+    if (!unit.getAttribute("style")) unit.removeAttribute("style");
+    commitBlock();
+    selectBlock(block);
+  };
+
+  const onAlignClick = (e) => alignBlock(e.currentTarget.dataset.align);
+
+  const deleteBlock = () => {
+    const block = toolbarBlock;
+    if (!block || !block.isConnected) return;
+    const ed = editorRef.current;
+    unitFor(block).remove();
+    if (ed && !ed.firstChild) ed.innerHTML = "<p><br></p>";
+    setHoverBlock(null);
+    setSelectedBlock(null);
+    commitBlock();
+    ed?.focus();
+  };
+
+  const editBlock = () => {
+    const block = toolbarBlock;
+    if (!block || !block.isConnected) return;
+    closeAllDropdowns();
+    editingElRef.current = block;
+    setEditing(true);
+    if (toolbarKind === "button") {
+      setButtonText(block.textContent || "");
+      setButtonUrl(block.getAttribute("href") || "");
+      setButtonError("");
+      loadLinkData();
+      setShowButtonModal(true);
+    } else if (toolbarKind === "image") {
+      setImageTab("url");
+      setImageUrl(block.getAttribute("src") || "");
+      setImageAlt(block.getAttribute("alt") || "");
+      setImageFile(null);
+      setImagePreview("");
+      setImageError("");
+      setShowImageModal(true);
+    } else if (toolbarKind === "video") {
+      setVideoUrl(block.getAttribute("src") || "");
+      setShowVideoModal(true);
+    } else if (toolbarKind === "table") {
+      setTableRows(block.rows.length);
+      setTableCols(block.rows[0]?.cells.length || 1);
+      setShowInsertTableModal(true);
+    }
+  };
+
+  // Drag a block by its handle: a line shows where it will land (between any two lines, also inside layout boxes)
+  const startBlockDrag = (e) => {
+    const ed = editorRef.current;
+    const canvas = canvasRef.current;
+    const block = toolbarBlock;
+    if (!ed || !canvas || !block) return;
+    e.preventDefault();
+    e.stopPropagation();
+    cancelHide();
+    const unit = unitFor(block);
+    let drop = null;
+
+    const onMove = (ev) => {
+      const box = ed.getBoundingClientRect();
+      if (ev.clientY < box.top + 24) ed.scrollTop -= 12;
+      else if (ev.clientY > box.bottom - 24) ed.scrollTop += 12;
+
+      const over = document.elementFromPoint(ev.clientX, ev.clientY);
+      let line = over && ed.contains(over) ? lineAt(over, ed) : null;
+      let before = true;
+
+      if (!line && over && (over === ed || ed.contains(over))) {
+        // On the editor's padding: above the first line or below the last one
+        const first = ed.firstElementChild;
+        const last = ed.lastElementChild;
+        if (first && ev.clientY < first.getBoundingClientRect().top) line = first;
+        else if (last) {
+          line = last;
+          before = false;
+        }
+      } else if (line) {
+        const r = line.getBoundingClientRect();
+        before = ev.clientY < r.top + r.height / 2;
+      }
+
+      if (!line || unit === line || unit.contains(line)) {
+        drop = null;
+        setDropLine(null);
+        return;
+      }
+      drop = { line, before };
+      const r = line.getBoundingClientRect();
+      const c = canvas.getBoundingClientRect();
+      setDropLine({
+        top: (before ? r.top : r.bottom) - c.top,
+        left: r.left - c.left,
+        width: r.width,
+      });
+    };
+
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      setDropLine(null);
+      if (drop && drop.line.isConnected) {
+        drop.line.parentNode.insertBefore(unit, drop.before ? drop.line : drop.line.nextSibling);
+        commitBlock();
+        selectBlock(block);
+      }
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  };
+
+  // Hovering a block shows its toolbar; leaving hides it after a moment
+  const handleEditorHover = (e) => {
+    const ed = editorRef.current;
+    if (!ed) return;
+    const block = findBlock(e.target, ed);
+    if (block) {
+      cancelHide();
+      if (block !== hoverBlock) setHoverBlock(block);
+    } else if (hoverBlock) {
+      scheduleHide();
+    }
+  };
+
+  // Where the toolbar and the outline sit (relative to the editor area); follows scrolling and edits
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ed = editorRef.current;
+    if (!toolbarBlock || !canvas || !ed) {
+      setBarPos(null);
+      return;
+    }
+    const unit = unitFor(toolbarBlock);
+    const r = unit.getBoundingClientRect();
+    const c = canvas.getBoundingClientRect();
+    const e = ed.getBoundingClientRect();
+    if (r.bottom < e.top + 4 || r.top > e.bottom - 4) {
+      setBarPos(null);
+      return;
+    }
+    // Never above the block (that hides the line of text over it): to the right of the block when there is room,
+    // else inside the block's top-right corner. Always inside the editor area.
+    const barWidth =
+      blockBarRef.current?.offsetWidth ||
+      (toolbarKind === "button" || toolbarKind === "image" ? 310 : 240);
+    const barHeight = blockBarRef.current?.offsetHeight || 32;
+    const roomRight = e.right - r.right - 8;
+    const wantLeft = roomRight >= barWidth ? r.right + 8 : r.right - barWidth - 4;
+    const left = Math.max(e.left + 4, Math.min(wantLeft, e.right - barWidth - 4)) - c.left;
+    const top = Math.max(e.top + 2, Math.min(r.top + 2, e.bottom - barHeight - 2)) - c.top;
+    setBarPos({
+      top,
+      left,
+      outline: { top: r.top - c.top, left: r.left - c.left, width: r.width, height: r.height },
+    });
+  }, [toolbarBlock, toolbarKind, blockTick, toolbarAlign]);
+
+  useEffect(() => {
+    const onResize = () => setBlockTick((t) => t + 1);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   // Toggle Source view
   const toggleSourceView = () => {
     if (isSourceView) {
       setIsSourceView(false);
+      setHoverBlock(null);
+      setSelectedBlock(null);
       setTimeout(() => {
         if (editorRef.current) {
           editorRef.current.innerHTML = value || "";
+          detachControls(editorRef.current);
           lastEmittedRef.current = value;
+          resetHistory();
           editorRef.current.focus();
         }
         updateActiveStates();
@@ -782,6 +1908,9 @@ export default function RichTextEditor({
   };
 
   const currentStyleLabel = styleLabels[activeFormats.blockFormat] || "Paragraph";
+
+  const slashItems = slashMenu ? filterSlashItems(slashMenu.query) : [];
+  const slashIndex = Math.min(slashActive, Math.max(slashItems.length - 1, 0));
 
   const withErrorBorder = error
     ? "border-red-400 focus-within:border-red-500"
@@ -1486,6 +2615,7 @@ export default function RichTextEditor({
                 setShowColorPicker(false);
               } else {
                 closeAllDropdowns();
+                clearEditing();
                 setShowInsertTableModal(true);
               }
             }}
@@ -1616,6 +2746,7 @@ export default function RichTextEditor({
                 onClick={(e) => {
                   e.stopPropagation();
                   closeAllDropdowns();
+                  clearEditing();
                   setShowInsertTableModal(true);
                 }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50"
@@ -1757,37 +2888,201 @@ export default function RichTextEditor({
           />
         </div>
       ) : (
-        <div
-          id={id}
-          ref={editorRef}
-          role="textbox"
-          aria-multiline="true"
-          contentEditable
-          suppressContentEditableWarning
-          data-placeholder={placeholder}
-          onInput={emit}
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          onKeyUp={handleSelectionChange}
-          onMouseUp={(e) => {
-            e.stopPropagation();
-            handleSelectionChange();
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            closeAllDropdowns();
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            closeAllDropdowns();
-          }}
-          onFocus={() => {
-            closeAllDropdowns();
-            document.execCommand("defaultParagraphSeparator", false, "p");
-            handleSelectionChange();
-          }}
-          className="min-h-[240px] max-h-[600px] overflow-y-auto px-4 py-3 text-sm leading-relaxed text-slate-900 outline-none empty:before:pointer-events-none empty:before:text-slate-400 empty:before:content-[attr(data-placeholder)] [&_a]:text-blue-600 [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-2 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-1.5 [&_h4]:text-base [&_h4]:font-semibold [&_h4]:my-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_p]:my-1 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_table]:border-collapse [&_table]:border [&_table]:border-slate-300 [&_table]:my-3 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-50 [&_th]:font-semibold"
-        />
+        <div ref={canvasRef} className="relative">
+          <div
+            id={id}
+            ref={editorRef}
+            role="textbox"
+            aria-multiline="true"
+            contentEditable
+            suppressContentEditableWarning
+            data-placeholder={placeholder}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+            onBlur={closeSlash}
+            aria-haspopup="listbox"
+            aria-controls={slashMenu ? slashListId : undefined}
+            aria-activedescendant={
+              slashMenu && slashItems.length
+                ? `${slashListId}-${slashItems[slashIndex].id}`
+                : undefined
+            }
+            onPaste={handlePaste}
+            onKeyUp={handleSelectionChange}
+            onMouseUp={(e) => {
+              e.stopPropagation();
+              handleSelectionChange();
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              closeAllDropdowns();
+              closeSlash();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              closeAllDropdowns();
+              const block = editorRef.current ? findBlock(e.target, editorRef.current) : null;
+              if (block) setSelectedBlock(block);
+            }}
+            onMouseMove={handleEditorHover}
+            onMouseLeave={() => hoverBlock && scheduleHide()}
+            onScroll={() => setBlockTick((t) => t + 1)}
+            onFocus={() => {
+              closeAllDropdowns();
+              document.execCommand("defaultParagraphSeparator", false, "p");
+              handleSelectionChange();
+            }}
+            className="min-h-[240px] max-h-[600px] overflow-y-auto px-4 py-3 text-sm leading-relaxed text-slate-900 outline-none empty:before:pointer-events-none empty:before:text-slate-400 empty:before:content-[attr(data-placeholder)] [&_a]:text-blue-600 [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-2 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-1.5 [&_h4]:text-base [&_h4]:font-semibold [&_h4]:my-1.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_p]:my-1 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_hr]:my-4 [&_hr]:border-slate-300 [&_iframe]:aspect-video [&_iframe]:h-auto [&_iframe]:w-full [&_iframe]:max-w-full [&_table]:border-collapse [&_table]:border [&_table]:border-slate-300 [&_table]:my-3 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-50 [&_th]:font-semibold"
+          />
+          {barPos && toolbarBlock && (
+            <>
+              {/* Outline of the hovered / selected block */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute z-10 rounded border-2 border-orange-400/70"
+                style={{
+                  top: barPos.outline.top,
+                  left: barPos.outline.left,
+                  width: barPos.outline.width,
+                  height: barPos.outline.height,
+                }}
+              />
+
+              <div
+                ref={blockBarRef}
+                role="toolbar"
+                aria-label="Block tools"
+                className="absolute z-20 flex items-center gap-0.5 rounded-md border border-slate-300 bg-white p-0.5 shadow-md"
+                style={{ top: barPos.top, left: barPos.left }}
+                onMouseEnter={cancelHide}
+                onMouseLeave={scheduleHide}
+                // Keep the caret in the editor while the mouse is used on the toolbar
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+                    e.preventDefault();
+                    moveBlock(e.key === "ArrowUp" ? -1 : 1);
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    editorRef.current?.focus();
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  title="Drag to move"
+                  aria-label="Drag to move (or Alt + Up / Down arrow)"
+                  onPointerDown={startBlockDrag}
+                  className="flex h-7 w-7 cursor-grab touch-none items-center justify-center rounded text-slate-500 hover:bg-slate-100 active:cursor-grabbing"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                    <circle cx="7" cy="5" r="1.4" />
+                    <circle cx="13" cy="5" r="1.4" />
+                    <circle cx="7" cy="10" r="1.4" />
+                    <circle cx="13" cy="10" r="1.4" />
+                    <circle cx="7" cy="15" r="1.4" />
+                    <circle cx="13" cy="15" r="1.4" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  title="Move up (Alt + Up arrow)"
+                  aria-label="Move up"
+                  onClick={() => moveBlock(-1)}
+                  className="flex h-7 w-7 items-center justify-center rounded text-slate-600 hover:bg-slate-100"
+                >
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="h-4 w-4"
+                  >
+                    <path d="M5 12l5-5 5 5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  title="Move down (Alt + Down arrow)"
+                  aria-label="Move down"
+                  onClick={() => moveBlock(1)}
+                  className="flex h-7 w-7 items-center justify-center rounded text-slate-600 hover:bg-slate-100"
+                >
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="h-4 w-4"
+                  >
+                    <path d="M5 8l5 5 5-5" />
+                  </svg>
+                </button>
+
+                {(toolbarKind === "button" || toolbarKind === "image") &&
+                  [
+                    ["left", "Align left", "M3 5h14M3 9h9M3 13h14M3 17h9"],
+                    ["center", "Align center", "M3 5h14M6 9h8M3 13h14M6 17h8"],
+                    ["right", "Align right", "M3 5h14M8 9h9M3 13h14M8 17h9"],
+                  ].map(([value, label, path]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      title={label}
+                      aria-label={label}
+                      aria-pressed={toolbarAlign === value}
+                      data-align={value}
+                      onClick={onAlignClick}
+                      className={`flex h-7 w-7 items-center justify-center rounded hover:bg-slate-100 ${
+                        toolbarAlign === value ? "bg-slate-200 text-slate-900" : "text-slate-600"
+                      }`}
+                    >
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        className="h-4 w-4"
+                      >
+                        <path d={path} />
+                      </svg>
+                    </button>
+                  ))}
+
+                {toolbarKind !== "divider" && (
+                  <button
+                    type="button"
+                    title="Edit"
+                    aria-label="Edit"
+                    onClick={editBlock}
+                    className="flex h-7 items-center rounded px-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  >
+                    Edit
+                  </button>
+                )}
+                <button
+                  type="button"
+                  title="Delete"
+                  aria-label="Delete block"
+                  onClick={deleteBlock}
+                  className="flex h-7 items-center rounded px-2 text-xs font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              </div>
+            </>
+          )}
+
+          {dropLine && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute z-30 h-0.5 rounded bg-orange-500"
+              style={{ top: dropLine.top - 1, left: dropLine.left, width: dropLine.width }}
+            />
+          )}
+        </div>
       )}
 
       {/* 3. MODALS */}
@@ -1796,7 +3091,7 @@ export default function RichTextEditor({
       {showLinkModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-          onClick={() => setShowLinkModal(false)}
+          onClick={() => closeLinkModal()}
         >
           <div
             className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
@@ -1808,14 +3103,14 @@ export default function RichTextEditor({
               </h3>
               <button
                 type="button"
-                onClick={() => setShowLinkModal(false)}
+                onClick={() => closeLinkModal()}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
                 <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={applyLink} className="space-y-3.5">
+            <div onKeyDown={(e) => submitOnEnter(applyLink, e)} className="space-y-3.5">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-slate-700">
                   Link URL <span className="text-red-500">*</span>
@@ -1870,20 +3165,21 @@ export default function RichTextEditor({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setShowLinkModal(false)}
+                    onClick={() => closeLinkModal()}
                     className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                   >
                     Cancel
                   </button>
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={applyLink}
                     className="rounded-lg bg-orange-600 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90"
                   >
                     {activeFormats.inLink ? "Update link" : "Insert link"}
                   </button>
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -1892,17 +3188,19 @@ export default function RichTextEditor({
       {showImageModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-          onClick={() => setShowImageModal(false)}
+          onClick={() => closeImageModal()}
         >
           <div
             className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">Insert image</h3>
+              <h3 className="text-base font-semibold text-slate-900">
+                {editing ? "Edit image" : "Insert image"}
+              </h3>
               <button
                 type="button"
-                onClick={() => setShowImageModal(false)}
+                onClick={() => closeImageModal()}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
                 <Icon name="x" className="h-4 w-4" />
@@ -1935,7 +3233,7 @@ export default function RichTextEditor({
               </button>
             </div>
 
-            <form onSubmit={applyImage} className="space-y-3.5">
+            <div onKeyDown={(e) => submitOnEnter(applyImage, e)} className="space-y-3.5">
               {imageTab === "url" ? (
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-slate-700">
@@ -1992,20 +3290,21 @@ export default function RichTextEditor({
               <div className="mt-5 flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                 <button
                   type="button"
-                  onClick={() => setShowImageModal(false)}
+                  onClick={() => closeImageModal()}
                   className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={applyImage}
                   disabled={imageUploading}
                   className="rounded-lg bg-orange-600 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90 disabled:opacity-50"
                 >
-                  {imageUploading ? "Uploading..." : "Insert image"}
+                  {imageUploading ? "Uploading..." : editing ? "Update image" : "Insert image"}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -2014,24 +3313,26 @@ export default function RichTextEditor({
       {showVideoModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-          onClick={() => setShowVideoModal(false)}
+          onClick={() => closeVideoModal()}
         >
           <div
             className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">Insert video</h3>
+              <h3 className="text-base font-semibold text-slate-900">
+                {editing ? "Edit video" : "Insert video"}
+              </h3>
               <button
                 type="button"
-                onClick={() => setShowVideoModal(false)}
+                onClick={() => closeVideoModal()}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
                 <Icon name="x" className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={applyVideo} className="space-y-3.5">
+            <div onKeyDown={(e) => submitOnEnter(applyVideo, e)} className="space-y-3.5">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-slate-700">
                   Video URL or embed snippet <span className="text-red-500">*</span>
@@ -2053,19 +3354,151 @@ export default function RichTextEditor({
               <div className="mt-5 flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                 <button
                   type="button"
-                  onClick={() => setShowVideoModal(false)}
+                  onClick={() => closeVideoModal()}
                   className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={applyVideo}
                   className="rounded-lg bg-orange-600 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90"
                 >
-                  Insert video
+                  {editing ? "Update video" : "Insert video"}
                 </button>
               </div>
-            </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* "/" SLASH MENU */}
+      <p role="status" aria-live="polite" className="sr-only">
+        {slashMenu ? `${slashItems.length} blocks available` : ""}
+      </p>
+      {slashMenu &&
+        createPortal(
+          <div
+            id={slashListId}
+            role="listbox"
+            aria-label="Insert a block"
+            style={{
+              position: "fixed",
+              zIndex: 60,
+              width: 240,
+              left: slashMenu.left,
+              top: slashMenu.top,
+              bottom: slashMenu.bottom,
+            }}
+            className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+            // Keep the cursor in the editor while the menu is used with the mouse
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {slashItems.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-slate-500">
+                No block matches "{slashMenu.query}".
+              </p>
+            ) : (
+              slashItems.map((item, i) => (
+                <div
+                  key={item.id}
+                  id={`${slashListId}-${item.id}`}
+                  role="option"
+                  aria-selected={i === slashIndex}
+                  onMouseEnter={() => setSlashActive(i)}
+                  onClick={() => runSlash(item)}
+                  className={`cursor-pointer px-3 py-1.5 ${i === slashIndex ? "bg-slate-100" : ""}`}
+                >
+                  <div className="text-xs font-semibold text-slate-800">{item.name}</div>
+                  <div className="text-[11px] text-slate-500">{item.hint}</div>
+                </div>
+              ))
+            )}
+          </div>,
+          document.body
+        )}
+
+      {/* BUTTON MODAL (the "/" Button block) */}
+      {showButtonModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+          onClick={() => closeButtonModal()}
+          onKeyDown={(e) => e.key === "Escape" && closeButtonModal()}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Insert button"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-slate-900">
+                {editing ? "Edit button" : "Insert button"}
+              </h3>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => closeButtonModal()}
+                className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              >
+                <Icon name="x" className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div onKeyDown={(e) => submitOnEnter(applyButton, e)} className="space-y-3.5">
+              <div>
+                <label
+                  htmlFor={`${slashListId}-button-text`}
+                  className="mb-1 block text-xs font-semibold text-slate-700"
+                >
+                  Button text <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id={`${slashListId}-button-text`}
+                  type="text"
+                  autoFocus
+                  value={buttonText}
+                  onChange={(e) => setButtonText(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-slate-500"
+                />
+              </div>
+
+              <div>
+                <span className="mb-1 block text-xs font-semibold text-slate-700">
+                  Link <span className="text-red-500">*</span>
+                </span>
+                <LinkField
+                  value={buttonUrl}
+                  onChange={setButtonUrl}
+                  collections={linkData.collections}
+                  products={linkData.products}
+                  pages={linkData.pages}
+                  posts={linkData.posts}
+                  label="Button link"
+                  placeholder="Search pages, products, collections or paste a link"
+                />
+              </div>
+
+              {buttonError && <p className="text-xs text-red-600">{buttonError}</p>}
+
+              <div className="mt-5 flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                <button
+                  type="button"
+                  onClick={() => closeButtonModal()}
+                  className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={applyButton}
+                  className="rounded-lg bg-orange-600 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90"
+                >
+                  {editing ? "Update button" : "Insert button"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -2074,17 +3507,19 @@ export default function RichTextEditor({
       {showInsertTableModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
-          onClick={() => setShowInsertTableModal(false)}
+          onClick={() => closeTableModal()}
         >
           <div
             className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">Insert table</h3>
+              <h3 className="text-base font-semibold text-slate-900">
+                {editing ? "Edit table" : "Insert table"}
+              </h3>
               <button
                 type="button"
-                onClick={() => setShowInsertTableModal(false)}
+                onClick={() => closeTableModal()}
                 className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
               >
                 <Icon name="x" className="h-4 w-4" />
@@ -2117,20 +3552,22 @@ export default function RichTextEditor({
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={tableHasHeader}
-                  onChange={(e) => setTableHasHeader(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
-                />
-                Include header row
-              </label>
+              {!editing && (
+                <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={tableHasHeader}
+                    onChange={(e) => setTableHasHeader(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                  />
+                  Include header row
+                </label>
+              )}
 
               <div className="mt-5 flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
                 <button
                   type="button"
-                  onClick={() => setShowInsertTableModal(false)}
+                  onClick={() => closeTableModal()}
                   className="rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
@@ -2140,7 +3577,7 @@ export default function RichTextEditor({
                   onClick={applyInsertTable}
                   className="rounded-lg bg-orange-600 px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:opacity-90"
                 >
-                  Insert table
+                  {editing ? "Update table" : "Insert table"}
                 </button>
               </div>
             </div>
