@@ -70,7 +70,10 @@ function getImageFormat(file, url, name) {
     if (subtype) return subtype.toUpperCase().replace("JPEG", "JPG");
   }
   const target = name || url || "";
-  const extMatch = target.split("?")[0].split("#")[0].match(/\.([a-zA-Z0-9]+)$/);
+  const extMatch = target
+    .split("?")[0]
+    .split("#")[0]
+    .match(/\.([a-zA-Z0-9]+)$/);
   if (extMatch && extMatch[1]) {
     const ext = extMatch[1].toUpperCase();
     return ext === "JPEG" ? "JPG" : ext;
@@ -4690,7 +4693,8 @@ export function ProductForm({ productId }) {
                           Drag and drop images here, or browse files from your computer
                         </p>
                         <p className="mt-0.5 text-[11px] text-slate-400">
-                          Accepted formats: JPG, PNG, WEBP • Recommended: 1024 × 1280 px (4:5 ratio, up to 1 MB)
+                          Accepted formats: JPG, PNG, WEBP • Recommended: 1024 × 1280 px (4:5 ratio,
+                          up to 1 MB)
                         </p>
                         <button
                           type="button"
@@ -5064,7 +5068,8 @@ export function ProductForm({ productId }) {
                                   <span className="font-semibold text-slate-900">
                                     {inspectingPhoto.size || imageMetadata[inspectingPhoto.id]?.size
                                       ? formatFileSize(
-                                          inspectingPhoto.size || imageMetadata[inspectingPhoto.id]?.size
+                                          inspectingPhoto.size ||
+                                            imageMetadata[inspectingPhoto.id]?.size
                                         )
                                       : inspectingPhoto.isSaved
                                         ? "Stored on server"

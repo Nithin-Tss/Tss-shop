@@ -3,12 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import { apiPost } from "@/lib/api";
 import Icon from "@/components/Icons";
-import {
-  ALL_COUNTRIES,
-  DEFAULT_COUNTRY,
-  validatePhone,
-  formatPhoneForSave,
-} from "@/lib/countries";
+import { ALL_COUNTRIES, DEFAULT_COUNTRY, validatePhone, formatPhoneForSave } from "@/lib/countries";
 
 const LANGUAGES = [
   "English [Default]",
@@ -186,9 +181,9 @@ export default function AdminAddCustomer() {
       setSaving(false);
       setError(
         res.formError ||
-        res.fieldErrors?.email ||
-        res.fieldErrors?.first_name ||
-        "Failed to save customer."
+          res.fieldErrors?.email ||
+          res.fieldErrors?.first_name ||
+          "Failed to save customer."
       );
       return;
     }
@@ -359,10 +354,11 @@ export default function AdminAddCustomer() {
                       <button
                         type="button"
                         onClick={() => setIsCountryDropdownOpen((prev) => !prev)}
-                        className={`flex items-center gap-1.5 h-9.5 px-3 border rounded-lg bg-white text-sm hover:border-slate-400 focus:outline-none transition cursor-pointer select-none ${isCountryDropdownOpen
+                        className={`flex items-center gap-1.5 h-9.5 px-3 border rounded-lg bg-white text-sm hover:border-slate-400 focus:outline-none transition cursor-pointer select-none ${
+                          isCountryDropdownOpen
                             ? "border-orange-600 ring-1 ring-orange-600"
                             : "border-slate-300"
-                          }`}
+                        }`}
                         title={`${selectedCountry.name} (${selectedCountry.callingCode})`}
                         aria-haspopup="listbox"
                         aria-expanded={isCountryDropdownOpen}
@@ -404,7 +400,9 @@ export default function AdminAddCustomer() {
 
                           <div className="overflow-y-auto max-h-64 py-1 divide-y divide-slate-50">
                             {filteredCountries.length === 0 ? (
-                              <div className="py-4 text-center text-slate-400">No countries found</div>
+                              <div className="py-4 text-center text-slate-400">
+                                No countries found
+                              </div>
                             ) : (
                               filteredCountries.map((c) => {
                                 const isSelected = c.code === selectedCountry.code;
@@ -413,13 +411,16 @@ export default function AdminAddCustomer() {
                                     key={c.code}
                                     type="button"
                                     onClick={() => handleSelectCountry(c)}
-                                    className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-slate-50 transition cursor-pointer ${isSelected
+                                    className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-slate-50 transition cursor-pointer ${
+                                      isSelected
                                         ? "bg-amber-50/70 font-semibold text-slate-900"
                                         : "text-slate-700"
-                                      }`}
+                                    }`}
                                   >
                                     <div className="flex items-center gap-2 min-w-0 pr-2">
-                                      <span className="text-base leading-none shrink-0">{c.flag}</span>
+                                      <span className="text-base leading-none shrink-0">
+                                        {c.flag}
+                                      </span>
                                       <span className="truncate">{c.name}</span>
                                       <span className="text-[10px] text-slate-400 shrink-0 uppercase">
                                         ({c.code})
@@ -430,7 +431,10 @@ export default function AdminAddCustomer() {
                                         {c.callingCode}
                                       </span>
                                       {isSelected && (
-                                        <Icon name="check" className="h-3.5 w-3.5 text-orange-600" />
+                                        <Icon
+                                          name="check"
+                                          className="h-3.5 w-3.5 text-orange-600"
+                                        />
                                       )}
                                     </div>
                                   </button>
@@ -453,15 +457,14 @@ export default function AdminAddCustomer() {
                         }
                       }}
                       placeholder={selectedCountry.placeholder || "412 345 678"}
-                      className={`flex-1 px-3.5 py-2 text-sm rounded-lg border bg-white transition outline-none ${phoneError
+                      className={`flex-1 px-3.5 py-2 text-sm rounded-lg border bg-white transition outline-none ${
+                        phoneError
                           ? "border-red-400 bg-red-50/20 focus:border-red-500"
                           : "border-slate-300 text-slate-900 focus:border-orange-600 focus:ring-1 focus:ring-orange-600"
-                        }`}
+                      }`}
                     />
                   </div>
-                  {phoneError ? (
-                    <p className="mt-1 text-xs text-red-500">{phoneError}</p>
-                  ) : null}
+                  {phoneError ? <p className="mt-1 text-xs text-red-500">{phoneError}</p> : null}
                 </div>
 
                 {/* Checkboxes */}

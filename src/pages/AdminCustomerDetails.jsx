@@ -1403,7 +1403,8 @@ export default function AdminCustomerDetails() {
                         )}
                         {([defaultAddress.city, defaultAddress.state, defaultAddress.postal_code]
                           .filter((p) => p && p !== "—")
-                          .join(" ") || null) && (
+                          .join(" ") ||
+                          null) && (
                           <div>
                             {[defaultAddress.city, defaultAddress.state, defaultAddress.postal_code]
                               .filter((p) => p && p !== "—")
@@ -1879,10 +1880,7 @@ export default function AdminCustomerDetails() {
                         }}
                         onBlur={() => {
                           if (editPhoneNumber.trim()) {
-                            const check = validatePhone(
-                              editPhoneNumber,
-                              editSelectedCountry.code
-                            );
+                            const check = validatePhone(editPhoneNumber, editSelectedCountry.code);
                             setEditPhoneError(check.valid ? "" : check.error);
                           }
                         }}
