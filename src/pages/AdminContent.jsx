@@ -4,6 +4,7 @@ import { RichTextEditor } from "@/pages/AdminAddCollection";
 import { deleteBlogPost, listBlogPosts, saveBlogPost, uploadThemeImage } from "@/lib/themeApi";
 import { checkImageFile } from "@/lib/imageUpload";
 import { announceThemeChange } from "@/lib/themeSync";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 // ---------------------------------------------------------------- blog posts
 // /admin/online-store/blog-posts: write, publish and delete the store's blog posts.
@@ -35,6 +36,8 @@ export function BlogPostsPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_POST);
   const [busy, setBusy] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Featured image states
   const fileInputRef = useRef(null);
@@ -71,6 +74,8 @@ export function BlogPostsPage() {
     setUploading(false);
     setUploadProgress(null);
     setIsDragging(false);
+    setShowDeleteModal(false);
+    setDeleting(false);
     setUrlInput(post?.cover_image || "");
     setForm(post && post.id ? { ...EMPTY_POST, ...post, tags: (post.tags || []).join(", ") } : EMPTY_POST);
   }
@@ -105,19 +110,26 @@ export function BlogPostsPage() {
     }
   }
 
-  async function remove() {
-    if (!window.confirm(`Delete "${editing.title}"? This can't be undone.`)) return;
-    setBusy(true);
+  function requestDelete() {
+    setShowDeleteModal(true);
+  }
+
+  async function handleConfirmDelete() {
+    if (!editing?.id || deleting) return;
+    setDeleting(true);
+    setError("");
     try {
       await deleteBlogPost(editing.id);
       setPosts((list) => list.filter((p) => p.id !== editing.id));
       setEditing(null);
+      setShowDeleteModal(false);
       setNotice("Post deleted.");
       announceThemeChange("posts");
     } catch (e) {
-      setError(e.message);
+      setError(e.message || "Failed to delete blog post.");
+      setShowDeleteModal(false);
     } finally {
-      setBusy(false);
+      setDeleting(false);
     }
   }
 
@@ -366,8 +378,8 @@ export function BlogPostsPage() {
                   {editing.id && (
                     <button
                       type="button"
-                      onClick={remove}
-                      disabled={busy}
+                      onClick={requestDelete}
+                      disabled={busy || deleting}
                       className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
                     >
                       Delete post
@@ -414,9 +426,8 @@ export function BlogPostsPage() {
                           src={localPreview || form.cover_image}
                           alt="Blog featured cover"
                           loading="lazy"
-                          className={`block h-[160px] w-full max-w-full object-contain object-center transition duration-200 ${
-                            uploading ? "scale-105 filter blur-xs" : ""
-                          }`}
+                          className={`block h-[160px] w-full max-w-full object-contain object-center transition duration-200 ${uploading ? "scale-105 filter blur-xs" : ""
+                            }`}
                           onError={() => {
                             if (!uploading) {
                               setImageError("Unable to load image from URL. Please check the link.");
@@ -559,10 +570,9 @@ export function BlogPostsPage() {
                           const file = e.dataTransfer.files?.[0];
                           if (file) handleImageFile(file);
                         }}
-                        className={`group flex w-full max-w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
-                          isDragging
-                            ? "border-orange-500 bg-orange-50/50"
-                            : "border-slate-200 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-50"
+                        className={`group flex w-full max-w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${isDragging
+                          ? "border-orange-500 bg-orange-50/50"
+                          : "border-slate-200 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-50"
                           }`}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 shadow-xs transition group-hover:border-orange-200 group-hover:text-orange-600">
@@ -693,6 +703,19 @@ export function BlogPostsPage() {
           )}
         </main>
       </div>
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => !deleting && setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete blog post?"
+        itemName={editing?.title || ""}
+        itemType="Blog post"
+        confirmText="Delete post"
+        cancelText="Cancel"
+        isDestructive
+        isLoading={deleting}
+      />
     </div>
   );
 }
