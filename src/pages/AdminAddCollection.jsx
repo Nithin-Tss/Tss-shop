@@ -1313,9 +1313,9 @@ export default function AdminAddCollection() {
                         <input
                           id="seo-page-title"
                           value={form.seo_title}
-                          onChange={(e) => set("seo_title", e.target.value)}
+                          onChange={(e) => set("seo_title", e.target.value.slice(0, 70))}
                           placeholder={form.name || "Collection title"}
-                          maxLength={255}
+                          maxLength={70}
                           className={inputClass}
                         />
                         <p className="mt-1 text-[12px] text-slate-400">
@@ -1329,11 +1329,12 @@ export default function AdminAddCollection() {
                         <textarea
                           id="seo-description"
                           value={form.seo_description}
-                          onChange={(e) => set("seo_description", e.target.value)}
+                          onChange={(e) => set("seo_description", e.target.value.slice(0, 160))}
                           rows={3}
                           placeholder={
                             plainText(form.description) || "A short summary for search results"
                           }
+                          maxLength={160}
                           className={`${inputClass} resize-y`}
                         />
                         <p className="mt-1 text-[12px] text-slate-400">
