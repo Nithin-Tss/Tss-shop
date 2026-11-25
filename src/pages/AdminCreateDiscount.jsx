@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
@@ -34,6 +34,7 @@ const TYPE_CONFIG = {
 
 const inputClass =
   "w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-orange-600 focus:bg-white focus:ring-4 focus:ring-ink/[0.07]";
+const numberInputClass = `${inputClass} no-spin-input`;
 
 const cardClass = "rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm";
 
@@ -154,6 +155,26 @@ export default function AdminCreateDiscount({ initialType }) {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [serverMessage, setServerMessage] = useState({ type: "", text: "" });
+
+  const containerRef = useRef(null);
+
+  // Prevent browser's native number input stepping on mouse wheel or trackpad scroll
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e) => {
+      if (e.target && e.target.tagName === "INPUT" && e.target.type === "number") {
+        e.preventDefault();
+        e.target.blur();
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   // Fetch catalog data for pickers
   useEffect(() => {
@@ -485,7 +506,7 @@ export default function AdminCreateDiscount({ initialType }) {
   ]);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div ref={containerRef} className="min-h-screen bg-slate-100">
       <AdminHeader />
 
       <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
@@ -706,11 +727,13 @@ export default function AdminCreateDiscount({ initialType }) {
                         <input
                           type="number"
                           min="0"
-                          step={valueType === "percentage" ? "1" : "0.01"}
+                          step="any"
+                          inputMode="decimal"
                           value={discountValue}
                           onChange={(e) => setDiscountValue(e.target.value)}
+                          onWheel={(e) => e.target.blur()}
                           placeholder="0"
-                          className={`${inputClass} pl-8 ${
+                          className={`${numberInputClass} pl-8 ${
                             errors.value ? "border-red-400 ring-2 ring-red-100" : ""
                           }`}
                         />
@@ -889,10 +912,13 @@ export default function AdminCreateDiscount({ initialType }) {
                           <input
                             type="number"
                             min="1"
+                            step="any"
+                            inputMode="decimal"
                             value={buyRequirementValue}
                             onChange={(e) => setBuyRequirementValue(e.target.value)}
+                            onWheel={(e) => e.target.blur()}
                             placeholder={buyRequirementType === "quantity" ? "1" : "0.00"}
-                            className={`${inputClass} ${buyRequirementType === "amount" ? "pl-7" : ""}`}
+                            className={`${numberInputClass} ${buyRequirementType === "amount" ? "pl-7" : ""}`}
                           />
                         </div>
                       </div>
@@ -956,7 +982,8 @@ export default function AdminCreateDiscount({ initialType }) {
                           min="1"
                           value={getYQuantity}
                           onChange={(e) => setGetYQuantity(e.target.value)}
-                          className={`mt-1 max-w-xs ${inputClass}`}
+                          onWheel={(e) => e.target.blur()}
+                          className={`mt-1 max-w-xs ${numberInputClass}`}
                         />
                       </div>
 
@@ -1045,12 +1072,15 @@ export default function AdminCreateDiscount({ initialType }) {
                             <input
                               type="number"
                               min="0"
+                              step="any"
+                              inputMode="decimal"
                               value={getYDiscountValue}
                               onChange={(e) => setGetYDiscountValue(e.target.value)}
+                              onWheel={(e) => e.target.blur()}
                               placeholder={
                                 getYDiscountType === "percentage" ? "e.g. 50%" : "e.g. 10.00"
                               }
-                              className={inputClass}
+                              className={numberInputClass}
                             />
                           </div>
                         )}
@@ -1072,7 +1102,8 @@ export default function AdminCreateDiscount({ initialType }) {
                                 min="1"
                                 value={maxUsesPerOrder}
                                 onChange={(e) => setMaxUsesPerOrder(e.target.value)}
-                                className={inputClass}
+                                onWheel={(e) => e.target.blur()}
+                                className={numberInputClass}
                               />
                             </div>
                           )}
@@ -1123,11 +1154,13 @@ export default function AdminCreateDiscount({ initialType }) {
                         <input
                           type="number"
                           min="0"
-                          step={valueType === "percentage" ? "1" : "0.01"}
+                          step="any"
+                          inputMode="decimal"
                           value={discountValue}
                           onChange={(e) => setDiscountValue(e.target.value)}
+                          onWheel={(e) => e.target.blur()}
                           placeholder="0"
-                          className={`${inputClass} pl-8 ${
+                          className={`${numberInputClass} pl-8 ${
                             errors.value ? "border-red-400 ring-2 ring-red-100" : ""
                           }`}
                         />
@@ -1269,8 +1302,9 @@ export default function AdminCreateDiscount({ initialType }) {
                               step="0.01"
                               value={excludeShippingRateAmount}
                               onChange={(e) => setExcludeShippingRateAmount(e.target.value)}
+                              onWheel={(e) => e.target.blur()}
                               placeholder="0.00"
-                              className={`${inputClass} pl-7`}
+                              className={`${numberInputClass} pl-7`}
                             />
                           </div>
                         )}
@@ -1319,8 +1353,9 @@ export default function AdminCreateDiscount({ initialType }) {
                             step="0.01"
                             value={minAmount}
                             onChange={(e) => setMinAmount(e.target.value)}
+                            onWheel={(e) => e.target.blur()}
                             placeholder="0.00"
-                            className={`${inputClass} pl-8`}
+                            className={`${numberInputClass} pl-8`}
                           />
                           <p className="mt-1 text-xs text-slate-500">
                             Applies to subtotal of items before taxes and shipping.
@@ -1345,8 +1380,9 @@ export default function AdminCreateDiscount({ initialType }) {
                             min="1"
                             value={minQuantity}
                             onChange={(e) => setMinQuantity(e.target.value)}
+                            onWheel={(e) => e.target.blur()}
                             placeholder="1"
-                            className={inputClass}
+                            className={numberInputClass}
                           />
                           <p className="mt-1 text-xs text-slate-500">
                             Applies to total count of eligible items.
@@ -1444,8 +1480,9 @@ export default function AdminCreateDiscount({ initialType }) {
                             min="1"
                             value={totalUsesLimit}
                             onChange={(e) => setTotalUsesLimit(e.target.value)}
+                            onWheel={(e) => e.target.blur()}
                             placeholder="e.g. 100"
-                            className={inputClass}
+                            className={numberInputClass}
                           />
                         </div>
                       )}
