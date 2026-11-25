@@ -444,6 +444,8 @@ export default function AdminCustomizePage() {
   );
 
   const [sampleQuery, setSampleQuery] = useState(() => startParams.get("q") || "");
+  // Wishlist page only: show sample products while the list is empty (preview only, off by default)
+  const [wishlistSamples, setWishlistSamples] = useState(false);
 
   // Visible store pages (About us, ...), and the one the Page preview shows (its handle)
   const [storePages, setStorePages] = useState([]);
@@ -624,6 +626,7 @@ export default function AdminCustomizePage() {
   const sampleCollectionRef = useRef("");
 
   const sampleQueryRef = useRef("");
+  const wishlistSamplesRef = useRef(false);
 
   const samplePageRef = useRef("");
 
@@ -647,6 +650,7 @@ export default function AdminCustomizePage() {
     sampleArticleRef.current = sampleArticle;
     sampleCollectionRef.current = sampleCollection;
     sampleQueryRef.current = sampleQuery;
+    wishlistSamplesRef.current = wishlistSamples;
     samplePageRef.current = samplePage;
     customerPageRef.current = customerPage;
     customerTokenRef.current = customerToken;
@@ -890,6 +894,7 @@ export default function AdminCustomizePage() {
       handle: basePage(pageRef.current) === "page" ? samplePageRef.current : "",
       customer: customerPageRef.current,
       customerToken: customerTokenRef.current,
+      wishlistSamples: pageRef.current === "wishlist" && wishlistSamplesRef.current,
     };
   }
 
@@ -1694,6 +1699,7 @@ export default function AdminCustomizePage() {
     collection: sampleCollection,
     q: sampleQuery,
     handle: samplePage,
+    wishlistSamples: page === "wishlist" && wishlistSamples,
     customer:
       customerPage === "account"
         ? `account|${customerToken}`
@@ -2925,6 +2931,18 @@ export default function AdminCustomizePage() {
                           </option>
                         ))}
                       </select>
+                    )}
+
+                    {/* The Wishlist page shows the real list; samples are an explicit, preview-only choice */}
+                    {page === "wishlist" && (
+                      <label className="flex h-9 items-center gap-2 whitespace-nowrap rounded-lg bg-white/10 px-3 text-sm font-medium text-white">
+                        <input
+                          type="checkbox"
+                          checked={wishlistSamples}
+                          onChange={(e) => setWishlistSamples(e.target.checked)}
+                        />
+                        Sample products (preview only)
+                      </label>
                     )}
 
                     <AssistantButton tone="dark" />
