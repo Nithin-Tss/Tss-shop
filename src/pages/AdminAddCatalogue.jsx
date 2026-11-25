@@ -37,6 +37,22 @@ export default function AdminAddCatalogue() {
   const [sortBy, setSortBy] = useState("title"); // "title" | "created"
   const [sortDirection, setSortDirection] = useState("asc"); // "asc" | "desc"
   const sortMenuRef = useRef(null);
+  const priceAdjustmentInputRef = useRef(null);
+
+  // Prevent browser's native number input stepping on mouse wheel or trackpad scroll
+  useEffect(() => {
+    const el = priceAdjustmentInputRef.current;
+    if (!el) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   // Feedback Toast
   const [toastMessage, setToastMessage] = useState(null);
@@ -424,12 +440,33 @@ export default function AdminAddCatalogue() {
                   {/* Percentage Adjustment Input */}
                   <div className="relative flex items-center">
                     <input
+                      ref={priceAdjustmentInputRef}
                       type="number"
                       min="0"
                       max="100"
+                      step="1"
+                      inputMode="numeric"
                       aria-label="Price adjustment percentage"
                       value={priceAdjustment}
-                      onChange={(e) => setPriceAdjustment(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "") {
+                          setPriceAdjustment("");
+                          return;
+                        }
+                        const num = Number(val);
+                        if (!isNaN(num)) {
+                          if (num > 100) setPriceAdjustment("100");
+                          else if (num < 0) setPriceAdjustment("0");
+                          else setPriceAdjustment(val);
+                        }
+                      }}
+                      onBlur={() => {
+                        if (priceAdjustment === "" || isNaN(Number(priceAdjustment))) {
+                          setPriceAdjustment("0");
+                        }
+                      }}
+                      onWheel={(e) => e.target.blur()}
                       className="w-20 rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-right text-ink focus:border-orange-600 focus:outline-none pr-7"
                     />
                     <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-600">
