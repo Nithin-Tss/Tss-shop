@@ -80,6 +80,7 @@ export function previewTheme(
     q = "",
     customer = "",
     customerToken = "",
+    wishlistSamples = false,
   } = {}
 ) {
   const query = new URLSearchParams({ scroll: String(Math.round(scroll)), selected, page });
@@ -90,6 +91,8 @@ export function previewTheme(
   if (collection) query.set("collection", collection);
   if (q) query.set("q", q);
   if (customer) query.set("customer", customer);
+  // Wishlist page: the merchant's explicit "Sample products (preview only)" option
+  if (wishlistSamples) query.set("sample_products", "1");
   // Sent on every page, so the signed-in preview customer is known beyond the account page
   if (customerToken) query.set("ct", customerToken);
   return apiRequest(`${BASE}/preview/?${query}`, {
