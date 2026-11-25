@@ -347,32 +347,9 @@ export default function AdminCollections() {
           {/* MAIN CARD CONTAINER */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-xs">
             {/* Filter / Search Bar */}
-            <div className="flex flex-col items-stretch justify-between gap-2 border-b border-slate-200 p-4 sm:flex-row sm:items-center">
-              {/* Left: Tab with up/down arrows */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-[13px] font-medium text-charcoal-navy transition-colors hover:bg-slate-200"
-                >
-                  <span>All</span>
-                  <svg
-                    className="h-3.5 w-3.5 text-slate-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Right: Search and filter input + view button */}
-              <div className="ml-auto flex w-full flex-1 items-center gap-2 sm:max-w-md">
+            <div className="flex items-center justify-end gap-2 border-b border-slate-200 p-4">
+              {/* Search and filter input + view button */}
+              <div className="flex w-full flex-1 items-center gap-2 sm:max-w-md">
                 <div className="relative flex flex-1 items-center">
                   <svg
                     className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400"
