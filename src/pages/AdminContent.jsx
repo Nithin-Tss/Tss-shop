@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { RichTextEditor } from "@/pages/AdminAddCollection";
 import { deleteBlogPost, listBlogPosts, saveBlogPost, uploadThemeImage } from "@/lib/themeApi";
+import { checkImageFile } from "@/lib/imageUpload";
 import { announceThemeChange } from "@/lib/themeSync";
 
 // ---------------------------------------------------------------- blog posts
@@ -35,6 +36,21 @@ export function BlogPostsPage() {
   const [form, setForm] = useState(EMPTY_POST);
   const [busy, setBusy] = useState(false);
 
+  // Featured image states
+  const fileInputRef = useRef(null);
+  const [localPreview, setLocalPreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
+  const [imageError, setImageError] = useState("");
+  const [urlInput, setUrlInput] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview);
+    };
+  }, [localPreview]);
+
   useEffect(() => {
     listBlogPosts()
       .then(setPosts)
@@ -44,10 +60,19 @@ export function BlogPostsPage() {
   const set = (key) => (value) => setForm((f) => ({ ...f, [key]: value }));
 
   function open(post) {
+    if (localPreview) {
+      URL.revokeObjectURL(localPreview);
+      setLocalPreview(null);
+    }
     setEditing(post);
     setError("");
     setNotice("");
-    setForm(post.id ? { ...EMPTY_POST, ...post, tags: (post.tags || []).join(", ") } : EMPTY_POST);
+    setImageError("");
+    setUploading(false);
+    setUploadProgress(null);
+    setIsDragging(false);
+    setUrlInput(post?.cover_image || "");
+    setForm(post && post.id ? { ...EMPTY_POST, ...post, tags: (post.tags || []).join(", ") } : EMPTY_POST);
   }
 
   async function save(event) {
@@ -96,13 +121,72 @@ export function BlogPostsPage() {
     }
   }
 
-  async function upload(file) {
+  async function handleImageFile(file) {
     if (!file) return;
-    setBusy(true);
-    const result = await uploadThemeImage(file);
-    setBusy(false);
-    if (result.ok) set("cover_image")(result.data.url);
-    else setError(String(result.error));
+    setImageError("");
+
+    // Validate size and format
+    const problem = await checkImageFile(file);
+    if (problem) {
+      setImageError(problem);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Instant local preview
+    const previewUrl = URL.createObjectURL(file);
+    setLocalPreview(previewUrl);
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const result = await uploadThemeImage(file, (progress) => {
+        setUploadProgress(Math.round(progress * 100));
+      });
+
+      if (result.ok && result.data?.url) {
+        set("cover_image")(result.data.url);
+        setUrlInput(result.data.url);
+        setImageError("");
+      } else {
+        setImageError(result.error ? String(result.error) : "Image upload failed. Please try again.");
+      }
+    } catch (err) {
+      setImageError(err.message || "Failed to upload image.");
+    } finally {
+      setUploading(false);
+      setUploadProgress(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function handleApplyUrl() {
+    const trimmed = urlInput.trim();
+    if (!trimmed) {
+      handleRemoveImage();
+      return;
+    }
+    if (!/^https?:\/\//i.test(trimmed) && !trimmed.startsWith("/")) {
+      setImageError("Please enter a valid image URL starting with http:// or https://");
+      return;
+    }
+    setImageError("");
+    if (localPreview) {
+      URL.revokeObjectURL(localPreview);
+      setLocalPreview(null);
+    }
+    set("cover_image")(trimmed);
+  }
+
+  function handleRemoveImage() {
+    if (localPreview) {
+      URL.revokeObjectURL(localPreview);
+      setLocalPreview(null);
+    }
+    set("cover_image")("");
+    setUrlInput("");
+    setImageError("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   return (
@@ -199,8 +283,11 @@ export function BlogPostsPage() {
           )}
 
           {editing && (
-            <form onSubmit={save} className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-              <section className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <form
+              onSubmit={save}
+              className="mt-5 grid w-full min-w-0 max-w-full gap-5 lg:grid-cols-[minmax(0,1fr)_300px]"
+            >
+              <section className="min-w-0 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <label>
                   <span className={fieldLabel}>Title</span>
                   <input
@@ -246,8 +333,8 @@ export function BlogPostsPage() {
                 </label>
               </section>
 
-              <aside className="grid content-start gap-4">
-                <section className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <aside className="grid w-full min-w-0 max-w-full content-start gap-4 lg:w-[300px] lg:max-w-[300px]">
+                <section className="min-w-0 grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Visibility</span>
                     <select
@@ -288,31 +375,291 @@ export function BlogPostsPage() {
                   )}
                 </section>
 
-                <section className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <span className={fieldLabel}>Featured image</span>
-                  {form.cover_image && (
-                    <img
-                      src={form.cover_image}
-                      alt=""
-                      loading="lazy"
-                      className="aspect-3/2 w-full rounded-lg object-cover"
-                    />
-                  )}
+                <section className="min-w-0 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="block text-[13px] font-semibold text-slate-800">
+                        Featured image
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        Header cover for your blog post
+                      </span>
+                    </div>
+                    {(form.cover_image || localPreview) && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200/60 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        Added
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Hidden file input */}
                   <input
+                    ref={fileInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
-                    onChange={(e) => upload(e.target.files[0])}
-                    className="text-xs"
+                    className="hidden"
+                    disabled={uploading || busy}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageFile(file);
+                    }}
                   />
-                  <input
-                    className={fieldClass}
-                    value={form.cover_image}
-                    onChange={(e) => set("cover_image")(e.target.value)}
-                    placeholder="or paste an image link (https://...)"
-                  />
+
+                  {/* State 1: Image is present or previewed */}
+                  {form.cover_image || localPreview ? (
+                    <div className="w-full min-w-0 space-y-2.5">
+                      <div className="relative flex h-[160px] w-full max-w-full items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 shadow-xs">
+                        <img
+                          src={localPreview || form.cover_image}
+                          alt="Blog featured cover"
+                          loading="lazy"
+                          className={`block h-[160px] w-full max-w-full object-contain object-center transition duration-200 ${
+                            uploading ? "scale-105 filter blur-xs" : ""
+                          }`}
+                          onError={() => {
+                            if (!uploading) {
+                              setImageError("Unable to load image from URL. Please check the link.");
+                            }
+                          }}
+                          onLoad={() => {
+                            if (imageError.startsWith("Unable to load")) {
+                              setImageError("");
+                            }
+                          }}
+                        />
+
+                        {/* Uploading progress overlay */}
+                        {uploading && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/65 p-4 text-center text-white backdrop-blur-[2px]">
+                            <svg
+                              className="h-7 w-7 animate-spin text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                            <p className="mt-2 text-xs font-semibold tracking-wide">
+                              {uploadProgress !== null
+                                ? `Uploading (${uploadProgress}%)`
+                                : "Uploading image..."}
+                            </p>
+                            {uploadProgress !== null && (
+                              <div className="mt-2 h-1.5 w-32 overflow-hidden rounded-full bg-white/30">
+                                <div
+                                  className="h-full bg-white transition-all duration-150"
+                                  style={{ width: `${uploadProgress}%` }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action buttons: Replace and Remove in a 2-column grid */}
+                      <div className="grid w-full min-w-0 grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploading || busy}
+                          className="flex min-w-0 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5 shrink-0 text-slate-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                            />
+                          </svg>
+                          <span className="truncate">Replace</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          disabled={uploading || busy}
+                          className="flex min-w-0 items-center justify-center gap-1 rounded-lg border border-red-200 bg-red-50/70 px-2 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:opacity-50"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5 shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                          <span className="truncate">Remove</span>
+                        </button>
+                      </div>
+
+                      {/* Display image address & Edit URL */}
+                      <div className="flex w-full min-w-0 items-center justify-between gap-1.5 rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1.5 text-[11px] text-slate-500">
+                        <span
+                          className="min-w-0 flex-1 truncate font-mono text-[10.5px]"
+                          title={form.cover_image}
+                        >
+                          {form.cover_image || "Local preview"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newUrl = window.prompt("Edit image URL:", form.cover_image);
+                            if (newUrl !== null) {
+                              const trimmed = newUrl.trim();
+                              set("cover_image")(trimmed);
+                              setUrlInput(trimmed);
+                              if (localPreview) {
+                                URL.revokeObjectURL(localPreview);
+                                setLocalPreview(null);
+                              }
+                            }
+                          }}
+                          className="shrink-0 font-medium text-slate-700 underline hover:text-slate-900"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* State 2: When no image is selected yet */
+                    <div className="w-full min-w-0 space-y-3">
+                      {/* Drag & drop upload area */}
+                      <div
+                        onClick={() => !uploading && fileInputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDragging(true);
+                        }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDragging(false);
+                          const file = e.dataTransfer.files?.[0];
+                          if (file) handleImageFile(file);
+                        }}
+                        className={`group flex w-full max-w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
+                          isDragging
+                            ? "border-orange-500 bg-orange-50/50"
+                            : "border-slate-200 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-50"
+                          }`}
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 shadow-xs transition group-hover:border-orange-200 group-hover:text-orange-600">
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                        <p className="mt-2 text-xs font-semibold text-slate-700 transition group-hover:text-orange-600">
+                          Click to upload{" "}
+                          <span className="font-normal text-slate-500">or drag and drop</span>
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-400">
+                          PNG, JPG or WEBP (up to 1 MB)
+                        </p>
+                      </div>
+
+                      {/* Divider & Paste URL Input */}
+                      <div className="w-full min-w-0 pt-0.5">
+                        <div className="relative mb-2 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-slate-200/80" />
+                          </div>
+                          <span className="relative bg-white px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            or paste image url
+                          </span>
+                        </div>
+
+                        <div className="flex w-full min-w-0 gap-1.5">
+                          <div className="relative min-w-0 flex-1">
+                            <input
+                              type="url"
+                              value={urlInput}
+                              onChange={(e) => {
+                                setUrlInput(e.target.value);
+                                if (imageError) setImageError("");
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleApplyUrl();
+                                }
+                              }}
+                              placeholder="https://example.com/image.jpg"
+                              className="w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleApplyUrl}
+                            disabled={!urlInput.trim()}
+                            className="shrink-0 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-30"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Inline Error Notice */}
+                  {imageError && (
+                    <div className="mt-1 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">
+                      <svg
+                        className="mt-0.5 h-4 w-4 shrink-0 text-red-500"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span className="flex-1 text-[11.5px] leading-snug">{imageError}</span>
+                      <button
+                        type="button"
+                        onClick={() => setImageError("")}
+                        className="ml-1 font-bold text-red-400 hover:text-red-600"
+                        aria-label="Dismiss error"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
                 </section>
 
-                <section className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <section className="min-w-0 grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                   <label>
                     <span className={fieldLabel}>Author</span>
                     <input
