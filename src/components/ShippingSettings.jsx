@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { getStoreId, useCan } from "@/lib/auth";
@@ -10,6 +10,7 @@ const RATES = "/api/v1/delivery/rates/";
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600";
+const numberInputClass = `${inputClass} no-spin-input`;
 
 const bandLabel = (rate, unit) => {
   const min = Number(rate.min_weight);
@@ -27,6 +28,25 @@ const slugify = (text) =>
 
 export default function ShippingSettings() {
   const canManage = useCan("shipping.manage");
+  const containerRef = useRef(null);
+
+  // Prevent browser's native number input stepping on mouse wheel or trackpad scroll
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e) => {
+      if (e.target && e.target.tagName === "INPUT" && e.target.type === "number") {
+        e.preventDefault();
+        e.target.blur();
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   const [locations, setLocations] = useState([]);
   const [gateways, setGateways] = useState([]);
@@ -355,7 +375,7 @@ export default function ShippingSettings() {
   );
 
   return (
-    <div className="space-y-0">
+    <div ref={containerRef} className="space-y-0">
       {error && (
         <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -410,8 +430,9 @@ export default function ShippingSettings() {
               step="0.01"
               value={flatRate}
               onChange={(e) => setFlatRate(e.target.value)}
+              onWheel={(e) => e.target.blur()}
               disabled={!canManage}
-              className={`${inputClass} mt-1`}
+              className={`${numberInputClass} mt-1`}
             />
             <span className="mt-1 block text-xs font-normal text-slate-500">
               Used when no rate below fits the order.
@@ -425,9 +446,10 @@ export default function ShippingSettings() {
               step="0.01"
               value={threshold}
               onChange={(e) => setThreshold(e.target.value)}
+              onWheel={(e) => e.target.blur()}
               placeholder="No free shipping"
               disabled={!canManage}
-              className={`${inputClass} mt-1`}
+              className={`${numberInputClass} mt-1`}
             />
           </label>
           {canManage && (
@@ -514,9 +536,10 @@ export default function ShippingSettings() {
               step="0.001"
               value={rateForm.min_weight}
               onChange={(e) => setRateForm({ ...rateForm, min_weight: e.target.value })}
+              onWheel={(e) => e.target.blur()}
               placeholder={`From (${weightUnit})`}
               aria-label="Minimum weight"
-              className={inputClass}
+              className={numberInputClass}
             />
             <input
               type="number"
@@ -524,9 +547,10 @@ export default function ShippingSettings() {
               step="0.001"
               value={rateForm.max_weight}
               onChange={(e) => setRateForm({ ...rateForm, max_weight: e.target.value })}
+              onWheel={(e) => e.target.blur()}
               placeholder={`Under (${weightUnit})`}
               aria-label="Maximum weight"
-              className={inputClass}
+              className={numberInputClass}
             />
             <input
               type="number"
@@ -535,9 +559,10 @@ export default function ShippingSettings() {
               required
               value={rateForm.price}
               onChange={(e) => setRateForm({ ...rateForm, price: e.target.value })}
+              onWheel={(e) => e.target.blur()}
               placeholder="Price"
               aria-label="Price"
-              className={inputClass}
+              className={numberInputClass}
             />
             <button
               type="submit"

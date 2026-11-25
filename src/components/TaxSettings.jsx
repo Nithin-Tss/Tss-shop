@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { getStoreId, useCan } from "@/lib/auth";
 
@@ -6,6 +6,7 @@ const RATES = "/api/v1/delivery/tax-rates/";
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-orange-600";
+const numberInputClass = `${inputClass} no-spin-input`;
 const primaryButton =
   "rounded-lg bg-orange-600 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600/90 disabled:opacity-50";
 
@@ -16,6 +17,25 @@ export default function TaxSettings() {
   const storeId = getStoreId();
   const canManageStore = useCan("tax.manage");
   const canManageRates = useCan("shipping.manage");
+  const containerRef = useRef(null);
+
+  // Prevent browser's native number input stepping on mouse wheel or trackpad scroll
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e) => {
+      if (e.target && e.target.tagName === "INPUT" && e.target.type === "number") {
+        e.preventDefault();
+        e.target.blur();
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -105,7 +125,7 @@ export default function TaxSettings() {
   };
 
   return (
-    <div>
+    <div ref={containerRef}>
       {error && (
         <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -129,8 +149,9 @@ export default function TaxSettings() {
               step="0.01"
               value={taxRate}
               onChange={(e) => setTaxRate(e.target.value)}
+              onWheel={(e) => e.target.blur()}
               disabled={!canManageStore}
-              className={`${inputClass} mt-1`}
+              className={`${numberInputClass} mt-1`}
             />
           </label>
           <label className="flex items-start gap-2 text-sm font-medium">
@@ -260,9 +281,10 @@ export default function TaxSettings() {
               required
               value={form.rate}
               onChange={(e) => setForm({ ...form, rate: e.target.value })}
+              onWheel={(e) => e.target.blur()}
               placeholder="Rate %"
               aria-label="Rate"
-              className={inputClass}
+              className={numberInputClass}
             />
             <button
               type="submit"
