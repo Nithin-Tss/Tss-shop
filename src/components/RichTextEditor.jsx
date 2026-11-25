@@ -1913,12 +1913,12 @@ export default function RichTextEditor({
   const slashIndex = Math.min(slashActive, Math.max(slashItems.length - 1, 0));
 
   const withErrorBorder = error
-    ? "border-red-400 focus-within:border-red-500"
-    : "border-slate-300 focus-within:border-slate-500";
+    ? "border-red-400 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20"
+    : "border-slate-300 focus-within:border-[#B08D57] focus-within:ring-2 focus-within:ring-[#B08D57]/20";
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border bg-white shadow-2xs transition focus-within:ring-2 focus-within:ring-slate-900/10 ${withErrorBorder}`}
+      className={`overflow-hidden rounded-xl border bg-white shadow-2xs transition ${withErrorBorder}`}
       onClick={(e) => {
         // Prevent click events from bubbling up to any potential ancestor <label>
         e.stopPropagation();
@@ -1926,7 +1926,9 @@ export default function RichTextEditor({
     >
       {/* 1. TOOLBAR */}
       <div
-        className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 bg-[#FAFBFD] px-2 py-1.5 text-slate-700"
+        className={`flex flex-wrap items-center gap-0.5 border-b border-slate-200 px-2 py-1.5 text-slate-700 transition-colors ${
+          isSourceView ? "bg-slate-100/70" : "bg-[#FAFBFD]"
+        }`}
         role="toolbar"
         aria-label="Rich text editor toolbar"
         onClick={(e) => {
@@ -2841,6 +2843,13 @@ export default function RichTextEditor({
         {/* Spacer */}
         <div className="flex-1" />
 
+        {isSourceView && (
+          <span className="mr-2 hidden items-center gap-1.5 text-[11px] font-medium text-slate-500 sm:inline-flex">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#B08D57]" />
+            HTML Source Mode
+          </span>
+        )}
+
         {/* 16. HTML / Source Code View Toggle */}
         <button
           type="button"
@@ -2857,7 +2866,7 @@ export default function RichTextEditor({
           }}
           className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition ${
             isSourceView
-              ? "border-orange-600 bg-orange-50 text-orange-700 shadow-2xs"
+              ? "border-[#B08D57] bg-[#B08D57]/10 text-[#8F6B32] shadow-2xs hover:bg-[#B08D57]/15"
               : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
           }`}
         >
@@ -2874,17 +2883,20 @@ export default function RichTextEditor({
 
       {/* 2. EDITOR CANVAS */}
       {isSourceView ? (
-        <div className="relative">
+        <div className="relative bg-[#FAFAFA]">
           <textarea
-            value={value}
+            value={value || ""}
             onChange={(e) => {
               const html = e.target.value;
               lastEmittedRef.current = html;
               onChange(html);
             }}
             placeholder="<p>Enter HTML source code here...</p>"
-            rows={10}
-            className="w-full min-h-[240px] max-h-[600px] resize-y bg-[#111827] px-4 py-3 font-mono text-xs leading-relaxed text-slate-100 outline-none"
+            rows={12}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoCorrect="off"
+            className="block w-full min-h-[260px] max-h-[600px] resize-y border-0 bg-[#FAFAFA] px-4 py-3.5 font-mono text-xs sm:text-[13px] leading-relaxed text-[#1F2937] placeholder:text-slate-400 caret-[#B08D57] selection:bg-[#B08D57]/20 selection:text-[#1F2937] outline-none focus:outline-none focus:ring-0"
           />
         </div>
       ) : (
