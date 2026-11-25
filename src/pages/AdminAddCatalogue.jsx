@@ -573,14 +573,14 @@ export default function AdminAddCatalogue() {
                     <button
                       type="button"
                       onClick={handleExportProducts}
-                      className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-medium text-slate-400 hover:bg-slate-200 hover:text-orange-600 transition"
+                      className="rounded-lg bg-black px-3 py-1 text-xs font-medium text-white hover:bg-neutral-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                     >
                       Export
                     </button>
                     <button
                       type="button"
                       onClick={() => importRef.current?.click()}
-                      className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-medium text-slate-400 hover:bg-slate-200 hover:text-orange-600 transition"
+                      className="rounded-lg bg-black px-3 py-1 text-xs font-medium text-white hover:bg-neutral-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
                     >
                       Import
                     </button>

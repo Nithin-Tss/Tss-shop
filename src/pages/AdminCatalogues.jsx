@@ -255,7 +255,7 @@ export default function CataloguesPage() {
               <button
                 type="button"
                 onClick={handleExport}
-                className="rounded-lg bg-slate-100 px-3.5 py-1.5 text-[13px] font-medium text-slate-400 hover:bg-slate-200 hover:text-orange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+                className="rounded-lg bg-black px-3.5 py-1.5 text-[13px] font-medium text-white hover:bg-neutral-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
               >
                 Export
               </button>
@@ -263,7 +263,7 @@ export default function CataloguesPage() {
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(true)}
-                className="rounded-lg bg-slate-100 px-3.5 py-1.5 text-[13px] font-medium text-slate-400 hover:bg-slate-200 hover:text-orange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+                className="rounded-lg bg-black px-3.5 py-1.5 text-[13px] font-medium text-white hover:bg-neutral-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
               >
                 Import
               </button>
