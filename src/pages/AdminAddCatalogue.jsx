@@ -337,14 +337,21 @@ export default function AdminAddCatalogue() {
                       aria-label="Catalog status"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2 pr-8 text-sm font-medium text-ink focus:border-orange-600 focus:outline-none cursor-pointer"
+                      className="appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2 pr-8 text-sm font-medium text-ink shadow-2xs hover:border-slate-400 focus:border-orange-600 focus:ring-1 focus:ring-orange-600 focus:outline-none transition-colors cursor-pointer"
                     >
                       <option value="active">Active</option>
                       <option value="draft">Draft</option>
                     </select>
-                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-600">
-                      ↕
-                    </span>
+                    <svg
+                      className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m6 8 4 4 4-4" />
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -417,7 +424,7 @@ export default function AdminAddCatalogue() {
                     id="set-prices-currency"
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full sm:w-auto min-w-60 appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2 pr-8 text-sm text-ink focus:border-orange-600 focus:outline-none cursor-pointer"
+                    className="w-full sm:w-auto min-w-48 appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2 pr-9 text-sm font-medium text-ink shadow-2xs hover:border-slate-400 focus:border-orange-600 focus:ring-1 focus:ring-orange-600 focus:outline-none transition-colors cursor-pointer"
                   >
                     <option value="">Store currency</option>
                     {CURRENCIES.map((code) => (
@@ -426,9 +433,16 @@ export default function AdminAddCatalogue() {
                       </option>
                     ))}
                   </select>
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-600">
-                    ⌄
-                  </span>
+                  <svg
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m6 8 4 4 4-4" />
+                  </svg>
                 </div>
               </div>
 
@@ -480,14 +494,21 @@ export default function AdminAddCatalogue() {
                       aria-label="Adjustment direction"
                       value={adjustmentDirection}
                       onChange={(e) => setAdjustmentDirection(e.target.value)}
-                      className="appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 pr-8 text-sm text-ink focus:border-orange-600 focus:outline-none cursor-pointer"
+                      className="appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-1.5 pr-8 text-sm font-medium text-ink shadow-2xs hover:border-slate-400 focus:border-orange-600 focus:ring-1 focus:ring-orange-600 focus:outline-none transition-colors cursor-pointer"
                     >
                       <option value="decrease">Decrease</option>
                       <option value="increase">Increase</option>
                     </select>
-                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-600">
-                      ↕
-                    </span>
+                    <svg
+                      className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m6 8 4 4 4-4" />
+                    </svg>
                   </div>
 
                   {/* Include compare-at price Switch */}
