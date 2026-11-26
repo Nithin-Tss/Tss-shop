@@ -592,8 +592,9 @@ function BankPayoutSettings() {
               <button
                 type="button"
                 onClick={() => setIsCountryDropdownOpen((prev) => !prev)}
-                className={`flex w-full items-center justify-between rounded-lg border bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-600 cursor-pointer ${fieldErrors.country ? "border-red-400" : "border-slate-300 hover:border-slate-400"
-                  }`}
+                className={`flex w-full items-center justify-between rounded-lg border bg-white px-3.5 py-2.5 text-sm transition-colors focus:border-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-600 cursor-pointer ${
+                  fieldErrors.country ? "border-red-400" : "border-slate-300 hover:border-slate-400"
+                }`}
                 aria-haspopup="listbox"
                 aria-expanded={isCountryDropdownOpen}
               >
@@ -609,8 +610,9 @@ function BankPayoutSettings() {
                   )}
                 </div>
                 <ChevronDown
-                  className={`h-4 w-4 text-slate-400 transition-transform ${isCountryDropdownOpen ? "rotate-180" : ""
-                    }`}
+                  className={`h-4 w-4 text-slate-400 transition-transform ${
+                    isCountryDropdownOpen ? "rotate-180" : ""
+                  }`}
                   strokeWidth={1.8}
                   aria-hidden="true"
                 />
@@ -644,10 +646,11 @@ function BankPayoutSettings() {
                             <button
                               type="button"
                               onClick={() => handleCountrySelect(c.code)}
-                              className={`flex w-full items-center justify-between px-3.5 py-2 text-left text-sm transition-colors hover:bg-slate-50 cursor-pointer ${isSelected
-                                ? "bg-orange-50/70 font-semibold text-orange-950"
-                                : "text-slate-700"
-                                }`}
+                              className={`flex w-full items-center justify-between px-3.5 py-2 text-left text-sm transition-colors hover:bg-slate-50 cursor-pointer ${
+                                isSelected
+                                  ? "bg-orange-50/70 font-semibold text-orange-950"
+                                  : "text-slate-700"
+                              }`}
                             >
                               <div className="flex items-center gap-2.5 truncate">
                                 <span className="text-base">{c.flag}</span>
@@ -717,14 +720,16 @@ function BankPayoutSettings() {
                     <span className="text-base">{selectedCountryObj?.flag}</span>
                     <span>
                       {selectedCountryObj?.name} banking form configured (
-                      {countryConfig?.isIban ? "ISO 13616 IBAN standard" : "Domestic clearing standard"}
+                      {countryConfig?.isIban
+                        ? "ISO 13616 IBAN standard"
+                        : "Domestic clearing standard"}
                       )
                     </span>
                   </div>
                   <p className="mt-1 text-[11px] text-emerald-700">
-                    Direct bank details collection form is active. Note: Actual merchant payout eligibility
-                    depends on your connected payment provider (e.g. Stripe Connect) account configuration
-                    and currency settlement availability.
+                    Direct bank details collection form is active. Note: Actual merchant payout
+                    eligibility depends on your connected payment provider (e.g. Stripe Connect)
+                    account configuration and currency settlement availability.
                   </p>
                 </div>
 
@@ -1133,17 +1138,14 @@ function BankPayoutSettings() {
                             countryConfig.routingType === "numeric"
                               ? handleNumericKeyDown("routing_code", countryConfig.routingLabel)
                               : handleAlphanumericKeyDown(
-                                "routing_code",
-                                countryConfig.routingLabel
-                              )
+                                  "routing_code",
+                                  countryConfig.routingLabel
+                                )
                           }
                           onPaste={
                             countryConfig.routingType === "numeric"
                               ? handleNumericPaste("routing_code", countryConfig.routingLabel)
-                              : handleAlphanumericPaste(
-                                "routing_code",
-                                countryConfig.routingLabel
-                              )
+                              : handleAlphanumericPaste("routing_code", countryConfig.routingLabel)
                           }
                           className={fieldClass}
                           placeholder={countryConfig.routingPlaceholder}
@@ -1163,8 +1165,8 @@ function BankPayoutSettings() {
 
                   {/* IBAN and Confirm IBAN (for SEPA and International IBAN countries) */}
                   {countryConfig?.isIban ||
-                    countryConfig?.formType === "SEPA" ||
-                    countryConfig?.formType === "IBAN" ? (
+                  countryConfig?.formType === "SEPA" ||
+                  countryConfig?.formType === "IBAN" ? (
                     <>
                       <label className="block">
                         <span className="mb-1 block text-sm font-medium text-slate-700">
@@ -1317,35 +1319,35 @@ function BankPayoutSettings() {
                           onKeyDown={
                             countryConfig?.accountNumberType === "numeric"
                               ? handleNumericKeyDown(
-                                "account_number",
-                                countryConfig?.accountNumberLabel ||
-                                `${countryConfig?.name || "This country's"} account number`
-                              )
+                                  "account_number",
+                                  countryConfig?.accountNumberLabel ||
+                                    `${countryConfig?.name || "This country's"} account number`
+                                )
                               : handleAlphanumericKeyDown(
-                                "account_number",
-                                countryConfig?.accountNumberLabel ||
-                                `${countryConfig?.name || "This country's"} account number`
-                              )
+                                  "account_number",
+                                  countryConfig?.accountNumberLabel ||
+                                    `${countryConfig?.name || "This country's"} account number`
+                                )
                           }
                           onPaste={
                             countryConfig?.accountNumberType === "numeric"
                               ? handleNumericPaste(
-                                "account_number",
-                                countryConfig?.accountNumberLabel ||
-                                `${countryConfig?.name || "This country's"} account number`
-                              )
+                                  "account_number",
+                                  countryConfig?.accountNumberLabel ||
+                                    `${countryConfig?.name || "This country's"} account number`
+                                )
                               : handleAlphanumericPaste(
-                                "account_number",
-                                countryConfig?.accountNumberLabel ||
-                                `${countryConfig?.name || "This country's"} account number`
-                              )
+                                  "account_number",
+                                  countryConfig?.accountNumberLabel ||
+                                    `${countryConfig?.name || "This country's"} account number`
+                                )
                           }
                           className={fieldClass}
                           placeholder={
                             saved?.configured
                               ? `•••• ${saved.account_last4} (leave blank to keep)`
                               : countryConfig?.accountNumberPlaceholder ||
-                              "Enter bank account number"
+                                "Enter bank account number"
                           }
                           autoComplete="off"
                           maxLength={countryConfig?.accountNumberMax || 34}
@@ -1396,24 +1398,24 @@ function BankPayoutSettings() {
                           onKeyDown={
                             countryConfig?.accountNumberType === "numeric"
                               ? handleNumericKeyDown(
-                                "confirm_account_number",
-                                `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
-                              )
+                                  "confirm_account_number",
+                                  `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
+                                )
                               : handleAlphanumericKeyDown(
-                                "confirm_account_number",
-                                `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
-                              )
+                                  "confirm_account_number",
+                                  `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
+                                )
                           }
                           onPaste={
                             countryConfig?.accountNumberType === "numeric"
                               ? handleNumericPaste(
-                                "confirm_account_number",
-                                `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
-                              )
+                                  "confirm_account_number",
+                                  `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
+                                )
                               : handleAlphanumericPaste(
-                                "confirm_account_number",
-                                `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
-                              )
+                                  "confirm_account_number",
+                                  `Confirm ${countryConfig?.accountNumberLabel?.toLowerCase() || "account number"}`
+                                )
                           }
                           className={fieldClass}
                           placeholder={`Re-enter ${countryConfig?.accountNumberLabel?.toLowerCase() || "bank account number"}`}

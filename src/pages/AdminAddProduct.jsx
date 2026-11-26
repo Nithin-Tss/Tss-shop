@@ -4617,7 +4617,10 @@ export function ProductForm({ productId }) {
                               {/* Image or Broken fallback */}
                               {isBroken ? (
                                 <div className="flex h-full w-full flex-col items-center justify-center p-3 text-center text-slate-400">
-                                  <AlertTriangle className="mb-1 h-7 w-7 text-slate-300" strokeWidth={1.5} />
+                                  <AlertTriangle
+                                    className="mb-1 h-7 w-7 text-slate-300"
+                                    strokeWidth={1.5}
+                                  />
                                   <span className="text-[11px] font-medium text-slate-600">
                                     Image unavailable
                                   </span>

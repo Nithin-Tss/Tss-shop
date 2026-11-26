@@ -952,7 +952,10 @@ export default function AdminCustomerDetails() {
                       <div>
                         {/* Test Order Warning Banner */}
                         <div className="bg-[rgba(234,88,12,0.08)] border border-orange-200 text-orange-700 rounded-xl px-4 py-2.5 text-xs font-medium flex items-center gap-2 mb-4">
-                          <AlertCircle className="w-4 h-4 text-orange-600 shrink-0" strokeWidth={2} />
+                          <AlertCircle
+                            className="w-4 h-4 text-orange-600 shrink-0"
+                            strokeWidth={2}
+                          />
                           <span>This is a test order. Payment not processed.</span>
                         </div>
 

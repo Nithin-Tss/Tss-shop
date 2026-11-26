@@ -17,11 +17,7 @@ const sparkle = <Sparkles className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden=
 
 // The empty state's picture: just a violet sparkle, no bubble (inline SVG)
 const illustration = (
-  <Sparkles
-    className="h-10 w-10 text-ink/70"
-    strokeWidth={1.4}
-    aria-hidden="true"
-  />
+  <Sparkles className="h-10 w-10 text-ink/70" strokeWidth={1.4} aria-hidden="true" />
 );
 
 const avatar =

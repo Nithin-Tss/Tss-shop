@@ -135,13 +135,7 @@ function OpenThemeLink({ theme, className, icon }) {
       onClick={() => openStorefront("/", theme.published ? "" : theme.id)}
       className={className}
     >
-      {icon && (
-        <ExternalLink
-          className="mr-1.5 h-4 w-4"
-          strokeWidth={1.8}
-          aria-hidden="true"
-        />
-      )}
+      {icon && <ExternalLink className="mr-1.5 h-4 w-4" strokeWidth={1.8} aria-hidden="true" />}
       Open theme
     </button>
   );

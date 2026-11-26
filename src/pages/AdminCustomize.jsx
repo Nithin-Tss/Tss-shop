@@ -1,6 +1,34 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { Link } from "react-router-dom";
+import {
+  ChevronLeft,
+  Code,
+  ExternalLink,
+  Undo,
+  Redo,
+  Check,
+  Save,
+  Menu,
+  MoreHorizontal,
+  X,
+  Plus,
+  ArrowLeft,
+  Copy,
+  Trash2,
+  MousePointer,
+  Monitor,
+  Smartphone,
+  RotateCw,
+  Image as ImageIcon,
+  Sliders,
+  LayoutGrid,
+  Layers,
+  AlignLeft,
+  LayoutTemplate,
+  Tag,
+  ShoppingBag,
+} from "lucide-react";
 
 import { AiPageBuilderButton } from "@/components/AiPageBuilder";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
@@ -346,55 +374,14 @@ function syncedForSave(section) {
 }
 
 const SECTION_ICONS = {
-  hero: (
-    <>
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <circle cx="9" cy="10" r="2" />
-      <path d="m21 16-5-5-9 9" />
-    </>
-  ),
-  slideshow: (
-    <>
-      <rect x="5" y="6" width="14" height="12" rx="2" />
-      <path d="M2 8v8M22 8v8" />
-    </>
-  ),
-  "product-grid": (
-    <>
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-    </>
-  ),
-  "product-carousel": (
-    <>
-      <rect x="6" y="5" width="12" height="14" rx="2" />
-      <path d="M2 7v10M22 7v10" />
-    </>
-  ),
-  "rich-text": <path d="M4 6h16M4 10h16M4 14h10M4 18h7" />,
-  custom: (
-    <>
-      <rect x="3" y="3" width="18" height="7" rx="1.5" />
-      <rect x="3" y="14" width="8" height="7" rx="1.5" />
-      <rect x="15" y="14" width="6" height="7" rx="1.5" />
-    </>
-  ),
-  "main-product": (
-    <>
-      <path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z" />
-      <circle cx="7.5" cy="7.5" r="1" />
-    </>
-  ),
-  "main-collection": (
-    <>
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-    </>
-  ),
+  hero: ImageIcon,
+  slideshow: Sliders,
+  "product-grid": LayoutGrid,
+  "product-carousel": Layers,
+  "rich-text": AlignLeft,
+  custom: LayoutTemplate,
+  "main-product": Tag,
+  "main-collection": ShoppingBag,
 };
 
 export default function AdminCustomizePage() {
@@ -2817,9 +2804,11 @@ export default function AdminCustomizePage() {
                         className={tbButton}
                         title="Back to the page you came from"
                       >
-                        <svg {...iconProps} className="h-4 w-4 text-slate-500">
-                          <path d="m15 18-6-6 6-6" />
-                        </svg>
+                        <ChevronLeft
+                          className="h-4 w-4 text-slate-500"
+                          strokeWidth={1.75}
+                          aria-hidden="true"
+                        />
                         {pageLabel(backStack[backStack.length - 1].page) || "Back"}
                       </button>
                     )}
@@ -2967,10 +2956,11 @@ export default function AdminCustomizePage() {
                       title="Open the theme code in the editor"
                       className={tbButton}
                     >
-                      <svg {...iconProps} className="h-4 w-4 text-slate-500">
-                        <path d="m8 7-5 5 5 5" />
-                        <path d="m16 7 5 5-5 5" />
-                      </svg>
+                      <Code
+                        className="h-4 w-4 text-slate-500"
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                      />
                       Edit code
                     </a>
 
@@ -2988,10 +2978,11 @@ export default function AdminCustomizePage() {
                         className={tbButton}
                       >
                         Open theme
-                        <svg {...iconProps} className="-mr-0.5 h-3.5 w-3.5 text-slate-500">
-                          <path d="M7 17 17 7" />
-                          <path d="M8 7h9v9" />
-                        </svg>
+                        <ExternalLink
+                          className="-mr-0.5 h-3.5 w-3.5 text-slate-500"
+                          strokeWidth={1.75}
+                          aria-hidden="true"
+                        />
                       </a>
                     )}
 
@@ -3004,10 +2995,7 @@ export default function AdminCustomizePage() {
                         aria-label="Undo"
                         title="Undo (Ctrl+Z)"
                       >
-                        <svg {...iconProps} className="h-4 w-4">
-                          <path d="M9 14 4 9l5-5" />
-                          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
-                        </svg>
+                        <Undo className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                       </button>
                       <span className="h-4 w-px bg-white/15" />
                       <button
@@ -3018,10 +3006,7 @@ export default function AdminCustomizePage() {
                         aria-label="Redo"
                         title="Redo (Ctrl+Shift+Z)"
                       >
-                        <svg {...iconProps} className="h-4 w-4">
-                          <path d="m15 14 5-5-5-5" />
-                          <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
-                        </svg>
+                        <Redo className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                       </button>
                     </div>
 
@@ -3032,13 +3017,11 @@ export default function AdminCustomizePage() {
                     >
                       {saveState === "saved" && (
                         <span className="flex items-center gap-1 text-white/70">
-                          <svg
-                            {...iconProps}
-                            strokeWidth="2.2"
+                          <Check
+                            strokeWidth={2.2}
                             className="h-3.5 w-3.5 text-emerald-400"
-                          >
-                            <path d="m5 12.5 4.5 4.5L19 7.5" />
-                          </svg>
+                            aria-hidden="true"
+                          />
                           All changes saved
                         </span>
                       )}
@@ -3101,10 +3084,7 @@ export default function AdminCustomizePage() {
                       className={tbPrimary}
                       title="Save your changes to the storefront"
                     >
-                      <svg {...iconProps} className="h-4 w-4">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
-                        <path d="M17 21v-8H7v8M7 3v5h8" />
-                      </svg>
+                      <Save className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                       Save
                     </button>
                   </div>
@@ -3159,9 +3139,7 @@ export default function AdminCustomizePage() {
                             : "lg:flex lg:group-focus-within/side:opacity-0 lg:group-hover/side:opacity-0"
                         }`}
                       >
-                        <svg {...iconProps} className="h-5 w-5">
-                          <path d="M3 5h18M3 12h18M3 19h18" />
-                        </svg>
+                        <Menu className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
                       </div>
                       <div
                         className={`flex h-full w-255 transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none ${
@@ -3256,14 +3234,19 @@ export default function AdminCustomizePage() {
                                   >
                                     {/* The type icon turns into the drag handle on hover */}
                                     <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
-                                      <svg
-                                        {...iconProps}
-                                        className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
-                                          s.hidden ? "text-slate-400" : "text-slate-400"
-                                        }`}
-                                      >
-                                        {SECTION_ICONS[s.type] || SECTION_ICONS.custom}
-                                      </svg>
+                                      {(() => {
+                                        const SectionIcon =
+                                          SECTION_ICONS[s.type] || SECTION_ICONS.custom;
+                                        return (
+                                          <SectionIcon
+                                            className={`h-4 w-4 group-hover:invisible group-focus-within:invisible [@media(hover:none)]:invisible ${
+                                              s.hidden ? "text-slate-400" : "text-slate-400"
+                                            }`}
+                                            strokeWidth={1.75}
+                                            aria-hidden="true"
+                                          />
+                                        );
+                                      })()}
                                       <span className="invisible absolute inset-0 flex items-center justify-center group-hover:visible group-focus-within:visible [@media(hover:none)]:visible">
                                         <DragHandle
                                           label={`Move ${name}`}
@@ -3365,16 +3348,11 @@ export default function AdminCustomizePage() {
                                             aria-haspopup="menu"
                                             aria-expanded={menuOpen}
                                           >
-                                            <svg
-                                              viewBox="0 0 24 24"
-                                              fill="currentColor"
+                                            <MoreHorizontal
                                               className="h-4 w-4"
+                                              strokeWidth={1.75}
                                               aria-hidden="true"
-                                            >
-                                              <circle cx="5" cy="12" r="1.6" />
-                                              <circle cx="12" cy="12" r="1.6" />
-                                              <circle cx="19" cy="12" r="1.6" />
-                                            </svg>
+                                            />
                                           </button>
 
                                           {menuOpen && (
@@ -3503,9 +3481,11 @@ export default function AdminCustomizePage() {
                                     aria-label="Add section"
                                     title="Add section"
                                   >
-                                    <svg {...iconProps} strokeWidth="2.2" className="h-4 w-4">
-                                      <path d="m5 12.5 4.5 4.5L19 7.5" />
-                                    </svg>
+                                    <Check
+                                      strokeWidth={2.2}
+                                      className="h-4 w-4"
+                                      aria-hidden="true"
+                                    />
                                   </button>
 
                                   <button
@@ -3518,9 +3498,7 @@ export default function AdminCustomizePage() {
                                     aria-label="Cancel"
                                     title="Cancel"
                                   >
-                                    <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                                      <path d="M6 6l12 12M18 6L6 18" />
-                                    </svg>
+                                    <X strokeWidth={2} className="h-4 w-4" aria-hidden="true" />
                                   </button>
                                 </div>
 
@@ -3557,9 +3535,7 @@ export default function AdminCustomizePage() {
                                   className="flex h-5 w-5 items-center justify-center"
                                   aria-hidden="true"
                                 >
-                                  <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                                    <path d="M12 5v14M5 12h14" />
-                                  </svg>
+                                  <Plus strokeWidth={2} className="h-4 w-4" aria-hidden="true" />
                                 </span>
                                 Add section
                               </button>
@@ -3630,9 +3606,7 @@ export default function AdminCustomizePage() {
                               aria-label="Back to sections"
                               title="Back (Esc)"
                             >
-                              <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                                <path d="M19 12H5M11 6l-6 6 6 6" />
-                              </svg>
+                              <ArrowLeft strokeWidth={2} className="h-4 w-4" aria-hidden="true" />
                             </button>
 
                             <div className="min-w-0 flex-1">
@@ -3804,10 +3778,11 @@ export default function AdminCustomizePage() {
                                     onClick={() => duplicateSection(shown)}
                                     className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600"
                                   >
-                                    <svg {...iconProps} className="h-3.5 w-3.5">
-                                      <rect x="8" y="8" width="13" height="13" rx="2" />
-                                      <path d="M4 16V5a2 2 0 0 1 2-2h11" />
-                                    </svg>
+                                    <Copy
+                                      className="h-3.5 w-3.5"
+                                      strokeWidth={1.75}
+                                      aria-hidden="true"
+                                    />
                                     Duplicate
                                   </button>
 
@@ -3816,9 +3791,11 @@ export default function AdminCustomizePage() {
                                     onClick={() => removeSection(shown)}
                                     className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
                                   >
-                                    <svg {...iconProps} className="h-3.5 w-3.5">
-                                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                                    </svg>
+                                    <Trash2
+                                      className="h-3.5 w-3.5"
+                                      strokeWidth={1.75}
+                                      aria-hidden="true"
+                                    />
                                     Delete
                                   </button>
                                 </>
@@ -3845,9 +3822,7 @@ export default function AdminCustomizePage() {
                               }
                               title="Back (Esc)"
                             >
-                              <svg {...iconProps} strokeWidth="2" className="h-4 w-4">
-                                <path d="M19 12H5M11 6l-6 6 6 6" />
-                              </svg>
+                              <ArrowLeft strokeWidth={2} className="h-4 w-4" aria-hidden="true" />
                             </button>
 
                             <div className="min-w-0 flex-1">
@@ -4090,10 +4065,11 @@ export default function AdminCustomizePage() {
                                   onClick={() => duplicateBlock(shown, shownBlockIndex)}
                                   className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-orange-600 disabled:opacity-30"
                                 >
-                                  <svg {...iconProps} className="h-3.5 w-3.5">
-                                    <rect x="8" y="8" width="13" height="13" rx="2" />
-                                    <path d="M4 16V5a2 2 0 0 1 2-2h11" />
-                                  </svg>
+                                  <Copy
+                                    className="h-3.5 w-3.5"
+                                    strokeWidth={1.75}
+                                    aria-hidden="true"
+                                  />
                                   Duplicate
                                 </button>
                               )}
@@ -4116,9 +4092,11 @@ export default function AdminCustomizePage() {
                                   }}
                                   className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
                                 >
-                                  <svg {...iconProps} className="h-3.5 w-3.5">
-                                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                                  </svg>
+                                  <Trash2
+                                    className="h-3.5 w-3.5"
+                                    strokeWidth={1.75}
+                                    aria-hidden="true"
+                                  />
                                   {cardPart ? "Remove block" : "Delete"}
                                 </button>
                               )}
@@ -4159,9 +4137,7 @@ export default function AdminCustomizePage() {
                               : "bg-white text-slate-700 ring-slate-900/10 hover:ring-slate-900/25"
                           }`}
                         >
-                          <svg {...iconProps} className="h-4 w-4">
-                            <path d="M4 3l7 17 2.5-7.5L21 10z" />
-                          </svg>
+                          <MousePointer className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                           Edit mode
                           <span
                             aria-hidden="true"
@@ -4180,9 +4156,9 @@ export default function AdminCustomizePage() {
                           aria-label="Preview size"
                         >
                           {[
-                            ["desktop", "Desktop", "M3 4h18v12H3zM8 20h8M12 16v4"],
-                            ["mobile", "Mobile", "M7 2h10v20H7zM11 18h2"],
-                          ].map(([id, name, path]) => (
+                            ["desktop", "Desktop", Monitor],
+                            ["mobile", "Mobile", Smartphone],
+                          ].map(([id, name, DeviceIcon]) => (
                             <button
                               key={id}
                               type="button"
@@ -4195,9 +4171,11 @@ export default function AdminCustomizePage() {
                                   : "text-slate-600 hover:text-ink"
                               }`}
                             >
-                              <svg {...iconProps} className="h-4 w-4">
-                                <path d={path} />
-                              </svg>
+                              <DeviceIcon
+                                className="h-4 w-4"
+                                strokeWidth={1.75}
+                                aria-hidden="true"
+                              />
                               {name}
                             </button>
                           ))}
@@ -4208,10 +4186,7 @@ export default function AdminCustomizePage() {
                           className="flex h-11 items-center gap-2 rounded-full bg-white px-4 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-slate-900/10 transition hover:ring-slate-900/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-charcoal-navy"
                           onClick={() => setPreviewKey((k) => k + 1)}
                         >
-                          <svg {...iconProps} className="h-4 w-4">
-                            <path d="M20 11a8 8 0 1 0-2.3 5.7" />
-                            <path d="M20 4v7h-7" />
-                          </svg>
+                          <RotateCw className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                           Refresh
                         </button>
                       </div>

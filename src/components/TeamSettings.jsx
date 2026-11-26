@@ -1,14 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Search,
-  X,
-  ArrowUpDown,
-  ChevronRight,
-  Shield,
-  Lock,
-  Mail,
-  Crown,
-} from "lucide-react";
+import { Search, X, ArrowUpDown, ChevronRight, Shield, Lock, Mail, Crown } from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { can, getActiveStore, setStores, useSession } from "@/lib/auth";
 
