@@ -1,14 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { formatAmount, useStoreCurrency } from "@/lib/formatPrice";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Sparkles,
-  ChevronDown,
-  Search,
-  SlidersHorizontal,
-  Check,
-  Trash2,
-} from "lucide-react";
+import { Sparkles, ChevronDown, Search, SlidersHorizontal, Check, Trash2 } from "lucide-react";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan, useSession } from "@/lib/auth";

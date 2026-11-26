@@ -1,11 +1,13 @@
 import { useState } from "react";
 
 export default function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+  // The form is not wired to an API or email service yet, so nothing is sent.
+  // Tell the user that plainly instead of pretending the message went through.
+  const [notIntegrated, setNotIntegrated] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setNotIntegrated(true);
   };
 
   return (
@@ -70,84 +72,83 @@ export default function Contact() {
               Fill out the form below and our support team will get back to you.
             </p>
 
-            {submitted ? (
-              <div className="mt-8 rounded-xl border border-green-200 bg-green-50 p-6">
-                <h3 className="font-semibold text-green-800">Message submitted</h3>
-                <p className="mt-2 text-green-700">
-                  Thank you for contacting TSS Shop. Our team will get back to you as soon as
-                  possible.
+            {notIntegrated && (
+              <div role="alert" className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-6">
+                <h3 className="font-semibold text-amber-800">No integration has been done yet</h3>
+                <p className="mt-2 text-amber-700">
+                  Your message was not sent. Please email us directly at support@tss-shop.com.
                 </p>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                <div>
-                  <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
-                    placeholder="Your name"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
-                    placeholder="you@example.com"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="subject" className="mb-2 block text-sm font-medium text-gray-700">
-                    Subject
-                  </label>
-
-                  <input
-                    id="subject"
-                    name="subject"
-                    type="text"
-                    required
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
-                    placeholder="How can we help?"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="mb-2 block text-sm font-medium text-gray-700">
-                    Message
-                  </label>
-
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows="6"
-                    required
-                    className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
-                    placeholder="Write your message..."
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition hover:opacity-90"
-                >
-                  Send Message
-                </button>
-              </form>
             )}
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+              <div>
+                <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="subject" className="mb-2 block text-sm font-medium text-gray-700">
+                  Subject
+                </label>
+
+                <input
+                  id="subject"
+                  name="subject"
+                  type="text"
+                  required
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
+                  placeholder="How can we help?"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="message" className="mb-2 block text-sm font-medium text-gray-700">
+                  Message
+                </label>
+
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="6"
+                  required
+                  className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20"
+                  placeholder="Write your message..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition hover:opacity-90"
+              >
+                Send Message
+              </button>
+            </form>
           </div>
         </div>
       </section>

@@ -596,16 +596,6 @@ function useSidebarScroll(navRef, path) {
 
 const ADMIN_NAV_EVENT = "admin:toggle-nav";
 
-const railIcon = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.75,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  viewBox: "0 0 24 24",
-  "aria-hidden": true,
-};
-
 // The brand mark: a white tile on the dark rail
 function BrandMark({ to }) {
   return (
@@ -977,16 +967,6 @@ export default function AdminSidebar() {
     </>
   );
 }
-
-const headerIcon = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.8,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  viewBox: "0 0 24 24",
-  "aria-hidden": true,
-};
 
 // Closes a dropdown on an outside click or Escape
 function useDismiss(ref, open, close) {

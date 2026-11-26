@@ -609,7 +609,10 @@ export default function AdminGiftCards() {
             {/* Search and Filters Toolbar */}
             <div className="p-3.5 sm:p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" strokeWidth={2} />
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500"
+                  strokeWidth={2}
+                />
                 <input
                   type="text"
                   placeholder="Search by code ending or customer"

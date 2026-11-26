@@ -70,6 +70,3 @@ export function PasswordChecklist({ password }) {
     </div>
   );
 }
-    </div>
-  );
-}

@@ -15,16 +15,6 @@ export function formatWhen(timestamp, now = Date.now()) {
   return new Date(timestamp).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
-const icon = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.8,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  "aria-hidden": true,
-};
-
 const focusRing = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600";
 
 // The "Recents" pill and the list under it. Controlled: the panel owns `open`, so its Escape key can close the

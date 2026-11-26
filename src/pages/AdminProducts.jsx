@@ -243,16 +243,6 @@ let productsCache = { storeId: null, items: null };
 
 const activeStoreId = () => getSession()?.storeId || null;
 
-const lineIcon = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.5,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  viewBox: "0 0 24 24",
-  "aria-hidden": true,
-};
-
 // Sample products in the storefront mockup next to "Add your products" (line icons from the Lucide set)
 const sampleProducts = [
   {

@@ -1,13 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Upload,
-  Image as ImageIcon,
-  Banknote,
-  Check,
-  Lightbulb,
-  ArrowRight,
-} from "lucide-react";
+import { Upload, Image as ImageIcon, Banknote, Check, Lightbulb, ArrowRight } from "lucide-react";
 import AdminSidebar, { AdminHeader, NavIcon, navIcons } from "@/components/AdminSidebar";
 import { apiGet, openStorefront } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";

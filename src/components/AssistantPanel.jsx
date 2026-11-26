@@ -67,16 +67,6 @@ function useFreshChatPerOwner() {
   }, [owner]);
 }
 
-const icon = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.8,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  "aria-hidden": true,
-};
-
 // The button in the admin header (phones) and at the bottom of the sidebar (desktop); tone "light" is for the
 // white top bars of the customizer and code editor, which don't render AdminSidebar
 export function AssistantButton({ tone = "rail" }) {

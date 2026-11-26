@@ -26,16 +26,6 @@ const categories = [
   "Manufacturing",
 ];
 
-const lineIcon = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.8,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  viewBox: "0 0 24 24",
-  "aria-hidden": true,
-};
-
 const OWN_SWATCHES = ["#111827", "#FFFFFF", "#111827"];
 
 // A small storefront drawn from a theme's colours
@@ -135,13 +125,7 @@ function OpenThemeLink({ theme, className, icon }) {
       onClick={() => openStorefront("/", theme.published ? "" : theme.id)}
       className={className}
     >
-      {icon && (
-        <ExternalLink
-          className="mr-1.5 h-4 w-4"
-          strokeWidth={1.8}
-          aria-hidden="true"
-        />
-      )}
+      {icon && <ExternalLink className="mr-1.5 h-4 w-4" strokeWidth={1.8} aria-hidden="true" />}
       Open theme
     </button>
   );

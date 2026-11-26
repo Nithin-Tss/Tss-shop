@@ -23,7 +23,6 @@ import {
   inputClass,
   smallButton,
   iconButton,
-  iconProps,
   IMAGE_TYPES,
   MAX_IMAGE_SIZE,
   defaultsOf,
