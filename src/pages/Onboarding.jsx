@@ -15,18 +15,6 @@ import NavBar from "@/components/NavBar";
 import { apiRequest } from "@/lib/api";
 import { addStore, useSession } from "@/lib/auth";
 
-const iconProps = {
-  width: 20,
-  height: 20,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.7,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  "aria-hidden": true,
-};
-
 const GOAL_OPTIONS = [
   {
     id: "online",

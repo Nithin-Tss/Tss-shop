@@ -152,14 +152,6 @@ export function findMatchingThemeFile(requested, files) {
 }
 
 /* ---------- small inline icons (VS Code codicon look) ---------- */
-const svgProps = {
-  width: 16,
-  height: 16,
-  viewBox: "0 0 16 16",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1,
-};
 const Chevron = ({ open }) => (
   <ChevronRight
     className="h-3.5 w-3.5 transition-transform shrink-0"
