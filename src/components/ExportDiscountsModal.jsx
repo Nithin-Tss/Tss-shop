@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
  * Escapes values for safe CSV formatting.
@@ -27,7 +27,7 @@ export default function ExportDiscountsModal({
   const isSearchActive = Boolean(searchQuery && searchQuery.trim().length > 0);
   const searchMatchCount = filteredDiscounts.length;
 
-  const [chosenScope, setChosenScope] = useState("current_page");
+  const [chosenScope, setChosenScope] = useState(null);
   const [exportFormat, setExportFormat] = useState("excel");
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState("");
@@ -35,25 +35,23 @@ export default function ExportDiscountsModal({
   const modalRef = useRef(null);
   const previousActiveElement = useRef(null);
 
-  // When modal opens, select "selected" if rows are checked, otherwise "current_page"
-  useEffect(() => {
-    if (isOpen) {
-      if (selectedCount > 0) {
-        setChosenScope("selected");
-      } else {
-        setChosenScope("current_page");
-      }
-      setExportError("");
-      setIsExporting(false);
-    }
-  }, [isOpen, selectedCount]);
+  const handleClose = useCallback(() => {
+    setChosenScope(null);
+    setExportError("");
+    setIsExporting(false);
+    onClose();
+  }, [onClose]);
+
+  // Default scope: "selected" if rows are checked, otherwise "current_page"
+  const defaultScope = selectedCount > 0 ? "selected" : "current_page";
+  const preferredScope = chosenScope || defaultScope;
 
   // Fall back to "current_page" when chosen scope is not available
   const exportScope =
-    (chosenScope === "selected" && selectedCount === 0) ||
-    (chosenScope === "search" && (!isSearchActive || searchMatchCount === 0))
+    (preferredScope === "selected" && selectedCount === 0) ||
+    (preferredScope === "search" && (!isSearchActive || searchMatchCount === 0))
       ? "current_page"
-      : chosenScope;
+      : preferredScope;
 
   // Handle escape key, focus trapping, and body scroll locking
   useEffect(() => {
@@ -65,7 +63,7 @@ export default function ExportDiscountsModal({
 
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
-        if (!isExporting) onClose();
+        if (!isExporting) handleClose();
         return;
       }
       if (e.key === "Tab" && modalRef.current) {
@@ -102,7 +100,7 @@ export default function ExportDiscountsModal({
         previousActiveElement.current.focus();
       }
     };
-  }, [isOpen, isExporting, onClose]);
+  }, [isOpen, isExporting, handleClose]);
 
   if (!isOpen) return null;
 
@@ -234,7 +232,7 @@ export default function ExportDiscountsModal({
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      onClose();
+      handleClose();
     } catch (err) {
       setExportError(err.message || "Failed to generate CSV export.");
     } finally {
@@ -246,7 +244,7 @@ export default function ExportDiscountsModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={() => {
-        if (!isExporting) onClose();
+        if (!isExporting) handleClose();
       }}
       role="presentation"
     >
@@ -265,7 +263,7 @@ export default function ExportDiscountsModal({
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isExporting}
             aria-label="Close modal"
             className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors focus:outline-none"
@@ -428,7 +426,7 @@ export default function ExportDiscountsModal({
         <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4 bg-white rounded-b-2xl">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isExporting}
             className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-ink shadow-xs hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400/20"
           >
