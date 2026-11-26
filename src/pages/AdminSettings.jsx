@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { currencyOptions } from "@/lib/formatPrice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiDelete, apiGet, apiPatch, syncAccess } from "@/lib/api";
 import { STORES_PATH, getActiveStore, getSession, storeCan } from "@/lib/auth";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
@@ -246,7 +246,17 @@ export default function AdminSettings() {
      SELECTED SETTINGS SECTION
      ========================================================= */
 
-  const [selectedSection, setSelectedSection] = useState("General");
+  // Kept in the URL (?section=...) so a page reload — e.g. the fallback reload when switching the
+  // language back to English can't be undone in place — returns to the same section.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sectionParam = searchParams.get("section");
+  const selectedSection = settingsMenu.some((item) => item.label === sectionParam)
+    ? sectionParam
+    : "General";
+  const setSelectedSection = (label) => {
+    if (label === selectedSection) return;
+    setSearchParams(label === "General" ? {} : { section: label });
+  };
 
   const [settingsSearch, setSettingsSearch] = useState("");
 
@@ -1124,12 +1134,14 @@ export default function AdminSettings() {
 
               <div className="shrink-0 border-b border-slate-200 p-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-fuchsia-600 text-xs font-semibold text-white">
-                    Sto
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-base font-bold uppercase text-white">
+                    {(activeStore?.storeName || "S").trim().charAt(0)}
                   </div>
 
-                  <div>
-                    <h2 className="text-base font-semibold">Store</h2>
+                  <div className="min-w-0">
+                    <h2 className="truncate text-base font-semibold">
+                      {activeStore?.storeName || "Store"}
+                    </h2>
 
                     <p className="text-sm text-slate-500">Store settings</p>
                   </div>

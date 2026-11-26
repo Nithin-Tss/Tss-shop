@@ -206,6 +206,48 @@ function selectInWidget(code, tries = 0) {
   combo.dispatchEvent(new Event("change"));
 }
 
+function isTranslated() {
+  return !!document.querySelector("html.translated-ltr, html.translated-rtl");
+}
+
+// Click the translator's own "Show original" button (it lives in its hidden, same-origin banner
+// iframe), which puts the original text nodes back in place without a page reload.
+function clickRestoreButton() {
+  for (const frame of document.querySelectorAll("iframe")) {
+    let doc;
+    try {
+      doc = frame.contentDocument;
+    } catch {
+      continue; // cross-origin frame, not the translator's
+    }
+    const button = doc && doc.querySelector('[id$=".restore"], button[id*="restore"]');
+    if (button) {
+      button.click();
+      return true;
+    }
+  }
+  return false;
+}
+
+// Back to the original English. Reloads only if the translator could not undo it within a moment.
+function restoreOriginal() {
+  if (!clickRestoreButton()) {
+    // No banner button: ask the widget for the page's own language, which also restores it.
+    const combo = document.querySelector("select.goog-te-combo");
+    if (combo) {
+      combo.value = SOURCE_LANGUAGE;
+      combo.dispatchEvent(new Event("change"));
+    }
+  }
+  const startedAt = Date.now();
+  const check = () => {
+    if (!isTranslated()) return;
+    if (Date.now() - startedAt > 1500) window.location.reload();
+    else setTimeout(check, 100);
+  };
+  setTimeout(check, 100);
+}
+
 // Switch the whole site to `code` and remember it.
 export async function setLanguage(code) {
   if (!isSupportedLanguage(code)) return;
@@ -220,9 +262,7 @@ export async function setLanguage(code) {
   patchDomForTranslator();
 
   if (code === SOURCE_LANGUAGE) {
-    // Restoring the original text is only reliable with a reload.
-    if (document.querySelector("html.translated-ltr, html.translated-rtl"))
-      window.location.reload();
+    if (isTranslated()) restoreOriginal();
     return;
   }
   await loadTranslator();

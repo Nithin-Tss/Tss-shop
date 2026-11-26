@@ -56,14 +56,19 @@ function ErrorNote({ children }) {
   );
 }
 
+// Role labels: plain text with a small dot (the app styles badges as text, not filled pills)
 function Chip({ children, tone = "slate" }) {
   const tones = {
-    slate: "bg-slate-100 text-slate-700",
-    dark: "bg-ink text-white",
-    amber: "bg-amber-50 text-amber-800",
+    slate: ["text-slate-700", "bg-slate-400"],
+    dark: ["text-ink font-semibold", "bg-violet-600"],
+    amber: ["text-amber-800", "bg-amber-500"],
   };
+  const [text, dot] = tones[tone] || tones.slate;
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium ${text}`}
+    >
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
       {children}
     </span>
   );
@@ -755,7 +760,7 @@ export function UsersSettings() {
                     <StatusPill tone="green">Active</StatusPill>
                   )}
                 </div>
-                <div className="flex min-w-0 flex-wrap gap-1.5">
+                <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-1">
                   {r.isOwner && <Chip tone="dark">Store owner</Chip>}
                   {r.roles.map((role) => (
                     <Chip key={role.id}>{role.name}</Chip>
@@ -773,12 +778,15 @@ export function UsersSettings() {
         <Section title="Recent changes" description="Who changed roles or access, newest first.">
           <ul className="divide-y divide-slate-200 px-5 py-2 text-sm">
             {activity.slice(0, 10).map((entry) => (
-              <li key={entry.id} className="flex flex-wrap items-baseline gap-x-3 py-2.5">
+              <li
+                key={entry.id}
+                className="grid grid-cols-1 gap-x-4 gap-y-0.5 py-2.5 sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:items-baseline"
+              >
                 <span className="font-medium text-slate-800">
                   {ACTION_LABELS[entry.action] || entry.action}
                 </span>
-                <span className="text-slate-600">{entry.subject}</span>
-                <span className="ml-auto text-xs text-slate-400">
+                <span className="truncate text-slate-600">{entry.subject}</span>
+                <span className="text-xs text-slate-400 sm:text-right" data-numeric>
                   {entry.actor || "System"} · {new Date(entry.createdAt).toLocaleString()}
                 </span>
               </li>
