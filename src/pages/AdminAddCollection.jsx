@@ -207,6 +207,8 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
   const [ticked, setTicked] = useState([]); // ids ticked in the dropdown, not added yet
   const box = useRef(null);
   const searchRef = useRef(null);
+  const pendingFocusRef = useRef(null);
+  const suppressFocusOpenRef = useRef(false);
   const listId = useId();
 
   const byId = useMemo(() => Object.fromEntries(collections.map((c) => [c.id, c])), [collections]);
@@ -252,7 +254,9 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
 
   // Arrow keys move between the checkboxes; Space ticks the focused one (native); Enter adds; Esc closes
   const focusRow = (from, step) => {
-    const boxes = [...box.current.querySelectorAll('input[type="checkbox"]:not(:disabled)')];
+    const boxes = box.current
+      ? [...box.current.querySelectorAll('input[type="checkbox"]:not(:disabled)')]
+      : [];
     if (boxes.length === 0) return;
     const i = boxes.indexOf(from);
     const next = i === -1 ? (step > 0 ? 0 : boxes.length - 1) : i + step;
@@ -260,20 +264,41 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
     else boxes[Math.min(next, boxes.length - 1)].focus();
   };
 
+  useEffect(() => {
+    if (open && pendingFocusRef.current) {
+      const { from, step } = pendingFocusRef.current;
+      pendingFocusRef.current = null;
+      focusRow(from, step);
+    }
+  });
+
   const onKeyDown = (e) => {
     if (e.key === "Escape") {
       if (open) {
         e.stopPropagation();
+        e.preventDefault();
         setOpen(false);
-        searchRef.current?.focus();
+        if (document.activeElement !== searchRef.current) {
+          suppressFocusOpenRef.current = true;
+          searchRef.current?.focus();
+        }
       }
     } else if (e.key === "Enter") {
       e.preventDefault();
       add();
     } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
-      setOpen(true);
-      focusRow(e.target.type === "checkbox" ? e.target : null, e.key === "ArrowDown" ? 1 : -1);
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      const from = e.target.type === "checkbox" ? e.target : null;
+      const boxes = box.current
+        ? [...box.current.querySelectorAll('input[type="checkbox"]:not(:disabled)')]
+        : [];
+      if (!open || boxes.length === 0) {
+        pendingFocusRef.current = { from, step };
+        setOpen(true);
+      } else {
+        focusRow(from, step);
+      }
     }
   };
 
@@ -301,7 +326,13 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
               autoComplete="off"
               value={query}
               placeholder="Search collections"
-              onFocus={() => setOpen(true)}
+              onFocus={() => {
+                if (suppressFocusOpenRef.current) {
+                  suppressFocusOpenRef.current = false;
+                  return;
+                }
+                setOpen(true);
+              }}
               onChange={(e) => {
                 setQuery(e.target.value);
                 setOpen(true);
@@ -402,7 +433,14 @@ export function IncludeCollectionsPicker({ collections, selected, error, onChang
               <span className="min-w-0 flex-1 truncate font-medium text-ink">
                 {c.name}
                 <span className="font-normal text-slate-500">
-                  {c.handle ? ` · /${c.handle}` : ""} · {productsLabel(c.products_count)}
+                  {c.handle && (
+                    <>
+                      {" · "}
+                      <span>/{c.handle}</span>
+                    </>
+                  )}
+                  {" · "}
+                  <span>{productsLabel(c.products_count)}</span>
                 </span>
               </span>
               <button
