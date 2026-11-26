@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import SelectDiscountTypeModal from "@/components/SelectDiscountTypeModal";
 import ExportDiscountsModal from "@/components/ExportDiscountsModal";
@@ -14,6 +14,77 @@ const STATUS_FILTER_LABELS = {
   scheduled: "Scheduled",
   expired: "Expired",
 };
+
+const DEFAULT_COLUMNS = [
+  { id: "status", label: "Status", width: "105px" },
+  { id: "method", label: "Method", width: "85px" },
+  { id: "eligibility", label: "Eligibility", width: "115px" },
+  { id: "rollouts", label: "Rollouts", width: "70px" },
+  { id: "type", label: "Type", width: "140px" },
+  { id: "combinations", label: "Combinations", width: "100px" },
+  { id: "used", label: "Used", width: "50px" },
+  { id: "created", label: "Created", width: "100px" },
+  { id: "start_date", label: "Start date", width: "100px" },
+  { id: "end_date", label: "End date", width: "100px" },
+  { id: "updated", label: "Updated", width: "100px" },
+];
+
+const INITIAL_VISIBLE_COLUMNS = {
+  status: true,
+  method: true,
+  eligibility: true,
+  rollouts: true,
+  type: true,
+  combinations: true,
+  used: true,
+  created: false,
+  start_date: false,
+  end_date: false,
+  updated: false,
+};
+
+const SORT_KEYS = [
+  { id: "title", label: "Title" },
+  { id: "used", label: "Used" },
+  { id: "created", label: "Created" },
+  { id: "start_date", label: "Start date" },
+  { id: "end_date", label: "End date" },
+  { id: "updated", label: "Updated" },
+];
+
+function formatDate(dateStr) {
+  if (!dateStr) return "—";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return "—";
+  }
+}
+
+function getSortDirectionOptions(key) {
+  if (key === "title") {
+    return [
+      { id: "asc", label: "A–Z" },
+      { id: "desc", label: "Z–A" },
+    ];
+  }
+  if (key === "used") {
+    return [
+      { id: "asc", label: "Lowest first" },
+      { id: "desc", label: "Highest first" },
+    ];
+  }
+  return [
+    { id: "asc", label: "Oldest first" },
+    { id: "desc", label: "Newest first" },
+  ];
+}
 
 function getDiscountStatus(discount) {
   const now = new Date();
@@ -30,6 +101,222 @@ function getDiscountStatus(discount) {
     return "scheduled";
   }
   return "active";
+}
+
+function StatusCell({ status }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleClickOutside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    if (!isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelowViewport = window.innerHeight - rect.bottom;
+      const scrollParent = containerRef.current.closest(".overflow-x-auto");
+      let spaceBelowParent = 999;
+      if (scrollParent) {
+        const parentRect = scrollParent.getBoundingClientRect();
+        spaceBelowParent = parentRect.bottom - rect.bottom;
+      }
+      setOpenUpward(spaceBelowViewport < 160 || spaceBelowParent < 110);
+    }
+    setIsOpen((prev) => !prev);
+  };
+
+  return (
+    <div
+      className={`relative inline-block text-left ${isOpen ? "z-40" : ""}`}
+      ref={containerRef}
+    >
+      <button
+        type="button"
+        onClick={handleToggle}
+        className="inline-flex items-center gap-1.5 cursor-pointer group select-none text-left whitespace-nowrap"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        title="View sales channels"
+      >
+        {status === "active" && (
+          <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-ink shadow-2xs group-hover:bg-slate-200 transition-colors">
+            Active
+          </span>
+        )}
+        {status === "scheduled" && (
+          <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 shadow-2xs group-hover:bg-slate-200 transition-colors">
+            Scheduled
+          </span>
+        )}
+        {status === "expired" && (
+          <span className="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500 shadow-2xs group-hover:bg-slate-200 transition-colors">
+            Expired
+          </span>
+        )}
+        <svg
+          className={`h-3 w-3 text-slate-700 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+          className={`absolute left-0 w-60 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xl shadow-slate-900/10 z-50 animate-in fade-in zoom-in-95 pointer-events-auto ${
+            openUpward ? "bottom-full mb-2" : "top-full mt-2"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="text-[13px] font-medium text-slate-600 mb-2.5">Sales channels</div>
+          <div className="flex items-center gap-2.5">
+            <span
+              className={`h-2.5 w-2.5 rounded-full shrink-0 ${
+                status === "expired" ? "bg-slate-400" : "bg-ink"
+              }`}
+            />
+            <span className="text-sm font-normal text-ink">Online Store</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function renderColumnCell(colId, discount, status, isCode) {
+  switch (colId) {
+    case "status":
+      return <StatusCell status={status} discount={discount} />;
+    case "method":
+      return <div className="text-slate-600 truncate">{isCode ? "Code" : "Automatic"}</div>;
+    case "eligibility":
+      return (
+        <div className="flex items-center gap-1.5 text-slate-600">
+          <svg
+            className="h-3.5 w-3.5 text-slate-500 shrink-0"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+          </svg>
+          <span className="truncate">All customers</span>
+        </div>
+      );
+    case "rollouts":
+      return (
+        <div className="text-slate-500 flex items-center">
+          <svg
+            className="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 8.41m5.96 5.96a14.926 14.926 0 01-5.84 2.58m-.12-8.54a6 6 0 00-7.38 5.84h4.8m2.58-5.84a14.927 14.927 0 00-2.58 5.84m2.69-2.7a1.5 1.5 0 11-2.12-2.12 1.5 1.5 0 012.12 2.12z"
+            />
+          </svg>
+        </div>
+      );
+    case "type":
+      return (
+        <div className="flex items-center gap-1.5 text-slate-600">
+          <svg
+            className="h-3.5 w-3.5 shrink-0 text-slate-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4.5 2A2.5 2.5 0 002 4.5v3.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l3.878-3.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 2H4.5zM5 6a1 1 0 100-2 1 1 0 000 2z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="truncate capitalize">
+            {discount.discount_type?.replace(/_/g, " ") || "Amount off products"}
+          </span>
+        </div>
+      );
+    case "combinations":
+      return (
+        <div className="flex items-center gap-1.5 text-slate-400">
+          <svg
+            className="h-3.5 w-3.5 hover:text-slate-600 transition shrink-0"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M7 3H3v4l9 9 4-4-9-9z"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <circle cx="5" cy="5" r="1" fill="currentColor" />
+          </svg>
+          <svg
+            className="h-3.5 w-3.5 hover:text-slate-600 transition shrink-0"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M4 6h12l-1 11H5L4 6z"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path d="M7 6V4a3 3 0 016 0v2" strokeWidth="1.25" strokeLinecap="round" />
+          </svg>
+          <svg
+            className="h-3.5 w-3.5 hover:text-slate-600 transition shrink-0"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path d="M2 5h10v9H2V5z" strokeWidth="1.25" />
+            <path d="M12 8h3l3 3v3h-6V8z" strokeWidth="1.25" />
+            <circle cx="5.5" cy="15.5" r="1.5" strokeWidth="1.25" />
+            <circle cx="15.5" cy="15.5" r="1.5" strokeWidth="1.25" />
+          </svg>
+        </div>
+      );
+    case "used":
+      return <div className="text-slate-600 truncate">{discount.times_used ?? 0}</div>;
+    case "created":
+      return (
+        <div className="text-slate-600 text-xs truncate">{formatDate(discount.created_at)}</div>
+      );
+    case "start_date":
+      return (
+        <div className="text-slate-600 text-xs truncate">{formatDate(discount.starts_at)}</div>
+      );
+    case "end_date":
+      return <div className="text-slate-600 text-xs truncate">{formatDate(discount.ends_at)}</div>;
+    case "updated":
+      return (
+        <div className="text-slate-600 text-xs truncate">{formatDate(discount.updated_at)}</div>
+      );
+    default:
+      return null;
+  }
 }
 
 export default function DiscountsPage() {
@@ -51,6 +338,20 @@ export default function DiscountsPage() {
   const [tagModalMode, setTagModalMode] = useState(null); // 'add' | 'remove' | null
   const [tagInput, setTagInput] = useState("");
   const [toastMessage, setToastMessage] = useState(null);
+  const [columnList, setColumnList] = useState(DEFAULT_COLUMNS);
+  const [visibleColumns, setVisibleColumns] = useState(INITIAL_VISIBLE_COLUMNS);
+  const [sortKey, setSortKey] = useState("created");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
+  const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false);
+  const [savedView, setSavedView] = useState({
+    visibleColumns: INITIAL_VISIBLE_COLUMNS,
+    columnList: DEFAULT_COLUMNS,
+    sortKey: "created",
+    sortDirection: "desc",
+  });
   const pageSize = 50;
 
   const showToast = (msg) => {
@@ -61,6 +362,72 @@ export default function DiscountsPage() {
   const filterMenuRef = useRef(null);
   const selectionMenuRef = useRef(null);
   const moreActionsRef = useRef(null);
+  const columnMenuRef = useRef(null);
+  const sortMenuRef = useRef(null);
+  const saveMenuRef = useRef(null);
+
+  // Check if current view differs from saved view
+  const isViewModified = useMemo(() => {
+    const keys = Object.keys(visibleColumns);
+    const hasColDiff = keys.some((k) => visibleColumns[k] !== savedView.visibleColumns[k]);
+    if (hasColDiff) return true;
+
+    const hasOrderDiff = columnList.some((col, i) => col.id !== savedView.columnList[i]?.id);
+    if (hasOrderDiff) return true;
+
+    if (sortKey !== savedView.sortKey || sortDirection !== savedView.sortDirection) {
+      return true;
+    }
+
+    return false;
+  }, [visibleColumns, columnList, sortKey, sortDirection, savedView]);
+
+  const handleResetView = () => {
+    setVisibleColumns(savedView.visibleColumns);
+    setColumnList(savedView.columnList);
+    setSortKey(savedView.sortKey);
+    setSortDirection(savedView.sortDirection);
+    showToast("View reset to default");
+  };
+
+  const handleUpdateView = () => {
+    setSavedView({
+      visibleColumns: { ...visibleColumns },
+      columnList: [...columnList],
+      sortKey,
+      sortDirection,
+    });
+    setIsSaveMenuOpen(false);
+    showToast("View updated");
+  };
+
+  const handleSaveAsNewView = () => {
+    setSavedView({
+      visibleColumns: { ...visibleColumns },
+      columnList: [...columnList],
+      sortKey,
+      sortDirection,
+    });
+    setIsSaveMenuOpen(false);
+    showToast("View saved as new view");
+  };
+
+  // Keyboard shortcuts: Ctrl+S to update view, Ctrl+Shift+S to save as new view
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleSaveAsNewView();
+        } else {
+          handleUpdateView();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleColumns, columnList, sortKey, sortDirection]);
 
   useEffect(() => {
     let active = true;
@@ -89,6 +456,16 @@ export default function DiscountsPage() {
       if (moreActionsRef.current && !moreActionsRef.current.contains(e.target)) {
         setIsMoreActionsOpen(false);
       }
+      if (columnMenuRef.current && !columnMenuRef.current.contains(e.target)) {
+        setIsColumnMenuOpen(false);
+        setIsSortMenuOpen(false);
+      }
+      if (sortMenuRef.current && !sortMenuRef.current.contains(e.target)) {
+        setIsSortMenuOpen(false);
+      }
+      if (saveMenuRef.current && !saveMenuRef.current.contains(e.target)) {
+        setIsSaveMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -112,10 +489,85 @@ export default function DiscountsPage() {
     );
   });
 
+  const sortedDiscounts = [...filteredDiscounts].sort((a, b) => {
+    let valA, valB;
+    switch (sortKey) {
+      case "title": {
+        const codeA = (Array.isArray(a.codes) && a.codes[0]) || a.name || "";
+        const codeB = (Array.isArray(b.codes) && b.codes[0]) || b.name || "";
+        return sortDirection === "asc" ? codeA.localeCompare(codeB) : codeB.localeCompare(codeA);
+      }
+      case "used": {
+        valA = a.times_used ?? 0;
+        valB = b.times_used ?? 0;
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+      case "start_date": {
+        valA = a.starts_at ? new Date(a.starts_at).getTime() : 0;
+        valB = b.starts_at ? new Date(b.starts_at).getTime() : 0;
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+      case "end_date": {
+        valA = a.ends_at ? new Date(a.ends_at).getTime() : 0;
+        valB = b.ends_at ? new Date(b.ends_at).getTime() : 0;
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+      case "updated": {
+        valA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        valB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+      case "created":
+      default: {
+        valA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        valB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+    }
+  });
+
   const effectiveShowOnlySelected = showOnlySelected && selectedIds.size > 0;
   const displayedDiscounts = effectiveShowOnlySelected
-    ? filteredDiscounts.filter((d) => selectedIds.has(d.id))
-    : filteredDiscounts;
+    ? sortedDiscounts.filter((d) => selectedIds.has(d.id))
+    : sortedDiscounts;
+
+  const toggleColumn = (colId) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [colId]: !prev[colId],
+    }));
+  };
+
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleDrop = (e, index) => {
+    e.preventDefault();
+    const fromIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    if (isNaN(fromIndex) || fromIndex === index) return;
+    setColumnList((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(index, 0, moved);
+      return next;
+    });
+  };
+
+  const activeColumns = columnList.filter((col) => visibleColumns[col.id]);
+  const minColumnsWidth = activeColumns.reduce(
+    (sum, col) => sum + parseInt(col.width || 100, 10),
+    0
+  );
+  const minTableWidth = 36 + 220 + minColumnsWidth;
+  const gridStyle = {
+    gridTemplateColumns: [
+      "36px",
+      "minmax(220px, 2fr)",
+      ...activeColumns.map((col) => col.width),
+    ].join(" "),
+    minWidth: `${minTableWidth}px`,
+  };
 
   const totalPages = Math.max(1, Math.ceil(displayedDiscounts.length / pageSize));
   const pageStart = (currentPage - 1) * pageSize;
@@ -357,29 +809,423 @@ export default function DiscountsPage() {
                   )}
                 </div>
 
-                <div className="flex flex-1 items-center gap-3 px-4">
-                  <span className="text-xl text-slate-500">⌕</span>
+                <div className="flex flex-1 items-center gap-2.5 px-4">
+                  <svg
+                    className="h-4 w-4 text-slate-400 shrink-0 select-none"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="9" cy="9" r="6" />
+                    <path d="m13.5 13.5 4 4" />
+                  </svg>
 
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
                     placeholder="Search and filter"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-slate-500"
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-slate-500 text-slate-900"
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition cursor-pointer shrink-0"
+                      title="Clear search"
+                      aria-label="Clear search"
+                    >
+                      <svg
+                        className="h-3.5 w-3.5"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      >
+                        <path d="M5 5l10 10M15 5L5 15" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
 
-                <button
-                  type="button"
-                  className="border-l border-slate-200 px-5 text-xl text-slate-500"
+                <div
+                  className="relative h-full flex items-center pr-3 pl-2 border-l border-slate-200 gap-1.5"
+                  ref={columnMenuRef}
                 >
-                  ▥
-                </button>
+                  {/* COLUMN CUSTOMIZATION BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsColumnMenuOpen(!isColumnMenuOpen);
+                      setIsSortMenuOpen(false);
+                      setIsSaveMenuOpen(false);
+                    }}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition cursor-pointer ${
+                      isColumnMenuOpen
+                        ? "bg-slate-100 text-ink border border-slate-300"
+                        : "text-slate-700 hover:bg-slate-100 hover:text-ink"
+                    }`}
+                    aria-label="Customize columns and sort"
+                    aria-expanded={isColumnMenuOpen}
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                      <rect x="2.5" y="3" width="15" height="14" rx="2" strokeWidth="1.3" />
+                      <path d="M7.5 3v14M12.5 3v14" strokeWidth="1.3" />
+                    </svg>
+                  </button>
+
+                  {/* RESET & SAVE BUTTONS (Appear when view has been modified) */}
+                  {isViewModified && (
+                    <>
+                      {/* Reset view button */}
+                      <button
+                        type="button"
+                        onClick={handleResetView}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 hover:text-ink transition cursor-pointer"
+                        title="Reset view"
+                        aria-label="Reset view"
+                      >
+                        <svg
+                          className="h-4 w-4 text-slate-700"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                        </svg>
+                      </button>
+
+                      {/* Save view button & popover */}
+                      <div className="relative" ref={saveMenuRef}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsSaveMenuOpen(!isSaveMenuOpen);
+                            setIsColumnMenuOpen(false);
+                            setIsSortMenuOpen(false);
+                          }}
+                          className={`flex h-8 items-center gap-1.5 px-3 rounded-full text-sm font-medium transition cursor-pointer select-none ${
+                            isSaveMenuOpen
+                              ? "bg-white text-slate-900 border-2 border-blue-600 shadow-xs"
+                              : "bg-white text-slate-800 border border-slate-300 hover:bg-slate-50 hover:border-slate-400"
+                          }`}
+                          aria-label="Save view"
+                          aria-expanded={isSaveMenuOpen}
+                        >
+                          <span>Save</span>
+                          <svg
+                            className="h-3 w-3 text-slate-700 shrink-0"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.25 9.48l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 111.1-1.02z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+
+                        {/* SAVE VIEW DROPDOWN (Matching Screenshot 3) */}
+                        {isSaveMenuOpen && (
+                          <div
+                            className="absolute right-0 top-full mt-2 w-[310px] sm:w-[320px] rounded-2xl border border-slate-200/90 bg-white py-2 px-1.5 shadow-2xl shadow-slate-900/10 z-50 animate-in fade-in duration-100"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={handleUpdateView}
+                              className="flex w-full items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-100/80 transition-colors cursor-pointer group text-slate-800"
+                            >
+                              <div className="flex items-center gap-3">
+                                <svg
+                                  className="h-4 w-4 text-slate-700 shrink-0"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                                  <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                                </svg>
+                                <span className="text-sm font-normal text-slate-900 whitespace-nowrap">
+                                  Update view
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="rounded-md bg-slate-100 border border-slate-200/90 px-2 py-0.5 text-xs font-semibold text-slate-600 shadow-2xs">
+                                  CTRL
+                                </span>
+                                <span className="rounded-md bg-slate-100 border border-slate-200/90 px-2 py-0.5 text-xs font-semibold text-slate-600 shadow-2xs">
+                                  S
+                                </span>
+                              </div>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleSaveAsNewView}
+                              className="flex w-full items-center justify-between px-3 py-2.5 rounded-xl hover:bg-slate-100/80 transition-colors cursor-pointer group text-slate-800"
+                            >
+                              <div className="flex items-center gap-3">
+                                <svg
+                                  className="h-4 w-4 text-slate-700 shrink-0"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.75"
+                                >
+                                  <circle cx="10" cy="10" r="7.5" />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M10 6.5v7M6.5 10h7"
+                                  />
+                                </svg>
+                                <span className="text-sm font-normal text-slate-900 whitespace-nowrap">
+                                  Save as new view
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="rounded-md bg-slate-100 border border-slate-200/90 px-2 py-0.5 text-xs font-semibold text-slate-600 shadow-2xs">
+                                  CTRL
+                                </span>
+                                <span className="rounded-md bg-slate-100 border border-slate-200/90 px-2 py-0.5 text-xs font-semibold text-slate-600 shadow-2xs">
+                                  ↑
+                                </span>
+                                <span className="rounded-md bg-slate-100 border border-slate-200/90 px-2 py-0.5 text-xs font-semibold text-slate-600 shadow-2xs">
+                                  S
+                                </span>
+                              </div>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {/* COLUMN CUSTOMIZATION & SORT POPOVER */}
+                  {isColumnMenuOpen && (
+                    <div
+                      className="absolute right-3 top-full mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl z-50"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* HEADER ROW: Sort by & [ SortKey ↕ ] */}
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 relative">
+                        <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
+                          <svg
+                            className="h-4 w-4 text-slate-700"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                            />
+                          </svg>
+                          <span>Sort by</span>
+                        </div>
+
+                        {/* SORT KEY TRIGGER BUTTON */}
+                        <div className="relative" ref={sortMenuRef}>
+                          <button
+                            type="button"
+                            onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                              isSortMenuOpen
+                                ? "border-blue-600 text-slate-900 ring-2 ring-blue-500/20 bg-white"
+                                : "border-slate-300 text-slate-700 bg-white hover:bg-slate-50"
+                            }`}
+                          >
+                            <span>
+                              {SORT_KEYS.find((k) => k.id === sortKey)?.label || "Created"}
+                            </span>
+                            <svg
+                              className="h-3 w-3 text-slate-500"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.25 9.48l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 111.1-1.02z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* NESTED SORT FLYOUT */}
+                          {isSortMenuOpen && (
+                            <div
+                              className="absolute right-0 top-full mt-1.5 w-48 rounded-xl border border-slate-200 bg-white py-1.5 shadow-xl z-60"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {/* Sort Key Options */}
+                              {SORT_KEYS.map((k) => {
+                                const isSelected = sortKey === k.id;
+                                return (
+                                  <button
+                                    key={k.id}
+                                    type="button"
+                                    onClick={() => setSortKey(k.id)}
+                                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs text-left transition cursor-pointer hover:bg-slate-50 ${
+                                      isSelected
+                                        ? "font-semibold text-slate-900"
+                                        : "font-normal text-slate-700"
+                                    }`}
+                                  >
+                                    <span className="w-3.5 text-center text-xs font-bold text-ink">
+                                      {isSelected ? "✓" : ""}
+                                    </span>
+                                    <span>{k.label}</span>
+                                  </button>
+                                );
+                              })}
+
+                              <div className="my-1.5 border-t border-slate-100" />
+
+                              {/* Sort Direction Options */}
+                              {getSortDirectionOptions(sortKey).map((dir) => {
+                                const isSelected = sortDirection === dir.id;
+                                return (
+                                  <button
+                                    key={dir.id}
+                                    type="button"
+                                    onClick={() => setSortDirection(dir.id)}
+                                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs text-left transition cursor-pointer hover:bg-slate-50 ${
+                                      isSelected
+                                        ? "font-semibold text-slate-900"
+                                        : "font-normal text-slate-700"
+                                    }`}
+                                  >
+                                    <span className="w-3.5 text-center text-xs font-bold text-ink">
+                                      {isSelected ? "✓" : ""}
+                                    </span>
+                                    <span>{dir.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* COLUMNS SECTION */}
+                      <div className="pt-2">
+                        <div className="px-1 pb-1.5 text-xs font-semibold text-slate-700">
+                          Columns
+                        </div>
+                        <div className="space-y-0.5">
+                          {columnList.map((col, index) => {
+                            const isVisible = visibleColumns[col.id];
+                            return (
+                              <div
+                                key={col.id}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => handleDrop(e, index)}
+                                onClick={() => toggleColumn(col.id)}
+                                className={`flex items-center justify-between rounded-lg px-2 py-1.5 text-xs transition select-none cursor-pointer hover:bg-slate-50 ${
+                                  isVisible ? "text-slate-800" : "text-slate-400"
+                                }`}
+                              >
+                                {/* Left: Drag dots + Label */}
+                                <div className="flex items-center gap-2">
+                                  {/* 6-dot drag handle icon */}
+                                  <svg
+                                    className="h-3.5 w-3 text-slate-400 cursor-grab shrink-0"
+                                    viewBox="0 0 10 16"
+                                    fill="currentColor"
+                                  >
+                                    <circle cx="2.5" cy="2.5" r="1.2" />
+                                    <circle cx="7.5" cy="2.5" r="1.2" />
+                                    <circle cx="2.5" cy="8" r="1.2" />
+                                    <circle cx="7.5" cy="8" r="1.2" />
+                                    <circle cx="2.5" cy="13.5" r="1.2" />
+                                    <circle cx="7.5" cy="13.5" r="1.2" />
+                                  </svg>
+                                  <span
+                                    className={`font-medium ${
+                                      isVisible ? "text-slate-800" : "text-slate-400"
+                                    }`}
+                                  >
+                                    {col.label}
+                                  </span>
+                                </div>
+
+                                {/* Right: Eye Icon */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleColumn(col.id);
+                                  }}
+                                  className="p-0.5 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                                  aria-label={`Toggle ${col.label} column`}
+                                >
+                                  {isVisible ? (
+                                    /* Eye open icon */
+                                    <svg
+                                      className="h-4 w-4 text-slate-700"
+                                      viewBox="0 0 20 20"
+                                      fill="none"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"
+                                        strokeWidth="1.5"
+                                      />
+                                      <path
+                                        d="M2.5 10c1.8-4 4.8-6 7.5-6s5.7 2 7.5 6c-1.8 4-4.8 6-7.5 6s-5.7-2-7.5-6z"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  ) : (
+                                    /* Eye slashed icon */
+                                    <svg
+                                      className="h-4 w-4 text-slate-400"
+                                      viewBox="0 0 20 20"
+                                      fill="none"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        d="M3 3l14 14M8.7 8.7a2.5 2.5 0 003.5 3.5M6.2 6.2C4.5 7.4 3.2 9 2.5 10c1.8 4 4.8 6 7.5 6 1.8 0 3.4-.9 4.7-2.1M9.2 4.1c.3 0 .5-.1.8-.1 2.7 0 5.7 2 7.5 6-.7 1.5-1.7 2.8-3 3.7"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="w-full">
-                {/* TABLE HEADER OR BULK ACTION TOOLBAR */}
-                {selectedIds.size > 0 ? (
+                {/* BULK ACTION TOOLBAR */}
+                {selectedIds.size > 0 && (
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-brand-cream-100 px-4 py-2.5 text-sm relative z-20">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       <div>
@@ -575,111 +1421,103 @@ export default function DiscountsPage() {
                       </span>
                     </button>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-[36px_minmax(0,2fr)_100px_90px_110px_130px_120px_50px] items-center border-b border-slate-200 bg-brand-cream-100 px-4 py-3 text-sm font-medium text-slate-700">
-                    <div>
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-slate-300 text-ink focus:ring-ink cursor-pointer"
-                        checked={isAllPageSelected}
-                        ref={(el) => {
-                          if (el) el.indeterminate = isSomePageSelected;
-                        }}
-                        onChange={handleToggleAll}
-                        aria-label="Select all discounts on this page"
-                      />
-                    </div>
-
-                    <div>Title</div>
-                    <div>Status</div>
-                    <div>Method</div>
-                    <div>Eligibility</div>
-                    <div>Type</div>
-                    <div>Combinations</div>
-                    <div>Used</div>
-                  </div>
                 )}
 
-                {/* TABLE BODY */}
-                {paginatedDiscounts.length > 0 ? (
-                  <div className="divide-y divide-slate-100">
-                    {paginatedDiscounts.map((discount) => {
-                      const codeDisplay =
-                        Array.isArray(discount.codes) && discount.codes.length > 0
-                          ? discount.codes.join(", ")
-                          : discount.name || "Untitled discount";
-                      const isCode = Array.isArray(discount.codes) && discount.codes.length > 0;
-                      const status = getDiscountStatus(discount);
-                      const isSelected = selectedIds.has(discount.id);
+                {/* SCROLLABLE TABLE AREA */}
+                <div className="w-full overflow-x-auto pb-28">
+                  {selectedIds.size === 0 && (
+                    <div
+                      className="grid items-center border-b border-slate-200 bg-brand-cream-100 px-4 py-3 text-sm font-medium text-slate-700"
+                      style={gridStyle}
+                    >
+                      <div>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-slate-300 text-ink focus:ring-ink cursor-pointer"
+                          checked={isAllPageSelected}
+                          ref={(el) => {
+                            if (el) el.indeterminate = isSomePageSelected;
+                          }}
+                          onChange={handleToggleAll}
+                          aria-label="Select all discounts on this page"
+                        />
+                      </div>
 
-                      let subtitle = "";
-                      if (discount.discount_type === "percentage" && discount.value) {
-                        subtitle = `${discount.value}% off entire order`;
-                      } else if (discount.discount_type === "fixed_amount" && discount.value) {
-                        subtitle = `₹${discount.value} off entire order`;
-                      } else if (discount.name && discount.name !== codeDisplay) {
-                        subtitle = discount.name;
-                      }
-
-                      return (
-                        <div
-                          key={discount.id}
-                          className={`grid grid-cols-[36px_minmax(0,2fr)_100px_90px_110px_130px_120px_50px] items-center px-4 py-3 text-sm transition ${
-                            isSelected
-                              ? "bg-amber-50/60 hover:bg-amber-50"
-                              : "text-slate-800 hover:bg-slate-50"
-                          }`}
-                        >
-                          <div>
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4 rounded border-slate-300 text-ink focus:ring-ink cursor-pointer"
-                              checked={isSelected}
-                              onChange={(e) => handleToggleSelect(discount.id, e)}
-                              onClick={(e) => e.stopPropagation()}
-                              aria-label={`Select discount ${codeDisplay}`}
-                            />
-                          </div>
-                          <div className="min-w-0 pr-2">
-                            <div className="font-medium text-ink truncate">{codeDisplay}</div>
-                            {subtitle && (
-                              <div className="text-xs text-slate-500 truncate">{subtitle}</div>
-                            )}
-                          </div>
-                          <div>
-                            {status === "active" && (
-                              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
-                                Active
-                              </span>
-                            )}
-                            {status === "scheduled" && (
-                              <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-                                Scheduled
-                              </span>
-                            )}
-                            {status === "expired" && (
-                              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                                Expired
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-slate-600">{isCode ? "Code" : "Automatic"}</div>
-                          <div className="text-slate-600">All customers</div>
-                          <div className="text-slate-600 capitalize">
-                            {discount.discount_type?.replace(/_/g, " ") || "Amount off products"}
-                          </div>
-                          <div className="text-slate-500 text-xs">Product discounts</div>
-                          <div className="text-slate-600">{discount.times_used ?? 0}</div>
+                      <div>Title</div>
+                      {activeColumns.map((col) => (
+                        <div key={col.id} className="truncate">
+                          {col.label}
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  /* EMPTY STRUCTURE */
-                  <div className="min-h-[120px] flex items-center justify-center text-sm text-slate-400">
-                    {loading ? "Loading discounts..." : "No discounts found"}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+
+                  {/* TABLE BODY */}
+                  {paginatedDiscounts.length > 0 ? (
+                    <div
+                      className="divide-y divide-slate-100"
+                      style={{ minWidth: gridStyle.minWidth }}
+                    >
+                      {paginatedDiscounts.map((discount) => {
+                        const codeDisplay =
+                          Array.isArray(discount.codes) && discount.codes.length > 0
+                            ? discount.codes.join(", ")
+                            : discount.name || "Untitled discount";
+                        const isCode = Array.isArray(discount.codes) && discount.codes.length > 0;
+                        const status = getDiscountStatus(discount);
+                        const isSelected = selectedIds.has(discount.id);
+
+                        let subtitle = "";
+                        if (discount.discount_type === "percentage" && discount.value) {
+                          subtitle = `${discount.value}% off entire order`;
+                        } else if (discount.discount_type === "fixed_amount" && discount.value) {
+                          subtitle = `₹${discount.value} off entire order`;
+                        } else if (discount.name && discount.name !== codeDisplay) {
+                          subtitle = discount.name;
+                        }
+
+                        return (
+                          <div
+                            key={discount.id}
+                            className={`grid items-center px-4 py-3 text-sm transition ${
+                              isSelected
+                                ? "bg-amber-50/60 hover:bg-amber-50"
+                                : "text-slate-800 hover:bg-slate-50"
+                            }`}
+                            style={gridStyle}
+                          >
+                            <div>
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-slate-300 text-ink focus:ring-ink cursor-pointer"
+                                checked={isSelected}
+                                onChange={(e) => handleToggleSelect(discount.id, e)}
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label={`Select discount ${codeDisplay}`}
+                              />
+                            </div>
+                            <div className="min-w-0 pr-2">
+                              <div className="font-medium text-ink truncate">{codeDisplay}</div>
+                              {subtitle && (
+                                <div className="text-xs text-slate-500 truncate">{subtitle}</div>
+                              )}
+                            </div>
+                            {activeColumns.map((col) => (
+                              <div key={col.id} className="min-w-0">
+                                {renderColumnCell(col.id, discount, status, isCode)}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    /* EMPTY STRUCTURE */
+                    <div className="min-h-[120px] flex items-center justify-center text-sm text-slate-400">
+                      {loading ? "Loading discounts..." : "No discounts found"}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* PAGINATION CONTROLS */}
@@ -711,11 +1549,139 @@ export default function DiscountsPage() {
               )}
             </section>
 
-            {/* LEARN MORE */}
-            <div className="pt-8 text-center">
-              <button type="button" className="text-sm font-medium text-ink hover:underline">
-                Learn more about discounts
-              </button>
+            {/* LEARN MORE HOVER POPUP */}
+            <div className="pt-8 pb-10 text-center">
+              <div
+                className="relative inline-block text-left"
+                onMouseEnter={() => setIsLearnMoreOpen(true)}
+                onMouseLeave={() => setIsLearnMoreOpen(false)}
+              >
+                <button
+                  type="button"
+                  className="text-sm font-medium text-ink hover:underline cursor-pointer"
+                  onClick={() => setIsLearnMoreOpen((prev) => !prev)}
+                  aria-expanded={isLearnMoreOpen}
+                  aria-haspopup="true"
+                >
+                  Learn more about discounts
+                </button>
+
+                {isLearnMoreOpen && (
+                  <div
+                    role="tooltip"
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 w-[360px] sm:w-[420px] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xl shadow-slate-900/10 z-50 transition-all duration-150 animate-in fade-in zoom-in-95 pointer-events-auto"
+                  >
+                    <div className="space-y-3">
+                      {/* 1. Create discounts */}
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 mt-0.5">
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.75"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M17.5 10.5L10 18l-7.5-7.5V3h7.5l7.5 7.5z" />
+                            <circle cx="6.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
+                          </svg>
+                        </div>
+                        <div className="text-xs leading-relaxed text-slate-600">
+                          <span className="font-semibold text-slate-900">Create discounts:</span>{" "}
+                          Offer percentage or fixed-amount discounts to attract customers.
+                        </div>
+                      </div>
+
+                      {/* 2. Discount codes */}
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mt-0.5">
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.75"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="2.5" y="5.5" width="15" height="9" rx="2" />
+                            <path d="M6.5 9.5h4M6.5 12h2" />
+                            <circle cx="14" cy="10" r="1" fill="currentColor" stroke="none" />
+                          </svg>
+                        </div>
+                        <div className="text-xs leading-relaxed text-slate-600">
+                          <span className="font-semibold text-slate-900">Discount codes:</span> Let
+                          customers enter a code at checkout to receive an offer.
+                        </div>
+                      </div>
+
+                      {/* 3. Manage discounts */}
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 mt-0.5">
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.75"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3.5 6h13M3.5 14h13" />
+                            <circle
+                              cx="7"
+                              cy="6"
+                              r="2"
+                              fill="white"
+                              stroke="currentColor"
+                              strokeWidth="1.75"
+                            />
+                            <circle
+                              cx="13"
+                              cy="14"
+                              r="2"
+                              fill="white"
+                              stroke="currentColor"
+                              strokeWidth="1.75"
+                            />
+                          </svg>
+                        </div>
+                        <div className="text-xs leading-relaxed text-slate-600">
+                          <span className="font-semibold text-slate-900">Manage discounts:</span>{" "}
+                          View, edit, activate, or deactivate your discounts.
+                        </div>
+                      </div>
+
+                      {/* 4. Track performance */}
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 mt-0.5">
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.75"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 16.5h14M4 12.5l4-4.5 3.5 3.5L16 6" />
+                            <path d="M12.5 6H16v3.5" />
+                          </svg>
+                        </div>
+                        <div className="text-xs leading-relaxed text-slate-600">
+                          <span className="font-semibold text-slate-900">Track performance:</span>{" "}
+                          Monitor discount usage to understand which offers work best.
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Caret pointing down to the link */}
+                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-3 w-3 rotate-45 border-b border-r border-slate-200/90 bg-white" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </main>
