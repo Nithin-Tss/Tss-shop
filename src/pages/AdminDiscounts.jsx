@@ -136,10 +136,7 @@ function StatusCell({ status }) {
   };
 
   return (
-    <div
-      className={`relative inline-block text-left ${isOpen ? "z-40" : ""}`}
-      ref={containerRef}
-    >
+    <div className={`relative inline-block text-left ${isOpen ? "z-40" : ""}`} ref={containerRef}>
       <button
         type="button"
         onClick={handleToggle}
@@ -555,18 +552,16 @@ export default function DiscountsPage() {
   };
 
   const activeColumns = columnList.filter((col) => visibleColumns[col.id]);
-  const minColumnsWidth = activeColumns.reduce(
-    (sum, col) => sum + parseInt(col.width || 100, 10),
-    0
-  );
-  const minTableWidth = 36 + 220 + minColumnsWidth;
   const gridStyle = {
     gridTemplateColumns: [
       "36px",
-      "minmax(220px, 2fr)",
-      ...activeColumns.map((col) => col.width),
+      "minmax(180px, 2fr)",
+      ...activeColumns.map((col) => {
+        const w = parseInt(col.width || "100", 10);
+        return `minmax(${Math.min(w, 80)}px, 1fr)`;
+      }),
     ].join(" "),
-    minWidth: `${minTableWidth}px`,
+    width: "100%",
   };
 
   const totalPages = Math.max(1, Math.ceil(displayedDiscounts.length / pageSize));
@@ -1424,7 +1419,7 @@ export default function DiscountsPage() {
                 )}
 
                 {/* SCROLLABLE TABLE AREA */}
-                <div className="w-full overflow-x-auto pb-28">
+                <div className="w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {selectedIds.size === 0 && (
                     <div
                       className="grid items-center border-b border-slate-200 bg-brand-cream-100 px-4 py-3 text-sm font-medium text-slate-700"
@@ -1454,10 +1449,7 @@ export default function DiscountsPage() {
 
                   {/* TABLE BODY */}
                   {paginatedDiscounts.length > 0 ? (
-                    <div
-                      className="divide-y divide-slate-100"
-                      style={{ minWidth: gridStyle.minWidth }}
-                    >
+                    <div className="divide-y divide-slate-100 w-full">
                       {paginatedDiscounts.map((discount) => {
                         const codeDisplay =
                           Array.isArray(discount.codes) && discount.codes.length > 0
