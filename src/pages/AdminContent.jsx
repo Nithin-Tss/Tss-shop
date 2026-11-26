@@ -77,7 +77,9 @@ export function BlogPostsPage() {
     setShowDeleteModal(false);
     setDeleting(false);
     setUrlInput(post?.cover_image || "");
-    setForm(post && post.id ? { ...EMPTY_POST, ...post, tags: (post.tags || []).join(", ") } : EMPTY_POST);
+    setForm(
+      post && post.id ? { ...EMPTY_POST, ...post, tags: (post.tags || []).join(", ") } : EMPTY_POST
+    );
   }
 
   async function save(event) {
@@ -161,7 +163,9 @@ export function BlogPostsPage() {
         setUrlInput(result.data.url);
         setImageError("");
       } else {
-        setImageError(result.error ? String(result.error) : "Image upload failed. Please try again.");
+        setImageError(
+          result.error ? String(result.error) : "Image upload failed. Please try again."
+        );
       }
     } catch (err) {
       setImageError(err.message || "Failed to upload image.");
@@ -426,11 +430,14 @@ export function BlogPostsPage() {
                           src={localPreview || form.cover_image}
                           alt="Blog featured cover"
                           loading="lazy"
-                          className={`block h-[160px] w-full max-w-full object-contain object-center transition duration-200 ${uploading ? "scale-105 filter blur-xs" : ""
-                            }`}
+                          className={`block h-[160px] w-full max-w-full object-contain object-center transition duration-200 ${
+                            uploading ? "scale-105 filter blur-xs" : ""
+                          }`}
                           onError={() => {
                             if (!uploading) {
-                              setImageError("Unable to load image from URL. Please check the link.");
+                              setImageError(
+                                "Unable to load image from URL. Please check the link."
+                              );
                             }
                           }}
                           onLoad={() => {
@@ -570,10 +577,11 @@ export function BlogPostsPage() {
                           const file = e.dataTransfer.files?.[0];
                           if (file) handleImageFile(file);
                         }}
-                        className={`group flex w-full max-w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${isDragging
-                          ? "border-orange-500 bg-orange-50/50"
-                          : "border-slate-200 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-50"
-                          }`}
+                        className={`group flex w-full max-w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition ${
+                          isDragging
+                            ? "border-orange-500 bg-orange-50/50"
+                            : "border-slate-200 bg-slate-50/70 hover:border-slate-400 hover:bg-slate-50"
+                        }`}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 shadow-xs transition group-hover:border-orange-200 group-hover:text-orange-600">
                           <svg
