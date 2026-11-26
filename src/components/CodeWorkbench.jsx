@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import {
+  ChevronRight,
+  ChevronLeft,
+  FilePlus,
+  FolderPlus,
+  RotateCw,
+  MinusSquare,
+  Files,
+  Search,
+  X,
+} from "lucide-react";
 import CodeEditor from "./CodeEditor";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
 import { openStorefront } from "@/lib/api";
@@ -150,48 +161,19 @@ const svgProps = {
   strokeWidth: 1,
 };
 const Chevron = ({ open }) => (
-  <svg {...svgProps} width={14} height={14} style={{ transform: open ? "rotate(90deg)" : "none" }}>
-    <path d="M6 3.5l4.5 4.5L6 12.5" strokeWidth="1.3" />
-  </svg>
+  <ChevronRight
+    className="h-3.5 w-3.5 transition-transform shrink-0"
+    style={{ transform: open ? "rotate(90deg)" : "none" }}
+    strokeWidth={1.5}
+  />
 );
-const fillProps = { width: 16, height: 16, viewBox: "0 0 16 16", fill: "currentColor" };
-const NewFileIcon = () => (
-  <svg {...fillProps}>
-    <path d="M9.5 1.1l3.4 3.5.1.4v2h-1V6H8V2H3v11h4v1H2.5l-.5-.5v-12l.5-.5h6.7l.3.1zM9 2v3h2.9L9 2zm4 14h-1v-3H9v-1h3V9h1v3h3v1h-3v3z" />
-  </svg>
-);
-const NewFolderIcon = () => (
-  <svg {...fillProps}>
-    <path d="M14.5 2H7.71l-.85-.85L6.51 1h-5l-.5.5v11l.5.5H7v-1H1.99V6h4.49l.35-.15.86-.86H14v1.5l-.001.51h1.011V2.5L14.5 2zm-.51 2h-6.5l-.35.15-.86.86H2v-3h4.29l.85.85.36.15H14l-.01.99zM13 16h-1v-3H9v-1h3V9h1v3h3v1h-3v3z" />
-  </svg>
-);
-const RefreshIcon = () => (
-  <svg {...fillProps}>
-    <path d="M4.681 3H2V2h3.5l.5.5V6H5V4a5 5 0 1 0 4.53-.761l.302-.954A6 6 0 1 1 4.681 3z" />
-  </svg>
-);
-const CollapseIcon = () => (
-  <svg {...svgProps}>
-    <rect x="3.5" y="3.5" width="9" height="9" rx="1.5" strokeWidth="1.1" />
-    <path d="M6 8h4" strokeWidth="1.1" />
-  </svg>
-);
-const ExplorerIcon = () => (
-  <svg {...svgProps} width={24} height={24}>
-    <path d="M9.5 2.5h-5a1 1 0 00-1 1v10a1 1 0 001 1h7a1 1 0 001-1v-8l-3-3zM9.5 2.5v3h3M6 8.5h4M6 10.5h3" />
-  </svg>
-);
-const SearchIcon = () => (
-  <svg {...svgProps} width={24} height={24}>
-    <circle cx="9.5" cy="6.5" r="3.5" />
-    <path d="M7 9l-4.5 4.5" />
-  </svg>
-);
-const CloseIcon = () => (
-  <svg {...svgProps} width={14} height={14}>
-    <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" strokeWidth="1.3" />
-  </svg>
-);
+const NewFileIcon = () => <FilePlus className="h-4 w-4 shrink-0" strokeWidth={1.5} />;
+const NewFolderIcon = () => <FolderPlus className="h-4 w-4 shrink-0" strokeWidth={1.5} />;
+const RefreshIcon = () => <RotateCw className="h-4 w-4 shrink-0" strokeWidth={1.5} />;
+const CollapseIcon = () => <MinusSquare className="h-4 w-4 shrink-0" strokeWidth={1.5} />;
+const ExplorerIcon = () => <Files className="h-6 w-6 shrink-0" strokeWidth={1.5} />;
+const SearchIcon = () => <Search className="h-6 w-6 shrink-0" strokeWidth={1.5} />;
+const CloseIcon = () => <X className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />;
 
 /* ---------- file / folder type icons (Material Icon Theme, same as VS Code) ---------- */
 const ICON_URLS = import.meta.glob(
@@ -1006,16 +988,7 @@ export default function CodeWorkbench({ height = "640px", fullscreen = false }) 
                 className="flex items-center gap-1.5 border-r border-slate-200 px-3 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-200 hover:text-orange-600"
                 title="Return to theme customizer"
               >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M10 13L5 8l5-5" />
-                </svg>
+                <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Back to customizer
               </Link>
 

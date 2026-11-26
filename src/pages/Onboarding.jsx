@@ -1,5 +1,16 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  ShoppingBag,
+  Store,
+  Share2,
+  Globe,
+  ShoppingCart,
+  Package,
+  Palette,
+  LayoutTemplate,
+  Check,
+} from "lucide-react";
 import NavBar from "@/components/NavBar";
 import { apiRequest } from "@/lib/api";
 import { addStore, useSession } from "@/lib/auth";
@@ -21,77 +32,37 @@ const GOAL_OPTIONS = [
     id: "online",
     title: "Sell online",
     desc: "Create an online store and sell products to customers.",
-    icon: (
-      <svg {...iconProps}>
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-        <path d="M3 6h18" />
-        <path d="M16 10a4 4 0 0 1-8 0" />
-      </svg>
-    ),
+    icon: <ShoppingBag className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
   {
     id: "physical",
     title: "Sell in a physical store",
     desc: "Manage sales and customers from a physical shop or location.",
-    icon: (
-      <svg {...iconProps}>
-        <path d="M3 9l1.5-5h15L21 9" />
-        <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
-        <path d="M5 12v8h14v-8" />
-        <path d="M10 20v-5h4v5" />
-      </svg>
-    ),
+    icon: <Store className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
   {
     id: "social",
     title: "Sell through social media",
     desc: "Reach customers and grow your business through social channels.",
-    icon: (
-      <svg {...iconProps}>
-        <circle cx="18" cy="5" r="3" />
-        <circle cx="6" cy="12" r="3" />
-        <circle cx="18" cy="19" r="3" />
-        <path d="M8.6 13.5l6.8 4" />
-        <path d="M15.4 6.5l-6.8 4" />
-      </svg>
-    ),
+    icon: <Share2 className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
   {
     id: "international",
     title: "Sell internationally",
     desc: "Reach customers in different countries and markets.",
-    icon: (
-      <svg {...iconProps}>
-        <circle cx="12" cy="12" r="10" />
-        <path d="M2 12h20" />
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
-      </svg>
-    ),
+    icon: <Globe className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
   {
     id: "marketplace",
     title: "Sell through marketplaces",
     desc: "Manage products and sales across online marketplaces.",
-    icon: (
-      <svg {...iconProps}>
-        <circle cx="8" cy="21" r="1" />
-        <circle cx="19" cy="21" r="1" />
-        <path d="M2 2h2l2.7 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1" />
-      </svg>
-    ),
+    icon: <ShoppingCart className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
   {
     id: "dropshipping",
     title: "Start a dropshipping business",
     desc: "Sell products without keeping your own inventory.",
-    icon: (
-      <svg {...iconProps}>
-        <path d="M16.5 9.4 7.5 4.2" />
-        <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z" />
-        <path d="M3.3 7 12 12l8.7-5" />
-        <path d="M12 22V12" />
-      </svg>
-    ),
+    icon: <Package className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
 ];
 
@@ -100,27 +71,13 @@ const THEME_OPTIONS = [
     id: "custom",
     title: "Create your custom theme",
     desc: "Build your unique design from scratch using flexible layout tools.",
-    icon: (
-      <svg {...iconProps}>
-        <circle cx="13.5" cy="6.5" r="0.75" fill="currentColor" />
-        <circle cx="17.5" cy="10.5" r="0.75" fill="currentColor" />
-        <circle cx="8.5" cy="7.5" r="0.75" fill="currentColor" />
-        <circle cx="6.5" cy="12.5" r="0.75" fill="currentColor" />
-        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7h2c3 0 5.5-2.5 5.5-5.5C22 6 17.5 2 12 2Z" />
-      </svg>
-    ),
+    icon: <Palette className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
   {
     id: "predefined",
     title: "Predefined theme",
     desc: "Choose from ready-made, professionally designed templates.",
-    icon: (
-      <svg {...iconProps}>
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M3 9h18" />
-        <path d="M9 21V9" />
-      </svg>
-    ),
+    icon: <LayoutTemplate className="h-5 w-5" strokeWidth={1.7} aria-hidden="true" />,
   },
 ];
 
@@ -261,19 +218,7 @@ export default function OnboardingPage() {
                       }`}
                     >
                       {isSelected && (
-                        <svg
-                          width="11"
-                          height="11"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M20 6 9 17l-5-5" />
-                        </svg>
+                        <Check className="h-2.5 w-2.5" strokeWidth={3.5} aria-hidden="true" />
                       )}
                     </span>
                   </button>

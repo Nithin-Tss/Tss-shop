@@ -1,5 +1,23 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  Monitor,
+  ShoppingBag,
+  Store,
+  Globe,
+  AlertCircle,
+  CheckCircle2,
+  Search,
+  Filter,
+  Check,
+  ChevronDown,
+  Trash2,
+  SlidersHorizontal,
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiDelete } from "@/lib/api";
 import { useCan } from "@/lib/auth";
@@ -192,71 +210,15 @@ export default function AdminCollections() {
     const name = (channel?.name || "").toLowerCase();
 
     if (type === "online" || name.includes("online")) {
-      return (
-        <svg
-          className="w-4 h-4 text-slate-700 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.7"
-            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-          />
-        </svg>
-      );
+      return <Monitor className="w-4 h-4 text-slate-700 shrink-0" />;
     }
     if (type === "shop" || name.includes("shop")) {
-      return (
-        <svg
-          className="w-4 h-4 text-slate-700 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.7"
-            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-          />
-        </svg>
-      );
+      return <ShoppingBag className="w-4 h-4 text-slate-700 shrink-0" />;
     }
     if (type === "pos" || name.includes("point of sale") || name.includes("pos")) {
-      return (
-        <svg
-          className="w-4 h-4 text-slate-700 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.7"
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-          />
-        </svg>
-      );
+      return <Store className="w-4 h-4 text-slate-700 shrink-0" />;
     }
-    return (
-      <svg
-        className="w-4 h-4 text-slate-700 shrink-0"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.7"
-          d="M13 10V3L4 14h7v7l9-11h-7z"
-        />
-      </svg>
-    );
+    return <Globe className="w-4 h-4 text-slate-700 shrink-0" />;
   };
 
   // Shared styles
@@ -279,33 +241,9 @@ export default function AdminCollections() {
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-3 text-[13px] font-medium text-white shadow-xl transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
         >
           {feedback.type === "error" ? (
-            <svg
-              className="h-4 w-4 text-red-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <AlertCircle className="h-4 w-4 text-red-400" />
           ) : (
-            <svg
-              className="h-4 w-4 text-emerald-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
           )}
           <span>{feedback.message}</span>
           <button
@@ -329,9 +267,7 @@ export default function AdminCollections() {
           {/* Top Heading Row */}
           <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2">
-              <span className="text-[18px] text-slate-500" aria-hidden="true">
-                ⊞
-              </span>
+              <Icon name="products" className="h-5 w-5 text-slate-500" aria-hidden="true" />
               <h1 className="text-[20px] font-semibold tracking-tight text-charcoal-navy">
                 Collections
               </h1>
@@ -351,20 +287,10 @@ export default function AdminCollections() {
               {/* Search and filter input + view button */}
               <div className="flex w-full flex-1 items-center gap-2 sm:max-w-md">
                 <div className="relative flex flex-1 items-center">
-                  <svg
+                  <Search
                     className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
                     aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                      d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"
-                    />
-                  </svg>
+                  />
                   <input
                     type="text"
                     value={searchQuery}
@@ -394,20 +320,7 @@ export default function AdminCollections() {
                   aria-label="View columns and filters"
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/15"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                      d="M9 4.5v15m6-15v15m-10.5 0h15a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5h-15A1.5 1.5 0 003 6v12a1.5 1.5 0 001.5 1.5z"
-                    />
-                  </svg>
+                  <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -434,19 +347,7 @@ export default function AdminCollections() {
                               </span>
                             ) : isAllSelected ? (
                               <span className="flex h-4 w-4 items-center justify-center rounded bg-orange-600 text-white shadow-xs">
-                                <svg
-                                  className="h-3 w-3"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2.5"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M5 13l4 4L19 7"
-                                  />
-                                </svg>
+                                <Check className="h-3 w-3" strokeWidth={2.5} />
                               </span>
                             ) : (
                               <span className="h-4 w-4 rounded border border-slate-300 bg-white transition-colors group-hover:border-slate-400" />
@@ -469,21 +370,11 @@ export default function AdminCollections() {
                                 aria-expanded={isSelectDropdownOpen}
                               >
                                 <span>{selectedIds.length} selected</span>
-                                <svg
+                                <ChevronDown
                                   className={`h-3.5 w-3.5 text-slate-600 transition-transform duration-150 ${
                                     isSelectDropdownOpen ? "rotate-180" : ""
                                   }`}
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="m6 9 6 6 6-6"
-                                  />
-                                </svg>
+                                />
                               </button>
 
                               {isSelectDropdownOpen && (
@@ -568,15 +459,7 @@ export default function AdminCollections() {
                                 aria-label="More bulk actions"
                                 aria-expanded={isMoreMenuOpen}
                               >
-                                <svg
-                                  className="h-4 w-4 text-slate-600"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle cx="5" cy="12" r="2" />
-                                  <circle cx="12" cy="12" r="2" />
-                                  <circle cx="19" cy="12" r="2" />
-                                </svg>
+                                <MoreHorizontal className="h-4 w-4 text-slate-600" />
                               </button>
 
                               {/* Popover Dropdown */}
@@ -759,19 +642,7 @@ export default function AdminCollections() {
                               >
                                 {isSelected ? (
                                   <span className="flex h-4 w-4 items-center justify-center rounded bg-orange-600 text-white shadow-xs">
-                                    <svg
-                                      className="h-3 w-3"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2.5"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M5 13l4 4L19 7"
-                                      />
-                                    </svg>
+                                    <Check className="h-3 w-3" strokeWidth={2.5} />
                                   </span>
                                 ) : (
                                   <span className="h-4 w-4 rounded border border-slate-300 bg-white transition-colors group-hover:border-slate-400" />
@@ -792,20 +663,7 @@ export default function AdminCollections() {
                                     loading="lazy"
                                   />
                                 ) : (
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="1.6"
-                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                  </svg>
+                                  <ImageIcon className="h-4 w-4" aria-hidden="true" />
                                 )}
                               </div>
                               <Link
@@ -865,22 +723,12 @@ export default function AdminCollections() {
                                   {col.sales_channels_count ??
                                     (col.sales_channels ? col.sales_channels.length : 0)}
                                 </span>
-                                <svg
+                                <ChevronDown
                                   className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-150 ${
                                     openChannelDropdownId === col.id ? "rotate-180" : ""
                                   }`}
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
                                   aria-hidden="true"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="m6 9 6 6 6-6"
-                                  />
-                                </svg>
+                                />
                               </button>
 
                               {/* Dropdown Popover */}
@@ -932,7 +780,7 @@ export default function AdminCollections() {
                   aria-label="Previous page"
                   className={pageButton}
                 >
-                  ‹
+                  <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   type="button"
@@ -941,7 +789,7 @@ export default function AdminCollections() {
                   aria-label="Next page"
                   className={pageButton}
                 >
-                  ›
+                  <ChevronRight className="h-4 w-4" />
                 </button>
                 <span className="min-w-12 text-center tabular-nums text-[13px] text-slate-700">
                   {displayedCollections.length === 0

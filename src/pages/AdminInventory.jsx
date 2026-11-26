@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Tag,
+  PlusSquare,
+  Check,
+  CheckSquare,
+  Download,
+  Upload,
+  Search,
+  Columns3,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { getSession, useCan } from "@/lib/auth";
@@ -127,18 +137,7 @@ function ProductThumbnail({ item }) {
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-slate-100 text-slate-500"
       title={item.title}
     >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-4 w-4"
-      >
-        <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-        <circle cx="7.5" cy="7.5" r="1" fill="currentColor" />
-      </svg>
+      <Tag className="h-4 w-4" strokeWidth={1.6} />
     </div>
   );
 }
@@ -368,19 +367,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
             showReasonDropdown ? "ring-1 ring-orange-600 border-orange-600" : ""
           }`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4"
-          >
-            <rect width="18" height="18" x="3" y="3" rx="2" />
-            <path d="M8 12h8" />
-            <path d="M12 8v8" />
-          </svg>
+          <PlusSquare className="h-4 w-4" strokeWidth={1.8} />
         </button>
 
         {showReasonDropdown && (
@@ -427,17 +414,7 @@ function AdjustPopover({ item, target, currentValue, onSave, onHistory, onClose 
         title="Confirm quantity change"
         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-charcoal-navy hover:bg-orange-600/90 hover:text-white transition shadow-2xs disabled:opacity-50"
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
+        <Check className="h-4 w-4" strokeWidth={2.5} />
       </button>
 
       {/* 6. History */}
@@ -1010,18 +987,7 @@ function StockCountsModal({ items, locations, onClose, onStartCount }) {
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-charcoal-navy">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4"
-              >
-                <path d="M9 11l3 3L22 4" />
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-              </svg>
+              <CheckSquare className="h-4 w-4" strokeWidth={2} />
             </div>
             <div>
               <h2 id="stock-counts-title" className="text-base font-semibold text-charcoal-navy">
@@ -1111,19 +1077,7 @@ function StockCountsModal({ items, locations, onClose, onStartCount }) {
               disabled={downloading || totalItems === 0}
               className="shrink-0 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-charcoal-navy shadow-2xs hover:bg-slate-100 disabled:opacity-50 transition cursor-pointer"
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4 text-slate-600"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
+              <Download className="h-4 w-4 text-slate-600" strokeWidth={2} />
               {downloading ? "Preparing..." : "Download count sheet"}
             </button>
           </div>
@@ -1413,18 +1367,7 @@ export default function InventoryPage() {
                 onClick={() => setIsStockCountsOpen(true)}
                 className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-slate-100 transition cursor-pointer"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 text-slate-600"
-                >
-                  <path d="M9 11l3 3L22 4" />
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                </svg>
+                <CheckSquare className="h-4 w-4 text-slate-600" strokeWidth={1.8} />
                 Stock counts
               </button>
 
@@ -1434,19 +1377,7 @@ export default function InventoryPage() {
                 disabled={items.length === 0}
                 className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-slate-100 disabled:opacity-50 transition cursor-pointer"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 text-slate-600"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
+                <Download className="h-4 w-4 text-slate-600" strokeWidth={1.8} />
                 Export
               </button>
 
@@ -1455,19 +1386,7 @@ export default function InventoryPage() {
                 onClick={() => setIsImportModalOpen(true)}
                 className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-medium text-charcoal-navy shadow-2xs hover:bg-slate-100 transition cursor-pointer"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 text-slate-600"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" />
-                  <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
+                <Upload className="h-4 w-4 text-slate-600" strokeWidth={1.8} />
                 Import
               </button>
             </div>
@@ -1518,18 +1437,7 @@ export default function InventoryPage() {
                 {/* Search input with magnifying glass */}
                 <div className="relative flex items-center w-full">
                   <span className="pointer-events-none absolute left-3 text-slate-400">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-4 w-4"
-                    >
-                      <circle cx="11" cy="11" r="8" />
-                      <path d="m21 21-4.3-4.3" />
-                    </svg>
+                    <Search className="h-4 w-4" strokeWidth={2} />
                   </span>
                   <input
                     type="text"
@@ -1563,19 +1471,7 @@ export default function InventoryPage() {
                 title="Table columns & view"
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition shrink-0 ml-2"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4"
-                >
-                  <rect width="18" height="18" x="3" y="3" rx="2" />
-                  <line x1="9" y1="3" x2="9" y2="21" />
-                  <line x1="15" y1="3" x2="15" y2="21" />
-                </svg>
+                <Columns3 className="h-4 w-4" strokeWidth={1.8} />
               </button>
             </div>
 

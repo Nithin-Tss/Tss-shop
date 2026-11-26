@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
+import { ExternalLink, ArrowLeft, Pencil } from "lucide-react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { openStorefront } from "@/lib/api";
 import { useCan } from "@/lib/auth";
@@ -136,18 +136,11 @@ function OpenThemeLink({ theme, className, icon }) {
       className={className}
     >
       {icon && (
-        <svg
-          viewBox="0 0 20 20"
+        <ExternalLink
           className="mr-1.5 h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeWidth={1.8}
           aria-hidden="true"
-        >
-          <path d="M11 4h5v5M16 4l-7 7M14 11v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4" />
-        </svg>
+        />
       )}
       Open theme
     </button>
@@ -420,9 +413,7 @@ export default function OnlineStorePage() {
                 onClick={goBack}
                 className="-ml-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-slate-600 transition hover:bg-white hover:text-orange-600"
               >
-                <svg {...lineIcon} className="h-4 w-4">
-                  <path d="M19 12H5M11 6l-6 6 6 6" />
-                </svg>
+                <ArrowLeft className="h-4 w-4" strokeWidth={1.8} />
                 Back
               </button>
               {live && (
@@ -490,18 +481,11 @@ export default function OnlineStorePage() {
                             style={{ backgroundColor: "#b08d57", color: "#111827", opacity: 1 }}
                             onClick={() => open(live, "/admin/online-store/customize")}
                           >
-                            <svg
-                              viewBox="0 0 20 20"
+                            <Pencil
                               className="mr-1.5 h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                              strokeWidth={1.8}
                               aria-hidden="true"
-                            >
-                              <path d="M4 16l1-4 8.5-8.5a1.4 1.4 0 0 1 2 2L7 14l-3 2z" />
-                            </svg>
+                            />
                             Edit theme
                           </button>
                           <ThemeMenu

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { GripVertical, MoreVertical } from "lucide-react";
 
 export const inputClass =
   "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-orange-600";
@@ -71,14 +72,7 @@ export function DragHandle({ label, onPointerDown, onKeyDown }) {
       aria-label={label}
       title="Drag to reorder (or use the arrow keys)"
     >
-      <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-        <circle cx="9" cy="6" r="1.6" />
-        <circle cx="15" cy="6" r="1.6" />
-        <circle cx="9" cy="12" r="1.6" />
-        <circle cx="15" cy="12" r="1.6" />
-        <circle cx="9" cy="18" r="1.6" />
-        <circle cx="15" cy="18" r="1.6" />
-      </svg>
+      <GripVertical className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
     </button>
   );
 }
@@ -154,11 +148,7 @@ export function StyleMenu({ name, count = 1, onCopy, onPaste, className = "" }) 
         aria-expanded={open}
         title="Copy / paste styles"
       >
-        <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-          <circle cx="12" cy="5" r="1.6" />
-          <circle cx="12" cy="12" r="1.6" />
-          <circle cx="12" cy="19" r="1.6" />
-        </svg>
+        <MoreVertical className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
       </button>
       {open && (
         <div

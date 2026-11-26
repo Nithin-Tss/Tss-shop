@@ -1,4 +1,40 @@
-/* Inline stroke icons (24x24, Lucide-style paths). */
+import {
+  ShoppingBag,
+  Sparkles,
+  Shirt,
+  Headphones,
+  Factory,
+  ShoppingBasket,
+  Layers,
+  Repeat,
+  BookOpen,
+  Package,
+  Truck,
+  Droplet,
+  Battery,
+  Speaker,
+  Settings,
+  Zap,
+  Wrench,
+  Search,
+  Heart,
+  Star,
+  ShieldCheck,
+  RotateCcw,
+  Watch,
+  Lock,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  SlidersHorizontal,
+  ChevronDown,
+  Layout,
+  CreditCard,
+  Boxes,
+  Tag,
+} from "lucide-react";
+
+/* Custom stroke icon paths for specialized landing page items without a standard 1:1 Lucide glyph */
 const PATHS = {
   bag: (
     <>
@@ -220,10 +256,61 @@ const PATHS = {
   ),
 };
 
+const LUCIDE_MAP = {
+  bag: ShoppingBag,
+  sparkles: Sparkles,
+  shirt: Shirt,
+  headphones: Headphones,
+  factory: Factory,
+  basket: ShoppingBasket,
+  layers: Layers,
+  repeat: Repeat,
+  book: BookOpen,
+  package: Package,
+  truck: Truck,
+  droplet: Droplet,
+  battery: Battery,
+  speaker: Speaker,
+  cog: Settings,
+  bolt: Zap,
+  wrench: Wrench,
+  search: Search,
+  heart: Heart,
+  star: Star,
+  shield: ShieldCheck,
+  returns: RotateCcw,
+  watch: Watch,
+  gear: Settings,
+  lock: Lock,
+  back: ArrowLeft,
+  forward: ArrowRight,
+  check: Check,
+  sliders: SlidersHorizontal,
+  chevron: ChevronDown,
+  arrow: ArrowRight,
+  layout: Layout,
+  card: CreditCard,
+  boxes: Boxes,
+  tag: Tag,
+};
+
 export default function Icon({ name, size = 20, stroke = 1.6, className = "" }) {
+  const LucideComponent = LUCIDE_MAP[name];
+
+  if (LucideComponent) {
+    return (
+      <LucideComponent
+        size={size}
+        strokeWidth={stroke}
+        className={`shrink-0 ${className}`}
+        aria-hidden="true"
+      />
+    );
+  }
+
   return (
     <svg
-      className={className}
+      className={`shrink-0 ${className}`}
       width={size}
       height={size}
       viewBox="0 0 24 24"

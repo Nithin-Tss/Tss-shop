@@ -1,5 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  ChevronLeft,
+  RotateCw,
+  MoreHorizontal,
+  MessageSquare,
+  SlidersHorizontal,
+  Calendar,
+  ChevronDown,
+  Bot,
+  BarChart2,
+  LayoutGrid,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import Icon from "@/components/Icons";
 
@@ -150,14 +162,7 @@ export default function AdminReportExploration() {
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-200 hover:text-orange-600 transition-colors"
                   title="Back"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
+                  <ChevronLeft className="h-4 w-4" strokeWidth={2} />
                 </button>
 
                 <span className="text-slate-400 text-sm">›</span>
@@ -173,19 +178,7 @@ export default function AdminReportExploration() {
                   title="Reset exploration"
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 hover:text-orange-600 shadow-2xs transition-colors"
                 >
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
+                  <RotateCw className="h-3.5 w-3.5" strokeWidth={2} />
                 </button>
 
                 {/* Three-dot menu */}
@@ -196,11 +189,7 @@ export default function AdminReportExploration() {
                     title="More options"
                     className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 hover:text-orange-600 shadow-2xs transition-colors"
                   >
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                      <circle cx="5" cy="12" r="2" />
-                      <circle cx="12" cy="12" r="2" />
-                      <circle cx="19" cy="12" r="2" />
-                    </svg>
+                    <MoreHorizontal className="h-4 w-4" strokeWidth={2} />
                   </button>
 
                   {isMoreMenuOpen && (
@@ -249,19 +238,7 @@ export default function AdminReportExploration() {
                   onClick={() => showToast("Annotations feature.")}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-[rgba(24,24,27,0.12)] hover:text-orange-600 transition-colors"
                 >
-                  <svg
-                    className="h-3.5 w-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                    />
-                  </svg>
+                  <MessageSquare className="h-3.5 w-3.5" strokeWidth={2} />
                   <span>Annotations</span>
                 </button>
 
@@ -276,19 +253,7 @@ export default function AdminReportExploration() {
                   }`}
                   aria-pressed={showControls}
                 >
-                  <svg
-                    className="h-3.5 w-3.5 text-ink"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                    />
-                  </svg>
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-ink" strokeWidth={2} />
                   <span>Controls</span>
                 </button>
               </div>
@@ -303,33 +268,9 @@ export default function AdminReportExploration() {
                   onClick={() => setIsDateMenuOpen((prev) => !prev)}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-ink shadow-2xs hover:bg-[rgba(24,24,27,0.12)] transition-colors"
                 >
-                  <svg
-                    className="h-3.5 w-3.5 text-slate-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
+                  <Calendar className="h-3.5 w-3.5 text-slate-500" strokeWidth={2} />
                   <span>{dateRange}</span>
-                  <svg
-                    className="h-3 w-3 text-slate-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m6 9 6 6 6-6"
-                    />
-                  </svg>
+                  <ChevronDown className="h-3 w-3 text-slate-500" strokeWidth={2} />
                 </button>
 
                 {isDateMenuOpen && (
@@ -414,18 +355,7 @@ export default function AdminReportExploration() {
                 <div className="flex items-center gap-3">
                   {/* Purple AI/Robot avatar icon matching reference screenshot */}
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white">
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <rect x="4" y="6" width="16" height="12" rx="2" />
-                      <circle cx="9" cy="12" r="1.5" fill="currentColor" />
-                      <circle cx="15" cy="12" r="1.5" fill="currentColor" />
-                      <path d="M12 2v4" />
-                    </svg>
+                    <Bot className="h-4 w-4" strokeWidth={2} />
                   </div>
 
                   <input
@@ -444,21 +374,12 @@ export default function AdminReportExploration() {
                     className="text-slate-500 hover:text-orange-600 p-1 transition-colors"
                     aria-label="Toggle exploration dropdown"
                   >
-                    <svg
+                    <ChevronDown
                       className={`h-4 w-4 transition-transform ${
                         isExplorationDropdownOpen ? "rotate-180" : ""
                       }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m6 9 6 6 6-6"
-                      />
-                    </svg>
+                      strokeWidth={2}
+                    />
                   </button>
                 </div>
 
@@ -582,19 +503,7 @@ export default function AdminReportExploration() {
                     }`}
                   >
                     {/* Bar chart icon */}
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      />
-                    </svg>
+                    <BarChart2 className="h-3.5 w-3.5" strokeWidth={2} />
                     <span>Freeform</span>
                     {activeTab === "freeform" && (
                       <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-sky-400 rounded-full" />
@@ -612,19 +521,7 @@ export default function AdminReportExploration() {
                     }`}
                   >
                     {/* Grid/cohort icon */}
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                      />
-                    </svg>
+                    <LayoutGrid className="h-3.5 w-3.5" strokeWidth={2} />
                     <span>Cohorts</span>
                     {activeTab === "cohorts" && (
                       <span className="absolute -bottom-px left-0 right-0 h-0.5 bg-sky-400 rounded-full" />

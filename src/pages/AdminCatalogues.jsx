@@ -1,50 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { BookOpen, User, Tag, Upload } from "lucide-react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiDelete, apiGet, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
 import Icon from "@/components/Icons";
 
-// Shopify Polaris CatalogIcon (20x20 viewBox)
 function CatalogHeaderIcon({ className = "h-5 w-5 text-ink shrink-0" }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
-      <path
-        fillRule="evenodd"
-        d="M14.772 9c-.63 0-1.232.254-1.669.704l-2.628 2.709c-.642.661-.632 1.712.023 2.361l1.79 1.777c.595.59 1.557.6 2.164.02l2.933-2.802c.393-.376.615-.894.615-1.436v-1.34c0-1.1-.899-1.993-2.008-1.993h-1.22Zm.978 3c.414 0 .75-.336.75-.75s-.336-.75-.75-.75-.75.336-.75.75.336.75.75.75Z"
-      />
-      <path d="M4.95 6.7c0-1.27 1.03-2.3 2.3-2.3h5.55c1.27 0 2.3 1.03 2.3 2.3v.4c0 .387.313.7.7.7.387 0 .7-.313.7-.7v-.4c0-2.043-1.656-3.7-3.7-3.7h-5.55c-2.043 0-3.7 1.657-3.7 3.7v6.55c0 2.044 1.657 3.7 3.7 3.7h1.75c.387 0 .7-.313.7-.7 0-.386-.313-.7-.7-.7h-1.75c-1.27 0-2.3-1.03-2.3-2.3v-6.55Z" />
-      <path d="M7 7c0-.414.336-.75.75-.75h4.5c.414 0 .75.336.75.75s-.336.75-.75.75h-4.5c-.414 0-.75-.336-.75-.75Z" />
-      <path d="M7 10c0-.414.336-.75.75-.75h2c.414 0 .75.336.75.75s-.336.75-.75.75h-2c-.414 0-.75-.336-.75-.75Z" />
-    </svg>
-  );
+  return <BookOpen className={className} strokeWidth={1.75} aria-hidden="true" />;
 }
-// Polaris PersonFilledIcon (20x20 viewBox)
 function PersonIcon({ className = "h-5 w-5 shrink-0" }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M10 9.75a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z" />
-      <path d="M10 11.5c-1.968 0-3.815.95-4.959 2.552l-.561.786a1.05 1.05 0 0 0 .855 1.662h9.33a1.05 1.05 0 0 0 .855-1.662l-.561-.786a6.094 6.094 0 0 0-4.959-2.552Z" />
-    </svg>
-  );
+  return <User className={className} strokeWidth={1.75} aria-hidden="true" />;
 }
-
-// Polaris TagIcon rotated so pointed tip faces top-right matching the reference image
 function TagIcon({ className = "h-4 w-4 shrink-0" }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="currentColor"
-      className={`${className} -rotate-90`}
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M2.5 4.5A2 2 0 0 1 4.5 2.5h5.172a2 2 0 0 1 1.414.586l7 7a2 2 0 0 1 0 2.828l-5.172 5.172a2 2 0 0 1-2.828 0l-7-7A2 2 0 0 1 2.5 9.672V4.5Zm2 1.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-      />
-    </svg>
-  );
+  return <Tag className={className} strokeWidth={1.75} aria-hidden="true" />;
 }
 
 // Centered illustration matching the reference screenshot:
@@ -444,10 +413,7 @@ export default function CataloguesPage() {
             </div>
 
             <div className="mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-6 text-center">
-              <svg className="h-8 w-8 text-slate-400 mb-2" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.56l2.22 2.22a.75.75 0 1 0 1.06-1.06l-3.5-3.5a.75.75 0 0 0-1.06 0l-3.5 3.5a.75.75 0 0 0 1.06 1.06l2.22-2.22v8.69Z" />
-                <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-              </svg>
+              <Upload className="h-8 w-8 text-slate-400 mb-2" strokeWidth={1.75} />
               <p className="text-xs text-slate-500">
                 Select a CSV file with a Name column (Status and Description are optional).
               </p>

@@ -1,5 +1,13 @@
 import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Upload,
+  Image as ImageIcon,
+  Banknote,
+  Check,
+  Lightbulb,
+  ArrowRight,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader, NavIcon, navIcons } from "@/components/AdminSidebar";
 import { apiGet, openStorefront } from "@/lib/api";
 import { can, getActiveStore, useSession } from "@/lib/auth";
@@ -7,50 +15,21 @@ import { formatMoney, useOverview } from "@/lib/reportsApi";
 
 const BASE = "/admin/online-store";
 
-const lineIcon = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.7,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  viewBox: "0 0 24 24",
-  "aria-hidden": true,
-};
-
-const icons = {
-  upload: <path d="M12 15V3M7 8l5-5 5 5M5 21h14" />,
-  image: (
-    <>
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <circle cx="9" cy="10" r="2" />
-      <path d="m21 16-5-5-9 9" />
-    </>
-  ),
-  cash: (
-    <>
-      <rect x="2" y="6" width="20" height="12" rx="2" />
-      <circle cx="12" cy="12" r="2.5" />
-    </>
-  ),
-  check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
-  bulb: (
-    <>
-      <path d="M9 18h6M10 21h4" />
-      <path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z" />
-    </>
-  ),
-  arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+const HOME_ICONS = {
+  upload: Upload,
+  image: ImageIcon,
+  cash: Banknote,
+  check: Check,
+  bulb: Lightbulb,
+  arrow: ArrowRight,
 };
 
 function Icon({ name, className = "h-5 w-5" }) {
   // Sidebar items (products, orders, discounts...) use the shared sidebar icon
   if (navIcons[name]) return <NavIcon name={name} className={className} />;
 
-  return (
-    <svg {...lineIcon} className={className}>
-      {icons[name]}
-    </svg>
-  );
+  const Comp = HOME_ICONS[name] || ArrowRight;
+  return <Comp className={className} strokeWidth={1.75} aria-hidden="true" />;
 }
 
 // `permission`: shown only to roles that can use what the link opens (see can() in lib/auth.js).

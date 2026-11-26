@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Loader2, Upload, Trash2, Image as ImageIcon, AlertCircle } from "lucide-react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { RichTextEditor } from "@/pages/AdminAddCollection";
 import { deleteBlogPost, listBlogPosts, saveBlogPost, uploadThemeImage } from "@/lib/themeApi";
@@ -450,25 +451,7 @@ export function BlogPostsPage() {
                         {/* Uploading progress overlay */}
                         {uploading && (
                           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/65 p-4 text-center text-white backdrop-blur-[2px]">
-                            <svg
-                              className="h-7 w-7 animate-spin text-white"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
+                            <Loader2 className="h-7 w-7 animate-spin text-white" />
                             <p className="mt-2 text-xs font-semibold tracking-wide">
                               {uploadProgress !== null
                                 ? `Uploading (${uploadProgress}%)`
@@ -494,19 +477,7 @@ export function BlogPostsPage() {
                           disabled={uploading || busy}
                           className="flex min-w-0 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
                         >
-                          <svg
-                            className="h-3.5 w-3.5 shrink-0 text-slate-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                            />
-                          </svg>
+                          <Upload className="h-3.5 w-3.5 shrink-0 text-slate-500" strokeWidth={2} />
                           <span className="truncate">Replace</span>
                         </button>
                         <button
@@ -515,19 +486,7 @@ export function BlogPostsPage() {
                           disabled={uploading || busy}
                           className="flex min-w-0 items-center justify-center gap-1 rounded-lg border border-red-200 bg-red-50/70 px-2 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:opacity-50"
                         >
-                          <svg
-                            className="h-3.5 w-3.5 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
+                          <Trash2 className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
                           <span className="truncate">Remove</span>
                         </button>
                       </div>
@@ -584,19 +543,7 @@ export function BlogPostsPage() {
                         }`}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-500 shadow-xs transition group-hover:border-orange-200 group-hover:text-orange-600">
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
+                          <ImageIcon className="h-5 w-5" strokeWidth={1.8} />
                         </div>
                         <p className="mt-2 text-xs font-semibold text-slate-700 transition group-hover:text-orange-600">
                           Click to upload{" "}
@@ -653,17 +600,7 @@ export function BlogPostsPage() {
                   {/* Inline Error Notice */}
                   {imageError && (
                     <div className="mt-1 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs text-red-700">
-                      <svg
-                        className="mt-0.5 h-4 w-4 shrink-0 text-red-500"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
                       <span className="flex-1 text-[11.5px] leading-snug">{imageError}</span>
                       <button
                         type="button"

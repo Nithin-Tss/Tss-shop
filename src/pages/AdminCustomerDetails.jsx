@@ -1,5 +1,17 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  Check,
+  AlertTriangle,
+  Pencil,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  AlertCircle,
+  Package,
+  LayoutGrid,
+  Copy,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader, NavIcon } from "@/components/AdminSidebar";
 import AddressModal from "@/components/AddressModal";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -635,19 +647,7 @@ export default function AdminCustomerDetails() {
           {/* TOAST MESSAGE */}
           {toastMsg && (
             <div className="fixed bottom-6 right-6 z-50 bg-orange-600 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
-              <svg
-                className="w-4 h-4 text-emerald-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+              <Check className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
               <span>{toastMsg}</span>
             </div>
           )}
@@ -674,14 +674,7 @@ export default function AdminCustomerDetails() {
           {!loading && error && (
             <div className="bg-white rounded-2xl border border-red-200 p-8 text-center max-w-md mx-auto my-12 shadow-sm">
               <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+                <AlertTriangle className="w-6 h-6" strokeWidth={2} />
               </div>
               <h2 className="text-base font-bold text-slate-900 mb-1">Customer Not Found</h2>
               <p className="text-xs text-slate-500 mb-6">{error}</p>
@@ -733,19 +726,7 @@ export default function AdminCustomerDetails() {
                           onClick={handleOpenEditCustomer}
                           className="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2"
                         >
-                          <svg
-                            className="w-3.5 h-3.5 text-slate-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                            />
-                          </svg>
+                          <Pencil className="w-3.5 h-3.5 text-slate-500" strokeWidth={2} />
                           <span>Edit customer details</span>
                         </button>
                         {canDelete && (
@@ -757,19 +738,7 @@ export default function AdminCustomerDetails() {
                             }}
                             className="w-full text-left px-3.5 py-2 hover:bg-red-50 text-red-600 flex items-center gap-2"
                           >
-                            <svg
-                              className="w-3.5 h-3.5 text-red-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" strokeWidth={2} />
                             <span>Delete customer</span>
                           </button>
                         )}
@@ -794,14 +763,7 @@ export default function AdminCustomerDetails() {
                         : "No previous customer"
                     }
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5 15l7-7 7 7"
-                      />
-                    </svg>
+                    <ChevronUp className="w-4 h-4" strokeWidth={2} />
                   </button>
 
                   {/* Next Customer */}
@@ -821,14 +783,7 @@ export default function AdminCustomerDetails() {
                         : "No next customer"
                     }
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                    <ChevronDown className="w-4 h-4" strokeWidth={2} />
                   </button>
                 </div>
               </div>
@@ -997,19 +952,7 @@ export default function AdminCustomerDetails() {
                       <div>
                         {/* Test Order Warning Banner */}
                         <div className="bg-[rgba(234,88,12,0.08)] border border-orange-200 text-orange-700 rounded-xl px-4 py-2.5 text-xs font-medium flex items-center gap-2 mb-4">
-                          <svg
-                            className="w-4 h-4 text-orange-600 shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                          </svg>
+                          <AlertCircle className="w-4 h-4 text-orange-600 shrink-0" strokeWidth={2} />
                           <span>This is a test order. Payment not processed.</span>
                         </div>
 
@@ -1068,19 +1011,7 @@ export default function AdminCustomerDetails() {
                                       />
                                     ) : (
                                       <div className="w-12 h-12 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
-                                        <svg
-                                          className="w-6 h-6"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="1.5"
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                          />
-                                        </svg>
+                                        <Package className="w-6 h-6" strokeWidth={1.5} />
                                       </div>
                                     )}
                                     <div className="min-w-0">
@@ -1115,19 +1046,7 @@ export default function AdminCustomerDetails() {
                   {/* CARD 2: BLOCKS SECTION */}
                   <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs">
                     <div className="flex items-center gap-2 mb-3">
-                      <svg
-                        className="w-4 h-4 text-slate-700"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                        />
-                      </svg>
+                      <LayoutGrid className="w-4 h-4 text-slate-700" strokeWidth={2} />
                       <h2 className="text-sm font-bold text-slate-900">Blocks</h2>
                     </div>
                     <button
@@ -1337,19 +1256,7 @@ export default function AdminCustomerDetails() {
                             {copiedEmail ? (
                               <Icon name="check" className="h-3.5 w-3.5" />
                             ) : (
-                              <svg
-                                className="w-3.5 h-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
-                                />
-                              </svg>
+                              <Copy className="w-3.5 h-3.5" strokeWidth={2} />
                             )}
                           </button>
                         )}
@@ -1464,19 +1371,7 @@ export default function AdminCustomerDetails() {
                         className="text-slate-400 hover:text-slate-700 transition"
                         title="Edit store credit"
                       >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                          />
-                        </svg>
+                        <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
                       </button>
                     </div>
                     <p className="text-xs text-slate-500">None</p>
@@ -1542,19 +1437,7 @@ export default function AdminCustomerDetails() {
                         className="text-slate-400 hover:text-slate-700 transition"
                         title="Edit note"
                       >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                          />
-                        </svg>
+                        <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
                       </button>
                     </div>
 
@@ -1685,14 +1568,7 @@ export default function AdminCustomerDetails() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
               <div className="bg-white rounded-2xl max-w-sm w-full border border-slate-200 shadow-xl p-6 text-center space-y-4">
                 <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mx-auto">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                    />
-                  </svg>
+                  <LayoutGrid className="w-6 h-6" strokeWidth={2} />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">Customer Blocks</h3>
                 <p className="text-xs text-slate-500">
@@ -1944,14 +1820,7 @@ export default function AdminCustomerDetails() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
               <div className="bg-white rounded-2xl max-w-sm w-full border border-slate-200 shadow-2xl p-6 text-center space-y-4">
                 <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
+                  <Trash2 className="w-6 h-6" strokeWidth={2} />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">Delete customer?</h3>
                 <p className="text-xs text-slate-500">

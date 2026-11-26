@@ -1,5 +1,20 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import {
+  Home,
+  Search,
+  Tag,
+  ShoppingBag,
+  FileText,
+  FilePenLine,
+  Shield,
+  Link2,
+  Mail,
+  Phone,
+  ChevronRight,
+  ChevronLeft,
+  X,
+} from "lucide-react";
 
 // A Shopify-style link field: shows where the link goes; opening it lists the store's
 // Home page, Collections, Products, Pages, Blogs, Blog posts and Policies to pick from,
@@ -51,36 +66,23 @@ const policyForHandle = (handle) =>
   POLICY_LINKS.find((p) => p.handle === handle || p.aliases.includes(handle));
 
 const ICONS = {
-  home: "M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10",
-  search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",
-  collection: "M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01",
-  product: "M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01",
-  page: "M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6",
-  blog: "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",
-  policy: "M9 5h10v14H9zM5 8v11h4M12 9h4M12 12h4M12 15h3",
-  link: "M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1",
-  mail: "M4 6h16v12H4zM4 7l8 6 8-6",
-  phone:
-    "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z",
-  chevron: "M9 6l6 6-6 6",
-  back: "M15 6l-6 6 6 6",
+  home: Home,
+  search: Search,
+  collection: Tag,
+  product: ShoppingBag,
+  page: FileText,
+  blog: FilePenLine,
+  policy: Shield,
+  link: Link2,
+  mail: Mail,
+  phone: Phone,
+  chevron: ChevronRight,
+  back: ChevronLeft,
 };
 
 function Icon({ name, className = "h-4 w-4" }) {
-  return (
-    <svg
-      className={`${className} shrink-0`}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d={ICONS[name]} />
-    </svg>
-  );
+  const Component = ICONS[name] || Link2;
+  return <Component className={`shrink-0 ${className}`} strokeWidth={1.75} aria-hidden="true" />;
 }
 
 // What a stored link points at: its icon and a readable name
@@ -297,15 +299,7 @@ export default function LinkField({
               className="rounded p-0.5 text-slate-600 hover:text-orange-600"
               aria-label="Clear link"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
+              <X className="h-4 w-4" />
             </button>
           </>
         ) : (

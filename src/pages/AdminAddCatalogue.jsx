@@ -1,5 +1,14 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  ChevronLeft,
+  ChevronDown,
+  Search,
+  SlidersHorizontal,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import AssignMarketsModal from "@/components/AssignMarketsModal";
 import { apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -263,15 +272,7 @@ export default function AdminAddCatalogue() {
                   className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 hover:text-orange-600 transition shadow-2xs"
                   aria-label="Back to catalogs"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <ChevronLeft className="h-4 w-4" strokeWidth={2} />
                 </Link>
                 <h1 className="text-[20px] font-bold text-ink tracking-tight">
                   {catalogueId ? title || "Catalog" : "New catalog"}
@@ -342,16 +343,11 @@ export default function AdminAddCatalogue() {
                       <option value="active">Active</option>
                       <option value="draft">Draft</option>
                     </select>
-                    <svg
+                    <ChevronDown
                       className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
+                      strokeWidth={1.8}
                       aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m6 8 4 4 4-4" />
-                    </svg>
+                    />
                   </div>
                 </div>
               </div>
@@ -433,16 +429,11 @@ export default function AdminAddCatalogue() {
                       </option>
                     ))}
                   </select>
-                  <svg
+                  <ChevronDown
                     className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
+                    strokeWidth={1.8}
                     aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m6 8 4 4 4-4" />
-                  </svg>
+                  />
                 </div>
               </div>
 
@@ -499,16 +490,11 @@ export default function AdminAddCatalogue() {
                       <option value="decrease">Decrease</option>
                       <option value="increase">Increase</option>
                     </select>
-                    <svg
+                    <ChevronDown
                       className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
+                      strokeWidth={1.8}
                       aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m6 8 4 4 4-4" />
-                    </svg>
+                    />
                   </div>
 
                   {/* Include compare-at price Switch */}
@@ -661,30 +647,8 @@ export default function AdminAddCatalogue() {
                     title="Search and filter products"
                     aria-label="Search and filter products"
                   >
-                    <svg
-                      className="h-3.5 w-3.5 text-ink"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="6.5" cy="6.5" r="4.5" />
-                      <path d="M10 10L13.5 13.5" />
-                    </svg>
-                    <svg
-                      className="h-3.5 w-3.5 text-ink"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    >
-                      <line x1="2" y1="4" x2="14" y2="4" />
-                      <line x1="2" y1="8" x2="11" y2="8" />
-                      <line x1="2" y1="12" x2="7" y2="12" />
-                    </svg>
+                    <Search className="h-3.5 w-3.5 text-ink" strokeWidth={1.8} />
+                    <SlidersHorizontal className="h-3.5 w-3.5 text-ink" strokeWidth={1.8} />
                   </button>
 
                   {/* Sort Button and Popover Dropdown */}
@@ -702,18 +666,7 @@ export default function AdminAddCatalogue() {
                       aria-label="Sort products"
                       aria-expanded={isSortOpen}
                     >
-                      <svg
-                        className="h-3.5 w-3.5 text-ink"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12.5V3.5M5 3.5L2.5 6M5 3.5L7.5 6" />
-                        <path d="M11 3.5V12.5M11 12.5L8.5 10M11 12.5L13.5 10" />
-                      </svg>
+                      <ArrowUpDown className="h-3.5 w-3.5 text-ink" strokeWidth={1.8} />
                     </button>
 
                     {/* SORT BY DROPDOWN POPOVER */}
@@ -777,17 +730,7 @@ export default function AdminAddCatalogue() {
                               : "text-ink hover:bg-slate-100"
                           }`}
                         >
-                          <svg
-                            className="h-3.5 w-3.5 text-ink shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 16 16"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M8 13.5V2.5M8 2.5L3.5 7M8 2.5L12.5 7" />
-                          </svg>
+                          <ArrowUp className="h-3.5 w-3.5 text-ink shrink-0" strokeWidth={2} />
                           <span>A-Z</span>
                         </button>
 
@@ -801,17 +744,7 @@ export default function AdminAddCatalogue() {
                               : "text-ink hover:bg-slate-100"
                           }`}
                         >
-                          <svg
-                            className="h-3.5 w-3.5 text-ink shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 16 16"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M8 2.5V13.5M8 13.5L3.5 9M8 13.5L12.5 9" />
-                          </svg>
+                          <ArrowDown className="h-3.5 w-3.5 text-ink shrink-0" strokeWidth={2} />
                           <span>Z-A</span>
                         </button>
                       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { apiGet, apiPatch } from "@/lib/api";
 import { getActiveStore, getSession } from "@/lib/auth";
 import { RichTextEditor } from "@/pages/AdminAddCollection";
@@ -353,18 +354,11 @@ export default function PoliciesSettings() {
                         {status.join(" · ")}
                       </span>
                     </span>
-                    <svg
+                    <ChevronDown
                       aria-hidden="true"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
                       className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-                    >
-                      <path d="M5 8l5 5 5-5" />
-                    </svg>
+                      strokeWidth={2}
+                    />
                   </button>
                 </h3>
                 <div

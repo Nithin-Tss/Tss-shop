@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { X, Search } from "lucide-react";
 import { apiGet } from "@/lib/api";
 
 const DEFAULT_CHANNELS = [
@@ -90,15 +91,7 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
             className="text-slate-600 hover:text-orange-600 text-lg font-bold p-1 rounded-md transition"
             aria-label="Close"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -107,19 +100,7 @@ export default function AssignMarketsModal({ isOpen, onClose, selectedMarkets = 
           {/* SEARCH INPUT */}
           <div className="relative mb-4">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <Search className="h-4 w-4" />
             </span>
             <input
               type="text"

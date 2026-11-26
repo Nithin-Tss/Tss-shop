@@ -1,4 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  X,
+  ArrowUpDown,
+  ChevronRight,
+  Shield,
+  Lock,
+  Mail,
+  Crown,
+} from "lucide-react";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { can, getActiveStore, setStores, useSession } from "@/lib/auth";
 
@@ -113,31 +123,20 @@ const withinMyAccess = (me, permissions) =>
 
 const checkboxClass = "h-4 w-4 cursor-pointer rounded border-slate-300 accent-orange-600";
 
+const TEAM_ICONS = {
+  search: Search,
+  close: X,
+  sort: ArrowUpDown,
+  chevron: ChevronRight,
+  shield: Shield,
+  lock: Lock,
+  mail: Mail,
+  crown: Crown,
+};
+
 function Icon({ name, className = "h-4 w-4" }) {
-  const paths = {
-    search: "M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z",
-    close: "M6 6l12 12M18 6L6 18",
-    sort: "M7 4v16m0 0l-3-3m3 3l3-3M17 20V4m0 0l-3 3m3-3l3 3",
-    chevron: "M9 6l6 6-6 6",
-    shield: "M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z",
-    lock: "M7 11V8a5 5 0 0110 0v3M6 11h12v9H6z",
-    mail: "M4 6h16v12H4zM4 7l8 6 8-6",
-    crown: "M4 18h16M5 8l4 4 3-6 3 6 4-4-1.5 10h-11z",
-  };
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d={paths[name]} />
-    </svg>
-  );
+  const Comp = TEAM_ICONS[name] || Search;
+  return <Comp className={className} strokeWidth={1.8} aria-hidden="true" />;
 }
 
 const AVATAR_TONES = [

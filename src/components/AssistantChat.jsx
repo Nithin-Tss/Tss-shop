@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Sparkles, ArrowUpRight, ArrowUp, Square } from "lucide-react";
 import AssistantMarkdown from "@/components/AssistantMarkdown";
 import { applyProposal } from "@/lib/assistantApi";
 import { createChatStore, useChatStore } from "@/lib/assistantChatStore";
@@ -12,37 +13,15 @@ export const EXAMPLE_QUESTIONS = [
 export const INPUT_HINT =
   "I read text only. Paste the lines you see; screenshots are not supported yet.";
 
-const sparkle = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.8}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-    className="h-3.5 w-3.5"
-  >
-    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
-    <path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z" />
-  </svg>
-);
+const sparkle = <Sparkles className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden="true" />;
 
 // The empty state's picture: just a violet sparkle, no bubble (inline SVG)
 const illustration = (
-  <svg
-    viewBox="3 2 19 19"
-    fill="rgba(24,24,27,0.22)"
-    stroke="#111827"
+  <Sparkles
+    className="h-10 w-10 text-ink/70"
     strokeWidth={1.4}
-    strokeLinecap="round"
-    strokeLinejoin="round"
     aria-hidden="true"
-    className="h-10 w-10"
-  >
-    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
-    <path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z" />
-  </svg>
+  />
 );
 
 const avatar =
@@ -56,45 +35,15 @@ const chip = `inline-flex min-h-9 max-w-full items-center rounded-full border bo
 // Action buttons ("Open ... in Code editor"): compact, solid and dark, so they read as the thing to click
 const actionButton = `inline-flex h-8 items-center gap-1.5 rounded-md bg-ink px-3 text-[12px] font-medium text-white transition-colors hover:bg-[rgba(24,24,27,0.88)] active:bg-black ${focusRing}`;
 
-const arrow = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-    className="h-3.5 w-3.5"
-  >
-    <path d="M7 17 17 7M8 7h9v9" />
-  </svg>
-);
+const arrow = <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />;
 
 // The round button inside the input bar: Send (up arrow) and, while an answer is pending, Stop (filled square).
 // Light violet while the box is empty, a stronger violet when there is something to send.
 const roundButton = `flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-700 text-white transition-colors hover:bg-brand-gold-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:hover:bg-slate-200 ${focusRing}`;
 
-const upArrow = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2.2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-    className="h-4 w-4"
-  >
-    <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
-  </svg>
-);
+const upArrow = <ArrowUp className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />;
 
-const stopSquare = (
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-3.5 w-3.5">
-    <rect x="5" y="5" width="14" height="14" rx="2.5" />
-  </svg>
-);
+const stopSquare = <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />;
 
 // A proposed code change: what is there now (red) and what it becomes (green). Nothing is saved until Apply.
 function Proposal({ proposal, onApply, onDiscard }) {

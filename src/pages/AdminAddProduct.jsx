@@ -1,5 +1,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Star,
+  Plus,
+  PlusCircle,
+  Search,
+  ChevronsUpDown,
+  ImageIcon,
+  Circle,
+  SlidersHorizontal,
+  Share2,
+  ChevronLeft,
+  ChevronDown,
+  Upload,
+  AlertTriangle,
+  Loader2,
+  Info,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { EXTRA_FIELDS, emptyExtraFields, useFieldLabels, withLabels } from "@/lib/productFields";
 import { apiDelete, apiGet, apiPatch, apiPost, apiUpload, storeBaseUrl } from "@/lib/api";
@@ -262,15 +279,7 @@ function CircleAddButton({ label, onClick, disabled }) {
       title={label}
       className="inline-flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] border-slate-600 text-slate-700 hover:bg-slate-100 disabled:opacity-40"
     >
-      <svg
-        viewBox="0 0 20 20"
-        className="h-3.5 w-3.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M10 5v10M5 10h10" strokeLinecap="round" />
-      </svg>
+      <Plus className="h-3.5 w-3.5" strokeWidth={2} />
     </button>
   );
 }
@@ -485,17 +494,7 @@ function OptionPicker({ label, usedNames, onPick }) {
         aria-expanded={open}
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-charcoal-navy hover:underline"
       >
-        <svg
-          viewBox="0 0 20 20"
-          className="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          aria-hidden="true"
-        >
-          <circle cx="10" cy="10" r="7.5" />
-          <path d="M10 6.5v7M6.5 10h7" strokeLinecap="round" />
-        </svg>
+        <PlusCircle className="h-4 w-4" strokeWidth={1.6} aria-hidden="true" />
         {label}
       </button>
       {open && (
@@ -508,17 +507,11 @@ function OptionPicker({ label, usedNames, onPick }) {
         >
           <div className="p-3 pb-2">
             <div className="relative">
-              <svg
-                viewBox="0 0 20 20"
+              <Search
                 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
+                strokeWidth={1.8}
                 aria-hidden="true"
-              >
-                <circle cx="9" cy="9" r="5.5" />
-                <path d="M13.5 13.5L17 17" strokeLinecap="round" />
-              </svg>
+              />
               <input
                 autoFocus
                 value={query}
@@ -574,17 +567,7 @@ function OptionPicker({ label, usedNames, onPick }) {
               onMouseEnter={() => setActive(footerIndex)}
               className={`${rowClass(footerIndex)} font-medium`}
             >
-              <svg
-                viewBox="0 0 20 20"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                aria-hidden="true"
-              >
-                <circle cx="10" cy="10" r="7.5" />
-                <path d="M10 6.5v7M6.5 10h7" strokeLinecap="round" />
-              </svg>
+              <PlusCircle className="h-4 w-4" strokeWidth={1.6} aria-hidden="true" />
               Create custom option
             </button>
           </div>
@@ -607,20 +590,11 @@ function ChevronSelect({ id, value, onChange, label, children }) {
       >
         {children}
       </select>
-      <svg
-        viewBox="0 0 20 20"
+      <ChevronsUpDown
         className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth={1.8}
         aria-hidden="true"
-      >
-        <path
-          d="M6.5 8L10 4.5 13.5 8M6.5 12l3.5 3.5 3.5-3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      />
     </div>
   );
 }
@@ -2539,17 +2513,7 @@ function VariantsSection({
       aria-label={label}
       className="flex h-[56px] w-[72px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-blue-500 hover:border-blue-400"
     >
-      <svg
-        viewBox="0 0 20 20"
-        className="h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        aria-hidden="true"
-      >
-        <rect x="3" y="4" width="14" height="12" rx="2" />
-        <path d="M3 13l4-4 3 3 2-2 5 5" />
-      </svg>
+      <ImageIcon className="h-5 w-5" strokeWidth={1.6} aria-hidden="true" />
     </button>
   );
 
@@ -2558,16 +2522,7 @@ function VariantsSection({
       className="inline-flex items-center gap-1 text-xs text-slate-600"
       title="Set on the product"
     >
-      <svg
-        viewBox="0 0 20 20"
-        className="h-3.5 w-3.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        aria-hidden="true"
-      >
-        <circle cx="10" cy="10" r="7" />
-      </svg>
+      <Circle className="h-3.5 w-3.5" strokeWidth={1.6} aria-hidden="true" />
       {channelCount ?? 0}
     </span>
   );
@@ -2798,17 +2753,7 @@ function VariantsSection({
           title="Search and filter"
           className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
         >
-          <svg
-            viewBox="0 0 20 20"
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            aria-hidden="true"
-          >
-            <circle cx="9" cy="9" r="6" />
-            <path d="M17 17l-4-4" />
-          </svg>
+          <Search className="h-4 w-4" strokeWidth={1.6} aria-hidden="true" />
         </button>
       </div>
       {toolbarOpen && (
@@ -4206,34 +4151,12 @@ export function ProductForm({ productId }) {
             title="Manage sales channels"
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-40"
           >
-            <svg
-              viewBox="0 0 20 20"
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-            >
-              <path d="M3 6h9M15 6h2M3 14h3M9 14h8" strokeLinecap="round" />
-              <circle cx="13.5" cy="6" r="1.8" />
-              <circle cx="7.5" cy="14" r="1.8" />
-            </svg>
+            <SlidersHorizontal className="h-5 w-5" strokeWidth={1.6} />
           </button>
         </div>
         {/* No issue-count badge: the backend doesn't report channel issues */}
         <p className="flex items-center gap-2 text-sm font-medium text-slate-800">
-          <svg
-            viewBox="0 0 20 20"
-            className="h-4.5 w-4.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            aria-hidden="true"
-          >
-            <circle cx="10" cy="5" r="2.2" />
-            <circle cx="5" cy="14" r="2.2" />
-            <circle cx="15" cy="14" r="2.2" />
-            <path d="M9 7l-3 5M11 7l3 5M7.2 14h5.6" />
-          </svg>
+          <Share2 className="h-4.5 w-4.5" strokeWidth={1.6} aria-hidden="true" />
           {channelSummary}
         </p>
         <FieldError message={fieldErrors.sales_channels} />
@@ -4451,16 +4374,7 @@ export function ProductForm({ productId }) {
                   title="Back to products"
                   className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-[0_1px_2px_rgba(24,24,27,0.05)] transition hover:bg-slate-100"
                 >
-                  <svg
-                    viewBox="0 0 20 20"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 5l-5 5 5 5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <ChevronLeft className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -4611,19 +4525,7 @@ export function ProductForm({ productId }) {
                         disabled={saving}
                         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-charcoal-navy shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <svg
-                          className="h-3.5 w-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2.5"
-                            d="M12 4v16m8-8H4"
-                          />
-                        </svg>
+                        <Upload className="h-3.5 w-3.5" strokeWidth={2.5} />
                         Add media
                       </button>
                     }
@@ -4672,19 +4574,7 @@ export function ProductForm({ productId }) {
                         }`}
                       >
                         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                          <svg
-                            className="h-6 w-6 text-slate-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="1.7"
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
+                          <Upload className="h-6 w-6 text-slate-400" strokeWidth={1.7} />
                         </div>
                         <p className="text-sm font-semibold text-charcoal-navy">
                           Upload product images
@@ -4702,19 +4592,7 @@ export function ProductForm({ productId }) {
                           disabled={saving}
                           className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-orange-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-navy-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          <svg
-                            className="h-3.5 w-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2.5"
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
+                          <Upload className="h-3.5 w-3.5" strokeWidth={2.5} />
                           Select images
                         </button>
                       </div>
@@ -4739,19 +4617,7 @@ export function ProductForm({ productId }) {
                               {/* Image or Broken fallback */}
                               {isBroken ? (
                                 <div className="flex h-full w-full flex-col items-center justify-center p-3 text-center text-slate-400">
-                                  <svg
-                                    className="mb-1 h-7 w-7 text-slate-300"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="1.5"
-                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                    />
-                                  </svg>
+                                  <AlertTriangle className="mb-1 h-7 w-7 text-slate-300" strokeWidth={1.5} />
                                   <span className="text-[11px] font-medium text-slate-600">
                                     Image unavailable
                                   </span>
@@ -4772,25 +4638,7 @@ export function ProductForm({ productId }) {
                               {/* Uploading Spinner Overlay */}
                               {isUploading && (
                                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 text-white backdrop-blur-2xs">
-                                  <svg
-                                    className="mb-1.5 h-6 w-6 animate-spin text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    />
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8v8H4z"
-                                    />
-                                  </svg>
+                                  <Loader2 className="mb-1.5 h-6 w-6 animate-spin text-white" />
                                   <span className="text-[11px] font-semibold">Uploading…</span>
                                 </div>
                               )}
@@ -4825,19 +4673,7 @@ export function ProductForm({ productId }) {
                                   className="rounded-md bg-white/95 hover:bg-white px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm transition disabled:opacity-50 inline-flex items-center gap-1"
                                   title="View image details and metadata"
                                 >
-                                  <svg
-                                    className="h-3 w-3"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth="2"
-                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                  </svg>
+                                  <Info className="h-3 w-3" strokeWidth={2} />
                                   Info
                                 </button>
                                 {!isCover && (
@@ -4905,19 +4741,7 @@ export function ProductForm({ productId }) {
                           } ${saving ? "pointer-events-none opacity-50" : ""}`}
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/80 text-charcoal-navy">
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2.5"
-                                d="M12 4v16m8-8H4"
-                              />
-                            </svg>
+                            <Plus className="h-4 w-4" strokeWidth={2.5} />
                           </div>
                           <span className="text-xs font-semibold text-charcoal-navy">
                             Add image
@@ -5027,8 +4851,9 @@ export function ProductForm({ productId }) {
                           </div>
                           <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                             {photos[0]?.id === inspectingPhoto.id && (
-                              <span className="rounded-md bg-orange-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
-                                ★ Primary Cover
+                              <span className="inline-flex items-center rounded-md bg-orange-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
+                                <Star className="inline-block h-3.5 w-3.5 mr-1 fill-current" />
+                                Primary Cover
                               </span>
                             )}
                             {inspectingPhoto.isSaved ? (
@@ -5153,14 +4978,10 @@ export function ProductForm({ productId }) {
                       className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-charcoal-navy hover:underline"
                     >
                       Additional display prices
-                      <svg
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+                      <ChevronDown
                         className={`h-4 w-4 transition-transform ${showDisplayPrices ? "rotate-180" : ""}`}
                         aria-hidden="true"
-                      >
-                        <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
-                      </svg>
+                      />
                     </button>
                     {showDisplayPrices && (
                       <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">

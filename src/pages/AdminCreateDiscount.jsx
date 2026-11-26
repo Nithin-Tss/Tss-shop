@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { ALL_COUNTRIES } from "@/lib/countries";
@@ -521,14 +522,7 @@ export default function AdminCreateDiscount({ initialType }) {
                 aria-label="Back to discounts"
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 transition hover:bg-slate-100 hover:text-orange-600"
               >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
+                <ArrowLeft className="h-5 w-5" strokeWidth={2} />
               </Link>
               <div>
                 <h1 className="text-xl font-semibold text-charcoal-navy">{typeConfig.title}</h1>

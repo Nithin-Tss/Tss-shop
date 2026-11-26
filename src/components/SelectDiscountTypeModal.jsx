@@ -1,92 +1,31 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Tag, Gift, Receipt, Truck, X, ChevronRight } from "lucide-react";
 
 export const DISCOUNT_TYPES = [
   {
     id: "amount-off-products",
     title: "Amount off products",
     description: "Discount specific products or collections of products",
-    icon: (
-      <svg
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-        <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" />
-      </svg>
-    ),
+    icon: <Tag className="h-5 w-5" />,
   },
   {
     id: "buy-x-get-y",
     title: "Buy X get Y",
     description: "Discount products based on a customer's purchase",
-    icon: (
-      <svg
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <rect x="3" y="8" width="18" height="4" rx="1" />
-        <path d="M12 8v13" />
-        <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
-        <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 4.8 0 0 1 12 8a4.8 4.8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
-      </svg>
-    ),
+    icon: <Gift className="h-5 w-5" />,
   },
   {
     id: "amount-off-order",
     title: "Amount off order",
     description: "Discount the total order amount",
-    icon: (
-      <svg
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
-        <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-        <path d="M12 6v12" />
-      </svg>
-    ),
+    icon: <Receipt className="h-5 w-5" />,
   },
   {
     id: "free-shipping",
     title: "Free shipping",
     description: "Offer free shipping on an order",
-    icon: (
-      <svg
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-        <path d="M15 18H9" />
-        <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
-        <circle cx="17" cy="18" r="2" />
-        <circle cx="7" cy="18" r="2" />
-      </svg>
-    ),
+    icon: <Truck className="h-5 w-5" />,
   },
 ];
 
@@ -170,20 +109,7 @@ export default function SelectDiscountTypeModal({ isOpen, onClose }) {
             aria-label="Close modal"
             className="rounded-lg p-1 text-slate-600 hover:bg-[rgba(24,24,27,0.06)] hover:text-orange-600 transition-colors focus:outline-none"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -207,14 +133,7 @@ export default function SelectDiscountTypeModal({ isOpen, onClose }) {
               </div>
 
               <div className="flex items-center pl-3 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-700">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                <ChevronRight className="h-5 w-5" aria-hidden="true" />
               </div>
             </button>
           ))}

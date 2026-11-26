@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import AdminSidebar, { AdminHeader, NavIcon, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { useSession } from "@/lib/auth";
@@ -385,20 +386,13 @@ export default function AdminOrders() {
                   aria-haspopup="true"
                 >
                   <span>More actions</span>
-                  <svg
+                  <ChevronDown
                     className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${
                       isMoreMenuOpen ? "rotate-180 text-slate-700" : ""
                     }`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                    strokeWidth={2}
                     aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  />
                 </button>
                 {isMoreMenuOpen && (
                   <div className="absolute right-0 mt-1.5 w-52 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg z-50">

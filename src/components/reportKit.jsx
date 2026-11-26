@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ChevronDown, BarChart2 } from "lucide-react";
 
 // Pieces shared by the Analytics page and the report pages: date ranges, menus, charts.
 
@@ -103,20 +104,13 @@ export function Delta({ change }) {
 // ---- icons / small pieces --------------------------------------------------------------
 
 export function Chevron() {
-  return (
-    <svg {...lineIcon} className="h-3.5 w-3.5 text-slate-600">
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
+  return <ChevronDown className="h-3.5 w-3.5 text-slate-600" strokeWidth={1.8} />;
 }
 
 export function EmptyState({ children = "No data for this date range" }) {
   return (
     <div className="flex h-full min-h-32 flex-col items-center justify-center text-center">
-      <svg {...lineIcon} className="h-6 w-6 text-slate-400">
-        <path d="M3 3v16a2 2 0 0 0 2 2h16" />
-        <path d="M18 17V9M13 17V5M8 17v-3" />
-      </svg>
+      <BarChart2 className="h-6 w-6 text-slate-400" strokeWidth={1.8} />
       <p className="mt-2 text-[13px] text-slate-600">{children}</p>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Info, Eye, Globe, Trash2 } from "lucide-react";
 import { apiDelete, apiGet, apiPost } from "@/lib/api";
 import { getActiveStore, useSession } from "@/lib/auth";
 
@@ -7,18 +8,6 @@ const KIND_GROUPS = [
   ["account", "Customer Account"],
 ];
 
-const iconProps = {
-  width: 16,
-  height: 16,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.75,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  "aria-hidden": true,
-};
-
 function IconButton({ title, onClick, danger, children }) {
   return (
     <button
@@ -26,9 +15,9 @@ function IconButton({ title, onClick, danger, children }) {
       title={title}
       aria-label={title}
       onClick={onClick}
-      className={`rounded-md p-1.5 hover:bg-slate-100 ${danger ? "text-red-600" : "text-slate-600"}`}
+      className={`flex items-center justify-center rounded-md p-1.5 hover:bg-slate-100 ${danger ? "text-red-600" : "text-slate-600"}`}
     >
-      <svg {...iconProps}>{children}</svg>
+      {children}
     </button>
   );
 }
@@ -341,29 +330,26 @@ export default function DomainsSettings() {
                     <StatusBadge status={d.status} />
                     {d.status !== "connected" && (
                       <IconButton title="DNS setup" onClick={() => setDnsFor(d)}>
-                        <path d="M12 16v-4M12 8h.01" />
-                        <circle cx="12" cy="12" r="10" />
+                        <Info className="h-4 w-4" strokeWidth={1.75} />
                       </IconButton>
                     )}
                     <IconButton
                       title="Visit"
                       onClick={() => window.open(`${scheme}://${d.host}`, "_blank", "noopener")}
                     >
-                      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-                      <circle cx="12" cy="12" r="3" />
+                      <Eye className="h-4 w-4" strokeWidth={1.75} />
                     </IconButton>
                     {k === "storefront" && !d.primary && (
                       <IconButton
                         title="Make primary"
                         onClick={() => !busy && run(() => apiPost(`${base}${d.id}/`, {}))}
                       >
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20" />
+                        <Globe className="h-4 w-4" strokeWidth={1.75} />
                       </IconButton>
                     )}
                     {!d.primary && (
                       <IconButton title="Remove" danger onClick={() => remove(d)}>
-                        <path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5M14 11v5" />
+                        <Trash2 className="h-4 w-4" strokeWidth={1.75} />
                       </IconButton>
                     )}
                   </div>

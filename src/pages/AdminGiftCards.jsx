@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Download, Plus, Search } from "lucide-react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiDownload, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useCan } from "@/lib/auth";
@@ -587,17 +588,7 @@ export default function AdminGiftCards() {
                 onClick={exportCsv}
                 className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs sm:text-sm font-semibold text-charcoal-navy hover:bg-slate-50 transition shadow-2xs cursor-pointer"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="h-4 w-4"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
+                <Download className="h-4 w-4" strokeWidth={2} />
                 Export
               </button>
               {canManage && (
@@ -606,16 +597,7 @@ export default function AdminGiftCards() {
                   onClick={() => setShowCreate(true)}
                   className="flex items-center gap-1.5 rounded-lg bg-orange-600 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-2xs hover:bg-orange-600/90 transition cursor-pointer"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-4 w-4"
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
+                  <Plus className="h-4 w-4" strokeWidth={2} />
                   Create gift card
                 </button>
               )}
@@ -627,16 +609,7 @@ export default function AdminGiftCards() {
             {/* Search and Filters Toolbar */}
             <div className="p-3.5 sm:p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
               <div className="relative flex-1 max-w-md">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" strokeWidth={2} />
                 <input
                   type="text"
                   placeholder="Search by code ending or customer"

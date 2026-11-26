@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { X, Download } from "lucide-react";
 
 function escapeCsv(val) {
   if (val === null || val === undefined) return '""';
@@ -193,20 +194,7 @@ export default function ExportDraftOrdersModal({
             aria-label="Close modal"
             className="rounded-lg p-1 text-slate-600 hover:bg-[rgba(24,24,27,0.06)] hover:text-orange-600 transition-colors focus:outline-none"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -391,19 +379,7 @@ export default function ExportDraftOrdersModal({
             onClick={handleExecuteExport}
             className="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-brand-navy-700 active:bg-ink transition-colors focus:outline-none focus:ring-2 focus:ring-ink/40"
           >
-            <svg
-              className="h-4 w-4 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V3m0 0L8 7m4-4l4 4"
-              />
-            </svg>
+            <Download className="h-4 w-4 text-white" />
             <span>Export draft orders</span>
           </button>
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FileText, Search, ArrowUpDown, ChevronDown } from "lucide-react";
 import AdminSidebar, { AdminHeader } from "@/components/AdminSidebar";
 import { apiGet } from "@/lib/api";
 import Icon from "@/components/Icons";
@@ -203,19 +204,7 @@ export default function AdminReports() {
           <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-2.5">
               {/* Document / report icon */}
-              <svg
-                className="h-5 w-5 text-slate-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
+              <FileText className="h-5 w-5 text-slate-500" strokeWidth={1.8} />
               <h1 className="text-[20px] font-bold tracking-tight text-ink">Reports</h1>
             </div>
 
@@ -234,20 +223,11 @@ export default function AdminReports() {
               {/* Search input bar with sort button */}
               <div className="flex items-center gap-2 mb-3">
                 <div className="relative flex flex-1 items-center">
-                  <svg
+                  <Search
                     className="pointer-events-none absolute left-3 h-4 w-4 text-slate-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    strokeWidth={1.8}
                     aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                      d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5"
-                    />
-                  </svg>
+                  />
                   <input
                     type="text"
                     value={searchQuery}
@@ -276,14 +256,7 @@ export default function AdminReports() {
                   aria-label="Sort reports"
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-600"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.8"
-                      d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"
-                    />
-                  </svg>
+                  <ArrowUpDown className="h-4 w-4" strokeWidth={1.8} />
                 </button>
               </div>
 
@@ -302,19 +275,7 @@ export default function AdminReports() {
                     <span>
                       {selectedCreator === "all" ? "Created by" : `Created by: ${selectedCreator}`}
                     </span>
-                    <svg
-                      className="h-3.5 w-3.5 text-slate-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m6 9 6 6 6-6"
-                      />
-                    </svg>
+                    <ChevronDown className="h-3.5 w-3.5 text-slate-500" strokeWidth={2} />
                   </button>
 
                   {isCreatedByOpen && (
@@ -371,19 +332,7 @@ export default function AdminReports() {
                     <span>
                       {selectedCategory === "all" ? "Category" : `Category: ${selectedCategory}`}
                     </span>
-                    <svg
-                      className="h-3.5 w-3.5 text-slate-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="m6 9 6 6 6-6"
-                      />
-                    </svg>
+                    <ChevronDown className="h-3.5 w-3.5 text-slate-500" strokeWidth={2} />
                   </button>
 
                   {isCategoryOpen && (
@@ -469,19 +418,7 @@ export default function AdminReports() {
                     >
                       <span className="inline-flex items-center gap-1">
                         Last viewed
-                        <svg
-                          className="h-3 w-3 text-slate-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"
-                          />
-                        </svg>
+                        <ArrowUpDown className="h-3 w-3 text-slate-400" strokeWidth={1.8} />
                       </span>
                     </th>
                     <th className={headCell}>Created by</th>
@@ -520,19 +457,7 @@ export default function AdminReports() {
                       <td colSpan={4} className="px-4 py-16 text-center">
                         <div className="mx-auto flex max-w-md flex-col items-center">
                           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-[22px] text-slate-400">
-                            <svg
-                              className="h-7 w-7 text-slate-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="1.5"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                              />
-                            </svg>
+                            <FileText className="h-7 w-7 text-slate-400" strokeWidth={1.5} />
                           </div>
                           <h3 className="mb-1 text-[16px] font-semibold text-ink">
                             {searchQuery || selectedCategory !== "all" || selectedCreator !== "all"

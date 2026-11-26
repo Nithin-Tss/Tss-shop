@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MessageSquareText, Plus, X } from "lucide-react";
 import AssistantChat from "@/components/AssistantChat";
 import AssistantRecents from "@/components/AssistantRecents";
 import { assistantStore, syncAssistantOwner } from "@/lib/assistantApi";
@@ -106,10 +107,7 @@ export function AssistantButton({ tone = "rail" }) {
               } ${open ? "bg-white/10 text-white" : ""}`
       }`}
     >
-      <svg {...icon} className="h-[18px] w-[18px]">
-        <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12Z" />
-        <path d="M8.5 11.5h7M8.5 14.5h4" />
-      </svg>
+      <MessageSquareText className="h-[18px] w-[18px]" strokeWidth={1.8} />
       {tone === "dark" && "Assistant"}
     </button>
   );
@@ -202,9 +200,7 @@ export function AssistantPanel() {
               }}
               className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
             >
-              <svg {...icon} className="h-4 w-4">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+              <Plus className="h-4 w-4" strokeWidth={1.8} />
             </button>
             <button
               type="button"
@@ -212,9 +208,7 @@ export function AssistantPanel() {
               onClick={() => assistantStore.setOpen(false)}
               className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600"
             >
-              <svg {...icon} className="h-4 w-4">
-                <path d="M6 6l12 12M18 6 6 18" />
-              </svg>
+              <X className="h-4 w-4" strokeWidth={1.8} />
             </button>
           </div>
         </header>

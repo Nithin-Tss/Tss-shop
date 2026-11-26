@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 
 const faqItems = [
   {
@@ -52,16 +53,11 @@ export default function FAQ() {
                   aria-controls={`faq-answer-${index}`}
                 >
                   <span className="text-lg text-ink">{item.question}</span>
-                  <svg
-                    viewBox="0 0 16 16"
+                  <Plus
                     className={`h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth={1.75}
                     aria-hidden="true"
-                  >
-                    <path d="M8 2v12M2 8h12" strokeLinecap="round" />
-                  </svg>
+                  />
                 </button>
 
                 {isOpen && (

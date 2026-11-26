@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LayoutTemplate } from "lucide-react";
 import {
   ChatBubble,
   ChatComposer,
@@ -49,19 +50,7 @@ export function AiPageBuilderButton({ tone = "light" }) {
         onClick={() => setOpen((v) => !v)}
         className={`flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition ${focusRing} ${tone === "dark" ? (open ? "bg-white/20 text-white ring-1 ring-white/40" : "bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/15 hover:ring-white/35") : open ? "bg-charcoal-navy text-white" : "bg-slate-900/[0.06] text-slate-800 hover:bg-slate-900/[0.1]"}`}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-          className="h-4 w-4"
-        >
-          <rect x="3" y="3" width="18" height="18" rx="2.5" />
-          <path d="M3 9h18M9 21V9" />
-        </svg>
+        <LayoutTemplate className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
         <span className="hidden lg:inline">AI pages</span>
       </button>
       {open && <AiPageBuilderPanel onClose={() => setOpen(false)} />}

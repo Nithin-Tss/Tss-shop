@@ -1,4 +1,18 @@
 import { createContext, memo, useContext, useEffect, useId, useRef, useState } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  Copy,
+  Eye,
+  EyeOff,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  PanelTop,
+  PanelBottom,
+} from "lucide-react";
 
 import LinkField, { collectionLabel } from "@/components/LinkField";
 import { getEditingThemeId } from "@/lib/editingTheme";
@@ -52,9 +66,10 @@ export function ThemeLink({ link }) {
 
 // Alignment buttons: three lines, flush left, centred, flush right
 const ALIGN_ICONS = {
-  left: "M4 6h16M4 12h10M4 18h14",
-  center: "M4 6h16M7 12h10M5 18h14",
-  right: "M4 6h16M10 12h10M6 18h14",
+  left: AlignLeft,
+  center: AlignCenter,
+  right: AlignRight,
+  justify: AlignJustify,
 };
 
 // One stable change handler per option, so unchanged options don't re-render
@@ -129,9 +144,7 @@ export function FontPicker({ value, allowTheme, onChange, label }) {
         style={{ fontFamily: current?.stack }}
       >
         <span className="truncate">{current ? current.label : "Use theme font"}</span>
-        <svg {...iconProps} className="h-4 w-4 shrink-0 text-slate-400">
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+        <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={1.8} />
       </button>
 
       {open && (
@@ -309,7 +322,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
               className="rounded p-1 text-slate-600 hover:text-orange-600 disabled:opacity-30"
               aria-label="Move link up"
             >
-              ▲
+              <ChevronUp className="h-4 w-4" strokeWidth={2} />
             </button>
             <button
               type="button"
@@ -318,7 +331,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
               className="rounded p-1 text-slate-600 hover:text-orange-600 disabled:opacity-30"
               aria-label="Move link down"
             >
-              ▼
+              <ChevronDown className="h-4 w-4" strokeWidth={2} />
             </button>
             <button
               type="button"
@@ -326,15 +339,7 @@ export function MenuLinksEditor({ value, collections, products, onChange, label 
               className="rounded p-1 text-slate-600 hover:text-red-600"
               aria-label="Delete link"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
+              <Trash2 className="h-4 w-4" strokeWidth={2} />
             </button>
           </div>
           <LinkField
@@ -707,12 +712,10 @@ export function GroupedFields({
             >
               {group.label}
 
-              <svg
-                {...iconProps}
+              <ChevronDown
                 className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
+                strokeWidth={1.8}
+              />
             </button>
 
             {isOpen && (
@@ -1015,26 +1018,27 @@ export const Field = memo(function Field({
             >
               {spec.options
                 .filter((o) => ALIGN_ICONS[o])
-                .map((o) => (
-                  <button
-                    key={o}
-                    type="button"
-                    role="radio"
-                    aria-checked={value === o}
-                    aria-label={`${spec.label}: ${o}`}
-                    title={o.charAt(0).toUpperCase() + o.slice(1)}
-                    onClick={() => onChange(o)}
-                    className={`flex h-8 w-10 items-center justify-center rounded-md transition-colors ${
-                      value === o
-                        ? "bg-white text-charcoal-navy shadow-sm"
-                        : "text-slate-500 hover:text-orange-600"
-                    }`}
-                  >
-                    <svg {...iconProps} className="h-4 w-4">
-                      <path d={ALIGN_ICONS[o]} />
-                    </svg>
-                  </button>
-                ))}
+                .map((o) => {
+                  const AlignComp = ALIGN_ICONS[o];
+                  return (
+                    <button
+                      key={o}
+                      type="button"
+                      role="radio"
+                      aria-checked={value === o}
+                      aria-label={`${spec.label}: ${o}`}
+                      title={o.charAt(0).toUpperCase() + o.slice(1)}
+                      onClick={() => onChange(o)}
+                      className={`flex h-8 w-10 items-center justify-center rounded-md transition-colors ${
+                        value === o
+                          ? "bg-white text-charcoal-navy shadow-sm"
+                          : "text-slate-500 hover:text-orange-600"
+                      }`}
+                    >
+                      <AlignComp className="h-4 w-4" strokeWidth={1.8} />
+                    </button>
+                  );
+                })}
             </div>
 
             <Help spec={spec} />
@@ -1766,10 +1770,7 @@ export function SectionBlocks({
                         aria-label={`Duplicate ${blockSpec.name}`}
                         title="Duplicate"
                       >
-                        <svg {...iconProps} className="h-3.5 w-3.5">
-                          <rect x="8" y="8" width="13" height="13" rx="2" />
-                          <path d="M4 16V5a2 2 0 0 1 2-2h11" />
-                        </svg>
+                        <Copy className="h-3.5 w-3.5" strokeWidth={1.8} />
                       </button>
                     </>
                   )}
@@ -1782,9 +1783,7 @@ export function SectionBlocks({
                       aria-label={`Delete ${blockSpec.name}`}
                       title="Delete"
                     >
-                      <svg {...iconProps} className="h-3.5 w-3.5">
-                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                      </svg>
+                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.8} />
                     </button>
                   )}
                 </div>
@@ -1998,9 +1997,7 @@ export function CardChildren({
                     aria-label={`Delete ${partSpec.name}`}
                     title="Delete"
                   >
-                    <svg {...iconProps} className="h-3.5 w-3.5">
-                      <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" />
-                    </svg>
+                    <Trash2 className="h-3.5 w-3.5" strokeWidth={1.8} />
                   </button>
                 </div>
               </li>
@@ -2177,20 +2174,10 @@ export function GroupChildren({
 }
 
 export function EyeIcon({ hidden }) {
-  return (
-    <svg {...iconProps} className="h-3.5 w-3.5">
-      {hidden ? (
-        <>
-          <path d="M10.7 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.2 3.1M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6" />
-          <path d="m2 2 20 20M9.9 9.9a3 3 0 0 0 4.2 4.2" />
-        </>
-      ) : (
-        <>
-          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
-          <circle cx="12" cy="12" r="3" />
-        </>
-      )}
-    </svg>
+  return hidden ? (
+    <EyeOff className="h-3.5 w-3.5" strokeWidth={1.8} />
+  ) : (
+    <Eye className="h-3.5 w-3.5" strokeWidth={1.8} />
   );
 }
 
@@ -2537,7 +2524,7 @@ export const LAYOUT_ROWS = [
     file: "sections/header.liquid",
     name: "Header",
     hint: "Announcement, logo and navigation",
-    icon: "M3 5h18v5H3zM7 15h10M9 19h6",
+    icon: PanelTop,
   },
   {
     part: "bottom",
@@ -2545,7 +2532,7 @@ export const LAYOUT_ROWS = [
     file: "sections/footer.liquid",
     name: "Footer",
     hint: "Links, social and copyright",
-    icon: "M3 14h18v5H3zM7 9h10M9 5h6",
+    icon: PanelBottom,
   },
 ];
 
@@ -2568,6 +2555,7 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
           ? selected === row.group
           : selected === "theme" && themeGroup === row.group;
 
+        const RowIcon = row.icon || PanelTop;
         return (
           <li key={row.group} className="flex items-center">
             <button
@@ -2578,9 +2566,7 @@ export function LayoutRows({ part, selected, themeGroup, synced = {}, onOpen }) 
               }`}
             >
               <span className="flex h-5 w-5 shrink-0 items-center justify-center text-slate-500">
-                <svg {...iconProps} className="h-4 w-4">
-                  <path d={row.icon} />
-                </svg>
+                <RowIcon className="h-4 w-4" strokeWidth={1.8} />
               </span>
               <span className="min-w-0 flex-1 truncate">
                 {row.name} <span className="text-xs text-slate-400">{row.hint}</span>

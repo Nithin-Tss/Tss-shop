@@ -1,5 +1,43 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Search,
+  X,
+  PanelLeft,
+  ChevronDown,
+  Check,
+  LayoutGrid,
+  Plus,
+  User,
+  Settings,
+  LogOut,
+  Bell,
+  Menu,
+  Home,
+  Inbox,
+  Tag,
+  Users,
+  BookOpen,
+  Package,
+  ClipboardList,
+  ArrowLeftRight,
+  Gift,
+  FileText,
+  BarChart2,
+  TrendingUp,
+  BadgePercent,
+  Truck,
+  Store,
+  Palette,
+  Image as ImageIcon,
+  LayoutTemplate,
+  PenTool,
+  Box,
+  SquareMenu,
+  MapPin,
+  ShieldAlert,
+  Headphones,
+} from "lucide-react";
 import { AssistantButton, AssistantPanel } from "@/components/AssistantPanel";
 import HelpWidget from "@/components/HelpWidget";
 import {
@@ -211,7 +249,41 @@ export const navIcons = {
   chevron: <path d="m6 9 6 6 6-6" />,
 };
 
+const NAV_ICON_COMPONENTS = {
+  home: Home,
+  orders: Inbox,
+  products: Tag,
+  customers: Users,
+  catalogues: BookOpen,
+  inventory: Package,
+  purchase_orders: ClipboardList,
+  transfers: ArrowLeftRight,
+  gift_cards: Gift,
+  content: FileText,
+  overview: LayoutGrid,
+  reports: BarChart2,
+  analytics: TrendingUp,
+  discounts: BadgePercent,
+  shipping: Truck,
+  store: Store,
+  themes: Palette,
+  media: ImageIcon,
+  pages: LayoutTemplate,
+  blog: PenTool,
+  apps: Box,
+  settings: Settings,
+  menus: SquareMenu,
+  location: MapPin,
+  platform: ShieldAlert,
+  support: Headphones,
+  chevron: ChevronDown,
+};
+
 export function NavIcon({ name, className = "h-[18px] w-[18px]" }) {
+  const Comp = NAV_ICON_COMPONENTS[name];
+  if (Comp) {
+    return <Comp className={`shrink-0 ${className}`} strokeWidth={1.75} aria-hidden="true" />;
+  }
   return (
     <svg
       viewBox="0 0 24 24"
@@ -555,20 +627,14 @@ function NavSearch({ inputRef, query, setQuery, onSubmit, collapsed, onExpand })
         onClick={onExpand}
         className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-ink text-white/70 transition hover:text-white"
       >
-        <svg {...railIcon} className="h-[18px] w-[18px]">
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
-        </svg>
+        <Search className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
       </button>
     );
   }
 
   return (
     <label className="group flex h-10 items-center gap-2.5 rounded-xl border border-white/10 bg-ink px-3 text-white/55 shadow-[inset_0_1px_2px_rgba(24,24,27,0.5)] transition focus-within:border-white/30 focus-within:text-white">
-      <svg {...railIcon} className="h-[18px] w-[18px] shrink-0">
-        <circle cx="11" cy="11" r="7" />
-        <path d="m20 20-3.5-3.5" />
-      </svg>
+      <Search className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} aria-hidden="true" />
       <input
         ref={inputRef}
         type="text"
@@ -694,14 +760,9 @@ export default function AdminSidebar() {
           className="flex h-8 w-8 items-center justify-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white"
         >
           {drawer ? (
-            <svg {...railIcon} className="h-[18px] w-[18px]">
-              <path d="M6 6l12 12M18 6 6 18" />
-            </svg>
+            <X className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
           ) : (
-            <svg {...railIcon} className="h-[18px] w-[18px]">
-              <rect width="18" height="18" x="3" y="3" rx="3" />
-              <path d="M9 3v18" />
-            </svg>
+            <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
           )}
         </button>
       </div>
@@ -1044,9 +1105,7 @@ function StoresDialog({ stores, activeId, onClose }) {
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
           >
-            <svg {...headerIcon} className="h-4 w-4">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+            <X className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>
 
@@ -1211,12 +1270,11 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
           </span>
         )}
         {!rail && (
-          <svg
-            {...headerIcon}
+          <ChevronDown
             className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
         )}
       </button>
 
@@ -1244,9 +1302,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
                 <StoreAvatar name={store.storeName} />
                 <span className="min-w-0 flex-1 truncate font-medium">{store.storeName}</span>
                 {store.storeId === session?.storeId && (
-                  <svg {...headerIcon} strokeWidth="2.2" className="h-4 w-4 shrink-0 text-ink">
-                    <path d="m5 12.5 4.5 4.5L19 7.5" />
-                  </svg>
+                  <Check className="h-4 w-4 shrink-0 text-ink" strokeWidth={2.2} />
                 )}
               </button>
             ))}
@@ -1265,9 +1321,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
               className={itemClass}
             >
               <span className="flex h-7 w-7 items-center justify-center text-slate-500">
-                <svg {...headerIcon} className="h-4 w-4">
-                  <path d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <LayoutGrid className="h-4 w-4" strokeWidth={1.75} />
               </span>
               All stores
             </button>
@@ -1283,9 +1337,7 @@ function StoreSwitcher({ variant = "bar", collapsed = false }) {
             className={`${itemClass} font-semibold`}
           >
             <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-dashed border-slate-300 text-ink">
-              <svg {...headerIcon} strokeWidth="2" className="h-4 w-4">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+              <Plus className="h-4 w-4" strokeWidth={2} />
             </span>
             Create new store
           </button>
@@ -1349,12 +1401,11 @@ function ProfileMenu({ variant = "bar" }) {
         {!rail && (
           <>
             <span className="hidden sm:inline text-sm font-medium text-ink">Admin</span>
-            <svg
-              {...headerIcon}
+            <ChevronDown
               className={`h-4 w-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
           </>
         )}
       </button>
@@ -1372,10 +1423,7 @@ function ProfileMenu({ variant = "bar" }) {
             onClick={() => setOpen(false)}
             className={itemClass}
           >
-            <svg {...headerIcon} className="h-4 w-4 text-slate-500">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 21a8 8 0 0 1 16 0" />
-            </svg>
+            <User className="h-4 w-4 text-slate-500" strokeWidth={1.75} />
             Profile
           </Link>
           <Link
@@ -1384,10 +1432,7 @@ function ProfileMenu({ variant = "bar" }) {
             onClick={() => setOpen(false)}
             className={itemClass}
           >
-            <svg {...headerIcon} className="h-4 w-4 text-slate-500">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
-            </svg>
+            <Settings className="h-4 w-4 text-slate-500" strokeWidth={1.75} />
             Settings
           </Link>
           <div className="my-1 h-px bg-slate-200" />
@@ -1397,9 +1442,7 @@ function ProfileMenu({ variant = "bar" }) {
             onClick={logout}
             className={`${itemClass} text-red-600 hover:bg-red-50`}
           >
-            <svg {...headerIcon} className="h-4 w-4">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-            </svg>
+            <LogOut className="h-4 w-4" strokeWidth={1.75} />
             Logout
           </button>
         </div>
@@ -1420,10 +1463,7 @@ function NotificationsButton({ tone = "rail" }) {
           : "text-white hover:bg-white/10"
       }`}
     >
-      <svg {...headerIcon} className="h-5 w-5">
-        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-      </svg>
+      <Bell className="h-5 w-5" strokeWidth={1.75} />
       <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-ink" />
     </button>
   );
@@ -1447,9 +1487,7 @@ export function AdminHeader() {
         onClick={() => window.dispatchEvent(new Event(ADMIN_NAV_EVENT))}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white transition hover:bg-white/10"
       >
-        <svg {...headerIcon} className="h-5 w-5">
-          <path d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        <Menu className="h-5 w-5" strokeWidth={1.75} />
       </button>
       <BrandMark to={`${BASE}/home`} />
       <div className="flex-1" />

@@ -1,5 +1,26 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import {
+  ChevronDown,
+  ChevronUp,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  AlignLeft,
+  List,
+  ListOrdered,
+  Outdent,
+  Indent,
+  Link2,
+  Image as ImageIcon,
+  Video,
+  Table,
+  RemoveFormatting,
+  Undo,
+  Redo,
+  Code,
+  GripVertical,
+} from "lucide-react";
 import { apiRequest, apiUpload } from "@/lib/api";
 import { listBlogPosts, listStorePages } from "@/lib/themeApi";
 import Icon from "@/components/Icons";
@@ -1958,9 +1979,7 @@ export default function RichTextEditor({
             }`}
           >
             <span>{currentStyleLabel}</span>
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 opacity-60">
-              <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
-            </svg>
+            <ChevronDown className="h-3.5 w-3.5 opacity-60" strokeWidth={2} />
           </button>
 
           {showStyleMenu && (
@@ -2281,41 +2300,15 @@ export default function RichTextEditor({
             }`}
           >
             {activeFormats.alignment === "center" ? (
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                <path
-                  fillRule="evenodd"
-                  d="M3 4.75A.75.75 0 013.75 4h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 4.75zm2 3.5A.75.75 0 015.75 7.5h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 8.25zm-2 3.5a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75zm2 3.5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5a.75.75 0 01-.75-.75z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <AlignCenter className="h-4 w-4" strokeWidth={2} />
             ) : activeFormats.alignment === "right" ? (
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                <path
-                  fillRule="evenodd"
-                  d="M3 4.75A.75.75 0 013.75 4h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 4.75zm4 3.5A.75.75 0 017.75 7.5h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 017 8.25zm-4 3.5a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75zm4 3.5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5a.75.75 0 01-.75-.75z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <AlignRight className="h-4 w-4" strokeWidth={2} />
             ) : activeFormats.alignment === "justify" ? (
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                <path
-                  fillRule="evenodd"
-                  d="M3 4.75A.75.75 0 013.75 4h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 4.75zm0 3.5A.75.75 0 013.75 7.5h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 8.25zm0 3.5a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75zm0 3.5a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <AlignJustify className="h-4 w-4" strokeWidth={2} />
             ) : (
-              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                <path
-                  fillRule="evenodd"
-                  d="M3 4.75A.75.75 0 013.75 4h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 4.75zm0 3.5A.75.75 0 013.75 7.5h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 013 8.25zm0 3.5a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75zm0 3.5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5a.75.75 0 01-.75-.75z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <AlignLeft className="h-4 w-4" strokeWidth={2} />
             )}
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3 opacity-60">
-              <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
-            </svg>
+            <ChevronDown className="h-3 w-3 opacity-60" strokeWidth={2} />
           </button>
 
           {showAlignMenu && (
@@ -2432,13 +2425,7 @@ export default function RichTextEditor({
             activeFormats.unorderedList ? "bg-slate-200 text-slate-950 font-bold" : ""
           }`}
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M6 4.75A.75.75 0 016.75 4h10.5a.75.75 0 010 1.5H6.75A.75.75 0 016 4.75zM6 10a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H6.75A.75.75 0 016 10zm0 5.25a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H6.75a.75.75 0 01-.75-.75zM3 4.75a1 1 0 112 0 1 1 0 01-2 0zm0 5.25a1 1 0 112 0 1 1 0 01-2 0zm0 5.25a1 1 0 112 0 1 1 0 01-2 0z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <List className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* 12. Numbered List */}
@@ -2460,13 +2447,7 @@ export default function RichTextEditor({
             activeFormats.orderedList ? "bg-slate-200 text-slate-950 font-bold" : ""
           }`}
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M7 4.75A.75.75 0 017.75 4h9.5a.75.75 0 010 1.5h-9.5A.75.75 0 017 4.75zM7 10a.75.75 0 01.75-.75h9.5a.75.75 0 010 1.5h-9.5A.75.75 0 017 10zm0 5.25a.75.75 0 01.75-.75h9.5a.75.75 0 010 1.5h-9.5a.75.75 0 01-.75-.75zM3.5 3.5h1v3h-1v-2H3v-1h.5zm-1 6.5h2v.5H3v.5h1.5v.5h-2v.5h2.5V9H2.5zm.5 4h1.5a.5.5 0 01.5.5v.5a.5.5 0 01-.5.5h-1v.5h1.5v.5H2.5V15h2v-.5h-1.5z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ListOrdered className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* 13. Decrease Indent (Outdent) */}
@@ -2486,13 +2467,7 @@ export default function RichTextEditor({
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-slate-200/60 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M2.75 4a.75.75 0 010 1.5h14.5a.75.75 0 010-1.5H2.75zm5 4a.75.75 0 010 1.5h9.5a.75.75 0 010-1.5h-9.5zm0 4a.75.75 0 010 1.5h9.5a.75.75 0 010-1.5h-9.5zm-5 4a.75.75 0 010 1.5h14.5a.75.75 0 010-1.5H2.75zM5.53 11.28a.75.75 0 000-1.06L3.56 8.25l1.97-1.97a.75.75 0 00-1.06-1.06l-2.5 2.5a.75.75 0 000 1.06l2.5 2.5a.75.75 0 001.06 0z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <Outdent className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* 14. Increase Indent (Indent) */}
@@ -2512,13 +2487,7 @@ export default function RichTextEditor({
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-slate-200/60 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M2.75 4a.75.75 0 010 1.5h14.5a.75.75 0 010-1.5H2.75zm5 4a.75.75 0 010 1.5h9.5a.75.75 0 010-1.5h-9.5zm0 4a.75.75 0 010 1.5h9.5a.75.75 0 010-1.5h-9.5zm-5 4a.75.75 0 010 1.5h14.5a.75.75 0 010-1.5H2.75zM2.47 6.22a.75.75 0 000 1.06l1.97 1.97-1.97 1.97a.75.75 0 101.06 1.06l2.5-2.5a.75.75 0 000-1.06l-2.5-2.5a.75.75 0 00-1.06 0z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <Indent className="h-4 w-4" strokeWidth={2} />
         </button>
 
         <div className="mx-1 h-4 w-px bg-slate-200" />
@@ -2542,10 +2511,7 @@ export default function RichTextEditor({
             activeFormats.inLink ? "bg-slate-200 text-orange-600 font-bold" : ""
           }`}
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z" />
-            <path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z" />
-          </svg>
+          <Link2 className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* 8. Insert Image */}
@@ -2565,13 +2531,7 @@ export default function RichTextEditor({
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-slate-200/60 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M1 5.25A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17H3.25A2.25 2.25 0 011 14.75v-9.5zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 00.75-.75v-2.69l-2.22-2.22a.75.75 0 00-1.06 0l-1.91 1.91-4.72-4.72a.75.75 0 00-1.06 0L2.5 11.06zm10.75-4.31a1.25 1.25 0 112.5 0 1.25 1.25 0 01-2.5 0z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ImageIcon className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* 9. Insert Video */}
@@ -2591,9 +2551,7 @@ export default function RichTextEditor({
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-slate-200/60 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path d="M3.25 4A2.25 2.25 0 001 6.25v7.5A2.25 2.25 0 003.25 16h8.5A2.25 2.25 0 0014 13.75v-7.5A2.25 2.25 0 0011.75 4h-8.5zM15.5 7.697l2.81-1.874A.75.75 0 0119.5 6.47v7.06a.75.75 0 01-1.19.647L15.5 12.303V7.697z" />
-          </svg>
+          <Video className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* 10. Insert / Manage Table */}
@@ -2625,13 +2583,7 @@ export default function RichTextEditor({
               activeFormats.inTable ? "bg-slate-200 text-orange-600 font-bold" : ""
             }`}
           >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-              <path
-                fillRule="evenodd"
-                d="M2 4.25A2.25 2.25 0 014.25 2h11.5A2.25 2.25 0 0118 4.25v11.5A2.25 2.25 0 0115.75 18H4.25A2.25 2.25 0 012 15.75V4.25zm2.25-.75a.75.75 0 00-.75.75v3.25h5.5V3.5h-4.75zm6.25 0v4h6v-3.25a.75.75 0 00-.75-.75h-5.25zm6 5.5h-6v4h6v-4zm-7.5 4h-5.5v-4h5.5v4zm-5.5 1.5v3.25c0 .414.336.75.75.75h4.75v-4h-5.5zm7 4h5.25a.75.75 0 00.75-.75V14.5h-6v4z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <Table className="h-4 w-4" strokeWidth={2} />
           </button>
 
           {showTableMenu && (
@@ -2779,13 +2731,7 @@ export default function RichTextEditor({
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-slate-200/60 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M13.28 14.78a.75.75 0 001.06-1.06l-4.5-4.5 4.5-4.5a.75.75 0 00-1.06-1.06l-4.5 4.5-4.5-4.5a.75.75 0 00-1.06 1.06l4.5 4.5-4.5 4.5a.75.75 0 001.06 1.06l4.5-4.5 4.5 4.5z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <RemoveFormatting className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* Undo */}
@@ -2805,13 +2751,7 @@ export default function RichTextEditor({
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-slate-200/60 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H13a5 5 0 015 5 1 1 0 11-2 0 3 3 0 00-3-3H5.414l2.293 2.293a1 1 0 010 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <Undo className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* Redo */}
@@ -2831,13 +2771,7 @@ export default function RichTextEditor({
           }}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-slate-200/60 disabled:opacity-40"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M12.293 14.707a1 1 0 001.414 0l4-4a1 1 0 000-1.414l-4-4a1 1 0 00-1.414 1.414L14.586 9H7a5 5 0 00-5 5 1 1 0 102 0 3 3 0 013-3h7.586l-2.293 2.293a1 1 0 000 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <Redo className="h-4 w-4" strokeWidth={2} />
         </button>
 
         {/* Spacer */}
@@ -2870,13 +2804,7 @@ export default function RichTextEditor({
               : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
           }`}
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path
-              fillRule="evenodd"
-              d="M6.28 5.22a.75.75 0 010 1.06L2.56 10l3.72 3.72a.75.75 0 01-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0zm7.44 0a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L17.44 10l-3.72-3.72a.75.75 0 010-1.06zM11.378 3.036a.75.75 0 01.586.886l-3 13a.75.75 0 01-1.464-.338l3-13a.75.75 0 01.878-.548z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <Code className="h-4 w-4" strokeWidth={2} />
           <span>{isSourceView ? "Show Visual" : "Show HTML"}</span>
         </button>
       </div>
@@ -2989,14 +2917,7 @@ export default function RichTextEditor({
                   onPointerDown={startBlockDrag}
                   className="flex h-7 w-7 cursor-grab touch-none items-center justify-center rounded text-slate-500 hover:bg-slate-100 active:cursor-grabbing"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                    <circle cx="7" cy="5" r="1.4" />
-                    <circle cx="13" cy="5" r="1.4" />
-                    <circle cx="7" cy="10" r="1.4" />
-                    <circle cx="13" cy="10" r="1.4" />
-                    <circle cx="7" cy="15" r="1.4" />
-                    <circle cx="13" cy="15" r="1.4" />
-                  </svg>
+                  <GripVertical className="h-4 w-4" strokeWidth={2} />
                 </button>
                 <button
                   type="button"
@@ -3005,15 +2926,7 @@ export default function RichTextEditor({
                   onClick={() => moveBlock(-1)}
                   className="flex h-7 w-7 items-center justify-center rounded text-slate-600 hover:bg-slate-100"
                 >
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-4 w-4"
-                  >
-                    <path d="M5 12l5-5 5 5" />
-                  </svg>
+                  <ChevronUp className="h-4 w-4" strokeWidth={2} />
                 </button>
                 <button
                   type="button"
@@ -3022,23 +2935,15 @@ export default function RichTextEditor({
                   onClick={() => moveBlock(1)}
                   className="flex h-7 w-7 items-center justify-center rounded text-slate-600 hover:bg-slate-100"
                 >
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-4 w-4"
-                  >
-                    <path d="M5 8l5 5 5-5" />
-                  </svg>
+                  <ChevronDown className="h-4 w-4" strokeWidth={2} />
                 </button>
 
                 {(toolbarKind === "button" || toolbarKind === "image") &&
                   [
-                    ["left", "Align left", "M3 5h14M3 9h9M3 13h14M3 17h9"],
-                    ["center", "Align center", "M3 5h14M6 9h8M3 13h14M6 17h8"],
-                    ["right", "Align right", "M3 5h14M8 9h9M3 13h14M8 17h9"],
-                  ].map(([value, label, path]) => (
+                    ["left", "Align left", AlignLeft],
+                    ["center", "Align center", AlignCenter],
+                    ["right", "Align right", AlignRight],
+                  ].map(([value, label, AlignComp]) => (
                     <button
                       key={value}
                       type="button"
@@ -3051,15 +2956,7 @@ export default function RichTextEditor({
                         toolbarAlign === value ? "bg-slate-200 text-slate-900" : "text-slate-600"
                       }`}
                     >
-                      <svg
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        className="h-4 w-4"
-                      >
-                        <path d={path} />
-                      </svg>
+                      <AlignComp className="h-4 w-4" strokeWidth={1.8} />
                     </button>
                   ))}
 

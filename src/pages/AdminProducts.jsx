@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Shirt,
+  ShoppingBag,
+  Headphones,
+  Coffee,
+  X,
+  FileSpreadsheet,
+  Upload,
+  AlertCircle,
+  Plus,
+} from "lucide-react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import { apiGet, apiPost } from "@/lib/api";
 import { getSession, useCan } from "@/lib/auth";
@@ -247,41 +258,22 @@ const sampleProducts = [
   {
     name: "T-shirt",
     price: "$24",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
-      </svg>
-    ),
+    icon: <Shirt className="h-4 w-4" strokeWidth={1.75} />,
   },
   {
     name: "Tote bag",
     price: "$38",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-        <path d="M3 6h18" />
-        <path d="M16 10a4 4 0 0 1-8 0" />
-      </svg>
-    ),
+    icon: <ShoppingBag className="h-4 w-4" strokeWidth={1.75} />,
   },
   {
     name: "Headphones",
     price: "$89",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
-      </svg>
-    ),
+    icon: <Headphones className="h-4 w-4" strokeWidth={1.75} />,
   },
   {
     name: "Mug",
     price: "$16",
-    icon: (
-      <svg {...lineIcon}>
-        <path d="M10 2v2M14 2v2M6 2v2" />
-        <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" />
-      </svg>
-    ),
+    icon: <Coffee className="h-4 w-4" strokeWidth={1.75} />,
   },
 ];
 
@@ -464,9 +456,7 @@ function ImportProductsModal({ onClose, onImported }) {
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition"
           >
-            <svg {...lineIcon} strokeWidth="1.8" className="h-4 w-4">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+            <X className="h-4 w-4" strokeWidth={1.8} />
           </button>
         </div>
 
@@ -542,10 +532,7 @@ function ImportProductsModal({ onClose, onImported }) {
           ) : file ? (
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-violet-600">
-                <svg {...lineIcon} className="h-5 w-5">
-                  <path d="M14 3H6v18h12V7Z" />
-                  <path d="M14 3v4h4M9 12h6M9 16h6" />
-                </svg>
+                <FileSpreadsheet className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-charcoal-navy">{file.name}</p>
@@ -578,9 +565,7 @@ function ImportProductsModal({ onClose, onImported }) {
               }`}
             >
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-violet-100 text-violet-600">
-                <svg {...lineIcon} strokeWidth="1.8" className="h-5 w-5">
-                  <path d="M12 15V3M7 8l5-5 5 5M5 21h14" />
-                </svg>
+                <Upload className="h-5 w-5" strokeWidth={1.8} />
               </span>
               <p className="mt-3 text-sm font-medium text-charcoal-navy">
                 <span className="underline underline-offset-2">Click to browse</span> or drag and
@@ -603,10 +588,7 @@ function ImportProductsModal({ onClose, onImported }) {
               role="alert"
               className="mt-3 flex items-start gap-2 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-700"
             >
-              <svg {...lineIcon} strokeWidth="1.8" className="mt-0.5 h-4 w-4 shrink-0">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 8v5M12 16h.01" />
-              </svg>
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.8} />
               {error}
             </p>
           )}
@@ -1334,7 +1316,7 @@ export default function ProductsPage() {
                         to="/admin/online-store/products/new"
                         className="flex items-center gap-2 rounded-lg bg-orange-600 px-7 py-3.5 text-[17px] font-semibold text-white hover:bg-orange-600/90 transition"
                       >
-                        <span className="text-2xl leading-none">+</span>
+                        <Plus className="h-5 w-5" strokeWidth={2} />
                         Add product
                       </Link>
 
@@ -1343,9 +1325,7 @@ export default function ProductsPage() {
                         onClick={() => setIsImportOpen(true)}
                         className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-7 py-3.5 text-[17px] font-medium text-charcoal-navy hover:border-orange-600 transition"
                       >
-                        <svg {...lineIcon} strokeWidth="1.8" className="h-5 w-5">
-                          <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
-                        </svg>
+                        <Upload className="h-5 w-5" strokeWidth={1.8} />
                         Import
                       </button>
                     </div>

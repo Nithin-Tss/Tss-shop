@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 import Icon from "./Icon";
 import { ONBOARDING_PATH, STORES_PATH, useSession } from "@/lib/auth";
 
@@ -68,19 +69,11 @@ export default function LandingNav() {
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                d={open ? "M6 18L18 6M6 6l12 12" : "M4 7h16M4 12h16M4 17h16"}
-              />
-            </svg>
+            {open ? (
+              <X className="h-[18px] w-[18px]" strokeWidth={2} />
+            ) : (
+              <Menu className="h-[18px] w-[18px]" strokeWidth={2} />
+            )}
           </button>
         </div>
       </div>

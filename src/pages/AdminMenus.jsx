@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ChevronRight, X, Trash2 } from "lucide-react";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
 import LinkField from "@/components/LinkField";
 import { apiRequest } from "@/lib/api";
@@ -44,20 +45,13 @@ const collectKeys = (n, out) => {
 
 function Chevron({ open, small }) {
   return (
-    <svg
+    <ChevronRight
       aria-hidden="true"
       className={`${small ? "h-3 w-3" : "h-4 w-4"} shrink-0 text-slate-500 transition-transform duration-200 motion-reduce:transition-none ${
         open ? "rotate-90" : ""
       }`}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m9 6 6 6-6 6" />
-    </svg>
+      strokeWidth={2.5}
+    />
   );
 }
 
@@ -72,19 +66,9 @@ function UnsavedDot() {
 
 function TrashIcon({ small }) {
   return small ? (
-    <svg
-      className="w-3.5 h-3.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
+    <X className="w-3.5 h-3.5" strokeWidth={2} />
   ) : (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-    </svg>
+    <Trash2 className="w-4 h-4" strokeWidth={2} />
   );
 }
 
@@ -1508,15 +1492,7 @@ export default function AdminMenus() {
                     onClick={() => setShowRedirectsModal(false)}
                     className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M18 6 6 18M6 6l12 12" />
-                    </svg>
+                    <X className="w-5 h-5" strokeWidth={2} />
                   </button>
                 </div>
 

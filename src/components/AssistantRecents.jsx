@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { History, Trash2 } from "lucide-react";
 import { chatTitle, useChatStore } from "@/lib/assistantChatStore";
 
 // "Just now", "5 min ago", "3 h ago", "Yesterday", "4 days ago", then the date
@@ -53,10 +54,7 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
           open ? "text-violet-700" : "text-ink"
         } ${focusRing}`}
       >
-        <svg {...icon} className="h-4 w-4">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3 2" />
-        </svg>
+        <History className="h-4 w-4" strokeWidth={1.8} />
         Recents
       </button>
 
@@ -101,9 +99,7 @@ export default function AssistantRecents({ store, open, onOpenChange, onOpened }
                         onClick={() => store.deleteChat(chat.id)}
                         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-200 hover:text-ink ${focusRing}`}
                       >
-                        <svg {...icon} className="h-3.5 w-3.5">
-                          <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3" />
-                        </svg>
+                        <Trash2 className="h-3.5 w-3.5" strokeWidth={1.8} />
                       </button>
                     </li>
                   );
