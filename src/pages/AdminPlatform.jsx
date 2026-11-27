@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import AdminSidebar, { AdminHeader, PageIcon } from "@/components/AdminSidebar";
+import ConfirmationModal from "@/components/ConfirmationModal";
+import RichTextEditor from "@/components/RichTextEditor";
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "@/lib/api";
 import { useSession } from "@/lib/auth";
+import {
+  createAdminBlogPost,
+  deleteAdminBlogPost,
+  publishAdminBlogPost,
+  unpublishAdminBlogPost,
+  updateAdminBlogPost,
+} from "@/lib/platformBlogApi";
 
 /*
  * Platform administration: everything across every store. Only platform administrators
@@ -28,11 +37,14 @@ const TABS = [
   ["users", "Users"],
   ["keys", "API keys"],
   ["flags", "Feature flags"],
+  ["blog", "Blog CMS"],
   ["audit", "Audit log"],
 ];
 
 const TONE = {
   active: "bg-emerald-50 text-emerald-700",
+  published: "bg-emerald-50 text-emerald-700",
+  draft: "bg-slate-100 text-slate-700",
   suspended: "bg-amber-50 text-amber-700",
   closed: "bg-slate-100 text-slate-600",
   revoked: "bg-slate-100 text-slate-600",
@@ -775,6 +787,444 @@ function Audit() {
   );
 }
 
+/* ------------------------------------------------------------------ blog CMS */
+
+function BlogPostEditorModal({ post, onClose, onSaved }) {
+  const isNew = !post?.id;
+  const [form, setForm] = useState({
+    title: post?.title || "",
+    slug: post?.slug || "",
+    category: post?.category || "Product Updates",
+    author: post?.author || "TSS Team",
+    excerpt: post?.excerpt || "",
+    content: post?.content || "",
+    featured_image: post?.featured_image || "",
+    read_time: post?.read_time || "",
+    status: post?.status || "draft",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const slugify = (text) =>
+    text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  const handleTitleChange = (val) => {
+    setForm((prev) => {
+      const next = { ...prev, title: val };
+      if (isNew && (!prev.slug || prev.slug === slugify(prev.title))) {
+        next.slug = slugify(val);
+      }
+      return next;
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim()) {
+      setError("Title is required.");
+      return;
+    }
+    setIsSubmitting(true);
+    setError("");
+
+    const payload = {
+      ...form,
+      title: form.title.trim(),
+      slug: form.slug.trim() || undefined,
+      category: form.category.trim(),
+      author: form.author.trim(),
+      excerpt: form.excerpt.trim(),
+      featured_image: form.featured_image.trim(),
+      read_time: form.read_time.trim() || undefined,
+    };
+
+    const res = isNew
+      ? await createAdminBlogPost(payload)
+      : await updateAdminBlogPost(post.id, payload);
+
+    setIsSubmitting(false);
+    if (!res.ok) {
+      setError(res.error || "Failed to save article.");
+      return;
+    }
+    onSaved();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="blog-modal-title"
+    >
+      <div className="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 id="blog-modal-title" className="text-lg font-semibold text-slate-900">
+            {isNew ? "Create Platform Blog Article" : "Edit Blog Article"}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+          {error && <ErrorNote>{error}</ErrorNote>}
+
+          <div className="space-y-1">
+            <label htmlFor="blog-title" className="text-sm font-medium text-slate-700">
+              Article Title *
+            </label>
+            <input
+              id="blog-title"
+              type="text"
+              required
+              value={form.title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              placeholder="e.g. Launching TSS Shop 2.0"
+              className={`w-full ${inputClass}`}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label htmlFor="blog-slug" className="text-sm font-medium text-slate-700">
+                URL Slug
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="blog-slug"
+                  type="text"
+                  value={form.slug}
+                  onChange={(e) => setForm((prev) => ({ ...prev, slug: slugify(e.target.value) }))}
+                  placeholder="launching-tss-shop-2-0"
+                  className={`w-full ${inputClass}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, slug: slugify(prev.title) }))}
+                  className={secondaryButton}
+                  title="Regenerate slug from title"
+                >
+                  Auto
+                </button>
+              </div>
+              <p className="text-xs text-slate-500">Live URL: /blog/{form.slug || "..."}</p>
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="blog-category" className="text-sm font-medium text-slate-700">
+                Category
+              </label>
+              <input
+                id="blog-category"
+                type="text"
+                value={form.category}
+                onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+                placeholder="Product Updates, Guides, E-Commerce"
+                className={`w-full ${inputClass}`}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="space-y-1">
+              <label htmlFor="blog-author" className="text-sm font-medium text-slate-700">
+                Author
+              </label>
+              <input
+                id="blog-author"
+                type="text"
+                value={form.author}
+                onChange={(e) => setForm((prev) => ({ ...prev, author: e.target.value }))}
+                placeholder="TSS Team"
+                className={`w-full ${inputClass}`}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="blog-read-time" className="text-sm font-medium text-slate-700">
+                Read Time
+              </label>
+              <input
+                id="blog-read-time"
+                type="text"
+                value={form.read_time}
+                onChange={(e) => setForm((prev) => ({ ...prev, read_time: e.target.value }))}
+                placeholder="e.g. 5 min read"
+                className={`w-full ${inputClass}`}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="blog-status" className="text-sm font-medium text-slate-700">
+                Status
+              </label>
+              <select
+                id="blog-status"
+                value={form.status}
+                onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
+                className={`w-full ${inputClass}`}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="blog-image" className="text-sm font-medium text-slate-700">
+              Featured Image URL
+            </label>
+            <input
+              id="blog-image"
+              type="url"
+              value={form.featured_image}
+              onChange={(e) => setForm((prev) => ({ ...prev, featured_image: e.target.value }))}
+              placeholder="https://example.com/image.jpg"
+              className={`w-full ${inputClass}`}
+            />
+            {form.featured_image && (
+              <div className="mt-2 h-32 w-full max-w-xs overflow-hidden rounded-lg border border-slate-200">
+                <img
+                  src={form.featured_image}
+                  alt="Featured preview"
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="blog-excerpt" className="text-sm font-medium text-slate-700">
+              Excerpt / Summary
+            </label>
+            <textarea
+              id="blog-excerpt"
+              rows={3}
+              value={form.excerpt}
+              onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
+              placeholder="Brief teaser displayed in marketing blog cards..."
+              className={`w-full ${inputClass}`}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Article Content</label>
+            <RichTextEditor
+              value={form.content}
+              onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+              placeholder="Write full article body..."
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className={secondaryButton}
+            >
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} className={primaryButton}>
+              {isSubmitting ? "Saving..." : isNew ? "Create Article" : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function PlatformBlogSection() {
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [editingPost, setEditingPost] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [actionError, setActionError] = useState("");
+
+  const list = usePaged(`${P}/blog/posts/`, {
+    q,
+    status: statusFilter,
+    category: categoryFilter,
+  });
+
+  const handleTogglePublish = async (post) => {
+    setActionError("");
+    const isPublished = post.status === "published";
+    const res = isPublished
+      ? await unpublishAdminBlogPost(post.id)
+      : await publishAdminBlogPost(post.id);
+    if (!res.ok) {
+      setActionError(res.error || `Failed to ${isPublished ? "unpublish" : "publish"} article.`);
+      return;
+    }
+    list.reload();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setActionError("");
+    const res = await deleteAdminBlogPost(deleteTarget.id);
+    setIsDeleting(false);
+    if (!res.ok) {
+      setActionError(res.error || "Failed to delete article.");
+      return;
+    }
+    setDeleteTarget(null);
+    list.reload();
+  };
+
+  return (
+    <Card
+      title="Marketing Blog CMS"
+      action={
+        <button type="button" onClick={() => setEditingPost({})} className={primaryButton}>
+          + New Article
+        </button>
+      }
+    >
+      <Search value={q} onChange={setQ} placeholder="Search articles by title, excerpt or content">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-orange-600"
+            aria-label="Filter by status"
+          >
+            <option value="">All Statuses</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+          </select>
+
+          <input
+            type="text"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            placeholder="Filter category..."
+            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-orange-600"
+          />
+        </div>
+      </Search>
+
+      <div className="px-5 pt-3">
+        <ErrorNote>{actionError || list.error}</ErrorNote>
+      </div>
+
+      <ul className="divide-y divide-slate-200">
+        {list.results.map((p) => (
+          <li key={p.id} className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+            <div className="min-w-0 max-w-2xl space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-semibold text-slate-900 text-sm">{p.title}</h3>
+                <Chip tone={p.status}>{p.status}</Chip>
+                {p.category && (
+                  <span className="rounded-md bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 border border-violet-200">
+                    {p.category}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 font-mono">
+                Slug: <span className="text-slate-700">/blog/{p.slug}</span>
+              </p>
+              {p.excerpt && <p className="text-xs text-slate-600 line-clamp-2">{p.excerpt}</p>}
+              <p className="text-xs text-slate-400">
+                By {p.author || "TSS Team"} · {p.read_time || "Quick read"} ·{" "}
+                {p.status === "published"
+                  ? `Published ${when(p.published_at)}`
+                  : `Created ${when(p.created_at)}`}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                to={`/blog/${p.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={secondaryButton}
+              >
+                View ↗
+              </Link>
+              <button
+                type="button"
+                onClick={() => handleTogglePublish(p)}
+                className={secondaryButton}
+              >
+                {p.status === "published" ? "Unpublish" : "Publish"}
+              </button>
+              <button type="button" onClick={() => setEditingPost(p)} className={secondaryButton}>
+                Edit
+              </button>
+              <button type="button" onClick={() => setDeleteTarget(p)} className={dangerButton}>
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+
+        {!list.loading && list.results.length === 0 && (
+          <li className="px-5 py-12 text-center text-sm text-slate-500">
+            <p className="font-medium text-slate-700">No blog articles found.</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Create your first article or adjust filters to manage marketing content.
+            </p>
+            <button
+              type="button"
+              onClick={() => setEditingPost({})}
+              className={`mt-4 ${primaryButton}`}
+            >
+              + Create First Article
+            </button>
+          </li>
+        )}
+      </ul>
+
+      <Pager offset={list.offset} count={list.count} setOffset={list.setOffset} />
+
+      {editingPost && (
+        <BlogPostEditorModal
+          post={editingPost}
+          onClose={() => setEditingPost(null)}
+          onSaved={() => {
+            setEditingPost(null);
+            list.reload();
+          }}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmationModal
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleDeleteConfirm}
+          title="Delete blog article?"
+          itemName={deleteTarget.title}
+          itemType="Blog article"
+          message={`Are you sure you want to delete "${deleteTarget.title}"? This permanently removes the article from the public platform blog.`}
+          confirmText="Delete article"
+          isLoading={isDeleting}
+        />
+      )}
+    </Card>
+  );
+}
+
 /* ------------------------------------------------------------------ page */
 
 export default function AdminPlatform() {
@@ -834,6 +1284,7 @@ export default function AdminPlatform() {
               {tab === "users" && <Users me={session.user.id} />}
               {tab === "keys" && <ApiKeys />}
               {tab === "flags" && <Flags />}
+              {tab === "blog" && <PlatformBlogSection />}
               {tab === "audit" && <Audit />}
             </div>
           )}

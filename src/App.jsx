@@ -263,6 +263,7 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/contact" element={<Contact />} />
         {flagsOn("blog") && <Route path="/blog" element={<Blog />} />}
+        {flagsOn("blog") && <Route path="/blog/:slug" element={<Blog />} />}
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         {/* Links sent by email (see the backend's apps/identity/email_links.py) */}
         <Route path="/auth/reset-password" element={<ResetPassword />} />
