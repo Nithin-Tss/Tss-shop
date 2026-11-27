@@ -1,3 +1,4 @@
+import { Wordmark } from "@/components/Brand";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -596,13 +597,16 @@ function useSidebarScroll(navRef, path) {
 
 const ADMIN_NAV_EVENT = "admin:toggle-nav";
 
-// The brand mark: a white tile on the dark rail
+// The brand: the cream "T." tile on the dark rail, with the TSS Shop name beside it while the rail is expanded
 function BrandMark({ to }) {
   return (
-    <Link to={to} aria-label="Home" className="flex shrink-0 items-center">
-      <span className="display flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-2xl text-ink">
-        S
-      </span>
+    <Link to={to} aria-label="TSS Shop home" className="flex shrink-0 items-center text-[15px]">
+      <Wordmark
+        tone="paper"
+        serif={false}
+        markSize={32}
+        textClassName="group-data-[collapsed=true]/nav:hidden"
+      />
     </Link>
   );
 }

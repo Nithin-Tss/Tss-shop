@@ -1,7 +1,7 @@
+import { Wordmark } from "@/components/Brand";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import Icon from "./Icon";
 import { ONBOARDING_PATH, STORES_PATH, useSession } from "@/lib/auth";
 
 const links = [
@@ -40,11 +40,8 @@ export default function LandingNav() {
   return (
     <header className={`lp-nav ${scrolled ? "scrolled" : ""}`}>
       <div className="bar">
-        <a href="#top" className="logo" aria-label="Store home">
-          <i>
-            <Icon name="bag" size={16} stroke={2} />
-          </i>{" "}
-          Store
+        <a href="#top" className="logo" aria-label="TSS Shop home">
+          <Wordmark markSize={30} />
         </a>
         <nav className="links" aria-label="Primary">
           {links.map((l) => item(l))}

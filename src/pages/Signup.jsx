@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { apiPost } from "@/lib/api";
 import { signIn } from "@/lib/auth";
 import { MOBILE_PATTERN, NAME_PATTERN, emailError, passwordError } from "@/lib/validation";
-import { PasswordChecklist } from "@/components/PasswordFields";
+import AuthShell from "@/components/AuthShell";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -179,343 +179,330 @@ export default function SignUpPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-      {/* Reduced width from max-w-2xl to max-w-lg */}
-      <div className="mx-auto w-full max-w-lg">
-        <div className="rounded-xl bg-white ring-1 ring-ink/5 p-6 shadow-lg sm:p-8">
-          {/* Heading */}
-          <div className="mb-8 text-center">
-            <h1 className="display text-5xl text-ink">Create your account</h1>
+    <AuthShell>
+      <div>
+        {/* Heading */}
+        <div className="mb-8">
+          <h1 className="display text-5xl text-ink">Create your account</h1>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Create an account to start building your online store.
-            </p>
+          <p className="mt-2 text-sm text-slate-500">
+            Create an account to start building your online store.
+          </p>
+        </div>
+
+        {/* Form Error */}
+
+        {errors.form && (
+          <div
+            role="alert"
+            className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+          >
+            {errors.form}
           </div>
+        )}
 
-          {/* Form Error */}
+        {/* Success / Frontend Message */}
 
-          {errors.form && (
-            <div
-              role="alert"
-              className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
-            >
-              {errors.form}
-            </div>
-          )}
+        {message && (
+          <div
+            role="status"
+            className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-violet-700"
+          >
+            {message}
+          </div>
+        )}
 
-          {/* Success / Frontend Message */}
-
-          {message && (
-            <div
-              role="status"
-              className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-violet-700"
-            >
-              {message}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} noValidate>
-            {/* First Name + Last Name */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {/* First Name */}
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="mb-2 block text-sm font-medium text-slate-700"
-                >
-                  First Name
-                </label>
-
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  required
-                  aria-required="true"
-                  aria-invalid={Boolean(errors.firstName)}
-                  aria-describedby={errors.firstName ? "firstName-error" : undefined}
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder="Enter first name"
-                  autoComplete="given-name"
-                  className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                    errors.firstName
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
-                  }`}
-                />
-
-                {errors.firstName && (
-                  <p id="firstName-error" role="alert" className="mt-1 text-xs text-red-500">
-                    {errors.firstName}
-                  </p>
-                )}
-              </div>
-
-              {/* Last Name */}
-              <div>
-                <label htmlFor="lastName" className="mb-2 block text-sm font-medium text-slate-700">
-                  Last Name
-                </label>
-
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  required
-                  aria-required="true"
-                  aria-invalid={Boolean(errors.lastName)}
-                  aria-describedby={errors.lastName ? "lastName-error" : undefined}
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  placeholder="Enter last name"
-                  autoComplete="family-name"
-                  className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                    errors.lastName
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
-                  }`}
-                />
-
-                {errors.lastName && (
-                  <p id="lastName-error" role="alert" className="mt-1 text-xs text-red-500">
-                    {errors.lastName}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="mt-5">
-              <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
-                Email
+        <form onSubmit={handleSubmit} noValidate>
+          {/* First Name + Last Name */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* First Name */}
+            <div>
+              <label htmlFor="firstName" className="mb-2 block text-sm font-medium text-slate-700">
+                First Name
               </label>
 
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="firstName"
+                name="firstName"
+                type="text"
                 required
                 aria-required="true"
-                aria-invalid={Boolean(errors.email)}
-                aria-describedby={errors.email ? "signup-email-error" : undefined}
-                value={formData.email}
+                aria-invalid={Boolean(errors.firstName)}
+                aria-describedby={errors.firstName ? "firstName-error" : undefined}
+                value={formData.firstName}
                 onChange={handleChange}
-                placeholder="Enter your email"
-                autoComplete="email"
+                placeholder="Enter first name"
+                autoComplete="given-name"
                 className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                  errors.email
+                  errors.firstName
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
                     : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
                 }`}
               />
 
-              {errors.email && (
-                <p id="signup-email-error" role="alert" className="mt-1 text-xs text-red-500">
-                  {errors.email}
+              {errors.firstName && (
+                <p id="firstName-error" role="alert" className="mt-1 text-xs text-red-500">
+                  {errors.firstName}
                 </p>
               )}
             </div>
 
-            {/* Mobile Number */}
-            <div className="mt-5">
-              <label
-                htmlFor="mobileNumber"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
-                Mobile Number
+            {/* Last Name */}
+            <div>
+              <label htmlFor="lastName" className="mb-2 block text-sm font-medium text-slate-700">
+                Last Name
               </label>
 
               <input
-                id="mobileNumber"
-                name="mobileNumber"
-                type="tel"
-                aria-invalid={Boolean(errors.mobileNumber)}
-                aria-describedby={errors.mobileNumber ? "mobileNumber-error" : undefined}
-                value={formData.mobileNumber}
+                id="lastName"
+                name="lastName"
+                type="text"
+                required
+                aria-required="true"
+                aria-invalid={Boolean(errors.lastName)}
+                aria-describedby={errors.lastName ? "lastName-error" : undefined}
+                value={formData.lastName}
                 onChange={handleChange}
-                placeholder="Enter 10-digit mobile number"
-                autoComplete="tel"
-                inputMode="numeric"
-                maxLength={10}
-
+                placeholder="Enter last name"
+                autoComplete="family-name"
                 className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                  errors.mobileNumber
+                  errors.lastName
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100"
                     : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
                 }`}
               />
 
-              {errors.mobileNumber && (
-                <p className="mt-1 text-xs text-red-500">{errors.mobileNumber}</p>
+              {errors.lastName && (
+                <p id="lastName-error" role="alert" className="mt-1 text-xs text-red-500">
+                  {errors.lastName}
+                </p>
               )}
             </div>
-
-            {/* Password */}
-            <div className="mt-5">
-              <label
-                htmlFor="password"
-
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
-                Password
-              </label>
-
-              <div className="relative">
-                <input
-                  id="password"
-
-                  name="password"
-
-                  type={showPassword ? "text" : "password"}
-
-                  value={formData.password}
-
-                  onChange={handleChange}
-
-                  placeholder="Create a password"
-
-                  autoComplete="new-password"
-
-                  className={`w-full rounded-lg border px-4 py-3 pr-20 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                    errors.password
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
-                  }`}
-                />
-
-                <button
-                  type="button"
-
-                  onClick={() => setShowPassword((previous) => !previous)}
-
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-violet-600 hover:text-violet-700"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-
-              {/* Live Password Requirements */}
-              <PasswordChecklist password={formData.password} />
-              {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="mt-5">
-              <label
-                htmlFor="confirmPassword"
-
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
-                Confirm Password
-              </label>
-
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-
-                  name="confirmPassword"
-
-                  type={showConfirmPassword ? "text" : "password"}
-
-                  value={formData.confirmPassword}
-
-                  onChange={handleChange}
-
-                  placeholder="Confirm your password"
-
-                  autoComplete="new-password"
-
-                  className={`w-full rounded-lg border px-4 py-3 pr-20 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
-                    errors.confirmPassword
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                      : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
-                  }`}
-                />
-
-                <button
-                  type="button"
-
-                  onClick={() => setShowConfirmPassword((previous) => !previous)}
-
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-violet-600 hover:text-violet-700"
-                >
-                  {showConfirmPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-
-              {errors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>
-              )}
-            </div>
-
-            {/* Terms & Conditions */}
-            <div className="mt-6">
-              <label className="flex cursor-pointer items-start gap-3">
-                <input
-                  type="checkbox"
-
-                  name="agreeTerms"
-
-                  checked={formData.agreeTerms}
-
-                  onChange={handleChange}
-
-                  className="mt-1 h-4 w-4 shrink-0 accent-violet-600"
-                />
-
-                <span className="text-sm leading-6 text-slate-600">
-                  I agree to the{" "}
-                  <Link
-                    to="/terms"
-
-                    className="font-medium text-violet-600 hover:underline"
-                  >
-                    Terms & Conditions
-                  </Link>{" "}
-                  and{" "}
-                  <Link
-                    to="/privacy"
-
-                    className="font-medium text-violet-600 hover:underline"
-                  >
-                    Privacy Policy
-                  </Link>
-                  .
-                </span>
-              </label>
-
-              {errors.agreeTerms && (
-                <p className="mt-1 text-xs text-red-500">{errors.agreeTerms}</p>
-              )}
-            </div>
-
-            {/* Sign Up Button */}
-            <button
-              type="submit"
-
-              disabled={isSubmitting}
-
-              className="mt-7 w-full rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? "Creating Account..." : "Sign Up"}
-            </button>
-          </form>
-
-          {/* Sign In */}
-          <div className="mt-7 border-t border-slate-200 pt-6 text-center">
-            <p className="text-sm text-slate-500">Already have an account?</p>
-
-            <Link
-              to="/auth/signin"
-
-              className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-violet-600 px-5 py-3 font-semibold text-violet-600 transition hover:bg-blue-50"
-            >
-              Sign In
-            </Link>
           </div>
+
+          {/* Email */}
+          <div className="mt-5">
+            <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
+              Email
+            </label>
+
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              aria-required="true"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "signup-email-error" : undefined}
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              autoComplete="email"
+              className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+                errors.email
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                  : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
+              }`}
+            />
+
+            {errors.email && (
+              <p id="signup-email-error" role="alert" className="mt-1 text-xs text-red-500">
+                {errors.email}
+              </p>
+            )}
+          </div>
+
+          {/* Mobile Number */}
+          <div className="mt-5">
+            <label htmlFor="mobileNumber" className="mb-2 block text-sm font-medium text-slate-700">
+              Mobile Number
+            </label>
+
+            <input
+              id="mobileNumber"
+              name="mobileNumber"
+              type="tel"
+              aria-invalid={Boolean(errors.mobileNumber)}
+              aria-describedby={errors.mobileNumber ? "mobileNumber-error" : undefined}
+              value={formData.mobileNumber}
+              onChange={handleChange}
+              placeholder="Enter 10-digit mobile number"
+              autoComplete="tel"
+              inputMode="numeric"
+              maxLength={10}
+
+              className={`w-full rounded-lg border px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+                errors.mobileNumber
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                  : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
+              }`}
+            />
+
+            {errors.mobileNumber && (
+              <p className="mt-1 text-xs text-red-500">{errors.mobileNumber}</p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div className="mt-5">
+            <label
+              htmlFor="password"
+
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Password
+            </label>
+
+            <div className="relative">
+              <input
+                id="password"
+
+                name="password"
+
+                type={showPassword ? "text" : "password"}
+
+                value={formData.password}
+
+                onChange={handleChange}
+
+                placeholder="Create a password"
+
+                autoComplete="new-password"
+
+                className={`w-full rounded-lg border px-4 py-3 pr-20 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+                  errors.password
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
+                }`}
+              />
+
+              <button
+                type="button"
+
+                onClick={() => setShowPassword((previous) => !previous)}
+
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-violet-600 hover:text-violet-700"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+
+            {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="mt-5">
+            <label
+              htmlFor="confirmPassword"
+
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Confirm Password
+            </label>
+
+            <div className="relative">
+              <input
+                id="confirmPassword"
+
+                name="confirmPassword"
+
+                type={showConfirmPassword ? "text" : "password"}
+
+                value={formData.confirmPassword}
+
+                onChange={handleChange}
+
+                placeholder="Confirm your password"
+
+                autoComplete="new-password"
+
+                className={`w-full rounded-lg border px-4 py-3 pr-20 text-sm outline-none transition placeholder:text-slate-400 focus:ring-2 ${
+                  errors.confirmPassword
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-slate-300 focus:border-violet-500 focus:ring-blue-100"
+                }`}
+              />
+
+              <button
+                type="button"
+
+                onClick={() => setShowConfirmPassword((previous) => !previous)}
+
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-violet-600 hover:text-violet-700"
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+
+            {errors.confirmPassword && (
+              <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>
+            )}
+          </div>
+
+          {/* Terms & Conditions */}
+          <div className="mt-6">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+
+                name="agreeTerms"
+
+                checked={formData.agreeTerms}
+
+                onChange={handleChange}
+
+                className="mt-1 h-4 w-4 shrink-0 accent-violet-600"
+              />
+
+              <span className="text-sm leading-6 text-slate-600">
+                I agree to the{" "}
+                <Link
+                  to="/terms"
+
+                  className="font-medium text-violet-600 hover:underline"
+                >
+                  Terms & Conditions
+                </Link>{" "}
+                and{" "}
+                <Link
+                  to="/privacy"
+
+                  className="font-medium text-violet-600 hover:underline"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
+
+            {errors.agreeTerms && <p className="mt-1 text-xs text-red-500">{errors.agreeTerms}</p>}
+          </div>
+
+          {/* Sign Up Button */}
+          <button
+            type="submit"
+
+            disabled={isSubmitting}
+
+            className="mt-7 w-full rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? "Creating Account..." : "Sign Up"}
+          </button>
+        </form>
+
+        {/* Sign In */}
+        <div className="mt-7 border-t border-slate-200 pt-6 text-center">
+          <p className="text-sm text-slate-500">Already have an account?</p>
+
+          <Link
+            to="/auth/signin"
+
+            className="mt-3 inline-flex w-full items-center justify-center rounded-lg border border-violet-600 px-5 py-3 font-semibold text-violet-600 transition hover:bg-blue-50"
+          >
+            Sign In
+          </Link>
         </div>
       </div>
-    </main>
+    </AuthShell>
   );
 }

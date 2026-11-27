@@ -10,6 +10,10 @@
   --brand-orange-light: #d6b875;
   --brand-paper: #f5f0e6;
   --brand-white: #ffffff;
+  /* Action brass: brass mixed with black so white labels on it, and brass text on white or cream, pass WCAG AA
+     (5.2:1 on white, 4.6:1 on cream). The bright #b08d57 stays for dots, glows and the mark's full stop. */
+  --brand-brass-deep: color-mix(in srgb, #b08d57 74%, black);
+  --brand-brass-deeper: color-mix(in srgb, #b08d57 62%, black);
 
   /* Shade scales for the three brand colours: brand-gold-*, brand-navy-*, brand-cream-* (500 = the base colour). */
   --color-brand-gold-50: color-mix(in srgb, #b08d57 10%, white);
@@ -200,8 +204,8 @@
   --color-violet-300: color-mix(in srgb, #d6b875 70%, transparent);
   --color-violet-400: #d6b875;
   --color-violet-500: #b08d57;
-  --color-violet-600: #b08d57;
-  --color-violet-700: color-mix(in srgb, #b08d57 80%, black);
+  --color-violet-600: var(--brand-brass-deep);
+  --color-violet-700: var(--brand-brass-deeper);
   --color-violet-800: color-mix(in srgb, #b08d57 62%, black);
   --color-violet-900: color-mix(in srgb, #b08d57 45%, black);
   --color-violet-950: #111827;
@@ -212,8 +216,8 @@
   --color-purple-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-purple-400: #b08d57;
   --color-purple-500: #b08d57;
-  --color-purple-600: #b08d57;
-  --color-purple-700: #b08d57;
+  --color-purple-600: var(--brand-brass-deep);
+  --color-purple-700: var(--brand-brass-deeper);
   --color-purple-800: #111827;
   --color-purple-900: #111827;
   --color-purple-950: #111827;
@@ -224,8 +228,8 @@
   --color-indigo-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-indigo-400: #b08d57;
   --color-indigo-500: #b08d57;
-  --color-indigo-600: #b08d57;
-  --color-indigo-700: #b08d57;
+  --color-indigo-600: var(--brand-brass-deep);
+  --color-indigo-700: var(--brand-brass-deeper);
   --color-indigo-800: #111827;
   --color-indigo-900: #111827;
   --color-indigo-950: #111827;
@@ -236,8 +240,8 @@
   --color-orange-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-orange-400: #b08d57;
   --color-orange-500: #b08d57;
-  --color-orange-600: #b08d57;
-  --color-orange-700: #b08d57;
+  --color-orange-600: var(--brand-brass-deep);
+  --color-orange-700: var(--brand-brass-deeper);
   --color-orange-800: #111827;
   --color-orange-900: #111827;
   --color-orange-950: #111827;
@@ -248,8 +252,8 @@
   --color-red-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-red-400: #b08d57;
   --color-red-500: #b08d57;
-  --color-red-600: #b08d57;
-  --color-red-700: #b08d57;
+  --color-red-600: var(--brand-brass-deep);
+  --color-red-700: var(--brand-brass-deeper);
   --color-red-800: #111827;
   --color-red-900: #111827;
   --color-red-950: #111827;
@@ -260,8 +264,8 @@
   --color-rose-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-rose-400: #b08d57;
   --color-rose-500: #b08d57;
-  --color-rose-600: #b08d57;
-  --color-rose-700: #b08d57;
+  --color-rose-600: var(--brand-brass-deep);
+  --color-rose-700: var(--brand-brass-deeper);
   --color-rose-800: #111827;
   --color-rose-900: #111827;
   --color-rose-950: #111827;
@@ -272,8 +276,8 @@
   --color-pink-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-pink-400: #b08d57;
   --color-pink-500: #b08d57;
-  --color-pink-600: #b08d57;
-  --color-pink-700: #b08d57;
+  --color-pink-600: var(--brand-brass-deep);
+  --color-pink-700: var(--brand-brass-deeper);
   --color-pink-800: #111827;
   --color-pink-900: #111827;
   --color-pink-950: #111827;
@@ -284,8 +288,8 @@
   --color-fuchsia-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-fuchsia-400: #b08d57;
   --color-fuchsia-500: #b08d57;
-  --color-fuchsia-600: #b08d57;
-  --color-fuchsia-700: #b08d57;
+  --color-fuchsia-600: var(--brand-brass-deep);
+  --color-fuchsia-700: var(--brand-brass-deeper);
   --color-fuchsia-800: #111827;
   --color-fuchsia-900: #111827;
   --color-fuchsia-950: #111827;
@@ -296,8 +300,8 @@
   --color-amber-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-amber-400: #b08d57;
   --color-amber-500: #b08d57;
-  --color-amber-600: #b08d57;
-  --color-amber-700: #b08d57;
+  --color-amber-600: var(--brand-brass-deep);
+  --color-amber-700: var(--brand-brass-deeper);
   --color-amber-800: #111827;
   --color-amber-900: #111827;
   --color-amber-950: #111827;
@@ -308,8 +312,8 @@
   --color-yellow-300: color-mix(in srgb, #b08d57 70%, transparent);
   --color-yellow-400: #b08d57;
   --color-yellow-500: #b08d57;
-  --color-yellow-600: #b08d57;
-  --color-yellow-700: #b08d57;
+  --color-yellow-600: var(--brand-brass-deep);
+  --color-yellow-700: var(--brand-brass-deeper);
   --color-yellow-800: #111827;
   --color-yellow-900: #111827;
   --color-yellow-950: #111827;

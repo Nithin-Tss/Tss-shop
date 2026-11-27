@@ -61,7 +61,6 @@ import { announceThemeChange, onThemeChange } from "@/lib/themeSync";
 
 import {
   iconButton,
-  iconProps,
   tbButton,
   tbPrimary,
   tbSegment,

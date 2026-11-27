@@ -1,3 +1,4 @@
+import { Wordmark } from "@/components/Brand";
 import Icon from "./Icon";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -54,7 +55,7 @@ const COLUMNS = [
   [
     "Store",
     [
-      ["What is Store", "#"],
+      ["What is TSS Shop", "#"],
       ["Editions", "#"],
       ["Careers", "#"],
       ["Newsroom", "#"],
@@ -96,7 +97,9 @@ export function LandingFooter() {
       <div className="wrap">
         <div className="cols">
           <div>
-            <p className="brand">Store</p>
+            <p className="brand">
+              <Wordmark tone="paper" markSize={44} />
+            </p>
             <p>Commerce software for shops that would rather sell than configure.</p>
           </div>
           {COLUMNS.map(([title, links]) => (
@@ -113,7 +116,7 @@ export function LandingFooter() {
           ))}
         </div>
         <div className="bottom">
-          <span>&copy; {new Date().getFullYear()} Store. Australia, English.</span>
+          <span>&copy; {new Date().getFullYear()} TSS Shop. Australia, English.</span>
           <div>
             <a href="/terms">Terms</a>
             <a href="/privacy">Privacy</a>

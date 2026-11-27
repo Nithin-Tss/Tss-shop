@@ -1,3 +1,4 @@
+import { Wordmark } from "@/components/Brand";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -31,8 +32,8 @@ export default function NavBar() {
         <div className="flex items-center justify-between h-16">
           {/* Left: Brand Logo & Desktop Nav Links */}
           <div className="flex items-center gap-8 lg:gap-12">
-            <a href="#" className="flex items-center gap-1 group">
-              <span className="display text-3xl text-ink">Store</span>
+            <a href="/" className="flex items-center text-lg" aria-label="TSS Shop home">
+              <Wordmark markSize={30} />
             </a>
 
             {/* Desktop Navigation Links */}
