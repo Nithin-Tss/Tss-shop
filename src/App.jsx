@@ -130,12 +130,7 @@ export default function App() {
             {/* Theme code editor: it saves theme files */}
             <Route
               path="/editor-demo"
-              element={
-                <>
-                  <EditorDemo />
-                  <EditingThemeBar />
-                </>
-              }
+              element={<Navigate to="/admin/online-store/code" replace />}
             />
             <Route
               path="/admin/online-store/code"
